@@ -10,6 +10,7 @@ import Layout from "./components/common/Layout";
 
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -43,6 +44,7 @@ function App() {
           {/* Public Landing & Auth Routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/adminlogin" element={<Navigate to="/login" replace />} />
           <Route path="/dashboard" element={<Navigate to="/login" replace />} />
 

@@ -64,9 +64,9 @@ const LandingPage = () => {
               <i className="bi bi-person"></i>
               <span>Login</span>
             </Link>
-            <Link to="/login" className="btn btn-gradient-primary px-4 py-2 rounded-3 fw-semibold d-flex align-items-center gap-2 shadow-sm text-white">
-              <i className="bi bi-box-arrow-in-right"></i>
-              <span>Sign In</span>
+            <Link to="/signup" className="btn btn-gradient-primary px-4 py-2 rounded-3 fw-semibold d-flex align-items-center gap-2 shadow-sm text-white">
+              <i className="bi bi-person-plus-fill"></i>
+              <span>Sign Up</span>
             </Link>
           </div>
         </div>
@@ -107,7 +107,7 @@ const LandingPage = () => {
 
               {/* CTAs */}
               <div className="d-flex flex-wrap align-items-center gap-3 mb-5">
-                <Link to="/login" className="btn btn-gradient-primary btn-lg px-4 py-2.5 rounded-3 fw-bold d-inline-flex align-items-center gap-2 text-white shadow-md hero-btn">
+                <Link to="/signup" className="btn btn-gradient-primary btn-lg px-4 py-2.5 rounded-3 fw-bold d-inline-flex align-items-center gap-2 text-white shadow-md hero-btn">
                   <span>Get Started</span>
                   <i className="bi bi-arrow-right"></i>
                 </Link>

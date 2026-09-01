@@ -27,10 +27,10 @@ export async function seedDatabase() {
   }
   console.log('✓ All 7 database tables verified.');
 
-  // Check if admin user exists
-  const [existing] = await pool.query("SELECT * FROM users WHERE email = 'admin@company.com'");
+  // Check if database is already seeded
+  const [existing] = await pool.query("SELECT id FROM users LIMIT 1");
   if (existing.length > 0) {
-    console.log('✓ Database already seeded. Skipping initial inserts.');
+    console.log('✓ Database already initialized and seeded. Skipping initial inserts.');
     return;
   }
 
