@@ -215,6 +215,35 @@ const LandingPage = () => {
     ["brightness(1) blur(0px)", "brightness(0.65) blur(2.5px)"]
   );
 
+  // 360° Interactive 3D Mouse Parallax (Dynamic Magnetic Pull on Hover)
+  const [isHoveredShowcase, setIsHoveredShowcase] = useState(false);
+  const showcaseMouseX = useMotionValue(0);
+  const showcaseMouseY = useMotionValue(0);
+
+  // Smooth, magnetic 3D pull physics
+  const tiltSpring = { damping: 22, stiffness: 220, mass: 0.4 };
+  const pullRotateX = useSpring(useTransform(showcaseMouseY, [-0.5, 0.5], [8, -8]), tiltSpring);
+  const pullRotateY = useSpring(useTransform(showcaseMouseX, [-0.5, 0.5], [-10, 10]), tiltSpring);
+
+  const handleShowcaseMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    showcaseMouseX.set(x);
+    showcaseMouseY.set(y);
+    if (!isHoveredShowcase) setIsHoveredShowcase(true);
+  };
+
+  const handleShowcaseMouseEnter = () => {
+    setIsHoveredShowcase(true);
+  };
+
+  const handleShowcaseMouseLeave = () => {
+    setIsHoveredShowcase(false);
+    showcaseMouseX.set(0);
+    showcaseMouseY.set(0);
+  };
+
   // Hero Dynamic Word Cycler
   const words = ["Excellence.", "Efficiency.", "Productivity.", "Innovation."];
   const [wordIndex, setWordIndex] = useState(0);
@@ -524,11 +553,27 @@ const LandingPage = () => {
                     {/* Floating Interactive Tag */}
                     <div className="showcase-floating-tag badge bg-dark text-white px-3 py-1.5 rounded-pill shadow-lg d-inline-flex align-items-center gap-2">
                       <span className="pulse-dot"></span>
-                      <small className="fw-bold">Interactive Live Preview • 360° Floating & Clickable</small>
+                      <small className="fw-bold">Interactive 3D Preview • Dynamic 360° Tilt & Full Controls</small>
                     </div>
 
-                    {/* THE 3D POP-OUT CARD (360° Omnidirectional Floating + 100% Fully Clickable) */}
-                    <div className="showcase-dashboard-card rounded-4 shadow-2xl overflow-hidden border border-slate-200 bg-white position-relative">
+                    {/* THE 3D POP-OUT CARD (Omni-Float when idle + Dynamic 3D Pull on Hover + 100% Clickable) */}
+                    <motion.div
+                      onMouseMove={handleShowcaseMouseMove}
+                      onMouseEnter={handleShowcaseMouseEnter}
+                      onMouseLeave={handleShowcaseMouseLeave}
+                      style={{
+                        rotateX: isHoveredShowcase ? pullRotateX : 0,
+                        rotateY: isHoveredShowcase ? pullRotateY : 0,
+                        scale: isHoveredShowcase ? 1.025 : 1,
+                        transformStyle: "preserve-3d",
+                        transition: isHoveredShowcase
+                          ? "scale 0.25s ease-out"
+                          : "scale 0.4s ease-out, rotateX 0.4s ease-out, rotateY 0.4s ease-out"
+                      }}
+                      className={`showcase-dashboard-card rounded-4 shadow-2xl overflow-hidden border border-slate-200 bg-white position-relative ${
+                        !isHoveredShowcase ? "omni-floating" : ""
+                      }`}
+                    >
                       <div className="d-flex flex-row" style={{ minHeight: "530px" }}>
                         {/* Full 10-Tab Mock Dark Sidebar */}
                         <div className="mock-sidebar p-3 d-flex flex-column justify-content-between text-white" style={{ width: "205px", background: "#0b1329" }}>
@@ -1006,7 +1051,7 @@ const LandingPage = () => {
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   </div>
                 </div>
               </div>

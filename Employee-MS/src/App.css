@@ -245,14 +245,15 @@ body {
   transform-style: preserve-3d;
   cursor: default !important;
   will-change: transform, box-shadow;
-  animation: omniFloat3D 12s ease-in-out infinite;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-/* When user hovers: Elevates forward in 3D so all buttons, inputs, tabs are 100% rock-solid and clickable */
+.showcase-dashboard-card.omni-floating {
+  animation: omniFloat3D 12s ease-in-out infinite;
+}
+
+/* Hover deep shadow enhancement while 3D mouse pull is active */
 .showcase-dashboard-card:hover {
-  animation-play-state: paused;
-  transform: rotateX(1deg) rotateY(-2deg) scale(1.025) translateY(-8px) translateZ(35px);
   box-shadow:
     0 35px 75px -15px rgba(79, 70, 229, 0.28),
     0 15px 30px -8px rgba(15, 23, 42, 0.14),
