@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise Employee Management System (EMS) - 4-Tier Blueprint</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({ startOnLoad: true, theme: 'default' });</script>
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white; color: black; font-size: 11pt; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+  <!-- Top Action Bar -->
+  <header class="no-print bg-slate-900 text-white sticky top-0 z-50 shadow-md">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex flex-wrap justify-between items-center gap-4">
+      <div>
+        <h1 class="text-xl font-bold tracking-tight">🏢 4-Tier Enterprise EMS Blueprint & Architecture</h1>
+        <p class="text-xs text-slate-400">HR Super Admin • Department Managers • Operational Supervisors • Staff Employees</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow flex items-center gap-2 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+          Print / Save as PDF
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-6 py-10">
+    <!-- Hero Box -->
+    <section class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm mb-10">
+      <div class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4">Official 4-Tier System Design</div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">Enterprise Employee Management System (EMS)</h1>
+      <p class="text-lg text-slate-600 leading-relaxed mb-6">
+        A 4-tier full-stack architecture coordinating corporate governance, strategic department planning, squad-level task delegation, and employee collaboration.
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 border-t border-slate-100 pt-6">
+        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+          <p class="text-xs text-blue-600 font-bold">Tier 1: HR Admin</p>
+          <p class="text-xs text-slate-600 mt-1">Company Governance & Onboarding</p>
+        </div>
+        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+          <p class="text-xs text-indigo-600 font-bold">Tier 2: Managers</p>
+          <p class="text-xs text-slate-600 mt-1">Department Projects & Escalations</p>
+        </div>
+        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+          <p class="text-xs text-emerald-600 font-bold">Tier 3: Supervisors</p>
+          <p class="text-xs text-slate-600 mt-1">Task Assignment & Tier-1 Leaves</p>
+        </div>
+        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+          <p class="text-xs text-purple-600 font-bold">Tier 4: Employees</p>
+          <p class="text-xs text-slate-600 mt-1">Execution, Blockers & Leaves</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 1: Powers Breakdown (Manager vs Supervisor) -->
+    <section class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm mb-10">
+      <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+        <span class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm font-bold">1</span>
+        Distinct Powers: Manager vs. Supervisor
+      </h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm border-collapse">
+          <thead>
+            <tr class="bg-slate-900 text-white font-semibold">
+              <th class="p-3.5 rounded-tl-lg">Dimension</th>
+              <th class="p-3.5 bg-indigo-900">👔 Tier 2: Manager (Strategic Lead)</th>
+              <th class="p-3.5 bg-emerald-900 rounded-tr-lg">👷 Tier 3: Supervisor (Operational Lead)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 text-slate-700">
+            <tr class="hover:bg-slate-50">
+              <td class="p-3.5 font-bold text-slate-900">Authority Scope</td>
+              <td class="p-3.5 text-indigo-950 font-medium">Departmental Macro-level (All squads/teams)</td>
+              <td class="p-3.5 text-emerald-950 font-medium">Squad Micro-level (4 to 12 direct subordinates)</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="p-3.5 font-bold text-slate-900">Project / Tasks</td>
+              <td class="p-3.5 text-indigo-950">Creates Projects, defines Milestones, sets budgets</td>
+              <td class="p-3.5 text-emerald-950">Breaks milestones into Task Tickets with deadlines & priorities</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="p-3.5 font-bold text-slate-900">Leave Approvals</td>
+              <td class="p-3.5 text-indigo-950">Tier-2 / Escalated Leaves: Approves >3 days & annual leaves</td>
+              <td class="p-3.5 text-emerald-950">Tier-1 / Routine Leaves: Direct first-line sick/casual approvals</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="p-3.5 font-bold text-slate-900">Performance</td>
+              <td class="p-3.5 text-indigo-950">Evaluates supervisor velocity & annual appraisals</td>
+              <td class="p-3.5 text-emerald-950">Monitors daily staff output, code quality, sprint completion</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 2: 4-Tier RBAC Matrix -->
+    <section class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm mb-10">
+      <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+        <span class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-sm font-bold">2</span>
+        Role-Based Access Control (RBAC) Matrix
+      </h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm border-collapse">
+          <thead>
+            <tr class="bg-slate-800 text-white font-semibold">
+              <th class="p-3">Feature</th>
+              <th class="p-3">👑 HR Admin</th>
+              <th class="p-3">👔 Manager</th>
+              <th class="p-3">👷 Supervisor</th>
+              <th class="p-3">💼 Employee</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 text-slate-700">
+            <tr class="hover:bg-slate-50">
+              <td class="p-3 font-semibold text-slate-900">User Onboarding</td>
+              <td class="p-3 text-emerald-600 font-bold">✅ Full Control</td>
+              <td class="p-3 text-red-500">❌</td>
+              <td class="p-3 text-red-500">❌</td>
+              <td class="p-3 text-red-500">❌</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="p-3 font-semibold text-slate-900">Create Projects / Milestones</td>
+              <td class="p-3 text-emerald-600">✅ Global</td>
+              <td class="p-3 text-emerald-600 font-bold">✅ Dept-Level</td>
+              <td class="p-3 text-red-500">❌</td>
+              <td class="p-3 text-red-500">❌</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="p-3 font-semibold text-slate-900">Assign Tasks to Staff</td>
+              <td class="p-3 text-emerald-600">✅ Override</td>
+              <td class="p-3 text-slate-500">👁️ View All</td>
+              <td class="p-3 text-emerald-600 font-bold">✅ Direct Team</td>
+              <td class="p-3 text-red-500">❌ (Execute Only)</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="p-3 font-semibold text-slate-900">Task Discussion Threads</td>
+              <td class="p-3 text-slate-500">👁️ Audit View</td>
+              <td class="p-3 text-slate-700">👁️ Read/Comment</td>
+              <td class="p-3 text-emerald-600 font-bold">✅ Two-Way Chat</td>
+              <td class="p-3 text-emerald-600 font-bold">✅ Two-Way Chat</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="p-3 font-semibold text-slate-900">Leave Approvals</td>
+              <td class="p-3 text-emerald-600">✅ Final Override</td>
+              <td class="p-3 text-indigo-600 font-bold">✅ Tier-2 (>3 days)</td>
+              <td class="p-3 text-emerald-600 font-bold">✅ Tier-1 (Routine)</td>
+              <td class="p-3 text-slate-500">Apply Only</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 3: Relational Database Schema -->
+    <section class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm mb-10">
+      <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+        <span class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-sm font-bold">3</span>
+        4-Tier Relational Database Schema (MySQL)
+      </h2>
+      <div class="mermaid bg-slate-50 p-4 rounded-xl border border-slate-200">
+erDiagram
+    DEPARTMENTS ||--o{ USERS : "belongs to"
+    USERS ||--o{ TEAM_HIERARCHY : "manager / supervisor"
+    USERS ||--o{ TEAM_HIERARCHY : "subordinate"
+    PROJECTS ||--o{ TASKS : "contains"
+    USERS ||--o{ PROJECTS : "created by manager"
+    USERS ||--o{ TASKS : "assigned by supervisor"
+    USERS ||--o{ TASKS : "assigned to employee"
+    TASKS ||--o{ TASK_COMMENTS : "has"
+    USERS ||--o{ LEAVE_REQUESTS : "applied by employee"
+
+    USERS {
+        int id PK
+        string name
+        string email UK
+        string password_hash
+        enum role "admin, manager, supervisor, employee"
+        int department_id FK
+        decimal salary
+    }
+    PROJECTS {
+        int id PK
+        string title
+        int department_id FK
+        int created_by FK
+        int lead_supervisor_id FK
+    }
+    TASKS {
+        int id PK
+        int project_id FK
+        string title
+        int assigned_by FK
+        int assigned_to FK
+        enum status "pending, in_progress, completed"
+    }
+    LEAVE_REQUESTS {
+        int id PK
+        int employee_id FK
+        int supervisor_id FK
+        int manager_id FK
+        enum status "pending_supervisor, pending_manager, approved, rejected"
+    }
+      </div>
+    </section>
+
+    <!-- Section 4: Sequence Workflows -->
+    <section class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm mb-10">
+      <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+        <span class="w-8 h-8 rounded-lg bg-purple-600 text-white flex items-center justify-center text-sm font-bold">4</span>
+        Strategic Milestone to Task Delegation Sequence
+      </h2>
+      <div class="mermaid bg-slate-50 p-4 rounded-xl border border-slate-200">
+sequenceDiagram
+    autonumber
+    actor Manager as 👔 Manager
+    actor Supervisor as 👷 Supervisor
+    actor Employee as 💼 Employee
+    participant Client as React UI
+    participant API as Express API
+    participant DB as MySQL
+
+    Manager->>Client: Creates Project Milestone (Title, Target Date, Lead Supervisor)
+    Client->>API: POST /api/projects
+    API->>DB: INSERT INTO projects
+    DB-->>API: Project #50 Created
+
+    Supervisor->>Client: Opens Project #50 ➔ Creates Task Tickets for direct team
+    Client->>API: POST /api/tasks {project_id: 50, title, assigned_to}
+    API->>DB: INSERT INTO tasks
+    DB-->>API: Task #101 Created
+
+    Employee->>Client: Checks "My Tasks" ➔ Updates status to "In Progress"
+    Employee->>Client: Posts query: "Need API specs"
+    Client->>API: POST /api/tasks/101/comments
+    API->>DB: INSERT INTO task_comments
+    Supervisor->>Client: Replies with docs ➔ Employee marks "Completed"
+      </div>
+    </section>
+  </main>
+</body>
+</html>
