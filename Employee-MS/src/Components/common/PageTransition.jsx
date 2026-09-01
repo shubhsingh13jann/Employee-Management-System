@@ -12,20 +12,14 @@ const PageTransition = ({ children }) => {
   return (
     <motion.div
       key={location.pathname}
-      initial={{ opacity: 0, y: 65, scale: 0.96 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{
-        opacity: 0,
-        scale: 0.90,
-        filter: "brightness(0.6) blur(3px)",
-        transition: { duration: 0.32, ease: [0.16, 1, 0.3, 1] }
-      }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       transition={{
-        duration: 0.44,
-        ease: [0.16, 1, 0.3, 1]
+        duration: 0.3,
+        ease: "easeInOut"
       }}
       className="w-100 min-vh-100"
-      style={{ willChange: "transform, opacity, filter" }}
     >
       {children}
     </motion.div>
