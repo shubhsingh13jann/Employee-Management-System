@@ -318,3 +318,97 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* ============================================================
+   INTERACTIVE DASHBOARD MOCKUP HOVER STYLES
+   ============================================================ */
+
+/* Stat Cards */
+.stat-card-interactive {
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid transparent !important;
+}
+
+.stat-card-active {
+  transform: translateY(-4px) scale(1.03);
+  border-color: rgba(99, 102, 241, 0.4) !important;
+  box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.15) !important;
+}
+
+.scale-105 {
+  transform: scale(1.05);
+}
+
+.scale-110 {
+  transform: scale(1.1);
+}
+
+.scale-115 {
+  transform: scale(1.15);
+}
+
+.rotate-12 {
+  transform: rotate(12deg);
+}
+
+.stat-icon-badge.purple { background-color: #f5f3ff; color: #4f46e5; }
+.stat-icon-badge.blue { background-color: #eff6ff; color: #2563eb; }
+.stat-icon-badge.green { background-color: #f0fdf4; color: #16a34a; }
+.stat-icon-badge.orange { background-color: #fffbeb; color: #d97706; }
+
+/* Chart Container */
+.chart-container-card {
+  transition: all 0.3s ease;
+  border: 1px solid transparent !important;
+}
+
+.chart-card-glow {
+  border-color: rgba(99, 102, 241, 0.35) !important;
+  box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.15) !important;
+}
+
+.chart-wave-glow {
+  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.65));
+}
+
+.pulse-ring {
+  animation: pulseRing 1.6s infinite;
+}
+
+@keyframes pulseRing {
+  0% { r: 6px; opacity: 0.8; }
+  100% { r: 16px; opacity: 0; }
+}
+
+/* Progress Bars */
+.progress-bar-glow {
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+/* Donut Circle Chart */
+.donut-interactive-wrapper {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.donut-hovered {
+  transform: scale(1.12);
+}
+
+.circle-animated-dash {
+  animation: donutSpin 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes donutSpin {
+  0% { stroke-dasharray: 0, 100; transform: rotate(-90deg); transform-origin: 50% 50%; }
+  100% { stroke-dasharray: 88, 100; transform: rotate(0deg); transform-origin: 50% 50%; }
+}
+
+.translate-x-1 {
+  transform: translateX(3px);
+}
+
+.translate-x-2 {
+  transform: translateX(5px);
+  background-color: #f1f5f9 !important;
+}

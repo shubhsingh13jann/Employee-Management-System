@@ -7,6 +7,26 @@ const LandingPage = () => {
   const [hoveredCard, setHoveredCard] = useState(null);
   const [activeTab, setActiveTab] = useState("Dashboard");
 
+  // Interactive Mock Dashboard States
+  const [graphTimeframe, setGraphTimeframe] = useState("This Month");
+  const [activeGraphPoint, setActiveGraphPoint] = useState({ index: 4, date: "May 29", count: 248, change: "+12%" });
+  const [isGraphHovered, setIsGraphHovered] = useState(false);
+  const [hoveredDept, setHoveredDept] = useState(null);
+  const [isCircleHovered, setIsCircleHovered] = useState(false);
+  const [hoveredStat, setHoveredStat] = useState(null);
+  const [hoveredApproval, setHoveredApproval] = useState(null);
+
+  // Graph Data points along curve
+  const graphPoints = [
+    { index: 0, x: 20, y: 85, date: "May 1", count: 212, change: "+3%" },
+    { index: 1, x: 100, y: 65, date: "May 8", count: 220, change: "+5%" },
+    { index: 2, x: 190, y: 72, date: "May 15", count: 228, change: "+7%" },
+    { index: 3, x: 285, y: 45, date: "May 22", count: 239, change: "+10%" },
+    { index: 4, x: 375, y: 52, date: "May 29", count: 248, change: "+12%" }
+  ];
+
+  const currentPoint = activeGraphPoint;
+
   return (
     <div className="min-vh-100 bg-white text-dark overflow-x-hidden landing-container">
       {/* 1. TOP NAVIGATION BAR */}
@@ -54,10 +74,10 @@ const LandingPage = () => {
 
       {/* 2. HERO SECTION */}
       <section className="position-relative pt-4 pb-5 px-3 px-lg-5 overflow-hidden hero-interactive-section">
-        {/* Interactive Dynamic Particle Constellation Network (Pure Animation, No Static Dots) */}
+        {/* Interactive Dynamic Particle Constellation Network */}
         <InteractiveBackground />
 
-        {/* Animated Floating Gradient Light Orbs (Gentle & Cool) */}
+        {/* Animated Floating Gradient Light Orbs */}
         <div className="ambient-orb orb-1"></div>
         <div className="ambient-orb orb-2"></div>
         <div className="ambient-orb orb-3"></div>
@@ -143,13 +163,11 @@ const LandingPage = () => {
                 {/* Floating Interactive Badge */}
                 <div className="showcase-floating-tag badge bg-dark text-white px-3 py-1.5 rounded-pill shadow-lg d-inline-flex align-items-center gap-1.5">
                   <span className="pulse-dot"></span>
-                  <small className="fw-bold">Hover to Pop Out & Explore Live Preview</small>
+                  <small className="fw-bold">Interactive Live Preview (Hover graphs & bars!)</small>
                 </div>
 
                 {/* THE 3D POP-OUT CARD */}
-                <div
-                  className="showcase-dashboard-card rounded-4 shadow-2xl overflow-hidden border border-slate-200 bg-white"
-                >
+                <div className="showcase-dashboard-card rounded-4 shadow-2xl overflow-hidden border border-slate-200 bg-white">
                   <div className="d-flex flex-row" style={{ minHeight: "560px" }}>
                     {/* Mock Dark Sidebar */}
                     <div className="mock-sidebar p-3 d-flex flex-column justify-content-between text-white" style={{ width: "210px", background: "#0b1329" }}>
@@ -184,9 +202,9 @@ const LandingPage = () => {
                                 type="button"
                                 onClick={(e) => { e.stopPropagation(); setActiveTab(item.name); }}
                                 className={`w-100 text-start d-flex align-items-center gap-2 px-2.5 py-1.5 rounded-2 text-white border-0 transition-all ${
-                                  activeTab === item.name ? "bg-primary fw-bold shadow-xs" : "bg-transparent text-white-50 hover-light"
+                                  activeTab === item.name ? "bg-primary fw-bold shadow-xs scale-102" : "bg-transparent text-white-50 hover-light"
                                 }`}
-                                style={{ fontSize: "11px" }}
+                                style={{ fontSize: "11px", transition: "all 0.2s ease" }}
                               >
                                 <i className={`bi ${item.icon}`}></i>
                                 <span>{item.name}</span>
@@ -220,16 +238,16 @@ const LandingPage = () => {
                           <small className="text-muted" style={{ fontSize: "11px" }}>Here's what's happening in your organization today.</small>
                         </div>
                         <div className="d-flex align-items-center gap-2">
-                          <div className="d-none d-md-flex align-items-center gap-1.5 bg-white px-2.5 py-1 rounded-pill border shadow-2xs">
+                          <div className="d-none d-md-flex align-items-center gap-1.5 bg-white px-2.5 py-1 rounded-pill border shadow-2xs hover-border-primary transition-all">
                             <i className="bi bi-search text-muted small"></i>
                             <input type="text" placeholder="Search employees, departments..." className="border-0 bg-transparent small outline-none" style={{ width: "160px", fontSize: "11px" }} readOnly />
                             <kbd className="bg-light text-muted border px-1 rounded small" style={{ fontSize: "9px" }}>⌘K</kbd>
                           </div>
-                          <div className="position-relative p-1.5 bg-white rounded-circle border shadow-2xs cursor-pointer">
+                          <div className="position-relative p-1.5 bg-white rounded-circle border shadow-2xs hover-scale transition-all cursor-pointer">
                             <i className="bi bi-bell text-secondary"></i>
                             <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{ fontSize: "8px" }}>1</span>
                           </div>
-                          <div className="d-flex align-items-center gap-1.5 bg-white p-1 rounded-pill border shadow-2xs">
+                          <div className="d-flex align-items-center gap-1.5 bg-white p-1 rounded-pill border shadow-2xs hover-lift transition-all">
                             <div className="bg-primary text-white rounded-circle fw-bold d-flex align-items-center justify-content-center" style={{ width: "24px", height: "24px", fontSize: "10px" }}>
                               S
                             </div>
@@ -241,151 +259,210 @@ const LandingPage = () => {
                         </div>
                       </div>
 
-                      {/* 4 Stat Cards Row */}
+                      {/* 4 Stat Cards Row with Active Hover Animations */}
                       <div className="row g-2">
-                        <div className="col-3">
-                          <div className="card border-0 shadow-xs p-2 rounded-3 bg-white hover-lift">
-                            <div className="d-flex justify-content-between align-items-start">
-                              <div>
-                                <small className="text-muted fw-semibold" style={{ fontSize: "10px" }}>Total Employees</small>
-                                <h5 className="fw-bold mb-0 text-dark">248</h5>
-                                <small className="text-success fw-bold" style={{ fontSize: "9px" }}>↑ 12% from last month</small>
-                              </div>
-                              <div className="p-1.5 bg-purple-soft text-primary rounded-circle">
-                                <i className="bi bi-people" style={{ fontSize: "12px" }}></i>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="col-3">
-                          <div className="card border-0 shadow-xs p-2 rounded-3 bg-white hover-lift">
-                            <div className="d-flex justify-content-between align-items-start">
-                              <div>
-                                <small className="text-muted fw-semibold" style={{ fontSize: "10px" }}>Departments</small>
-                                <h5 className="fw-bold mb-0 text-dark">18</h5>
-                                <small className="text-primary fw-bold" style={{ fontSize: "9px" }}>↑ 2 new this month</small>
-                              </div>
-                              <div className="p-1.5 bg-primary bg-opacity-10 text-primary rounded-circle">
-                                <i className="bi bi-building" style={{ fontSize: "12px" }}></i>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="col-3">
-                          <div className="card border-0 shadow-xs p-2 rounded-3 bg-white hover-lift">
-                            <div className="d-flex justify-content-between align-items-start">
-                              <div>
-                                <small className="text-muted fw-semibold" style={{ fontSize: "10px" }}>Active Projects</small>
-                                <h5 className="fw-bold mb-0 text-dark">32</h5>
-                                <small className="text-success fw-bold" style={{ fontSize: "9px" }}>↑ 8 in progress</small>
-                              </div>
-                              <div className="p-1.5 bg-success bg-opacity-10 text-success rounded-circle">
-                                <i className="bi bi-kanban" style={{ fontSize: "12px" }}></i>
+                        {[
+                          { id: 1, label: "Total Employees", val: "248", change: "↑ 12% from last month", isUp: true, icon: "bi-people", color: "purple" },
+                          { id: 2, label: "Departments", val: "18", change: "↑ 2 new this month", isUp: true, icon: "bi-building", color: "blue" },
+                          { id: 3, label: "Active Projects", val: "32", change: "↑ 8 in progress", isUp: true, icon: "bi-kanban", color: "green" },
+                          { id: 4, label: "Total Payroll", val: "$1.24M", change: "↑ 8.5% from last month", isUp: true, icon: "bi-cash-stack", color: "orange" }
+                        ].map((stat) => (
+                          <div key={stat.id} className="col-3">
+                            <div
+                              className={`card border-0 p-2 rounded-3 bg-white transition-all stat-card-interactive ${
+                                hoveredStat === stat.id ? "stat-card-active shadow-md" : "shadow-xs"
+                              }`}
+                              onMouseEnter={() => setHoveredStat(stat.id)}
+                              onMouseLeave={() => setHoveredStat(null)}
+                            >
+                              <div className="d-flex justify-content-between align-items-start">
+                                <div>
+                                  <small className="text-muted fw-semibold" style={{ fontSize: "10px" }}>{stat.label}</small>
+                                  <h5 className={`fw-bold mb-0 text-dark transition-all ${hoveredStat === stat.id ? "text-primary scale-105" : ""}`}>
+                                    {stat.val}
+                                  </h5>
+                                  <small className="text-success fw-bold d-block" style={{ fontSize: "9px" }}>{stat.change}</small>
+                                </div>
+                                <div className={`p-1.5 rounded-circle transition-all stat-icon-badge ${stat.color} ${hoveredStat === stat.id ? "rotate-12 scale-110" : ""}`}>
+                                  <i className={`bi ${stat.icon}`} style={{ fontSize: "12px" }}></i>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-
-                        <div className="col-3">
-                          <div className="card border-0 shadow-xs p-2 rounded-3 bg-white hover-lift">
-                            <div className="d-flex justify-content-between align-items-start">
-                              <div>
-                                <small className="text-muted fw-semibold" style={{ fontSize: "10px" }}>Total Payroll</small>
-                                <h5 className="fw-bold mb-0 text-dark">$1.24M</h5>
-                                <small className="text-success fw-bold" style={{ fontSize: "9px" }}>↑ 8.5% from last month</small>
-                              </div>
-                              <div className="p-1.5 bg-warning bg-opacity-10 text-warning rounded-circle">
-                                <i className="bi bi-cash-stack" style={{ fontSize: "12px" }}></i>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                        ))}
                       </div>
 
-                      {/* Middle Row: Area Chart + Approvals */}
+                      {/* Middle Row: Interactive Area Chart + Approvals */}
                       <div className="row g-2">
                         {/* Workforce Overview Chart Card */}
                         <div className="col-8">
-                          <div className="card border-0 shadow-xs p-2.5 rounded-3 bg-white h-100">
-                            <div className="d-flex justify-content-between align-items-center mb-2">
-                              <h6 className="fw-bold mb-0 text-dark" style={{ fontSize: "12px" }}>Workforce Overview</h6>
-                              <span className="badge bg-light text-dark border small" style={{ fontSize: "9px" }}>This Month ▾</span>
+                          <div
+                            className={`card border-0 shadow-xs p-2.5 rounded-3 bg-white h-100 transition-all chart-container-card ${
+                              isGraphHovered ? "chart-card-glow" : ""
+                            }`}
+                            onMouseEnter={() => setIsGraphHovered(true)}
+                            onMouseLeave={() => setIsGraphHovered(false)}
+                          >
+                            <div className="d-flex justify-content-between align-items-center mb-1">
+                              <div className="d-flex align-items-center gap-2">
+                                <h6 className="fw-bold mb-0 text-dark" style={{ fontSize: "12px" }}>Workforce Overview</h6>
+                                {isGraphHovered && (
+                                  <span className="badge bg-purple-soft text-primary animate-fade-in" style={{ fontSize: "9px" }}>
+                                    ● {currentPoint.date}: {currentPoint.count} Staff ({currentPoint.change})
+                                  </span>
+                                )}
+                              </div>
+                              <div className="dropdown">
+                                <button
+                                  className="btn btn-sm btn-light border py-0 px-2 fw-semibold text-dark dropdown-toggle"
+                                  style={{ fontSize: "9px" }}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const next = graphTimeframe === "This Month" ? "This Quarter" : graphTimeframe === "This Quarter" ? "This Year" : "This Month";
+                                    setGraphTimeframe(next);
+                                  }}
+                                >
+                                  {graphTimeframe}
+                                </button>
+                              </div>
                             </div>
 
-                            {/* Simulated Area Chart SVG */}
-                            <div className="position-relative w-100 my-1" style={{ height: "110px" }}>
+                            {/* Simulated Interactive Area Chart SVG with Hover Nodes & Guides */}
+                            <div className="position-relative w-100 my-1 cursor-crosshair" style={{ height: "115px" }}>
+                              {/* Hover Floating Tooltip */}
+                              {isGraphHovered && (
+                                <div
+                                  className="position-absolute bg-dark text-white px-2 py-1 rounded shadow-lg pointer-events-none transition-all"
+                                  style={{
+                                    left: `${(currentPoint.x / 400) * 100}%`,
+                                    top: `${(currentPoint.y / 120) * 100 - 32}%`,
+                                    transform: "translate(-50%, -100%)",
+                                    fontSize: "10px",
+                                    whiteSpace: "nowrap",
+                                    zIndex: 5
+                                  }}
+                                >
+                                  <span className="fw-bold">{currentPoint.count} Employees</span>
+                                  <small className="text-success ms-1">({currentPoint.change})</small>
+                                </div>
+                              )}
+
                               <svg viewBox="0 0 400 120" className="w-100 h-100 overflow-visible">
                                 <defs>
                                   <linearGradient id="chartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                                    <stop offset="0%" stopColor="#6366f1" stopOpacity="0.35" />
+                                    <stop offset="0%" stopColor="#6366f1" stopOpacity={isGraphHovered ? "0.48" : "0.32"} />
                                     <stop offset="100%" stopColor="#6366f1" stopOpacity="0.0" />
                                   </linearGradient>
                                 </defs>
+
+                                {/* Grid lines */}
                                 <line x1="0" y1="30" x2="400" y2="30" stroke="#f1f5f9" strokeWidth="1" />
                                 <line x1="0" y1="60" x2="400" y2="60" stroke="#f1f5f9" strokeWidth="1" />
                                 <line x1="0" y1="90" x2="400" y2="90" stroke="#f1f5f9" strokeWidth="1" />
+
+                                {/* Area Fill with pulse animation */}
                                 <path
-                                  d="M0,80 Q50,75 100,50 T200,60 T300,40 T400,55 L400,120 L0,120 Z"
+                                  d="M0,85 Q50,75 100,65 T190,72 T285,45 T375,52 L400,60 L400,120 L0,120 Z"
                                   fill="url(#chartGrad)"
+                                  className="chart-area-path"
                                 />
+
+                                {/* Animated Glowing Wave Line */}
                                 <path
-                                  d="M0,80 Q50,75 100,50 T200,60 T300,40 T400,55"
+                                  d="M0,85 Q50,75 100,65 T190,72 T285,45 T375,52 L400,60"
                                   fill="none"
                                   stroke="#6366f1"
-                                  strokeWidth="2.5"
+                                  strokeWidth={isGraphHovered ? "3.2" : "2.5"}
                                   strokeLinecap="round"
+                                  className={`transition-all ${isGraphHovered ? "chart-wave-glow" : ""}`}
                                 />
-                                <circle cx="360" cy="45" r="4" fill="#6366f1" />
-                                <circle cx="360" cy="45" r="8" fill="#6366f1" opacity="0.2" />
+
+                                {/* Vertical dashed hover guide line */}
+                                {isGraphHovered && (
+                                  <line
+                                    x1={currentPoint.x}
+                                    y1={currentPoint.y}
+                                    x2={currentPoint.x}
+                                    y2="120"
+                                    stroke="#818cf8"
+                                    strokeWidth="1.5"
+                                    strokeDasharray="3 3"
+                                  />
+                                )}
+
+                                {/* Interactive Hover Nodes along Wave */}
+                                {graphPoints.map((pt) => (
+                                  <g key={pt.index} onMouseEnter={() => setActiveGraphPoint(pt)}>
+                                    {/* Invisible larger hover hit area */}
+                                    <circle cx={pt.x} cy={pt.y} r="16" fill="transparent" className="cursor-pointer" />
+                                    {/* Visible node circle */}
+                                    <circle
+                                      cx={pt.x}
+                                      cy={pt.y}
+                                      r={currentPoint.index === pt.index ? "6" : "3.5"}
+                                      fill={currentPoint.index === pt.index ? "#ffffff" : "#6366f1"}
+                                      stroke="#6366f1"
+                                      strokeWidth={currentPoint.index === pt.index ? "3" : "1.5"}
+                                      className="transition-all"
+                                    />
+                                    {currentPoint.index === pt.index && (
+                                      <circle cx={pt.x} cy={pt.y} r="12" fill="#6366f1" opacity="0.25" className="pulse-ring" />
+                                    )}
+                                  </g>
+                                ))}
                               </svg>
                             </div>
 
-                            {/* 4 Mini metrics at bottom of chart */}
+                            {/* 4 Mini metrics at bottom of chart with hover feedback */}
                             <div className="row g-1 pt-2 border-top border-light">
-                              <div className="col-3">
-                                <div className="p-1 bg-light rounded text-center">
-                                  <small className="text-muted d-block" style={{ fontSize: "8px" }}>New Hires</small>
-                                  <strong className="text-dark d-block" style={{ fontSize: "10px" }}>15 <span className="text-success" style={{ fontSize: "8px" }}>↑ 28%</span></strong>
+                              {[
+                                { title: "New Hires", val: "15", badge: "↑ 28%", badgeColor: "text-success" },
+                                { title: "Attrition Rate", val: "2.4%", badge: "↓ -0.8%", badgeColor: "text-danger" },
+                                { title: "Avg. Tenure", val: "2.8 Yrs", badge: "↑ 0.6", badgeColor: "text-primary" },
+                                { title: "Satisfaction", val: "4.6/5", badge: "★ 0.3", badgeColor: "text-success" }
+                              ].map((m, idx) => (
+                                <div key={m.title} className="col-3">
+                                  <div
+                                    className="p-1 bg-light rounded text-center transition-all hover-lift hover-bg cursor-pointer"
+                                    onMouseEnter={() => {
+                                      if (graphPoints[idx]) setActiveGraphPoint(graphPoints[idx]);
+                                    }}
+                                  >
+                                    <small className="text-muted d-block" style={{ fontSize: "8px" }}>{m.title}</small>
+                                    <strong className="text-dark d-block" style={{ fontSize: "10px" }}>
+                                      {m.val} <span className={m.badgeColor} style={{ fontSize: "8px" }}>{m.badge}</span>
+                                    </strong>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="col-3">
-                                <div className="p-1 bg-light rounded text-center">
-                                  <small className="text-muted d-block" style={{ fontSize: "8px" }}>Attrition Rate</small>
-                                  <strong className="text-dark d-block" style={{ fontSize: "10px" }}>2.4% <span className="text-danger" style={{ fontSize: "8px" }}>↓ -0.8%</span></strong>
-                                </div>
-                              </div>
-                              <div className="col-3">
-                                <div className="p-1 bg-light rounded text-center">
-                                  <small className="text-muted d-block" style={{ fontSize: "8px" }}>Avg. Tenure</small>
-                                  <strong className="text-dark d-block" style={{ fontSize: "10px" }}>2.8 Yrs <span className="text-primary" style={{ fontSize: "8px" }}>↑ 0.6</span></strong>
-                                </div>
-                              </div>
-                              <div className="col-3">
-                                <div className="p-1 bg-light rounded text-center">
-                                  <small className="text-muted d-block" style={{ fontSize: "8px" }}>Satisfaction</small>
-                                  <strong className="text-dark d-block" style={{ fontSize: "10px" }}>4.6/5 <span className="text-success" style={{ fontSize: "8px" }}>★ 0.3</span></strong>
-                                </div>
-                              </div>
+                              ))}
                             </div>
                           </div>
                         </div>
 
-                        {/* Pending Approvals Card */}
+                        {/* Pending Approvals Card with interactive list hover */}
                         <div className="col-4">
                           <div className="card border-0 shadow-xs p-2.5 rounded-3 bg-white h-100">
-                            <h6 className="fw-bold mb-2 text-dark" style={{ fontSize: "12px" }}>Pending Approvals <i className="bi bi-info-circle text-muted small"></i></h6>
+                            <h6 className="fw-bold mb-2 text-dark" style={{ fontSize: "12px" }}>
+                              Pending Approvals <i className="bi bi-info-circle text-muted small"></i>
+                            </h6>
                             <div className="d-flex flex-column gap-1.5">
                               {[
-                                { title: "Leave Requests", count: "3 pending requests", icon: "bi-calendar-check", color: "text-danger bg-danger" },
-                                { title: "Department Changes", count: "1 pending request", icon: "bi-diagram-3", color: "text-info bg-info" },
-                                { title: "Team Assignments", count: "1 pending request", icon: "bi-person-badge", color: "text-primary bg-primary" },
-                                { title: "Salary Approvals", count: "2 pending requests", icon: "bi-cash", color: "text-warning bg-warning" }
+                                { id: 1, title: "Leave Requests", count: "3 pending requests", icon: "bi-calendar-check", color: "text-danger bg-danger" },
+                                { id: 2, title: "Department Changes", count: "1 pending request", icon: "bi-diagram-3", color: "text-info bg-info" },
+                                { id: 3, title: "Team Assignments", count: "1 pending request", icon: "bi-person-badge", color: "text-primary bg-primary" },
+                                { id: 4, title: "Salary Approvals", count: "2 pending requests", icon: "bi-cash", color: "text-warning bg-warning" }
                               ].map((item) => (
-                                <div key={item.title} className="d-flex justify-content-between align-items-center p-1.5 rounded bg-light hover-bg border border-light">
+                                <div
+                                  key={item.id}
+                                  className={`d-flex justify-content-between align-items-center p-1.5 rounded transition-all cursor-pointer ${
+                                    hoveredApproval === item.id ? "bg-light shadow-2xs translate-x-2" : "bg-light border border-light"
+                                  }`}
+                                  onMouseEnter={() => setHoveredApproval(item.id)}
+                                  onMouseLeave={() => setHoveredApproval(null)}
+                                >
                                   <div className="d-flex align-items-center gap-1.5">
-                                    <div className={`p-1 rounded ${item.color} bg-opacity-10`}>
+                                    <div className={`p-1 rounded ${item.color} bg-opacity-10 transition-all ${hoveredApproval === item.id ? "scale-110" : ""}`}>
                                       <i className={`bi ${item.icon}`} style={{ fontSize: "10px" }}></i>
                                     </div>
                                     <div>
@@ -393,7 +470,7 @@ const LandingPage = () => {
                                       <small className="text-muted" style={{ fontSize: "8px" }}>{item.count}</small>
                                     </div>
                                   </div>
-                                  <i className="bi bi-chevron-right text-muted" style={{ fontSize: "9px" }}></i>
+                                  <i className={`bi bi-chevron-right text-muted transition-all ${hoveredApproval === item.id ? "text-primary translate-x-1" : ""}`} style={{ fontSize: "9px" }}></i>
                                 </div>
                               ))}
                             </div>
@@ -401,42 +478,101 @@ const LandingPage = () => {
                         </div>
                       </div>
 
-                      {/* Bottom Row: Top Departments Progress Bars + Donut */}
+                      {/* Bottom Row: Top Departments Progress Bars & Circle Donut with FULL HOVER ANIMATIONS */}
                       <div className="card border-0 shadow-xs p-2.5 rounded-3 bg-white">
                         <div className="d-flex justify-content-between align-items-center mb-2">
-                          <h6 className="fw-bold mb-0 text-dark" style={{ fontSize: "12px" }}>Top Departments</h6>
-                          <span className="text-primary small fw-semibold cursor-pointer" style={{ fontSize: "10px" }}>View All</span>
+                          <div className="d-flex align-items-center gap-2">
+                            <h6 className="fw-bold mb-0 text-dark" style={{ fontSize: "12px" }}>Top Departments</h6>
+                            {hoveredDept && (
+                              <span className="badge bg-primary bg-opacity-10 text-primary animate-fade-in" style={{ fontSize: "9px" }}>
+                                {hoveredDept.name}: {hoveredDept.count} Employees ({Math.round((hoveredDept.count / 229) * 100)}%)
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-primary small fw-semibold cursor-pointer hover-underline" style={{ fontSize: "10px" }}>View All</span>
                         </div>
+
                         <div className="row align-items-center">
+                          {/* PROGRESS BARS WITH VIBRANT HOVER ANIMATION */}
                           <div className="col-8">
                             <div className="d-flex flex-column gap-1.5">
                               {[
-                                { name: "Engineering", count: 86, color: "bg-primary" },
-                                { name: "Marketing", count: 45, color: "bg-purple" },
-                                { name: "Sales", count: 38, color: "bg-info" },
-                                { name: "Human Resources", count: 32, color: "bg-success" },
-                                { name: "Finance", count: 28, color: "bg-warning" }
+                                { name: "Engineering", count: 86, color: "bg-primary", glow: "#3b82f6", pct: 38 },
+                                { name: "Marketing", count: 45, color: "bg-purple", glow: "#8b5cf6", pct: 20 },
+                                { name: "Sales", count: 38, color: "bg-info", glow: "#06b6d4", pct: 17 },
+                                { name: "Human Resources", count: 32, color: "bg-success", glow: "#10b981", pct: 14 },
+                                { name: "Finance", count: 28, color: "bg-warning", glow: "#f59e0b", pct: 11 }
                               ].map((d) => (
-                                <div key={d.name} className="d-flex align-items-center gap-2">
-                                  <small className="text-muted text-truncate" style={{ width: "90px", fontSize: "10px" }}>{d.name}</small>
-                                  <div className="progress flex-grow-1" style={{ height: "5px" }}>
-                                    <div className={`progress-bar ${d.color}`} style={{ width: `${(d.count / 86) * 100}%` }}></div>
+                                <div
+                                  key={d.name}
+                                  className={`d-flex align-items-center gap-2 p-1 rounded transition-all cursor-pointer ${
+                                    hoveredDept?.name === d.name ? "bg-slate-100 shadow-2xs" : ""
+                                  }`}
+                                  onMouseEnter={() => setHoveredDept(d)}
+                                  onMouseLeave={() => setHoveredDept(null)}
+                                >
+                                  <small className={`text-truncate transition-all ${hoveredDept?.name === d.name ? "fw-bold text-dark" : "text-muted"}`} style={{ width: "95px", fontSize: "10px" }}>
+                                    {d.name}
+                                  </small>
+                                  {/* THE ANIMATED EXPANDING BAR */}
+                                  <div className="progress flex-grow-1 position-relative overflow-hidden" style={{ height: hoveredDept?.name === d.name ? "8px" : "6px", transition: "height 0.25s ease" }}>
+                                    <div
+                                      className={`progress-bar ${d.color} ${hoveredDept?.name === d.name ? "progress-bar-glow progress-bar-striped progress-bar-animated" : ""}`}
+                                      style={{
+                                        width: `${(d.count / 86) * 100}%`,
+                                        boxShadow: hoveredDept?.name === d.name ? `0 0 10px ${d.glow}` : "none",
+                                        transition: "width 0.4s ease, box-shadow 0.25s ease"
+                                      }}
+                                    ></div>
                                   </div>
-                                  <small className="fw-bold text-dark" style={{ width: "20px", fontSize: "10px" }}>{d.count}</small>
+                                  <small className={`fw-bold transition-all ${hoveredDept?.name === d.name ? "text-primary scale-110" : "text-dark"}`} style={{ width: "22px", fontSize: "10px" }}>
+                                    {d.count}
+                                  </small>
                                 </div>
                               ))}
                             </div>
                           </div>
+
+                          {/* THE CIRCLE / DONUT CHART WITH HOVER PULSE & ROTATION */}
                           <div className="col-4 text-center">
-                            {/* Donut Chart Mockup */}
-                            <div className="position-relative d-inline-block">
-                              <svg width="64" height="64" viewBox="0 0 36 36" className="circular-chart">
-                                <path className="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e2e8f0" strokeWidth="3.8" />
-                                <path className="circle" strokeDasharray="80, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#6366f1" strokeWidth="3.8" />
+                            <div
+                              className={`position-relative d-inline-block transition-all cursor-pointer donut-interactive-wrapper ${
+                                isCircleHovered ? "donut-hovered scale-110" : ""
+                              }`}
+                              onMouseEnter={() => setIsCircleHovered(true)}
+                              onMouseLeave={() => setIsCircleHovered(false)}
+                            >
+                              <svg width="72" height="72" viewBox="0 0 36 36" className="circular-chart">
+                                <path
+                                  className="circle-bg"
+                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                  fill="none"
+                                  stroke="#e2e8f0"
+                                  strokeWidth="3.8"
+                                />
+                                <path
+                                  className={`circle ${isCircleHovered ? "circle-animated-dash" : ""}`}
+                                  strokeDasharray={isCircleHovered ? "88, 100" : "80, 100"}
+                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                  fill="none"
+                                  stroke={isCircleHovered ? "#4f46e5" : "#6366f1"}
+                                  strokeWidth={isCircleHovered ? "4.6" : "3.8"}
+                                  strokeLinecap="round"
+                                  style={{
+                                    filter: isCircleHovered ? "drop-shadow(0 0 6px rgba(79, 70, 229, 0.6))" : "none",
+                                    transition: "all 0.4s ease"
+                                  }}
+                                />
                               </svg>
-                              <div className="position-absolute top-50 start-50 translate-middle">
-                                <span className="fw-bold text-dark d-block leading-none" style={{ fontSize: "11px" }}>229</span>
-                                <small className="text-muted leading-none" style={{ fontSize: "7px" }}>Total</small>
+
+                              {/* Center Number with Pulse Animation */}
+                              <div className="position-absolute top-50 start-50 translate-middle text-center pointer-events-none">
+                                <span className={`fw-bold text-dark d-block leading-none transition-all ${isCircleHovered ? "text-primary scale-115" : ""}`} style={{ fontSize: "12px" }}>
+                                  229
+                                </span>
+                                <small className="text-muted leading-none d-block" style={{ fontSize: "8px" }}>
+                                  {isCircleHovered ? "Total" : "Total"}
+                                </small>
                               </div>
                             </div>
                           </div>
