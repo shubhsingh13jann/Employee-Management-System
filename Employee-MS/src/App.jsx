@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./App.css";
@@ -43,64 +44,66 @@ const AnimatedAppContent = () => {
   return (
     <>
       <TopLaserBar />
-      <PageTransition>
-        <Routes location={location} key={location.pathname}>
-        {/* Public Landing & Auth Routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/adminlogin" element={<Navigate to="/login" replace />} />
-        <Route path="/dashboard" element={<Navigate to="/login" replace />} />
+      <AnimatePresence mode="wait">
+        <PageTransition key={location.pathname}>
+          <Routes location={location}>
+            {/* Public Landing & Auth Routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/adminlogin" element={<Navigate to="/login" replace />} />
+            <Route path="/dashboard" element={<Navigate to="/login" replace />} />
 
-        {/* 👑 HR Admin Portal */}
-        <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-          <Route path="/admin" element={<Layout />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="departments" element={<Departments />} />
-            <Route path="users" element={<UserManagement />} />
-            <Route path="hierarchy" element={<HierarchyMapping />} />
-          </Route>
-        </Route>
+            {/* 👑 HR Admin Portal */}
+            <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+              <Route path="/admin" element={<Layout />}>
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="departments" element={<Departments />} />
+                <Route path="users" element={<UserManagement />} />
+                <Route path="hierarchy" element={<HierarchyMapping />} />
+              </Route>
+            </Route>
 
-        {/* 👔 Manager Portal */}
-        <Route element={<ProtectedRoute allowedRoles={["manager", "admin"]} />}>
-          <Route path="/manager" element={<Layout />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<ManagerDashboard />} />
-            <Route path="projects" element={<ProjectsManager />} />
-            <Route path="supervisors" element={<DepartmentSupervisors />} />
-            <Route path="leaves" element={<ManagerLeaves />} />
-          </Route>
-        </Route>
+            {/* 👔 Manager Portal */}
+            <Route element={<ProtectedRoute allowedRoles={["manager", "admin"]} />}>
+              <Route path="/manager" element={<Layout />}>
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="dashboard" element={<ManagerDashboard />} />
+                <Route path="projects" element={<ProjectsManager />} />
+                <Route path="supervisors" element={<DepartmentSupervisors />} />
+                <Route path="leaves" element={<ManagerLeaves />} />
+              </Route>
+            </Route>
 
-        {/* 👷 Supervisor Portal */}
-        <Route element={<ProtectedRoute allowedRoles={["supervisor", "admin"]} />}>
-          <Route path="/supervisor" element={<Layout />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<SupervisorDashboard />} />
-            <Route path="team" element={<SupervisorTeam />} />
-            <Route path="tasks" element={<SupervisorTasks />} />
-            <Route path="leaves" element={<SupervisorLeaves />} />
-          </Route>
-        </Route>
+            {/* 👷 Supervisor Portal */}
+            <Route element={<ProtectedRoute allowedRoles={["supervisor", "admin"]} />}>
+              <Route path="/supervisor" element={<Layout />}>
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="dashboard" element={<SupervisorDashboard />} />
+                <Route path="team" element={<SupervisorTeam />} />
+                <Route path="tasks" element={<SupervisorTasks />} />
+                <Route path="leaves" element={<SupervisorLeaves />} />
+              </Route>
+            </Route>
 
-        {/* 💼 Employee Portal */}
-        <Route element={<ProtectedRoute allowedRoles={["employee", "admin"]} />}>
-          <Route path="/employee" element={<Layout />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<EmployeeDashboard />} />
-            <Route path="tasks" element={<EmployeeTasks />} />
-            <Route path="leaves" element={<EmployeeLeaves />} />
-            <Route path="profile" element={<EmployeeProfile />} />
-          </Route>
-        </Route>
+            {/* 💼 Employee Portal */}
+            <Route element={<ProtectedRoute allowedRoles={["employee", "admin"]} />}>
+              <Route path="/employee" element={<Layout />}>
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="dashboard" element={<EmployeeDashboard />} />
+                <Route path="tasks" element={<EmployeeTasks />} />
+                <Route path="leaves" element={<EmployeeLeaves />} />
+                <Route path="profile" element={<EmployeeProfile />} />
+              </Route>
+            </Route>
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </PageTransition>
-  </>
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </PageTransition>
+      </AnimatePresence>
+    </>
   );
 };
 

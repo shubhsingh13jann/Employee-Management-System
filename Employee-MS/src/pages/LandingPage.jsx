@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import InteractiveBackground from "../components/common/InteractiveBackground";
 
-// A true Framer Motion Stacking Section
+// A true Framer Motion Full-Screen Stacking Section
 const StackingSection = ({ id, zIndex, children, bg = "bg-white", isFirst = false }) => {
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({
@@ -11,17 +11,15 @@ const StackingSection = ({ id, zIndex, children, bg = "bg-white", isFirst = fals
     offset: ["start start", "end start"]
   });
 
-  // 1. Pushes back into 3D depth (scale 1.0 -> 0.88)
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.88]);
+  // 1. PUSHES BACK (scales down in 3D perspective), strictly NO upward movement
+  const scale = useTransform(scrollYProgress, [0, 0.88], [1, 0.91]);
 
-  // 2. Disappearing / fading effect until the next card completely occupies its place
-  const opacity = useTransform(scrollYProgress, [0, 0.35, 0.9, 1], [1, 0.88, 0.05, 0]);
-
-  // 3. Subtle depth blur & brightness dimming
+  // 2. SLIGHTLY DISAPPEARING EFFECT visible until the next card occupies its place
+  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.85, 1], [1, 0.95, 0.25, 0]);
   const filter = useTransform(
     scrollYProgress,
-    [0, 0.5, 1],
-    ["brightness(1) blur(0px)", "brightness(0.92) blur(1px)", "brightness(0.78) blur(3px)"]
+    [0, 0.85],
+    ["brightness(1) blur(0px)", "brightness(0.65) blur(2px)"]
   );
 
   return (
@@ -30,23 +28,24 @@ const StackingSection = ({ id, zIndex, children, bg = "bg-white", isFirst = fals
       id={id}
       style={{
         position: "relative",
-        minHeight: "125vh", // Generous scroll distance so the push-back and slide-over is cinematic
+        height: "100vh", // Exactly 1 viewport height for scroll travel
         zIndex: zIndex
       }}
     >
       <motion.div
         style={{
           position: "sticky",
-          top: "74px",
+          top: "74px", // Pinned right below the fixed 74px navbar
+          height: "calc(100vh - 74px)", // COVERS 100% OF THE COMPLETE SCREEN!
           scale,
           opacity,
           filter,
-          transformOrigin: "center 30%", // Stays centered, pushes back without shifting up
+          transformOrigin: "top center",
           willChange: "transform, opacity, filter",
-          boxShadow: isFirst ? "none" : "0 -35px 70px -15px rgba(15, 23, 42, 0.32)",
-          borderTop: isFirst ? "none" : "1px solid rgba(226, 232, 240, 0.85)"
+          boxShadow: isFirst ? "none" : "0 -22px 55px -8px rgba(15, 23, 42, 0.25)",
+          borderTop: isFirst ? "none" : "1px solid rgba(226, 232, 240, 0.9)"
         }}
-        className={`${bg} w-100`}
+        className={`${bg} w-100 d-flex flex-column justify-content-center align-items-center overflow-y-auto`}
       >
         {children}
       </motion.div>
@@ -55,6 +54,14 @@ const StackingSection = ({ id, zIndex, children, bg = "bg-white", isFirst = fals
 };
 
 const LandingPage = () => {
+  // Reset scroll to top and ensure manual restoration so navbar is ALWAYS visible on refresh
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+    window.scrollTo(0, 0);
+  }, []);
+
   // Navigation & Active Stack Section State
   const [activeNavSection, setActiveNavSection] = useState("overview-sec");
 
@@ -67,55 +74,48 @@ const LandingPage = () => {
     { id: "faq-sec", label: "FAQ & Access", icon: "bi-shield-check" }
   ];
 
-  // Custom Cubic-Eased Smooth Scroll for Navbar Navigation (allows viewing the push-back & slide-over effect)
+  // High-precision smooth animated scroll so the stack effect is completely visible when toggling
   const smoothScrollTo = (targetY, duration = 750) => {
     const startY = window.pageYOffset;
-    const diff = targetY - startY;
-    if (Math.abs(diff) < 5) return;
-
+    const distance = targetY - startY;
     let startTime = null;
+
     const easeInOutCubic = (t) =>
       t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
 
     const step = (currentTime) => {
       if (!startTime) startTime = currentTime;
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const ease = easeInOutCubic(progress);
-
-      window.scrollTo(0, startY + diff * ease);
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      const easedProgress = easeInOutCubic(progress);
+      window.scrollTo(0, startY + distance * easedProgress);
 
       if (progress < 1) {
-        requestAnimationFrame(step);
+        window.requestAnimationFrame(step);
       }
     };
 
-    requestAnimationFrame(step);
+    window.requestAnimationFrame(step);
   };
 
-  // Smooth scroll to section when toggled from navbar
   const handleNavToggle = (id) => {
     setActiveNavSection(id);
-    const el = document.getElementById(id);
-    if (el) {
-      const targetY = el.offsetTop - 74;
-      smoothScrollTo(targetY, 800);
+    const index = navItems.findIndex((item) => item.id === id);
+    if (index !== -1) {
+      const targetY = index * window.innerHeight;
+      smoothScrollTo(targetY, 750);
     }
   };
 
-  // ScrollSpy to update active navbar toggle as user scrolls through the stack
+  // Mathematically precise ScrollSpy based on viewport scroll
   useEffect(() => {
     const handleScrollSpy = () => {
-      const sectionIds = ["overview-sec", "roles-sec", "calc-sec", "features-sec", "faq-sec"];
-      const scrollPos = window.scrollY + 220;
-
-      for (let i = sectionIds.length - 1; i >= 0; i--) {
-        const el = document.getElementById(sectionIds[i]);
-        if (el && el.offsetTop <= scrollPos) {
-          setActiveNavSection(sectionIds[i]);
-          break;
-        }
-      }
+      const scrollPos = window.scrollY;
+      const vh = window.innerHeight;
+      const activeIdx = Math.min(
+        Math.max(0, Math.floor((scrollPos + vh * 0.45) / vh)),
+        navItems.length - 1
+      );
+      setActiveNavSection(navItems[activeIdx].id);
     };
 
     window.addEventListener("scroll", handleScrollSpy, { passive: true });
@@ -228,6 +228,7 @@ const LandingPage = () => {
   const activeCurve = timeframeData[graphTimeframe] || timeframeData["This Month"];
   const activePt = hoveredGraphPoint || activeCurve.points[activeCurve.points.length - 1];
 
+  // Complete departments list
   const initialDepts = [
     { name: "Engineering", count: 86, color: "bg-primary", glow: "#3b82f6", pct: 38 },
     { name: "Marketing", count: 45, color: "bg-purple", glow: "#8b5cf6", pct: 20 },
@@ -241,11 +242,11 @@ const LandingPage = () => {
   );
 
   return (
-    <div className="min-vh-100 bg-slate-900 text-dark overflow-x-hidden landing-container position-relative">
-      {/* 1. TOP STICKY NAVBAR WITH INTERACTIVE STACK TOGGLES */}
+    <div className="bg-slate-900 text-dark overflow-x-hidden landing-container position-relative">
+      {/* 1. FIXED TOP NAVBAR - ALWAYS VISIBLE, NEVER DISAPPEARS (zIndex: 9999) */}
       <nav
-        className="navbar navbar-expand-lg py-2.5 px-4 px-lg-5 sticky-top bg-white bg-opacity-95 backdrop-blur border-bottom border-light shadow-xs z-3"
-        style={{ height: "74px" }}
+        className="navbar navbar-expand-lg py-2 px-4 px-lg-5 fixed-top bg-white bg-opacity-95 backdrop-blur border-bottom border-light shadow-xs"
+        style={{ height: "74px", zIndex: 9999 }}
       >
         <div className="container-fluid p-0 d-flex justify-content-between align-items-center">
           {/* Brand Logo with 3D Tilt Hover */}
@@ -288,7 +289,7 @@ const LandingPage = () => {
             ))}
           </div>
 
-          {/* Action Buttons (Login & Sign Up with Page Stack Transition) */}
+          {/* Action Buttons */}
           <div className="d-flex align-items-center gap-2">
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
               <Link
@@ -312,20 +313,20 @@ const LandingPage = () => {
         </div>
       </nav>
 
-      {/* 2. THE STACKING SECTIONS */}
+      {/* 2. THE FULL-SCREEN STACKING SECTIONS */}
 
       {/* ============================================================
-          SECTION 1: OVERVIEW & 3D LIVING DASHBOARD
+          SECTION 1: OVERVIEW & FULL 3D LIVING DASHBOARD SHOWCASE
           ============================================================ */}
       <StackingSection id="overview-sec" zIndex={1} bg="bg-white" isFirst={true}>
-        <section className="position-relative pt-4 pb-5 px-3 px-lg-5 overflow-hidden hero-interactive-section">
+        <div className="w-100 h-100 position-relative d-flex align-items-center justify-content-center px-3 px-lg-5 overflow-hidden hero-interactive-section">
           <InteractiveBackground />
 
           <div className="ambient-orb orb-1"></div>
           <div className="ambient-orb orb-2"></div>
           <div className="ambient-orb orb-3"></div>
 
-          <div className="container-fluid p-0 position-relative z-1">
+          <div className="container-fluid p-0 position-relative z-1 my-auto">
             <div className="row align-items-center g-4">
               {/* Hero Content */}
               <div className="col-12 col-xl-5">
@@ -334,7 +335,7 @@ const LandingPage = () => {
                   <span className="small fw-semibold">Trusted by 1000+ Organizations Worldwide</span>
                 </div>
 
-                <h1 className="hero-heading fw-extrabold text-dark tracking-tight mb-3">
+                <h1 className="hero-heading fw-extrabold text-dark tracking-tight mb-2">
                   Manage People.<br />
                   Empower Teams.<br />
                   Drive{" "}
@@ -352,13 +353,13 @@ const LandingPage = () => {
                   </AnimatePresence>
                 </h1>
 
-                <p className="hero-subtext text-secondary mb-4 leading-relaxed" style={{ fontSize: "1.05rem" }}>
+                <p className="hero-subtext text-secondary mb-3 leading-relaxed" style={{ fontSize: "1rem" }}>
                   Enterprise EMS is the all-in-one workforce operating system built with dedicated roles for{" "}
                   <strong className="text-dark">HR Admins</strong>, <strong className="text-dark">Managers</strong>,{" "}
                   <strong className="text-dark">Supervisors</strong>, and <strong className="text-dark">Staff</strong>.
                 </p>
 
-                <div className="d-flex flex-wrap align-items-center gap-3 mb-4">
+                <div className="d-flex flex-wrap align-items-center gap-3 mb-3">
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
                     <Link
                       to="/signup"
@@ -381,7 +382,7 @@ const LandingPage = () => {
                 </div>
 
                 {/* 3 Value Pillars */}
-                <div className="row g-2 pt-3 border-top border-light">
+                <div className="row g-2 pt-2 border-top border-light">
                   {[
                     { title: "Enterprise Secure", desc: "Bank-level bcrypt & JWT security", icon: "bi-shield-check", color: "text-primary bg-purple-soft" },
                     { title: "Smart Automation", desc: "Two-tier approvals & task sync", icon: "bi-lightning-charge-fill", color: "text-success bg-success bg-opacity-10" },
@@ -397,7 +398,7 @@ const LandingPage = () => {
                         </div>
                         <div>
                           <h6 className="fw-bold mb-0 text-dark" style={{ fontSize: "11px" }}>{pillar.title}</h6>
-                          <small className="text-muted d-block" style={{ fontSize: "10px" }}>{pillar.desc}</small>
+                          <small className="text-muted d-block" style={{ fontSize: "9px" }}>{pillar.desc}</small>
                         </div>
                       </motion.div>
                     </div>
@@ -405,14 +406,22 @@ const LandingPage = () => {
                 </div>
               </div>
 
-              {/* 3D Dashboard Showcase */}
-              <div className="col-12 col-xl-7">
+              {/* COMPLETE, ADVANCED, FULLY-DETAILED 3D LIVING DASHBOARD SHOWCASE */}
+              <div className="col-12 col-xl-7" id="showcase">
                 <div className="showcase-3d-wrapper position-relative">
+                  {/* Floating Interactive Tag */}
+                  <div className="showcase-floating-tag badge bg-dark text-white px-3 py-1.5 rounded-pill shadow-lg d-inline-flex align-items-center gap-2">
+                    <span className="pulse-dot"></span>
+                    <small className="fw-bold">Interactive Live Preview • Hover & Click Elements</small>
+                  </div>
+
+                  {/* THE 3D POP-OUT CARD */}
                   <div className="showcase-dashboard-card rounded-4 shadow-2xl overflow-hidden border border-slate-200 bg-white">
                     <div className="d-flex flex-row" style={{ minHeight: "530px" }}>
-                      {/* Dark Sidebar */}
-                      <div className="mock-sidebar p-3 d-flex flex-column justify-content-between text-white" style={{ width: "200px", background: "#0b1329" }}>
+                      {/* Full 10-Tab Mock Dark Sidebar */}
+                      <div className="mock-sidebar p-3 d-flex flex-column justify-content-between text-white" style={{ width: "205px", background: "#0b1329" }}>
                         <div>
+                          {/* Sidebar Brand */}
                           <div className="d-flex align-items-center gap-2 mb-3 px-1">
                             <div className="logo-cube-sm d-flex align-items-center justify-content-center">
                               <i className="bi bi-box-fill text-white fs-6"></i>
@@ -423,15 +432,19 @@ const LandingPage = () => {
                             </div>
                           </div>
 
+                          {/* Full 10 Interactive Sidebar Items */}
                           <ul className="nav nav-pills flex-column gap-1 list-unstyled p-0 m-0">
                             {[
                               { name: "Dashboard", icon: "bi-speedometer2" },
                               { name: "Departments", icon: "bi-building" },
                               { name: "User Directory", icon: "bi-people" },
-                              { name: "Hierarchy", icon: "bi-diagram-3" },
+                              { name: "Team Hierarchy", icon: "bi-diagram-3" },
                               { name: "Projects", icon: "bi-kanban" },
-                              { name: "Reports", icon: "bi-graph-up" },
-                              { name: "Payroll", icon: "bi-cash-stack" }
+                              { name: "Reports & Analytics", icon: "bi-graph-up" },
+                              { name: "Requests", icon: "bi-inbox" },
+                              { name: "Payroll", icon: "bi-cash-stack" },
+                              { name: "System Settings", icon: "bi-gear" },
+                              { name: "Audit Logs", icon: "bi-shield-shaded" }
                             ].map((item) => (
                               <li key={item.name}>
                                 <button
@@ -440,12 +453,12 @@ const LandingPage = () => {
                                     e.stopPropagation();
                                     setActiveSidebarTab(item.name);
                                   }}
-                                  className={`w-100 text-start d-flex align-items-center gap-2 px-2.5 py-1.5 rounded-2 text-white border-0 transition-all ${
+                                  className={`w-100 text-start d-flex align-items-center gap-2 px-2 py-1 rounded-2 text-white border-0 transition-all ${
                                     activeSidebarTab === item.name
                                       ? "bg-primary fw-bold shadow-xs scale-102"
                                       : "bg-transparent text-white-50 hover-light"
                                   }`}
-                                  style={{ fontSize: "11px" }}
+                                  style={{ fontSize: "10.5px" }}
                                 >
                                   <i className={`bi ${item.icon}`}></i>
                                   <span>{item.name}</span>
@@ -455,45 +468,54 @@ const LandingPage = () => {
                           </ul>
                         </div>
 
+                        {/* Sidebar Footer System Status */}
                         <div className="p-2 rounded mt-2" style={{ background: "rgba(255, 255, 255, 0.08)", border: "1px solid rgba(255, 255, 255, 0.12)" }}>
                           <div className="d-flex align-items-center justify-content-between">
                             <div className="d-flex align-items-center gap-1.5">
                               <span className="pulse-dot-green"></span>
-                              <small className="text-white fw-semibold" style={{ fontSize: "10px" }}>System Status</small>
+                              <small className="text-white fw-semibold" style={{ fontSize: "9.5px" }}>System Status</small>
                             </div>
                             <span className="badge bg-success bg-opacity-25 text-success small" style={{ fontSize: "8px" }}>Live</span>
                           </div>
-                          <small className="text-white-50 d-block mt-0.5" style={{ fontSize: "9px" }}>
-                            All services active • {currentTime}
+                          <small className="text-white-50 d-block mt-0.5" style={{ fontSize: "8.5px" }}>
+                            All 4 services operational • {currentTime}
                           </small>
                         </div>
                       </div>
 
-                      {/* Dashboard Main Body */}
+                      {/* Mock Main Dashboard Body */}
                       <div className="mock-body flex-grow-1 p-3 bg-slate-50 overflow-hidden d-flex flex-column gap-2.5 position-relative">
+                        {/* Interactive Topbar */}
                         <div className="d-flex justify-content-between align-items-center pb-2 border-bottom border-light">
                           <div>
-                            <h6 className="fw-bold mb-0 text-dark d-flex align-items-center gap-1.5" style={{ fontSize: "13px" }}>
+                            <h6 className="fw-bold mb-0 text-dark d-flex align-items-center gap-1.5" style={{ fontSize: "12.5px" }}>
                               {getGreeting()}, Shubh Singh! 👋
                             </h6>
                             <small className="text-muted" style={{ fontSize: "10px" }}>
-                              Viewing module: <span className="text-primary fw-semibold">{activeSidebarTab}</span>
+                              Viewing active module: <span className="text-primary fw-semibold">{activeSidebarTab}</span>
                             </small>
                           </div>
 
-                          <div className="d-flex align-items-center gap-2">
+                          <div className="d-flex align-items-center gap-2 position-relative">
+                            {/* Live Search Input */}
                             <div className="d-none d-md-flex align-items-center gap-1 bg-white px-2 py-1 rounded-pill border shadow-2xs">
                               <i className="bi bi-search text-muted small"></i>
                               <input
                                 type="text"
-                                placeholder="Filter departments..."
+                                placeholder="Search departments..."
                                 className="border-0 bg-transparent small outline-none"
-                                style={{ width: "130px", fontSize: "10px" }}
+                                style={{ width: "135px", fontSize: "10px" }}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                               />
+                              {searchQuery ? (
+                                <i className="bi bi-x-circle text-muted cursor-pointer small" onClick={() => setSearchQuery("")}></i>
+                              ) : (
+                                <kbd className="bg-light text-muted border px-1 rounded small" style={{ fontSize: "8.5px" }}>⌘K</kbd>
+                              )}
                             </div>
 
+                            {/* Interactive Notification Bell */}
                             <div
                               className="position-relative p-1.5 bg-white rounded-circle border shadow-2xs cursor-pointer hover-scale transition-all"
                               onClick={(e) => {
@@ -507,136 +529,366 @@ const LandingPage = () => {
                                   {unreadNotifs}
                                 </span>
                               )}
+
+                              {/* Notification Popup Dropdown */}
+                              {notifOpen && (
+                                <div
+                                  className="position-absolute top-100 end-0 mt-2 bg-white rounded-3 shadow-xl border border-light p-2.5 text-start animate-fade-in"
+                                  style={{ width: "220px", zIndex: 100 }}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <div className="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom">
+                                    <strong className="text-dark small">Notifications</strong>
+                                    <small
+                                      className="text-primary cursor-pointer hover-underline"
+                                      style={{ fontSize: "9px" }}
+                                      onClick={() => setUnreadNotifs(0)}
+                                    >
+                                      Mark all read
+                                    </small>
+                                  </div>
+                                  <div className="d-flex flex-column gap-1">
+                                    <div className="p-1 rounded bg-light small">
+                                      <small className="fw-bold d-block text-dark" style={{ fontSize: "9.5px" }}>Leave request from Alex</small>
+                                      <small className="text-muted" style={{ fontSize: "8px" }}>Casual leave • 2 days</small>
+                                    </div>
+                                    <div className="p-1 rounded bg-light small">
+                                      <small className="fw-bold d-block text-dark" style={{ fontSize: "9.5px" }}>May Payroll Generated</small>
+                                      <small className="text-muted" style={{ fontSize: "8px" }}>$1.24M processed</small>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                             </div>
 
-                            <div className="d-flex align-items-center gap-1.5 bg-white p-1 rounded-pill border shadow-2xs">
+                            {/* User Profile Pill */}
+                            <div className="d-flex align-items-center gap-1.5 bg-white p-1 rounded-pill border shadow-2xs hover-lift transition-all">
                               <div className="bg-primary text-white rounded-circle fw-bold d-flex align-items-center justify-content-center" style={{ width: "22px", height: "22px", fontSize: "9px" }}>
                                 S
                               </div>
                               <div className="pe-1 text-start">
-                                <small className="fw-bold text-dark d-block leading-none" style={{ fontSize: "9px" }}>Shubh Singh</small>
-                                <small className="text-success leading-none fw-semibold" style={{ fontSize: "7px" }}>Online 🟢</small>
+                                <small className="fw-bold text-dark d-block leading-none" style={{ fontSize: "9.5px" }}>Shubh Singh</small>
+                                <small className="text-success leading-none fw-semibold" style={{ fontSize: "7.5px" }}>Online 🟢</small>
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        {/* 4 Stat Cards */}
+                        {/* 4 Interactive Stat Cards with Colored Badges */}
                         <div className="row g-2">
                           {[
-                            { id: "employees", label: "Total Staff", val: "248", change: "↑ 12%", icon: "bi-people", color: "purple" },
-                            { id: "departments", label: "Units", val: "18", change: "↑ 2 new", icon: "bi-building", color: "blue" },
+                            { id: "employees", label: "Total Employees", val: "248", change: "↑ 12% last mo", icon: "bi-people", color: "purple" },
+                            { id: "departments", label: "Departments", val: "18", change: "↑ 2 new", icon: "bi-building", color: "blue" },
                             { id: "projects", label: "Active Projects", val: "32", change: "↑ 8 active", icon: "bi-kanban", color: "green" },
-                            { id: "payroll", label: "Payroll", val: "$1.24M", change: "↑ 8.5%", icon: "bi-cash-stack", color: "orange" }
+                            { id: "payroll", label: "Total Payroll", val: "$1.24M", change: "↑ 8.5% mo", icon: "bi-cash-stack", color: "orange" }
                           ].map((stat) => (
                             <div key={stat.id} className="col-3">
-                              <motion.div
-                                whileHover={{ y: -3, scale: 1.02 }}
+                              <div
                                 onClick={() => setSelectedStat(stat.id)}
                                 className={`card border-0 p-1.5 rounded-3 bg-white transition-all stat-card-interactive ${
                                   selectedStat === stat.id ? "stat-card-active shadow-md" : "shadow-xs"
                                 }`}
                               >
-                                <small className="text-muted fw-semibold d-block" style={{ fontSize: "9px" }}>{stat.label}</small>
-                                <h6 className="fw-bold mb-0 text-dark" style={{ fontSize: "13px" }}>{stat.val}</h6>
-                                <small className="text-success fw-bold d-block" style={{ fontSize: "8px" }}>{stat.change}</small>
-                              </motion.div>
+                                <div className="d-flex justify-content-between align-items-start">
+                                  <div>
+                                    <small className="text-muted fw-semibold" style={{ fontSize: "9px" }}>{stat.label}</small>
+                                    <h6 className={`fw-bold mb-0 text-dark transition-all ${selectedStat === stat.id ? "text-primary scale-105" : ""}`} style={{ fontSize: "13px" }}>
+                                      {stat.val}
+                                    </h6>
+                                    <small className="text-success fw-bold d-block" style={{ fontSize: "8px" }}>{stat.change}</small>
+                                  </div>
+                                  <div className={`p-1 rounded-circle transition-all stat-icon-badge ${stat.color} ${selectedStat === stat.id ? "rotate-12 scale-110" : ""}`}>
+                                    <i className={`bi ${stat.icon}`} style={{ fontSize: "11px" }}></i>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           ))}
                         </div>
 
-                        {/* Area Chart */}
-                        <div className="card border-0 shadow-xs p-2 rounded-3 bg-white">
-                          <div className="d-flex justify-content-between align-items-center mb-1">
-                            <div className="d-flex align-items-center gap-1.5">
-                              <strong className="text-dark small" style={{ fontSize: "11px" }}>Workforce Trend</strong>
-                              <span className="badge bg-purple-soft text-primary" style={{ fontSize: "8px" }}>
-                                ● {activePt.label}: {activePt.count} Staff
-                              </span>
-                            </div>
-                            <div className="d-flex gap-1 bg-light p-0.5 rounded border">
-                              {["Today", "This Week", "This Month", "This Year"].map((tf) => (
-                                <button
-                                  key={tf}
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setGraphTimeframe(tf);
-                                  }}
-                                  className={`btn btn-xs py-0 px-1 border-0 rounded ${
-                                    graphTimeframe === tf ? "bg-white fw-bold text-primary shadow-xs" : "text-muted"
-                                  }`}
-                                  style={{ fontSize: "8px" }}
-                                >
-                                  {tf}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div className="position-relative w-100 my-1 cursor-crosshair" style={{ height: "105px" }}>
-                            <svg viewBox="0 0 400 120" className="w-100 h-100 overflow-visible">
-                              <defs>
-                                <linearGradient id="stackChartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                                  <stop offset="0%" stopColor="#6366f1" stopOpacity="0.45" />
-                                  <stop offset="100%" stopColor="#6366f1" stopOpacity="0.0" />
-                                </linearGradient>
-                              </defs>
-                              <path d={activeCurve.path} fill="url(#stackChartGrad)" />
-                              <path d={activeCurve.line} fill="none" stroke="#6366f1" strokeWidth="2.8" strokeLinecap="round" />
-                              {activeCurve.points.map((pt) => (
-                                <circle
-                                  key={pt.index}
-                                  cx={pt.x}
-                                  cy={pt.y}
-                                  r={activePt.index === pt.index ? "5.5" : "3"}
-                                  fill={activePt.index === pt.index ? "#ffffff" : "#6366f1"}
-                                  stroke="#6366f1"
-                                  strokeWidth="2"
-                                />
-                              ))}
-                            </svg>
-                          </div>
-                        </div>
-
-                        {/* Approvals + Department Progress */}
+                        {/* Middle Row: Full Area Chart + Pending Approvals */}
                         <div className="row g-2">
-                          <div className="col-6">
-                            <div className="p-2 rounded bg-white shadow-xs">
-                              <strong className="text-dark d-block mb-1" style={{ fontSize: "10px" }}>Pending Approvals</strong>
-                              <div className="d-flex flex-column gap-1">
-                                <div className="d-flex justify-content-between align-items-center p-1 bg-light rounded" style={{ fontSize: "9px" }}>
-                                  <span>Leave: Alex Turner</span>
-                                  <button
-                                    type="button"
-                                    onClick={() => setApprovedItems({ ...approvedItems, 1: true })}
-                                    className="btn btn-xs btn-primary py-0 px-1 rounded"
-                                    style={{ fontSize: "8px" }}
+                          {/* Workforce Overview Chart Card */}
+                          <div className="col-8">
+                            <div className="card border-0 shadow-xs p-2 rounded-3 bg-white h-100 transition-all chart-container-card chart-card-glow">
+                              <div className="d-flex justify-content-between align-items-center mb-1">
+                                <div className="d-flex align-items-center gap-1.5">
+                                  <h6 className="fw-bold mb-0 text-dark" style={{ fontSize: "11px" }}>Workforce Overview</h6>
+                                  <span className="badge bg-purple-soft text-primary animate-fade-in" style={{ fontSize: "8px" }}>
+                                    ● {activePt.label}: {activePt.count} Staff ({activePt.change})
+                                  </span>
+                                </div>
+
+                                {/* Timeframe Filter Buttons */}
+                                <div className="d-flex gap-1 bg-light p-0.5 rounded border">
+                                  {["Today", "This Week", "This Month", "This Year"].map((tf) => (
+                                    <button
+                                      key={tf}
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setGraphTimeframe(tf);
+                                        setHoveredGraphPoint(null);
+                                      }}
+                                      className={`btn btn-xs py-0 px-1 border-0 rounded ${
+                                        graphTimeframe === tf ? "bg-white fw-bold text-primary shadow-xs" : "text-muted"
+                                      }`}
+                                      style={{ fontSize: "8px" }}
+                                    >
+                                      {tf}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Interactive SVG Area Chart with Crosshair Laser & Pulse Ring */}
+                              <div className="position-relative w-100 my-0.5 cursor-crosshair" style={{ height: "100px" }}>
+                                {hoveredGraphPoint && (
+                                  <div
+                                    className="position-absolute bg-dark text-white px-2 py-0.5 rounded shadow-lg pointer-events-none transition-all"
+                                    style={{
+                                      left: `${(hoveredGraphPoint.x / 400) * 100}%`,
+                                      top: `${(hoveredGraphPoint.y / 120) * 100 - 30}%`,
+                                      transform: "translate(-50%, -100%)",
+                                      fontSize: "9px",
+                                      whiteSpace: "nowrap",
+                                      zIndex: 5
+                                    }}
                                   >
-                                    {approvedItems[1] ? "✓ Done" : "Approve"}
-                                  </button>
-                                </div>
-                                <div className="d-flex justify-content-between align-items-center p-1 bg-light rounded" style={{ fontSize: "9px" }}>
-                                  <span>Salary Revision: Sarah</span>
-                                  <span className="text-muted">Pending</span>
-                                </div>
+                                    <span className="fw-bold">{hoveredGraphPoint.count} Active</span>
+                                    <small className="text-success ms-1">({hoveredGraphPoint.change})</small>
+                                  </div>
+                                )}
+
+                                <svg viewBox="0 0 400 120" className="w-100 h-100 overflow-visible">
+                                  <defs>
+                                    <linearGradient id="superChartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                      <stop offset="0%" stopColor="#6366f1" stopOpacity="0.45" />
+                                      <stop offset="100%" stopColor="#6366f1" stopOpacity="0.0" />
+                                    </linearGradient>
+                                  </defs>
+
+                                  <line x1="0" y1="30" x2="400" y2="30" stroke="#f1f5f9" strokeWidth="1" />
+                                  <line x1="0" y1="60" x2="400" y2="60" stroke="#f1f5f9" strokeWidth="1" />
+                                  <line x1="0" y1="90" x2="400" y2="90" stroke="#f1f5f9" strokeWidth="1" />
+
+                                  <path d={activeCurve.path} fill="url(#superChartGrad)" />
+                                  <path
+                                    d={activeCurve.line}
+                                    fill="none"
+                                    stroke="#6366f1"
+                                    strokeWidth="2.8"
+                                    strokeLinecap="round"
+                                    className="chart-wave-glow"
+                                  />
+
+                                  <line
+                                    x1={activePt.x}
+                                    y1={activePt.y}
+                                    x2={activePt.x}
+                                    y2="120"
+                                    stroke="#818cf8"
+                                    strokeWidth="1.5"
+                                    strokeDasharray="3 3"
+                                  />
+
+                                  {activeCurve.points.map((pt) => (
+                                    <g key={pt.index} onMouseEnter={() => setHoveredGraphPoint(pt)}>
+                                      <circle cx={pt.x} cy={pt.y} r="14" fill="transparent" className="cursor-pointer" />
+                                      <circle
+                                        cx={pt.x}
+                                        cy={pt.y}
+                                        r={activePt.index === pt.index ? "5.5" : "3"}
+                                        fill={activePt.index === pt.index ? "#ffffff" : "#6366f1"}
+                                        stroke="#6366f1"
+                                        strokeWidth={activePt.index === pt.index ? "2.5" : "1.5"}
+                                      />
+                                      {activePt.index === pt.index && (
+                                        <circle cx={pt.x} cy={pt.y} r="10" fill="#6366f1" opacity="0.25" className="pulse-ring" />
+                                      )}
+                                    </g>
+                                  ))}
+                                </svg>
+                              </div>
+
+                              {/* 4 Mini metrics at bottom of chart */}
+                              <div className="row g-1 pt-1.5 border-top border-light">
+                                {[
+                                  { title: "New Hires", val: "15", badge: "↑ 28%", badgeColor: "text-success" },
+                                  { title: "Attrition", val: "2.4%", badge: "↓ 0.8%", badgeColor: "text-danger" },
+                                  { title: "Avg. Tenure", val: "2.8 Yrs", badge: "↑ 0.6", badgeColor: "text-primary" },
+                                  { title: "Satisfaction", val: "4.6/5", badge: "★ 0.3", badgeColor: "text-success" }
+                                ].map((m) => (
+                                  <div key={m.title} className="col-3">
+                                    <div className="p-0.5 bg-light rounded text-center transition-all hover-lift cursor-pointer">
+                                      <small className="text-muted d-block" style={{ fontSize: "7.5px" }}>{m.title}</small>
+                                      <strong className="text-dark d-block" style={{ fontSize: "9.5px" }}>
+                                        {m.val} <span className={m.badgeColor} style={{ fontSize: "7.5px" }}>{m.badge}</span>
+                                      </strong>
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                             </div>
                           </div>
-                          <div className="col-6">
-                            <div className="p-2 rounded bg-white shadow-xs">
-                              <strong className="text-dark d-block mb-1" style={{ fontSize: "10px" }}>Top Departments</strong>
-                              {filteredDepts.slice(0, 2).map((d) => (
-                                <div key={d.name} className="mb-1">
-                                  <div className="d-flex justify-content-between" style={{ fontSize: "8px" }}>
-                                    <span>{d.name}</span>
-                                    <strong>{d.count}</strong>
+
+                          {/* Pending Approvals Card with Instant Action */}
+                          <div className="col-4">
+                            <div className="card border-0 shadow-xs p-2 rounded-3 bg-white h-100">
+                              <div className="d-flex justify-content-between align-items-center mb-1.5">
+                                <h6 className="fw-bold mb-0 text-dark" style={{ fontSize: "11px" }}>Pending Approvals</h6>
+                                <span className="badge bg-danger bg-opacity-10 text-danger small" style={{ fontSize: "7.5px" }}>Action</span>
+                              </div>
+
+                              <div className="d-flex flex-column gap-1">
+                                {[
+                                  { id: 1, title: "Leave Requests", count: "3 pending", icon: "bi-calendar-check", color: "text-danger bg-danger" },
+                                  { id: 2, title: "Dept Changes", count: "1 pending", icon: "bi-diagram-3", color: "text-info bg-info" },
+                                  { id: 3, title: "Team Assign", count: "1 pending", icon: "bi-person-badge", color: "text-primary bg-primary" },
+                                  { id: 4, title: "Salary Approvals", count: "2 pending", icon: "bi-cash", color: "text-warning bg-warning" }
+                                ].map((item) => (
+                                  <div
+                                    key={item.id}
+                                    className={`d-flex justify-content-between align-items-center p-1 rounded transition-all cursor-pointer ${
+                                      hoveredApproval === item.id ? "bg-light shadow-2xs translate-x-2" : "bg-light border border-light"
+                                    }`}
+                                    onMouseEnter={() => setHoveredApproval(item.id)}
+                                    onMouseLeave={() => setHoveredApproval(null)}
+                                  >
+                                    <div className="d-flex align-items-center gap-1">
+                                      <div className={`p-1 rounded ${item.color} bg-opacity-10 transition-all ${hoveredApproval === item.id ? "scale-110" : ""}`}>
+                                        <i className={`bi ${item.icon}`} style={{ fontSize: "9px" }}></i>
+                                      </div>
+                                      <div>
+                                        <span className="fw-bold text-dark d-block leading-none" style={{ fontSize: "9px" }}>{item.title}</span>
+                                        <small className="text-muted" style={{ fontSize: "7.5px" }}>
+                                          {approvedItems[item.id] ? <span className="text-success fw-bold">✓ Done</span> : item.count}
+                                        </small>
+                                      </div>
+                                    </div>
+
+                                    {hoveredApproval === item.id && !approvedItems[item.id] ? (
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setApprovedItems({ ...approvedItems, [item.id]: true });
+                                        }}
+                                        className="btn btn-xs btn-primary py-0 px-1 rounded small"
+                                        style={{ fontSize: "7.5px" }}
+                                      >
+                                        Approve
+                                      </button>
+                                    ) : (
+                                      <i className="bi bi-chevron-right text-muted" style={{ fontSize: "8px" }}></i>
+                                    )}
                                   </div>
-                                  <div className="progress" style={{ height: "4px" }}>
-                                    <div className={`progress-bar ${d.color}`} style={{ width: `${(d.count / 86) * 100}%` }}></div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Bottom Row: Top Departments Progress Bars & Segmented Donut Chart */}
+                        <div className="card border-0 shadow-xs p-2 rounded-3 bg-white">
+                          <div className="d-flex justify-content-between align-items-center mb-1.5">
+                            <div className="d-flex align-items-center gap-1.5">
+                              <h6 className="fw-bold mb-0 text-dark" style={{ fontSize: "11px" }}>Top Departments</h6>
+                              {hoveredDept && (
+                                <span className="badge bg-primary bg-opacity-10 text-primary animate-fade-in" style={{ fontSize: "8px" }}>
+                                  {hoveredDept.name}: {hoveredDept.count} ({hoveredDept.pct}%)
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-primary small fw-semibold cursor-pointer hover-underline" style={{ fontSize: "9px" }}>View All 18</span>
+                          </div>
+
+                          <div className="row align-items-center">
+                            {/* PROGRESS BARS WITH VIBRANT SHIMMER */}
+                            <div className="col-8">
+                              <div className="d-flex flex-column gap-1">
+                                {filteredDepts.map((d) => (
+                                  <div
+                                    key={d.name}
+                                    className={`d-flex align-items-center gap-2 p-0.5 rounded transition-all cursor-pointer ${
+                                      hoveredDept?.name === d.name ? "bg-slate-100 shadow-2xs" : ""
+                                    }`}
+                                    onMouseEnter={() => setHoveredDept(d)}
+                                    onMouseLeave={() => setHoveredDept(null)}
+                                  >
+                                    <small className={`text-truncate transition-all ${hoveredDept?.name === d.name ? "fw-bold text-dark" : "text-muted"}`} style={{ width: "90px", fontSize: "9px" }}>
+                                      {d.name}
+                                    </small>
+                                    <div className="progress flex-grow-1 position-relative overflow-hidden" style={{ height: hoveredDept?.name === d.name ? "7px" : "5px", transition: "height 0.25s ease" }}>
+                                      <div
+                                        className={`progress-bar ${d.color} ${hoveredDept?.name === d.name ? "progress-bar-glow progress-bar-striped progress-bar-animated" : ""}`}
+                                        style={{
+                                          width: `${(d.count / 86) * 100}%`,
+                                          boxShadow: hoveredDept?.name === d.name ? `0 0 10px ${d.glow}` : "none",
+                                          transition: "width 0.4s ease, box-shadow 0.25s ease"
+                                        }}
+                                      ></div>
+                                    </div>
+                                    <small className={`fw-bold transition-all ${hoveredDept?.name === d.name ? "text-primary scale-110" : "text-dark"}`} style={{ width: "20px", fontSize: "9px" }}>
+                                      {d.count}
+                                    </small>
                                   </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* SEGMENTED INTERACTIVE DONUT CHART */}
+                            <div className="col-4 text-center">
+                              <div
+                                className="position-relative d-inline-block transition-all cursor-pointer donut-interactive-wrapper"
+                                onMouseEnter={() => setHoveredDonutSegment("Total")}
+                                onMouseLeave={() => setHoveredDonutSegment(null)}
+                              >
+                                <svg width="70" height="70" viewBox="0 0 36 36" className="circular-chart">
+                                  <path
+                                    className="circle-bg"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    fill="none"
+                                    stroke="#e2e8f0"
+                                    strokeWidth="3.8"
+                                  />
+                                  <path
+                                    className="circle"
+                                    strokeDasharray="38, 100"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    fill="none"
+                                    stroke="#4f46e5"
+                                    strokeWidth="3.8"
+                                  />
+                                  <path
+                                    className="circle"
+                                    strokeDasharray="20, 100"
+                                    strokeDashoffset="-38"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    fill="none"
+                                    stroke="#a855f7"
+                                    strokeWidth="3.8"
+                                  />
+                                  <path
+                                    className="circle"
+                                    strokeDasharray="17, 100"
+                                    strokeDashoffset="-58"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    fill="none"
+                                    stroke="#06b6d4"
+                                    strokeWidth="3.8"
+                                  />
+                                </svg>
+
+                                <div className="position-absolute top-50 start-50 translate-middle text-center pointer-events-none">
+                                  <span className="fw-bold text-dark d-block leading-none" style={{ fontSize: "11px" }}>
+                                    229
+                                  </span>
+                                  <small className="text-muted leading-none d-block" style={{ fontSize: "7.5px" }}>
+                                    {hoveredDonutSegment || "Total"}
+                                  </small>
                                 </div>
-                              ))}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -647,24 +899,24 @@ const LandingPage = () => {
               </div>
             </div>
           </div>
-        </section>
+        </div>
       </StackingSection>
 
       {/* ============================================================
-          SECTION 2: 4-TIER ROLE PORTALS (STACKS OVER OVERVIEW)
+          SECTION 2: 4-TIER ROLE PORTALS (COVERS COMPLETE SCREEN)
           ============================================================ */}
       <StackingSection id="roles-sec" zIndex={2} bg="bg-white">
-        <section className="py-5 px-3 px-lg-5">
-          <div className="container-fluid p-0">
-            <div className="text-center max-w-2xl mx-auto mb-4">
+        <div className="w-100 h-100 d-flex flex-column justify-content-center align-items-center px-3 px-lg-5 my-auto">
+          <div className="container-fluid p-0 max-w-5xl">
+            <div className="text-center mx-auto mb-3">
               <span className="badge bg-purple-soft text-purple-deep px-3 py-1 rounded-pill text-uppercase fw-bold mb-2 tracking-wider" style={{ fontSize: "11px" }}>
                 4-TIER WORKFORCE ARCHITECTURE
               </span>
-              <h2 className="fw-extrabold text-dark tracking-tight mb-2">Dedicated Dashboards for Every Corporate Tier</h2>
-              <p className="text-secondary small">Click between roles to preview specialized toolsets, scopes, and workflows.</p>
+              <h2 className="fw-extrabold text-dark tracking-tight mb-1">Dedicated Dashboards for Every Corporate Tier</h2>
+              <p className="text-secondary small mb-2">Click between roles to preview specialized toolsets, scopes, and workflows.</p>
 
               {/* Interactive Role Tabs with Spring Indicator */}
-              <div className="d-inline-flex p-1.5 bg-light rounded-pill border shadow-2xs gap-1 mt-2 position-relative">
+              <div className="d-inline-flex p-1.5 bg-light rounded-pill border shadow-2xs gap-1 position-relative">
                 {[
                   { id: "admin", label: "👑 HR Administrator" },
                   { id: "manager", label: "👔 Department Manager" },
@@ -850,28 +1102,28 @@ const LandingPage = () => {
               </motion.div>
             </AnimatePresence>
           </div>
-        </section>
+        </div>
       </StackingSection>
 
       {/* ============================================================
-          SECTION 3: ROI CALCULATOR (STACKS OVER ROLE PORTALS)
+          SECTION 3: ROI CALCULATOR (COVERS COMPLETE SCREEN)
           ============================================================ */}
       <StackingSection id="calc-sec" zIndex={3} bg="bg-slate-50">
-        <section className="py-5 px-3 px-lg-5">
-          <div className="container-fluid p-0">
-            <div className="text-center max-w-2xl mx-auto mb-4">
+        <div className="w-100 h-100 d-flex flex-column justify-content-center align-items-center px-3 px-lg-5 my-auto">
+          <div className="container-fluid p-0 max-w-4xl">
+            <div className="text-center mx-auto mb-4">
               <span className="badge bg-success bg-opacity-10 text-success px-3 py-1 rounded-pill text-uppercase fw-bold mb-2 tracking-wider" style={{ fontSize: "11px" }}>
                 INTERACTIVE ROI CALCULATOR
               </span>
-              <h2 className="fw-extrabold text-dark tracking-tight mb-2">Quantify Your Operational Capital Savings</h2>
+              <h2 className="fw-extrabold text-dark tracking-tight mb-1">Quantify Your Operational Capital Savings</h2>
               <p className="text-secondary small">Drag the headcount slider to calculate automated workforce hours and budget reduction.</p>
             </div>
 
-            <div className="max-w-3xl mx-auto bg-white border rounded-4 p-4 p-lg-5 shadow-sm">
+            <div className="bg-white border rounded-4 p-4 p-lg-5 shadow-sm">
               <div className="mb-4">
                 <div className="d-flex justify-content-between align-items-center mb-2">
-                  <label className="fw-bold text-dark">Current Headcount</label>
-                  <span className="badge bg-primary fs-6 px-3 py-1 rounded-pill">{employeeCount} Employees</span>
+                  <label className="fw-bold text-dark fs-6">Current Headcount</label>
+                  <span className="badge bg-primary fs-6 px-3 py-1.5 rounded-pill">{employeeCount} Employees</span>
                 </div>
                 <input
                   type="range"
@@ -891,19 +1143,19 @@ const LandingPage = () => {
 
               <div className="row g-3 text-center">
                 <div className="col-4">
-                  <motion.div whileHover={{ scale: 1.04 }} className="p-3 rounded-3 bg-light border hover-lift transition-all">
+                  <motion.div whileHover={{ scale: 1.04 }} className="p-3.5 rounded-3 bg-light border hover-lift transition-all">
                     <h3 className="fw-extrabold text-primary mb-0">{Math.round(employeeCount * 1.8)} hrs</h3>
                     <small className="text-muted fw-semibold">Admin Time Saved / Mo</small>
                   </motion.div>
                 </div>
                 <div className="col-4">
-                  <motion.div whileHover={{ scale: 1.04 }} className="p-3 rounded-3 bg-light border hover-lift transition-all">
+                  <motion.div whileHover={{ scale: 1.04 }} className="p-3.5 rounded-3 bg-light border hover-lift transition-all">
                     <h3 className="fw-extrabold text-success mb-0">${(employeeCount * 360).toLocaleString()}</h3>
                     <small className="text-muted fw-semibold">Annual Cost Reduction</small>
                   </motion.div>
                 </div>
                 <div className="col-4">
-                  <motion.div whileHover={{ scale: 1.04 }} className="p-3 rounded-3 bg-light border hover-lift transition-all">
+                  <motion.div whileHover={{ scale: 1.04 }} className="p-3.5 rounded-3 bg-light border hover-lift transition-all">
                     <h3 className="fw-extrabold text-warning mb-0">3.8x</h3>
                     <small className="text-muted fw-semibold">Faster Approvals</small>
                   </motion.div>
@@ -911,24 +1163,24 @@ const LandingPage = () => {
               </div>
             </div>
           </div>
-        </section>
+        </div>
       </StackingSection>
 
       {/* ============================================================
-          SECTION 4: FEATURE MATRIX (STACKS OVER CALCULATOR)
+          SECTION 4: FEATURE MATRIX (COVERS COMPLETE SCREEN)
           ============================================================ */}
       <StackingSection id="features-sec" zIndex={4} bg="bg-white">
-        <section className="py-5 px-3 px-lg-5">
-          <div className="container-fluid p-0">
-            <div className="text-center max-w-2xl mx-auto mb-4">
+        <div className="w-100 h-100 d-flex flex-column justify-content-center align-items-center px-3 px-lg-5 my-auto">
+          <div className="container-fluid p-0 max-w-6xl">
+            <div className="text-center mx-auto mb-3">
               <span className="badge bg-purple-soft text-purple-deep px-3 py-1 rounded-pill text-uppercase fw-bold mb-2 tracking-wider" style={{ fontSize: "11px" }}>
                 ENTERPRISE PLATFORM
               </span>
-              <h2 className="fw-extrabold text-dark tracking-tight mb-2">Everything You Need to Scale Operations</h2>
+              <h2 className="fw-extrabold text-dark tracking-tight mb-1">Everything You Need to Scale Operations</h2>
               <p className="text-secondary small">Six core architectural pillars built to streamline operations.</p>
             </div>
 
-            <div className="row g-4">
+            <div className="row g-3">
               {[
                 { id: 1, title: "Employee Directory", desc: "Complete employee lifecycle management with salary records and profile management.", icon: "bi-people-fill", bg: "bg-purple-soft text-primary" },
                 { id: 2, title: "Department Hierarchies", desc: "Organize units, define direct reports, and eliminate organizational bottlenecks.", icon: "bi-building", bg: "bg-primary bg-opacity-10 text-primary" },
@@ -938,13 +1190,13 @@ const LandingPage = () => {
                 { id: 6, title: "Payroll & Compensation", desc: "Automated calculations, tax compliance checks, and secure role-based access.", icon: "bi-cash-coin", bg: "bg-info bg-opacity-10 text-info" }
               ].map((card) => (
                 <div key={card.id} className="col-12 col-md-6 col-lg-4">
-                  <div className="card rounded-4 p-4 h-100 bg-white feature-card shadow-xs cursor-pointer">
-                    <div className={`p-3 rounded-3 d-inline-flex align-items-center justify-content-center mb-3 ${card.bg}`} style={{ width: "48px", height: "48px" }}>
+                  <div className="card rounded-4 p-3.5 h-100 bg-white feature-card shadow-xs cursor-pointer">
+                    <div className={`p-2.5 rounded-3 d-inline-flex align-items-center justify-content-center mb-2.5 ${card.bg}`} style={{ width: "42px", height: "42px" }}>
                       <i className={`bi ${card.icon} fs-5`}></i>
                     </div>
-                    <h5 className="fw-bold text-dark mb-2" style={{ fontSize: "15px" }}>{card.title}</h5>
-                    <p className="text-secondary small leading-relaxed mb-3">{card.desc}</p>
-                    <span className="text-primary small fw-semibold d-inline-flex align-items-center gap-1 hover-underline">
+                    <h5 className="fw-bold text-dark mb-1.5" style={{ fontSize: "14px" }}>{card.title}</h5>
+                    <p className="text-secondary small leading-relaxed mb-2" style={{ fontSize: "11px" }}>{card.desc}</p>
+                    <span className="text-primary small fw-semibold d-inline-flex align-items-center gap-1 hover-underline" style={{ fontSize: "11px" }}>
                       <span>Learn more</span>
                       <i className="bi bi-arrow-right small"></i>
                     </span>
@@ -953,24 +1205,24 @@ const LandingPage = () => {
               ))}
             </div>
           </div>
-        </section>
+        </div>
       </StackingSection>
 
       {/* ============================================================
-          SECTION 5: FAQ & CONVERSION CTA BANNER (STACKS OVER FEATURES)
+          SECTION 5: FAQ & CONVERSION CTA BANNER (COVERS COMPLETE SCREEN)
           ============================================================ */}
       <StackingSection id="faq-sec" zIndex={5} bg="bg-slate-50">
-        <section className="py-5 px-3 px-lg-5">
-          <div className="container-fluid p-0">
-            <div className="text-center max-w-2xl mx-auto mb-4">
+        <div className="w-100 h-100 d-flex flex-column justify-content-center align-items-center px-3 px-lg-5 my-auto">
+          <div className="container-fluid p-0 max-w-4xl">
+            <div className="text-center mx-auto mb-3">
               <span className="badge bg-info bg-opacity-10 text-info px-3 py-1 rounded-pill text-uppercase fw-bold mb-2 tracking-wider" style={{ fontSize: "11px" }}>
                 COMMON QUESTIONS
               </span>
-              <h2 className="fw-extrabold text-dark tracking-tight mb-2">Frequently Asked Questions</h2>
+              <h2 className="fw-extrabold text-dark tracking-tight mb-1">Frequently Asked Questions</h2>
               <p className="text-secondary small">Answers to common organizational questions.</p>
             </div>
 
-            <div className="max-w-3xl mx-auto d-flex flex-column gap-3 mb-5">
+            <div className="d-flex flex-column gap-2 mb-3">
               {[
                 { q: "Can employees self-register, or must HR onboard them?", a: "Both! Employees, Supervisors, Managers, and Admins can register anytime through the dedicated /signup page. Alternatively, the HR Administrator can onboard new users directly from the User Directory." },
                 { q: "How does the two-step leave approval workflow operate?", a: "When an employee submits a leave request, it is first routed to their direct Supervisor. Once approved by the Supervisor, it escalates to the Department Manager for final sign-off." },
@@ -980,11 +1232,11 @@ const LandingPage = () => {
                 <div key={item.q} className="card border rounded-4 bg-white overflow-hidden shadow-2xs">
                   <button
                     type="button"
-                    className="btn text-start p-3.5 d-flex justify-content-between align-items-center fw-bold text-dark border-0"
+                    className="btn text-start p-3 d-flex justify-content-between align-items-center fw-bold text-dark border-0"
                     onClick={() => setOpenFaq(openFaq === idx ? -1 : idx)}
                   >
-                    <span style={{ fontSize: "14px" }}>{item.q}</span>
-                    <i className={`bi bi-chevron-${openFaq === idx ? "up" : "down"} text-muted small`}></i>
+                    <span style={{ fontSize: "13px" }}>{item.q}</span>
+                    <i className={`bi ${openFaq === idx ? "chevron-up" : "chevron-down"} text-muted small`}></i>
                   </button>
                   <AnimatePresence>
                     {openFaq === idx && (
@@ -993,7 +1245,7 @@ const LandingPage = () => {
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
                         transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                        className="px-3.5 pb-3.5 pt-0 text-secondary small leading-relaxed border-top border-light overflow-hidden"
+                        className="px-3 pb-3 pt-0 text-secondary small leading-relaxed border-top border-light overflow-hidden"
                       >
                         {item.a}
                       </motion.div>
@@ -1005,26 +1257,23 @@ const LandingPage = () => {
 
             {/* High-Conversion CTA Banner */}
             <div
-              className="p-5 rounded-4 text-center text-white position-relative overflow-hidden shadow-xl"
+              className="p-4 rounded-4 text-center text-white position-relative overflow-hidden shadow-xl"
               style={{ background: "linear-gradient(135deg, #312e81 0%, #4f46e5 50%, #7c3aed 100%)" }}
             >
               <div className="ambient-orb orb-1" style={{ top: "-30%", left: "20%", opacity: 0.3 }}></div>
-              <div className="position-relative z-1 max-w-2xl mx-auto">
-                <span className="badge bg-white bg-opacity-20 text-white px-3 py-1.5 rounded-pill mb-3 text-uppercase fw-semibold" style={{ fontSize: "10px" }}>
-                  START TRANSFORMING TODAY
-                </span>
-                <h2 className="fw-extrabold mb-3 tracking-tight">Ready to Elevate Your Organization?</h2>
-                <p className="text-white-50 mb-4 leading-relaxed small">
+              <div className="position-relative z-1 max-w-xl mx-auto">
+                <h3 className="fw-extrabold mb-2 tracking-tight">Ready to Elevate Your Organization?</h3>
+                <p className="text-white-50 mb-3 leading-relaxed small" style={{ fontSize: "12px" }}>
                   Join thousands of productive teams. Get up and running in minutes with role-based access for your whole organization.
                 </p>
-                <div className="d-flex flex-wrap justify-content-center gap-3">
+                <div className="d-flex flex-wrap justify-content-center gap-2">
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
-                    <Link to="/signup" className="btn btn-light btn-lg px-4 py-2 rounded-3 fw-bold text-primary shadow-md">
+                    <Link to="/signup" className="btn btn-light px-4 py-2 rounded-3 fw-bold text-primary shadow-md btn-sm">
                       Create Your Free Account →
                     </Link>
                   </motion.div>
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
-                    <Link to="/login" className="btn btn-outline-light btn-lg px-4 py-2 rounded-3 fw-semibold hover-light">
+                    <Link to="/login" className="btn btn-outline-light px-4 py-2 rounded-3 fw-semibold hover-light btn-sm">
                       Sign In to Portal
                     </Link>
                   </motion.div>
@@ -1032,21 +1281,8 @@ const LandingPage = () => {
               </div>
             </div>
           </div>
-        </section>
-      </StackingSection>
-
-      {/* 3. FOOTER */}
-      <footer className="bg-dark text-white py-4 px-3 px-lg-5 text-center position-relative z-3">
-        <div className="container-fluid p-0 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
-          <small className="text-white-50">© 2026 Enterprise EMS Inc. All rights reserved.</small>
-          <div className="d-flex align-items-center gap-3">
-            <Link to="/login" className="text-white-50 text-decoration-none small hover-white">HR Portal</Link>
-            <Link to="/login" className="text-white-50 text-decoration-none small hover-white">Manager Portal</Link>
-            <Link to="/login" className="text-white-50 text-decoration-none small hover-white">Supervisor Portal</Link>
-            <Link to="/login" className="text-white-50 text-decoration-none small hover-white">Employee Portal</Link>
-          </div>
         </div>
-      </footer>
+      </StackingSection>
     </div>
   );
 };
