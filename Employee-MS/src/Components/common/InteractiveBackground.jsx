@@ -23,7 +23,7 @@ const InteractiveBackground = () => {
     const mouse = {
       x: null,
       y: null,
-      radius: 170
+      radius: 175
     };
 
     const handleMouseMove = (e) => {
@@ -52,7 +52,7 @@ const InteractiveBackground = () => {
     ];
 
     // Particles setup
-    const particleCount = Math.min(Math.floor((width * height) / 14000), 70);
+    const particleCount = Math.min(Math.floor((width * height) / 14500), 65);
     const particles = [];
 
     for (let i = 0; i < particleCount; i++) {
@@ -62,7 +62,8 @@ const InteractiveBackground = () => {
         y: Math.random() * height,
         color: color,
         vx: (Math.random() - 0.5) * 0.95,
-        vy: (Math.random() - 0.5) * 0.95
+        vy: (Math.random() - 0.5) * 0.95,
+        connections: 0
       });
     }
 
@@ -70,13 +71,14 @@ const InteractiveBackground = () => {
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Update positions
+      // 1. Update positions & reset connection counts
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
+        p.connections = 0;
         p.x += p.vx;
         p.y += p.vy;
 
-        // Bounce at boundaries
+        // Bounce on canvas edges
         if (p.x < 0 || p.x > width) p.vx *= -1;
         if (p.y < 0 || p.y > height) p.vy *= -1;
 
@@ -93,12 +95,9 @@ const InteractiveBackground = () => {
             p.y -= Math.sin(angle) * force * 1.8;
           }
         }
-
-        // NOTE: DOTS ARE COMPLETELY TRANSPARENT (NOT DRAWN)
-        // No circular dot marks on the text or background!
       }
 
-      // Draw VIBRANT COLORFUL CONNECTING LINES
+      // 2. Draw COLORFUL CONNECTING LINES & Count Junctions
       for (let i = 0; i < particles.length; i++) {
         const p1 = particles[i];
 
@@ -109,9 +108,13 @@ const InteractiveBackground = () => {
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < 145) {
-            const alpha = (1 - dist / 145) * 0.45; // Vibrant & clearly visible
+            // Count junction connection
+            p1.connections++;
+            p2.connections++;
 
-            // Create colorful gradient line between p1 and p2
+            const alpha = (1 - dist / 145) * 0.5; // Vibrant line visibility
+
+            // Gradient line blending between the two node colors
             const grad = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
             grad.addColorStop(0, `rgba(${p1.color.r}, ${p1.color.g}, ${p1.color.b}, ${alpha})`);
             grad.addColorStop(1, `rgba(${p2.color.r}, ${p2.color.g}, ${p2.color.b}, ${alpha})`);
@@ -125,14 +128,16 @@ const InteractiveBackground = () => {
           }
         }
 
-        // Connect to mouse with vivid interactive neon lines
+        // Connect to mouse with neon gradient lines
         if (mouse.x !== null && mouse.y !== null) {
           const mdx = p1.x - mouse.x;
           const mdy = p1.y - mouse.y;
           const mdist = Math.sqrt(mdx * mdx + mdy * mdy);
 
           if (mdist < mouse.radius) {
-            const mAlpha = (1 - mdist / mouse.radius) * 0.7; // Bright interactive flare
+            p1.connections += 2; // Extra emphasis when connected to mouse
+
+            const mAlpha = (1 - mdist / mouse.radius) * 0.75;
             const mouseGrad = ctx.createLinearGradient(p1.x, p1.y, mouse.x, mouse.y);
             mouseGrad.addColorStop(0, `rgba(${p1.color.r}, ${p1.color.g}, ${p1.color.b}, ${mAlpha})`);
             mouseGrad.addColorStop(1, `rgba(168, 85, 247, ${mAlpha * 0.9})`);
@@ -141,9 +146,41 @@ const InteractiveBackground = () => {
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(mouse.x, mouse.y);
             ctx.strokeStyle = mouseGrad;
-            ctx.lineWidth = 1.6;
+            ctx.lineWidth = 1.7;
             ctx.stroke();
           }
+        }
+      }
+
+      // 3. HIGHLIGHT THE BULLETS WHERE THE POINTS ARE JOINED!
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+
+        // ONLY HIGHLIGHT BULLETS AT ACTIVE JOINED JUNCTIONS
+        if (p.connections > 0) {
+          const bulletRadius = Math.min(2.8 + p.connections * 0.35, 5.0);
+          const glowColor = `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`;
+
+          // Outer soft glow halo
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, bulletRadius + 3, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, 0.22)`;
+          ctx.fill();
+
+          // Main highlighted bullet with neon glow
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, bulletRadius, 0, Math.PI * 2);
+          ctx.fillStyle = glowColor;
+          ctx.shadowColor = glowColor;
+          ctx.shadowBlur = 12;
+          ctx.fill();
+
+          // Bright illuminated white center spark (crystalline bullet core)
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, bulletRadius * 0.45, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+          ctx.fill();
+          ctx.shadowBlur = 0; // reset
         }
       }
 
