@@ -27,23 +27,29 @@ const LandingPage = () => {
   // High-performance cancellable RAF scroll reference & navigation lock
   const scrollAnimRef = useRef(null);
   const isNavigatingRef = useRef(false);
+  const isSnappingRef = useRef(false);
 
   // Silky-smooth, lag-free animated scroll with quartic easing (works perfectly backwards & forwards)
-  const smoothScrollTo = (targetY, duration = 650) => {
+  const smoothScrollTo = (targetY, duration = 650, isSnap = false) => {
     // 1. Cancel any active animation so scrolling back never fights or stutters
     if (scrollAnimRef.current) {
       cancelAnimationFrame(scrollAnimRef.current);
       scrollAnimRef.current = null;
     }
 
-    // 2. Lock scrollspy so React doesn't re-render 60 times/sec during the animation
-    isNavigatingRef.current = true;
+    if (isSnap) {
+      isSnappingRef.current = true;
+    } else {
+      isNavigatingRef.current = true;
+    }
+
     const startY = window.pageYOffset;
     const distance = targetY - startY;
 
     if (Math.abs(distance) < 2) {
       window.scrollTo(0, targetY);
       isNavigatingRef.current = false;
+      isSnappingRef.current = false;
       return;
     }
 
@@ -66,9 +72,10 @@ const LandingPage = () => {
       } else {
         window.scrollTo(0, targetY);
         scrollAnimRef.current = null;
-        // Release scrollspy after motion settles
+        // Release locks after motion settles
         setTimeout(() => {
           isNavigatingRef.current = false;
+          isSnappingRef.current = false;
         }, 60);
       }
     };
@@ -83,15 +90,44 @@ const LandingPage = () => {
     if (index !== -1) {
       const travel = window.innerHeight - 74;
       const targetY = index * travel;
-      smoothScrollTo(targetY, 680);
+      smoothScrollTo(targetY, 680, false);
     }
   };
 
-  // Mathematically exact ScrollSpy based on card travel (only active during manual scroll)
+  // Automatic Full-Screen Snap Settler:
+  // When scrolling with mouse wheel, automatically settles on 100% full screen as soon as scrolling stops
   useEffect(() => {
-    const handleScrollSpy = () => {
-      if (isNavigatingRef.current) return;
+    let scrollTimeout = null;
 
+    const onUserInterrupt = () => {
+      if (isSnappingRef.current && scrollAnimRef.current) {
+        cancelAnimationFrame(scrollAnimRef.current);
+        scrollAnimRef.current = null;
+        isSnappingRef.current = false;
+      }
+    };
+
+    const handleScrollEnd = () => {
+      if (isNavigatingRef.current || isSnappingRef.current) return;
+
+      const travel = window.innerHeight - 74;
+      const scrollPos = window.scrollY;
+      const nearestIdx = Math.min(
+        Math.max(0, Math.round(scrollPos / travel)),
+        navItems.length - 1
+      );
+      const targetY = nearestIdx * travel;
+
+      // If the card is not settled in 100% full screen (off by more than 6px), smoothly lock it into 100% full screen
+      if (Math.abs(scrollPos - targetY) > 6) {
+        smoothScrollTo(targetY, 380, true);
+      }
+    };
+
+    const onScroll = () => {
+      if (isNavigatingRef.current || isSnappingRef.current) return;
+
+      // Update ScrollSpy active pill during manual scroll
       const scrollPos = window.scrollY;
       const travel = window.innerHeight - 74;
       const activeIdx = Math.min(
@@ -99,11 +135,21 @@ const LandingPage = () => {
         navItems.length - 1
       );
       setActiveNavSection(navItems[activeIdx].id);
+
+      // Debounce snapping so it only snaps when mouse scrolling stops
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(handleScrollEnd, 120);
     };
 
-    window.addEventListener("scroll", handleScrollSpy, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("wheel", onUserInterrupt, { passive: true });
+    window.addEventListener("touchstart", onUserInterrupt, { passive: true });
+
     return () => {
-      window.removeEventListener("scroll", handleScrollSpy);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("wheel", onUserInterrupt);
+      window.removeEventListener("touchstart", onUserInterrupt);
+      if (scrollTimeout) clearTimeout(scrollTimeout);
       if (scrollAnimRef.current) {
         cancelAnimationFrame(scrollAnimRef.current);
       }
