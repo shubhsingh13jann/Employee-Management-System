@@ -1,32 +1,203 @@
-/* Modern Enterprise EMS UI Styles */
+/* Modern Enterprise EMS UI & Hero Animations */
+
+:root {
+  --primary-purple: #4f46e5;
+  --primary-indigo: #6366f1;
+  --deep-purple: #7c3aed;
+  --bg-soft-purple: #f5f3ff;
+  --border-purple: #ddd6fe;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #1e293b;
-  background-color: #f8fafc;
+  background-color: #ffffff;
+  overflow-x: hidden;
 }
 
-.hover-dark:hover {
-  background-color: rgba(255, 255, 255, 0.1) !important;
+/* Gradient Text */
+.text-gradient {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Gradient Button */
+.btn-gradient-primary {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  border: none;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-gradient-primary:hover {
+  background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(79, 70, 229, 0.5);
+  color: #ffffff;
+}
+
+/* Logo Cube */
+.logo-cube {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.35);
+}
+
+.logo-cube-sm {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  border-radius: 8px;
+}
+
+/* Soft Purple Badges */
+.bg-purple-soft {
+  background-color: #f5f3ff !important;
+}
+
+.text-purple-deep {
+  color: #5b21b6 !important;
+}
+
+.border-purple-subtle {
+  border-color: #ddd6fe !important;
+}
+
+/* Hero Typography */
+.hero-heading {
+  font-size: 3.5rem;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+@media (max-width: 991px) {
+  .hero-heading {
+    font-size: 2.6rem;
+  }
+}
+
+/* ============================================================
+   3D POP-OUT SHOWCASE ANIMATIONS (Right-Hand Image / Card)
+   ============================================================ */
+
+.showcase-3d-wrapper {
+  perspective: 1400px;
+  transform-style: preserve-3d;
+  padding: 15px;
+}
+
+.showcase-dashboard-card {
+  transform: perspective(1400px) rotateY(-7deg) rotateX(3deg) scale(0.97);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 20px 45px -15px rgba(15, 23, 42, 0.18), 0 0 25px rgba(99, 102, 241, 0.1);
+  cursor: pointer;
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+}
+
+/* Auto subtle breathing float before hover */
+@keyframes heroFloat {
+  0%, 100% {
+    transform: perspective(1400px) rotateY(-7deg) rotateX(3deg) translateY(0px) scale(0.97);
+  }
+  50% {
+    transform: perspective(1400px) rotateY(-5deg) rotateX(5deg) translateY(-8px) scale(0.98);
+  }
+}
+
+.showcase-3d-wrapper:not(:hover) .showcase-dashboard-card {
+  animation: heroFloat 6s ease-in-out infinite;
+}
+
+/* ON HOVER: POPS OUT TOWARDS USER WITH ELEVATED 3D GLOW */
+.showcase-3d-wrapper:hover .showcase-dashboard-card {
+  transform: perspective(1400px) rotateY(0deg) rotateX(0deg) scale(1.03) translateY(-14px) translateZ(30px) !important;
+  box-shadow: 0 35px 80px -15px rgba(79, 70, 229, 0.35), 0 0 45px rgba(99, 102, 241, 0.22), 0 10px 25px rgba(0, 0, 0, 0.08) !important;
+  border-color: rgba(99, 102, 241, 0.45) !important;
+}
+
+/* Floating badge indicator */
+.showcase-floating-tag {
+  position: absolute;
+  top: -8px;
+  right: 25px;
+  z-index: 10;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.showcase-3d-wrapper:hover .showcase-floating-tag {
+  transform: translateY(-4px) scale(1.05);
+  background-color: #4f46e5 !important;
+}
+
+/* Pulse dots */
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #818cf8;
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulseGlow 1.8s infinite;
+}
+
+.pulse-dot-green {
+  animation: pulseGreen 2s infinite;
+}
+
+@keyframes pulseGlow {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(129, 140, 248, 0.7); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(129, 140, 248, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(129, 140, 248, 0); }
+}
+
+@keyframes pulseGreen {
+  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+/* Inner card hover interactions */
+.hover-lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.08);
+}
+
+.hover-bg:hover {
+  background-color: #f1f5f9 !important;
+}
+
+.hover-light:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
   color: #fff !important;
 }
 
-.card {
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+/* ============================================================
+   FEATURE CARDS SECTION
+   ============================================================ */
+
+.feature-card {
+  border: 1px solid #e2e8f0 !important;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.card:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04) !important;
+.feature-card:hover,
+.feature-card-hover {
+  transform: translateY(-8px) scale(1.015);
+  box-shadow: 0 20px 35px -10px rgba(99, 102, 241, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.04) !important;
+  border-color: #a5b4fc !important;
 }
 
-.table-hover tbody tr:hover {
-  background-color: #f1f5f9;
-}
-
-.badge {
-  letter-spacing: 0.025em;
-}
-
-/* Custom Scrollbar for clean sidebar */
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

@@ -8,6 +8,7 @@ import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import Layout from "./components/common/Layout";
 
+import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 
 // Admin Pages
@@ -39,7 +40,8 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Public Auth Route */}
+          {/* Public Landing & Auth Routes */}
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/adminlogin" element={<Navigate to="/login" replace />} />
           <Route path="/dashboard" element={<Navigate to="/login" replace />} />
