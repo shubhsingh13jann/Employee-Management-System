@@ -136,17 +136,48 @@ const Signup = () => {
               </div>
             </div>
 
-            {/* Role & Department */}
+            {/* 4 Role Selector Buttons */}
+            <div className="mb-3">
+              <label className="form-label fw-bold text-secondary small mb-2">SELECT YOUR ROLE (ALL 4 TIERS) *</label>
+              <div className="row g-2">
+                {[
+                  { id: "admin", label: "HR Admin", icon: "bi-shield-lock-fill" },
+                  { id: "manager", label: "Manager", icon: "bi-person-badge-fill" },
+                  { id: "supervisor", label: "Supervisor", icon: "bi-person-check-fill" },
+                  { id: "employee", label: "Employee", icon: "bi-person-fill" }
+                ].map((r) => (
+                  <div key={r.id} className="col-3">
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, role: r.id })}
+                      className={`btn w-100 py-2 rounded-3 d-flex flex-column align-items-center justify-content-center gap-1 transition-all ${
+                        form.role === r.id
+                          ? "btn-primary shadow-xs fw-bold"
+                          : "btn-light border text-secondary hover-light"
+                      }`}
+                      style={{ fontSize: "11px" }}
+                    >
+                      <i className={`bi ${r.icon} fs-6`}></i>
+                      <span style={{ fontSize: "10px" }}>{r.label}</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Role & Department Details */}
             <div className="row g-2 mb-3">
               <div className="col-6">
-                <label className="form-label fw-bold text-secondary small">REGISTERING AS *</label>
+                <label className="form-label fw-bold text-secondary small">ROLE CONFIRMATION *</label>
                 <select
                   className="form-select py-2"
                   value={form.role}
                   onChange={(e) => setForm({ ...form, role: e.target.value })}
                 >
-                  <option value="employee">💼 Staff Employee</option>
+                  <option value="admin">👑 HR Administrator</option>
+                  <option value="manager">👔 Department Manager</option>
                   <option value="supervisor">👷 Operational Supervisor</option>
+                  <option value="employee">💼 Staff Employee</option>
                 </select>
               </div>
               <div className="col-6">
@@ -155,10 +186,15 @@ const Signup = () => {
                   className="form-select py-2"
                   value={form.department_id}
                   onChange={(e) => setForm({ ...form, department_id: e.target.value })}
+                  disabled={form.role === "admin"}
                 >
-                  {departments.map((d) => (
-                    <option key={d.id} value={d.id}>{d.name}</option>
-                  ))}
+                  {form.role === "admin" ? (
+                    <option value="">HQ / Executive</option>
+                  ) : (
+                    departments.map((d) => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))
+                  )}
                 </select>
               </div>
             </div>
