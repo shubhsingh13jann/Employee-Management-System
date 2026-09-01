@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import InteractiveBackground from "../components/common/InteractiveBackground";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -53,23 +54,13 @@ const LandingPage = () => {
 
       {/* 2. HERO SECTION */}
       <section className="position-relative pt-4 pb-5 px-3 px-lg-5 overflow-hidden hero-interactive-section">
-        {/* Subtle Ambient Tech Dot/Grid Matrix */}
-        <div className="ambient-grid-overlay"></div>
+        {/* Interactive Dynamic Particle Constellation Network (Pure Animation, No Static Dots) */}
+        <InteractiveBackground />
 
         {/* Animated Floating Gradient Light Orbs (Gentle & Cool) */}
         <div className="ambient-orb orb-1"></div>
         <div className="ambient-orb orb-2"></div>
         <div className="ambient-orb orb-3"></div>
-
-        {/* Floating Subtle Micro Sparkles / Geometric Badges */}
-        <div className="floating-micro-badge badge-1">
-          <i className="bi bi-shield-check text-primary"></i>
-          <span>99.9% Uptime</span>
-        </div>
-        <div className="floating-micro-badge badge-2">
-          <i className="bi bi-people-fill text-success"></i>
-          <span>Fast Sync</span>
-        </div>
 
         <div className="container-fluid p-0 position-relative z-1">
           <div className="row align-items-center g-5">
@@ -206,7 +197,7 @@ const LandingPage = () => {
                       </div>
 
                       {/* Sidebar Footer System Status */}
-                      <div className="p-2 rounded bg-white bg-opacity-5 border border-white border-opacity-10 mt-3">
+                      <div className="p-2 rounded mt-3" style={{ background: "rgba(255, 255, 255, 0.08)", border: "1px solid rgba(255, 255, 255, 0.12)" }}>
                         <div className="d-flex align-items-center justify-content-between">
                           <div className="d-flex align-items-center gap-1.5">
                             <span className="badge bg-success p-1 rounded-circle pulse-dot-green"></span>
