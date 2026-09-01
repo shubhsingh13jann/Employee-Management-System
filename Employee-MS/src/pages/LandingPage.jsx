@@ -11,10 +11,18 @@ const StackingSection = ({ id, zIndex, children, bg = "bg-white", isFirst = fals
     offset: ["start start", "end start"]
   });
 
-  // Scales down to 0.92 and dims as subsequent section stacks over it
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.91]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8, 1], [1, 0.85, 0.4]);
-  const y = useTransform(scrollYProgress, [0, 1], [0, -25]);
+  // 1. Pushes back into 3D depth (scale 1.0 -> 0.88)
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.88]);
+
+  // 2. Disappearing / fading effect until the next card completely occupies its place
+  const opacity = useTransform(scrollYProgress, [0, 0.35, 0.9, 1], [1, 0.88, 0.05, 0]);
+
+  // 3. Subtle depth blur & brightness dimming
+  const filter = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    ["brightness(1) blur(0px)", "brightness(0.92) blur(1px)", "brightness(0.78) blur(3px)"]
+  );
 
   return (
     <div
@@ -22,7 +30,7 @@ const StackingSection = ({ id, zIndex, children, bg = "bg-white", isFirst = fals
       id={id}
       style={{
         position: "relative",
-        minHeight: "115vh",
+        minHeight: "125vh", // Generous scroll distance so the push-back and slide-over is cinematic
         zIndex: zIndex
       }}
     >
@@ -32,11 +40,11 @@ const StackingSection = ({ id, zIndex, children, bg = "bg-white", isFirst = fals
           top: "74px",
           scale,
           opacity,
-          y,
-          transformOrigin: "top center",
-          willChange: "transform, opacity",
-          boxShadow: isFirst ? "none" : "0 -25px 60px -10px rgba(15, 23, 42, 0.22)",
-          borderTop: isFirst ? "none" : "1px solid rgba(226, 232, 240, 0.8)"
+          filter,
+          transformOrigin: "center 30%", // Stays centered, pushes back without shifting up
+          willChange: "transform, opacity, filter",
+          boxShadow: isFirst ? "none" : "0 -35px 70px -15px rgba(15, 23, 42, 0.32)",
+          borderTop: isFirst ? "none" : "1px solid rgba(226, 232, 240, 0.85)"
         }}
         className={`${bg} w-100`}
       >
@@ -59,12 +67,39 @@ const LandingPage = () => {
     { id: "faq-sec", label: "FAQ & Access", icon: "bi-shield-check" }
   ];
 
+  // Custom Cubic-Eased Smooth Scroll for Navbar Navigation (allows viewing the push-back & slide-over effect)
+  const smoothScrollTo = (targetY, duration = 750) => {
+    const startY = window.pageYOffset;
+    const diff = targetY - startY;
+    if (Math.abs(diff) < 5) return;
+
+    let startTime = null;
+    const easeInOutCubic = (t) =>
+      t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+
+    const step = (currentTime) => {
+      if (!startTime) startTime = currentTime;
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = easeInOutCubic(progress);
+
+      window.scrollTo(0, startY + diff * ease);
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+
+    requestAnimationFrame(step);
+  };
+
   // Smooth scroll to section when toggled from navbar
   const handleNavToggle = (id) => {
     setActiveNavSection(id);
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
+      const targetY = el.offsetTop - 74;
+      smoothScrollTo(targetY, 800);
     }
   };
 
@@ -253,7 +288,7 @@ const LandingPage = () => {
             ))}
           </div>
 
-          {/* Action Buttons */}
+          {/* Action Buttons (Login & Sign Up with Page Stack Transition) */}
           <div className="d-flex align-items-center gap-2">
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
               <Link
@@ -901,7 +936,7 @@ const LandingPage = () => {
                 { id: 4, title: "Analytics & Reports", desc: "Real-time metrics, employee growth indicators, and automated executive digests.", icon: "bi-graph-up-arrow", bg: "bg-warning bg-opacity-10 text-warning" },
                 { id: 5, title: "Multi-Step Approvals", desc: "Two-step supervisor-to-manager routing for leave requests and department transfers.", icon: "bi-inbox-fill", bg: "bg-danger bg-opacity-10 text-danger" },
                 { id: 6, title: "Payroll & Compensation", desc: "Automated calculations, tax compliance checks, and secure role-based access.", icon: "bi-cash-coin", bg: "bg-info bg-opacity-10 text-info" }
-              ].map((card, idx) => (
+              ].map((card) => (
                 <div key={card.id} className="col-12 col-md-6 col-lg-4">
                   <div className="card rounded-4 p-4 h-100 bg-white feature-card shadow-xs cursor-pointer">
                     <div className={`p-3 rounded-3 d-inline-flex align-items-center justify-content-center mb-3 ${card.bg}`} style={{ width: "48px", height: "48px" }}>
