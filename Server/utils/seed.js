@@ -49,16 +49,16 @@ export async function seedDatabase() {
 
   console.log('Generating password hashes...');
   const salt = await bcrypt.genSalt(10);
-  const adminPass = await bcrypt.hash('Admin@123', salt);
+  const adminPass = await bcrypt.hash('8859574934', salt);
   const managerPass = await bcrypt.hash('Manager@123', salt);
   const supervisorPass = await bcrypt.hash('Supervisor@123', salt);
   const employeePass = await bcrypt.hash('Employee@123', salt);
 
   console.log('Inserting 4-tier seed users...');
-  // 1. HR Admin
+  // 1. HR Admin (Single Master)
   await pool.query(`
     INSERT INTO users (name, email, password_hash, role, salary, phone, address)
-    VALUES ('Chief HR Admin', 'admin@company.com', ?, 'admin', 95000.00, '+1 555-0100', 'Executive Suite 101')
+    VALUES ('Shubh Singh', 'shubhsingh.13jan@gmail.com', ?, 'admin', 95000.00, '+1 555-0100', 'Executive Suite 101')
   `, [adminPass]);
 
   // 2. Manager
