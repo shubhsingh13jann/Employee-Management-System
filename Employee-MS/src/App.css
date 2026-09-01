@@ -219,12 +219,13 @@ body {
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
-  animation: floatTag 3s ease-in-out infinite alternate;
+  animation: floatTag 4.5s ease-in-out infinite alternate;
 }
 
 @keyframes floatTag {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-6px); }
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-7px) rotate(1deg); }
+  100% { transform: translateY(-3px) rotate(-0.8deg); }
 }
 
 .showcase-dashboard-card {
@@ -234,23 +235,50 @@ body {
   background: #ffffff;
   border: 1px solid rgba(203, 213, 225, 0.7);
   box-shadow:
-    0 25px 50px -12px rgba(15, 23, 42, 0.15),
-    0 10px 20px -5px rgba(99, 102, 241, 0.08),
+    0 25px 50px -12px rgba(15, 23, 42, 0.18),
+    0 10px 20px -5px rgba(99, 102, 241, 0.10),
     0 0 0 1px rgba(226, 232, 240, 0.6);
-  transform: rotateX(6deg) rotateY(-8deg) rotateZ(1deg);
   transform-style: preserve-3d;
-  transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: default !important;
+  will-change: transform, box-shadow;
 }
 
-/* Hover: Pop Out Forward towards user */
-.showcase-dashboard-card:hover {
-  transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.025) translateY(-10px) translateZ(35px);
-  box-shadow:
-    0 35px 70px -15px rgba(79, 70, 229, 0.28),
-    0 15px 30px -8px rgba(15, 23, 42, 0.12),
-    0 0 0 2px rgba(99, 102, 241, 0.35);
-  border-color: #818cf8;
+/* Omnidirectional 3D Floating Animation: floats in ALL directions (left, right, up, down, yaw, pitch, roll) */
+.showcase-dashboard-card.omni-floating {
+  animation: omniFloat3D 11s ease-in-out infinite;
+}
+
+@keyframes omniFloat3D {
+  0% {
+    transform: rotateX(5deg) rotateY(-7deg) rotateZ(0.5deg) translate3d(0px, 0px, 0px);
+    box-shadow:
+      0 25px 50px -12px rgba(15, 23, 42, 0.18),
+      0 10px 20px -5px rgba(99, 102, 241, 0.10);
+  }
+  25% {
+    transform: rotateX(2deg) rotateY(-1deg) rotateZ(-1deg) translate3d(8px, -12px, 20px);
+    box-shadow:
+      0 35px 65px -15px rgba(15, 23, 42, 0.22),
+      0 14px 28px -6px rgba(99, 102, 241, 0.14);
+  }
+  50% {
+    transform: rotateX(-3deg) rotateY(6deg) rotateZ(1.2deg) translate3d(12px, -5px, 28px);
+    box-shadow:
+      0 40px 75px -18px rgba(79, 70, 229, 0.24),
+      0 16px 32px -8px rgba(15, 23, 42, 0.16);
+  }
+  75% {
+    transform: rotateX(4deg) rotateY(3deg) rotateZ(-0.8deg) translate3d(-6px, 8px, 14px);
+    box-shadow:
+      0 22px 45px -10px rgba(15, 23, 42, 0.15),
+      0 8px 16px -4px rgba(99, 102, 241, 0.08);
+  }
+  100% {
+    transform: rotateX(5deg) rotateY(-7deg) rotateZ(0.5deg) translate3d(0px, 0px, 0px);
+    box-shadow:
+      0 25px 50px -12px rgba(15, 23, 42, 0.18),
+      0 10px 20px -5px rgba(99, 102, 241, 0.10);
+  }
 }
 
 /* ============================================================
