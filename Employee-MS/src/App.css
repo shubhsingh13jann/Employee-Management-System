@@ -15,6 +15,120 @@ body {
   overflow-x: hidden;
 }
 
+/* ============================================================
+   SUBTLE INTERACTIVE AMBIENT BACKGROUND ANIMATION
+   ============================================================ */
+
+.hero-interactive-section {
+  background: radial-gradient(circle at 50% 0%, rgba(245, 243, 255, 0.6) 0%, #ffffff 70%);
+}
+
+/* High-tech subtle dot matrix */
+.ambient-grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(99, 102, 241, 0.16) 1.2px, transparent 1.2px);
+  background-size: 36px 36px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.55;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, #000 40%, transparent 85%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, #000 40%, transparent 85%);
+}
+
+/* Animated Floating Soft Gradient Light Orbs */
+.ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(110px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+  will-change: transform;
+}
+
+.orb-1 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.45) 0%, rgba(124, 58, 237, 0) 70%);
+  top: -8%;
+  left: -8%;
+  animation: floatOrb1 18s ease-in-out infinite alternate;
+}
+
+.orb-2 {
+  width: 580px;
+  height: 580px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.35) 0%, rgba(236, 72, 153, 0) 70%);
+  bottom: -5%;
+  right: -8%;
+  animation: floatOrb2 22s ease-in-out infinite alternate;
+}
+
+.orb-3 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.3) 0%, rgba(99, 102, 241, 0) 70%);
+  top: 35%;
+  left: 40%;
+  animation: floatOrb3 16s ease-in-out infinite alternate;
+}
+
+@keyframes floatOrb1 {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(60px, 35px) scale(1.08); }
+  100% { transform: translate(25px, 70px) scale(0.96); }
+}
+
+@keyframes floatOrb2 {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(-65px, -45px) scale(1.06); }
+  100% { transform: translate(-25px, -15px) scale(0.94); }
+}
+
+@keyframes floatOrb3 {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(-35px, 45px) scale(1.12); }
+  100% { transform: translate(30px, -25px) scale(0.92); }
+}
+
+/* Floating Micro Badges */
+.floating-micro-badge {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 9999px;
+  padding: 5px 13px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  pointer-events: none;
+  z-index: 1;
+  animation: floatBadge 8s ease-in-out infinite;
+}
+
+.badge-1 {
+  top: 14%;
+  right: 50%;
+  animation-delay: 0s;
+}
+
+.badge-2 {
+  bottom: 8%;
+  left: 36%;
+  animation-delay: 4s;
+}
+
+@keyframes floatBadge {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1.2deg); }
+}
+
 /* Gradient Text */
 .text-gradient {
   background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%);
@@ -80,7 +194,7 @@ body {
 }
 
 /* ============================================================
-   3D POP-OUT SHOWCASE ANIMATIONS (Right-Hand Image / Card)
+   3D POP-OUT SHOWCASE ANIMATIONS (Non-Clickable, Pure Hover Pop-Out)
    ============================================================ */
 
 .showcase-3d-wrapper {
@@ -93,7 +207,7 @@ body {
   transform: perspective(1400px) rotateY(-7deg) rotateX(3deg) scale(0.97);
   transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 20px 45px -15px rgba(15, 23, 42, 0.18), 0 0 25px rgba(99, 102, 241, 0.1);
-  cursor: pointer;
+  cursor: default !important; /* NOT CLICKABLE */
   transform-style: preserve-3d;
   will-change: transform, box-shadow;
   border: 1px solid rgba(226, 232, 240, 0.8) !important;
@@ -186,7 +300,7 @@ body {
 
 .feature-card {
   border: 1px solid #e2e8f0 !important;
-  cursor: pointer;
+  cursor: default !important; /* NOT CLICKABLE */
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
