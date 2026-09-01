@@ -1,4 +1,4 @@
-/* Modern Enterprise EMS UI & Hero Animations */
+/* Modern Enterprise EMS UI & Advanced Hero Animations */
 
 :root {
   --primary-purple: #4f46e5;
@@ -20,10 +20,9 @@ body {
    ============================================================ */
 
 .hero-interactive-section {
-  background: radial-gradient(circle at 50% 0%, rgba(245, 243, 255, 0.6) 0%, #ffffff 70%);
+  background: radial-gradient(circle at 50% 0%, rgba(245, 243, 255, 0.7) 0%, #ffffff 75%);
 }
 
-/* High-tech subtle dot matrix - DISABLED per user preference for transparent clean look */
 .ambient-grid-overlay {
   display: none !important;
 }
@@ -32,291 +31,226 @@ body {
 .ambient-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(70px);
+  filter: blur(80px);
   pointer-events: none;
   z-index: 0;
-  opacity: 0.65;
+  opacity: 0.6;
   will-change: transform;
 }
 
 .orb-1 {
-  width: 480px;
-  height: 480px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.55) 0%, rgba(124, 58, 237, 0.1) 70%, transparent 85%);
-  top: -5%;
-  left: -5%;
-  animation: floatOrb1 16s ease-in-out infinite alternate;
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.5) 0%, rgba(124, 58, 237, 0.1) 70%, transparent 85%);
+  top: -8%;
+  left: -8%;
+  animation: floatOrb1 18s ease-in-out infinite alternate;
 }
 
 .orb-2 {
-  width: 540px;
-  height: 540px;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.5) 0%, rgba(236, 72, 153, 0.1) 70%, transparent 85%);
-  bottom: -5%;
-  right: -5%;
-  animation: floatOrb2 20s ease-in-out infinite alternate;
+  width: 560px;
+  height: 560px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.45) 0%, rgba(236, 72, 153, 0.1) 70%, transparent 85%);
+  bottom: -6%;
+  right: -6%;
+  animation: floatOrb2 22s ease-in-out infinite alternate;
 }
 
 .orb-3 {
-  width: 380px;
-  height: 380px;
-  background: radial-gradient(circle, rgba(14, 165, 233, 0.45) 0%, rgba(99, 102, 241, 0.1) 70%, transparent 85%);
-  top: 30%;
-  left: 35%;
-  animation: floatOrb3 14s ease-in-out infinite alternate;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.4) 0%, rgba(99, 102, 241, 0.1) 70%, transparent 85%);
+  top: 35%;
+  left: 30%;
+  animation: floatOrb3 16s ease-in-out infinite alternate;
 }
 
 @keyframes floatOrb1 {
   0% { transform: translate(0px, 0px) scale(1); }
-  50% { transform: translate(60px, 35px) scale(1.08); }
-  100% { transform: translate(25px, 70px) scale(0.96); }
+  50% { transform: translate(60px, 40px) scale(1.08); }
+  100% { transform: translate(25px, 80px) scale(0.95); }
 }
 
 @keyframes floatOrb2 {
   0% { transform: translate(0px, 0px) scale(1); }
-  50% { transform: translate(-65px, -45px) scale(1.06); }
-  100% { transform: translate(-25px, -15px) scale(0.94); }
+  50% { transform: translate(-70px, -50px) scale(1.06); }
+  100% { transform: translate(-30px, -20px) scale(0.93); }
 }
 
 @keyframes floatOrb3 {
   0% { transform: translate(0px, 0px) scale(1); }
-  50% { transform: translate(-35px, 45px) scale(1.12); }
-  100% { transform: translate(30px, -25px) scale(0.92); }
+  50% { transform: translate(-40px, 50px) scale(1.12); }
+  100% { transform: translate(35px, -30px) scale(0.92); }
 }
 
-/* Floating Micro Badges */
-.floating-micro-badge {
-  position: absolute;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.85);
-  border-radius: 9999px;
-  padding: 5px 13px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #1e293b;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-  pointer-events: none;
-  z-index: 1;
-  animation: floatBadge 8s ease-in-out infinite;
-}
+/* ============================================================
+   BRAND & LOGO ANIMATIONS
+   ============================================================ */
 
-.badge-1 {
-  top: 14%;
-  right: 50%;
-  animation-delay: 0s;
-}
-
-.badge-2 {
-  bottom: 8%;
-  left: 36%;
-  animation-delay: 4s;
-}
-
-@keyframes floatBadge {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-8px) rotate(1.2deg); }
-}
-
-/* Gradient Text */
-.text-gradient {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Gradient Button */
-.btn-gradient-primary {
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-  border: none;
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.btn-gradient-primary:hover {
-  background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(79, 70, 229, 0.5);
-  color: #ffffff;
-}
-
-/* Logo Cube */
 .logo-cube {
   width: 38px;
   height: 38px;
   background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
   border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.35);
+  box-shadow: 0 8px 16px -4px rgba(79, 70, 229, 0.4);
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.navbar-brand:hover .logo-cube {
+  transform: rotateY(20deg) rotateX(15deg) scale(1.08);
+  box-shadow: 0 12px 24px -4px rgba(79, 70, 229, 0.6);
 }
 
 .logo-cube-sm {
   width: 28px;
   height: 28px;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-  border-radius: 8px;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  border-radius: 7px;
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.35);
+  transition: transform 0.3s ease;
 }
 
-/* Soft Purple Badges */
-.bg-purple-soft {
-  background-color: #f5f3ff !important;
+.logo-cube-sm:hover {
+  transform: rotate(15deg) scale(1.1);
 }
 
-.text-purple-deep {
-  color: #5b21b6 !important;
+/* Magnetic Buttons & Gradient Sweeps */
+.btn-gradient-primary {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #7c3aed 100%);
+  background-size: 200% auto;
+  border: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.border-purple-subtle {
-  border-color: #ddd6fe !important;
+.btn-gradient-primary:hover {
+  background-position: right center;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.45) !important;
 }
 
-/* Hero Typography */
+.btn-gradient-primary:active {
+  transform: translateY(0px) scale(0.98);
+}
+
+/* Hero Heading Gradient & Typography */
 .hero-heading {
-  font-size: 3.5rem;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
+  font-size: clamp(2.3rem, 4.2vw, 3.4rem);
+  line-height: 1.12;
+  font-weight: 800;
+  letter-spacing: -0.035em;
 }
 
-@media (max-width: 991px) {
-  .hero-heading {
-    font-size: 2.6rem;
-  }
+.text-gradient {
+  background: linear-gradient(135deg, #4f46e5 0%, #a855f7 50%, #ec4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  position: relative;
 }
 
-/* ============================================================
-   3D POP-OUT SHOWCASE ANIMATIONS (Non-Clickable, Pure Hover Pop-Out)
-   ============================================================ */
-
-.showcase-3d-wrapper {
-  perspective: 1400px;
-  transform-style: preserve-3d;
-  padding: 15px;
-}
-
-.showcase-dashboard-card {
-  transform: perspective(1400px) rotateY(-7deg) rotateX(3deg) scale(0.97);
-  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 20px 45px -15px rgba(15, 23, 42, 0.18), 0 0 25px rgba(99, 102, 241, 0.1);
-  cursor: default !important; /* NOT CLICKABLE */
-  transform-style: preserve-3d;
-  will-change: transform, box-shadow;
-  border: 1px solid rgba(226, 232, 240, 0.8) !important;
-}
-
-/* Auto subtle breathing float before hover */
-@keyframes heroFloat {
-  0%, 100% {
-    transform: perspective(1400px) rotateY(-7deg) rotateX(3deg) translateY(0px) scale(0.97);
-  }
-  50% {
-    transform: perspective(1400px) rotateY(-5deg) rotateX(5deg) translateY(-8px) scale(0.98);
-  }
-}
-
-.showcase-3d-wrapper:not(:hover) .showcase-dashboard-card {
-  animation: heroFloat 6s ease-in-out infinite;
-}
-
-/* ON HOVER: POPS OUT TOWARDS USER WITH ELEVATED 3D GLOW */
-.showcase-3d-wrapper:hover .showcase-dashboard-card {
-  transform: perspective(1400px) rotateY(0deg) rotateX(0deg) scale(1.03) translateY(-14px) translateZ(30px) !important;
-  box-shadow: 0 35px 80px -15px rgba(79, 70, 229, 0.35), 0 0 45px rgba(99, 102, 241, 0.22), 0 10px 25px rgba(0, 0, 0, 0.08) !important;
-  border-color: rgba(99, 102, 241, 0.45) !important;
-}
-
-/* Floating badge indicator */
-.showcase-floating-tag {
-  position: absolute;
-  top: -16px;
-  right: 28px;
-  z-index: 10;
-  pointer-events: none;
-  transition: all 0.3s ease;
-}
-
-.showcase-3d-wrapper:hover .showcase-floating-tag {
-  transform: translateY(-4px) scale(1.05);
-  background-color: #4f46e5 !important;
-}
-
-/* Pulse dots */
+/* Radar Ping Animations */
 .pulse-dot {
   width: 8px;
   height: 8px;
-  background-color: #818cf8;
+  background-color: #6366f1;
   border-radius: 50%;
+  position: relative;
   display: inline-block;
-  animation: pulseGlow 1.8s infinite;
+}
+
+.pulse-dot::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  border: 2px solid #6366f1;
+  animation: ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
 .pulse-dot-green {
-  animation: pulseGreen 2s infinite;
+  width: 8px;
+  height: 8px;
+  background-color: #10b981;
+  border-radius: 50%;
+  position: relative;
+  display: inline-block;
 }
 
-@keyframes pulseGlow {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(129, 140, 248, 0.7); }
-  70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(129, 140, 248, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(129, 140, 248, 0); }
+.pulse-dot-green::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 50%;
+  border: 1.5px solid #10b981;
+  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
-@keyframes pulseGreen {
-  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-  70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-}
-
-/* Inner card hover interactions */
-.hover-lift {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.hover-lift:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.08);
-}
-
-.hover-bg:hover {
-  background-color: #f1f5f9 !important;
-}
-
-.hover-light:hover {
-  background-color: rgba(255, 255, 255, 0.08) !important;
-  color: #fff !important;
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
 }
 
 /* ============================================================
-   FEATURE CARDS SECTION
+   3D DASHBOARD SHOWCASE PERSPECTIVE & POP-OUT
    ============================================================ */
 
-.feature-card {
-  border: 1px solid #e2e8f0 !important;
-  cursor: default !important; /* NOT CLICKABLE */
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+.showcase-3d-wrapper {
+  perspective: 1600px;
+  perspective-origin: 50% 40%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 18px 10px 30px 10px;
 }
 
-.feature-card:hover,
-.feature-card-hover {
-  transform: translateY(-8px) scale(1.015);
-  box-shadow: 0 20px 35px -10px rgba(99, 102, 241, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.04) !important;
-  border-color: #a5b4fc !important;
+.showcase-floating-tag {
+  position: absolute;
+  top: -18px;
+  right: 24px;
+  z-index: 10;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  animation: floatTag 3s ease-in-out infinite alternate;
 }
 
-/* Custom Scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+@keyframes floatTag {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-6px); }
 }
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
+
+.showcase-dashboard-card {
+  width: 100%;
+  max-width: 790px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(203, 213, 225, 0.7);
+  box-shadow:
+    0 25px 50px -12px rgba(15, 23, 42, 0.15),
+    0 10px 20px -5px rgba(99, 102, 241, 0.08),
+    0 0 0 1px rgba(226, 232, 240, 0.6);
+  transform: rotateX(6deg) rotateY(-8deg) rotateZ(1deg);
+  transform-style: preserve-3d;
+  transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: default !important;
 }
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+
+/* Hover: Pop Out Forward towards user */
+.showcase-dashboard-card:hover {
+  transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.025) translateY(-10px) translateZ(35px);
+  box-shadow:
+    0 35px 70px -15px rgba(79, 70, 229, 0.28),
+    0 15px 30px -8px rgba(15, 23, 42, 0.12),
+    0 0 0 2px rgba(99, 102, 241, 0.35);
+  border-color: #818cf8;
 }
 
 /* ============================================================
@@ -330,26 +264,11 @@ body {
   border: 1px solid transparent !important;
 }
 
+.stat-card-interactive:hover,
 .stat-card-active {
   transform: translateY(-4px) scale(1.03);
   border-color: rgba(99, 102, 241, 0.4) !important;
   box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.15) !important;
-}
-
-.scale-105 {
-  transform: scale(1.05);
-}
-
-.scale-110 {
-  transform: scale(1.1);
-}
-
-.scale-115 {
-  transform: scale(1.15);
-}
-
-.rotate-12 {
-  transform: rotate(12deg);
 }
 
 .stat-icon-badge.purple { background-color: #f5f3ff; color: #4f46e5; }
@@ -357,7 +276,7 @@ body {
 .stat-icon-badge.green { background-color: #f0fdf4; color: #16a34a; }
 .stat-icon-badge.orange { background-color: #fffbeb; color: #d97706; }
 
-/* Chart Container */
+/* Chart Container & Animations */
 .chart-container-card {
   transition: all 0.3s ease;
   border: 1px solid transparent !important;
@@ -404,11 +323,211 @@ body {
   100% { stroke-dasharray: 88, 100; transform: rotate(0deg); transform-origin: 50% 50%; }
 }
 
-.translate-x-1 {
-  transform: translateX(3px);
+/* Micro detail utilities */
+.scale-102 { transform: scale(1.02); }
+.scale-105 { transform: scale(1.05); }
+.scale-110 { transform: scale(1.1); }
+.scale-115 { transform: scale(1.15); }
+.rotate-12 { transform: rotate(12deg); }
+.translate-x-1 { transform: translateX(3px); }
+.translate-x-2 { transform: translateX(5px); }
+
+/* Feature Cards with Radiant Hover */
+.feature-card {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  position: relative;
+  overflow: hidden;
 }
 
-.translate-x-2 {
-  transform: translateX(5px);
-  background-color: #f1f5f9 !important;
+.feature-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px) scale(1.015);
+  box-shadow: 0 20px 35px -10px rgba(99, 102, 241, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.04) !important;
+  border-color: #a5b4fc !important;
+}
+
+.feature-card:hover::before {
+  opacity: 1;
+}
+
+/* Role Showcase Tabs */
+.role-tab-btn {
+  transition: all 0.25s ease;
+  border: 1px solid transparent;
+}
+
+.role-tab-btn.active {
+  background: #ffffff !important;
+  color: #4f46e5 !important;
+  box-shadow: 0 8px 18px -4px rgba(79, 70, 229, 0.25);
+  border-color: #ddd6fe !important;
+}
+
+/* Interactive Calculator Range Slider */
+.calc-slider {
+  accent-color: #4f46e5;
+  cursor: pointer;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ============================================================
+   OPTION 4: ELEVATED RISE & PRESENT PAGE NAVIGATION ANIMATION
+   ============================================================ */
+.page-elevated-transition {
+  animation: elevatedRisePresent 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+  min-height: 100vh;
+  width: 100%;
+}
+
+@keyframes elevatedRisePresent {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+  }
+}
+
+/* ============================================================
+   SMOOTH SCROLL-DRIVEN REVEAL ANIMATIONS
+   ============================================================ */
+html {
+  scroll-behavior: smooth;
+}
+
+.scroll-reveal {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.scroll-reveal.is-revealed {
+  opacity: 1 !important;
+  transform: translateY(0px) !important;
+}
+
+.delay-1 { transition-delay: 0.08s; }
+.delay-2 { transition-delay: 0.16s; }
+.delay-3 { transition-delay: 0.24s; }
+.delay-4 { transition-delay: 0.32s; }
+.delay-5 { transition-delay: 0.40s; }
+.delay-6 { transition-delay: 0.48s; }
+
+/* ============================================================
+   ROLE PORTALS TAB SWITCHING & SPOTLIGHT ANIMATIONS
+   ============================================================ */
+.role-content-animated {
+  animation: roleCardElevate 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes roleCardElevate {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.975);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+  }
+}
+
+.role-tab-btn {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  position: relative;
+}
+
+.role-tab-btn.active {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 22px -5px rgba(79, 70, 229, 0.45) !important;
+  transform: scale(1.06);
+}
+
+.role-section-spotlight {
+  animation: spotlightGlow 2.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes spotlightGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.6);
+    border-color: #6366f1 !important;
+  }
+  40% {
+    box-shadow: 0 0 0 18px rgba(79, 70, 229, 0.18);
+    border-color: #4f46e5 !important;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+    border-color: #e2e8f0 !important;
+  }
+}
+
+/* ============================================================
+   ACTIVE NAVBAR PILL INDICATOR
+   ============================================================ */
+
+/* Active Navbar Pill Indicator */
+.nav-toggle-btn {
+  position: relative;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.25s ease;
+}
+
+.nav-toggle-btn:hover {
+  color: #0f172a;
+}
+
+.nav-toggle-btn.active {
+  color: #ffffff;
+}
+
+.nav-toggle-active-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  border-radius: 9999px;
+  z-index: -1;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
 }

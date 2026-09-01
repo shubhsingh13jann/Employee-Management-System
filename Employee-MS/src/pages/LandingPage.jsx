@@ -1,579 +1,607 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import InteractiveBackground from "../components/common/InteractiveBackground";
 
-const LandingPage = () => {
-  const navigate = useNavigate();
-  const [hoveredCard, setHoveredCard] = useState(null);
-  const [activeTab, setActiveTab] = useState("Dashboard");
+// A true Framer Motion Stacking Section
+const StackingSection = ({ id, zIndex, children, bg = "bg-white", isFirst = false }) => {
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"]
+  });
 
-  // Interactive Mock Dashboard States
-  const [graphTimeframe, setGraphTimeframe] = useState("This Month");
-  const [activeGraphPoint, setActiveGraphPoint] = useState({ index: 4, date: "May 29", count: 248, change: "+12%" });
-  const [isGraphHovered, setIsGraphHovered] = useState(false);
-  const [hoveredDept, setHoveredDept] = useState(null);
-  const [isCircleHovered, setIsCircleHovered] = useState(false);
-  const [hoveredStat, setHoveredStat] = useState(null);
-  const [hoveredApproval, setHoveredApproval] = useState(null);
-
-  // Graph Data points along curve
-  const graphPoints = [
-    { index: 0, x: 20, y: 85, date: "May 1", count: 212, change: "+3%" },
-    { index: 1, x: 100, y: 65, date: "May 8", count: 220, change: "+5%" },
-    { index: 2, x: 190, y: 72, date: "May 15", count: 228, change: "+7%" },
-    { index: 3, x: 285, y: 45, date: "May 22", count: 239, change: "+10%" },
-    { index: 4, x: 375, y: 52, date: "May 29", count: 248, change: "+12%" }
-  ];
-
-  const currentPoint = activeGraphPoint;
+  // Scales down to 0.92 and dims as subsequent section stacks over it
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.91]);
+  const opacity = useTransform(scrollYProgress, [0, 0.8, 1], [1, 0.85, 0.4]);
+  const y = useTransform(scrollYProgress, [0, 1], [0, -25]);
 
   return (
-    <div className="min-vh-100 bg-white text-dark overflow-x-hidden landing-container">
-      {/* 1. TOP NAVIGATION BAR */}
-      <nav className="navbar navbar-expand-lg py-3 px-4 px-lg-5 sticky-top bg-white bg-opacity-95 backdrop-blur border-bottom border-light shadow-xs z-3">
+    <div
+      ref={containerRef}
+      id={id}
+      style={{
+        position: "relative",
+        minHeight: "115vh",
+        zIndex: zIndex
+      }}
+    >
+      <motion.div
+        style={{
+          position: "sticky",
+          top: "74px",
+          scale,
+          opacity,
+          y,
+          transformOrigin: "top center",
+          willChange: "transform, opacity",
+          boxShadow: isFirst ? "none" : "0 -25px 60px -10px rgba(15, 23, 42, 0.22)",
+          borderTop: isFirst ? "none" : "1px solid rgba(226, 232, 240, 0.8)"
+        }}
+        className={`${bg} w-100`}
+      >
+        {children}
+      </motion.div>
+    </div>
+  );
+};
+
+const LandingPage = () => {
+  // Navigation & Active Stack Section State
+  const [activeNavSection, setActiveNavSection] = useState("overview-sec");
+
+  // Navbar Deck Items
+  const navItems = [
+    { id: "overview-sec", label: "Overview", icon: "bi-layers-fill" },
+    { id: "roles-sec", label: "Role Portals", icon: "bi-person-badge-fill" },
+    { id: "calc-sec", label: "ROI Calculator", icon: "bi-calculator-fill" },
+    { id: "features-sec", label: "Features", icon: "bi-grid-fill" },
+    { id: "faq-sec", label: "FAQ & Access", icon: "bi-shield-check" }
+  ];
+
+  // Smooth scroll to section when toggled from navbar
+  const handleNavToggle = (id) => {
+    setActiveNavSection(id);
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  // ScrollSpy to update active navbar toggle as user scrolls through the stack
+  useEffect(() => {
+    const handleScrollSpy = () => {
+      const sectionIds = ["overview-sec", "roles-sec", "calc-sec", "features-sec", "faq-sec"];
+      const scrollPos = window.scrollY + 220;
+
+      for (let i = sectionIds.length - 1; i >= 0; i--) {
+        const el = document.getElementById(sectionIds[i]);
+        if (el && el.offsetTop <= scrollPos) {
+          setActiveNavSection(sectionIds[i]);
+          break;
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScrollSpy, { passive: true });
+    return () => window.removeEventListener("scroll", handleScrollSpy);
+  }, []);
+
+  // Hero Dynamic Word Cycler
+  const words = ["Excellence.", "Efficiency.", "Productivity.", "Innovation."];
+  const [wordIndex, setWordIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setWordIndex((prev) => (prev + 1) % words.length);
+    }, 2800);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Real-time Clock in Mock Dashboard
+  const [currentTime, setCurrentTime] = useState("");
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentTime(
+        now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+      );
+    };
+    updateTime();
+    const clockTimer = setInterval(updateTime, 1000);
+    return () => clearInterval(clockTimer);
+  }, []);
+
+  // Dynamic Greeting based on current hour
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
+
+  // Mock Dashboard Interactive States
+  const [activeSidebarTab, setActiveSidebarTab] = useState("Dashboard");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [unreadNotifs, setUnreadNotifs] = useState(3);
+  const [selectedStat, setSelectedStat] = useState("employees");
+  const [graphTimeframe, setGraphTimeframe] = useState("This Month");
+  const [hoveredGraphPoint, setHoveredGraphPoint] = useState(null);
+  const [hoveredDept, setHoveredDept] = useState(null);
+  const [hoveredDonutSegment, setHoveredDonutSegment] = useState(null);
+  const [hoveredApproval, setHoveredApproval] = useState(null);
+  const [approvedItems, setApprovedItems] = useState({});
+
+  // 4-Tier Role Showcase Tab State
+  const [activeRoleTab, setActiveRoleTab] = useState("admin");
+
+  // Interactive ROI Calculator State
+  const [employeeCount, setEmployeeCount] = useState(85);
+
+  // FAQ Accordion State
+  const [openFaq, setOpenFaq] = useState(0);
+
+  // Timeframe-specific Graph data sets
+  const timeframeData = {
+    Today: {
+      points: [
+        { index: 0, x: 20, y: 80, label: "09:00", count: 218, change: "+1.2%" },
+        { index: 1, x: 100, y: 60, label: "12:00", count: 235, change: "+4.5%" },
+        { index: 2, x: 190, y: 50, label: "14:00", count: 242, change: "+6.8%" },
+        { index: 3, x: 285, y: 40, label: "16:00", count: 246, change: "+8.9%" },
+        { index: 4, x: 375, y: 35, label: "18:00", count: 248, change: "+12.0%" }
+      ],
+      path: "M0,85 Q50,75 100,60 T190,50 T285,40 T375,35 L400,38 L400,120 L0,120 Z",
+      line: "M0,85 Q50,75 100,60 T190,50 T285,40 T375,35 L400,38"
+    },
+    "This Week": {
+      points: [
+        { index: 0, x: 20, y: 90, label: "Mon", count: 230, change: "+2.1%" },
+        { index: 1, x: 100, y: 75, label: "Tue", count: 236, change: "+3.9%" },
+        { index: 2, x: 190, y: 65, label: "Wed", count: 240, change: "+5.4%" },
+        { index: 3, x: 285, y: 55, label: "Thu", count: 244, change: "+8.2%" },
+        { index: 4, x: 375, y: 45, label: "Fri", count: 248, change: "+12.0%" }
+      ],
+      path: "M0,95 Q50,85 100,75 T190,65 T285,55 T375,45 L400,50 L400,120 L0,120 Z",
+      line: "M0,95 Q50,85 100,75 T190,65 T285,55 T375,45 L400,50"
+    },
+    "This Month": {
+      points: [
+        { index: 0, x: 20, y: 85, label: "May 1", count: 212, change: "+3.0%" },
+        { index: 1, x: 100, y: 65, label: "May 8", count: 220, change: "+5.2%" },
+        { index: 2, x: 190, y: 72, label: "May 15", count: 228, change: "+7.1%" },
+        { index: 3, x: 285, y: 45, label: "May 22", count: 239, change: "+10.4%" },
+        { index: 4, x: 375, y: 52, label: "May 29", count: 248, change: "+12.0%" }
+      ],
+      path: "M0,85 Q50,75 100,65 T190,72 T285,45 T375,52 L400,60 L400,120 L0,120 Z",
+      line: "M0,85 Q50,75 100,65 T190,72 T285,45 T375,52 L400,60"
+    },
+    "This Year": {
+      points: [
+        { index: 0, x: 20, y: 100, label: "Q1", count: 180, change: "+15%" },
+        { index: 1, x: 100, y: 80, label: "Q2", count: 205, change: "+22%" },
+        { index: 2, x: 190, y: 65, label: "Q3", count: 226, change: "+29%" },
+        { index: 3, x: 285, y: 50, label: "Q4", count: 248, change: "+38%" },
+        { index: 4, x: 375, y: 40, label: "Est.", count: 270, change: "+45%" }
+      ],
+      path: "M0,105 Q50,95 100,80 T190,65 T285,50 T375,40 L400,45 L400,120 L0,120 Z",
+      line: "M0,105 Q50,95 100,80 T190,65 T285,50 T375,40 L400,45"
+    }
+  };
+
+  const activeCurve = timeframeData[graphTimeframe] || timeframeData["This Month"];
+  const activePt = hoveredGraphPoint || activeCurve.points[activeCurve.points.length - 1];
+
+  const initialDepts = [
+    { name: "Engineering", count: 86, color: "bg-primary", glow: "#3b82f6", pct: 38 },
+    { name: "Marketing", count: 45, color: "bg-purple", glow: "#8b5cf6", pct: 20 },
+    { name: "Sales", count: 38, color: "bg-info", glow: "#06b6d4", pct: 17 },
+    { name: "Human Resources", count: 32, color: "bg-success", glow: "#10b981", pct: 14 },
+    { name: "Finance", count: 28, color: "bg-warning", glow: "#f59e0b", pct: 11 }
+  ];
+
+  const filteredDepts = initialDepts.filter((d) =>
+    d.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  return (
+    <div className="min-vh-100 bg-slate-900 text-dark overflow-x-hidden landing-container position-relative">
+      {/* 1. TOP STICKY NAVBAR WITH INTERACTIVE STACK TOGGLES */}
+      <nav
+        className="navbar navbar-expand-lg py-2.5 px-4 px-lg-5 sticky-top bg-white bg-opacity-95 backdrop-blur border-bottom border-light shadow-xs z-3"
+        style={{ height: "74px" }}
+      >
         <div className="container-fluid p-0 d-flex justify-content-between align-items-center">
-          {/* Logo */}
+          {/* Brand Logo with 3D Tilt Hover */}
           <Link to="/" className="navbar-brand d-flex align-items-center gap-2 text-decoration-none">
-            <div className="logo-cube d-flex align-items-center justify-content-center">
+            <motion.div
+              whileHover={{ rotateY: 20, rotateX: 15, scale: 1.08 }}
+              className="logo-cube d-flex align-items-center justify-content-center"
+            >
               <i className="bi bi-box-fill text-white fs-5"></i>
-            </div>
+            </motion.div>
             <div>
               <span className="fw-bold fs-5 text-dark tracking-tight d-block leading-tight">Enterprise EMS</span>
-              <small className="text-muted" style={{ fontSize: "11px", letterSpacing: "0.5px" }}>Workforce Excellence</small>
+              <small className="text-muted" style={{ fontSize: "11px", letterSpacing: "0.5px" }}>
+                Workforce Excellence
+              </small>
             </div>
           </Link>
 
-          {/* Nav Menu */}
-          <div className="d-none d-lg-flex align-items-center gap-4">
-            <a className="nav-link text-secondary fw-semibold d-flex align-items-center gap-1 cursor-pointer" href="#features">
-              Features <i className="bi bi-chevron-down small"></i>
-            </a>
-            <a className="nav-link text-secondary fw-semibold d-flex align-items-center gap-1 cursor-pointer" href="#solutions">
-              Solutions <i className="bi bi-chevron-down small"></i>
-            </a>
-            <a className="nav-link text-secondary fw-semibold d-flex align-items-center gap-1 cursor-pointer" href="#resources">
-              Resources <i className="bi bi-chevron-down small"></i>
-            </a>
-            <a className="nav-link text-secondary fw-semibold" href="#pricing">Pricing</a>
-            <a className="nav-link text-secondary fw-semibold" href="#about">About Us</a>
+          {/* Interactive Stack Navigation Toggles with Spring Pill */}
+          <div className="d-none d-lg-flex align-items-center gap-1 bg-slate-100 p-1 rounded-pill border shadow-2xs position-relative">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => handleNavToggle(item.id)}
+                className={`nav-toggle-btn d-flex align-items-center gap-1.5 ${
+                  activeNavSection === item.id ? "active" : ""
+                }`}
+              >
+                {activeNavSection === item.id && (
+                  <motion.div
+                    layoutId="activeNavIndicator"
+                    className="nav-toggle-active-bg"
+                    transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                  />
+                )}
+                <i className={`bi ${item.icon} small`}></i>
+                <span>{item.label}</span>
+              </button>
+            ))}
           </div>
 
           {/* Action Buttons */}
           <div className="d-flex align-items-center gap-2">
-            <Link to="/login" className="btn btn-outline-secondary px-3.5 py-2 rounded-3 fw-semibold d-flex align-items-center gap-2 shadow-xs">
-              <i className="bi bi-person"></i>
-              <span>Login</span>
-            </Link>
-            <Link to="/signup" className="btn btn-gradient-primary px-4 py-2 rounded-3 fw-semibold d-flex align-items-center gap-2 shadow-sm text-white">
-              <i className="bi bi-person-plus-fill"></i>
-              <span>Sign Up</span>
-            </Link>
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+              <Link
+                to="/login"
+                className="btn btn-outline-secondary px-3.5 py-2 rounded-3 fw-semibold d-flex align-items-center gap-2 shadow-xs"
+              >
+                <i className="bi bi-person"></i>
+                <span>Login</span>
+              </Link>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+              <Link
+                to="/signup"
+                className="btn btn-gradient-primary px-4 py-2 rounded-3 fw-semibold d-flex align-items-center gap-2 shadow-sm text-white"
+              >
+                <i className="bi bi-person-plus-fill"></i>
+                <span>Sign Up</span>
+              </Link>
+            </motion.div>
           </div>
         </div>
       </nav>
 
-      {/* 2. HERO SECTION */}
-      <section className="position-relative pt-4 pb-5 px-3 px-lg-5 overflow-hidden hero-interactive-section">
-        {/* Interactive Dynamic Particle Constellation Network */}
-        <InteractiveBackground />
+      {/* 2. THE STACKING SECTIONS */}
 
-        {/* Animated Floating Gradient Light Orbs */}
-        <div className="ambient-orb orb-1"></div>
-        <div className="ambient-orb orb-2"></div>
-        <div className="ambient-orb orb-3"></div>
+      {/* ============================================================
+          SECTION 1: OVERVIEW & 3D LIVING DASHBOARD
+          ============================================================ */}
+      <StackingSection id="overview-sec" zIndex={1} bg="bg-white" isFirst={true}>
+        <section className="position-relative pt-4 pb-5 px-3 px-lg-5 overflow-hidden hero-interactive-section">
+          <InteractiveBackground />
 
-        <div className="container-fluid p-0 position-relative z-1">
-          <div className="row align-items-center g-5">
-            {/* Left Content Column */}
-            <div className="col-12 col-xl-5">
-              {/* Trust Badge */}
-              <div className="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill bg-purple-soft text-purple-deep mb-4 border border-purple-subtle shadow-2xs animate-fade-in">
-                <i className="bi bi-patch-check-fill fs-6 text-primary"></i>
-                <span className="small fw-semibold">Trusted by 1000+ Organizations Worldwide</span>
-              </div>
+          <div className="ambient-orb orb-1"></div>
+          <div className="ambient-orb orb-2"></div>
+          <div className="ambient-orb orb-3"></div>
 
-              {/* Headline */}
-              <h1 className="hero-heading fw-extrabold text-dark tracking-tight mb-4 animate-slide-up">
-                Manage People.<br />
-                Empower Teams.<br />
-                Drive <span className="text-gradient">Excellence.</span>
-              </h1>
-
-              {/* Subtitle */}
-              <p className="hero-subtext text-secondary mb-4 leading-relaxed" style={{ fontSize: "1.1rem" }}>
-                Enterprise EMS is a next-generation workforce management platform designed to streamline operations,
-                improve collaboration, and drive organizational success.
-              </p>
-
-              {/* CTAs */}
-              <div className="d-flex flex-wrap align-items-center gap-3 mb-5">
-                <Link to="/signup" className="btn btn-gradient-primary btn-lg px-4 py-2.5 rounded-3 fw-bold d-inline-flex align-items-center gap-2 text-white shadow-md hero-btn">
-                  <span>Get Started</span>
-                  <i className="bi bi-arrow-right"></i>
-                </Link>
-                <a href="#features" className="btn btn-outline-secondary btn-lg px-4 py-2.5 rounded-3 fw-semibold d-inline-flex align-items-center gap-2 hero-btn-secondary">
-                  <span>Explore Features</span>
-                  <i className="bi bi-play-circle fs-5"></i>
-                </a>
-              </div>
-
-              {/* 3 Value Pillars */}
-              <div className="row g-3 pt-3 border-top border-light">
-                <div className="col-4">
-                  <div className="d-flex align-items-start gap-2">
-                    <div className="p-2 bg-purple-soft text-primary rounded-3 shadow-2xs">
-                      <i className="bi bi-shield-check fs-5"></i>
-                    </div>
-                    <div>
-                      <h6 className="fw-bold mb-0 text-dark small">Enterprise Secure</h6>
-                      <small className="text-muted d-block" style={{ fontSize: "11px" }}>Bank-level security for your data</small>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="col-4">
-                  <div className="d-flex align-items-start gap-2">
-                    <div className="p-2 bg-primary bg-opacity-10 text-primary rounded-3 shadow-2xs">
-                      <i className="bi bi-lightning-charge-fill fs-5"></i>
-                    </div>
-                    <div>
-                      <h6 className="fw-bold mb-0 text-dark small">Smart Automation</h6>
-                      <small className="text-muted d-block" style={{ fontSize: "11px" }}>Automate workflows and save time</small>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="col-4">
-                  <div className="d-flex align-items-start gap-2">
-                    <div className="p-2 bg-info bg-opacity-10 text-info rounded-3 shadow-2xs">
-                      <i className="bi bi-people-fill fs-5"></i>
-                    </div>
-                    <div>
-                      <h6 className="fw-bold mb-0 text-dark small">People-Centric</h6>
-                      <small className="text-muted d-block" style={{ fontSize: "11px" }}>Empower your teams to do their best</small>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: 3D Pop-Out Interactive Dashboard Showcase */}
-            <div className="col-12 col-xl-7">
-              <div className="showcase-3d-wrapper position-relative">
-                {/* Floating Interactive Badge */}
-                <div className="showcase-floating-tag badge bg-dark text-white px-3 py-1.5 rounded-pill shadow-lg d-inline-flex align-items-center gap-1.5">
+          <div className="container-fluid p-0 position-relative z-1">
+            <div className="row align-items-center g-4">
+              {/* Hero Content */}
+              <div className="col-12 col-xl-5">
+                <div className="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill bg-purple-soft text-purple-deep mb-3 border border-purple-subtle shadow-2xs hover-scale transition-all cursor-pointer">
                   <span className="pulse-dot"></span>
-                  <small className="fw-bold">Interactive Live Preview (Hover graphs & bars!)</small>
+                  <span className="small fw-semibold">Trusted by 1000+ Organizations Worldwide</span>
                 </div>
 
-                {/* THE 3D POP-OUT CARD */}
-                <div className="showcase-dashboard-card rounded-4 shadow-2xl overflow-hidden border border-slate-200 bg-white">
-                  <div className="d-flex flex-row" style={{ minHeight: "560px" }}>
-                    {/* Mock Dark Sidebar */}
-                    <div className="mock-sidebar p-3 d-flex flex-column justify-content-between text-white" style={{ width: "210px", background: "#0b1329" }}>
-                      <div>
-                        {/* Sidebar Brand */}
-                        <div className="d-flex align-items-center gap-2 mb-4 px-2">
-                          <div className="logo-cube-sm d-flex align-items-center justify-content-center">
-                            <i className="bi bi-box-fill text-white fs-6"></i>
-                          </div>
-                          <div>
-                            <span className="fw-bold text-white small d-block">Enterprise EMS</span>
-                            <small className="text-white-50" style={{ fontSize: "9px" }}>Workforce Excellence</small>
-                          </div>
+                <h1 className="hero-heading fw-extrabold text-dark tracking-tight mb-3">
+                  Manage People.<br />
+                  Empower Teams.<br />
+                  Drive{" "}
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={words[wordIndex]}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.28 }}
+                      className="text-gradient d-inline-block"
+                    >
+                      {words[wordIndex]}
+                    </motion.span>
+                  </AnimatePresence>
+                </h1>
+
+                <p className="hero-subtext text-secondary mb-4 leading-relaxed" style={{ fontSize: "1.05rem" }}>
+                  Enterprise EMS is the all-in-one workforce operating system built with dedicated roles for{" "}
+                  <strong className="text-dark">HR Admins</strong>, <strong className="text-dark">Managers</strong>,{" "}
+                  <strong className="text-dark">Supervisors</strong>, and <strong className="text-dark">Staff</strong>.
+                </p>
+
+                <div className="d-flex flex-wrap align-items-center gap-3 mb-4">
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
+                    <Link
+                      to="/signup"
+                      className="btn btn-gradient-primary btn-lg px-4 py-2 rounded-3 fw-bold d-inline-flex align-items-center gap-2 text-white shadow-md hero-btn"
+                    >
+                      <span>Get Started Free</span>
+                      <i className="bi bi-arrow-right"></i>
+                    </Link>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                    <button
+                      type="button"
+                      onClick={() => handleNavToggle("roles-sec")}
+                      className="btn btn-outline-secondary btn-lg px-4 py-2 rounded-3 fw-semibold d-inline-flex align-items-center gap-2 hero-btn-secondary hover-lift"
+                    >
+                      <span>Explore Next Layer</span>
+                      <i className="bi bi-arrow-down fs-6"></i>
+                    </button>
+                  </motion.div>
+                </div>
+
+                {/* 3 Value Pillars */}
+                <div className="row g-2 pt-3 border-top border-light">
+                  {[
+                    { title: "Enterprise Secure", desc: "Bank-level bcrypt & JWT security", icon: "bi-shield-check", color: "text-primary bg-purple-soft" },
+                    { title: "Smart Automation", desc: "Two-tier approvals & task sync", icon: "bi-lightning-charge-fill", color: "text-success bg-success bg-opacity-10" },
+                    { title: "People-Centric", desc: "Custom portals for every employee", icon: "bi-people-fill", color: "text-info bg-info bg-opacity-10" }
+                  ].map((pillar) => (
+                    <div key={pillar.title} className="col-4">
+                      <motion.div
+                        whileHover={{ y: -3, scale: 1.02 }}
+                        className="d-flex align-items-start gap-1.5 p-1 rounded-3 hover-bg transition-all cursor-pointer"
+                      >
+                        <div className={`p-1.5 rounded-2 shadow-2xs ${pillar.color}`}>
+                          <i className={`bi ${pillar.icon} fs-6`}></i>
                         </div>
-
-                        {/* Sidebar Nav Items */}
-                        <ul className="nav nav-pills flex-column gap-1 list-unstyled p-0 m-0">
-                          {[
-                            { name: "Dashboard", icon: "bi-speedometer2" },
-                            { name: "Departments", icon: "bi-building" },
-                            { name: "User Directory", icon: "bi-people" },
-                            { name: "Team Hierarchy", icon: "bi-diagram-3" },
-                            { name: "Projects", icon: "bi-kanban" },
-                            { name: "Reports & Analytics", icon: "bi-graph-up" },
-                            { name: "Requests", icon: "bi-inbox" },
-                            { name: "Payroll", icon: "bi-cash-stack" },
-                            { name: "System Settings", icon: "bi-gear" },
-                            { name: "Audit Logs", icon: "bi-shield-shaded" }
-                          ].map((item) => (
-                            <li key={item.name}>
-                              <button
-                                type="button"
-                                onClick={(e) => { e.stopPropagation(); setActiveTab(item.name); }}
-                                className={`w-100 text-start d-flex align-items-center gap-2 px-2.5 py-1.5 rounded-2 text-white border-0 transition-all ${
-                                  activeTab === item.name ? "bg-primary fw-bold shadow-xs scale-102" : "bg-transparent text-white-50 hover-light"
-                                }`}
-                                style={{ fontSize: "11px", transition: "all 0.2s ease" }}
-                              >
-                                <i className={`bi ${item.icon}`}></i>
-                                <span>{item.name}</span>
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      {/* Sidebar Footer System Status */}
-                      <div className="p-2 rounded mt-3" style={{ background: "rgba(255, 255, 255, 0.08)", border: "1px solid rgba(255, 255, 255, 0.12)" }}>
-                        <div className="d-flex align-items-center justify-content-between">
-                          <div className="d-flex align-items-center gap-1.5">
-                            <span className="badge bg-success p-1 rounded-circle pulse-dot-green"></span>
-                            <small className="text-white fw-semibold" style={{ fontSize: "10px" }}>System Status</small>
-                          </div>
-                          <i className="bi bi-chevron-right text-white-50 small"></i>
-                        </div>
-                        <small className="text-white-50 d-block" style={{ fontSize: "9px" }}>All systems operational</small>
-                      </div>
-                    </div>
-
-                    {/* Mock Main Dashboard Body */}
-                    <div className="mock-body flex-grow-1 p-3 bg-slate-50 overflow-hidden d-flex flex-column gap-3">
-                      {/* Mock Topbar */}
-                      <div className="d-flex justify-content-between align-items-center pb-2 border-bottom border-light">
                         <div>
-                          <h6 className="fw-bold mb-0 text-dark d-flex align-items-center gap-1.5">
-                            Good morning, Shubh Singh! 👋
-                          </h6>
-                          <small className="text-muted" style={{ fontSize: "11px" }}>Here's what's happening in your organization today.</small>
+                          <h6 className="fw-bold mb-0 text-dark" style={{ fontSize: "11px" }}>{pillar.title}</h6>
+                          <small className="text-muted d-block" style={{ fontSize: "10px" }}>{pillar.desc}</small>
                         </div>
-                        <div className="d-flex align-items-center gap-2">
-                          <div className="d-none d-md-flex align-items-center gap-1.5 bg-white px-2.5 py-1 rounded-pill border shadow-2xs hover-border-primary transition-all">
-                            <i className="bi bi-search text-muted small"></i>
-                            <input type="text" placeholder="Search employees, departments..." className="border-0 bg-transparent small outline-none" style={{ width: "160px", fontSize: "11px" }} readOnly />
-                            <kbd className="bg-light text-muted border px-1 rounded small" style={{ fontSize: "9px" }}>⌘K</kbd>
-                          </div>
-                          <div className="position-relative p-1.5 bg-white rounded-circle border shadow-2xs hover-scale transition-all cursor-pointer">
-                            <i className="bi bi-bell text-secondary"></i>
-                            <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{ fontSize: "8px" }}>1</span>
-                          </div>
-                          <div className="d-flex align-items-center gap-1.5 bg-white p-1 rounded-pill border shadow-2xs hover-lift transition-all">
-                            <div className="bg-primary text-white rounded-circle fw-bold d-flex align-items-center justify-content-center" style={{ width: "24px", height: "24px", fontSize: "10px" }}>
-                              S
-                            </div>
-                            <div className="pe-2 text-start">
-                              <small className="fw-bold text-dark d-block leading-none" style={{ fontSize: "10px" }}>Shubh Singh</small>
-                              <small className="text-muted leading-none" style={{ fontSize: "8px" }}>HR Super Admin</small>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      </motion.div>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-                      {/* 4 Stat Cards Row with Active Hover Animations */}
-                      <div className="row g-2">
-                        {[
-                          { id: 1, label: "Total Employees", val: "248", change: "↑ 12% from last month", isUp: true, icon: "bi-people", color: "purple" },
-                          { id: 2, label: "Departments", val: "18", change: "↑ 2 new this month", isUp: true, icon: "bi-building", color: "blue" },
-                          { id: 3, label: "Active Projects", val: "32", change: "↑ 8 in progress", isUp: true, icon: "bi-kanban", color: "green" },
-                          { id: 4, label: "Total Payroll", val: "$1.24M", change: "↑ 8.5% from last month", isUp: true, icon: "bi-cash-stack", color: "orange" }
-                        ].map((stat) => (
-                          <div key={stat.id} className="col-3">
-                            <div
-                              className={`card border-0 p-2 rounded-3 bg-white transition-all stat-card-interactive ${
-                                hoveredStat === stat.id ? "stat-card-active shadow-md" : "shadow-xs"
-                              }`}
-                              onMouseEnter={() => setHoveredStat(stat.id)}
-                              onMouseLeave={() => setHoveredStat(null)}
-                            >
-                              <div className="d-flex justify-content-between align-items-start">
-                                <div>
-                                  <small className="text-muted fw-semibold" style={{ fontSize: "10px" }}>{stat.label}</small>
-                                  <h5 className={`fw-bold mb-0 text-dark transition-all ${hoveredStat === stat.id ? "text-primary scale-105" : ""}`}>
-                                    {stat.val}
-                                  </h5>
-                                  <small className="text-success fw-bold d-block" style={{ fontSize: "9px" }}>{stat.change}</small>
-                                </div>
-                                <div className={`p-1.5 rounded-circle transition-all stat-icon-badge ${stat.color} ${hoveredStat === stat.id ? "rotate-12 scale-110" : ""}`}>
-                                  <i className={`bi ${stat.icon}`} style={{ fontSize: "12px" }}></i>
-                                </div>
-                              </div>
+              {/* 3D Dashboard Showcase */}
+              <div className="col-12 col-xl-7">
+                <div className="showcase-3d-wrapper position-relative">
+                  <div className="showcase-dashboard-card rounded-4 shadow-2xl overflow-hidden border border-slate-200 bg-white">
+                    <div className="d-flex flex-row" style={{ minHeight: "530px" }}>
+                      {/* Dark Sidebar */}
+                      <div className="mock-sidebar p-3 d-flex flex-column justify-content-between text-white" style={{ width: "200px", background: "#0b1329" }}>
+                        <div>
+                          <div className="d-flex align-items-center gap-2 mb-3 px-1">
+                            <div className="logo-cube-sm d-flex align-items-center justify-content-center">
+                              <i className="bi bi-box-fill text-white fs-6"></i>
+                            </div>
+                            <div>
+                              <span className="fw-bold text-white small d-block">Enterprise EMS</span>
+                              <small className="text-white-50" style={{ fontSize: "9px" }}>Workforce Excellence</small>
                             </div>
                           </div>
-                        ))}
-                      </div>
 
-                      {/* Middle Row: Interactive Area Chart + Approvals */}
-                      <div className="row g-2">
-                        {/* Workforce Overview Chart Card */}
-                        <div className="col-8">
-                          <div
-                            className={`card border-0 shadow-xs p-2.5 rounded-3 bg-white h-100 transition-all chart-container-card ${
-                              isGraphHovered ? "chart-card-glow" : ""
-                            }`}
-                            onMouseEnter={() => setIsGraphHovered(true)}
-                            onMouseLeave={() => setIsGraphHovered(false)}
-                          >
-                            <div className="d-flex justify-content-between align-items-center mb-1">
-                              <div className="d-flex align-items-center gap-2">
-                                <h6 className="fw-bold mb-0 text-dark" style={{ fontSize: "12px" }}>Workforce Overview</h6>
-                                {isGraphHovered && (
-                                  <span className="badge bg-purple-soft text-primary animate-fade-in" style={{ fontSize: "9px" }}>
-                                    ● {currentPoint.date}: {currentPoint.count} Staff ({currentPoint.change})
-                                  </span>
-                                )}
-                              </div>
-                              <div className="dropdown">
+                          <ul className="nav nav-pills flex-column gap-1 list-unstyled p-0 m-0">
+                            {[
+                              { name: "Dashboard", icon: "bi-speedometer2" },
+                              { name: "Departments", icon: "bi-building" },
+                              { name: "User Directory", icon: "bi-people" },
+                              { name: "Hierarchy", icon: "bi-diagram-3" },
+                              { name: "Projects", icon: "bi-kanban" },
+                              { name: "Reports", icon: "bi-graph-up" },
+                              { name: "Payroll", icon: "bi-cash-stack" }
+                            ].map((item) => (
+                              <li key={item.name}>
                                 <button
-                                  className="btn btn-sm btn-light border py-0 px-2 fw-semibold text-dark dropdown-toggle"
-                                  style={{ fontSize: "9px" }}
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    const next = graphTimeframe === "This Month" ? "This Quarter" : graphTimeframe === "This Quarter" ? "This Year" : "This Month";
-                                    setGraphTimeframe(next);
+                                    setActiveSidebarTab(item.name);
                                   }}
+                                  className={`w-100 text-start d-flex align-items-center gap-2 px-2.5 py-1.5 rounded-2 text-white border-0 transition-all ${
+                                    activeSidebarTab === item.name
+                                      ? "bg-primary fw-bold shadow-xs scale-102"
+                                      : "bg-transparent text-white-50 hover-light"
+                                  }`}
+                                  style={{ fontSize: "11px" }}
                                 >
-                                  {graphTimeframe}
+                                  <i className={`bi ${item.icon}`}></i>
+                                  <span>{item.name}</span>
                                 </button>
-                              </div>
-                            </div>
-
-                            {/* Simulated Interactive Area Chart SVG with Hover Nodes & Guides */}
-                            <div className="position-relative w-100 my-1 cursor-crosshair" style={{ height: "115px" }}>
-                              {/* Hover Floating Tooltip */}
-                              {isGraphHovered && (
-                                <div
-                                  className="position-absolute bg-dark text-white px-2 py-1 rounded shadow-lg pointer-events-none transition-all"
-                                  style={{
-                                    left: `${(currentPoint.x / 400) * 100}%`,
-                                    top: `${(currentPoint.y / 120) * 100 - 32}%`,
-                                    transform: "translate(-50%, -100%)",
-                                    fontSize: "10px",
-                                    whiteSpace: "nowrap",
-                                    zIndex: 5
-                                  }}
-                                >
-                                  <span className="fw-bold">{currentPoint.count} Employees</span>
-                                  <small className="text-success ms-1">({currentPoint.change})</small>
-                                </div>
-                              )}
-
-                              <svg viewBox="0 0 400 120" className="w-100 h-100 overflow-visible">
-                                <defs>
-                                  <linearGradient id="chartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                                    <stop offset="0%" stopColor="#6366f1" stopOpacity={isGraphHovered ? "0.48" : "0.32"} />
-                                    <stop offset="100%" stopColor="#6366f1" stopOpacity="0.0" />
-                                  </linearGradient>
-                                </defs>
-
-                                {/* Grid lines */}
-                                <line x1="0" y1="30" x2="400" y2="30" stroke="#f1f5f9" strokeWidth="1" />
-                                <line x1="0" y1="60" x2="400" y2="60" stroke="#f1f5f9" strokeWidth="1" />
-                                <line x1="0" y1="90" x2="400" y2="90" stroke="#f1f5f9" strokeWidth="1" />
-
-                                {/* Area Fill with pulse animation */}
-                                <path
-                                  d="M0,85 Q50,75 100,65 T190,72 T285,45 T375,52 L400,60 L400,120 L0,120 Z"
-                                  fill="url(#chartGrad)"
-                                  className="chart-area-path"
-                                />
-
-                                {/* Animated Glowing Wave Line */}
-                                <path
-                                  d="M0,85 Q50,75 100,65 T190,72 T285,45 T375,52 L400,60"
-                                  fill="none"
-                                  stroke="#6366f1"
-                                  strokeWidth={isGraphHovered ? "3.2" : "2.5"}
-                                  strokeLinecap="round"
-                                  className={`transition-all ${isGraphHovered ? "chart-wave-glow" : ""}`}
-                                />
-
-                                {/* Vertical dashed hover guide line */}
-                                {isGraphHovered && (
-                                  <line
-                                    x1={currentPoint.x}
-                                    y1={currentPoint.y}
-                                    x2={currentPoint.x}
-                                    y2="120"
-                                    stroke="#818cf8"
-                                    strokeWidth="1.5"
-                                    strokeDasharray="3 3"
-                                  />
-                                )}
-
-                                {/* Interactive Hover Nodes along Wave */}
-                                {graphPoints.map((pt) => (
-                                  <g key={pt.index} onMouseEnter={() => setActiveGraphPoint(pt)}>
-                                    {/* Invisible larger hover hit area */}
-                                    <circle cx={pt.x} cy={pt.y} r="16" fill="transparent" className="cursor-pointer" />
-                                    {/* Visible node circle */}
-                                    <circle
-                                      cx={pt.x}
-                                      cy={pt.y}
-                                      r={currentPoint.index === pt.index ? "6" : "3.5"}
-                                      fill={currentPoint.index === pt.index ? "#ffffff" : "#6366f1"}
-                                      stroke="#6366f1"
-                                      strokeWidth={currentPoint.index === pt.index ? "3" : "1.5"}
-                                      className="transition-all"
-                                    />
-                                    {currentPoint.index === pt.index && (
-                                      <circle cx={pt.x} cy={pt.y} r="12" fill="#6366f1" opacity="0.25" className="pulse-ring" />
-                                    )}
-                                  </g>
-                                ))}
-                              </svg>
-                            </div>
-
-                            {/* 4 Mini metrics at bottom of chart with hover feedback */}
-                            <div className="row g-1 pt-2 border-top border-light">
-                              {[
-                                { title: "New Hires", val: "15", badge: "↑ 28%", badgeColor: "text-success" },
-                                { title: "Attrition Rate", val: "2.4%", badge: "↓ -0.8%", badgeColor: "text-danger" },
-                                { title: "Avg. Tenure", val: "2.8 Yrs", badge: "↑ 0.6", badgeColor: "text-primary" },
-                                { title: "Satisfaction", val: "4.6/5", badge: "★ 0.3", badgeColor: "text-success" }
-                              ].map((m, idx) => (
-                                <div key={m.title} className="col-3">
-                                  <div
-                                    className="p-1 bg-light rounded text-center transition-all hover-lift hover-bg cursor-pointer"
-                                    onMouseEnter={() => {
-                                      if (graphPoints[idx]) setActiveGraphPoint(graphPoints[idx]);
-                                    }}
-                                  >
-                                    <small className="text-muted d-block" style={{ fontSize: "8px" }}>{m.title}</small>
-                                    <strong className="text-dark d-block" style={{ fontSize: "10px" }}>
-                                      {m.val} <span className={m.badgeColor} style={{ fontSize: "8px" }}>{m.badge}</span>
-                                    </strong>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
+                              </li>
+                            ))}
+                          </ul>
                         </div>
 
-                        {/* Pending Approvals Card with interactive list hover */}
-                        <div className="col-4">
-                          <div className="card border-0 shadow-xs p-2.5 rounded-3 bg-white h-100">
-                            <h6 className="fw-bold mb-2 text-dark" style={{ fontSize: "12px" }}>
-                              Pending Approvals <i className="bi bi-info-circle text-muted small"></i>
-                            </h6>
-                            <div className="d-flex flex-column gap-1.5">
-                              {[
-                                { id: 1, title: "Leave Requests", count: "3 pending requests", icon: "bi-calendar-check", color: "text-danger bg-danger" },
-                                { id: 2, title: "Department Changes", count: "1 pending request", icon: "bi-diagram-3", color: "text-info bg-info" },
-                                { id: 3, title: "Team Assignments", count: "1 pending request", icon: "bi-person-badge", color: "text-primary bg-primary" },
-                                { id: 4, title: "Salary Approvals", count: "2 pending requests", icon: "bi-cash", color: "text-warning bg-warning" }
-                              ].map((item) => (
-                                <div
-                                  key={item.id}
-                                  className={`d-flex justify-content-between align-items-center p-1.5 rounded transition-all cursor-pointer ${
-                                    hoveredApproval === item.id ? "bg-light shadow-2xs translate-x-2" : "bg-light border border-light"
-                                  }`}
-                                  onMouseEnter={() => setHoveredApproval(item.id)}
-                                  onMouseLeave={() => setHoveredApproval(null)}
-                                >
-                                  <div className="d-flex align-items-center gap-1.5">
-                                    <div className={`p-1 rounded ${item.color} bg-opacity-10 transition-all ${hoveredApproval === item.id ? "scale-110" : ""}`}>
-                                      <i className={`bi ${item.icon}`} style={{ fontSize: "10px" }}></i>
-                                    </div>
-                                    <div>
-                                      <span className="fw-bold text-dark d-block leading-none" style={{ fontSize: "10px" }}>{item.title}</span>
-                                      <small className="text-muted" style={{ fontSize: "8px" }}>{item.count}</small>
-                                    </div>
-                                  </div>
-                                  <i className={`bi bi-chevron-right text-muted transition-all ${hoveredApproval === item.id ? "text-primary translate-x-1" : ""}`} style={{ fontSize: "9px" }}></i>
-                                </div>
-                              ))}
+                        <div className="p-2 rounded mt-2" style={{ background: "rgba(255, 255, 255, 0.08)", border: "1px solid rgba(255, 255, 255, 0.12)" }}>
+                          <div className="d-flex align-items-center justify-content-between">
+                            <div className="d-flex align-items-center gap-1.5">
+                              <span className="pulse-dot-green"></span>
+                              <small className="text-white fw-semibold" style={{ fontSize: "10px" }}>System Status</small>
                             </div>
+                            <span className="badge bg-success bg-opacity-25 text-success small" style={{ fontSize: "8px" }}>Live</span>
                           </div>
+                          <small className="text-white-50 d-block mt-0.5" style={{ fontSize: "9px" }}>
+                            All services active • {currentTime}
+                          </small>
                         </div>
                       </div>
 
-                      {/* Bottom Row: Top Departments Progress Bars & Circle Donut with FULL HOVER ANIMATIONS */}
-                      <div className="card border-0 shadow-xs p-2.5 rounded-3 bg-white">
-                        <div className="d-flex justify-content-between align-items-center mb-2">
-                          <div className="d-flex align-items-center gap-2">
-                            <h6 className="fw-bold mb-0 text-dark" style={{ fontSize: "12px" }}>Top Departments</h6>
-                            {hoveredDept && (
-                              <span className="badge bg-primary bg-opacity-10 text-primary animate-fade-in" style={{ fontSize: "9px" }}>
-                                {hoveredDept.name}: {hoveredDept.count} Employees ({Math.round((hoveredDept.count / 229) * 100)}%)
-                              </span>
-                            )}
+                      {/* Dashboard Main Body */}
+                      <div className="mock-body flex-grow-1 p-3 bg-slate-50 overflow-hidden d-flex flex-column gap-2.5 position-relative">
+                        <div className="d-flex justify-content-between align-items-center pb-2 border-bottom border-light">
+                          <div>
+                            <h6 className="fw-bold mb-0 text-dark d-flex align-items-center gap-1.5" style={{ fontSize: "13px" }}>
+                              {getGreeting()}, Shubh Singh! 👋
+                            </h6>
+                            <small className="text-muted" style={{ fontSize: "10px" }}>
+                              Viewing module: <span className="text-primary fw-semibold">{activeSidebarTab}</span>
+                            </small>
                           </div>
-                          <span className="text-primary small fw-semibold cursor-pointer hover-underline" style={{ fontSize: "10px" }}>View All</span>
+
+                          <div className="d-flex align-items-center gap-2">
+                            <div className="d-none d-md-flex align-items-center gap-1 bg-white px-2 py-1 rounded-pill border shadow-2xs">
+                              <i className="bi bi-search text-muted small"></i>
+                              <input
+                                type="text"
+                                placeholder="Filter departments..."
+                                className="border-0 bg-transparent small outline-none"
+                                style={{ width: "130px", fontSize: "10px" }}
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                              />
+                            </div>
+
+                            <div
+                              className="position-relative p-1.5 bg-white rounded-circle border shadow-2xs cursor-pointer hover-scale transition-all"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setNotifOpen(!notifOpen);
+                              }}
+                            >
+                              <i className="bi bi-bell text-secondary small"></i>
+                              {unreadNotifs > 0 && (
+                                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{ fontSize: "7px" }}>
+                                  {unreadNotifs}
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="d-flex align-items-center gap-1.5 bg-white p-1 rounded-pill border shadow-2xs">
+                              <div className="bg-primary text-white rounded-circle fw-bold d-flex align-items-center justify-content-center" style={{ width: "22px", height: "22px", fontSize: "9px" }}>
+                                S
+                              </div>
+                              <div className="pe-1 text-start">
+                                <small className="fw-bold text-dark d-block leading-none" style={{ fontSize: "9px" }}>Shubh Singh</small>
+                                <small className="text-success leading-none fw-semibold" style={{ fontSize: "7px" }}>Online 🟢</small>
+                              </div>
+                            </div>
+                          </div>
                         </div>
 
-                        <div className="row align-items-center">
-                          {/* PROGRESS BARS WITH VIBRANT HOVER ANIMATION */}
-                          <div className="col-8">
-                            <div className="d-flex flex-column gap-1.5">
-                              {[
-                                { name: "Engineering", count: 86, color: "bg-primary", glow: "#3b82f6", pct: 38 },
-                                { name: "Marketing", count: 45, color: "bg-purple", glow: "#8b5cf6", pct: 20 },
-                                { name: "Sales", count: 38, color: "bg-info", glow: "#06b6d4", pct: 17 },
-                                { name: "Human Resources", count: 32, color: "bg-success", glow: "#10b981", pct: 14 },
-                                { name: "Finance", count: 28, color: "bg-warning", glow: "#f59e0b", pct: 11 }
-                              ].map((d) => (
-                                <div
-                                  key={d.name}
-                                  className={`d-flex align-items-center gap-2 p-1 rounded transition-all cursor-pointer ${
-                                    hoveredDept?.name === d.name ? "bg-slate-100 shadow-2xs" : ""
+                        {/* 4 Stat Cards */}
+                        <div className="row g-2">
+                          {[
+                            { id: "employees", label: "Total Staff", val: "248", change: "↑ 12%", icon: "bi-people", color: "purple" },
+                            { id: "departments", label: "Units", val: "18", change: "↑ 2 new", icon: "bi-building", color: "blue" },
+                            { id: "projects", label: "Active Projects", val: "32", change: "↑ 8 active", icon: "bi-kanban", color: "green" },
+                            { id: "payroll", label: "Payroll", val: "$1.24M", change: "↑ 8.5%", icon: "bi-cash-stack", color: "orange" }
+                          ].map((stat) => (
+                            <div key={stat.id} className="col-3">
+                              <motion.div
+                                whileHover={{ y: -3, scale: 1.02 }}
+                                onClick={() => setSelectedStat(stat.id)}
+                                className={`card border-0 p-1.5 rounded-3 bg-white transition-all stat-card-interactive ${
+                                  selectedStat === stat.id ? "stat-card-active shadow-md" : "shadow-xs"
+                                }`}
+                              >
+                                <small className="text-muted fw-semibold d-block" style={{ fontSize: "9px" }}>{stat.label}</small>
+                                <h6 className="fw-bold mb-0 text-dark" style={{ fontSize: "13px" }}>{stat.val}</h6>
+                                <small className="text-success fw-bold d-block" style={{ fontSize: "8px" }}>{stat.change}</small>
+                              </motion.div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Area Chart */}
+                        <div className="card border-0 shadow-xs p-2 rounded-3 bg-white">
+                          <div className="d-flex justify-content-between align-items-center mb-1">
+                            <div className="d-flex align-items-center gap-1.5">
+                              <strong className="text-dark small" style={{ fontSize: "11px" }}>Workforce Trend</strong>
+                              <span className="badge bg-purple-soft text-primary" style={{ fontSize: "8px" }}>
+                                ● {activePt.label}: {activePt.count} Staff
+                              </span>
+                            </div>
+                            <div className="d-flex gap-1 bg-light p-0.5 rounded border">
+                              {["Today", "This Week", "This Month", "This Year"].map((tf) => (
+                                <button
+                                  key={tf}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setGraphTimeframe(tf);
+                                  }}
+                                  className={`btn btn-xs py-0 px-1 border-0 rounded ${
+                                    graphTimeframe === tf ? "bg-white fw-bold text-primary shadow-xs" : "text-muted"
                                   }`}
-                                  onMouseEnter={() => setHoveredDept(d)}
-                                  onMouseLeave={() => setHoveredDept(null)}
+                                  style={{ fontSize: "8px" }}
                                 >
-                                  <small className={`text-truncate transition-all ${hoveredDept?.name === d.name ? "fw-bold text-dark" : "text-muted"}`} style={{ width: "95px", fontSize: "10px" }}>
-                                    {d.name}
-                                  </small>
-                                  {/* THE ANIMATED EXPANDING BAR */}
-                                  <div className="progress flex-grow-1 position-relative overflow-hidden" style={{ height: hoveredDept?.name === d.name ? "8px" : "6px", transition: "height 0.25s ease" }}>
-                                    <div
-                                      className={`progress-bar ${d.color} ${hoveredDept?.name === d.name ? "progress-bar-glow progress-bar-striped progress-bar-animated" : ""}`}
-                                      style={{
-                                        width: `${(d.count / 86) * 100}%`,
-                                        boxShadow: hoveredDept?.name === d.name ? `0 0 10px ${d.glow}` : "none",
-                                        transition: "width 0.4s ease, box-shadow 0.25s ease"
-                                      }}
-                                    ></div>
-                                  </div>
-                                  <small className={`fw-bold transition-all ${hoveredDept?.name === d.name ? "text-primary scale-110" : "text-dark"}`} style={{ width: "22px", fontSize: "10px" }}>
-                                    {d.count}
-                                  </small>
-                                </div>
+                                  {tf}
+                                </button>
                               ))}
                             </div>
                           </div>
 
-                          {/* THE CIRCLE / DONUT CHART WITH HOVER PULSE & ROTATION */}
-                          <div className="col-4 text-center">
-                            <div
-                              className={`position-relative d-inline-block transition-all cursor-pointer donut-interactive-wrapper ${
-                                isCircleHovered ? "donut-hovered scale-110" : ""
-                              }`}
-                              onMouseEnter={() => setIsCircleHovered(true)}
-                              onMouseLeave={() => setIsCircleHovered(false)}
-                            >
-                              <svg width="72" height="72" viewBox="0 0 36 36" className="circular-chart">
-                                <path
-                                  className="circle-bg"
-                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                  fill="none"
-                                  stroke="#e2e8f0"
-                                  strokeWidth="3.8"
+                          <div className="position-relative w-100 my-1 cursor-crosshair" style={{ height: "105px" }}>
+                            <svg viewBox="0 0 400 120" className="w-100 h-100 overflow-visible">
+                              <defs>
+                                <linearGradient id="stackChartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                  <stop offset="0%" stopColor="#6366f1" stopOpacity="0.45" />
+                                  <stop offset="100%" stopColor="#6366f1" stopOpacity="0.0" />
+                                </linearGradient>
+                              </defs>
+                              <path d={activeCurve.path} fill="url(#stackChartGrad)" />
+                              <path d={activeCurve.line} fill="none" stroke="#6366f1" strokeWidth="2.8" strokeLinecap="round" />
+                              {activeCurve.points.map((pt) => (
+                                <circle
+                                  key={pt.index}
+                                  cx={pt.x}
+                                  cy={pt.y}
+                                  r={activePt.index === pt.index ? "5.5" : "3"}
+                                  fill={activePt.index === pt.index ? "#ffffff" : "#6366f1"}
+                                  stroke="#6366f1"
+                                  strokeWidth="2"
                                 />
-                                <path
-                                  className={`circle ${isCircleHovered ? "circle-animated-dash" : ""}`}
-                                  strokeDasharray={isCircleHovered ? "88, 100" : "80, 100"}
-                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                  fill="none"
-                                  stroke={isCircleHovered ? "#4f46e5" : "#6366f1"}
-                                  strokeWidth={isCircleHovered ? "4.6" : "3.8"}
-                                  strokeLinecap="round"
-                                  style={{
-                                    filter: isCircleHovered ? "drop-shadow(0 0 6px rgba(79, 70, 229, 0.6))" : "none",
-                                    transition: "all 0.4s ease"
-                                  }}
-                                />
-                              </svg>
+                              ))}
+                            </svg>
+                          </div>
+                        </div>
 
-                              {/* Center Number with Pulse Animation */}
-                              <div className="position-absolute top-50 start-50 translate-middle text-center pointer-events-none">
-                                <span className={`fw-bold text-dark d-block leading-none transition-all ${isCircleHovered ? "text-primary scale-115" : ""}`} style={{ fontSize: "12px" }}>
-                                  229
-                                </span>
-                                <small className="text-muted leading-none d-block" style={{ fontSize: "8px" }}>
-                                  {isCircleHovered ? "Total" : "Total"}
-                                </small>
+                        {/* Approvals + Department Progress */}
+                        <div className="row g-2">
+                          <div className="col-6">
+                            <div className="p-2 rounded bg-white shadow-xs">
+                              <strong className="text-dark d-block mb-1" style={{ fontSize: "10px" }}>Pending Approvals</strong>
+                              <div className="d-flex flex-column gap-1">
+                                <div className="d-flex justify-content-between align-items-center p-1 bg-light rounded" style={{ fontSize: "9px" }}>
+                                  <span>Leave: Alex Turner</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setApprovedItems({ ...approvedItems, 1: true })}
+                                    className="btn btn-xs btn-primary py-0 px-1 rounded"
+                                    style={{ fontSize: "8px" }}
+                                  >
+                                    {approvedItems[1] ? "✓ Done" : "Approve"}
+                                  </button>
+                                </div>
+                                <div className="d-flex justify-content-between align-items-center p-1 bg-light rounded" style={{ fontSize: "9px" }}>
+                                  <span>Salary Revision: Sarah</span>
+                                  <span className="text-muted">Pending</span>
+                                </div>
                               </div>
+                            </div>
+                          </div>
+                          <div className="col-6">
+                            <div className="p-2 rounded bg-white shadow-xs">
+                              <strong className="text-dark d-block mb-1" style={{ fontSize: "10px" }}>Top Departments</strong>
+                              {filteredDepts.slice(0, 2).map((d) => (
+                                <div key={d.name} className="mb-1">
+                                  <div className="d-flex justify-content-between" style={{ fontSize: "8px" }}>
+                                    <span>{d.name}</span>
+                                    <strong>{d.count}</strong>
+                                  </div>
+                                  <div className="progress" style={{ height: "4px" }}>
+                                    <div className={`progress-bar ${d.color}`} style={{ width: `${(d.count / 86) * 100}%` }}></div>
+                                  </div>
+                                </div>
+                              ))}
                             </div>
                           </div>
                         </div>
@@ -584,87 +612,396 @@ const LandingPage = () => {
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </StackingSection>
 
-      {/* 3. POWERFUL FEATURES SECTION */}
-      <section id="features" className="py-5 px-3 px-lg-5 bg-slate-50 border-top border-light">
-        <div className="container-fluid p-0">
-          <div className="text-center max-w-2xl mx-auto mb-5">
-            <span className="badge bg-purple-soft text-purple-deep px-3 py-1 rounded-pill text-uppercase fw-bold mb-2 tracking-wider" style={{ fontSize: "11px" }}>
-              POWERFUL FEATURES
-            </span>
-            <h2 className="fw-extrabold text-dark tracking-tight mb-2">Everything You Need to Manage Your Workforce</h2>
-            <p className="text-secondary">Comprehensive tools designed to streamline every aspect of your workforce management</p>
-          </div>
+      {/* ============================================================
+          SECTION 2: 4-TIER ROLE PORTALS (STACKS OVER OVERVIEW)
+          ============================================================ */}
+      <StackingSection id="roles-sec" zIndex={2} bg="bg-white">
+        <section className="py-5 px-3 px-lg-5">
+          <div className="container-fluid p-0">
+            <div className="text-center max-w-2xl mx-auto mb-4">
+              <span className="badge bg-purple-soft text-purple-deep px-3 py-1 rounded-pill text-uppercase fw-bold mb-2 tracking-wider" style={{ fontSize: "11px" }}>
+                4-TIER WORKFORCE ARCHITECTURE
+              </span>
+              <h2 className="fw-extrabold text-dark tracking-tight mb-2">Dedicated Dashboards for Every Corporate Tier</h2>
+              <p className="text-secondary small">Click between roles to preview specialized toolsets, scopes, and workflows.</p>
 
-          <div className="row g-4">
-            {[
-              {
-                id: 1,
-                title: "Employee Management",
-                desc: "Complete employee lifecycle management from onboarding to offboarding.",
-                icon: "bi-people-fill",
-                bg: "bg-purple-soft text-primary"
-              },
-              {
-                id: 2,
-                title: "Department Management",
-                desc: "Organize departments, define hierarchies, and manage team structures.",
-                icon: "bi-building",
-                bg: "bg-primary bg-opacity-10 text-primary"
-              },
-              {
-                id: 3,
-                title: "Team Hierarchy",
-                desc: "Visualize reporting structures and streamline team assignments.",
-                icon: "bi-diagram-3-fill",
-                bg: "bg-success bg-opacity-10 text-success"
-              },
-              {
-                id: 4,
-                title: "Analytics & Reports",
-                desc: "Data-driven insights and comprehensive reports for better decisions.",
-                icon: "bi-graph-up-arrow",
-                bg: "bg-warning bg-opacity-10 text-warning"
-              },
-              {
-                id: 5,
-                title: "Request Management",
-                desc: "Streamline approvals for leaves, changes, and other requests.",
-                icon: "bi-inbox-fill",
-                bg: "bg-danger bg-opacity-10 text-danger"
-              },
-              {
-                id: 6,
-                title: "Payroll Management",
-                desc: "Automated payroll processing with accurate calculations and compliance.",
-                icon: "bi-cash-coin",
-                bg: "bg-info bg-opacity-10 text-info"
-              }
-            ].map((card) => (
-              <div key={card.id} className="col-12 col-md-6 col-lg-4">
-                <div
-                  className={`card border-0 rounded-4 p-4 h-100 bg-white transition-all feature-card ${
-                    hoveredCard === card.id ? "feature-card-hover" : "shadow-xs"
-                  }`}
-                  onMouseEnter={() => setHoveredCard(card.id)}
-                  onMouseLeave={() => setHoveredCard(null)}
-                >
-                  <div className={`p-3 rounded-3 d-inline-flex align-items-center justify-content-center mb-3 ${card.bg}`} style={{ width: "52px", height: "52px" }}>
-                    <i className={`bi ${card.icon} fs-4`}></i>
+              {/* Interactive Role Tabs with Spring Indicator */}
+              <div className="d-inline-flex p-1.5 bg-light rounded-pill border shadow-2xs gap-1 mt-2 position-relative">
+                {[
+                  { id: "admin", label: "👑 HR Administrator" },
+                  { id: "manager", label: "👔 Department Manager" },
+                  { id: "supervisor", label: "👷 Operational Supervisor" },
+                  { id: "employee", label: "💼 Staff Employee" }
+                ].map((r) => (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => setActiveRoleTab(r.id)}
+                    className={`btn btn-sm rounded-pill px-3 py-1.5 fw-semibold position-relative z-1 transition-all ${
+                      activeRoleTab === r.id ? "text-white" : "text-muted hover-text-dark"
+                    }`}
+                    style={{ fontSize: "12px", border: "none" }}
+                  >
+                    {activeRoleTab === r.id && (
+                      <motion.div
+                        layoutId="activeRoleDeckIndicator"
+                        className="position-absolute top-0 start-0 w-100 h-100 rounded-pill shadow-sm"
+                        style={{ background: "linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)", zIndex: -1 }}
+                        transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                      />
+                    )}
+                    <span>{r.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Role Preview Card */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeRoleTab}
+                initial={{ opacity: 0, y: 16, scale: 0.985 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -12, scale: 0.985 }}
+                transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+                className="max-w-4xl mx-auto bg-slate-50 border rounded-4 p-4 p-lg-5 shadow-xs"
+              >
+                {activeRoleTab === "admin" && (
+                  <div className="row align-items-center g-4">
+                    <div className="col-12 col-md-6">
+                      <span className="badge bg-primary text-white mb-2">Master Administrator</span>
+                      <h3 className="fw-bold text-dark">Executive Command & Global Control</h3>
+                      <p className="text-secondary small leading-relaxed">
+                        Full user management, department lifecycle control, real-time hierarchy mapping, and immutable audit logs.
+                      </p>
+                      <ul className="list-unstyled d-flex flex-column gap-2 small">
+                        <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-success"></i> Comprehensive User & Department CRUD</li>
+                        <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-success"></i> Visual reporting hierarchy tree</li>
+                        <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-success"></i> Security logs with IP & timestamp tracking</li>
+                      </ul>
+                      <Link to="/login" className="btn btn-primary btn-sm px-3 py-2 rounded-3 mt-2 fw-semibold shadow-xs">
+                        Explore HR Admin Portal →
+                      </Link>
+                    </div>
+                    <div className="col-12 col-md-6 text-center">
+                      <div className="p-4 bg-white rounded-4 shadow-sm border text-start">
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                          <strong className="text-dark small">HR Control Panel</strong>
+                          <span className="badge bg-success small">Active Admin</span>
+                        </div>
+                        <div className="p-2 bg-light rounded mb-2 small d-flex justify-content-between">
+                          <span>Total Staff</span>
+                          <strong className="text-primary">248 Active</strong>
+                        </div>
+                        <div className="p-2 bg-light rounded small d-flex justify-content-between">
+                          <span>Pending Approvals</span>
+                          <strong className="text-warning">7 Requests</strong>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <h5 className="fw-bold text-dark mb-2">{card.title}</h5>
-                  <p className="text-secondary small leading-relaxed mb-0">{card.desc}</p>
+                )}
+
+                {activeRoleTab === "manager" && (
+                  <div className="row align-items-center g-4">
+                    <div className="col-12 col-md-6">
+                      <span className="badge bg-info text-white mb-2">Department Manager</span>
+                      <h3 className="fw-bold text-dark">Department Strategy & Delegation</h3>
+                      <p className="text-secondary small leading-relaxed">
+                        Delegate projects to team supervisors, track progress milestones, and provide final sign-off on department leave requests.
+                      </p>
+                      <ul className="list-unstyled d-flex flex-column gap-2 small">
+                        <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-info"></i> Project deadline monitoring</li>
+                        <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-info"></i> Supervisor delegation & reviews</li>
+                        <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-info"></i> Secondary leave approvals</li>
+                      </ul>
+                      <Link to="/login" className="btn btn-info text-white btn-sm px-3 py-2 rounded-3 mt-2 fw-semibold shadow-xs">
+                        Explore Manager Portal →
+                      </Link>
+                    </div>
+                    <div className="col-12 col-md-6 text-center">
+                      <div className="p-4 bg-white rounded-4 shadow-sm border text-start">
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                          <strong className="text-dark small">Engineering Projects</strong>
+                          <span className="badge bg-info small">Active</span>
+                        </div>
+                        <div className="p-2 bg-light rounded mb-2 small d-flex justify-content-between">
+                          <span>Cloud Migration</span>
+                          <span className="badge bg-success">85% Complete</span>
+                        </div>
+                        <div className="p-2 bg-light rounded mb-2 small d-flex justify-content-between">
+                          <span>Mobile App v2</span>
+                          <span className="badge bg-primary">40% In Progress</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeRoleTab === "supervisor" && (
+                  <div className="row align-items-center g-4">
+                    <div className="col-12 col-md-6">
+                      <span className="badge bg-success text-white mb-2">Team Supervisor</span>
+                      <h3 className="fw-bold text-dark">Daily Team Operations & Guidance</h3>
+                      <p className="text-secondary small leading-relaxed">
+                        Assign daily tasks, review submitted deliverables, and conduct first-line screening for team time-off requests.
+                      </p>
+                      <ul className="list-unstyled d-flex flex-column gap-2 small">
+                        <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-success"></i> Direct task allocation & priorities</li>
+                        <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-success"></i> Real-time deliverables inspection</li>
+                        <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-success"></i> First-level leave approval gate</li>
+                      </ul>
+                      <Link to="/login" className="btn btn-success text-white btn-sm px-3 py-2 rounded-3 mt-2 fw-semibold shadow-xs">
+                        Explore Supervisor Portal →
+                      </Link>
+                    </div>
+                    <div className="col-12 col-md-6 text-center">
+                      <div className="p-4 bg-white rounded-4 shadow-sm border text-start">
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                          <strong className="text-dark small">Team Task Board</strong>
+                          <span className="badge bg-success small">6 Members</span>
+                        </div>
+                        <div className="p-2 bg-light rounded mb-2 small d-flex justify-content-between">
+                          <span>API Schema Design</span>
+                          <span className="text-success fw-bold">✓ Ready</span>
+                        </div>
+                        <div className="p-2 bg-light rounded small d-flex justify-content-between">
+                          <span>Database Indexing</span>
+                          <span className="text-primary fw-bold">⏳ In Progress</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeRoleTab === "employee" && (
+                  <div className="row align-items-center g-4">
+                    <div className="col-12 col-md-6">
+                      <span className="badge bg-secondary text-white mb-2">Staff Employee</span>
+                      <h3 className="fw-bold text-dark">Personal Tasks, Leaves & Profile</h3>
+                      <p className="text-secondary small leading-relaxed">
+                        Track assigned deliverables, update completion statuses, submit leave requests with live tracking, and view salary slips.
+                      </p>
+                      <ul className="list-unstyled d-flex flex-column gap-2 small">
+                        <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-primary"></i> Personal task board with deadlines</li>
+                        <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-primary"></i> 1-click leave submission & status tracker</li>
+                        <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-primary"></i> Digital profile & compensation slips</li>
+                      </ul>
+                      <Link to="/login" className="btn btn-secondary text-white btn-sm px-3 py-2 rounded-3 mt-2 fw-semibold shadow-xs">
+                        Explore Employee Portal →
+                      </Link>
+                    </div>
+                    <div className="col-12 col-md-6 text-center">
+                      <div className="p-4 bg-white rounded-4 shadow-sm border text-start">
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                          <strong className="text-dark small">My Work & Leaves</strong>
+                          <span className="badge bg-primary small">Active</span>
+                        </div>
+                        <div className="p-2 bg-light rounded mb-2 small d-flex justify-content-between">
+                          <span>Annual Leave Balance</span>
+                          <strong className="text-primary">14 Days Left</strong>
+                        </div>
+                        <div className="p-2 bg-light rounded small d-flex justify-content-between">
+                          <span>Assigned Tasks</span>
+                          <strong className="text-success">3 In Progress</strong>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </section>
+      </StackingSection>
+
+      {/* ============================================================
+          SECTION 3: ROI CALCULATOR (STACKS OVER ROLE PORTALS)
+          ============================================================ */}
+      <StackingSection id="calc-sec" zIndex={3} bg="bg-slate-50">
+        <section className="py-5 px-3 px-lg-5">
+          <div className="container-fluid p-0">
+            <div className="text-center max-w-2xl mx-auto mb-4">
+              <span className="badge bg-success bg-opacity-10 text-success px-3 py-1 rounded-pill text-uppercase fw-bold mb-2 tracking-wider" style={{ fontSize: "11px" }}>
+                INTERACTIVE ROI CALCULATOR
+              </span>
+              <h2 className="fw-extrabold text-dark tracking-tight mb-2">Quantify Your Operational Capital Savings</h2>
+              <p className="text-secondary small">Drag the headcount slider to calculate automated workforce hours and budget reduction.</p>
+            </div>
+
+            <div className="max-w-3xl mx-auto bg-white border rounded-4 p-4 p-lg-5 shadow-sm">
+              <div className="mb-4">
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <label className="fw-bold text-dark">Current Headcount</label>
+                  <span className="badge bg-primary fs-6 px-3 py-1 rounded-pill">{employeeCount} Employees</span>
+                </div>
+                <input
+                  type="range"
+                  min="10"
+                  max="500"
+                  step="5"
+                  value={employeeCount}
+                  onChange={(e) => setEmployeeCount(Number(e.target.value))}
+                  className="form-range calc-slider w-100"
+                />
+                <div className="d-flex justify-content-between text-muted small mt-1">
+                  <span>10 staff</span>
+                  <span>250 staff</span>
+                  <span>500+ staff</span>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* 4. FOOTER */}
-      <footer className="bg-dark text-white py-4 px-3 px-lg-5 text-center">
+              <div className="row g-3 text-center">
+                <div className="col-4">
+                  <motion.div whileHover={{ scale: 1.04 }} className="p-3 rounded-3 bg-light border hover-lift transition-all">
+                    <h3 className="fw-extrabold text-primary mb-0">{Math.round(employeeCount * 1.8)} hrs</h3>
+                    <small className="text-muted fw-semibold">Admin Time Saved / Mo</small>
+                  </motion.div>
+                </div>
+                <div className="col-4">
+                  <motion.div whileHover={{ scale: 1.04 }} className="p-3 rounded-3 bg-light border hover-lift transition-all">
+                    <h3 className="fw-extrabold text-success mb-0">${(employeeCount * 360).toLocaleString()}</h3>
+                    <small className="text-muted fw-semibold">Annual Cost Reduction</small>
+                  </motion.div>
+                </div>
+                <div className="col-4">
+                  <motion.div whileHover={{ scale: 1.04 }} className="p-3 rounded-3 bg-light border hover-lift transition-all">
+                    <h3 className="fw-extrabold text-warning mb-0">3.8x</h3>
+                    <small className="text-muted fw-semibold">Faster Approvals</small>
+                  </motion.div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </StackingSection>
+
+      {/* ============================================================
+          SECTION 4: FEATURE MATRIX (STACKS OVER CALCULATOR)
+          ============================================================ */}
+      <StackingSection id="features-sec" zIndex={4} bg="bg-white">
+        <section className="py-5 px-3 px-lg-5">
+          <div className="container-fluid p-0">
+            <div className="text-center max-w-2xl mx-auto mb-4">
+              <span className="badge bg-purple-soft text-purple-deep px-3 py-1 rounded-pill text-uppercase fw-bold mb-2 tracking-wider" style={{ fontSize: "11px" }}>
+                ENTERPRISE PLATFORM
+              </span>
+              <h2 className="fw-extrabold text-dark tracking-tight mb-2">Everything You Need to Scale Operations</h2>
+              <p className="text-secondary small">Six core architectural pillars built to streamline operations.</p>
+            </div>
+
+            <div className="row g-4">
+              {[
+                { id: 1, title: "Employee Directory", desc: "Complete employee lifecycle management with salary records and profile management.", icon: "bi-people-fill", bg: "bg-purple-soft text-primary" },
+                { id: 2, title: "Department Hierarchies", desc: "Organize units, define direct reports, and eliminate organizational bottlenecks.", icon: "bi-building", bg: "bg-primary bg-opacity-10 text-primary" },
+                { id: 3, title: "Team Collaboration", desc: "Assign deliverables, monitor task comments, and track project deadlines.", icon: "bi-diagram-3-fill", bg: "bg-success bg-opacity-10 text-success" },
+                { id: 4, title: "Analytics & Reports", desc: "Real-time metrics, employee growth indicators, and automated executive digests.", icon: "bi-graph-up-arrow", bg: "bg-warning bg-opacity-10 text-warning" },
+                { id: 5, title: "Multi-Step Approvals", desc: "Two-step supervisor-to-manager routing for leave requests and department transfers.", icon: "bi-inbox-fill", bg: "bg-danger bg-opacity-10 text-danger" },
+                { id: 6, title: "Payroll & Compensation", desc: "Automated calculations, tax compliance checks, and secure role-based access.", icon: "bi-cash-coin", bg: "bg-info bg-opacity-10 text-info" }
+              ].map((card, idx) => (
+                <div key={card.id} className="col-12 col-md-6 col-lg-4">
+                  <div className="card rounded-4 p-4 h-100 bg-white feature-card shadow-xs cursor-pointer">
+                    <div className={`p-3 rounded-3 d-inline-flex align-items-center justify-content-center mb-3 ${card.bg}`} style={{ width: "48px", height: "48px" }}>
+                      <i className={`bi ${card.icon} fs-5`}></i>
+                    </div>
+                    <h5 className="fw-bold text-dark mb-2" style={{ fontSize: "15px" }}>{card.title}</h5>
+                    <p className="text-secondary small leading-relaxed mb-3">{card.desc}</p>
+                    <span className="text-primary small fw-semibold d-inline-flex align-items-center gap-1 hover-underline">
+                      <span>Learn more</span>
+                      <i className="bi bi-arrow-right small"></i>
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </StackingSection>
+
+      {/* ============================================================
+          SECTION 5: FAQ & CONVERSION CTA BANNER (STACKS OVER FEATURES)
+          ============================================================ */}
+      <StackingSection id="faq-sec" zIndex={5} bg="bg-slate-50">
+        <section className="py-5 px-3 px-lg-5">
+          <div className="container-fluid p-0">
+            <div className="text-center max-w-2xl mx-auto mb-4">
+              <span className="badge bg-info bg-opacity-10 text-info px-3 py-1 rounded-pill text-uppercase fw-bold mb-2 tracking-wider" style={{ fontSize: "11px" }}>
+                COMMON QUESTIONS
+              </span>
+              <h2 className="fw-extrabold text-dark tracking-tight mb-2">Frequently Asked Questions</h2>
+              <p className="text-secondary small">Answers to common organizational questions.</p>
+            </div>
+
+            <div className="max-w-3xl mx-auto d-flex flex-column gap-3 mb-5">
+              {[
+                { q: "Can employees self-register, or must HR onboard them?", a: "Both! Employees, Supervisors, Managers, and Admins can register anytime through the dedicated /signup page. Alternatively, the HR Administrator can onboard new users directly from the User Directory." },
+                { q: "How does the two-step leave approval workflow operate?", a: "When an employee submits a leave request, it is first routed to their direct Supervisor. Once approved by the Supervisor, it escalates to the Department Manager for final sign-off." },
+                { q: "Are passwords and user credentials secure?", a: "Yes. All passwords are encrypted with bcrypt salt hashing. Authentication tokens are issued with JWT and stored securely via HTTP-only cookies and protected headers." },
+                { q: "Can we manage separate departments and supervisors?", a: "Absolutely. The system features dedicated manager and supervisor tables, allowing departments to scale independently with custom reporting lines." }
+              ].map((item, idx) => (
+                <div key={item.q} className="card border rounded-4 bg-white overflow-hidden shadow-2xs">
+                  <button
+                    type="button"
+                    className="btn text-start p-3.5 d-flex justify-content-between align-items-center fw-bold text-dark border-0"
+                    onClick={() => setOpenFaq(openFaq === idx ? -1 : idx)}
+                  >
+                    <span style={{ fontSize: "14px" }}>{item.q}</span>
+                    <i className={`bi bi-chevron-${openFaq === idx ? "up" : "down"} text-muted small`}></i>
+                  </button>
+                  <AnimatePresence>
+                    {openFaq === idx && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                        className="px-3.5 pb-3.5 pt-0 text-secondary small leading-relaxed border-top border-light overflow-hidden"
+                      >
+                        {item.a}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
+            </div>
+
+            {/* High-Conversion CTA Banner */}
+            <div
+              className="p-5 rounded-4 text-center text-white position-relative overflow-hidden shadow-xl"
+              style={{ background: "linear-gradient(135deg, #312e81 0%, #4f46e5 50%, #7c3aed 100%)" }}
+            >
+              <div className="ambient-orb orb-1" style={{ top: "-30%", left: "20%", opacity: 0.3 }}></div>
+              <div className="position-relative z-1 max-w-2xl mx-auto">
+                <span className="badge bg-white bg-opacity-20 text-white px-3 py-1.5 rounded-pill mb-3 text-uppercase fw-semibold" style={{ fontSize: "10px" }}>
+                  START TRANSFORMING TODAY
+                </span>
+                <h2 className="fw-extrabold mb-3 tracking-tight">Ready to Elevate Your Organization?</h2>
+                <p className="text-white-50 mb-4 leading-relaxed small">
+                  Join thousands of productive teams. Get up and running in minutes with role-based access for your whole organization.
+                </p>
+                <div className="d-flex flex-wrap justify-content-center gap-3">
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
+                    <Link to="/signup" className="btn btn-light btn-lg px-4 py-2 rounded-3 fw-bold text-primary shadow-md">
+                      Create Your Free Account →
+                    </Link>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
+                    <Link to="/login" className="btn btn-outline-light btn-lg px-4 py-2 rounded-3 fw-semibold hover-light">
+                      Sign In to Portal
+                    </Link>
+                  </motion.div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </StackingSection>
+
+      {/* 3. FOOTER */}
+      <footer className="bg-dark text-white py-4 px-3 px-lg-5 text-center position-relative z-3">
         <div className="container-fluid p-0 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
           <small className="text-white-50">© 2026 Enterprise EMS Inc. All rights reserved.</small>
           <div className="d-flex align-items-center gap-3">
