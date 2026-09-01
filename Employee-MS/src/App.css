@@ -228,6 +228,10 @@ body {
   100% { transform: translateY(-3px) rotate(-0.8deg); }
 }
 
+.pointer-events-none {
+  pointer-events: none !important;
+}
+
 .showcase-dashboard-card {
   width: 100%;
   max-width: 790px;
@@ -241,13 +245,22 @@ body {
   transform-style: preserve-3d;
   cursor: default !important;
   will-change: transform, box-shadow;
+  animation: omniFloat3D 12s ease-in-out infinite;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+}
+
+/* When user hovers: Elevates forward in 3D so all buttons, inputs, tabs are 100% rock-solid and clickable */
+.showcase-dashboard-card:hover {
+  animation-play-state: paused;
+  transform: rotateX(1deg) rotateY(-2deg) scale(1.025) translateY(-8px) translateZ(35px);
+  box-shadow:
+    0 35px 75px -15px rgba(79, 70, 229, 0.28),
+    0 15px 30px -8px rgba(15, 23, 42, 0.14),
+    0 0 0 2px rgba(99, 102, 241, 0.35);
+  border-color: #818cf8;
 }
 
 /* Omnidirectional 3D Floating Animation: floats in ALL directions (left, right, up, down, yaw, pitch, roll) */
-.showcase-dashboard-card.omni-floating {
-  animation: omniFloat3D 11s ease-in-out infinite;
-}
-
 @keyframes omniFloat3D {
   0% {
     transform: rotateX(5deg) rotateY(-7deg) rotateZ(0.5deg) translate3d(0px, 0px, 0px);
