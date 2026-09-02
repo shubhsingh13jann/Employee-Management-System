@@ -450,7 +450,11 @@ const Login = ({ initialMode = "login" }) => {
               <button
                 type="button"
                 className="auth-eye-btn"
-                onClick={() => setShowPassword(!showPassword)}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  setShowPassword((prev) => !prev);
+                  setActiveField("password");
+                }}
                 title={showPassword ? "Hide password" : "Show password & peek"}
               >
                 <i className={showPassword ? "bi bi-eye-slash-fill text-primary" : "bi bi-eye-fill"}></i>
