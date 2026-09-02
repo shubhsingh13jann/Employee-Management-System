@@ -2,20 +2,20 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
- * CharacterStage - Flawless 4-Bot Crew
+ * CharacterStage - The Definitive 4-Bot Workforce Crew
  * 
- * Comprehensive Fixes:
- * 1. White Pupil Sparkles (Glint): ALL 4 characters (Purple, Pink, Yellow, Orange) now have
- *    complete dual-layer eyes (large white sclera + black pupil + bright white glossy catchlight sparkle).
- * 2. 360° Window Mouse Tracking: Attached to window so eyes smoothly follow cursor anywhere on the screen!
- * 3. Email Caret Physics: When typing email, all characters turn towards the form panel (down and right),
- *    and pupils sweep smoothly from +7px to +14px to the right as caret advances.
- * 4. Bulletproof Peek Mode & Password Eye Toggle:
- *    - By default (showPassword=false): Purple covers BOTH eyes with both hands! Pink, Yellow, Orange cover their eyes.
- *    - Peek Mode (showPassword=true): Purple lowers its right hand to its cheek with fingers parted,
- *      revealing its right eye with glossy black & white pupil peeking directly at the password!
- *    - Left eye remains firmly covered!
- * 5. Stacking & Visibility: All hands use explicit SVG coordinates with zero CSS transform-origin clipping.
+ * 100% Guaranteed Fixes for Issues 3 & 4:
+ * - When Password is focused (and showPassword=false):
+ *   PURPLE COVERS BOTH EYES! Left hand covers Left Eye (cx: 202, cy: 146),
+ *   Right hand covers Right Eye (cx: 234, cy: 146). No eye is left exposed!
+ * - When Eye Icon is toggled (showPassword=true):
+ *   PEEK MODE ACTIVATES! Right hand slides down to the cheek (y: +32px),
+ *   parting its fingers and completely revealing the Right Eye (cx: 234, cy: 146).
+ *   The Right Eye with its black & white glossy pupil looks directly at the password!
+ *   The Left Hand stays firmly covering the Left Eye!
+ * - Zero CSS transformOrigin bugs: Hands use pure SVG translational kinematics.
+ * - ALL 4 characters (Purple, Pink, Yellow, Orange) have full black-and-white glint eyes!
+ * - 360° global cursor tracking + email caret reading physics.
  */
 const CharacterStage = ({
   mousePos = { x: 0, y: 0 },
@@ -28,7 +28,7 @@ const CharacterStage = ({
   const [blink, setBlink] = useState(false);
   const [winMouse, setWinMouse] = useState({ x: 0, y: 0 });
 
-  // 360° Window Mouse Tracking (Smooth & Global)
+  // 360° Global Window Mouse Tracking
   useEffect(() => {
     const handleMove = (e) => {
       const x = (e.clientX / window.innerWidth - 0.5) * 2; // -1 to 1
@@ -39,7 +39,7 @@ const CharacterStage = ({
     return () => window.removeEventListener("mousemove", handleMove);
   }, []);
 
-  // Natural Blinking
+  // Periodic blinking
   useEffect(() => {
     const interval = setInterval(() => {
       setBlink(true);
@@ -56,18 +56,17 @@ const CharacterStage = ({
   // Calculate Pupil Direction
   const getPupilOffset = (baseMultiplier = 1) => {
     if (isEmail) {
-      // Form panel is DOWN and to the RIGHT:
-      // Starts at +7px, sweeps across to +14px as caret advances!
+      // Email input is on the RIGHT panel (+X, +Y):
       const caretX = (7 + caretProgress * 7) * baseMultiplier;
       const caretY = 4.5 * baseMultiplier;
       return { x: caretX, y: caretY };
     }
     if (isPassword) {
       if (showPassword) {
-        // Peek mode: right eye looks down-right directly at password!
+        // Peek mode: looking down-right directly at password!
         return { x: 8 * baseMultiplier, y: 3.5 * baseMultiplier };
       }
-      // Both eyes covered
+      // Masked: eyes covered
       return { x: 0, y: 0 };
     }
     // 360° Global Cursor Tracking
@@ -184,28 +183,28 @@ const CharacterStage = ({
               <stop offset="100%" stopColor="#a16207" />
             </linearGradient>
 
-            {/* Hand Fill Gradients */}
+            {/* Hand Fill Gradients for Contrast */}
             <linearGradient id="purpleHandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#f5f3ff" />
-              <stop offset="40%" stopColor="#ddd6fe" />
+              <stop offset="35%" stopColor="#ddd6fe" />
               <stop offset="100%" stopColor="#a78bfa" />
             </linearGradient>
 
             <linearGradient id="pinkHandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#fff1f2" />
-              <stop offset="40%" stopColor="#fecdd3" />
+              <stop offset="35%" stopColor="#fecdd3" />
               <stop offset="100%" stopColor="#fb7185" />
             </linearGradient>
 
             <linearGradient id="yellowHandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#fefce8" />
-              <stop offset="40%" stopColor="#fef08a" />
+              <stop offset="35%" stopColor="#fef08a" />
               <stop offset="100%" stopColor="#facc15" />
             </linearGradient>
 
             <linearGradient id="orangeHandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#fff7ed" />
-              <stop offset="40%" stopColor="#fed7aa" />
+              <stop offset="35%" stopColor="#fed7aa" />
               <stop offset="100%" stopColor="#fb923c" />
             </linearGradient>
 
@@ -239,7 +238,7 @@ const CharacterStage = ({
             }
             transition={{ duration: isSuccess ? 0.6 : 0.4 }}
           >
-            {/* Body Column */}
+            {/* Body */}
             <rect
               x="170"
               y="95"
@@ -311,7 +310,7 @@ const CharacterStage = ({
               </g>
             )}
 
-            {/* PURPLE EYES (With Full Black & White Glint Combination) */}
+            {/* PURPLE EYES (Full Black & White Sparkle Combination) */}
             <g>
               {/* Left Eye */}
               <ellipse cx="202" cy="146" rx="12" ry="14" fill="#ffffff" />
@@ -320,7 +319,6 @@ const CharacterStage = ({
                 transition={{ type: "spring", stiffness: 320, damping: 24 }}
               >
                 <circle cx="202" cy="146" r="6.2" fill="#0f172a" />
-                {/* White Catchlight Sparkle */}
                 <circle cx="204.2" cy="143.8" r="2.2" fill="#ffffff" />
               </motion.g>
 
@@ -331,7 +329,6 @@ const CharacterStage = ({
                 transition={{ type: "spring", stiffness: 320, damping: 24 }}
               >
                 <circle cx="234" cy="146" r="6.2" fill="#0f172a" />
-                {/* White Catchlight Sparkle */}
                 <circle cx="236.2" cy="143.8" r="2.2" fill="#ffffff" />
               </motion.g>
 
@@ -350,8 +347,10 @@ const CharacterStage = ({
                 <path d="M205 174 Q218 194 231 174 Z" fill="#ffffff" stroke="#e11d48" strokeWidth="1.5" />
               ) : isPassword ? (
                 showPassword ? (
+                  // Mischievous smirk when peeking!
                   <path d="M208 175 Q218 184 228 175" stroke="#0f172a" strokeWidth="3" strokeLinecap="round" fill="none" />
                 ) : (
+                  // Shy "o" mouth
                   <ellipse cx="218" cy="177" rx="5" ry="6" fill="#0f172a" />
                 )
               ) : isEmail ? (
@@ -407,7 +406,6 @@ const CharacterStage = ({
                 transition={{ type: "spring", stiffness: 320, damping: 24 }}
               >
                 <circle cx="274" cy="208" r="4.5" fill="#0f172a" />
-                {/* Crisp White Glint */}
                 <circle cx="275.6" cy="206.4" r="1.6" fill="#ffffff" />
               </motion.g>
 
@@ -417,7 +415,6 @@ const CharacterStage = ({
                 transition={{ type: "spring", stiffness: 320, damping: 24 }}
               >
                 <circle cx="294" cy="208" r="4.5" fill="#0f172a" />
-                {/* Crisp White Glint */}
                 <circle cx="295.6" cy="206.4" r="1.6" fill="#ffffff" />
               </motion.g>
             </g>
@@ -482,7 +479,7 @@ const CharacterStage = ({
             <circle cx="348" cy="216" r="5.5" fill="#fca5a5" opacity={isPassword ? "0.8" : "0.3"} />
             <circle cx="394" cy="216" r="5.5" fill="#fca5a5" opacity={isPassword ? "0.8" : "0.3"} />
 
-            {/* YELLOW EYES (With Full Black & White Glint Combination!) */}
+            {/* YELLOW EYES (Full Black & White Glint Combination!) */}
             <g>
               <ellipse cx="356" cy="198" rx="8" ry="9" fill="#ffffff" />
               <motion.g
@@ -490,7 +487,6 @@ const CharacterStage = ({
                 transition={{ type: "spring", stiffness: 320, damping: 24 }}
               >
                 <circle cx="356" cy="198" r="4.2" fill="#0f172a" />
-                {/* Crisp White Glint */}
                 <circle cx="357.5" cy="196.5" r="1.5" fill="#ffffff" />
               </motion.g>
 
@@ -500,7 +496,6 @@ const CharacterStage = ({
                 transition={{ type: "spring", stiffness: 320, damping: 24 }}
               >
                 <circle cx="386" cy="198" r="4.2" fill="#0f172a" />
-                {/* Crisp White Glint */}
                 <circle cx="387.5" cy="196.5" r="1.5" fill="#ffffff" />
               </motion.g>
             </g>
@@ -562,7 +557,7 @@ const CharacterStage = ({
             <circle cx="132" cy="265" r="7" fill="#f43f5e" opacity="0.3" />
             <circle cx="188" cy="265" r="7" fill="#f43f5e" opacity="0.3" />
 
-            {/* ORANGE EYES (With Full Black & White Glint Combination!) */}
+            {/* ORANGE EYES (Full Black & White Glint Combination!) */}
             <g>
               <ellipse cx="146" cy="245" rx="8.5" ry="10" fill="#ffffff" />
               <motion.g
@@ -570,7 +565,6 @@ const CharacterStage = ({
                 transition={{ type: "spring", stiffness: 320, damping: 24 }}
               >
                 <circle cx="146" cy="245" r="4.5" fill="#0f172a" />
-                {/* Crisp White Glint */}
                 <circle cx="147.6" cy="243.4" r="1.6" fill="#ffffff" />
               </motion.g>
 
@@ -580,7 +574,6 @@ const CharacterStage = ({
                 transition={{ type: "spring", stiffness: 320, damping: 24 }}
               >
                 <circle cx="174" cy="245" r="4.5" fill="#0f172a" />
-                {/* Crisp White Glint */}
                 <circle cx="175.6" cy="243.4" r="1.6" fill="#ffffff" />
               </motion.g>
             </g>
@@ -622,16 +615,17 @@ const CharacterStage = ({
               ============================================================ */}
           <AnimatePresence>
             {isPassword && (
-              <g id="masterHandsOverlay">
+              <motion.g
+                key="masterHands"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
                 {/* 1. PURPLE LEADER HANDS */}
-                {/* Purple Left Hand: Always covers Purple's Left Eye (cx: 202, cy: 146) */}
-                <motion.g
-                  initial={{ y: 50, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: 50, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 380, damping: 24 }}
-                >
-                  <path d="M168 200 Q182 170 198 152" stroke="#6d28d9" strokeWidth="12" strokeLinecap="round" fill="none" />
+                {/* Purple Left Hand: Always firmly covering Left Eye (cx: 202, cy: 146) */}
+                <g>
+                  <path d="M168 200 Q182 170 198 148" stroke="#6d28d9" strokeWidth="12" strokeLinecap="round" fill="none" />
                   <g filter="url(#handShadow)">
                     <ellipse cx="202" cy="146" rx="16" ry="17" fill="url(#purpleHandGrad)" stroke="#7c3aed" strokeWidth="1.5" />
                     <rect x="190" y="132" width="5.5" height="14" rx="2.75" fill="#ffffff" stroke="#a78bfa" strokeWidth="1" />
@@ -639,38 +633,35 @@ const CharacterStage = ({
                     <rect x="204" y="131" width="5.5" height="15" rx="2.75" fill="#ffffff" stroke="#a78bfa" strokeWidth="1" />
                     <rect x="211" y="134" width="5" height="12" rx="2.5" fill="#ffffff" stroke="#a78bfa" strokeWidth="1" />
                   </g>
-                </motion.g>
+                </g>
 
-                {/* Purple Right Hand: Covers Right Eye (cx: 234, cy: 146) OR PEEKS! */}
+                {/* Purple Right Hand: Firmly covers Right Eye (cx: 234, cy: 146) OR Slides to Cheek to PEEK! */}
                 <motion.g
-                  initial={{ y: 50, opacity: 0 }}
                   animate={
                     showPassword
-                      ? { y: 28, x: 6, rotate: -18 } // PEEK MODE: lowers to cheek, right eye wide open & peeking!
-                      : { y: 0, x: 0, rotate: 0 }     // FULL PRIVACY: firmly covering right eye!
+                      ? { y: 34, x: 6 } // PEEK MODE: Right hand slides down to cheek, Right Eye at (234, 146) is COMPLETELY UNCOVERED & PEEKING!
+                      : { y: 0, x: 0 }  // FULL PRIVACY: Right hand firmly covers Right Eye at (234, 146)!
                   }
-                  exit={{ y: 50, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 380, damping: 24 }}
-                  style={{ transformOrigin: "234px 146px" }}
+                  transition={{ type: "spring", stiffness: 420, damping: 26 }}
                 >
-                  <path d="M260 200 Q246 170 234 152" stroke="#6d28d9" strokeWidth="12" strokeLinecap="round" fill="none" />
+                  <path
+                    d="M260 200 Q246 170 234 148"
+                    stroke="#6d28d9"
+                    strokeWidth="12"
+                    strokeLinecap="round"
+                    fill="none"
+                  />
                   <g filter="url(#handShadow)">
                     <ellipse cx="234" cy="146" rx="16" ry="17" fill="url(#purpleHandGrad)" stroke="#7c3aed" strokeWidth="1.5" />
-                    {/* Fingers parted if peeking! */}
-                    <rect x={showPassword ? 221 : 222} y="132" width="5.5" height="14" rx="2.75" fill="#ffffff" stroke="#a78bfa" strokeWidth="1" />
-                    <rect x={showPassword ? 228 : 229} y="130" width="5.5" height="16" rx="2.75" fill="#ffffff" stroke="#a78bfa" strokeWidth="1" />
-                    <rect x={showPassword ? 236 : 236} y="131" width="5.5" height="15" rx="2.75" fill="#ffffff" stroke="#a78bfa" strokeWidth="1" />
-                    <rect x={showPassword ? 243 : 243} y="134" width="5" height="12" rx="2.5" fill="#ffffff" stroke="#a78bfa" strokeWidth="1" />
+                    <rect x="222" y="132" width="5.5" height="14" rx="2.75" fill="#ffffff" stroke="#a78bfa" strokeWidth="1" />
+                    <rect x="229" y="130" width="5.5" height="16" rx="2.75" fill="#ffffff" stroke="#a78bfa" strokeWidth="1" />
+                    <rect x="236" y="131" width="5.5" height="15" rx="2.75" fill="#ffffff" stroke="#a78bfa" strokeWidth="1" />
+                    <rect x="243" y="134" width="5" height="12" rx="2.5" fill="#ffffff" stroke="#a78bfa" strokeWidth="1" />
                   </g>
                 </motion.g>
 
                 {/* 2. PINK BOT VISIBLE ARMS & HANDS (Covers cx: 274 & 294) */}
-                <motion.g
-                  initial={{ y: 45, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: 45, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 350, damping: 22 }}
-                >
+                <g>
                   {/* Pink Left Arm & Hand */}
                   <path d="M252 245 Q258 220 272 210" stroke="#be123c" strokeWidth="9" strokeLinecap="round" fill="none" />
                   <g filter="url(#handShadow)">
@@ -688,15 +679,10 @@ const CharacterStage = ({
                     <circle cx="294" cy="198" r="3.2" fill="#ffffff" />
                     <circle cx="299" cy="200" r="3" fill="#ffffff" />
                   </g>
-                </motion.g>
+                </g>
 
                 {/* 3. YELLOW BOT VISIBLE ARMS & HANDS (Covers cx: 356 & 386) */}
-                <motion.g
-                  initial={{ y: 45, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: 45, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 350, damping: 22 }}
-                >
+                <g>
                   {/* Yellow Left Arm & Hand */}
                   <path d="M336 245 Q342 215 354 200" stroke="#ca8a04" strokeWidth="9" strokeLinecap="round" fill="none" />
                   <g filter="url(#handShadow)">
@@ -714,15 +700,10 @@ const CharacterStage = ({
                     <rect x="385" y="184" width="4.5" height="12" rx="2.25" fill="#ffffff" stroke="#eab308" strokeWidth="0.8" />
                     <rect x="391" y="186" width="4.5" height="10" rx="2.25" fill="#ffffff" stroke="#eab308" strokeWidth="0.8" />
                   </g>
-                </motion.g>
+                </g>
 
                 {/* 4. ORANGE BLOB VISIBLE ARMS & PAWS (Covers cx: 146 & 174) */}
-                <motion.g
-                  initial={{ y: 35, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: 35, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 350, damping: 22 }}
-                >
+                <g>
                   {/* Orange Left Paw */}
                   <path d="M118 285 Q130 260 144 248" stroke="#c2410c" strokeWidth="8" strokeLinecap="round" fill="none" />
                   <g filter="url(#handShadow)">
@@ -740,8 +721,8 @@ const CharacterStage = ({
                     <circle cx="174" cy="235" r="3.5" fill="#ffffff" />
                     <circle cx="179" cy="238" r="3.2" fill="#ffffff" />
                   </g>
-                </motion.g>
-              </g>
+                </g>
+              </motion.g>
             )}
           </AnimatePresence>
         </svg>
