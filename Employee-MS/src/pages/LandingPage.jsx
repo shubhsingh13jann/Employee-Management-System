@@ -83,73 +83,105 @@ const LandingPage = () => {
     scrollAnimRef.current = requestAnimationFrame(step);
   };
 
-  // Nav toggle handler: pure mathematical target position, 100% reliable backwards and forwards
+  // Cinema-Grade Card Navigation: Zero-lag navbar highlight sync + quartic glide
+  const goToCard = (targetIdx, duration = 640) => {
+    const clampedIdx = Math.min(Math.max(0, targetIdx), navItems.length - 1);
+    const travel = window.innerHeight - 74;
+    const targetY = clampedIdx * travel;
+
+    // 1. INSTANT NAVBAR HIGHLIGHT UPDATE: 0ms delay, Framer Motion spring pill glides on frame 0
+    setActiveNavSection(navItems[clampedIdx].id);
+
+    // 2. Buttery-smooth quartic scroll glide
+    smoothScrollTo(targetY, duration, false);
+  };
+
+  // Nav toggle handler: clicks on navbar buttons
   const handleNavToggle = (id) => {
-    setActiveNavSection(id);
     const index = navItems.findIndex((item) => item.id === id);
     if (index !== -1) {
-      const travel = window.innerHeight - 74;
-      const targetY = index * travel;
-      smoothScrollTo(targetY, 680, false);
+      goToCard(index, 680);
     }
   };
 
-  // Automatic Full-Screen Snap Settler:
-  // When scrolling with mouse wheel, automatically settles on 100% full screen as soon as scrolling stops
+  // Ultra-Smooth Wheel & Keyboard Transition Engine:
+  // Eliminates jerky step-scrolling and converts wheel rolls into cinema-fluid card transitions
   useEffect(() => {
-    let scrollTimeout = null;
+    let lastWheelTime = 0;
 
-    const onUserInterrupt = () => {
-      if (isSnappingRef.current && scrollAnimRef.current) {
-        cancelAnimationFrame(scrollAnimRef.current);
-        scrollAnimRef.current = null;
-        isSnappingRef.current = false;
+    const onWheel = (e) => {
+      // Ignore micro-scroll drift (e.g. tiny trackpad vibrations)
+      if (Math.abs(e.deltaY) < 18) return;
+
+      const now = Date.now();
+      // Cooldown debounce (520ms) ensures one deliberate wheel flick = exactly one smooth card glide
+      if (isNavigatingRef.current || isSnappingRef.current || now - lastWheelTime < 520) {
+        e.preventDefault();
+        return;
       }
-    };
-
-    const handleScrollEnd = () => {
-      if (isNavigatingRef.current || isSnappingRef.current) return;
 
       const travel = window.innerHeight - 74;
       const scrollPos = window.scrollY;
-      const nearestIdx = Math.min(
+      const currentIdx = Math.round(scrollPos / travel);
+
+      if (e.deltaY > 0) {
+        // Rolling DOWN -> Glide to Next Card
+        if (currentIdx < navItems.length - 1) {
+          e.preventDefault();
+          lastWheelTime = now;
+          goToCard(currentIdx + 1, 640);
+        }
+      } else if (e.deltaY < 0) {
+        // Rolling UP -> Glide to Previous Card
+        if (currentIdx > 0) {
+          e.preventDefault();
+          lastWheelTime = now;
+          goToCard(currentIdx - 1, 640);
+        }
+      }
+    };
+
+    const onKeyDown = (e) => {
+      if (["ArrowDown", "PageDown"].includes(e.key)) {
+        e.preventDefault();
+        const travel = window.innerHeight - 74;
+        const currentIdx = Math.round(window.scrollY / travel);
+        if (currentIdx < navItems.length - 1) {
+          goToCard(currentIdx + 1, 640);
+        }
+      } else if (["ArrowUp", "PageUp"].includes(e.key)) {
+        e.preventDefault();
+        const travel = window.innerHeight - 74;
+        const currentIdx = Math.round(window.scrollY / travel);
+        if (currentIdx > 0) {
+          goToCard(currentIdx - 1, 640);
+        }
+      }
+    };
+
+    // Passive listener for scrollbar dragging
+    const onScroll = () => {
+      if (isNavigatingRef.current || isSnappingRef.current) return;
+      const scrollPos = window.scrollY;
+      const travel = window.innerHeight - 74;
+      const currentIdx = Math.min(
         Math.max(0, Math.round(scrollPos / travel)),
         navItems.length - 1
       );
-      const targetY = nearestIdx * travel;
-
-      // If the card is not settled in 100% full screen (off by more than 6px), smoothly lock it into 100% full screen
-      if (Math.abs(scrollPos - targetY) > 6) {
-        smoothScrollTo(targetY, 380, true);
-      }
+      setActiveNavSection((prev) => {
+        const nextId = navItems[currentIdx].id;
+        return prev !== nextId ? nextId : prev;
+      });
     };
 
-    const onScroll = () => {
-      if (isNavigatingRef.current || isSnappingRef.current) return;
-
-      // Update ScrollSpy active pill during manual scroll
-      const scrollPos = window.scrollY;
-      const travel = window.innerHeight - 74;
-      const activeIdx = Math.min(
-        Math.max(0, Math.floor((scrollPos + travel * 0.45) / travel)),
-        navItems.length - 1
-      );
-      setActiveNavSection(navItems[activeIdx].id);
-
-      // Debounce snapping so it only snaps when mouse scrolling stops
-      if (scrollTimeout) clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(handleScrollEnd, 120);
-    };
-
+    window.addEventListener("wheel", onWheel, { passive: false });
+    window.addEventListener("keydown", onKeyDown);
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("wheel", onUserInterrupt, { passive: true });
-    window.addEventListener("touchstart", onUserInterrupt, { passive: true });
 
     return () => {
+      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("wheel", onUserInterrupt);
-      window.removeEventListener("touchstart", onUserInterrupt);
-      if (scrollTimeout) clearTimeout(scrollTimeout);
       if (scrollAnimRef.current) {
         cancelAnimationFrame(scrollAnimRef.current);
       }
@@ -172,7 +204,7 @@ const LandingPage = () => {
   const card1Filter = useTransform(
     card2Progress,
     [0, 1],
-    ["brightness(1) blur(0px)", "brightness(0.65) blur(2.5px)"]
+    ["brightness(1)", "brightness(0.7)"]
   );
   const card1Radius = useTransform(card2Progress, [0, 0.2], ["0px", "28px"]);
 
@@ -186,7 +218,7 @@ const LandingPage = () => {
   const card2Filter = useTransform(
     card3Progress,
     [0, 1],
-    ["brightness(1) blur(0px)", "brightness(0.65) blur(2.5px)"]
+    ["brightness(1)", "brightness(0.7)"]
   );
 
   // 3. As Card 4 moves from bottom of screen up to 74px, Card 3 PUSHES BACK while STUCK at top: 74px
@@ -199,7 +231,7 @@ const LandingPage = () => {
   const card3Filter = useTransform(
     card4Progress,
     [0, 1],
-    ["brightness(1) blur(0px)", "brightness(0.65) blur(2.5px)"]
+    ["brightness(1)", "brightness(0.7)"]
   );
 
   // 4. As Card 5 moves from bottom of screen up to 74px, Card 4 PUSHES BACK while STUCK at top: 74px
@@ -212,7 +244,7 @@ const LandingPage = () => {
   const card4Filter = useTransform(
     card5Progress,
     [0, 1],
-    ["brightness(1) blur(0px)", "brightness(0.65) blur(2.5px)"]
+    ["brightness(1)", "brightness(0.7)"]
   );
 
   // 360° Interactive 3D Mouse Parallax (Dynamic Magnetic Pull on Hover)
@@ -456,7 +488,7 @@ const LandingPage = () => {
             filter: card1Filter,
             borderRadius: card1Radius,
             transformOrigin: "top center",
-            willChange: "transform, opacity, filter"
+            willChange: "transform, opacity"
           }}
           className="bg-white w-100 d-flex flex-column justify-content-center align-items-center overflow-y-auto"
         >
@@ -1074,7 +1106,7 @@ const LandingPage = () => {
             opacity: card2Opacity,
             filter: card2Filter,
             transformOrigin: "top center",
-            willChange: "transform, opacity, filter",
+            willChange: "transform, opacity",
             borderTopLeftRadius: "32px",
             borderTopRightRadius: "32px",
             boxShadow: "0 -30px 70px -10px rgba(15, 23, 42, 0.4), 0 -8px 24px -5px rgba(15, 23, 42, 0.2)",
@@ -1296,7 +1328,7 @@ const LandingPage = () => {
             opacity: card3Opacity,
             filter: card3Filter,
             transformOrigin: "top center",
-            willChange: "transform, opacity, filter",
+            willChange: "transform, opacity",
             borderTopLeftRadius: "32px",
             borderTopRightRadius: "32px",
             boxShadow: "0 -30px 70px -10px rgba(15, 23, 42, 0.4), 0 -8px 24px -5px rgba(15, 23, 42, 0.2)",
@@ -1376,7 +1408,7 @@ const LandingPage = () => {
             opacity: card4Opacity,
             filter: card4Filter,
             transformOrigin: "top center",
-            willChange: "transform, opacity, filter",
+            willChange: "transform, opacity",
             borderTopLeftRadius: "32px",
             borderTopRightRadius: "32px",
             boxShadow: "0 -30px 70px -10px rgba(15, 23, 42, 0.4), 0 -8px 24px -5px rgba(15, 23, 42, 0.2)",

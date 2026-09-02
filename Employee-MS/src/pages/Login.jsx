@@ -1,29 +1,77 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
+import CharacterStage from "../components/auth/CharacterStage";
+import BriefcaseLoader from "../components/auth/BriefcaseLoader";
+import "../components/auth/authInteractive.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("admin");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Character Stage Interaction States
+  const [activeField, setActiveField] = useState(null); // 'email' | 'password' | null
+  const [caretProgress, setCaretProgress] = useState(0); // 0 to 1
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [authStatus, setAuthStatus] = useState("idle"); // 'idle' | 'submitting' | 'success' | 'error'
+
+  // Briefcase Intro State (Link 3)
+  const [showIntro, setShowIntro] = useState(() => {
+    return !sessionStorage.getItem("ems_intro_seen");
+  });
+
   const { login, getDefaultRouteForRole } = useAuth();
   const navigate = useNavigate();
+  const containerRef = useRef(null);
+
+  // Mouse Movement tracking for 360° eye kinematics
+  const handleMouseMove = (e) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
+    const y = (e.clientY - rect.top) / rect.height - 0.5; // -0.5 to 0.5
+    setMousePos({ x, y });
+  };
+
+  const handleEmailChange = (e) => {
+    const val = e.target.value;
+    setEmail(val);
+    // Approximate caret position ratio across normal email length (max 30 chars)
+    setCaretProgress(Math.min(val.length / 28, 1));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) return setError("Please enter both email and password.");
+    if (!email || !password) {
+      setError("Please enter both email and password.");
+      setAuthStatus("error");
+      setTimeout(() => setAuthStatus("idle"), 1200);
+      return;
+    }
 
     try {
       setError("");
       setSubmitting(true);
+      setAuthStatus("submitting");
+
       const res = await login(email, password, role);
-      const targetRoute = getDefaultRouteForRole(res.user.role);
-      navigate(targetRoute, { replace: true });
+      setAuthStatus("success");
+
+      // Celebrate briefly before transitioning
+      setTimeout(() => {
+        const targetRoute = getDefaultRouteForRole(res.user.role);
+        navigate(targetRoute, { replace: true });
+      }, 700);
     } catch (err) {
       setError(err.response?.data?.error || err.message || "Failed to sign in. Please check credentials.");
+      setAuthStatus("error");
+      setTimeout(() => setAuthStatus("idle"), 1400);
     } finally {
       setSubmitting(false);
     }
@@ -33,126 +81,308 @@ const Login = () => {
     setEmail(demoEmail);
     setPassword(demoPassword);
     setRole(demoRole);
+    setCaretProgress(Math.min(demoEmail.length / 28, 1));
     setError("");
   };
 
+  const handleIntroComplete = () => {
+    sessionStorage.setItem("ems_intro_seen", "true");
+    setShowIntro(false);
+  };
+
   return (
-    <div className="d-flex align-items-center justify-content-center min-vh-100 bg-dark p-3" style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)" }}>
-      <div className="card shadow-lg border-0 rounded-4 overflow-hidden" style={{ maxWidth: "480px", width: "100%" }}>
-        {/* Header Banner */}
-        <div className="bg-primary text-white p-4 text-center">
-          <div className="d-inline-flex p-3 bg-white bg-opacity-25 rounded-circle mb-3">
-            <i className="bi bi-buildings-fill fs-2"></i>
+    <div
+      ref={containerRef}
+      onMouseMove={handleMouseMove}
+      className="auth-split-wrapper position-relative"
+    >
+      {/* Briefcase Loading Opening Sequence (Link 3) */}
+      <AnimatePresence>
+        {showIntro && <BriefcaseLoader onComplete={handleIntroComplete} />}
+      </AnimatePresence>
+
+      {/* Background Ambient Glow Orbs */}
+      <div
+        className="position-absolute rounded-circle"
+        style={{
+          width: "450px",
+          height: "450px",
+          background: "radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0) 70%)",
+          top: "10%",
+          left: "15%",
+          pointerEvents: "none"
+        }}
+      />
+      <div
+        className="position-absolute rounded-circle"
+        style={{
+          width: "450px",
+          height: "450px",
+          background: "radial-gradient(circle, rgba(236, 72, 153, 0.12) 0%, rgba(236, 72, 153, 0) 70%)",
+          bottom: "10%",
+          right: "15%",
+          pointerEvents: "none"
+        }}
+      />
+
+      {/* Top Navbar Brand & Replay Intro Control */}
+      <div className="position-absolute top-0 start-0 w-100 p-3 px-md-4 d-flex align-items-center justify-content-between">
+        <Link to="/" className="text-decoration-none d-flex align-items-center gap-2">
+          <div
+            className="d-flex align-items-center justify-content-center rounded-3 text-white shadow-xs"
+            style={{ width: "32px", height: "32px", background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)" }}
+          >
+            <i className="bi bi-box-fill small"></i>
           </div>
-          <h4 className="fw-bold mb-1">Enterprise EMS Portal</h4>
-          <p className="mb-0 text-white-50" style={{ fontSize: "13px" }}>4-Tier Role-Based Workforce Management</p>
+          <span className="fw-bold text-white small tracking-wide">Enterprise EMS</span>
+        </Link>
+
+        <button
+          type="button"
+          onClick={() => setShowIntro(true)}
+          className="btn btn-sm btn-outline-light rounded-pill px-2.5 py-1 d-flex align-items-center gap-1.5 shadow-2xs"
+          style={{ fontSize: "11px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)" }}
+          title="Replay Suitcase Opening Intro"
+        >
+          <i className="bi bi-play-circle"></i>
+          <span className="d-none d-sm-inline">Replay Intro</span>
+        </button>
+      </div>
+
+      {/* MASTER 2-PANEL SPLIT CARD */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 15 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="auth-split-card"
+      >
+        {/* ============================================================
+            LEFT PANEL: INTERACTIVE COMPANION BOT RIG & PRIVACY HANDS
+            ============================================================ */}
+        <div className="auth-character-stage">
+          <CharacterStage
+            mousePos={mousePos}
+            activeField={activeField}
+            caretProgress={caretProgress}
+            showPassword={showPassword}
+            selectedRole={role}
+            authStatus={authStatus}
+          />
         </div>
 
-        <div className="card-body p-4 bg-white">
-          {error && <div className="alert alert-danger py-2 d-flex align-items-center gap-2 mb-3"><i className="bi bi-exclamation-triangle-fill"></i><span>{error}</span></div>}
+        {/* ============================================================
+            RIGHT PANEL: MODERN MINIMALIST AUTH FORM (FROM USER IMAGE)
+            ============================================================ */}
+        <div className="auth-form-panel">
+          
+          {/* Top EMS Hex / Delta Logo (Matching Uploaded Image) */}
+          <div className="d-flex justify-content-center mb-3">
+            <div
+              className="d-flex align-items-center justify-content-center rounded-3"
+              style={{
+                width: "44px",
+                height: "44px",
+                background: "#0f172a",
+                color: "#ffffff",
+                transform: "rotate(45deg)",
+                boxShadow: "0 8px 16px -4px rgba(15, 23, 42, 0.2)"
+              }}
+            >
+              <i className="bi bi-box-fill fs-5" style={{ transform: "rotate(-45deg)" }}></i>
+            </div>
+          </div>
+
+          {/* Heading */}
+          <div className="text-center mb-4">
+            <h3 className="fw-bold text-dark mb-1 tracking-tight" style={{ fontSize: "24px" }}>
+              Welcome back!
+            </h3>
+            <p className="text-muted small mb-0" style={{ fontSize: "13px" }}>
+              Please enter your details to sign in
+            </p>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="alert alert-danger py-2 px-3 rounded-3 small d-flex align-items-center gap-2 mb-3 border-0"
+              style={{ background: "#fef2f2", color: "#991b1b" }}
+            >
+              <i className="bi bi-exclamation-circle-fill"></i>
+              <span>{error}</span>
+            </motion.div>
+          )}
 
           <form onSubmit={handleSubmit}>
-            {/* Role Selection */}
+            {/* 4-Tier Role Selection Pills */}
             <div className="mb-3">
-              <label className="form-label fw-bold text-secondary small">SELECT PORTAL / ROLE</label>
-              <select
-                className="form-select rounded-3 py-2 fw-semibold"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
+              <label className="auth-clean-label">Select Portal Role</label>
+              <div className="d-flex flex-wrap gap-1.5">
+                {[
+                  { id: "admin", label: "HR Admin", icon: "👑" },
+                  { id: "manager", label: "Manager", icon: "👔" },
+                  { id: "supervisor", label: "Supervisor", icon: "👷" },
+                  { id: "employee", label: "Employee", icon: "💼" }
+                ].map((r) => (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => setRole(r.id)}
+                    className={`role-pill-btn ${role === r.id ? "active" : ""}`}
+                  >
+                    <span>{r.icon}</span>
+                    <span>{r.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Email Field (With Caret Tracking) */}
+            <div className="auth-clean-input-group">
+              <label className="auth-clean-label">Work Email</label>
+              <input
+                type="email"
+                required
+                autoComplete="off"
+                placeholder="name@company.com"
+                value={email}
+                onChange={handleEmailChange}
+                onFocus={() => setActiveField("email")}
+                onBlur={() => setActiveField(null)}
+                className="auth-clean-input"
+              />
+              <div className="auth-input-focus-line"></div>
+            </div>
+
+            {/* Password Field (With Hands-Over-Eyes & Eye Peek Toggle) */}
+            <div className="auth-clean-input-group">
+              <label className="auth-clean-label">Password</label>
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                placeholder="••••••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onFocus={() => setActiveField("password")}
+                onBlur={() => setActiveField(null)}
+                className="auth-clean-input"
+              />
+              <div className="auth-input-focus-line"></div>
+
+              {/* Eye Toggle Button */}
+              <button
+                type="button"
+                className="auth-eye-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? "Hide password" : "Show password & peek"}
               >
-                <option value="admin">👑 HR / Super Admin</option>
-                <option value="manager">👔 Department Manager</option>
-                <option value="supervisor">👷 Operational Supervisor</option>
-                <option value="employee">💼 Staff Employee</option>
-              </select>
+                <i className={showPassword ? "bi bi-eye-slash-fill text-primary" : "bi bi-eye-fill"}></i>
+              </button>
             </div>
 
-            {/* Email */}
-            <div className="mb-3">
-              <label className="form-label fw-bold text-secondary small">WORK EMAIL</label>
-              <div className="input-group">
-                <span className="input-group-text bg-light"><i className="bi bi-envelope"></i></span>
+            {/* Remember Me & Forgot Password */}
+            <div className="d-flex align-items-center justify-content-between mb-4">
+              <label className="d-flex align-items-center gap-2 cursor-pointer m-0">
                 <input
-                  type="email"
-                  className="form-control rounded-end-3 py-2"
-                  placeholder="name@company.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="form-check-input mt-0 rounded"
+                  style={{ width: "15px", height: "15px" }}
                 />
-              </div>
+                <span className="text-secondary small" style={{ fontSize: "12px" }}>
+                  Remember me
+                </span>
+              </label>
+
+              <button
+                type="button"
+                onClick={() => alert("Password reset instructions have been dispatched to your work email.")}
+                className="btn btn-link p-0 text-decoration-none small text-secondary"
+                style={{ fontSize: "12px" }}
+              >
+                Forgot password?
+              </button>
             </div>
 
-            {/* Password */}
-            <div className="mb-4">
-              <label className="form-label fw-bold text-secondary small">PASSWORD</label>
-              <div className="input-group">
-                <span className="input-group-text bg-light"><i className="bi bi-lock"></i></span>
-                <input
-                  type="password"
-                  className="form-control rounded-end-3 py-2"
-                  placeholder="Enter password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
+            {/* Primary Submit Button */}
             <button
               type="submit"
               disabled={submitting}
-              className="btn btn-primary w-100 py-2 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
+              className="auth-submit-btn"
             >
-              {submitting ? <span className="spinner-border spinner-border-sm"></span> : <i className="bi bi-box-arrow-in-right"></i>}
-              <span>Sign In to Portal</span>
+              {submitting ? (
+                <>
+                  <span className="spinner-border spinner-border-sm" role="status"></span>
+                  <span>Verifying Credentials...</span>
+                </>
+              ) : (
+                <>
+                  <span>Sign In to Portal</span>
+                  <i className="bi bi-arrow-right"></i>
+                </>
+              )}
             </button>
           </form>
 
-          {/* Quick Fill Testing Box */}
-          <div className="mt-4 pt-3 border-top">
-            <p className="text-muted small fw-bold mb-2 text-center text-uppercase" style={{ fontSize: "11px" }}>One-Click Demo Credentials</p>
-            <div className="d-grid gap-2" style={{ gridTemplateColumns: "1fr 1fr" }}>
+          {/* Quick-Fill Demo Credentials Bar */}
+          <div className="mt-4 pt-3 border-top border-slate-100">
+            <div className="d-flex align-items-center justify-content-between mb-2">
+              <span className="text-muted fw-bold text-uppercase" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
+                1-Click Demo Credentials
+              </span>
+              <span className="badge bg-slate-100 text-secondary" style={{ fontSize: "9px" }}>Quick Test</span>
+            </div>
+
+            <div className="auth-demo-grid">
               <button
                 type="button"
-                className="btn btn-sm btn-outline-danger d-flex align-items-center justify-content-center gap-1 py-1.5 rounded-2"
+                className="auth-demo-pill"
                 onClick={() => handleQuickFill("shubhsingh.13jan@gmail.com", "8859574934", "admin")}
               >
-                <span>👑 HR Admin (Shubh)</span>
+                <span>👑</span>
+                <span className="text-truncate">Admin (Shubh)</span>
               </button>
               <button
                 type="button"
-                className="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center gap-1 py-1.5 rounded-2"
+                className="auth-demo-pill"
                 onClick={() => handleQuickFill("manager@company.com", "Manager@123", "manager")}
               >
-                <span>👔 Manager</span>
+                <span>👔</span>
+                <span className="text-truncate">Manager</span>
               </button>
               <button
                 type="button"
-                className="btn btn-sm btn-outline-success d-flex align-items-center justify-content-center gap-1 py-1.5 rounded-2"
+                className="auth-demo-pill"
                 onClick={() => handleQuickFill("supervisor@company.com", "Supervisor@123", "supervisor")}
               >
-                <span>👷 Supervisor</span>
+                <span>👷</span>
+                <span className="text-truncate">Supervisor</span>
               </button>
               <button
                 type="button"
-                className="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center gap-1 py-1.5 rounded-2"
+                className="auth-demo-pill"
                 onClick={() => handleQuickFill("employee@company.com", "Employee@123", "employee")}
               >
-                <span>💼 Employee</span>
+                <span>💼</span>
+                <span className="text-truncate">Employee</span>
               </button>
             </div>
 
-            {/* Link to Signup page */}
-            <div className="text-center mt-3 pt-2">
-              <span className="text-muted small">Need an employee or supervisor account? </span>
-              <Link to="/signup" className="fw-bold text-primary text-decoration-none small hover-underline d-block mt-1">
-                Create Account / Sign Up Here →
+            {/* Sign Up Link */}
+            <div className="text-center mt-3 pt-1">
+              <span className="text-muted small" style={{ fontSize: "12px" }}>
+                Don't have an account?{" "}
+              </span>
+              <Link to="/signup" className="fw-bold text-dark text-decoration-none small hover-underline">
+                Create Account / Sign Up
               </Link>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
