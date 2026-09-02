@@ -213,11 +213,11 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
       </AnimatePresence>
 
       {/* Top Navbar Brand & Replay Intro Control */}
-      <div className="position-absolute top-0 start-0 w-100 p-3 px-md-4 d-flex align-items-center justify-content-between">
+      <div className="position-absolute top-0 start-0 w-100 p-2.5 px-md-4 d-flex align-items-center justify-content-between" style={{ zIndex: 10 }}>
         <Link to="/" className="text-decoration-none d-flex align-items-center gap-2">
           <div
             className="d-flex align-items-center justify-content-center rounded-3 text-white shadow-xs"
-            style={{ width: "32px", height: "32px", background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)" }}
+            style={{ width: "30px", height: "30px", background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)" }}
           >
             <i className="bi bi-box-fill small"></i>
           </div>
@@ -263,7 +263,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
         <div className="auth-form-panel">
           
           {/* Sliding Pill Mode Switcher (Option 4: Seamless Switch) */}
-          <div className="d-flex justify-content-center mb-3">
+          <div className="d-flex justify-content-center mb-2">
             <div className="d-inline-flex p-1 bg-slate-100 rounded-pill border border-slate-200">
               <button
                 type="button"
@@ -277,7 +277,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                     ? "bg-dark text-white shadow-xs"
                     : "text-secondary hover-dark border-0 bg-transparent"
                 }`}
-                style={{ fontSize: "11.5px" }}
+                style={{ fontSize: "11px" }}
               >
                 <i className="bi bi-box-arrow-in-right me-1"></i>
                 <span>Sign In</span>
@@ -295,7 +295,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                     ? "bg-dark text-white shadow-xs"
                     : "text-secondary hover-dark border-0 bg-transparent"
                 }`}
-                style={{ fontSize: "11.5px" }}
+                style={{ fontSize: "11px" }}
               >
                 <i className="bi bi-person-plus-fill me-1"></i>
                 <span>Create Account</span>
@@ -304,11 +304,11 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
           </div>
 
           {/* Heading */}
-          <div className="text-center mb-3">
-            <h3 className="fw-bold text-dark mb-1 tracking-tight" style={{ fontSize: "22px" }}>
+          <div className="text-center mb-2">
+            <h3 className="fw-bold text-dark mb-0.5 tracking-tight" style={{ fontSize: "19px" }}>
               {authMode === "login" ? "Welcome back!" : "Join Enterprise EMS"}
             </h3>
-            <p className="text-muted small mb-0" style={{ fontSize: "12.5px" }}>
+            <p className="text-muted small mb-0" style={{ fontSize: "12px" }}>
               {authMode === "login"
                 ? "Enter your credentials to access your portal"
                 : "Register your workforce account for access"}
@@ -320,7 +320,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
             <motion.div
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
-              className="alert alert-danger py-2 px-3 rounded-3 small d-flex align-items-center gap-2 mb-3 border-0"
+              className="alert alert-danger py-1.5 px-2.5 rounded-3 small d-flex align-items-center gap-2 mb-2 border-0"
               style={{ background: "#fef2f2", color: "#991b1b" }}
             >
               <i className="bi bi-exclamation-circle-fill"></i>
@@ -332,7 +332,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
             <motion.div
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
-              className="alert alert-success py-2 px-3 rounded-3 small d-flex align-items-center gap-2 mb-3 border-0"
+              className="alert alert-success py-1.5 px-2.5 rounded-3 small d-flex align-items-center gap-2 mb-2 border-0"
               style={{ background: "#f0fdf4", color: "#166534" }}
             >
               <i className="bi bi-check-circle-fill"></i>
@@ -342,9 +342,9 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
 
           <form onSubmit={handleSubmit}>
             {/* 4-Tier Role Selection Pills */}
-            <div className="mb-2.5">
-              <label className="auth-clean-label">Select Role Tier</label>
-              <div className="d-flex flex-wrap gap-1.5">
+            <div className="auth-role-selection-group mb-2.5">
+              <label className="auth-clean-label mb-1.5">Select Role Tier</label>
+              <div className="role-pills-grid">
                 {[
                   { id: "admin", label: "HR Admin", icon: "👑" },
                   { id: "manager", label: "Manager", icon: "👔" },
@@ -490,16 +490,16 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
 
             {/* Remember Me & Forgot Password (Only in Login Mode) */}
             {authMode === "login" && (
-              <div className="d-flex align-items-center justify-content-between mb-3">
+              <div className="d-flex align-items-center justify-content-between mb-2">
                 <label className="d-flex align-items-center gap-2 cursor-pointer m-0">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="form-check-input mt-0 rounded"
-                    style={{ width: "15px", height: "15px" }}
+                    style={{ width: "14px", height: "14px" }}
                   />
-                  <span className="text-secondary small" style={{ fontSize: "12px" }}>
+                  <span className="text-secondary small" style={{ fontSize: "11.5px" }}>
                     Remember me
                   </span>
                 </label>
@@ -508,7 +508,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   type="button"
                   onClick={() => alert("Password reset instructions have been dispatched to your work email.")}
                   className="btn btn-link p-0 text-decoration-none small text-secondary"
-                  style={{ fontSize: "12px" }}
+                  style={{ fontSize: "11.5px" }}
                 >
                   Forgot password?
                 </button>
@@ -519,7 +519,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
             <button
               type="submit"
               disabled={submitting}
-              className="auth-submit-btn mt-2"
+              className="auth-submit-btn mt-1.5"
             >
               {submitting ? (
                 <>
@@ -537,8 +537,8 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
 
           {/* Quick-Fill Demo Credentials Bar (Only in Login Mode) */}
           {authMode === "login" ? (
-            <div className="mt-3 pt-2 border-top border-slate-100">
-              <div className="d-flex align-items-center justify-content-between mb-2">
+            <div className="mt-2 pt-1.5 border-top border-slate-100">
+              <div className="d-flex align-items-center justify-content-between mb-1.5">
                 <span className="text-muted fw-bold text-uppercase" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
                   1-Click Demo Credentials
                 </span>

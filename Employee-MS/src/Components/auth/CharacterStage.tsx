@@ -35,7 +35,7 @@ export const CharacterStage: React.FC<CharacterStageProps> = ({
   });
 
   return (
-    <div className="character-stage-container w-100 h-100 d-flex flex-column align-items-center justify-content-between p-3 p-md-4 select-none">
+    <div className="character-stage-container w-100 h-100 d-flex flex-column align-items-center justify-content-between p-2.5 p-md-3 select-none">
       
       {/* 👑 DYNAMIC ROLE BADGE BANNER */}
       <motion.div
@@ -43,7 +43,7 @@ export const CharacterStage: React.FC<CharacterStageProps> = ({
         initial={{ opacity: 0, y: -10, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
-        className="w-100 text-center py-2 px-3 rounded-4 shadow-xs"
+        className="w-100 text-center py-1.5 px-3 rounded-4 shadow-xs"
         style={{
           background: currentTheme.accentBg,
           border: `1.5px solid ${currentTheme.border}`,
@@ -51,17 +51,17 @@ export const CharacterStage: React.FC<CharacterStageProps> = ({
         }}
       >
         <div className="d-flex align-items-center justify-content-center gap-1.5 mb-0.5">
-          <span className="fw-bold tracking-wider" style={{ color: currentTheme.accent, fontSize: "12px", letterSpacing: "0.5px" }}>
+          <span className="fw-bold tracking-wider" style={{ color: currentTheme.accent, fontSize: "11.5px", letterSpacing: "0.5px" }}>
             {currentTheme.badgeTitle}
           </span>
         </div>
-        <span className="text-secondary d-block" style={{ fontSize: "10.5px" }}>
+        <span className="text-secondary d-block" style={{ fontSize: "10px" }}>
           {currentTheme.badgeDesc}
         </span>
       </motion.div>
 
       {/* 🎨 MASTER SVG RIG */}
-      <div className="position-relative d-flex align-items-center justify-content-center my-auto w-100" style={{ maxWidth: "420px", height: "300px" }}>
+      <div className="position-relative d-flex align-items-center justify-content-center my-auto w-100" style={{ maxWidth: "390px", height: "clamp(200px, 28vh, 260px)" }}>
         <svg
           viewBox="0 0 460 340"
           className="w-100 h-100"
