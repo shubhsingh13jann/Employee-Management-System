@@ -10,7 +10,11 @@ import { motion, AnimatePresence } from 'framer-motion';
  * - Metallic latch unclick, 3D lid swing, and expanding radiant morph into the auth card
  * - Instant Skip button for fast access
  */
-const BriefcaseLoader = ({ onComplete }) => {
+interface BriefcaseLoaderProps {
+  onComplete: () => void;
+}
+
+const BriefcaseLoader: React.FC<BriefcaseLoaderProps> = ({ onComplete }) => {
   const [phase, setPhase] = useState(0);
   // Phase 0: Walking across stage from left to center carrying briefcase (0s -> 1.7s)
   // Phase 1: Halting, bending down, and planting briefcase on floor (1.7s -> 2.5s)

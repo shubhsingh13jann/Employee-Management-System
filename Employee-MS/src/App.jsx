@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -9,34 +9,36 @@ import ProtectedRoute from "./components/common/ProtectedRoute";
 import Layout from "./components/common/Layout";
 import PageTransition from "./components/common/PageTransition";
 import TopLaserBar from "./components/common/TopLaserBar";
+import ErrorBoundary from "./Components/common/ErrorBoundary";
+import SuspenseFallback from "./Components/common/SuspenseFallback";
 
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 
-// Admin Pages
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import Departments from "./pages/admin/Departments";
-import UserManagement from "./pages/admin/UserManagement";
-import HierarchyMapping from "./pages/admin/HierarchyMapping";
+// 👑 Lazy-Loaded Admin Pages
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const Departments = lazy(() => import("./pages/admin/Departments"));
+const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
+const HierarchyMapping = lazy(() => import("./pages/admin/HierarchyMapping"));
 
-// Manager Pages
-import ManagerDashboard from "./pages/manager/ManagerDashboard";
-import ProjectsManager from "./pages/manager/ProjectsManager";
-import DepartmentSupervisors from "./pages/manager/DepartmentSupervisors";
-import ManagerLeaves from "./pages/manager/ManagerLeaves";
+// 👔 Lazy-Loaded Manager Pages
+const ManagerDashboard = lazy(() => import("./pages/manager/ManagerDashboard"));
+const ProjectsManager = lazy(() => import("./pages/manager/ProjectsManager"));
+const DepartmentSupervisors = lazy(() => import("./pages/manager/DepartmentSupervisors"));
+const ManagerLeaves = lazy(() => import("./pages/manager/ManagerLeaves"));
 
-// Supervisor Pages
-import SupervisorDashboard from "./pages/supervisor/SupervisorDashboard";
-import SupervisorTeam from "./pages/supervisor/SupervisorTeam";
-import SupervisorTasks from "./pages/supervisor/SupervisorTasks";
-import SupervisorLeaves from "./pages/supervisor/SupervisorLeaves";
+// 👷 Lazy-Loaded Supervisor Pages
+const SupervisorDashboard = lazy(() => import("./pages/supervisor/SupervisorDashboard"));
+const SupervisorTeam = lazy(() => import("./pages/supervisor/SupervisorTeam"));
+const SupervisorTasks = lazy(() => import("./pages/supervisor/SupervisorTasks"));
+const SupervisorLeaves = lazy(() => import("./pages/supervisor/SupervisorLeaves"));
 
-// Employee Pages
-import EmployeeDashboard from "./pages/employee/EmployeeDashboard";
-import EmployeeTasks from "./pages/employee/EmployeeTasks";
-import EmployeeLeaves from "./pages/employee/EmployeeLeaves";
-import EmployeeProfile from "./pages/employee/EmployeeProfile";
+// 💼 Lazy-Loaded Employee Pages
+const EmployeeDashboard = lazy(() => import("./pages/employee/EmployeeDashboard"));
+const EmployeeTasks = lazy(() => import("./pages/employee/EmployeeTasks"));
+const EmployeeLeaves = lazy(() => import("./pages/employee/EmployeeLeaves"));
+const EmployeeProfile = lazy(() => import("./pages/employee/EmployeeProfile"));
 
 const AnimatedAppContent = () => {
   const location = useLocation();
@@ -56,7 +58,16 @@ const AnimatedAppContent = () => {
 
             {/* 👑 HR Admin Portal */}
             <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-              <Route path="/admin" element={<Layout />}>
+              <Route
+                path="/admin"
+                element={
+                  <ErrorBoundary fallbackTitle="Admin Portal Error">
+                    <Suspense fallback={<SuspenseFallback label="Loading Admin Dashboard..." />}>
+                      <Layout />
+                    </Suspense>
+                  </ErrorBoundary>
+                }
+              >
                 <Route index element={<Navigate to="dashboard" replace />} />
                 <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="departments" element={<Departments />} />
@@ -67,7 +78,16 @@ const AnimatedAppContent = () => {
 
             {/* 👔 Manager Portal */}
             <Route element={<ProtectedRoute allowedRoles={["manager", "admin"]} />}>
-              <Route path="/manager" element={<Layout />}>
+              <Route
+                path="/manager"
+                element={
+                  <ErrorBoundary fallbackTitle="Manager Portal Error">
+                    <Suspense fallback={<SuspenseFallback label="Loading Manager Dashboard..." />}>
+                      <Layout />
+                    </Suspense>
+                  </ErrorBoundary>
+                }
+              >
                 <Route index element={<Navigate to="dashboard" replace />} />
                 <Route path="dashboard" element={<ManagerDashboard />} />
                 <Route path="projects" element={<ProjectsManager />} />
@@ -78,7 +98,16 @@ const AnimatedAppContent = () => {
 
             {/* 👷 Supervisor Portal */}
             <Route element={<ProtectedRoute allowedRoles={["supervisor", "admin"]} />}>
-              <Route path="/supervisor" element={<Layout />}>
+              <Route
+                path="/supervisor"
+                element={
+                  <ErrorBoundary fallbackTitle="Supervisor Portal Error">
+                    <Suspense fallback={<SuspenseFallback label="Loading Supervisor Dashboard..." />}>
+                      <Layout />
+                    </Suspense>
+                  </ErrorBoundary>
+                }
+              >
                 <Route index element={<Navigate to="dashboard" replace />} />
                 <Route path="dashboard" element={<SupervisorDashboard />} />
                 <Route path="team" element={<SupervisorTeam />} />
@@ -89,7 +118,16 @@ const AnimatedAppContent = () => {
 
             {/* 💼 Employee Portal */}
             <Route element={<ProtectedRoute allowedRoles={["employee", "admin"]} />}>
-              <Route path="/employee" element={<Layout />}>
+              <Route
+                path="/employee"
+                element={
+                  <ErrorBoundary fallbackTitle="Employee Portal Error">
+                    <Suspense fallback={<SuspenseFallback label="Loading Employee Portal..." />}>
+                      <Layout />
+                    </Suspense>
+                  </ErrorBoundary>
+                }
+              >
                 <Route index element={<Navigate to="dashboard" replace />} />
                 <Route path="dashboard" element={<EmployeeDashboard />} />
                 <Route path="tasks" element={<EmployeeTasks />} />
