@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import api from "../api/axios";
+import React from "react";
+import Login from "./Login";
 
 const Signup = () => {
+  return <Login initialMode="signup" />;
+};
+
+const _legacySignup = () => {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({

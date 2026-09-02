@@ -49,8 +49,8 @@ const AnimatedAppContent = () => {
           <Routes location={location}>
             {/* Public Landing & Auth Routes */}
             <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login initialMode="login" />} />
+            <Route path="/signup" element={<Login initialMode="signup" />} />
             <Route path="/adminlogin" element={<Navigate to="/login" replace />} />
             <Route path="/dashboard" element={<Navigate to="/login" replace />} />
 
