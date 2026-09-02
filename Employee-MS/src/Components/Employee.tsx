@@ -38,7 +38,7 @@ const Employee = () => {
                 <td>{employee.address}</td>
               </tr>
             ))}
-            {!employees.length && !error && <tr><td colSpan="5" className="text-center">No employees found.</td></tr>}
+            {!employees.length && !error && <tr><td colSpan={5} className="text-center">No employees found.</td></tr>}
           </tbody>
         </table>
       </div>

@@ -97,14 +97,14 @@ const HierarchyMapping = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-5">
+                  <td colSpan={5} className="text-center py-5">
                     <div className="spinner-border spinner-border-sm text-primary"></div>
                     <span className="ms-2 text-muted">Loading hierarchy mappings...</span>
                   </td>
                 </tr>
               ) : hierarchy.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-5 text-muted">
+                  <td colSpan={5} className="text-center py-5 text-muted">
                     No active team hierarchy mappings found. Click 'Assign / Reassign Team' to create mappings.
                   </td>
                 </tr>

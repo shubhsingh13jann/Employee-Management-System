@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import api from "../api/axios";
 import CharacterStage from "../components/auth/CharacterStage";
 import BriefcaseLoader from "../components/auth/BriefcaseLoader";
+import { UserRole, AuthStatus } from "../components/auth/auth.types";
 import "../components/auth/authInteractive.css";
 
 /**
@@ -12,19 +13,23 @@ import "../components/auth/authInteractive.css";
  * with the interactive character crew, caret tracking, privacy hands,
  * and the articulated walking briefcase opening animation.
  */
-const Login = ({ initialMode = "login" }) => {
+interface LoginProps {
+  initialMode?: "login" | "signup";
+}
+
+const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
   // Mode: 'login' | 'signup'
-  const [authMode, setAuthMode] = useState(() => {
+  const [authMode, setAuthMode] = useState<"login" | "signup">(() => {
     if (initialMode === "signup" || location.pathname.includes("signup")) {
       return "signup";
     }
     return "login";
   });
 
-  // Sync mode if route changes
+  // Sync mode if URL route changes
   useEffect(() => {
     if (location.pathname.includes("signup")) {
       setAuthMode("signup");
@@ -34,7 +39,7 @@ const Login = ({ initialMode = "login" }) => {
   }, [location.pathname]);
 
   // Form State
-  const [role, setRole] = useState("admin");
+  const [role, setRole] = useState<UserRole>("admin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -54,10 +59,10 @@ const Login = ({ initialMode = "login" }) => {
   ]);
 
   // Interaction & Animation States
-  const [activeField, setActiveField] = useState(null); // 'email' | 'password' | 'confirm' | null
+  const [activeField, setActiveField] = useState<"email" | "password" | null>(null);
   const [caretProgress, setCaretProgress] = useState(0);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [authStatus, setAuthStatus] = useState("idle"); // 'idle' | 'submitting' | 'success' | 'error'
+  const [authStatus, setAuthStatus] = useState<AuthStatus>("idle");
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -349,7 +354,7 @@ const Login = ({ initialMode = "login" }) => {
                   <button
                     key={r.id}
                     type="button"
-                    onClick={() => setRole(r.id)}
+                    onClick={() => setRole(r.id as UserRole)}
                     className={`role-pill-btn ${role === r.id ? "active" : ""}`}
                   >
                     <span>{r.icon}</span>

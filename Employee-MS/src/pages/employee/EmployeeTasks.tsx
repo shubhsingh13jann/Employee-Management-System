@@ -80,14 +80,14 @@ const EmployeeTasks = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="6" className="text-center py-5">
+                  <td colSpan={6} className="text-center py-5">
                     <div className="spinner-border spinner-border-sm text-primary"></div>
                     <span className="ms-2 text-muted">Loading your tasks...</span>
                   </td>
                 </tr>
               ) : tasks.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center py-5 text-muted">
+                  <td colSpan={6} className="text-center py-5 text-muted">
                     <i className="bi bi-check2-circle fs-1 text-success d-block mb-2"></i>
                     Awesome! You currently have no pending tasks.
                   </td>

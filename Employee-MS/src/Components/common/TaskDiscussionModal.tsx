@@ -56,7 +56,7 @@ const TaskDiscussionModal = ({ task, onClose }) => {
   if (!task) return null;
 
   return (
-    <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} tabIndex="-1">
+    <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} tabIndex={-1}>
       <div className="modal-dialog modal-dialog-centered modal-lg">
         <div className="modal-content shadow-lg border-0">
           <div className="modal-header bg-dark text-white">

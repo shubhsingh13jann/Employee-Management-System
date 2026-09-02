@@ -183,7 +183,7 @@ const ProjectsManager = () => {
                     <label className="form-label fw-semibold small">Description & Goals</label>
                     <textarea
                       className="form-control"
-                      rows="3"
+                      rows={3}
                       placeholder="Deliverables, scope, and objectives..."
                       value={form.description}
                       onChange={(e) => setForm({ ...form, description: e.target.value })}

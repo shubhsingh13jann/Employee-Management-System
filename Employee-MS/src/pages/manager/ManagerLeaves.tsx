@@ -76,14 +76,14 @@ const ManagerLeaves = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="6" className="text-center py-5">
+                  <td colSpan={6} className="text-center py-5">
                     <div className="spinner-border spinner-border-sm text-primary"></div>
                     <span className="ms-2 text-muted">Loading escalated queue...</span>
                   </td>
                 </tr>
               ) : leaves.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center py-5 text-muted">
+                  <td colSpan={6} className="text-center py-5 text-muted">
                     <i className="bi bi-check2-circle fs-2 text-success d-block mb-1"></i>
                     No pending escalated leave applications requiring review!
                   </td>
@@ -156,7 +156,7 @@ const ManagerLeaves = () => {
                 <label className="form-label fw-semibold small">Manager's Notes / Justification (Optional)</label>
                 <textarea
                   className="form-control"
-                  rows="3"
+                  rows={3}
                   placeholder="e.g. Approved. Project delivery milestone timeline adjusted accordingly."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}

@@ -110,14 +110,14 @@ const SupervisorTasks = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="6" className="text-center py-5">
+                  <td colSpan={6} className="text-center py-5">
                     <div className="spinner-border spinner-border-sm text-primary"></div>
                     <span className="ms-2 text-muted">Loading assigned tasks...</span>
                   </td>
                 </tr>
               ) : tasks.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center py-5 text-muted">
+                  <td colSpan={6} className="text-center py-5 text-muted">
                     No tasks currently delegated. Click 'Assign New Task' to create tickets for your team.
                   </td>
                 </tr>
@@ -223,7 +223,7 @@ const SupervisorTasks = () => {
                     <label className="form-label fw-semibold small">Description & Acceptance Criteria</label>
                     <textarea
                       className="form-control"
-                      rows="3"
+                      rows={3}
                       placeholder="Steps to complete, technical requirements..."
                       value={form.description}
                       onChange={(e) => setForm({ ...form, description: e.target.value })}

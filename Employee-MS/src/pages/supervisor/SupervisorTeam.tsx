@@ -47,14 +47,14 @@ const SupervisorTeam = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-5">
+                  <td colSpan={5} className="text-center py-5">
                     <div className="spinner-border spinner-border-sm text-primary"></div>
                     <span className="ms-2 text-muted">Loading team roster...</span>
                   </td>
                 </tr>
               ) : team.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-5 text-muted">
+                  <td colSpan={5} className="text-center py-5 text-muted">
                     No employees currently assigned to your team. Please contact HR Admin for assignment.
                   </td>
                 </tr>

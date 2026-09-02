@@ -180,14 +180,14 @@ const UserManagement = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-5">
+                  <td colSpan={7} className="text-center py-5">
                     <div className="spinner-border spinner-border-sm text-primary"></div>
                     <span className="ms-2 text-muted">Loading user directory...</span>
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-5 text-muted">
+                  <td colSpan={7} className="text-center py-5 text-muted">
                     No users found matching the selected criteria.
                   </td>
                 </tr>

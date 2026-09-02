@@ -76,14 +76,14 @@ const SupervisorLeaves = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-5">
+                  <td colSpan={5} className="text-center py-5">
                     <div className="spinner-border spinner-border-sm text-primary"></div>
                     <span className="ms-2 text-muted">Loading team leave applications...</span>
                   </td>
                 </tr>
               ) : leaves.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-5 text-muted">
+                  <td colSpan={5} className="text-center py-5 text-muted">
                     <i className="bi bi-check-circle fs-2 text-success d-block mb-1"></i>
                     No pending routine leave requests from your team!
                   </td>
@@ -154,7 +154,7 @@ const SupervisorLeaves = () => {
                 <label className="form-label fw-semibold small">Supervisor Remarks / Justification</label>
                 <textarea
                   className="form-control"
-                  rows="3"
+                  rows={3}
                   placeholder="e.g. Recommended. Task tickets reassigned during this window."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}

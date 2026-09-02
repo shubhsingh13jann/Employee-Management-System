@@ -89,7 +89,7 @@ const Departments = () => {
                 <label className="form-label fw-semibold small">Description</label>
                 <textarea
                   className="form-control"
-                  rows="3"
+                  rows={3}
                   placeholder="Responsibilities, scope, and objectives..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -124,13 +124,13 @@ const Departments = () => {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan="4" className="text-center py-4">
+                      <td colSpan={4} className="text-center py-4">
                         <div className="spinner-border spinner-border-sm text-primary"></div>
                       </td>
                     </tr>
                   ) : departments.length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="text-center py-4 text-muted">No departments created yet.</td>
+                      <td colSpan={4} className="text-center py-4 text-muted">No departments created yet.</td>
                     </tr>
                   ) : (
                     departments.map((dept) => (

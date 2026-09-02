@@ -47,14 +47,14 @@ const DepartmentSupervisors = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-5">
+                  <td colSpan={5} className="text-center py-5">
                     <div className="spinner-border spinner-border-sm text-primary"></div>
                     <span className="ms-2 text-muted">Loading supervisors...</span>
                   </td>
                 </tr>
               ) : supervisors.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-5 text-muted">No supervisors registered in this department.</td>
+                  <td colSpan={5} className="text-center py-5 text-muted">No supervisors registered in this department.</td>
                 </tr>
               ) : (
                 supervisors.map((s) => (

@@ -100,14 +100,14 @@ const EmployeeLeaves = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-5">
+                  <td colSpan={7} className="text-center py-5">
                     <div className="spinner-border spinner-border-sm text-primary"></div>
                     <span className="ms-2 text-muted">Loading leave history...</span>
                   </td>
                 </tr>
               ) : leaves.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-5 text-muted">
+                  <td colSpan={7} className="text-center py-5 text-muted">
                     No leave requests found. Click 'Apply for Leave' to submit a time-off application.
                   </td>
                 </tr>
@@ -192,7 +192,7 @@ const EmployeeLeaves = () => {
                     <label className="form-label fw-semibold small">Reason for Leave</label>
                     <textarea
                       className="form-control"
-                      rows="3"
+                      rows={3}
                       placeholder="Explain reason for absence..."
                       value={form.reason}
                       onChange={(e) => setForm({ ...form, reason: e.target.value })}
