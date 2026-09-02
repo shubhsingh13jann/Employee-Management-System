@@ -2,20 +2,18 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
- * CharacterStage - The Definitive 4-Bot Workforce Crew
+ * CharacterStage - All 4 Crew Members Sneak Peek Together!
  * 
- * 100% Guaranteed Fixes for Issues 3 & 4:
- * - When Password is focused (and showPassword=false):
- *   PURPLE COVERS BOTH EYES! Left hand covers Left Eye (cx: 202, cy: 146),
- *   Right hand covers Right Eye (cx: 234, cy: 146). No eye is left exposed!
- * - When Eye Icon is toggled (showPassword=true):
- *   PEEK MODE ACTIVATES! Right hand slides down to the cheek (y: +32px),
- *   parting its fingers and completely revealing the Right Eye (cx: 234, cy: 146).
- *   The Right Eye with its black & white glossy pupil looks directly at the password!
- *   The Left Hand stays firmly covering the Left Eye!
- * - Zero CSS transformOrigin bugs: Hands use pure SVG translational kinematics.
- * - ALL 4 characters (Purple, Pink, Yellow, Orange) have full black-and-white glint eyes!
- * - 360° global cursor tracking + email caret reading physics.
+ * When Password is Masked (showPassword=false):
+ * - ALL 4 characters (Purple, Pink, Yellow, Orange) firmly cover BOTH eyes with both hands/paws!
+ * 
+ * When Password is Unmasked (showPassword=true / Sneak Peek):
+ * - ALL 4 characters sneak peek together!
+ * - Purple lowers right hand to cheek, right eye peeks at password!
+ * - Pink lowers right hand to cheek, right eye peeks at password!
+ * - Yellow lowers right hand to cheek, right eye peeks at password!
+ * - Orange lowers right paw to cheek, right eye peeks at password!
+ * - All 4 characters look directly at the password with their black & white glossy glint eyes!
  */
 const CharacterStage = ({
   mousePos = { x: 0, y: 0 },
@@ -56,14 +54,14 @@ const CharacterStage = ({
   // Calculate Pupil Direction
   const getPupilOffset = (baseMultiplier = 1) => {
     if (isEmail) {
-      // Email input is on the RIGHT panel (+X, +Y):
+      // Email input is on the RIGHT panel (+X, +Y)
       const caretX = (7 + caretProgress * 7) * baseMultiplier;
       const caretY = 4.5 * baseMultiplier;
       return { x: caretX, y: caretY };
     }
     if (isPassword) {
       if (showPassword) {
-        // Peek mode: looking down-right directly at password!
+        // Peek mode: ALL characters look down-right directly at password!
         return { x: 8 * baseMultiplier, y: 3.5 * baseMultiplier };
       }
       // Masked: eyes covered
@@ -310,7 +308,7 @@ const CharacterStage = ({
               </g>
             )}
 
-            {/* PURPLE EYES (Full Black & White Sparkle Combination) */}
+            {/* PURPLE EYES */}
             <g>
               {/* Left Eye */}
               <ellipse cx="202" cy="146" rx="12" ry="14" fill="#ffffff" />
@@ -398,7 +396,7 @@ const CharacterStage = ({
             <circle cx="266" cy="220" r="4.5" fill="#fda4af" opacity="0.6" />
             <circle cx="302" cy="220" r="4.5" fill="#fda4af" opacity="0.6" />
 
-            {/* PINK EYES (With Full Black & White Glint Combination!) */}
+            {/* PINK EYES */}
             <g>
               <ellipse cx="274" cy="208" rx="8.5" ry="10" fill="#ffffff" />
               <motion.g
@@ -421,7 +419,12 @@ const CharacterStage = ({
 
             {/* Mouth */}
             {isPassword ? (
-              <path d="M280 228 Q284 225 288 228" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" fill="none" />
+              showPassword ? (
+                // Happy smile when peeking!
+                <path d="M280 227 Q285 233 290 227" stroke="#0f172a" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+              ) : (
+                <path d="M280 228 Q284 225 288 228" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" fill="none" />
+              )
             ) : (
               <path d="M278 226 Q284 232 290 226" stroke="#0f172a" strokeWidth="2.5" strokeLinecap="round" fill="none" />
             )}
@@ -479,7 +482,7 @@ const CharacterStage = ({
             <circle cx="348" cy="216" r="5.5" fill="#fca5a5" opacity={isPassword ? "0.8" : "0.3"} />
             <circle cx="394" cy="216" r="5.5" fill="#fca5a5" opacity={isPassword ? "0.8" : "0.3"} />
 
-            {/* YELLOW EYES (Full Black & White Glint Combination!) */}
+            {/* YELLOW EYES */}
             <g>
               <ellipse cx="356" cy="198" rx="8" ry="9" fill="#ffffff" />
               <motion.g
@@ -501,7 +504,12 @@ const CharacterStage = ({
             </g>
 
             {/* Mouth */}
-            <path d="M360 220 H382" stroke="#0f172a" strokeWidth="3" strokeLinecap="round" />
+            {isPassword && showPassword ? (
+              // Amused "o" when peeking!
+              <circle cx="371" cy="222" r="3.5" fill="#0f172a" />
+            ) : (
+              <path d="M360 220 H382" stroke="#0f172a" strokeWidth="3" strokeLinecap="round" />
+            )}
 
             {/* Idle Accessories */}
             {!isPassword && (
@@ -557,7 +565,7 @@ const CharacterStage = ({
             <circle cx="132" cy="265" r="7" fill="#f43f5e" opacity="0.3" />
             <circle cx="188" cy="265" r="7" fill="#f43f5e" opacity="0.3" />
 
-            {/* ORANGE EYES (Full Black & White Glint Combination!) */}
+            {/* ORANGE EYES */}
             <g>
               <ellipse cx="146" cy="245" rx="8.5" ry="10" fill="#ffffff" />
               <motion.g
@@ -582,7 +590,12 @@ const CharacterStage = ({
             {isSuccess ? (
               <path d="M150 262 Q160 280 170 262 Z" fill="#ffffff" stroke="#c2410c" strokeWidth="1.5" />
             ) : isPassword ? (
-              <circle cx="160" cy="268" r="4" fill="#0f172a" />
+              showPassword ? (
+                // Happy smile when peeking!
+                <path d="M152 265 Q160 274 168 265" stroke="#0f172a" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+              ) : (
+                <circle cx="160" cy="268" r="4" fill="#0f172a" />
+              )
             ) : (
               <g>
                 <path d="M150 264 Q160 276 170 264 Z" fill="#0f172a" />
@@ -611,7 +624,7 @@ const CharacterStage = ({
           </motion.g>
 
           {/* ============================================================
-              MASTER PRIVACY HANDS OVERLAY (RENDERED ON TOP)
+              MASTER PRIVACY HANDS OVERLAY - ALL 4 BOTS SNEAK PEEK!
               ============================================================ */}
           <AnimatePresence>
             {isPassword && (
@@ -639,8 +652,8 @@ const CharacterStage = ({
                 <motion.g
                   animate={
                     showPassword
-                      ? { y: 34, x: 6 } // PEEK MODE: Right hand slides down to cheek, Right Eye at (234, 146) is COMPLETELY UNCOVERED & PEEKING!
-                      : { y: 0, x: 0 }  // FULL PRIVACY: Right hand firmly covers Right Eye at (234, 146)!
+                      ? { y: 34, x: 6 } // PEEK MODE: Right hand slides down to cheek, uncovering right eye!
+                      : { y: 0, x: 0 }  // FULL PRIVACY: Right hand firmly covers right eye!
                   }
                   transition={{ type: "spring", stiffness: 420, damping: 26 }}
                 >
@@ -660,9 +673,9 @@ const CharacterStage = ({
                   </g>
                 </motion.g>
 
-                {/* 2. PINK BOT VISIBLE ARMS & HANDS (Covers cx: 274 & 294) */}
+                {/* 2. PINK BOT HANDS */}
+                {/* Pink Left Hand: Always covers Pink's Left Eye (cx: 274, cy: 208) */}
                 <g>
-                  {/* Pink Left Arm & Hand */}
                   <path d="M252 245 Q258 220 272 210" stroke="#be123c" strokeWidth="9" strokeLinecap="round" fill="none" />
                   <g filter="url(#handShadow)">
                     <ellipse cx="274" cy="208" rx="12" ry="13" fill="url(#pinkHandGrad)" stroke="#e11d48" strokeWidth="1.5" />
@@ -670,8 +683,17 @@ const CharacterStage = ({
                     <circle cx="274" cy="198" r="3.2" fill="#ffffff" />
                     <circle cx="279" cy="200" r="3" fill="#ffffff" />
                   </g>
+                </g>
 
-                  {/* Pink Right Arm & Hand */}
+                {/* Pink Right Hand: Firmly covers Right Eye (cx: 294, cy: 208) OR Slides to Cheek to PEEK! */}
+                <motion.g
+                  animate={
+                    showPassword
+                      ? { y: 24, x: 5 } // PEEK MODE: Right hand slides down to cheek, uncovering Pink's right eye!
+                      : { y: 0, x: 0 }  // FULL PRIVACY: Covers right eye!
+                  }
+                  transition={{ type: "spring", stiffness: 420, damping: 26 }}
+                >
                   <path d="M316 245 Q310 220 296 210" stroke="#be123c" strokeWidth="9" strokeLinecap="round" fill="none" />
                   <g filter="url(#handShadow)">
                     <ellipse cx="294" cy="208" rx="12" ry="13" fill="url(#pinkHandGrad)" stroke="#e11d48" strokeWidth="1.5" />
@@ -679,11 +701,11 @@ const CharacterStage = ({
                     <circle cx="294" cy="198" r="3.2" fill="#ffffff" />
                     <circle cx="299" cy="200" r="3" fill="#ffffff" />
                   </g>
-                </g>
+                </motion.g>
 
-                {/* 3. YELLOW BOT VISIBLE ARMS & HANDS (Covers cx: 356 & 386) */}
+                {/* 3. YELLOW BOT HANDS */}
+                {/* Yellow Left Hand: Always covers Yellow's Left Eye (cx: 356, cy: 198) */}
                 <g>
-                  {/* Yellow Left Arm & Hand */}
                   <path d="M336 245 Q342 215 354 200" stroke="#ca8a04" strokeWidth="9" strokeLinecap="round" fill="none" />
                   <g filter="url(#handShadow)">
                     <ellipse cx="356" cy="198" rx="13" ry="14" fill="url(#yellowHandGrad)" stroke="#ca8a04" strokeWidth="1.5" />
@@ -691,8 +713,17 @@ const CharacterStage = ({
                     <rect x="355" y="184" width="4.5" height="12" rx="2.25" fill="#ffffff" stroke="#eab308" strokeWidth="0.8" />
                     <rect x="361" y="186" width="4.5" height="10" rx="2.25" fill="#ffffff" stroke="#eab308" strokeWidth="0.8" />
                   </g>
+                </g>
 
-                  {/* Yellow Right Arm & Hand */}
+                {/* Yellow Right Hand: Firmly covers Right Eye (cx: 386, cy: 198) OR Slides to Cheek to PEEK! */}
+                <motion.g
+                  animate={
+                    showPassword
+                      ? { y: 24, x: 5 } // PEEK MODE: Right hand slides down to cheek, uncovering Yellow's right eye!
+                      : { y: 0, x: 0 }  // FULL PRIVACY: Covers right eye!
+                  }
+                  transition={{ type: "spring", stiffness: 420, damping: 26 }}
+                >
                   <path d="M406 245 Q398 215 388 200" stroke="#ca8a04" strokeWidth="9" strokeLinecap="round" fill="none" />
                   <g filter="url(#handShadow)">
                     <ellipse cx="386" cy="198" rx="13" ry="14" fill="url(#yellowHandGrad)" stroke="#ca8a04" strokeWidth="1.5" />
@@ -700,11 +731,11 @@ const CharacterStage = ({
                     <rect x="385" y="184" width="4.5" height="12" rx="2.25" fill="#ffffff" stroke="#eab308" strokeWidth="0.8" />
                     <rect x="391" y="186" width="4.5" height="10" rx="2.25" fill="#ffffff" stroke="#eab308" strokeWidth="0.8" />
                   </g>
-                </g>
+                </motion.g>
 
-                {/* 4. ORANGE BLOB VISIBLE ARMS & PAWS (Covers cx: 146 & 174) */}
+                {/* 4. ORANGE BLOB PAWS */}
+                {/* Orange Left Paw: Always covers Orange's Left Eye (cx: 146, cy: 245) */}
                 <g>
-                  {/* Orange Left Paw */}
                   <path d="M118 285 Q130 260 144 248" stroke="#c2410c" strokeWidth="8" strokeLinecap="round" fill="none" />
                   <g filter="url(#handShadow)">
                     <ellipse cx="146" cy="245" rx="13" ry="14" fill="url(#orangeHandGrad)" stroke="#c2410c" strokeWidth="1.5" />
@@ -712,8 +743,17 @@ const CharacterStage = ({
                     <circle cx="146" cy="235" r="3.5" fill="#ffffff" />
                     <circle cx="151" cy="238" r="3.2" fill="#ffffff" />
                   </g>
+                </g>
 
-                  {/* Orange Right Paw */}
+                {/* Orange Right Paw: Firmly covers Right Eye (cx: 174, cy: 245) OR Slides to Cheek to PEEK! */}
+                <motion.g
+                  animate={
+                    showPassword
+                      ? { y: 20, x: 4 } // PEEK MODE: Right paw slides down to cheek, uncovering Orange's right eye!
+                      : { y: 0, x: 0 }  // FULL PRIVACY: Covers right eye!
+                  }
+                  transition={{ type: "spring", stiffness: 420, damping: 26 }}
+                >
                   <path d="M202 285 Q190 260 176 248" stroke="#c2410c" strokeWidth="8" strokeLinecap="round" fill="none" />
                   <g filter="url(#handShadow)">
                     <ellipse cx="174" cy="245" rx="13" ry="14" fill="url(#orangeHandGrad)" stroke="#c2410c" strokeWidth="1.5" />
@@ -721,7 +761,7 @@ const CharacterStage = ({
                     <circle cx="174" cy="235" r="3.5" fill="#ffffff" />
                     <circle cx="179" cy="238" r="3.2" fill="#ffffff" />
                   </g>
-                </g>
+                </motion.g>
               </motion.g>
             )}
           </AnimatePresence>
@@ -738,7 +778,7 @@ const CharacterStage = ({
             showPassword ? (
               <>
                 <span>👀</span>
-                <strong className="text-primary">Peeking through fingers! Password is unmasked.</strong>
+                <strong className="text-primary">All 4 crew members peeking through their fingers!</strong>
               </>
             ) : (
               <>
