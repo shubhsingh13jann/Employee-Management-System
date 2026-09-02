@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
-import Login from "./Login";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -88,9 +87,6 @@ const Signup = () => {
     }
   };
 
-  return <Login initialMode="signup" />;
-
-  // Legacy fallback below
   return (
     <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5 px-3">
       <div className="card shadow-lg border-0 rounded-4 overflow-hidden bg-white w-100" style={{ maxWidth: "520px" }}>
