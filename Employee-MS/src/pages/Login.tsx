@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import api from "../api/axios";
 import CharacterStage from "../components/auth/CharacterStage";
-import BriefcaseLoader from "../components/auth/BriefcaseLoader";
 import { UserRole, AuthStatus } from "../components/auth/auth.types";
 import "../components/auth/authInteractive.css";
 
@@ -66,11 +65,6 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  // Briefcase Intro State (Link 3)
-  const [showIntro, setShowIntro] = useState(() => {
-    return !sessionStorage.getItem("ems_intro_seen");
-  });
 
   const { login, getDefaultRouteForRole } = useAuth();
   const containerRef = useRef(null);
@@ -196,23 +190,13 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
     setError("");
   };
 
-  const handleIntroComplete = () => {
-    sessionStorage.setItem("ems_intro_seen", "true");
-    setShowIntro(false);
-  };
-
   return (
     <div
       ref={containerRef}
       onMouseMove={handleMouseMove}
       className="auth-split-wrapper position-relative"
     >
-      {/* Briefcase Loading Opening Sequence (Link 3) */}
-      <AnimatePresence>
-        {showIntro && <BriefcaseLoader onComplete={handleIntroComplete} />}
-      </AnimatePresence>
-
-      {/* Top Navbar Brand & Replay Intro Control */}
+      {/* Top Navbar Brand */}
       <div className="position-absolute top-0 start-0 w-100 p-2.5 px-md-4 d-flex align-items-center justify-content-between" style={{ zIndex: 10 }}>
         <Link to="/" className="text-decoration-none d-flex align-items-center gap-2">
           <div
@@ -223,17 +207,6 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
           </div>
           <span className="fw-bold text-white small tracking-wide">Enterprise EMS</span>
         </Link>
-
-        <button
-          type="button"
-          onClick={() => setShowIntro(true)}
-          className="btn btn-sm btn-outline-light rounded-pill px-2.5 py-1 d-flex align-items-center gap-1.5 shadow-2xs"
-          style={{ fontSize: "11px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)" }}
-          title="Replay Suitcase Opening Intro"
-        >
-          <i className="bi bi-play-circle"></i>
-          <span className="d-none d-sm-inline">Replay Intro</span>
-        </button>
       </div>
 
       {/* MASTER 2-PANEL SPLIT CARD */}
