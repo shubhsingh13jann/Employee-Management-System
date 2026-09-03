@@ -397,12 +397,23 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   </select>
                 </div>
                 <div className="col-6">
-                  <label className="auth-clean-label">Phone</label>
+                  <label className="auth-clean-label">Phone (+91)</label>
                   <input
                     type="tel"
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="+91 98765 43210"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={(e) => {
+                      const digits = e.target.value.replace(/\D/g, "");
+                      let num = digits.startsWith("91") ? digits.slice(2) : digits;
+                      num = num.slice(0, 10);
+                      if (!num) {
+                        setPhone("");
+                      } else if (num.length <= 5) {
+                        setPhone(`+91 ${num}`);
+                      } else {
+                        setPhone(`+91 ${num.slice(0, 5)} ${num.slice(5)}`);
+                      }
+                    }}
                     className="auth-clean-input py-1"
                     style={{ fontSize: "12.5px" }}
                   />
