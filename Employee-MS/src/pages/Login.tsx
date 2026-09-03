@@ -10,7 +10,7 @@ import "../components/auth/authInteractive.css";
 /**
  * Unified Auth Hub: Seamlessly handles both Sign In and Sign Up
  * with the interactive character crew, caret tracking, privacy hands,
- * and the articulated walking briefcase opening animation.
+ * and interactive feedback.
  */
 interface LoginProps {
   initialMode?: "login" | "signup";
@@ -196,7 +196,8 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
       onMouseMove={handleMouseMove}
       className="auth-split-wrapper position-relative"
     >
-      {/* Top Navbar Brand */}
+
+      {/* Top Navbar Brand & Replay Intro Control */}
       <div className="position-absolute top-0 start-0 w-100 p-2.5 px-md-4 d-flex align-items-center justify-content-between" style={{ zIndex: 10 }}>
         <Link to="/" className="text-decoration-none d-flex align-items-center gap-2">
           <div
