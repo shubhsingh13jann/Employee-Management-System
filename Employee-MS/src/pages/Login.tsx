@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import api from "../api/axios";
 import CharacterStage from "../components/auth/CharacterStage";
+import RadialRevealTransition, { RevealOrigin } from "../components/common/RadialRevealTransition";
 import { UserRole, AuthStatus } from "../components/auth/auth.types";
 import "../components/auth/authInteractive.css";
 
@@ -19,6 +20,9 @@ interface LoginProps {
 const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Extract radial reveal origin coordinates from navigation state (if coming from landing page button click)
+  const revealOrigin = (location.state as { revealOrigin?: RevealOrigin } | null)?.revealOrigin;
 
   // Mode: 'login' | 'signup'
   const [authMode, setAuthMode] = useState<"login" | "signup">(() => {
@@ -191,11 +195,15 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
   };
 
   return (
-    <div
-      ref={containerRef}
-      onMouseMove={handleMouseMove}
-      className="auth-split-wrapper position-relative"
+    <RadialRevealTransition
+      origin={revealOrigin}
+      onClose={() => navigate("/")}
     >
+      <div
+        ref={containerRef}
+        onMouseMove={handleMouseMove}
+        className="auth-split-wrapper position-relative"
+      >
 
       {/* Top Navbar Brand & Replay Intro Control */}
       <div className="position-absolute top-0 start-0 w-100 p-2.5 px-md-4 d-flex align-items-center justify-content-between" style={{ zIndex: 10 }}>
@@ -582,6 +590,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
         </div>
       </motion.div>
     </div>
+    </RadialRevealTransition>
   );
 };
 
