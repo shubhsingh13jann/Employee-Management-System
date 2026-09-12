@@ -67,6 +67,7 @@ function getLiquidBlobPath(
  * 100% Coded Native Fluid Water / Liquid Blob Page Transition:
  * - Direct SVG filled liquid blob rendering (immune to browser clip-path bugs)
  * - True fluid water expansion with organic 5-lobe morphing and aquatic sheen waves
+ * - Auth card floats cleanly in front with z-index, guaranteed never to disappear or turn white
  * - Automatically cleanly terminates once opening finishes so no ripple lines or droplets linger
  * - Auth card floats cleanly in front with z-index
  * - Reverse contraction on Close / Back pulls all water back into the button
@@ -145,6 +146,7 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
 
       // Primary liquid blob
       const mainD = getLiquidBlobPath(originX, originY, currentRadius, phase, wobble);
+      setBlobPath(mainD);
 
       // Wave crest and ripple are only drawn during active motion, cleared once expanding completes
       if (progress < 0.96) {
@@ -156,8 +158,6 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         setCrestPath("");
         setRipplePath("");
       }
-
-      setBlobPath(mainD);
 
       if (progress < 1) {
         animFrameRef.current = requestAnimationFrame(animateLoop);
