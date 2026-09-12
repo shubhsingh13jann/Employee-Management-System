@@ -67,7 +67,8 @@ function getLiquidBlobPath(
  * 100% Coded Native Fluid Water / Liquid Blob Page Transition:
  * - Direct SVG filled liquid blob rendering (immune to browser clip-path bugs)
  * - True fluid water expansion with organic 5-lobe morphing and aquatic sheen waves
- * - Auth card floats cleanly in front with z-index, guaranteed never to disappear or turn white
+ * - Automatically cleanly terminates once opening finishes so no ripple lines or droplets linger
+ * - Auth card floats cleanly in front with z-index
  * - Reverse contraction on Close / Back pulls all water back into the button
  */
 export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
@@ -76,6 +77,7 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
   onClose
 }) => {
   const [isClosing, setIsClosing] = useState(false);
+  const [isSettled, setIsSettled] = useState(false);
 
   // Viewport dimensions for SVG canvas
   const [dimensions, setDimensions] = useState({
@@ -136,24 +138,34 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         : 1 - Math.pow(1 - progress, 3.2); // luscious organic splash expansion
 
       // Wobble intensity decreases as the fluid floods the entire screen
-      const wobble = isClosing ? 0.9 : Math.max(0.1, 1.2 * (1 - progress * 0.75));
+      const wobble = isClosing ? 0.9 : Math.max(0.05, 1.2 * (1 - progress * 0.9));
       const phase = elapsed * 0.0035;
 
       const currentRadius = maxRadiusRef.current * eased;
 
       // Primary liquid blob
       const mainD = getLiquidBlobPath(originX, originY, currentRadius, phase, wobble);
-      // Secondary leading ripple (sheen)
-      const crestD = getLiquidBlobPath(originX, originY, currentRadius * 1.03, phase + 0.5, wobble * 0.9);
-      // Inner lagging viscous depth
-      const rippleD = getLiquidBlobPath(originX, originY, currentRadius * 0.92, phase - 0.4, wobble * 1.1);
+
+      // Wave crest and ripple are only drawn during active motion, cleared once expanding completes
+      if (progress < 0.96) {
+        const crestD = getLiquidBlobPath(originX, originY, currentRadius * 1.03, phase + 0.5, wobble * 0.9);
+        const rippleD = getLiquidBlobPath(originX, originY, currentRadius * 0.92, phase - 0.4, wobble * 1.1);
+        setCrestPath(crestD);
+        setRipplePath(rippleD);
+      } else {
+        setCrestPath("");
+        setRipplePath("");
+      }
 
       setBlobPath(mainD);
-      setCrestPath(crestD);
-      setRipplePath(rippleD);
 
-      if (progress < 1 || !isClosing) {
+      if (progress < 1) {
         animFrameRef.current = requestAnimationFrame(animateLoop);
+      } else {
+        // Animation loop finished: settle background and stop CPU usage
+        if (!isClosing) {
+          setIsSettled(true);
+        }
       }
     };
 
@@ -166,6 +178,7 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
 
   const handleTriggerClose = () => {
     if (isClosing) return;
+    setIsSettled(false);
     setIsClosing(true);
     setTimeout(() => {
       onClose();
@@ -227,50 +240,59 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
           </filter>
         </defs>
 
-        {/* The Solid Fluid Water Blob Body (Visible & Expanding!) */}
-        {blobPath && (
-          <path
-            d={blobPath}
-            fill="url(#liquid-theme-gradient)"
-            filter="url(#water-turbulence-filter)"
-          />
-        )}
+        {/* If settled, render a clean solid gradient background without GPU overhead or stroke lines */}
+        {isSettled && !isClosing ? (
+          <rect width="100%" height="100%" fill="url(#liquid-theme-gradient)" />
+        ) : (
+          <>
+            {/* The Solid Fluid Water Blob Body (Visible & Expanding!) */}
+            {blobPath && (
+              <path
+                d={blobPath}
+                fill="url(#liquid-theme-gradient)"
+                filter="url(#water-turbulence-filter)"
+              />
+            )}
 
-        {/* Leading Aquatic Sheen Wave (Wet Rim) */}
-        {crestPath && (
-          <path
-            d={crestPath}
-            fill="none"
-            stroke="url(#aquatic-sheen-grad)"
-            strokeWidth="8"
-            strokeOpacity="0.85"
-            filter="url(#water-turbulence-filter)"
-          />
-        )}
+            {/* Leading Aquatic Sheen Wave (Wet Rim) */}
+            {crestPath && (
+              <path
+                d={crestPath}
+                fill="none"
+                stroke="url(#aquatic-sheen-grad)"
+                strokeWidth="8"
+                strokeOpacity="0.85"
+                filter="url(#water-turbulence-filter)"
+              />
+            )}
 
-        {/* Lagging Depth Wave (Secondary Ripple) */}
-        {ripplePath && (
-          <path
-            d={ripplePath}
-            fill="none"
-            stroke="rgba(56, 189, 248, 0.45)"
-            strokeWidth="4"
-            strokeDasharray="16 10"
-          />
+            {/* Lagging Depth Wave (Secondary Ripple) */}
+            {ripplePath && (
+              <path
+                d={ripplePath}
+                fill="none"
+                stroke="rgba(56, 189, 248, 0.45)"
+                strokeWidth="4"
+                strokeDasharray="16 10"
+              />
+            )}
+          </>
         )}
       </svg>
 
-      {/* Satellite Fluid Splash Droplets Bursting from Button */}
-      <div
-        className={`water-satellite-droplets ${isClosing ? "closing" : ""}`}
-        style={{ left: originX, top: originY }}
-      >
-        <span className="drop drop-1" />
-        <span className="drop drop-2" />
-        <span className="drop drop-3" />
-        <span className="drop drop-4" />
-        <span className="drop drop-5" />
-      </div>
+      {/* Satellite Fluid Splash Droplets Bursting from Button (Only active during opening transition) */}
+      {!isSettled && (
+        <div
+          className={`water-satellite-droplets ${isClosing ? "closing" : ""}`}
+          style={{ left: originX, top: originY }}
+        >
+          <span className="drop drop-1" />
+          <span className="drop drop-2" />
+          <span className="drop drop-3" />
+          <span className="drop drop-4" />
+          <span className="drop drop-5" />
+        </div>
+      )}
 
       {/* Subtle Geometric Mesh Overlay */}
       <div className="radial-reveal-mesh-grid" />
