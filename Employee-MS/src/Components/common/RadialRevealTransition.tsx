@@ -26,7 +26,7 @@ function getLiquidBlobPath(
   phase: number,
   wobbleIntensity = 1
 ): string {
-  if (baseR <= 0) return `M ${cx} ${cy} Z`;
+  if (baseR <= 0) return "";
 
   const numPoints = 32;
   const points: { x: number; y: number }[] = [];
@@ -65,10 +65,10 @@ function getLiquidBlobPath(
  * RadialRevealTransition
  * 
  * 100% Coded Native Fluid Water / Liquid Blob Page Transition:
- * - Emulates real water dynamics: 5-lobed fluid wave, surface tension wobbles, and ripples
- * - Paced at 1.45s so the watery expansion is clearly visible and luscious
- * - Uses SVG fluid paths and turbulent displacement filters matching EMS theme
- * - On Close / Back: contracts the liquid wave in reverse right back into the button
+ * - Direct SVG filled liquid blob rendering (immune to browser clip-path bugs)
+ * - True fluid water expansion with organic 5-lobe morphing and aquatic sheen waves
+ * - Auth card floats cleanly in front with z-index, guaranteed never to disappear or turn white
+ * - Reverse contraction on Close / Back pulls all water back into the button
  */
 export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
   children,
@@ -77,8 +77,25 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
 }) => {
   const [isClosing, setIsClosing] = useState(false);
 
+  // Viewport dimensions for SVG canvas
+  const [dimensions, setDimensions] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 1920,
+    height: typeof window !== "undefined" ? window.innerHeight : 1080
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   // Default origin to top-right navbar location if accessed directly
-  const originX = origin?.x ?? (typeof window !== "undefined" ? window.innerWidth - 85 : 800);
+  const originX = origin?.x ?? (dimensions.width > 0 ? dimensions.width - 85 : 800);
   const originY = origin?.y ?? 38;
 
   // Real-time animation states for liquid blob math
@@ -92,16 +109,14 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
 
   useEffect(() => {
     // Calculate max radius needed to flood past all 4 screen corners
-    if (typeof window !== "undefined") {
-      const corners = [
-        Math.hypot(originX, originY),
-        Math.hypot(window.innerWidth - originX, originY),
-        Math.hypot(originX, window.innerHeight - originY),
-        Math.hypot(window.innerWidth - originX, window.innerHeight - originY)
-      ];
-      maxRadiusRef.current = Math.max(...corners) * 1.35;
-    }
-  }, [originX, originY]);
+    const corners = [
+      Math.hypot(originX, originY),
+      Math.hypot(dimensions.width - originX, originY),
+      Math.hypot(originX, dimensions.height - originY),
+      Math.hypot(dimensions.width - originX, dimensions.height - originY)
+    ];
+    maxRadiusRef.current = Math.max(...corners) * 1.35;
+  }, [originX, originY, dimensions]);
 
   // Liquid expansion duration (1.45s opening, 0.85s reverse contraction)
   const OPEN_DURATION = 1450;
@@ -129,7 +144,7 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
       // Primary liquid blob
       const mainD = getLiquidBlobPath(originX, originY, currentRadius, phase, wobble);
       // Secondary leading ripple (sheen)
-      const crestD = getLiquidBlobPath(originX, originY, currentRadius * 1.04, phase + 0.5, wobble * 0.9);
+      const crestD = getLiquidBlobPath(originX, originY, currentRadius * 1.03, phase + 0.5, wobble * 0.9);
       // Inner lagging viscous depth
       const rippleD = getLiquidBlobPath(originX, originY, currentRadius * 0.92, phase - 0.4, wobble * 1.1);
 
@@ -157,64 +172,95 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
     }, CLOSE_DURATION - 50);
   };
 
+  const gradCx = dimensions.width > 0 ? `${((originX / dimensions.width) * 100).toFixed(1)}%` : "50%";
+  const gradCy = dimensions.height > 0 ? `${((originY / dimensions.height) * 100).toFixed(1)}%` : "20%";
+
   return (
     <div className="radial-reveal-viewport">
-      {/* SVG Liquid Filters and Clipping Masks */}
-      <svg className="liquid-svg-engine" aria-hidden="true">
+      {/* Master Liquid SVG Canvas Rendering True Fluid Water Blob & Ripples */}
+      <svg
+        className="liquid-reveal-svg-canvas"
+        width={dimensions.width}
+        height={dimensions.height}
+        viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
+        aria-hidden="true"
+      >
         <defs>
+          {/* Dynamic Radial Gradient Centered at Clicked Button Origin */}
+          <radialGradient
+            id="liquid-theme-gradient"
+            cx={gradCx}
+            cy={gradCy}
+            r="80%"
+            fx={gradCx}
+            fy={gradCy}
+          >
+            <stop offset="0%" stopColor="#818cf8" stopOpacity="0.98" />
+            <stop offset="25%" stopColor="#6366f1" stopOpacity="0.96" />
+            <stop offset="50%" stopColor="#4f46e5" stopOpacity="0.96" />
+            <stop offset="78%" stopColor="#1e1b4b" stopOpacity="0.98" />
+            <stop offset="100%" stopColor="#090d16" stopOpacity="1" />
+          </radialGradient>
+
+          {/* Leading Crest Rim Gradient */}
+          <linearGradient id="aquatic-sheen-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.95" />
+            <stop offset="50%" stopColor="#818cf8" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#c084fc" stopOpacity="0.7" />
+          </linearGradient>
+
           {/* Water Surface Wave Turbulence Filter */}
           <filter id="water-turbulence-filter" x="-20%" y="-20%" width="140%" height="140%">
             <feTurbulence
               type="fractalNoise"
-              baseFrequency="0.015 0.02"
+              baseFrequency="0.014 0.018"
               numOctaves="2"
               result="noise"
             />
             <feDisplacementMap
               in="SourceGraphic"
               in2="noise"
-              scale="22"
+              scale="24"
               xChannelSelector="R"
               yChannelSelector="G"
             />
           </filter>
-
-          {/* Liquid Blob Clip Path */}
-          <clipPath id="liquid-blob-mask">
-            <path d={blobPath || `M ${originX} ${originY} Z`} />
-          </clipPath>
         </defs>
+
+        {/* The Solid Fluid Water Blob Body (Visible & Expanding!) */}
+        {blobPath && (
+          <path
+            d={blobPath}
+            fill="url(#liquid-theme-gradient)"
+            filter="url(#water-turbulence-filter)"
+          />
+        )}
+
+        {/* Leading Aquatic Sheen Wave (Wet Rim) */}
+        {crestPath && (
+          <path
+            d={crestPath}
+            fill="none"
+            stroke="url(#aquatic-sheen-grad)"
+            strokeWidth="8"
+            strokeOpacity="0.85"
+            filter="url(#water-turbulence-filter)"
+          />
+        )}
+
+        {/* Lagging Depth Wave (Secondary Ripple) */}
+        {ripplePath && (
+          <path
+            d={ripplePath}
+            fill="none"
+            stroke="rgba(56, 189, 248, 0.45)"
+            strokeWidth="4"
+            strokeDasharray="16 10"
+          />
+        )}
       </svg>
 
-      {/* Water Ripple Visual Overlays (Rendered outside the clip for the wet leading rim) */}
-      <svg className="liquid-water-ripples-canvas" aria-hidden="true">
-        {/* Leading Aquatic Sheen Wave */}
-        <path
-          d={crestPath}
-          fill="none"
-          stroke="url(#aquatic-sheen-grad)"
-          strokeWidth="6"
-          strokeOpacity="0.75"
-          filter="url(#water-turbulence-filter)"
-        />
-        {/* Lagging Depth Wave */}
-        <path
-          d={ripplePath}
-          fill="none"
-          stroke="rgba(129, 140, 248, 0.4)"
-          strokeWidth="4"
-          strokeDasharray="16 8"
-        />
-        <defs>
-          <linearGradient id="aquatic-sheen-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.9" />
-            <stop offset="50%" stopColor="#818cf8" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#c084fc" stopOpacity="0.6" />
-          </linearGradient>
-        </defs>
-      </svg>
-
-      {/* Satellite Fluid Splash Droplets */}
+      {/* Satellite Fluid Splash Droplets Bursting from Button */}
       <div
         className={`water-satellite-droplets ${isClosing ? "closing" : ""}`}
         style={{ left: originX, top: originY }}
@@ -226,62 +272,41 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         <span className="drop drop-5" />
       </div>
 
-      {/* The Master Container Cloaked by the Liquid Blob Mask */}
-      <div
-        className="radial-reveal-container"
-        style={{
-          clipPath: "url(#liquid-blob-mask)",
-          WebkitClipPath: "url(#liquid-blob-mask)"
+      {/* Subtle Geometric Mesh Overlay */}
+      <div className="radial-reveal-mesh-grid" />
+
+      {/* Top Floating Close / Return Control */}
+      <div className="radial-reveal-header">
+        <button
+          type="button"
+          onClick={handleTriggerClose}
+          className="radial-reveal-close-btn"
+          title="Return to Home (Contract Liquid View)"
+        >
+          <span className="close-text">Back to Home</span>
+          <div className="close-icon-circle">
+            <i className="bi bi-x-lg"></i>
+          </div>
+        </button>
+      </div>
+
+      {/* Auth Card Content Container (Always Visible, Paced Float-In) */}
+      <motion.div
+        className="radial-reveal-content"
+        initial={{ opacity: 0, scale: 0.92, y: 30 }}
+        animate={{
+          opacity: isClosing ? 0 : 1,
+          scale: isClosing ? 0.94 : 1,
+          y: isClosing ? 18 : 0
+        }}
+        transition={{
+          duration: isClosing ? 0.35 : 0.65,
+          delay: isClosing ? 0 : 0.35, // Floats in as the water floods
+          ease: [0.16, 1, 0.3, 1]
         }}
       >
-        {/* Multi-Layered Liquid Theme Gradient Backdrop */}
-        <div className="radial-reveal-backdrop">
-          <div
-            className="radial-blob radial-blob-1"
-            style={{
-              left: `${originX - 220}px`,
-              top: `${originY - 220}px`
-            }}
-          />
-          <div className="radial-blob radial-blob-2" />
-          <div className="radial-blob radial-blob-3" />
-          <div className="radial-reveal-mesh-grid" />
-          <div className="water-caustics-layer" />
-        </div>
-
-        {/* Top Floating Close / Return Control */}
-        <div className="radial-reveal-header">
-          <button
-            type="button"
-            onClick={handleTriggerClose}
-            className="radial-reveal-close-btn"
-            title="Return to Home (Contract Liquid View)"
-          >
-            <span className="close-text">Back to Home</span>
-            <div className="close-icon-circle">
-              <i className="bi bi-x-lg"></i>
-            </div>
-          </button>
-        </div>
-
-        {/* Child Content (Auth Card) with Paced Float-In after water floods */}
-        <motion.div
-          className="radial-reveal-content"
-          initial={{ opacity: 0, scale: 0.91, y: 35 }}
-          animate={{
-            opacity: isClosing ? 0 : 1,
-            scale: isClosing ? 0.93 : 1,
-            y: isClosing ? 20 : 0
-          }}
-          transition={{
-            duration: isClosing ? 0.4 : 0.65,
-            delay: isClosing ? 0 : 0.6, // Wait for the luscious water wave to flood
-            ease: [0.16, 1, 0.3, 1]
-          }}
-        >
-          {children}
-        </motion.div>
-      </div>
+        {children}
+      </motion.div>
     </div>
   );
 };

@@ -16,7 +16,7 @@
 }
 
 /* Seamless integration inside RadialRevealTransition */
-.radial-reveal-container .auth-split-wrapper {
+.radial-reveal-viewport .auth-split-wrapper {
   background: transparent !important;
   min-height: auto;
   padding: 0;
