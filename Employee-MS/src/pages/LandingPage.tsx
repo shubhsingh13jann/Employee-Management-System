@@ -1,9 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 import InteractiveBackground from "../components/common/InteractiveBackground";
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+
+  // Handle Button-Originated Radial Reveal Navigation
+  const handleAuthNavigate = (path: "/login" | "/signup", e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const origin = {
+      x: Math.round(rect.left + rect.width / 2),
+      y: Math.round(rect.top + rect.height / 2)
+    };
+    navigate(path, { state: { revealOrigin: origin } });
+  };
+
   // Reset scroll to top and ensure manual restoration so navbar is ALWAYS visible on refresh
   useEffect(() => {
     if ("scrollRestoration" in window.history) {
@@ -446,22 +459,24 @@ const LandingPage = () => {
           {/* Action Buttons */}
           <div className="d-flex align-items-center gap-2">
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
-              <Link
-                to="/login"
+              <button
+                type="button"
+                onClick={(e) => handleAuthNavigate("/login", e)}
                 className="btn btn-outline-secondary px-3.5 py-2 rounded-3 fw-semibold d-flex align-items-center gap-2 shadow-xs"
               >
                 <i className="bi bi-person"></i>
                 <span>Login</span>
-              </Link>
+              </button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
-              <Link
-                to="/signup"
+              <button
+                type="button"
+                onClick={(e) => handleAuthNavigate("/signup", e)}
                 className="btn btn-gradient-primary px-4 py-2 rounded-3 fw-semibold d-flex align-items-center gap-2 shadow-sm text-white"
               >
                 <i className="bi bi-person-plus-fill"></i>
                 <span>Sign Up</span>
-              </Link>
+              </button>
             </motion.div>
           </div>
         </div>
@@ -534,13 +549,14 @@ const LandingPage = () => {
 
                   <div className="d-flex flex-wrap align-items-center gap-3 mb-3">
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
-                      <Link
-                        to="/signup"
+                      <button
+                        type="button"
+                        onClick={(e) => handleAuthNavigate("/signup", e)}
                         className="btn btn-gradient-primary btn-lg px-4 py-2 rounded-3 fw-bold d-inline-flex align-items-center gap-2 text-white shadow-md hero-btn"
                       >
                         <span>Get Started Free</span>
                         <i className="bi bi-arrow-right"></i>
-                      </Link>
+                      </button>
                     </motion.div>
                     <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                       <button
@@ -1177,9 +1193,13 @@ const LandingPage = () => {
                           <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-success"></i> Visual reporting hierarchy tree</li>
                           <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-success"></i> Security logs with IP & timestamp tracking</li>
                         </ul>
-                        <Link to="/login" className="btn btn-primary btn-sm px-3 py-2 rounded-3 mt-2 fw-semibold shadow-xs">
+                        <button
+                          type="button"
+                          onClick={(e) => handleAuthNavigate("/login", e)}
+                          className="btn btn-primary btn-sm px-3 py-2 rounded-3 mt-2 fw-semibold shadow-xs"
+                        >
                           Explore HR Admin Portal →
-                        </Link>
+                        </button>
                       </div>
                       <div className="col-12 col-md-6 text-center">
                         <div className="p-4 bg-white rounded-4 shadow-sm border text-start">
@@ -1213,9 +1233,13 @@ const LandingPage = () => {
                           <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-info"></i> Supervisor delegation & reviews</li>
                           <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-info"></i> Secondary leave approvals</li>
                         </ul>
-                        <Link to="/login" className="btn btn-info text-white btn-sm px-3 py-2 rounded-3 mt-2 fw-semibold shadow-xs">
+                        <button
+                          type="button"
+                          onClick={(e) => handleAuthNavigate("/login", e)}
+                          className="btn btn-info text-white btn-sm px-3 py-2 rounded-3 mt-2 fw-semibold shadow-xs"
+                        >
                           Explore Manager Portal →
-                        </Link>
+                        </button>
                       </div>
                       <div className="col-12 col-md-6 text-center">
                         <div className="p-4 bg-white rounded-4 shadow-sm border text-start">
@@ -1249,9 +1273,13 @@ const LandingPage = () => {
                           <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-success"></i> Real-time deliverables inspection</li>
                           <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-success"></i> First-level leave approval gate</li>
                         </ul>
-                        <Link to="/login" className="btn btn-success text-white btn-sm px-3 py-2 rounded-3 mt-2 fw-semibold shadow-xs">
+                        <button
+                          type="button"
+                          onClick={(e) => handleAuthNavigate("/login", e)}
+                          className="btn btn-success text-white btn-sm px-3 py-2 rounded-3 mt-2 fw-semibold shadow-xs"
+                        >
                           Explore Supervisor Portal →
-                        </Link>
+                        </button>
                       </div>
                       <div className="col-12 col-md-6 text-center">
                         <div className="p-4 bg-white rounded-4 shadow-sm border text-start">
@@ -1285,9 +1313,13 @@ const LandingPage = () => {
                           <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-primary"></i> 1-click leave submission & status tracker</li>
                           <li className="d-flex align-items-center gap-2"><i className="bi bi-check-circle-fill text-primary"></i> Digital profile & compensation slips</li>
                         </ul>
-                        <Link to="/login" className="btn btn-secondary text-white btn-sm px-3 py-2 rounded-3 mt-2 fw-semibold shadow-xs">
+                        <button
+                          type="button"
+                          onClick={(e) => handleAuthNavigate("/login", e)}
+                          className="btn btn-secondary text-white btn-sm px-3 py-2 rounded-3 mt-2 fw-semibold shadow-xs"
+                        >
                           Explore Employee Portal →
-                        </Link>
+                        </button>
                       </div>
                       <div className="col-12 col-md-6 text-center">
                         <div className="p-4 bg-white rounded-4 shadow-sm border text-start">
@@ -1528,14 +1560,22 @@ const LandingPage = () => {
                   </p>
                   <div className="d-flex flex-wrap justify-content-center gap-2">
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
-                      <Link to="/signup" className="btn btn-light px-4 py-2 rounded-3 fw-bold text-primary shadow-md btn-sm">
+                      <button
+                        type="button"
+                        onClick={(e) => handleAuthNavigate("/signup", e)}
+                        className="btn btn-light px-4 py-2 rounded-3 fw-bold text-primary shadow-md btn-sm"
+                      >
                         Create Your Free Account →
-                      </Link>
+                      </button>
                     </motion.div>
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
-                      <Link to="/login" className="btn btn-outline-light px-4 py-2 rounded-3 fw-semibold hover-light btn-sm">
+                      <button
+                        type="button"
+                        onClick={(e) => handleAuthNavigate("/login", e)}
+                        className="btn btn-outline-light px-4 py-2 rounded-3 fw-semibold hover-light btn-sm"
+                      >
                         Sign In to Portal
-                      </Link>
+                      </button>
                     </motion.div>
                   </div>
                 </div>
