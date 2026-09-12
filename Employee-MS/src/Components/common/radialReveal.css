@@ -13,6 +13,115 @@
   pointer-events: auto;
 }
 
+/* Hidden SVG container that holds defs & filters */
+.liquid-svg-engine {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* Water Ripple Waves Canvas overlaying the expanding perimeter */
+.liquid-water-ripples-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9998;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Satellite Fluid Splash Droplets bursting from button */
+.water-satellite-droplets {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.water-satellite-droplets .drop {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, #38bdf8 0%, #6366f1 70%, transparent 100%);
+  filter: blur(2px);
+  opacity: 0.85;
+  transform: translate(-50%, -50%);
+  animation: splashDroplet 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.water-satellite-droplets .drop-1 {
+  width: 28px;
+  height: 28px;
+  --tx: -85px;
+  --ty: 60px;
+  animation-delay: 0.05s;
+}
+
+.water-satellite-droplets .drop-2 {
+  width: 22px;
+  height: 22px;
+  --tx: -130px;
+  --ty: -30px;
+  animation-delay: 0.12s;
+}
+
+.water-satellite-droplets .drop-3 {
+  width: 32px;
+  height: 32px;
+  --tx: -40px;
+  --ty: 110px;
+  animation-delay: 0.08s;
+}
+
+.water-satellite-droplets .drop-4 {
+  width: 18px;
+  height: 18px;
+  --tx: -150px;
+  --ty: 80px;
+  animation-delay: 0.18s;
+}
+
+.water-satellite-droplets .drop-5 {
+  width: 24px;
+  height: 24px;
+  --tx: 50px;
+  --ty: 100px;
+  animation-delay: 0.15s;
+}
+
+.water-satellite-droplets.closing .drop {
+  animation: contractDroplet 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes splashDroplet {
+  0% {
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1.6);
+    opacity: 0;
+  }
+}
+
+@keyframes contractDroplet {
+  0% {
+    transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1.4);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.1);
+    opacity: 0;
+  }
+}
+
+/* The Master Container Masked by the Liquid Blob */
 .radial-reveal-container {
   position: absolute;
   inset: 0;
@@ -36,6 +145,26 @@
   background: radial-gradient(circle at 50% 30%, #172033 0%, #0d1322 55%, #070a12 100%);
 }
 
+/* Water Caustics / Fluid Surface Shimmer */
+.water-caustics-layer {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 60% 40%, rgba(56, 189, 248, 0.08) 0%, transparent 70%);
+  filter: blur(40px);
+  animation: waterCausticsWave 8s ease-in-out infinite alternate;
+}
+
+@keyframes waterCausticsWave {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.2) rotate(8deg);
+    opacity: 0.85;
+  }
+}
+
 /* Organic Floating Liquid Blobs matching UI Theme */
 .radial-blob {
   position: absolute;
@@ -48,8 +177,8 @@
 
 /* Blob 1: Originates around the clicked button with vibrant Indigo */
 .radial-blob-1 {
-  width: 380px;
-  height: 380px;
+  width: 420px;
+  height: 420px;
   background: radial-gradient(circle, rgba(99, 102, 241, 0.85) 0%, rgba(79, 70, 229, 0.4) 60%, transparent 100%);
   animation: pulseOriginBlob 6s ease-in-out infinite alternate;
 }
@@ -58,8 +187,8 @@
 .radial-blob-2 {
   bottom: -100px;
   left: -80px;
-  width: 480px;
-  height: 480px;
+  width: 520px;
+  height: 520px;
   background: radial-gradient(circle, rgba(56, 189, 248, 0.5) 0%, rgba(99, 102, 241, 0.25) 50%, transparent 100%);
   animation: floatAmbientBlob1 12s ease-in-out infinite alternate;
 }
@@ -68,8 +197,8 @@
 .radial-blob-3 {
   top: -120px;
   right: -100px;
-  width: 520px;
-  height: 520px;
+  width: 560px;
+  height: 560px;
   background: radial-gradient(circle, rgba(168, 85, 247, 0.55) 0%, rgba(129, 140, 248, 0.3) 55%, transparent 100%);
   animation: floatAmbientBlob2 14s ease-in-out infinite alternate;
 }
@@ -159,7 +288,7 @@
     transform: scale(0.95) translate(0, 0);
   }
   100% {
-    transform: scale(1.15) translate(20px, 15px);
+    transform: scale(1.18) translate(25px, 20px);
   }
 }
 
@@ -168,7 +297,7 @@
     transform: translate(0, 0) scale(1);
   }
   100% {
-    transform: translate(40px, -30px) scale(1.1);
+    transform: translate(45px, -35px) scale(1.12);
   }
 }
 
@@ -177,7 +306,6 @@
     transform: translate(0, 0) scale(1);
   }
   100% {
-    transform: translate(-35px, 25px) scale(1.08);
+    transform: translate(-40px, 30px) scale(1.1);
   }
 }
-
