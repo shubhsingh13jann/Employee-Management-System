@@ -67,8 +67,7 @@ function getLiquidBlobPath(
  * 100% Coded Native Fluid Water / Liquid Blob Page Transition:
  * - Direct SVG filled liquid blob rendering (immune to browser clip-path bugs)
  * - True fluid water expansion with organic 5-lobe morphing and aquatic sheen waves
- * - Auth card floats cleanly in front with z-index, guaranteed never to disappear or turn white
- * - Automatically cleanly terminates once opening finishes so no ripple lines or droplets linger
+ * - Automatically cleanly terminates once opened so no ripple lines linger
  * - Auth card floats cleanly in front with z-index
  * - Reverse contraction on Close / Back pulls all water back into the button
  */
