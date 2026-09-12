@@ -207,10 +207,9 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
             fx={gradCx}
             fy={gradCy}
           >
-            <stop offset="0%" stopColor="#818cf8" stopOpacity="0.98" />
-            <stop offset="25%" stopColor="#6366f1" stopOpacity="0.96" />
-            <stop offset="50%" stopColor="#4f46e5" stopOpacity="0.96" />
-            <stop offset="78%" stopColor="#1e1b4b" stopOpacity="0.98" />
+            <stop offset="0%" stopColor="#1e1b4b" stopOpacity="0.95" />
+            <stop offset="35%" stopColor="#0f172a" stopOpacity="0.98" />
+            <stop offset="70%" stopColor="#0b1120" stopOpacity="0.98" />
             <stop offset="100%" stopColor="#090d16" stopOpacity="1" />
           </radialGradient>
 
@@ -239,10 +238,8 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
           </filter>
         </defs>
 
-        {/* If settled, render a clean solid gradient background without GPU overhead or stroke lines */}
-        {isSettled && !isClosing ? (
-          <rect width="100%" height="100%" fill="url(#liquid-theme-gradient)" />
-        ) : (
+        {/* When settled, no off-center SVG gradient is rendered; the uniform dark viewport background displays cleanly */}
+        {isSettled && !isClosing ? null : (
           <>
             {/* The Solid Fluid Water Blob Body (Visible & Expanding!) */}
             {blobPath && (
