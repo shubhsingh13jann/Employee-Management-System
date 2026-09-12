@@ -31,7 +31,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   const isSm = size === "sm";
 
   const content = (
-    <div className={`brand-logo-root d-flex align-items-center gap-2.5 ${className}`}>
+    <div className={`brand-logo-root d-flex align-items-center gap-3 ${className}`}>
       {/* 3D Tilt Hover Icon Cube */}
       <motion.div
         whileHover={{ rotateY: 18, rotateX: 12, scale: 1.08 }}
@@ -50,8 +50,8 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
         <i className={`bi bi-box-fill text-white ${isSm ? "small" : "fs-5"}`}></i>
       </motion.div>
 
-      {/* Brand Typography */}
-      <div className="d-flex flex-column text-start">
+      {/* Brand Typography (Centered alignment so Workforce Excellence is centered with respect to Enterprise EMS) */}
+      <div className="d-flex flex-column align-items-center text-center">
         <span
           className={`fw-bold tracking-tight leading-tight ${
             isSm ? "small" : "fs-5"
@@ -67,7 +67,8 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
               fontSize: isSm ? "10px" : "11px",
               letterSpacing: "0.5px",
               lineHeight: 1.2,
-              marginTop: "2px"
+              marginTop: "2px",
+              textAlign: "center"
             }}
           >
             {subtitle}
@@ -94,3 +95,4 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
 };
 
 export default BrandLogo;
+
