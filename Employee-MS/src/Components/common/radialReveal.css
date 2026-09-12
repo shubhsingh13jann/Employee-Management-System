@@ -132,12 +132,15 @@
 .radial-reveal-header {
   position: fixed;
   top: 0;
+  left: 0;
   right: 0;
+  width: 100%;
   padding: 1.25rem 2rem;
   z-index: 50;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
+  box-sizing: border-box;
 }
 
 .radial-reveal-close-btn {

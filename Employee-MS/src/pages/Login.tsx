@@ -205,18 +205,6 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
         className="auth-split-wrapper position-relative"
       >
 
-      {/* Top Navbar Brand & Replay Intro Control */}
-      <div className="position-absolute top-0 start-0 w-100 p-2.5 px-md-4 d-flex align-items-center justify-content-between" style={{ zIndex: 10 }}>
-        <Link to="/" className="text-decoration-none d-flex align-items-center gap-2">
-          <div
-            className="d-flex align-items-center justify-content-center rounded-3 text-white shadow-xs"
-            style={{ width: "30px", height: "30px", background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)" }}
-          >
-            <i className="bi bi-box-fill small"></i>
-          </div>
-          <span className="fw-bold text-white small tracking-wide">Enterprise EMS</span>
-        </Link>
-      </div>
 
       {/* MASTER 2-PANEL SPLIT CARD */}
       <motion.div

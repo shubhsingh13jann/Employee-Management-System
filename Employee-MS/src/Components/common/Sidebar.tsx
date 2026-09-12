@@ -1,9 +1,10 @@
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import BrandLogo from "./BrandLogo";
 
 const Sidebar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, getDefaultRouteForRole } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -156,14 +157,11 @@ const Sidebar = () => {
   return (
     <aside className="bg-dark text-white d-flex flex-column p-3 vh-100 position-sticky top-0" style={{ width: "260px", minWidth: "260px" }}>
       {/* Brand Header */}
-      <div className="pb-3 mb-3 border-bottom border-secondary d-flex align-items-center gap-2">
-        <div className="bg-primary text-white rounded p-2 d-flex align-items-center justify-content-center" style={{ width: "38px", height: "38px" }}>
-          <i className="bi bi-buildings-fill fs-5"></i>
-        </div>
-        <div>
-          <h6 className="mb-0 fw-bold tracking-tight text-white">Enterprise EMS</h6>
-          <small className="text-muted" style={{ fontSize: "11px" }}>4-Tier Portal System</small>
-        </div>
+      <div className="pb-3 mb-3 border-bottom border-secondary">
+        <BrandLogo
+          theme="dark"
+          to={getDefaultRouteForRole ? getDefaultRouteForRole(user?.role) : "/"}
+        />
       </div>
 
       {/* User Chip */}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 import InteractiveBackground from "../components/common/InteractiveBackground";
+import BrandLogo from "../components/common/BrandLogo";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -417,20 +418,7 @@ const LandingPage = () => {
       >
         <div className="container-fluid p-0 d-flex justify-content-between align-items-center">
           {/* Brand Logo with 3D Tilt Hover */}
-          <Link to="/" className="navbar-brand d-flex align-items-center gap-2 text-decoration-none">
-            <motion.div
-              whileHover={{ rotateY: 20, rotateX: 15, scale: 1.08 }}
-              className="logo-cube d-flex align-items-center justify-content-center"
-            >
-              <i className="bi bi-box-fill text-white fs-5"></i>
-            </motion.div>
-            <div>
-              <span className="fw-bold fs-5 text-dark tracking-tight d-block leading-tight">Enterprise EMS</span>
-              <small className="text-muted" style={{ fontSize: "11px", letterSpacing: "0.5px" }}>
-                Workforce Excellence
-              </small>
-            </div>
-          </Link>
+          <BrandLogo theme="light" />
 
           {/* Interactive Stack Navigation Toggles with Spring Pill */}
           <div className="d-none d-lg-flex align-items-center gap-1 bg-slate-100 p-1 rounded-pill border shadow-2xs position-relative">
@@ -627,14 +615,8 @@ const LandingPage = () => {
                         <div className="mock-sidebar p-3 d-flex flex-column justify-content-between text-white" style={{ width: "205px", background: "#0b1329" }}>
                           <div>
                             {/* Sidebar Brand */}
-                            <div className="d-flex align-items-center gap-2 mb-3 px-1">
-                              <div className="logo-cube-sm d-flex align-items-center justify-content-center">
-                                <i className="bi bi-box-fill text-white fs-6"></i>
-                              </div>
-                              <div>
-                                <span className="fw-bold text-white small d-block">Enterprise EMS</span>
-                                <small className="text-white-50" style={{ fontSize: "9px" }}>Workforce Excellence</small>
-                              </div>
+                            <div className="mb-3 px-1">
+                              <BrandLogo theme="dark" size="sm" clickable={false} />
                             </div>
 
                             {/* Full 10 Interactive Sidebar Items */}

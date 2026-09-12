@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import BrandLogo from "./BrandLogo";
 import "./radialReveal.css";
 
 export interface RevealOrigin {
@@ -293,8 +294,9 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
       {/* Subtle Geometric Mesh Overlay */}
       <div className="radial-reveal-mesh-grid" />
 
-      {/* Top Floating Close / Return Control */}
+      {/* Top Floating Header with Unified Brand Logo (Left) and Return Control (Right) */}
       <div className="radial-reveal-header">
+        <BrandLogo theme="dark" />
         <button
           type="button"
           onClick={handleTriggerClose}
