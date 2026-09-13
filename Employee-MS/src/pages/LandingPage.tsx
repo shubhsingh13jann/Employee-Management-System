@@ -9,38 +9,22 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Handle reverse water suction animation when returning from Login/Signup
-  const locationState = location.state as {
-    reverseReveal?: boolean;
-    origin?: { x: number; y: number };
-  } | null;
-
-  const [reverseOrigin, setReverseOrigin] = useState<{ x: number; y: number } | null>(() => {
-    if (locationState?.reverseReveal && locationState?.origin) {
-      return locationState.origin;
-    }
-    return null;
-  });
-
-  useEffect(() => {
-    if (reverseOrigin) {
-      // Clear location state so refreshing does not re-trigger
-      window.history.replaceState({}, document.title);
-    }
-  }, [reverseOrigin]);
-
   // Water-drop portal state — shown while landing page is still mounted (opening)
   const [pendingReveal, setPendingReveal] = useState<{
     path: "/login" | "/signup";
     origin: { x: number; y: number };
   } | null>(null);
 
+  // Synchronous navigation lock to completely prevent double-click back-to-back triggers
+  const isAuthNavigatingRef = useRef(false);
+
   // Handle Button-Originated Radial Reveal Navigation:
   // 1. Show the water-drop portal on top of the current page
   // 2. Once blob covers the screen (onCovered), THEN navigate
   const handleAuthNavigate = (path: "/login" | "/signup", e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
-    if (pendingReveal) return; // already animating
+    if (isAuthNavigatingRef.current || pendingReveal) return; // Synchronously block repeat clicks
+    isAuthNavigatingRef.current = true;
     const rect = e.currentTarget.getBoundingClientRect();
     setPendingReveal({
       path,
@@ -1609,17 +1593,9 @@ const LandingPage = () => {
               state: { revealOrigin: pendingReveal.origin, alreadyCovered: true },
             });
             setPendingReveal(null);
-          }}
-        />
-      )}
-
-      {/* ── Water-Drop Reverse Portal: contracts back into the button when returning (Closing) ── */}
-      {reverseOrigin && (
-        <WaterDropReveal
-          origin={reverseOrigin}
-          mode="contract"
-          onComplete={() => {
-            setReverseOrigin(null);
+            setTimeout(() => {
+              isAuthNavigatingRef.current = false;
+            }, 500);
           }}
         />
       )}

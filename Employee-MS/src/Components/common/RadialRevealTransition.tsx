@@ -182,8 +182,11 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
       if (progress < 1) {
         animFrameRef.current = requestAnimationFrame(animateLoop);
       } else {
-        // Animation loop finished: settle background
-        if (!isClosing) {
+        if (isClosing) {
+          // Contraction complete — navigate back to home
+          onClose();
+        } else {
+          // Expansion complete
           setIsSettled(true);
         }
       }
@@ -194,16 +197,14 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [isClosing, originX, originY, alreadyCovered]);
+  }, [isClosing, originX, originY, alreadyCovered, onClose]);
 
   const handleTriggerClose = () => {
     if (isClosing) return;
+    setIsSettled(false);
     setIsClosing(true);
-    // Instant fast fade-out of the auth card (120ms) then navigate to LandingPage
-    // where the reverse water-suction portal smoothly contracts into the button!
-    setTimeout(() => {
-      onClose();
-    }, 120);
+    // Liquid contraction loop starts immediately, organically shrinking the
+    // login page into the button while revealing the landing page underneath.
   };
 
   const gradCx = dimensions.width > 0 ? `${((originX / dimensions.width) * 100).toFixed(1)}%` : "50%";
@@ -214,8 +215,9 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
       className="radial-reveal-viewport"
       style={{
         opacity: isVisible ? 1 : 0,
-        // Block all interaction until visible so there's no stale click on the hidden layer
-        pointerEvents: isVisible ? "auto" : "none",
+        pointerEvents: isClosing ? "none" : (isVisible ? "auto" : "none"),
+        clipPath: isClosing && blobPath ? "url(#login-liquid-clip)" : undefined,
+        WebkitClipPath: isClosing && blobPath ? "url(#login-liquid-clip)" : undefined,
       }}
     >
       {/* Master Liquid SVG Canvas Rendering True Fluid Water Blob & Ripples */}
@@ -227,6 +229,11 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         aria-hidden="true"
       >
         <defs>
+          {/* SVG ClipPath used to physically clip the login viewport during closing */}
+          <clipPath id="login-liquid-clip">
+            {blobPath && <path d={blobPath} />}
+          </clipPath>
+
           {/* Dynamic Radial Gradient Centered at Clicked Button Origin */}
           <radialGradient
             id="liquid-theme-gradient"
@@ -320,12 +327,12 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
       {/* Subtle Geometric Mesh Overlay — only after blob settles */}
       {(isSettled || isClosing) && <div className="radial-reveal-mesh-grid" />}
 
-      {/* Top Floating Header — fades in once blob has settled */}
+      {/* Top Floating Header — stays visible during closing so clipPath shrinks it away */}
       <motion.div
         className="radial-reveal-header"
         initial={{ opacity: 0 }}
-        animate={{ opacity: (isSettled && !isClosing) ? 1 : 0 }}
-        transition={{ duration: isClosing ? 0.12 : 0.3, ease: [0.16, 1, 0.3, 1] }}
+        animate={{ opacity: (isSettled || isClosing) ? 1 : 0 }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       >
         <BrandLogo theme="dark" />
         <button
@@ -341,17 +348,17 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         </button>
       </motion.div>
 
-      {/* Auth Card — fast, crisp float-in after blob settles, instant fadeout on close */}
+      {/* Auth Card — stays visible during closing so the fluid clip-path naturally sucks it away */}
       <motion.div
         className="radial-reveal-content"
         initial={{ opacity: 0, scale: 0.96, y: 16 }}
         animate={{
-          opacity: (isSettled && !isClosing) ? 1 : 0,
-          scale: (isSettled && !isClosing) ? 1 : 0.96,
-          y: (isSettled && !isClosing) ? 0 : 16
+          opacity: (isSettled || isClosing) ? 1 : 0,
+          scale: (isSettled || isClosing) ? 1 : 0.96,
+          y: (isSettled || isClosing) ? 0 : 16
         }}
         transition={{
-          duration: isClosing ? 0.12 : 0.35,
+          duration: 0.35,
           delay: 0,
           ease: [0.16, 1, 0.3, 1]
         }}

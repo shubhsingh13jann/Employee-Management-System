@@ -9,6 +9,16 @@ const PageTransition = ({ children }) => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [location.pathname]);
 
+  const isAuthRoute =
+    location.pathname === "/" ||
+    location.pathname === "/login" ||
+    location.pathname === "/signup" ||
+    location.pathname === "/adminlogin";
+
+  if (isAuthRoute) {
+    return <div className="w-100 min-vh-100">{children}</div>;
+  }
+
   return (
     <motion.div
       key={location.pathname}

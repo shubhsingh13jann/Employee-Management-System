@@ -36,6 +36,15 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
     return "login";
   });
 
+  // Lock body scroll while auth overlay is open
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, []);
+
   // Sync mode if URL route changes
   useEffect(() => {
     if (location.pathname.includes("signup")) {
@@ -203,17 +212,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
       origin={revealOrigin}
       role={role}
       alreadyCovered={alreadyCovered}
-      onClose={() =>
-        navigate("/", {
-          state: {
-            reverseReveal: true,
-            origin: revealOrigin || {
-              x: typeof window !== "undefined" ? window.innerWidth - 85 : 800,
-              y: 38,
-            },
-          },
-        })
-      }
+      onClose={() => navigate("/")}
     >
       <div
         ref={containerRef}
