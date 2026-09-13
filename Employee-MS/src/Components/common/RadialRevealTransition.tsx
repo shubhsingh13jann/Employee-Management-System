@@ -122,6 +122,8 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
     maxRadiusRef.current = Math.max(...corners) * 1.35;
   }, [originX, originY, dimensions]);
 
+  const viewportRef = useRef<HTMLDivElement>(null);
+
   // Luxurious, smooth fluid timing (550ms opening, 520ms closing)
   const OPEN_DURATION = 550;
   const CLOSE_DURATION = 520;
@@ -170,6 +172,14 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         animFrameRef.current = requestAnimationFrame(animateLoop);
       } else {
         if (isClosing) {
+          const tinyDot = `M ${originX} ${originY} m -0.1, 0 a 0.1,0.1 0 1,0 0.2,0 a 0.1,0.1 0 1,0 -0.2,0 Z`;
+          setBlobPath(tinyDot);
+          if (viewportRef.current) {
+            viewportRef.current.style.opacity = "0";
+            viewportRef.current.style.display = "none";
+            viewportRef.current.style.visibility = "hidden";
+            viewportRef.current.style.pointerEvents = "none";
+          }
           setIsFullyClosed(true);
           setIsVisible(false);
           onCloseRef.current();
@@ -188,14 +198,19 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
 
   const handleTriggerClose = () => {
     if (isClosing) return;
+    const fullPath = getLiquidBlobPath(originX, originY, maxRadiusRef.current, 0, 0.9);
+    setBlobPath(fullPath);
     setIsClosing(true);
   };
 
   const gradCx = dimensions.width > 0 ? `${((originX / dimensions.width) * 100).toFixed(1)}%` : "50%";
   const gradCy = dimensions.height > 0 ? `${((originY / dimensions.height) * 100).toFixed(1)}%` : "20%";
 
+  const tinyDotFallback = `M ${originX} ${originY} m -0.1, 0 a 0.1,0.1 0 1,0 0.2,0 a 0.1,0.1 0 1,0 -0.2,0 Z`;
+
   return (
     <div
+      ref={viewportRef}
       className="radial-reveal-viewport"
       style={{
         opacity: isFullyClosed ? 0 : (isVisible ? 1 : 0),
@@ -216,7 +231,7 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         <defs>
           {/* SVG ClipPath physically clips the entire login portal during opening and closing */}
           <clipPath id="login-liquid-clip" clipPathUnits="userSpaceOnUse">
-            <path d={blobPath || "M 0 0"} />
+            <path d={blobPath || tinyDotFallback} />
           </clipPath>
 
           {/* Dynamic Radial Gradient Centered at Clicked Button Origin */}
