@@ -7,8 +7,6 @@
 .enterprise-background {
   position: fixed;
   inset: 0;
-  width: 100vw;
-  height: 100vh;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -21,6 +19,48 @@
 
   --mouse-x: 0px;
   --mouse-y: 0px;
+
+  /* Default / HR Admin Palette: Royal Amethyst Velvet / Electric Violet */
+  --role-primary-rgb: 139, 92, 246;
+  --role-deep-rgb: 124, 58, 237;
+  --role-light-rgb: 192, 132, 252;
+  --role-light-hex: #c084fc;
+  --role-glow-rgb: 168, 85, 247;
+}
+
+/* ============================================================
+   ROLE-TIER CHROMATIC PALETTES
+   ============================================================ */
+.enterprise-background[data-role="admin"] {
+  --role-primary-rgb: 139, 92, 246;
+  --role-deep-rgb: 124, 58, 237;
+  --role-light-rgb: 192, 132, 252;
+  --role-light-hex: #c084fc;
+  --role-glow-rgb: 168, 85, 247;
+}
+
+.enterprise-background[data-role="manager"] {
+  --role-primary-rgb: 37, 99, 235;
+  --role-deep-rgb: 29, 78, 216;
+  --role-light-rgb: 56, 189, 248;
+  --role-light-hex: #38bdf8;
+  --role-glow-rgb: 96, 165, 250;
+}
+
+.enterprise-background[data-role="supervisor"] {
+  --role-primary-rgb: 5, 150, 105;
+  --role-deep-rgb: 4, 120, 87;
+  --role-light-rgb: 52, 211, 153;
+  --role-light-hex: #34d399;
+  --role-glow-rgb: 16, 185, 129;
+}
+
+.enterprise-background[data-role="employee"] {
+  --role-primary-rgb: 79, 70, 229;
+  --role-deep-rgb: 67, 56, 202;
+  --role-light-rgb: 129, 140, 248;
+  --role-light-hex: #818cf8;
+  --role-glow-rgb: 99, 102, 241;
 }
 
 /* Canvas element filling entire viewport */
@@ -53,9 +93,10 @@
   line-height: 0.8;
   font-weight: 900;
   letter-spacing: -0.06em;
-  color: rgba(139, 92, 246, 0.085);
-  text-shadow: 0 0 50px rgba(124, 58, 237, 0.12);
+  color: rgba(var(--role-primary-rgb), 0.085);
+  text-shadow: 0 0 50px rgba(var(--role-deep-rgb), 0.12);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: color 0.6s cubic-bezier(0.16, 1, 0.3, 1), text-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ems-watermark-subtitle {
@@ -64,8 +105,9 @@
   font-size: 11px;
   letter-spacing: 7px;
   font-weight: 600;
-  color: rgba(192, 132, 252, 0.24);
+  color: rgba(var(--role-light-rgb), 0.24);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ============================================================
@@ -81,8 +123,8 @@
   z-index: 2;
   opacity: 0.65;
   pointer-events: none;
-  filter: drop-shadow(0 0 35px rgba(124, 58, 237, 0.25));
-  transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  filter: drop-shadow(0 0 35px rgba(var(--role-deep-rgb), 0.25));
+  transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Globe Core Sphere */
@@ -91,16 +133,17 @@
   inset: 12%;
   border-radius: 50%;
   overflow: hidden;
-  border: 1px solid rgba(139, 92, 246, 0.26);
+  border: 1px solid rgba(var(--role-primary-rgb), 0.26);
   background: radial-gradient(
     circle at 35% 30%,
-    rgba(124, 58, 237, 0.18),
+    rgba(var(--role-deep-rgb), 0.18),
     rgba(20, 21, 39, 0.08) 55%,
     transparent 75%
   );
   box-shadow:
-    inset 0 0 45px rgba(124, 58, 237, 0.18),
-    0 0 45px rgba(124, 58, 237, 0.12);
+    inset 0 0 45px rgba(var(--role-deep-rgb), 0.18),
+    0 0 45px rgba(var(--role-deep-rgb), 0.12);
+  transition: border-color 0.6s ease, box-shadow 0.6s ease;
 }
 
 /* Rotating Longitude Meridians */
@@ -109,9 +152,10 @@
   top: -10%;
   width: 100%;
   height: 120%;
-  border: 1px solid rgba(139, 92, 246, 0.22);
+  border: 1px solid rgba(var(--role-primary-rgb), 0.22);
   border-radius: 50%;
   animation: globeRotate 14s linear infinite;
+  transition: border-color 0.6s ease;
 }
 
 .m1 {
@@ -141,8 +185,9 @@
   left: -5%;
   width: 110%;
   height: 35%;
-  border: 1px solid rgba(139, 92, 246, 0.16);
+  border: 1px solid rgba(var(--role-primary-rgb), 0.16);
   border-radius: 50%;
+  transition: border-color 0.6s ease;
 }
 
 .l1 { top: 5%; }
@@ -158,7 +203,7 @@
   opacity: 0.45;
   background-image: radial-gradient(
     circle,
-    rgba(192, 132, 252, 0.75) 1px,
+    rgba(var(--role-light-rgb), 0.75) 1px,
     transparent 1.5px
   );
   background-size: 8px 8px;
@@ -177,8 +222,9 @@
 .globe-orbit {
   position: absolute;
   inset: 0;
-  border: 1px solid rgba(168, 85, 247, 0.22);
+  border: 1px solid rgba(var(--role-glow-rgb), 0.22);
   border-radius: 50%;
+  transition: border-color 0.6s ease;
 }
 
 .orbit-one {
@@ -219,7 +265,7 @@
   align-items: center;
   gap: 10px;
   padding: 8px 16px;
-  border: 1px solid rgba(149, 118, 242, 0.18);
+  border: 1px solid rgba(var(--role-primary-rgb), 0.18);
   border-radius: 9999px;
   background: rgba(18, 21, 38, 0.55);
   backdrop-filter: blur(14px);
@@ -229,20 +275,22 @@
   font-weight: 600;
   letter-spacing: 0.4px;
   box-shadow:
-    inset 0 0 16px rgba(139, 92, 246, 0.06),
+    inset 0 0 16px rgba(var(--role-primary-rgb), 0.06),
     0 8px 30px rgba(0, 0, 0, 0.35);
   pointer-events: none;
   animation: labelFloat 7s ease-in-out infinite;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: border-color 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .label-icon {
-  color: #c084fc;
+  color: var(--role-light-hex);
   font-size: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-shadow: 0 0 10px rgba(168, 85, 247, 0.7);
+  text-shadow: 0 0 10px rgba(var(--role-glow-rgb), 0.7);
+  transition: color 0.6s cubic-bezier(0.16, 1, 0.3, 1), text-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Left Side Pill Coordinates */
@@ -298,11 +346,12 @@
 .data-code {
   position: absolute;
   z-index: 4;
-  color: rgba(147, 112, 219, 0.22);
+  color: rgba(var(--role-primary-rgb), 0.22);
   font-size: 8px;
   font-family: "SFMono-Regular", Consolas, "Courier New", monospace;
   letter-spacing: 2px;
   pointer-events: none;
+  transition: color 0.6s ease;
 }
 
 .code-one {
@@ -366,10 +415,11 @@
   height: 32px;
   background: linear-gradient(
     to bottom,
-    rgba(168, 85, 247, 0.9),
-    rgba(168, 85, 247, 0)
+    rgba(var(--role-glow-rgb), 0.9),
+    rgba(var(--role-glow-rgb), 0)
   );
-  box-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+  box-shadow: 0 0 8px rgba(var(--role-glow-rgb), 0.6);
+  transition: background 0.6s ease, box-shadow 0.6s ease;
 }
 
 /* ============================================================

@@ -295,7 +295,7 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
       </svg>
 
       {/* Enterprise SaaS Background Environment */}
-      <EnterpriseBackground />
+      <EnterpriseBackground role={role} />
 
       {/* Top Floating Header — stays visible throughout so it smoothly moves with the viewport */}
       <div className="radial-reveal-header">

@@ -1,22 +1,33 @@
 import React, { useEffect, useRef } from "react";
+import { UserRole } from "./auth.types";
 import "./enterprise-background.css";
+
+export interface EnterpriseBackgroundProps {
+  role?: UserRole;
+}
 
 /**
  * EnterpriseBackground Component
  * 
  * High-performance 2D Canvas + CSS hardware-accelerated spatial background
  * featuring:
- * - Ambient volumetric violet/navy lighting & dark vignette
+ * - Dynamic role-tier chromatic adaptation (Admin, Manager, Supervisor, Employee)
+ * - Ambient volumetric lighting & dark vignette
  * - Technical perspective floor with glowing grid intersections
  * - Constellation network nodes with travelling data pulses & micro-particles
  * - Rotating digital wireframe globe with orbital rings & stipple matrix
- * - Glassmorphic floating business labels (People, Teams, Growth, Productivity, Security, Collaboration)
+ * - Glassmorphic floating business labels
  * - Large EMS watermark with subtle mouse parallax
  * - System metadata micro-codes & branded bottom telemetry
  */
-const EnterpriseBackground: React.FC = () => {
+const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "admin" }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const roleRef = useRef<UserRole>(role);
+
+  useEffect(() => {
+    roleRef.current = role;
+  }, [role]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -43,15 +54,77 @@ const EnterpriseBackground: React.FC = () => {
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     /* =========================================================
+       ROLE COLOR PALETTES & CHROMATIC THEMES
+    ========================================================= */
+    interface RoleColorSet {
+      r: number;
+      g: number;
+      b: number;
+    }
+
+    interface RolePalette {
+      primary: RoleColorSet;
+      deep: RoleColorSet;
+      light: RoleColorSet;
+      glow: RoleColorSet;
+      highlight: RoleColorSet;
+      tint: RoleColorSet;
+    }
+
+    const ROLE_PALETTES: Record<UserRole, RolePalette> = {
+      admin: {
+        // Royal Amethyst Velvet / Electric Violet
+        primary: { r: 139, g: 92, b: 246 },    // #8b5cf6
+        deep: { r: 124, g: 58, b: 237 },       // #7c3aed
+        light: { r: 192, g: 132, b: 252 },     // #c084fc
+        glow: { r: 168, g: 85, b: 247 },      // #a855f7
+        highlight: { r: 216, g: 180, b: 254 }, // #d8b4fe
+        tint: { r: 35, g: 22, b: 65 },
+      },
+      manager: {
+        // Corporate Ocean Azure / Electric Sky
+        primary: { r: 37, g: 99, b: 235 },     // #2563eb
+        deep: { r: 29, g: 78, b: 216 },        // #1d4ed8
+        light: { r: 56, g: 189, b: 248 },      // #38bdf8
+        glow: { r: 96, g: 165, b: 250 },      // #60a5fa
+        highlight: { r: 186, g: 230, b: 253 }, // #bae6fd
+        tint: { r: 15, g: 30, b: 65 },
+      },
+      supervisor: {
+        // Jade Forest / Emerald Seafoam
+        primary: { r: 5, g: 150, b: 105 },     // #059669
+        deep: { r: 4, g: 120, b: 87 },         // #047857
+        light: { r: 52, g: 211, b: 153 },      // #34d399
+        glow: { r: 16, g: 185, b: 129 },      // #10b981
+        highlight: { r: 167, g: 243, b: 208 }, // #a7f3d0
+        tint: { r: 10, g: 45, b: 35 },
+      },
+      employee: {
+        // Morning Indigo / Tech Electric Blue
+        primary: { r: 79, g: 70, b: 229 },     // #4f46e5
+        deep: { r: 67, g: 56, b: 202 },        // #4338ca
+        light: { r: 129, g: 140, b: 248 },     // #818cf8
+        glow: { r: 99, g: 102, b: 241 },      // #6366f1
+        highlight: { r: 199, g: 210, b: 254 }, // #c7d2fe
+        tint: { r: 25, g: 25, b: 65 },
+      },
+    };
+
+    const initialPalette = ROLE_PALETTES[roleRef.current] || ROLE_PALETTES.admin;
+    const currentColors: RolePalette = {
+      primary: { ...initialPalette.primary },
+      deep: { ...initialPalette.deep },
+      light: { ...initialPalette.light },
+      glow: { ...initialPalette.glow },
+      highlight: { ...initialPalette.highlight },
+      tint: { ...initialPalette.tint },
+    };
+
+    /* =========================================================
        CONFIGURATION
     ========================================================= */
     const CONFIG = {
       background: "#070b13",
-      gridColor: "rgba(111, 91, 190, 0.05)",
-      networkLine: "rgba(139, 92, 246, 0.22)",
-      networkGlow: "rgba(168, 85, 247, 0.5)",
-      nodeColor: "rgba(192, 132, 252, 0.95)",
-      particleColor: "rgba(216, 180, 254, 0.85)",
       maxNetworkDistance: 240,
       networkNodeCount: 38,
       particleCount: 50,
@@ -213,7 +286,9 @@ const EnterpriseBackground: React.FC = () => {
         height * 0.38,
         Math.max(width, height) * 0.78
       );
-      gradient.addColorStop(0, "rgba(35, 22, 65, 0.30)");
+      const t = currentColors.tint;
+      const tr = Math.round(t.r), tg = Math.round(t.g), tb = Math.round(t.b);
+      gradient.addColorStop(0, `rgba(${tr}, ${tg}, ${tb}, 0.35)`);
       gradient.addColorStop(0.35, "rgba(15, 17, 32, 0.35)");
       gradient.addColorStop(1, "rgba(7, 11, 19, 0.95)");
 
@@ -226,7 +301,8 @@ const EnterpriseBackground: React.FC = () => {
     ========================================================= */
     const drawGrid = () => {
       ctx.save();
-      ctx.strokeStyle = CONFIG.gridColor;
+      const p = currentColors.primary;
+      ctx.strokeStyle = `rgba(${Math.round(p.r)}, ${Math.round(p.g)}, ${Math.round(p.b)}, 0.05)`;
       ctx.lineWidth = 1;
       const gridSize = CONFIG.gridSize;
       const offset = prefersReducedMotion ? 0 : (time * 0.12) % gridSize;
@@ -256,6 +332,16 @@ const EnterpriseBackground: React.FC = () => {
 
       ctx.save();
 
+      const p = currentColors.primary;
+      const d = currentColors.deep;
+      const l = currentColors.light;
+      const g = currentColors.glow;
+
+      const pr = Math.round(p.r), pg = Math.round(p.g), pb = Math.round(p.b);
+      const dr = Math.round(d.r), dg = Math.round(d.g), db = Math.round(d.b);
+      const lr = Math.round(l.r), lg = Math.round(l.g), lb = Math.round(l.b);
+      const gr = Math.round(g.r), gg = Math.round(g.g), gb = Math.round(g.b);
+
       // Horizontal perspective rings / grid lines
       const horizontalLines = 15;
       const hPoints: number[] = [];
@@ -269,7 +355,7 @@ const EnterpriseBackground: React.FC = () => {
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(width, y);
-        ctx.strokeStyle = `rgba(139, 92, 246, ${0.03 + norm * 0.08})`;
+        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${0.03 + norm * 0.08})`;
         ctx.lineWidth = norm > 0.6 ? 1.2 : 0.8;
         ctx.stroke();
       }
@@ -285,7 +371,7 @@ const EnterpriseBackground: React.FC = () => {
         ctx.beginPath();
         ctx.moveTo(centerX, horizon);
         ctx.lineTo(bottomX, height + 60);
-        ctx.strokeStyle = "rgba(124, 58, 237, 0.045)";
+        ctx.strokeStyle = `rgba(${dr}, ${dg}, ${db}, 0.045)`;
         ctx.lineWidth = 0.9;
         ctx.stroke();
       }
@@ -308,7 +394,7 @@ const EnterpriseBackground: React.FC = () => {
 
             ctx.beginPath();
             ctx.arc(ix, y, dotR, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(192, 132, 252, ${dotAlpha})`;
+            ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, ${dotAlpha})`;
             ctx.fill();
           }
         }
@@ -323,9 +409,9 @@ const EnterpriseBackground: React.FC = () => {
         horizon,
         width * 0.55
       );
-      horizonGlow.addColorStop(0, "rgba(139, 92, 246, 0.16)");
-      horizonGlow.addColorStop(0.5, "rgba(124, 58, 237, 0.06)");
-      horizonGlow.addColorStop(1, "rgba(124, 58, 237, 0)");
+      horizonGlow.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0.16)`);
+      horizonGlow.addColorStop(0.5, `rgba(${dr}, ${dg}, ${db}, 0.06)`);
+      horizonGlow.addColorStop(1, `rgba(${dr}, ${dg}, ${db}, 0)`);
 
       ctx.fillStyle = horizonGlow;
       ctx.fillRect(0, horizon - 80, width, 180);
@@ -334,7 +420,7 @@ const EnterpriseBackground: React.FC = () => {
       ctx.beginPath();
       ctx.moveTo(width * 0.1, horizon);
       ctx.lineTo(width * 0.9, horizon);
-      ctx.strokeStyle = "rgba(168, 85, 247, 0.18)";
+      ctx.strokeStyle = `rgba(${gr}, ${gg}, ${gb}, 0.18)`;
       ctx.lineWidth = 1.2;
       ctx.stroke();
 
@@ -345,14 +431,18 @@ const EnterpriseBackground: React.FC = () => {
        LAYER: AMBIENT VOLUMETRIC LIGHTS
     ========================================================= */
     const drawAmbientLights = () => {
+      const p = currentColors.primary;
+      const d = currentColors.deep;
+      const l = currentColors.light;
+
       const lights = [
-        // Top-center luminous purple nebula (frames top of screen and login card)
+        // Top-center luminous role nebula (frames top of screen and login card)
         {
           x: width * 0.5,
           y: height * 0.04,
           radius: 460,
           alpha: 0.18,
-          r: 139, g: 92, b: 246,
+          r: Math.round(p.r), g: Math.round(p.g), b: Math.round(p.b),
         },
         // Left globe aura
         {
@@ -360,7 +450,7 @@ const EnterpriseBackground: React.FC = () => {
           y: height * 0.52,
           radius: 320,
           alpha: 0.14,
-          r: 124, g: 58, b: 237,
+          r: Math.round(d.r), g: Math.round(d.g), b: Math.round(d.b),
         },
         // Right watermark aura
         {
@@ -368,7 +458,7 @@ const EnterpriseBackground: React.FC = () => {
           y: height * 0.70,
           radius: 340,
           alpha: 0.11,
-          r: 99, g: 102, b: 241,
+          r: Math.round(l.r), g: Math.round(l.g), b: Math.round(l.b),
         },
       ];
 
@@ -401,13 +491,15 @@ const EnterpriseBackground: React.FC = () => {
        LAYER: STARS & SPARKLES
     ========================================================= */
     const drawStars = () => {
+      const l = currentColors.light;
+      const lr = Math.round(l.r), lg = Math.round(l.g), lb = Math.round(l.b);
       stars.forEach((star) => {
         const twinkle =
           star.alpha +
           Math.sin(time * 0.001 * star.twinkle + star.phase) * 0.12;
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(192, 132, 252, ${clamp(twinkle, 0.05, 0.65)})`;
+        ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, ${clamp(twinkle, 0.05, 0.65)})`;
         ctx.fill();
       });
     };
@@ -429,6 +521,8 @@ const EnterpriseBackground: React.FC = () => {
     };
 
     const drawConnections = () => {
+      const p = currentColors.primary;
+      const pr = Math.round(p.r), pg = Math.round(p.g), pb = Math.round(p.b);
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const a = nodes[i];
@@ -441,7 +535,7 @@ const EnterpriseBackground: React.FC = () => {
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(139, 92, 246, ${opacity})`;
+            ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${opacity})`;
             ctx.lineWidth = 0.75;
             ctx.stroke();
           }
@@ -450,6 +544,13 @@ const EnterpriseBackground: React.FC = () => {
     };
 
     const drawNodes = () => {
+      const g = currentColors.glow;
+      const d = currentColors.deep;
+      const h = currentColors.highlight;
+      const gr = Math.round(g.r), gg = Math.round(g.g), gb = Math.round(g.b);
+      const dr = Math.round(d.r), dg = Math.round(d.g), db = Math.round(d.b);
+      const hr = Math.round(h.r), hg = Math.round(h.g), hb = Math.round(h.b);
+
       nodes.forEach((node) => {
         const pulse =
           1 + Math.sin(time * 0.002 * node.pulseSpeed + node.pulse) * 0.4;
@@ -464,8 +565,8 @@ const EnterpriseBackground: React.FC = () => {
           node.y,
           glowRadius
         );
-        glow.addColorStop(0, `rgba(168, 85, 247, ${node.opacity * 0.75})`);
-        glow.addColorStop(1, "rgba(124, 58, 237, 0)");
+        glow.addColorStop(0, `rgba(${gr}, ${gg}, ${gb}, ${node.opacity * 0.75})`);
+        glow.addColorStop(1, `rgba(${dr}, ${dg}, ${db}, 0)`);
 
         ctx.fillStyle = glow;
         ctx.beginPath();
@@ -475,7 +576,7 @@ const EnterpriseBackground: React.FC = () => {
         // Solid core
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.radius * pulse, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(216, 180, 254, ${node.opacity})`;
+        ctx.fillStyle = `rgba(${hr}, ${hg}, ${hb}, ${node.opacity})`;
         ctx.fill();
       });
     };
@@ -496,10 +597,13 @@ const EnterpriseBackground: React.FC = () => {
       const px = a.x + (b.x - a.x) * progress;
       const py = a.y + (b.y - a.y) * progress;
 
+      const l = currentColors.light;
+      const d = currentColors.deep;
+
       const glow = ctx.createRadialGradient(px, py, 0, px, py, 14);
       glow.addColorStop(0, "rgba(255, 255, 255, 0.95)");
-      glow.addColorStop(0.2, "rgba(192, 132, 252, 0.85)");
-      glow.addColorStop(1, "rgba(124, 58, 237, 0)");
+      glow.addColorStop(0.2, `rgba(${Math.round(l.r)}, ${Math.round(l.g)}, ${Math.round(l.b)}, 0.85)`);
+      glow.addColorStop(1, `rgba(${Math.round(d.r)}, ${Math.round(d.g)}, ${Math.round(d.b)}, 0)`);
 
       ctx.fillStyle = glow;
       ctx.beginPath();
@@ -524,13 +628,15 @@ const EnterpriseBackground: React.FC = () => {
     };
 
     const drawParticles = () => {
+      const l = currentColors.light;
+      const lr = Math.round(l.r), lg = Math.round(l.g), lb = Math.round(l.b);
       particles.forEach((p) => {
         const alpha =
           p.alpha *
           (0.75 + Math.sin(time * 0.001 * p.speed + p.phase) * 0.25);
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(192, 132, 252, ${alpha})`;
+        ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, ${alpha})`;
         ctx.fill();
       });
     };
@@ -564,6 +670,22 @@ const EnterpriseBackground: React.FC = () => {
       // Smooth mouse interpolation
       smoothMouseX += (mouseX - smoothMouseX) * 0.04;
       smoothMouseY += (mouseY - smoothMouseY) * 0.04;
+
+      // Smoothly morph canvas chromatic colors to active role tier palette
+      const targetPalette = ROLE_PALETTES[roleRef.current] || ROLE_PALETTES.admin;
+      const LERP_RATE = 0.06;
+      const lerpChannel = (c: RoleColorSet, t: RoleColorSet) => {
+        c.r += (t.r - c.r) * LERP_RATE;
+        c.g += (t.g - c.g) * LERP_RATE;
+        c.b += (t.b - c.b) * LERP_RATE;
+      };
+
+      lerpChannel(currentColors.primary, targetPalette.primary);
+      lerpChannel(currentColors.deep, targetPalette.deep);
+      lerpChannel(currentColors.light, targetPalette.light);
+      lerpChannel(currentColors.glow, targetPalette.glow);
+      lerpChannel(currentColors.highlight, targetPalette.highlight);
+      lerpChannel(currentColors.tint, targetPalette.tint);
 
       ctx.clearRect(0, 0, width, height);
 
@@ -645,7 +767,12 @@ const EnterpriseBackground: React.FC = () => {
   }, []);
 
   return (
-    <div ref={wrapperRef} className="enterprise-background" aria-hidden="true">
+    <div
+      ref={wrapperRef}
+      className="enterprise-background"
+      data-role={role}
+      aria-hidden="true"
+    >
       {/* Hardware-accelerated dynamic canvas */}
       <canvas ref={canvasRef} className="enterprise-canvas" />
 
