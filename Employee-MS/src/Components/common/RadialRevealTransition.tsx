@@ -16,7 +16,6 @@ interface RadialRevealTransitionProps {
   isOpen?: boolean;
   onClose: () => void;
   role?: UserRole;
-  alreadyCovered?: boolean;
 }
 
 /**
@@ -31,7 +30,7 @@ function getLiquidBlobPath(
   phase: number,
   wobbleIntensity = 1
 ): string {
-  if (baseR <= 0) return "";
+  if (baseR <= 0) return "M 0 0";
 
   const numPoints = 32;
   const points: { x: number; y: number }[] = [];
@@ -71,11 +70,14 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
   origin,
   onClose,
   role = "admin",
-  alreadyCovered = false,
 }) => {
+  // If no origin is provided (direct URL visit), settle immediately without intro animation
+  const isDirectVisit = !origin;
+
   const [isClosing, setIsClosing] = useState(false);
-  const [isSettled, setIsSettled] = useState(alreadyCovered);
-  const [isVisible, setIsVisible] = useState(alreadyCovered);
+  const [isSettled, setIsSettled] = useState(isDirectVisit);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isFullyClosed, setIsFullyClosed] = useState(false);
 
   // Viewport dimensions for SVG canvas
   const [dimensions, setDimensions] = useState({
@@ -99,7 +101,10 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
   const originY = origin?.y ?? 38;
 
   // Real-time animation states for liquid blob math
-  const [blobPath, setBlobPath] = useState("");
+  // Start with a zero-radius dot on frame 0 if animating so there is zero initial flash
+  const [blobPath, setBlobPath] = useState(() =>
+    isDirectVisit ? "" : getLiquidBlobPath(originX, originY, 0, 0, 0.2)
+  );
   const [ripplePath, setRipplePath] = useState("");
   const [crestPath, setCrestPath] = useState("");
 
@@ -117,17 +122,15 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
     maxRadiusRef.current = Math.max(...corners) * 1.35;
   }, [originX, originY, dimensions]);
 
-  const [isFullyClosed, setIsFullyClosed] = useState(false);
-
-  // Silky fluid timing (550ms opening, 580ms closing)
+  // Luxurious, smooth fluid timing (550ms opening, 520ms closing)
   const OPEN_DURATION = 550;
-  const CLOSE_DURATION = 580;
+  const CLOSE_DURATION = 520;
 
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
   useEffect(() => {
-    if (alreadyCovered && !isClosing) return;
+    if (isDirectVisit && !isClosing) return;
 
     startTimeRef.current = performance.now();
 
@@ -181,7 +184,7 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [isClosing, originX, originY, alreadyCovered]);
+  }, [isClosing, originX, originY, isDirectVisit]);
 
   const handleTriggerClose = () => {
     if (isClosing) return;
@@ -198,8 +201,8 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         opacity: isFullyClosed ? 0 : (isVisible ? 1 : 0),
         display: isFullyClosed ? "none" : undefined,
         pointerEvents: isClosing ? "none" : (isVisible ? "auto" : "none"),
-        clipPath: isClosing ? "url(#login-liquid-clip)" : undefined,
-        WebkitClipPath: isClosing ? "url(#login-liquid-clip)" : undefined,
+        clipPath: (!isSettled || isClosing) ? "url(#login-liquid-clip)" : undefined,
+        WebkitClipPath: (!isSettled || isClosing) ? "url(#login-liquid-clip)" : undefined,
       }}
     >
       {/* Master Liquid SVG Canvas Rendering True Fluid Water Blob & Ripples */}
@@ -211,7 +214,7 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         aria-hidden="true"
       >
         <defs>
-          {/* SVG ClipPath used to physically clip the entire login viewport during closing */}
+          {/* SVG ClipPath physically clips the entire login portal during opening and closing */}
           <clipPath id="login-liquid-clip" clipPathUnits="userSpaceOnUse">
             <path d={blobPath || "M 0 0"} />
           </clipPath>
@@ -248,17 +251,9 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
           </filter>
         </defs>
 
-        {/* During closing or when not settled, render fluid crest & ripples along boundary */}
+        {/* During closing or active opening, render fluid crest & ripples along boundary */}
         {(!isSettled || isClosing) && (
           <>
-            {/* When not already covered and opening, render blob body */}
-            {!alreadyCovered && !isSettled && blobPath && (
-              <path
-                d={blobPath}
-                fill="url(#liquid-theme-gradient)"
-              />
-            )}
-
             {/* Leading Aquatic Sheen Wave (Wet Rim) */}
             {crestPath && (
               <path
@@ -284,27 +279,13 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         )}
       </svg>
 
-      {/* Satellite Fluid Splash Droplets (Only active during initial direct opening if not already covered) */}
-      {!isSettled && !alreadyCovered && (
-        <div
-          className="water-satellite-droplets"
-          style={{ left: originX, top: originY }}
-        >
-          <span className="drop drop-1" />
-          <span className="drop drop-2" />
-          <span className="drop drop-3" />
-          <span className="drop drop-4" />
-          <span className="drop drop-5" />
-        </div>
-      )}
-
-      {/* Concept 3: Executive Volumetric Spotlight — visible during settled & closing */}
-      {(isSettled || isClosing) && <VolumetricAtmosphere role={role} />}
+      {/* Concept 3: Executive Volumetric Spotlight */}
+      <VolumetricAtmosphere role={role} />
 
       {/* Subtle Geometric Mesh Overlay */}
-      {(isSettled || isClosing) && <div className="radial-reveal-mesh-grid" />}
+      <div className="radial-reveal-mesh-grid" />
 
-      {/* Top Floating Header — stays visible during closing so it contracts with the background */}
+      {/* Top Floating Header — stays visible throughout so it smoothly moves with the viewport */}
       <div className="radial-reveal-header">
         <BrandLogo theme="dark" />
         <button
@@ -320,7 +301,7 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         </button>
       </div>
 
-      {/* Auth Card — stays visible during closing so it contracts with the background */}
+      {/* Auth Card — stays visible throughout so it organically expands and contracts with the liquid boundary */}
       <div className="radial-reveal-content">
         {children}
       </div>

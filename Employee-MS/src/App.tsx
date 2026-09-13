@@ -43,16 +43,25 @@ const EmployeeProfile = lazy(() => import("./pages/employee/EmployeeProfile"));
 const AnimatedAppContent = () => {
   const location = useLocation();
 
+  const isAuthRoute =
+    location.pathname === "/" ||
+    location.pathname === "/login" ||
+    location.pathname === "/signup" ||
+    location.pathname === "/adminlogin" ||
+    location.pathname === "/dashboard";
+  const transitionKey = isAuthRoute ? "auth-root" : location.pathname;
+
   return (
     <>
       <TopLaserBar />
       <AnimatePresence mode="wait">
-        <PageTransition key={location.pathname}>
+        <PageTransition key={transitionKey}>
           <Routes location={location}>
-            {/* Public Landing & Auth Routes */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<Login initialMode="login" />} />
-            <Route path="/signup" element={<Login initialMode="signup" />} />
+            {/* Public Landing & Auth Routes (LandingPage persists underneath Auth overlay) */}
+            <Route path="/" element={<LandingPage />}>
+              <Route path="login" element={<Login initialMode="login" />} />
+              <Route path="signup" element={<Login initialMode="signup" />} />
+            </Route>
             <Route path="/adminlogin" element={<Navigate to="/login" replace />} />
             <Route path="/dashboard" element={<Navigate to="/login" replace />} />
 
