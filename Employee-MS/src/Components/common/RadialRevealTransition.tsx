@@ -83,6 +83,9 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
 }) => {
   const [isClosing, setIsClosing] = useState(false);
   const [isSettled, setIsSettled] = useState(false);
+  // Keep the whole viewport invisible until the very first blob frame renders,
+  // so the dark background never flashes before the animation starts.
+  const [isVisible, setIsVisible] = useState(false);
 
   // Viewport dimensions for SVG canvas
   const [dimensions, setDimensions] = useState({
@@ -133,6 +136,10 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
     startTimeRef.current = performance.now();
 
     const animateLoop = (now: number) => {
+      // Make the entire viewport visible on the very first frame — dark background
+      // and blob animation appear together, never background-before-blob.
+      setIsVisible(true);
+
       const elapsed = now - startTimeRef.current;
       const duration = isClosing ? CLOSE_DURATION : OPEN_DURATION;
       let progress = Math.min(elapsed / duration, 1);
@@ -193,7 +200,14 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
   const gradCy = dimensions.height > 0 ? `${((originY / dimensions.height) * 100).toFixed(1)}%` : "20%";
 
   return (
-    <div className="radial-reveal-viewport">
+    <div
+      className="radial-reveal-viewport"
+      style={{
+        opacity: isVisible ? 1 : 0,
+        // Block all interaction until visible so there's no stale click on the hidden layer
+        pointerEvents: isVisible ? "auto" : "none",
+      }}
+    >
       {/* Master Liquid SVG Canvas Rendering True Fluid Water Blob & Ripples */}
       <svg
         className="liquid-reveal-svg-canvas"
