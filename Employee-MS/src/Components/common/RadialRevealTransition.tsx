@@ -308,6 +308,9 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         >
           <i className="bi bi-arrow-left me-1.5" style={{ fontSize: "0.85rem" }}></i>
           <span className="close-text">Back to Home</span>
+          <div className="close-icon-circle">
+            <i className="bi bi-x-lg"></i>
+          </div>
         </button>
       </div>
 

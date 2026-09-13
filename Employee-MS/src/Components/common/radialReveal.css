@@ -6,15 +6,11 @@
 .radial-reveal-viewport {
   position: fixed;
   inset: 0;
-  width: 100vw;
-  height: 100vh;
   width: 100%;
   height: 100%;
   z-index: 9999;
   overflow-y: auto;
   overflow-x: hidden;
-  background: radial-gradient(circle at 50% 30%, #131d31 0%, #090d16 100%);
-  overflow: hidden !important;
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
   background: #070b13;
@@ -145,16 +141,13 @@
   opacity: 0.8;
 }
 
-/* Header & Return Navigation */
 /* Header & Return Navigation — Aligned with Landing Page Navbar (height: 74px) */
-/* Header & Return Navigation — Exactly aligned with Landing Page Navbar (height: 74px) */
 .radial-reveal-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   width: 100%;
-  padding: 1.25rem 2rem;
   height: 74px;
   padding: 0 1.5rem;
   z-index: 50;
@@ -166,8 +159,7 @@
 
 @media (min-width: 992px) {
   .radial-reveal-header {
-    padding: 0 3rem;
-    padding: 0 3rem; /* Exactly matches landing page px-lg-5 */
+    padding: 0 3rem; /* Matches landing page px-lg-5 */
   }
 }
 
@@ -175,37 +167,27 @@
   display: inline-flex;
   align-items: center;
   gap: 0.65rem;
-  background: rgba(255, 255, 255, 0.08);
-  gap: 0.5rem;
   background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
   border: 1px solid rgba(148, 163, 184, 0.25);
   color: #e2e8f0;
   padding: 0.45rem 0.95rem 0.45rem 1.15rem;
-  padding: 0.45rem 1.1rem;
   border-radius: 9999px;
   font-size: 0.82rem;
   font-weight: 600;
-  font-weight: 500;
   letter-spacing: 0.02em;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
   box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.45);
 }
 
 .radial-reveal-close-btn:hover {
-  background: rgba(99, 102, 241, 0.3);
-  border-color: rgba(129, 140, 248, 0.5);
   background: rgba(30, 41, 59, 0.85);
   border-color: rgba(168, 85, 247, 0.5);
   color: #ffffff;
   transform: translateY(-1px) scale(1.02);
   box-shadow: 0 8px 24px -4px rgba(99, 102, 241, 0.4);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px -2px rgba(168, 85, 247, 0.35);
 }
 
 .close-icon-circle {
@@ -225,26 +207,17 @@
   background: rgba(255, 255, 255, 0.25);
 }
 
-/* Content Container for Auth Card */
-/* Content Container for Auth Card — perfectly centered in remaining viewport */
+/* Content Container for Auth Card — perfectly centered in viewport */
 .radial-reveal-content {
   position: relative;
   z-index: 10;
   width: 100%;
   min-height: 100vh;
-  min-height: 100%;
-  flex: 1;
-  height: calc(100vh - 74px);
-  max-height: calc(100vh - 74px);
-  margin-top: 74px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem 1rem;
-  padding: calc(74px + 1rem) 1.5rem 2rem 1.5rem;
-  padding: 1rem 1.5rem;
+  padding: 1.5rem;
   box-sizing: border-box;
-  overflow: hidden !important;
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
 }
@@ -255,10 +228,10 @@
   height: 0 !important;
 }
 
-/* Responsive: Allow scroll without visible scrollbar on very short viewports */
-@media (max-height: 700px) {
+@media (max-width: 991px), (max-height: 640px) {
   .radial-reveal-content {
-    overflow-y: auto !important;
+    padding-top: calc(74px + 1rem);
+    padding-bottom: 2rem;
     align-items: flex-start;
   }
 }
