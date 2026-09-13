@@ -117,9 +117,12 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
     maxRadiusRef.current = Math.max(...corners) * 1.35;
   }, [originX, originY, dimensions]);
 
-  // Snappy, energetic fluid timing (550ms opening, 450ms closing)
+  // Silky fluid timing (550ms opening, 580ms closing)
   const OPEN_DURATION = 550;
-  const CLOSE_DURATION = 450;
+  const CLOSE_DURATION = 580;
+
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (alreadyCovered && !isClosing) return;
@@ -162,7 +165,7 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         animFrameRef.current = requestAnimationFrame(animateLoop);
       } else {
         if (isClosing) {
-          onClose();
+          onCloseRef.current();
         } else {
           setIsSettled(true);
         }
@@ -174,7 +177,7 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [isClosing, originX, originY, onClose, alreadyCovered]);
+  }, [isClosing, originX, originY, alreadyCovered]);
 
   const handleTriggerClose = () => {
     if (isClosing) return;

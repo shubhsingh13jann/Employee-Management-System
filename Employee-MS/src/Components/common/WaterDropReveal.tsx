@@ -151,13 +151,6 @@ export const WaterDropReveal: React.FC<WaterDropRevealProps> = ({
         if (ripplePathRef.current) ripplePathRef.current.setAttribute("d", "");
       }
 
-      // Early trigger for expand when screen is comfortably covered (at ~94% progress)
-      if (isExpand && rawProgress >= 0.94 && !triggeredRef.current) {
-        triggeredRef.current = true;
-        if (onCovered) onCovered();
-        if (onComplete) onComplete();
-      }
-
       if (rawProgress < 1) {
         rafRef.current = requestAnimationFrame(tick);
       } else {
