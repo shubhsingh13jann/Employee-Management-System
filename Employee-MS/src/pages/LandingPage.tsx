@@ -32,8 +32,10 @@ const LandingPage = () => {
     });
   };
 
-  // Reset scroll to top and ensure manual restoration so navbar is ALWAYS visible on refresh
+  // Reset scroll to top, unlock auth navigation, and ensure manual restoration
   useEffect(() => {
+    isAuthNavigatingRef.current = false;
+    setPendingReveal(null);
     if ("scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual";
     }
@@ -1589,10 +1591,6 @@ const LandingPage = () => {
             navigate(pendingReveal.path, {
               state: { revealOrigin: pendingReveal.origin, alreadyCovered: true },
             });
-            setPendingReveal(null);
-            setTimeout(() => {
-              isAuthNavigatingRef.current = false;
-            }, 600);
           }}
         />
       )}

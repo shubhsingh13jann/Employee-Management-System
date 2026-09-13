@@ -117,6 +117,8 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
     maxRadiusRef.current = Math.max(...corners) * 1.35;
   }, [originX, originY, dimensions]);
 
+  const [isFullyClosed, setIsFullyClosed] = useState(false);
+
   // Silky fluid timing (550ms opening, 580ms closing)
   const OPEN_DURATION = 550;
   const CLOSE_DURATION = 580;
@@ -165,6 +167,8 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         animFrameRef.current = requestAnimationFrame(animateLoop);
       } else {
         if (isClosing) {
+          setIsFullyClosed(true);
+          setIsVisible(false);
           onCloseRef.current();
         } else {
           setIsSettled(true);
@@ -191,10 +195,11 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
     <div
       className="radial-reveal-viewport"
       style={{
-        opacity: isVisible ? 1 : 0,
+        opacity: isFullyClosed ? 0 : (isVisible ? 1 : 0),
+        display: isFullyClosed ? "none" : undefined,
         pointerEvents: isClosing ? "none" : (isVisible ? "auto" : "none"),
-        clipPath: isClosing && blobPath ? "url(#login-liquid-clip)" : undefined,
-        WebkitClipPath: isClosing && blobPath ? "url(#login-liquid-clip)" : undefined,
+        clipPath: isClosing ? "url(#login-liquid-clip)" : undefined,
+        WebkitClipPath: isClosing ? "url(#login-liquid-clip)" : undefined,
       }}
     >
       {/* Master Liquid SVG Canvas Rendering True Fluid Water Blob & Ripples */}
@@ -208,7 +213,7 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         <defs>
           {/* SVG ClipPath used to physically clip the entire login viewport during closing */}
           <clipPath id="login-liquid-clip" clipPathUnits="userSpaceOnUse">
-            {blobPath && <path d={blobPath} />}
+            <path d={blobPath || "M 0 0"} />
           </clipPath>
 
           {/* Dynamic Radial Gradient Centered at Clicked Button Origin */}
