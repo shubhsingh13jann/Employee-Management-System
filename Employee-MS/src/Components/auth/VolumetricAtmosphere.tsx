@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import { motion } from "framer-motion";
 import { UserRole } from "./auth.types";
 import "./volumetricAtmosphere.css";
@@ -7,268 +7,235 @@ export interface VolumetricAtmosphereProps {
   role?: UserRole;
 }
 
-// Role-reactive color palettes
+/* ─── Role palettes ─────────────────────────────────────────────────────── */
 const PALETTES: Record<
   UserRole,
-  { primary: string; secondary: string; node: string; halo: string; mesh: string }
+  {
+    spotlightR: number; spotlightG: number; spotlightB: number;
+    nodeR: number; nodeG: number; nodeB: number;
+    haloCSS: string; spotlightCSS: string; ambientCSS: string;
+  }
 > = {
   admin: {
-    primary: "rgba(147, 51, 234, 0.55)",     // amethyst velvet core
-    secondary: "rgba(245, 158, 11, 0.18)",   // imperial gold rim
-    node: "#c084fc",
-    halo: "rgba(192, 132, 252, 0.55)",
-    mesh: "rgba(167, 139, 250, 0.18)",
+    // Amethyst Velvet + Imperial Gold
+    spotlightR: 147, spotlightG: 51, spotlightB: 234,
+    nodeR: 192,      nodeG: 132,    nodeB: 252,
+    spotlightCSS:
+      "radial-gradient(ellipse 46% 36% at 50% 50%, rgba(147,51,234,0.70) 0%, rgba(88,28,135,0.30) 55%, transparent 100%)",
+    ambientCSS:
+      "radial-gradient(ellipse 80% 65% at 50% 50%, rgba(245,158,11,0.10) 0%, transparent 100%)",
+    haloCSS: "rgba(192,132,252,0.70)",
   },
   manager: {
-    primary: "rgba(37, 99, 235, 0.55)",      // executive sapphire core
-    secondary: "rgba(56, 189, 248, 0.18)",   // electric azure rim
-    node: "#38bdf8",
-    halo: "rgba(56, 189, 248, 0.55)",
-    mesh: "rgba(96, 165, 250, 0.18)",
+    // Corporate Ocean Navy + Electric Azure
+    spotlightR: 37,  spotlightG: 99,  spotlightB: 235,
+    nodeR: 56,       nodeG: 189,      nodeB: 248,
+    spotlightCSS:
+      "radial-gradient(ellipse 46% 36% at 50% 50%, rgba(37,99,235,0.70) 0%, rgba(30,58,138,0.30) 55%, transparent 100%)",
+    ambientCSS:
+      "radial-gradient(ellipse 80% 65% at 50% 50%, rgba(56,189,248,0.10) 0%, transparent 100%)",
+    haloCSS: "rgba(56,189,248,0.70)",
   },
   supervisor: {
-    primary: "rgba(5, 150, 105, 0.55)",      // jade forest core
-    secondary: "rgba(45, 212, 191, 0.18)",   // seafoam rim
-    node: "#34d399",
-    halo: "rgba(45, 212, 191, 0.55)",
-    mesh: "rgba(52, 211, 153, 0.18)",
+    // Jade Forest + Crystalline Seafoam
+    spotlightR: 5,   spotlightG: 150, spotlightB: 105,
+    nodeR: 52,       nodeG: 211,      nodeB: 153,
+    spotlightCSS:
+      "radial-gradient(ellipse 46% 36% at 50% 50%, rgba(5,150,105,0.70) 0%, rgba(6,78,59,0.30) 55%, transparent 100%)",
+    ambientCSS:
+      "radial-gradient(ellipse 80% 65% at 50% 50%, rgba(45,212,191,0.10) 0%, transparent 100%)",
+    haloCSS: "rgba(52,211,153,0.70)",
   },
   employee: {
-    primary: "rgba(79, 70, 229, 0.55)",      // morning indigo core
-    secondary: "rgba(14, 165, 233, 0.18)",   // sky blue rim
-    node: "#818cf8",
-    halo: "rgba(129, 140, 248, 0.55)",
-    mesh: "rgba(129, 140, 248, 0.18)",
+    // Morning Indigo + Sky Blue
+    spotlightR: 79,  spotlightG: 70,  spotlightB: 229,
+    nodeR: 129,      nodeG: 140,      nodeB: 248,
+    spotlightCSS:
+      "radial-gradient(ellipse 46% 36% at 50% 50%, rgba(79,70,229,0.70) 0%, rgba(49,46,129,0.30) 55%, transparent 100%)",
+    ambientCSS:
+      "radial-gradient(ellipse 80% 65% at 50% 50%, rgba(14,165,233,0.10) 0%, transparent 100%)",
+    haloCSS: "rgba(129,140,248,0.70)",
   },
 };
 
-// Deterministic pseudo-random node positions (seeded so they never change layout on re-render)
-function seededRand(seed: number) {
-  let s = seed;
-  return () => {
-    s = (s * 1664525 + 1013904223) & 0xffffffff;
-    return ((s >>> 0) / 0xffffffff);
-  };
-}
+/* ─── Deterministic node layout ─────────────────────────────────────────── */
+// Nodes are in [0,1] normalised space
+const NODES_NX: number[] = [
+  // Corner accent nodes (bright)
+  0.04, 0.96, 0.04, 0.96,
+  // Edge mid-point accents
+  0.50, 0.04, 0.96, 0.50,
+  // Inner scattered
+  0.14, 0.82, 0.28, 0.70, 0.18, 0.72,
+  0.36, 0.60, 0.44, 0.54, 0.30, 0.68,
+  0.08, 0.90, 0.22, 0.78, 0.12, 0.88,
+  0.40, 0.64, 0.50, 0.50, 0.46, 0.52,
+  0.16, 0.80, 0.32, 0.62, 0.24, 0.74,
+  0.06, 0.92, 0.58, 0.42,
+];
+const NODES_NY: number[] = [
+  // Corner accent nodes (bright)
+  0.05, 0.05, 0.95, 0.95,
+  // Edge mid-point accents
+  0.04, 0.50, 0.50, 0.96,
+  // Inner scattered
+  0.12, 0.88, 0.20, 0.78, 0.32, 0.68,
+  0.16, 0.82, 0.25, 0.72, 0.42, 0.58,
+  0.38, 0.60, 0.45, 0.55, 0.62, 0.38,
+  0.72, 0.28, 0.50, 0.50, 0.84, 0.16,
+  0.90, 0.10, 0.08, 0.90, 0.75, 0.22,
+  0.65, 0.35, 0.48, 0.54,
+];
+// First 8 nodes are bright accent nodes
+const BRIGHT_COUNT = 8;
+const NODE_COUNT = NODES_NX.length;
 
-interface Node { x: number; y: number; size: number; bright: boolean }
-
-function generateNodes(): Node[] {
-  const rand = seededRand(42);
-  const nodes: Node[] = [];
-
-  // Corner / edge accent nodes (bright)
-  const cornerNodes: Node[] = [
-    { x: 0.05, y: 0.06, size: 4.5, bright: true },
-    { x: 0.94, y: 0.05, size: 4, bright: true },
-    { x: 0.03, y: 0.93, size: 4.5, bright: true },
-    { x: 0.95, y: 0.94, size: 3.5, bright: true },
-    { x: 0.50, y: 0.04, size: 3.5, bright: true },
-    { x: 0.14, y: 0.50, size: 3, bright: true },
-    { x: 0.86, y: 0.50, size: 3, bright: true },
-  ];
-  nodes.push(...cornerNodes);
-
-  // Scattered mid-density nodes
-  for (let i = 0; i < 36; i++) {
-    nodes.push({
-      x: rand(),
-      y: rand(),
-      size: 1.2 + rand() * 2,
-      bright: rand() > 0.78,
-    });
-  }
-  return nodes;
-}
-
-function generateEdges(nodes: Node[]): [number, number][] {
+// Pre-compute edge list (connect nodes within distance threshold)
+const EDGES: [number, number][] = (() => {
   const edges: [number, number][] = [];
-  const W = 1440, H = 900;
-  const MAX_DIST = 340; // max connection distance in px
-
-  for (let i = 0; i < nodes.length; i++) {
-    let connections = 0;
-    for (let j = i + 1; j < nodes.length; j++) {
-      if (connections >= 4) break;
-      const dx = (nodes[i].x - nodes[j].x) * W;
-      const dy = (nodes[i].y - nodes[j].y) * H;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < MAX_DIST) {
+  const MAX_D = 0.28; // normalised distance
+  for (let i = 0; i < NODE_COUNT; i++) {
+    let conn = 0;
+    for (let j = i + 1; j < NODE_COUNT && conn < 5; j++) {
+      const dx = NODES_NX[i] - NODES_NX[j];
+      const dy = NODES_NY[i] - NODES_NY[j];
+      if (Math.sqrt(dx * dx + dy * dy) < MAX_D) {
         edges.push([i, j]);
-        connections++;
+        conn++;
       }
     }
   }
   return edges;
-}
+})();
 
-const NODES = generateNodes();
-const EDGES = generateEdges(NODES);
-
-// Canvas-based animated wireframe for performance
+/* ─── Component ─────────────────────────────────────────────────────────── */
 export const VolumetricAtmosphere: React.FC<VolumetricAtmosphereProps> = ({
   role = "admin",
 }) => {
-  const palette = useMemo(() => PALETTES[role] || PALETTES.admin, [role]);
+  const pal = useMemo(() => PALETTES[role] ?? PALETTES.admin, [role]);
+  const palRef = useRef(pal);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animRef = useRef<number>(0);
-  const paletteRef = useRef(palette);
+  const rafRef = useRef<number>(0);
 
+  // Keep palRef current whenever role changes
   useEffect(() => {
-    paletteRef.current = palette;
-  }, [palette]);
+    palRef.current = pal;
+  }, [pal]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const ctx = canvas.getContext("2d")!;
 
-    let W = window.innerWidth;
-    let H = window.innerHeight;
-
+    let W = 0, H = 0;
     const resize = () => {
-      W = window.innerWidth;
-      H = window.innerHeight;
-      canvas.width = W;
-      canvas.height = H;
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
     };
     resize();
     window.addEventListener("resize", resize);
 
-    let t = 0;
+    let frame = 0;
 
-    const draw = () => {
+    const tick = () => {
+      rafRef.current = requestAnimationFrame(tick);
+      frame++;
+      const p = palRef.current;
+      const t = frame * 0.012; // time
+
       ctx.clearRect(0, 0, W, H);
-      const pal = paletteRef.current;
-      t += 0.005;
 
-      // --- Draw mesh edges ---
-      EDGES.forEach(([i, j]) => {
-        const a = NODES[i];
-        const b = NODES[j];
-        const ax = a.x * W, ay = a.y * H;
-        const bx = b.x * W, by = b.y * H;
+      /* ── draw edges ────────────────────────────────────────────────── */
+      for (const [i, j] of EDGES) {
+        const ax = NODES_NX[i] * W, ay = NODES_NY[i] * H;
+        const bx = NODES_NX[j] * W, by = NODES_NY[j] * H;
 
-        // Fade lines near center (the spotlight is bright there; lines fade so card stands out)
-        const midX = (ax + bx) / 2;
-        const midY = (ay + by) / 2;
-        const distFromCenter = Math.sqrt(
-          Math.pow((midX - W / 2) / W, 2) + Math.pow((midY - H / 2) / H, 2)
-        );
-        const centerFade = Math.min(1, distFromCenter * 3.5);
+        // Shimmer: each edge has unique phase
+        const phase = (i * 0.61 + j * 0.37);
+        const shimmer = 0.5 + 0.5 * Math.sin(t + phase);
 
-        // Gentle shimmer per edge using t
-        const shimmer = 0.5 + 0.5 * Math.sin(t + i * 0.7 + j * 0.3);
-        const alpha = 0.08 + 0.14 * shimmer * centerFade;
+        // Lines are clearly visible: base 0.20, shimmer up to 0.42
+        const alpha = 0.20 + 0.22 * shimmer;
 
         ctx.beginPath();
         ctx.moveTo(ax, ay);
         ctx.lineTo(bx, by);
-        ctx.strokeStyle = pal.mesh.replace(
-          /[\d.]+\)$/,
-          `${alpha.toFixed(3)})`
-        );
-        ctx.lineWidth = 0.75;
+        ctx.strokeStyle = `rgba(${p.nodeR},${p.nodeG},${p.nodeB},${alpha.toFixed(3)})`;
+        ctx.lineWidth = 0.85;
         ctx.stroke();
-      });
+      }
 
-      // --- Draw nodes ---
-      NODES.forEach((node, i) => {
-        const nx = node.x * W;
-        const ny = node.y * H;
+      /* ── draw nodes ────────────────────────────────────────────────── */
+      for (let i = 0; i < NODE_COUNT; i++) {
+        const nx = NODES_NX[i] * W;
+        const ny = NODES_NY[i] * H;
+        const breathe = 0.6 + 0.4 * Math.sin(t * 1.1 + i * 0.83);
+        const isBright = i < BRIGHT_COUNT;
 
-        // Distance from screen center for edge brightening
-        const dx = (nx - W / 2) / W;
-        const dy = (ny - H / 2) / H;
-        const distFromCenter = Math.sqrt(dx * dx + dy * dy);
-        const edgeBrightness = Math.min(1, distFromCenter * 2.8);
-
-        const breathe = 0.6 + 0.4 * Math.sin(t * 1.3 + i * 0.9);
-
-        if (node.bright) {
-          // Outer glow halo
-          const grd = ctx.createRadialGradient(nx, ny, 0, nx, ny, node.size * 5);
-          grd.addColorStop(0, pal.node + "cc");
-          grd.addColorStop(0.4, pal.node + "55");
-          grd.addColorStop(1, pal.node + "00");
+        if (isBright) {
+          // Large glow halo
+          const haloR = 22 * breathe;
+          const grd = ctx.createRadialGradient(nx, ny, 0, nx, ny, haloR);
+          grd.addColorStop(0, `rgba(${p.nodeR},${p.nodeG},${p.nodeB},0.80)`);
+          grd.addColorStop(0.35, `rgba(${p.nodeR},${p.nodeG},${p.nodeB},0.35)`);
+          grd.addColorStop(1,   `rgba(${p.nodeR},${p.nodeG},${p.nodeB},0.00)`);
           ctx.beginPath();
-          ctx.arc(nx, ny, node.size * 5 * breathe, 0, Math.PI * 2);
+          ctx.arc(nx, ny, haloR, 0, Math.PI * 2);
           ctx.fillStyle = grd;
-          ctx.globalAlpha = 0.7 * edgeBrightness;
           ctx.fill();
 
           // Core dot
           ctx.beginPath();
-          ctx.arc(nx, ny, node.size * breathe, 0, Math.PI * 2);
-          ctx.fillStyle = pal.node;
-          ctx.globalAlpha = 0.9 * edgeBrightness;
+          ctx.arc(nx, ny, 3.5 * breathe, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${p.nodeR},${p.nodeG},${p.nodeB},0.95)`;
           ctx.fill();
-          ctx.globalAlpha = 1;
         } else {
           // Small dim node
-          const alpha = (0.2 + 0.3 * breathe) * edgeBrightness;
+          const dotA = 0.25 + 0.25 * breathe;
           ctx.beginPath();
-          ctx.arc(nx, ny, node.size * 0.7, 0, Math.PI * 2);
-          ctx.fillStyle = pal.mesh.replace(/[\d.]+\)$/, `${alpha.toFixed(3)})`);
-          ctx.globalAlpha = 1;
+          ctx.arc(nx, ny, 2.2, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${p.nodeR},${p.nodeG},${p.nodeB},${dotA.toFixed(2)})`;
           ctx.fill();
         }
-      });
-
-      ctx.globalAlpha = 1;
-      animRef.current = requestAnimationFrame(draw);
+      }
     };
 
-    animRef.current = requestAnimationFrame(draw);
+    rafRef.current = requestAnimationFrame(tick);
     return () => {
-      cancelAnimationFrame(animRef.current);
+      cancelAnimationFrame(rafRef.current);
       window.removeEventListener("resize", resize);
     };
-  }, []); // only run once — palette changes reflected via ref
+  }, []); // runs once; palette changes reach canvas via palRef
 
   return (
     <div className="volumetric-atmosphere-root" aria-hidden="true">
-      {/* === 1. Angular Wireframe Constellation Canvas === */}
+
+      {/* 1. Canvas — angular wireframe constellation mesh */}
       <canvas ref={canvasRef} className="constellation-canvas" />
 
-      {/* === 2. Tight Card-Centered Spotlight Bloom === */}
+      {/* 2. Tight card-centered spotlight bloom */}
       <motion.div
         className="card-spotlight-bloom"
-        animate={{
-          background: `radial-gradient(ellipse 48% 38% at 50% 50%, ${palette.primary} 0%, rgba(9,13,22,0) 100%)`,
-        }}
-        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+        animate={{ background: pal.spotlightCSS }}
+        transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
       />
 
-      {/* === 3. Outer ambient halo (very faint, role colored) === */}
+      {/* 3. Very faint ambient outer halo */}
       <motion.div
         className="ambient-outer-halo"
-        animate={{
-          background: `radial-gradient(ellipse 75% 60% at 50% 50%, ${palette.secondary} 0%, rgba(9,13,22,0) 100%)`,
-        }}
-        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+        animate={{ background: pal.ambientCSS }}
+        transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
       />
 
-      {/* === 4. SVG: Card Perimeter Halo Ring + subtle breathing rings === */}
+      {/* 4. SVG: card perimeter halo ring */}
       <svg
         className="atmosphere-svg"
         viewBox="0 0 1440 900"
         preserveAspectRatio="xMidYMid slice"
       >
         <defs>
-          {/* Glow filter for halo ring */}
-          <filter id="halo-glow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="6" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-
-          {/* Node glow filter */}
-          <filter id="node-glow" x="-100%" y="-100%" width="300%" height="300%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
+          <filter id="halo-glow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="7" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -276,36 +243,30 @@ export const VolumetricAtmosphere: React.FC<VolumetricAtmosphereProps> = ({
           </filter>
         </defs>
 
-        {/* Card perimeter halo ring — tightly hugging the card area */}
+        {/* Outer ring — tight around card */}
         <motion.ellipse
-          cx="720"
-          cy="450"
-          rx="320"
-          ry="220"
+          cx={720} cy={450} rx={330} ry={225}
           fill="none"
-          animate={{ stroke: palette.halo }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          strokeWidth="1.5"
+          animate={{ stroke: pal.haloCSS }}
+          transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+          strokeWidth="1.2"
           filter="url(#halo-glow)"
           className="card-halo-ring"
         />
 
-        {/* Second tighter inner ring */}
+        {/* Inner ring */}
         <motion.ellipse
-          cx="720"
-          cy="450"
-          rx="240"
-          ry="160"
+          cx={720} cy={450} rx={250} ry={168}
           fill="none"
-          animate={{ stroke: palette.halo }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          strokeWidth="0.75"
+          animate={{ stroke: pal.haloCSS }}
+          transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+          strokeWidth="0.6"
           filter="url(#halo-glow)"
           className="card-halo-ring card-halo-ring-inner"
         />
       </svg>
 
-      {/* === 5. Subtle dark vignette to keep edges deep === */}
+      {/* 5. Edge vignette — darkens corners, keeps card area bright */}
       <div className="volumetric-vignette-overlay" />
     </div>
   );
