@@ -197,6 +197,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
   return (
     <RadialRevealTransition
       origin={revealOrigin}
+      role={role}
       onClose={() => navigate("/")}
     >
       <div

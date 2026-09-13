@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import BrandLogo from "./BrandLogo";
+import VolumetricAtmosphere from "../auth/VolumetricAtmosphere";
+import { UserRole } from "../auth/auth.types";
 import "./radialReveal.css";
 
 export interface RevealOrigin {
@@ -13,6 +15,7 @@ interface RadialRevealTransitionProps {
   origin?: RevealOrigin | null;
   isOpen?: boolean;
   onClose: () => void;
+  role?: UserRole;
 }
 
 /**
@@ -75,7 +78,8 @@ function getLiquidBlobPath(
 export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
   children,
   origin,
-  onClose
+  onClose,
+  role = "admin"
 }) => {
   const [isClosing, setIsClosing] = useState(false);
   const [isSettled, setIsSettled] = useState(false);
@@ -290,6 +294,9 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
           <span className="drop drop-5" />
         </div>
       )}
+
+      {/* Concept 3: Executive Volumetric Spotlight & Concentric Harmonic Ripples */}
+      <VolumetricAtmosphere role={role} />
 
       {/* Subtle Geometric Mesh Overlay */}
       <div className="radial-reveal-mesh-grid" />
