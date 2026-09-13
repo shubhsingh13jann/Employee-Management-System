@@ -22,7 +22,11 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
   const navigate = useNavigate();
 
   // Extract radial reveal origin coordinates from navigation state (if coming from landing page button click)
-  const revealOrigin = (location.state as { revealOrigin?: RevealOrigin } | null)?.revealOrigin;
+  const locationState = location.state as { revealOrigin?: RevealOrigin; alreadyCovered?: boolean } | null;
+  const revealOrigin = locationState?.revealOrigin;
+  // When true: the water-drop blob already covered the screen before navigation,
+  // so RadialRevealTransition should skip its opening animation and start settled.
+  const alreadyCovered = locationState?.alreadyCovered ?? false;
 
   // Mode: 'login' | 'signup'
   const [authMode, setAuthMode] = useState<"login" | "signup">(() => {
@@ -198,6 +202,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
     <RadialRevealTransition
       origin={revealOrigin}
       role={role}
+      alreadyCovered={alreadyCovered}
       onClose={() => navigate("/")}
     >
       <div

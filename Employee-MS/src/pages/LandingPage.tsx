@@ -3,19 +3,31 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 import InteractiveBackground from "../components/common/InteractiveBackground";
 import BrandLogo from "../components/common/BrandLogo";
+import WaterDropReveal from "../Components/common/WaterDropReveal";
 
 const LandingPage = () => {
   const navigate = useNavigate();
 
-  // Handle Button-Originated Radial Reveal Navigation
+  // Water-drop portal state — shown while landing page is still mounted
+  const [pendingReveal, setPendingReveal] = useState<{
+    path: "/login" | "/signup";
+    origin: { x: number; y: number };
+  } | null>(null);
+
+  // Handle Button-Originated Radial Reveal Navigation:
+  // 1. Show the water-drop portal on top of the current page
+  // 2. Once blob covers the screen (onCovered), THEN navigate
   const handleAuthNavigate = (path: "/login" | "/signup", e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
+    if (pendingReveal) return; // already animating
     const rect = e.currentTarget.getBoundingClientRect();
-    const origin = {
-      x: Math.round(rect.left + rect.width / 2),
-      y: Math.round(rect.top + rect.height / 2)
-    };
-    navigate(path, { state: { revealOrigin: origin } });
+    setPendingReveal({
+      path,
+      origin: {
+        x: Math.round(rect.left + rect.width / 2),
+        y: Math.round(rect.top + rect.height / 2),
+      },
+    });
   };
 
   // Reset scroll to top and ensure manual restoration so navbar is ALWAYS visible on refresh
@@ -1566,6 +1578,19 @@ const LandingPage = () => {
           </div>
         </motion.div>
       </div>
+      {/* ── Water-Drop Portal: expands over the current page BEFORE navigating ── */}
+      {pendingReveal && (
+        <WaterDropReveal
+          origin={pendingReveal.origin}
+          onCovered={() => {
+            // Blob now covers the full screen — navigate to login/signup.
+            // Pass the origin so Login knows it arrived via water-drop (no repeat animation needed).
+            navigate(pendingReveal.path, {
+              state: { revealOrigin: pendingReveal.origin, alreadyCovered: true },
+            });
+          }}
+        />
+      )}
     </div>
   );
 };

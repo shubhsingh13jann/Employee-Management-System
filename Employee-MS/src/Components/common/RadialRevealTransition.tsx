@@ -16,6 +16,11 @@ interface RadialRevealTransitionProps {
   isOpen?: boolean;
   onClose: () => void;
   role?: UserRole;
+  /**
+   * When true: the WaterDropReveal portal already animated the opening on the
+   * previous page. Skip the blob expansion and start in the settled state immediately.
+   */
+  alreadyCovered?: boolean;
 }
 
 /**
@@ -79,13 +84,14 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
   children,
   origin,
   onClose,
-  role = "admin"
+  role = "admin",
+  alreadyCovered = false,
 }) => {
   const [isClosing, setIsClosing] = useState(false);
-  const [isSettled, setIsSettled] = useState(false);
-  // Keep the whole viewport invisible until the very first blob frame renders,
-  // so the dark background never flashes before the animation starts.
-  const [isVisible, setIsVisible] = useState(false);
+  // If the water-drop portal already covered the screen, start settled immediately.
+  const [isSettled, setIsSettled] = useState(alreadyCovered);
+  // Same — if already covered, the page is immediately visible (no need to wait for first frame).
+  const [isVisible, setIsVisible] = useState(alreadyCovered);
 
   // Viewport dimensions for SVG canvas
   const [dimensions, setDimensions] = useState({
@@ -133,6 +139,10 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
   const CLOSE_DURATION = 850;
 
   useEffect(() => {
+    // When the water-drop portal already covered the screen (alreadyCovered=true),
+    // skip the opening blob animation — only run the loop for closing.
+    if (alreadyCovered && !isClosing) return;
+
     startTimeRef.current = performance.now();
 
     const animateLoop = (now: number) => {
@@ -185,7 +195,7 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [isClosing, originX, originY]);
+  }, [isClosing, originX, originY, alreadyCovered]);
 
   const handleTriggerClose = () => {
     if (isClosing) return;
