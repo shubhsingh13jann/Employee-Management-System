@@ -14,12 +14,21 @@
   overflow-y: auto;
   overflow-x: hidden;
   background: radial-gradient(circle at 50% 30%, #131d31 0%, #090d16 100%);
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
   background: #070b13;
   display: flex;
   flex-direction: column;
   contain: paint;
   isolation: isolate;
   transform: translateZ(0);
+}
+
+.radial-reveal-viewport::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* Master Liquid SVG Canvas Rendering Fluid Water Waves & Glowing Blobs */
@@ -138,6 +147,7 @@
 
 /* Header & Return Navigation */
 /* Header & Return Navigation — Aligned with Landing Page Navbar (height: 74px) */
+/* Header & Return Navigation — Exactly aligned with Landing Page Navbar (height: 74px) */
 .radial-reveal-header {
   position: fixed;
   top: 0;
@@ -157,6 +167,7 @@
 @media (min-width: 992px) {
   .radial-reveal-header {
     padding: 0 3rem;
+    padding: 0 3rem; /* Exactly matches landing page px-lg-5 */
   }
 }
 
@@ -215,6 +226,7 @@
 }
 
 /* Content Container for Auth Card */
+/* Content Container for Auth Card — perfectly centered in remaining viewport */
 .radial-reveal-content {
   position: relative;
   z-index: 10;
@@ -222,10 +234,31 @@
   min-height: 100vh;
   min-height: 100%;
   flex: 1;
+  height: calc(100vh - 74px);
+  max-height: calc(100vh - 74px);
+  margin-top: 74px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem 1rem;
   padding: calc(74px + 1rem) 1.5rem 2rem 1.5rem;
+  padding: 1rem 1.5rem;
   box-sizing: border-box;
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.radial-reveal-content::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Responsive: Allow scroll without visible scrollbar on very short viewports */
+@media (max-height: 700px) {
+  .radial-reveal-content {
+    overflow-y: auto !important;
+    align-items: flex-start;
+  }
 }

@@ -13,6 +13,21 @@ html {
   overflow-y: scroll;
 }
 
+/* Eliminate scrollbars completely when the auth portal is open */
+html:has(.radial-reveal-viewport),
+body:has(.radial-reveal-viewport) {
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+html:has(.radial-reveal-viewport)::-webkit-scrollbar,
+body:has(.radial-reveal-viewport)::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #1e293b;
