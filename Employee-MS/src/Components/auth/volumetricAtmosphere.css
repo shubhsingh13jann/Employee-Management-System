@@ -1,8 +1,9 @@
 /* =========================================================================
-   CONCEPT 3: EXECUTIVE VOLUMETRIC SPOTLIGHT & CONCENTRIC HARMONIC RIPPLES
-   Dynamic Role-Reactive Background Atmosphere for Enterprise EMS
+   CONCEPT 3 — REBUILT: Angular Wireframe Constellation + Card Spotlight Halo
+   Exact match to reference: neural network mesh + tight card bloom + halo ring
    ========================================================================= */
 
+/* Root container — covers full viewport, sits behind the card content */
 .volumetric-atmosphere-root {
   position: fixed;
   inset: 0;
@@ -14,163 +15,91 @@
   user-select: none;
 }
 
-/* 1. Master Volumetric Beams & Glowing Conical Spotlights */
-.volumetric-spotlight-core {
+/* ─── 1. Canvas: Angular Wireframe Constellation Mesh ─────────────────── */
+.constellation-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ─── 2. Card-centered tight spotlight bloom ──────────────────────────── */
+.card-spotlight-bloom {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: clamp(540px, 60vw, 980px);
-  height: clamp(380px, 50vh, 680px);
-  border-radius: 50%;
-  filter: blur(85px);
-  opacity: 0.65;
-  will-change: transform, opacity, background;
-  transition: background 0.7s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.7s ease;
-  animation: volumetricBreathing 7s ease-in-out infinite alternate;
+  width: clamp(420px, 55vw, 760px);
+  height: clamp(280px, 45vh, 520px);
+  pointer-events: none;
+  animation: spotlightBreathe 6s ease-in-out infinite alternate;
+  will-change: opacity;
 }
 
-.volumetric-spotlight-halo {
+@keyframes spotlightBreathe {
+  0% { opacity: 0.75; }
+  100% { opacity: 1; }
+}
+
+/* ─── 3. Outer ambient halo (very faint) ─────────────────────────────── */
+.ambient-outer-halo {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: clamp(720px, 80vw, 1300px);
-  height: clamp(500px, 70vh, 880px);
-  border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.35;
-  will-change: transform, opacity, background;
-  transition: background 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-  animation: volumetricHaloPulse 11s ease-in-out infinite alternate;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.8;
 }
 
-@keyframes volumetricBreathing {
-  0% {
-    transform: translate(-50%, -50%) scale(0.95);
-    opacity: 0.55;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.06);
-    opacity: 0.72;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(0.95);
-    opacity: 0.55;
-  }
-}
-
-@keyframes volumetricHaloPulse {
-  0% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.28;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.12);
-    opacity: 0.42;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.28;
-  }
-}
-
-/* 2. Concentric Harmonic Breathing Wave Rings */
-.harmonic-rings-svg {
+/* ─── 4. SVG layer: halo ring ─────────────────────────────────────────── */
+.atmosphere-svg {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
 
-.harmonic-ring {
-  transform-origin: 50% 50%;
-  transition: stroke 0.7s cubic-bezier(0.16, 1, 0.3, 1), stroke-opacity 0.7s ease;
+/* Outer card halo ring — slow breathing in/out */
+.card-halo-ring {
+  transform-origin: 720px 450px;
+  stroke-opacity: 0.65;
+  animation: haloRingBreathe 5s ease-in-out infinite;
 }
 
-.harmonic-ring-1 {
-  animation: harmonicRingBreathe 5s ease-in-out infinite;
-  animation-delay: 0s;
+.card-halo-ring-inner {
+  stroke-opacity: 0.35;
+  animation: haloRingBreathe 5s ease-in-out infinite reverse;
 }
 
-.harmonic-ring-2 {
-  animation: harmonicRingBreathe 6.5s ease-in-out infinite;
-  animation-delay: 1.2s;
-}
-
-.harmonic-ring-3 {
-  animation: harmonicRingBreathe 8s ease-in-out infinite;
-  animation-delay: 2.4s;
-}
-
-.harmonic-ring-4 {
-  animation: harmonicRingBreathe 9.5s ease-in-out infinite;
-  animation-delay: 3.6s;
-}
-
-.harmonic-ring-5 {
-  animation: harmonicRingBreathe 11s ease-in-out infinite;
-  animation-delay: 4.8s;
-}
-
-@keyframes harmonicRingBreathe {
+@keyframes haloRingBreathe {
   0% {
     transform: scale(0.97);
-    stroke-opacity: 0.25;
+    stroke-opacity: 0.45;
   }
   50% {
-    transform: scale(1.035);
-    stroke-opacity: 0.65;
+    transform: scale(1.03);
+    stroke-opacity: 0.75;
   }
   100% {
     transform: scale(0.97);
-    stroke-opacity: 0.25;
+    stroke-opacity: 0.45;
   }
 }
 
-/* 3. Executive Architectural Perspective Grid Floor */
-.architectural-perspective-grid {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 48vh;
-  perspective: 750px;
-  overflow: hidden;
-  pointer-events: none;
-  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.3) 60%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.3) 60%, transparent 100%);
-}
-
-.perspective-plane {
-  position: absolute;
-  inset: -60% -20% 0 -20%;
-  transform-origin: 50% 100%;
-  transform: rotateX(72deg);
-  background-size: 50px 50px;
-  background-image:
-    linear-gradient(to right, var(--grid-line, rgba(255, 255, 255, 0.05)) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line, rgba(255, 255, 255, 0.05)) 1px, transparent 1px);
-  transition: background-image 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-  animation: gridFloorDrift 24s linear infinite;
-}
-
-@keyframes gridFloorDrift {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 0 50px;
-  }
-}
-
-/* 4. Subtle Radial Vignette to Ground the Card */
+/* ─── 5. Vignette overlay — darkens edges for depth ─────────────────── */
 .volumetric-vignette-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 50%, transparent 35%, rgba(9, 13, 22, 0.6) 80%, #090d16 100%);
+  background: radial-gradient(
+    circle at 50% 50%,
+    transparent 28%,
+    rgba(9, 13, 22, 0.45) 68%,
+    rgba(9, 13, 22, 0.88) 100%
+  );
   pointer-events: none;
 }
-
