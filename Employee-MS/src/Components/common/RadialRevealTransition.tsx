@@ -178,8 +178,8 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
 
   const handleTriggerClose = () => {
     if (isClosing) return;
-    setIsSettled(false);
     setIsClosing(true);
+    onClose();
   };
 
   const gradCx = dimensions.width > 0 ? `${((originX / dimensions.width) * 100).toFixed(1)}%` : "50%";

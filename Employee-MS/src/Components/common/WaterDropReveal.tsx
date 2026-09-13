@@ -232,6 +232,7 @@ export const WaterDropReveal: React.FC<WaterDropRevealProps> = ({
         {/* 1. Master Solid Fluid Body */}
         <path
           ref={blobPathRef}
+          d={!isExpand ? getLiquidBlobPath(origin.x, origin.y, maxR, 0, 0.2) : ""}
           fill="url(#wdr-fill)"
         />
 
@@ -259,3 +260,4 @@ export const WaterDropReveal: React.FC<WaterDropRevealProps> = ({
 };
 
 export default WaterDropReveal;
+

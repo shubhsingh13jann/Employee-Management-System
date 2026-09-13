@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 import InteractiveBackground from "../components/common/InteractiveBackground";
 import BrandLogo from "../components/common/BrandLogo";
@@ -7,6 +7,22 @@ import WaterDropReveal from "../Components/common/WaterDropReveal";
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Reverse water-drop portal state — contracts smoothly back into the button when returning from auth
+  const [reverseOrigin, setReverseOrigin] = useState<{ x: number; y: number } | null>(() => {
+    const st = location.state as { reverseOrigin?: { x: number; y: number } } | null;
+    return st?.reverseOrigin || null;
+  });
+
+  useEffect(() => {
+    const st = location.state as { reverseOrigin?: { x: number; y: number } } | null;
+    if (st?.reverseOrigin) {
+      setReverseOrigin(st.reverseOrigin);
+      // Clean history state so refresh does not replay contraction
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // Water-drop portal state — expands organically over landing page on click
   const [pendingReveal, setPendingReveal] = useState<{
@@ -1593,6 +1609,17 @@ const LandingPage = () => {
             setTimeout(() => {
               isAuthNavigatingRef.current = false;
             }, 600);
+          }}
+        />
+      )}
+
+      {/* ── Symmetrical Water-Drop Suction: contracts into button when returning from Login ── */}
+      {reverseOrigin && (
+        <WaterDropReveal
+          origin={reverseOrigin}
+          mode="contract"
+          onComplete={() => {
+            setReverseOrigin(null);
           }}
         />
       )}
