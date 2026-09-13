@@ -324,11 +324,12 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     };
 
     /* =========================================================
-       LAYER: PERSPECTIVE CYBER FLOOR WITH GLOWING INTERSECTIONS
+       LAYER: PROFESSIONAL HOLOGRAPHIC PERSPECTIVE FLOOR
     ========================================================= */
     const drawPerspectiveFloor = () => {
-      const horizon = height * 0.74;
+      const horizon = height * 0.70;
       const centerX = width * 0.5;
+      const floorBottom = height + 40;
 
       ctx.save();
 
@@ -342,86 +343,135 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       const lr = Math.round(l.r), lg = Math.round(l.g), lb = Math.round(l.b);
       const gr = Math.round(g.r), gg = Math.round(g.g), gb = Math.round(g.b);
 
-      // Horizontal perspective rings / grid lines
-      const horizontalLines = 15;
+      // ─────────────────────────────────────────────────────
+      // 1. FLOOR ATMOSPHERIC FILL — rich tinted base
+      // ─────────────────────────────────────────────────────
+      const floorFill = ctx.createLinearGradient(0, horizon, 0, floorBottom);
+      floorFill.addColorStop(0,    `rgba(${pr}, ${pg}, ${pb}, 0.12)`);
+      floorFill.addColorStop(0.4,  `rgba(${dr}, ${dg}, ${db}, 0.06)`);
+      floorFill.addColorStop(1,    `rgba(4, 6, 18, 0.96)`);
+      ctx.fillStyle = floorFill;
+      ctx.fillRect(0, horizon, width, floorBottom - horizon);
+
+      // ─────────────────────────────────────────────────────
+      // 2. HORIZONTAL GRID RINGS
+      //    Exponential bunching near horizon (perspective correct)
+      //    Lines near horizon: tighter, slightly brighter
+      //    Lines near viewer: wider spaced, subtle
+      // ─────────────────────────────────────────────────────
+      const totalH = 20;
       const hPoints: number[] = [];
 
-      for (let i = 0; i < horizontalLines; i++) {
-        const norm = i / horizontalLines;
-        // Exponential spacing: close at horizon, wider near bottom
-        const y = horizon + Math.pow(norm, 2.2) * (height - horizon + 60);
+      for (let i = 0; i < totalH; i++) {
+        const t = i / (totalH - 1);
+        const y = horizon + Math.pow(t, 2.1) * (floorBottom - horizon);
         hPoints.push(y);
 
+        // Horizon-edge rows are brighter; bottom rows very faint
+        const alpha = 0.22 * Math.pow(1 - t, 0.6) + 0.03;
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(width, y);
-        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${0.03 + norm * 0.08})`;
-        ctx.lineWidth = norm > 0.6 ? 1.2 : 0.8;
+        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${Math.min(alpha, 0.26)})`;
+        ctx.lineWidth = t < 0.15 ? 0.6 : 0.85;
         ctx.stroke();
       }
 
-      // Vertical perspective lines converging toward center vanishing point
-      const vSegments = 26;
+      // ─────────────────────────────────────────────────────
+      // 3. VERTICAL CONVERGENCE LINES
+      //    All converge from one vanishing point on horizon
+      //    Center-weighted opacity — professional taper effect
+      // ─────────────────────────────────────────────────────
+      const totalV = 38;
       const vBottoms: number[] = [];
 
-      for (let i = -vSegments; i <= vSegments; i++) {
-        const bottomX = centerX + i * (width / (vSegments * 0.95));
+      for (let i = -totalV / 2; i <= totalV / 2; i++) {
+        const frac = i / (totalV / 2); // -1 to 1
+        const bottomX = centerX + frac * (width * 0.56);
         vBottoms.push(bottomX);
+
+        const centerWeight = Math.pow(1 - Math.abs(frac), 1.4);
+        const vAlpha = 0.03 + centerWeight * 0.10;
 
         ctx.beginPath();
         ctx.moveTo(centerX, horizon);
-        ctx.lineTo(bottomX, height + 60);
-        ctx.strokeStyle = `rgba(${dr}, ${dg}, ${db}, 0.045)`;
-        ctx.lineWidth = 0.9;
+        ctx.lineTo(bottomX, floorBottom);
+        ctx.strokeStyle = `rgba(${dr}, ${dg}, ${db}, ${vAlpha})`;
+        ctx.lineWidth = 0.7;
         ctx.stroke();
       }
 
-      // Glowing grid intersection dots across the floor
-      for (let row = 2; row < hPoints.length; row++) {
+      // ─────────────────────────────────────────────────────
+      // 4. INTERSECTION SPARKLE DOTS
+      //    Only every-other row & spoke for clean grid look
+      //    Dots scale with depth (larger = closer to viewer)
+      // ─────────────────────────────────────────────────────
+      for (let row = 0; row < hPoints.length; row += 2) {
         const y = hPoints[row];
-        const rowNorm = (y - horizon) / (height - horizon);
-        if (rowNorm < 0.1) continue;
+        const rowT = (y - horizon) / (floorBottom - horizon);
+        if (rowT < 0.04) continue;
 
         for (let col = 0; col < vBottoms.length; col += 2) {
-          const bottomX = vBottoms[col];
-          // Calculate intersection x at current y
-          const t = (y - horizon) / (height + 60 - horizon);
-          const ix = centerX + (bottomX - centerX) * t;
+          const bx = vBottoms[col];
+          const ix = centerX + (bx - centerX) * rowT;
+          if (ix < -8 || ix > width + 8) continue;
 
-          if (ix >= -20 && ix <= width + 20) {
-            const dotAlpha = rowNorm * 0.38;
-            const dotR = 1.0 + rowNorm * 1.4;
+          const dotAlpha = (1 - rowT) * 0.32 + 0.04;
+          const dotR = 0.6 + (1 - rowT) * 0.8;
 
-            ctx.beginPath();
-            ctx.arc(ix, y, dotR, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, ${dotAlpha})`;
-            ctx.fill();
-          }
+          ctx.beginPath();
+          ctx.arc(ix, y, dotR, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, ${dotAlpha})`;
+          ctx.fill();
         }
       }
 
-      // Horizon line glow
-      const horizonGlow = ctx.createRadialGradient(
-        centerX,
-        horizon,
-        0,
-        centerX,
-        horizon,
-        width * 0.55
+      // ─────────────────────────────────────────────────────
+      // 5. WIDE ATMOSPHERIC HORIZON BAND
+      //    Radial glow emanating outward from the horizon
+      //    This gives the scene that deep sci-fi atmosphere
+      // ─────────────────────────────────────────────────────
+      const hBand = ctx.createRadialGradient(
+        centerX, horizon, 0,
+        centerX, horizon, width * 0.75
       );
-      horizonGlow.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0.16)`);
-      horizonGlow.addColorStop(0.5, `rgba(${dr}, ${dg}, ${db}, 0.06)`);
-      horizonGlow.addColorStop(1, `rgba(${dr}, ${dg}, ${db}, 0)`);
+      hBand.addColorStop(0,    `rgba(${pr}, ${pg}, ${pb}, 0.18)`);
+      hBand.addColorStop(0.22, `rgba(${pr}, ${pg}, ${pb}, 0.09)`);
+      hBand.addColorStop(0.55, `rgba(${dr}, ${dg}, ${db}, 0.04)`);
+      hBand.addColorStop(1,    `rgba(${dr}, ${dg}, ${db}, 0)`);
+      ctx.fillStyle = hBand;
+      ctx.fillRect(0, horizon - 120, width, 300);
 
-      ctx.fillStyle = horizonGlow;
-      ctx.fillRect(0, horizon - 80, width, 180);
-
-      // Sharp horizon beam
+      // ─────────────────────────────────────────────────────
+      // 6. SPECULAR HORIZON LINE — the detail that sells it
+      //    Pass 1: wide soft bloom
+      //    Pass 2: tight bright core with horizontal fade
+      // ─────────────────────────────────────────────────────
+      // Bloom
       ctx.beginPath();
-      ctx.moveTo(width * 0.1, horizon);
-      ctx.lineTo(width * 0.9, horizon);
-      ctx.strokeStyle = `rgba(${gr}, ${gg}, ${gb}, 0.18)`;
-      ctx.lineWidth = 1.2;
+      ctx.moveTo(0, horizon);
+      ctx.lineTo(width, horizon);
+      ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, 0.28)`;
+      ctx.lineWidth = 8;
+      ctx.filter = 'blur(5px)';
+      ctx.stroke();
+      ctx.filter = 'none';
+
+      // Tight specular streak
+      const specular = ctx.createLinearGradient(0, 0, width, 0);
+      specular.addColorStop(0,    `rgba(${lr}, ${lg}, ${lb}, 0)`);
+      specular.addColorStop(0.10, `rgba(${gr}, ${gg}, ${gb}, 0.20)`);
+      specular.addColorStop(0.35, `rgba(${lr}, ${lg}, ${lb}, 0.60)`);
+      specular.addColorStop(0.50, `rgba(255, 255, 255, 0.80)`);
+      specular.addColorStop(0.65, `rgba(${lr}, ${lg}, ${lb}, 0.60)`);
+      specular.addColorStop(0.90, `rgba(${gr}, ${gg}, ${gb}, 0.20)`);
+      specular.addColorStop(1,    `rgba(${lr}, ${lg}, ${lb}, 0)`);
+
+      ctx.beginPath();
+      ctx.moveTo(0, horizon);
+      ctx.lineTo(width, horizon);
+      ctx.strokeStyle = specular;
+      ctx.lineWidth = 1.0;
       ctx.stroke();
 
       ctx.restore();
@@ -459,6 +509,14 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           radius: 340,
           alpha: 0.11,
           r: Math.round(l.r), g: Math.round(l.g), b: Math.round(l.b),
+        },
+        // Bottom-center horizon upwelling (floor atmospheric glow)
+        {
+          x: width * 0.5,
+          y: height * 0.88,
+          radius: Math.max(width * 0.52, 560),
+          alpha: 0.13,
+          r: Math.round(p.r), g: Math.round(p.g), b: Math.round(p.b),
         },
       ];
 
@@ -645,17 +703,18 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
        LAYER: CORNER VIGNETTE
     ========================================================= */
     const drawVignette = () => {
+      // Side + top corner darkening
       const gradient = ctx.createRadialGradient(
         width * 0.5,
-        height * 0.48,
-        Math.min(width, height) * 0.22,
+        height * 0.42,
+        Math.min(width, height) * 0.20,
         width * 0.5,
-        height * 0.48,
+        height * 0.42,
         Math.max(width, height) * 0.78
       );
       gradient.addColorStop(0, "rgba(0,0,0,0)");
-      gradient.addColorStop(0.65, "rgba(0,0,0,0.12)");
-      gradient.addColorStop(1, "rgba(3, 6, 12, 0.75)");
+      gradient.addColorStop(0.6, "rgba(0,0,0,0.08)");
+      gradient.addColorStop(1, "rgba(3, 6, 12, 0.62)");
 
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, width, height);
