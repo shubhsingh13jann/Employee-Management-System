@@ -179,7 +179,6 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
   const handleTriggerClose = () => {
     if (isClosing) return;
     setIsClosing(true);
-    onClose();
   };
 
   const gradCx = dimensions.width > 0 ? `${((originX / dimensions.width) * 100).toFixed(1)}%` : "50%";
@@ -191,6 +190,8 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
       style={{
         opacity: isVisible ? 1 : 0,
         pointerEvents: isClosing ? "none" : (isVisible ? "auto" : "none"),
+        clipPath: isClosing && blobPath ? "url(#login-liquid-clip)" : undefined,
+        WebkitClipPath: isClosing && blobPath ? "url(#login-liquid-clip)" : undefined,
       }}
     >
       {/* Master Liquid SVG Canvas Rendering True Fluid Water Blob & Ripples */}
@@ -202,8 +203,8 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         aria-hidden="true"
       >
         <defs>
-          {/* SVG ClipPath used to physically clip the login viewport during closing */}
-          <clipPath id="login-liquid-clip">
+          {/* SVG ClipPath used to physically clip the entire login viewport during closing */}
+          <clipPath id="login-liquid-clip" clipPathUnits="userSpaceOnUse">
             {blobPath && <path d={blobPath} />}
           </clipPath>
 
@@ -239,11 +240,11 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
           </filter>
         </defs>
 
-        {/* When settled, no off-center SVG gradient is rendered */}
-        {isSettled && !isClosing ? null : (
+        {/* During closing or when not settled, render fluid crest & ripples along boundary */}
+        {(!isSettled || isClosing) && (
           <>
-            {/* The Solid Fluid Water Blob Body */}
-            {blobPath && (
+            {/* When not already covered and opening, render blob body */}
+            {!alreadyCovered && !isSettled && blobPath && (
               <path
                 d={blobPath}
                 fill="url(#liquid-theme-gradient)"
@@ -275,10 +276,10 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         )}
       </svg>
 
-      {/* Satellite Fluid Splash Droplets Bursting from Button (Only active during opening transition) */}
-      {!isSettled && (
+      {/* Satellite Fluid Splash Droplets (Only active during initial direct opening if not already covered) */}
+      {!isSettled && !alreadyCovered && (
         <div
-          className={`water-satellite-droplets ${isClosing ? "closing" : ""}`}
+          className="water-satellite-droplets"
           style={{ left: originX, top: originY }}
         >
           <span className="drop drop-1" />
@@ -289,55 +290,32 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         </div>
       )}
 
-      {/* ── Constellation atmosphere, header & card:
-           Hidden while blob is expanding so the blob arrives on a clean dark screen.
-           Revealed only once the blob has fully settled (isSettled = true).
-           During close (isClosing) we keep them visible so they can fade out. ── */}
-
-      {/* Concept 3: Executive Volumetric Spotlight — only after blob settles */}
+      {/* Concept 3: Executive Volumetric Spotlight — visible during settled & closing */}
       {(isSettled || isClosing) && <VolumetricAtmosphere role={role} />}
 
-      {/* Subtle Geometric Mesh Overlay — only after blob settles */}
+      {/* Subtle Geometric Mesh Overlay */}
       {(isSettled || isClosing) && <div className="radial-reveal-mesh-grid" />}
 
-      {/* Top Floating Header — fades in on settle, smoothly fades out on close */}
-      <motion.div
-        className="radial-reveal-header"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: (isSettled && !isClosing) ? 1 : 0 }}
-        transition={{ duration: isClosing ? 0.2 : 0.3, ease: [0.16, 1, 0.3, 1] }}
-      >
+      {/* Top Floating Header — stays visible during closing so it contracts with the background */}
+      <div className="radial-reveal-header">
         <BrandLogo theme="dark" />
         <button
           type="button"
           onClick={handleTriggerClose}
           className="radial-reveal-close-btn"
-          title="Return to Home (Contract Liquid View)"
+          title="Return to Home"
         >
           <span className="close-text">Back to Home</span>
           <div className="close-icon-circle">
             <i className="bi bi-x-lg"></i>
           </div>
         </button>
-      </motion.div>
+      </div>
 
-      {/* Auth Card — fades in on settle, smoothly fades out on close */}
-      <motion.div
-        className="radial-reveal-content"
-        initial={{ opacity: 0, scale: 0.96, y: 16 }}
-        animate={{
-          opacity: (isSettled && !isClosing) ? 1 : 0,
-          scale: (isSettled && !isClosing) ? 1 : 0.96,
-          y: (isSettled && !isClosing) ? 0 : 16
-        }}
-        transition={{
-          duration: isClosing ? 0.2 : 0.35,
-          delay: 0,
-          ease: [0.16, 1, 0.3, 1]
-        }}
-      >
+      {/* Auth Card — stays visible during closing so it contracts with the background */}
+      <div className="radial-reveal-content">
         {children}
-      </motion.div>
+      </div>
     </div>
   );
 };

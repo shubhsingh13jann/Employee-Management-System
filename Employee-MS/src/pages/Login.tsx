@@ -212,16 +212,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
       origin={revealOrigin}
       role={role}
       alreadyCovered={alreadyCovered}
-      onClose={() => {
-        navigate("/", {
-          state: {
-            reverseOrigin: revealOrigin || {
-              x: typeof window !== "undefined" ? window.innerWidth - 85 : 800,
-              y: 38,
-            },
-          },
-        });
-      }}
+      onClose={() => navigate("/")}
     >
       <div
         ref={containerRef}
@@ -231,12 +222,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
 
 
       {/* MASTER 2-PANEL SPLIT CARD */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.94, y: 15 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="auth-split-card"
-      >
+      <div className="auth-split-card">
         {/* ============================================================
             LEFT PANEL: INTERACTIVE COMPANION BOT RIG & PRIVACY HANDS
             ============================================================ */}
@@ -600,7 +586,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
             </div>
           )}
         </div>
-      </motion.div>
+      </div>
     </div>
     </RadialRevealTransition>
   );
