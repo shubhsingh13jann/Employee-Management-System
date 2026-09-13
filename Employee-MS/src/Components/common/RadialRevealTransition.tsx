@@ -309,14 +309,24 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         </div>
       )}
 
-      {/* Concept 3: Executive Volumetric Spotlight & Concentric Harmonic Ripples */}
-      <VolumetricAtmosphere role={role} />
+      {/* ── Constellation atmosphere, header & card:
+           Hidden while blob is expanding so the blob arrives on a clean dark screen.
+           Revealed only once the blob has fully settled (isSettled = true).
+           During close (isClosing) we keep them visible so they can fade out. ── */}
 
-      {/* Subtle Geometric Mesh Overlay */}
-      <div className="radial-reveal-mesh-grid" />
+      {/* Concept 3: Executive Volumetric Spotlight — only after blob settles */}
+      {(isSettled || isClosing) && <VolumetricAtmosphere role={role} />}
 
-      {/* Top Floating Header with Unified Brand Logo (Left) and Return Control (Right) */}
-      <div className="radial-reveal-header">
+      {/* Subtle Geometric Mesh Overlay — only after blob settles */}
+      {(isSettled || isClosing) && <div className="radial-reveal-mesh-grid" />}
+
+      {/* Top Floating Header — fades in once blob has settled */}
+      <motion.div
+        className="radial-reveal-header"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: (isSettled && !isClosing) ? 1 : 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      >
         <BrandLogo theme="dark" />
         <button
           type="button"
@@ -329,20 +339,20 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
             <i className="bi bi-x-lg"></i>
           </div>
         </button>
-      </div>
+      </motion.div>
 
-      {/* Auth Card Content Container (Always Visible, Paced Float-In) */}
+      {/* Auth Card — fades in after blob settles, fades out on close */}
       <motion.div
         className="radial-reveal-content"
-        initial={{ opacity: 0, scale: 0.92, y: 30 }}
+        initial={{ opacity: 0, scale: 0.93, y: 28 }}
         animate={{
-          opacity: isClosing ? 0 : 1,
-          scale: isClosing ? 0.94 : 1,
-          y: isClosing ? 18 : 0
+          opacity: (isSettled && !isClosing) ? 1 : 0,
+          scale: (isSettled && !isClosing) ? 1 : 0.93,
+          y: (isSettled && !isClosing) ? 0 : 28
         }}
         transition={{
-          duration: isClosing ? 0.35 : 0.65,
-          delay: isClosing ? 0 : 0.35, // Floats in as the water floods
+          duration: isClosing ? 0.30 : 0.60,
+          delay: isClosing ? 0 : 0.15,
           ease: [0.16, 1, 0.3, 1]
         }}
       >
