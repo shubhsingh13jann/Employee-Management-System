@@ -16,10 +16,6 @@ interface RadialRevealTransitionProps {
   isOpen?: boolean;
   onClose: () => void;
   role?: UserRole;
-  /**
-   * When true: the WaterDropReveal portal already animated the opening on the
-   * previous page. Skip the blob expansion and start in the settled state immediately.
-   */
   alreadyCovered?: boolean;
 }
 
@@ -70,28 +66,15 @@ function getLiquidBlobPath(
   return d;
 }
 
-/**
- * RadialRevealTransition
- * 
- * 100% Coded Native Fluid Water / Liquid Blob Page Transition:
- * - Direct SVG filled liquid blob rendering (immune to browser clip-path bugs)
- * - True fluid water expansion with organic 5-lobe morphing and aquatic sheen waves
- * - Automatically cleanly terminates once opened so no ripple lines linger
- * - Auth card floats cleanly in front with z-index
- * - Reverse contraction on Close / Back pulls all water back into the button
- */
 export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
   children,
   origin,
   onClose,
   role = "admin",
-  alreadyCovered = false,
 }) => {
   const [isClosing, setIsClosing] = useState(false);
-  // If the water-drop portal already covered the screen, start settled immediately.
-  const [isSettled, setIsSettled] = useState(alreadyCovered);
-  // Same — if already covered, the page is immediately visible (no need to wait for first frame).
-  const [isVisible, setIsVisible] = useState(alreadyCovered);
+  const [isSettled, setIsSettled] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   // Viewport dimensions for SVG canvas
   const [dimensions, setDimensions] = useState({
@@ -124,7 +107,6 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
   const maxRadiusRef = useRef<number>(2000);
 
   useEffect(() => {
-    // Calculate max radius needed to flood past all 4 screen corners
     const corners = [
       Math.hypot(originX, originY),
       Math.hypot(dimensions.width - originX, originY),
@@ -134,19 +116,14 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
     maxRadiusRef.current = Math.max(...corners) * 1.35;
   }, [originX, originY, dimensions]);
 
-  // Liquid expansion duration (650ms opening, 520ms reverse contraction)
-  const OPEN_DURATION = 650;
-  const CLOSE_DURATION = 520;
+  // Snappy, energetic fluid timing (550ms opening, 450ms closing)
+  const OPEN_DURATION = 550;
+  const CLOSE_DURATION = 450;
 
   useEffect(() => {
-    // When the water-drop portal already covered the screen (alreadyCovered=true),
-    // skip the opening blob animation — only run the loop for closing.
-    if (alreadyCovered && !isClosing) return;
-
     startTimeRef.current = performance.now();
 
     const animateLoop = (now: number) => {
-      // Make the entire viewport visible on the very first frame
       setIsVisible(true);
 
       const elapsed = now - startTimeRef.current;
@@ -158,7 +135,6 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         ? 1 - Math.pow(progress, 2.5) // accelerating suction into button
         : 1 - Math.pow(1 - progress, 3.2); // luscious organic splash expansion
 
-      // Wobble intensity decreases as fluid spreads
       const wobble = isClosing ? 0.9 : Math.max(0.04, 1.15 * (1 - progress * 0.9));
       const phase = elapsed * 0.005;
 
@@ -183,10 +159,8 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         animFrameRef.current = requestAnimationFrame(animateLoop);
       } else {
         if (isClosing) {
-          // Contraction complete — navigate back to home
           onClose();
         } else {
-          // Expansion complete
           setIsSettled(true);
         }
       }
@@ -197,14 +171,12 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [isClosing, originX, originY, alreadyCovered, onClose]);
+  }, [isClosing, originX, originY, onClose]);
 
   const handleTriggerClose = () => {
     if (isClosing) return;
     setIsSettled(false);
     setIsClosing(true);
-    // Liquid contraction loop starts immediately, organically shrinking the
-    // login page into the button while revealing the landing page underneath.
   };
 
   const gradCx = dimensions.width > 0 ? `${((originX / dimensions.width) * 100).toFixed(1)}%` : "50%";
@@ -216,8 +188,6 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
       style={{
         opacity: isVisible ? 1 : 0,
         pointerEvents: isClosing ? "none" : (isVisible ? "auto" : "none"),
-        clipPath: isClosing && blobPath ? "url(#login-liquid-clip)" : undefined,
-        WebkitClipPath: isClosing && blobPath ? "url(#login-liquid-clip)" : undefined,
       }}
     >
       {/* Master Liquid SVG Canvas Rendering True Fluid Water Blob & Ripples */}
@@ -327,12 +297,12 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
       {/* Subtle Geometric Mesh Overlay — only after blob settles */}
       {(isSettled || isClosing) && <div className="radial-reveal-mesh-grid" />}
 
-      {/* Top Floating Header — stays visible during closing so clipPath shrinks it away */}
+      {/* Top Floating Header — fades in on settle, smoothly fades out on close */}
       <motion.div
         className="radial-reveal-header"
         initial={{ opacity: 0 }}
-        animate={{ opacity: (isSettled || isClosing) ? 1 : 0 }}
-        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        animate={{ opacity: (isSettled && !isClosing) ? 1 : 0 }}
+        transition={{ duration: isClosing ? 0.2 : 0.3, ease: [0.16, 1, 0.3, 1] }}
       >
         <BrandLogo theme="dark" />
         <button
@@ -348,17 +318,17 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         </button>
       </motion.div>
 
-      {/* Auth Card — stays visible during closing so the fluid clip-path naturally sucks it away */}
+      {/* Auth Card — fades in on settle, smoothly fades out on close */}
       <motion.div
         className="radial-reveal-content"
         initial={{ opacity: 0, scale: 0.96, y: 16 }}
         animate={{
-          opacity: (isSettled || isClosing) ? 1 : 0,
-          scale: (isSettled || isClosing) ? 1 : 0.96,
-          y: (isSettled || isClosing) ? 0 : 16
+          opacity: (isSettled && !isClosing) ? 1 : 0,
+          scale: (isSettled && !isClosing) ? 1 : 0.96,
+          y: (isSettled && !isClosing) ? 0 : 16
         }}
         transition={{
-          duration: 0.35,
+          duration: isClosing ? 0.2 : 0.35,
           delay: 0,
           ease: [0.16, 1, 0.3, 1]
         }}

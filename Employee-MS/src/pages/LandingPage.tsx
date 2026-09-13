@@ -1,38 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 import InteractiveBackground from "../components/common/InteractiveBackground";
 import BrandLogo from "../components/common/BrandLogo";
-import WaterDropReveal from "../Components/common/WaterDropReveal";
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const location = useLocation();
 
-  // Water-drop portal state — shown while landing page is still mounted (opening)
-  const [pendingReveal, setPendingReveal] = useState<{
-    path: "/login" | "/signup";
-    origin: { x: number; y: number };
-  } | null>(null);
-
-  // Synchronous navigation lock to completely prevent double-click back-to-back triggers
-  const isAuthNavigatingRef = useRef(false);
-
-  // Handle Button-Originated Radial Reveal Navigation:
-  // 1. Show the water-drop portal on top of the current page
-  // 2. Once blob covers the screen (onCovered), THEN navigate
+  // Handle Button-Originated Radial Reveal Navigation
   const handleAuthNavigate = (path: "/login" | "/signup", e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
-    if (isAuthNavigatingRef.current || pendingReveal) return; // Synchronously block repeat clicks
-    isAuthNavigatingRef.current = true;
     const rect = e.currentTarget.getBoundingClientRect();
-    setPendingReveal({
-      path,
-      origin: {
-        x: Math.round(rect.left + rect.width / 2),
-        y: Math.round(rect.top + rect.height / 2),
-      },
-    });
+    const origin = {
+      x: Math.round(rect.left + rect.width / 2),
+      y: Math.round(rect.top + rect.height / 2),
+    };
+    navigate(path, { state: { revealOrigin: origin } });
   };
 
   // Reset scroll to top and ensure manual restoration so navbar is ALWAYS visible on refresh
@@ -1583,22 +1566,6 @@ const LandingPage = () => {
           </div>
         </motion.div>
       </div>
-      {/* ── Water-Drop Portal: expands over the current page BEFORE navigating (Opening) ── */}
-      {pendingReveal && (
-        <WaterDropReveal
-          origin={pendingReveal.origin}
-          mode="expand"
-          onCovered={() => {
-            navigate(pendingReveal.path, {
-              state: { revealOrigin: pendingReveal.origin, alreadyCovered: true },
-            });
-            setPendingReveal(null);
-            setTimeout(() => {
-              isAuthNavigatingRef.current = false;
-            }, 500);
-          }}
-        />
-      )}
     </div>
   );
 };

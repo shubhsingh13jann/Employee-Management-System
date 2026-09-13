@@ -43,33 +43,20 @@ const EmployeeProfile = lazy(() => import("./pages/employee/EmployeeProfile"));
 const AnimatedAppContent = () => {
   const location = useLocation();
 
-  const isPublicAuthRoute =
-    location.pathname === "/" ||
-    location.pathname === "/login" ||
-    location.pathname === "/signup" ||
-    location.pathname === "/adminlogin" ||
-    location.pathname === "/dashboard";
-
   return (
     <>
       <TopLaserBar />
-      {isPublicAuthRoute ? (
-        <>
-          <LandingPage />
+      <AnimatePresence mode="wait">
+        <PageTransition key={location.pathname}>
           <Routes location={location}>
-            {/* Public Landing & Auth Routes — LandingPage is persistently mounted underneath */}
-            <Route path="/" element={null} />
+            {/* Public Landing & Auth Routes */}
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login initialMode="login" />} />
             <Route path="/signup" element={<Login initialMode="signup" />} />
             <Route path="/adminlogin" element={<Navigate to="/login" replace />} />
             <Route path="/dashboard" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </>
-      ) : (
-        <AnimatePresence mode="wait">
-          <PageTransition key={location.pathname}>
-            <Routes location={location}>
-              {/* 👑 HR Admin Portal */}
+
+            {/* 👑 HR Admin Portal */}
             <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
               <Route
                 path="/admin"
@@ -154,9 +141,8 @@ const AnimatedAppContent = () => {
           </Routes>
         </PageTransition>
       </AnimatePresence>
-    )}
-  </>
-);
+    </>
+  );
 };
 
 function App() {
