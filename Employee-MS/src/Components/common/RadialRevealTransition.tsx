@@ -71,10 +71,11 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
   origin,
   onClose,
   role = "admin",
+  alreadyCovered = false,
 }) => {
   const [isClosing, setIsClosing] = useState(false);
-  const [isSettled, setIsSettled] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isSettled, setIsSettled] = useState(alreadyCovered);
+  const [isVisible, setIsVisible] = useState(alreadyCovered);
 
   // Viewport dimensions for SVG canvas
   const [dimensions, setDimensions] = useState({
@@ -121,6 +122,8 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
   const CLOSE_DURATION = 450;
 
   useEffect(() => {
+    if (alreadyCovered && !isClosing) return;
+
     startTimeRef.current = performance.now();
 
     const animateLoop = (now: number) => {
@@ -171,7 +174,7 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [isClosing, originX, originY, onClose]);
+  }, [isClosing, originX, originY, onClose, alreadyCovered]);
 
   const handleTriggerClose = () => {
     if (isClosing) return;

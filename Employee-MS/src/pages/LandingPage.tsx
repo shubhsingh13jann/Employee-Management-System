@@ -3,19 +3,33 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 import InteractiveBackground from "../components/common/InteractiveBackground";
 import BrandLogo from "../components/common/BrandLogo";
+import WaterDropReveal from "../Components/common/WaterDropReveal";
 
 const LandingPage = () => {
   const navigate = useNavigate();
 
+  // Water-drop portal state — expands organically over landing page on click
+  const [pendingReveal, setPendingReveal] = useState<{
+    path: "/login" | "/signup";
+    origin: { x: number; y: number };
+  } | null>(null);
+
+  // Synchronous lock to prevent multiple animations on rapid clicks
+  const isAuthNavigatingRef = useRef(false);
+
   // Handle Button-Originated Radial Reveal Navigation
   const handleAuthNavigate = (path: "/login" | "/signup", e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
+    if (isAuthNavigatingRef.current || pendingReveal) return; // Prevent double-trigger
+    isAuthNavigatingRef.current = true;
     const rect = e.currentTarget.getBoundingClientRect();
-    const origin = {
-      x: Math.round(rect.left + rect.width / 2),
-      y: Math.round(rect.top + rect.height / 2),
-    };
-    navigate(path, { state: { revealOrigin: origin } });
+    setPendingReveal({
+      path,
+      origin: {
+        x: Math.round(rect.left + rect.width / 2),
+        y: Math.round(rect.top + rect.height / 2),
+      },
+    });
   };
 
   // Reset scroll to top and ensure manual restoration so navbar is ALWAYS visible on refresh
@@ -1566,6 +1580,22 @@ const LandingPage = () => {
           </div>
         </motion.div>
       </div>
+      {/* ── Native Water-Drop Fluid Portal: expands over the current landing page on click ── */}
+      {pendingReveal && (
+        <WaterDropReveal
+          origin={pendingReveal.origin}
+          mode="expand"
+          onCovered={() => {
+            navigate(pendingReveal.path, {
+              state: { revealOrigin: pendingReveal.origin, alreadyCovered: true },
+            });
+            setPendingReveal(null);
+            setTimeout(() => {
+              isAuthNavigatingRef.current = false;
+            }, 600);
+          }}
+        />
+      )}
     </div>
   );
 };
