@@ -100,13 +100,13 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         tint: { r: 10, g: 45, b: 35 },
       },
       employee: {
-        // Morning Indigo / Tech Electric Blue
-        primary: { r: 79, g: 70, b: 229 },     // #4f46e5
-        deep: { r: 67, g: 56, b: 202 },        // #4338ca
-        light: { r: 129, g: 140, b: 248 },     // #818cf8
-        glow: { r: 99, g: 102, b: 241 },      // #6366f1
-        highlight: { r: 199, g: 210, b: 254 }, // #c7d2fe
-        tint: { r: 25, g: 25, b: 65 },
+        // Solar Amber / Warm Golden Honey
+        primary: { r: 245, g: 158, b: 11 },    // #f59e0b
+        deep: { r: 217, g: 119, b: 6 },        // #d97706
+        light: { r: 253, g: 224, b: 71 },      // #fde047
+        glow: { r: 250, g: 204, b: 21 },       // #facc15
+        highlight: { r: 254, g: 240, b: 138 }, // #fef08a
+        tint: { r: 42, g: 30, b: 12 },
       },
     };
 

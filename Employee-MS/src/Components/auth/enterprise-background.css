@@ -56,11 +56,11 @@
 }
 
 .enterprise-background[data-role="employee"] {
-  --role-primary-rgb: 79, 70, 229;
-  --role-deep-rgb: 67, 56, 202;
-  --role-light-rgb: 129, 140, 248;
-  --role-light-hex: #818cf8;
-  --role-glow-rgb: 99, 102, 241;
+  --role-primary-rgb: 245, 158, 11;
+  --role-deep-rgb: 217, 119, 6;
+  --role-light-rgb: 253, 224, 71;
+  --role-light-hex: #fde047;
+  --role-glow-rgb: 250, 204, 21;
 }
 
 /* Canvas element filling entire viewport */
