@@ -134,9 +134,9 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
     maxRadiusRef.current = Math.max(...corners) * 1.35;
   }, [originX, originY, dimensions]);
 
-  // Liquid expansion duration (1.45s opening, 0.85s reverse contraction)
-  const OPEN_DURATION = 1450;
-  const CLOSE_DURATION = 850;
+  // Liquid expansion duration (650ms opening, 520ms reverse contraction)
+  const OPEN_DURATION = 650;
+  const CLOSE_DURATION = 520;
 
   useEffect(() => {
     // When the water-drop portal already covered the screen (alreadyCovered=true),
@@ -146,22 +146,21 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
     startTimeRef.current = performance.now();
 
     const animateLoop = (now: number) => {
-      // Make the entire viewport visible on the very first frame — dark background
-      // and blob animation appear together, never background-before-blob.
+      // Make the entire viewport visible on the very first frame
       setIsVisible(true);
 
       const elapsed = now - startTimeRef.current;
       const duration = isClosing ? CLOSE_DURATION : OPEN_DURATION;
       let progress = Math.min(elapsed / duration, 1);
 
-      // Custom fluid easing: fast burst followed by viscous liquid deceleration
+      // Custom fluid easing
       let eased = isClosing
         ? 1 - Math.pow(progress, 2.5) // accelerating suction into button
         : 1 - Math.pow(1 - progress, 3.2); // luscious organic splash expansion
 
-      // Wobble intensity decreases as the fluid floods the entire screen
-      const wobble = isClosing ? 0.9 : Math.max(0.05, 1.2 * (1 - progress * 0.9));
-      const phase = elapsed * 0.0035;
+      // Wobble intensity decreases as fluid spreads
+      const wobble = isClosing ? 0.9 : Math.max(0.04, 1.15 * (1 - progress * 0.9));
+      const phase = elapsed * 0.005;
 
       const currentRadius = maxRadiusRef.current * eased;
 
@@ -169,10 +168,10 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
       const mainD = getLiquidBlobPath(originX, originY, currentRadius, phase, wobble);
       setBlobPath(mainD);
 
-      // Wave crest and ripple are only drawn during active motion, cleared once expanding completes
+      // Wave crest and ripple are only drawn during active motion
       if (progress < 0.96) {
-        const crestD = getLiquidBlobPath(originX, originY, currentRadius * 1.03, phase + 0.5, wobble * 0.9);
-        const rippleD = getLiquidBlobPath(originX, originY, currentRadius * 0.92, phase - 0.4, wobble * 1.1);
+        const crestD = getLiquidBlobPath(originX, originY, currentRadius * 1.025, phase + 0.4, wobble * 0.9);
+        const rippleD = getLiquidBlobPath(originX, originY, currentRadius * 0.94, phase - 0.4, wobble * 1.1);
         setCrestPath(crestD);
         setRipplePath(rippleD);
       } else {
@@ -183,7 +182,7 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
       if (progress < 1) {
         animFrameRef.current = requestAnimationFrame(animateLoop);
       } else {
-        // Animation loop finished: settle background and stop CPU usage
+        // Animation loop finished: settle background
         if (!isClosing) {
           setIsSettled(true);
         }
@@ -199,11 +198,12 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
 
   const handleTriggerClose = () => {
     if (isClosing) return;
-    setIsSettled(false);
     setIsClosing(true);
+    // Instant fast fade-out of the auth card (120ms) then navigate to LandingPage
+    // where the reverse water-suction portal smoothly contracts into the button!
     setTimeout(() => {
       onClose();
-    }, CLOSE_DURATION - 50);
+    }, 120);
   };
 
   const gradCx = dimensions.width > 0 ? `${((originX / dimensions.width) * 100).toFixed(1)}%` : "50%";
@@ -249,33 +249,24 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
             <stop offset="100%" stopColor="#c084fc" stopOpacity="0.7" />
           </linearGradient>
 
-          {/* Water Surface Wave Turbulence Filter */}
-          <filter id="water-turbulence-filter" x="-20%" y="-20%" width="140%" height="140%">
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.014 0.018"
-              numOctaves="2"
-              result="noise"
-            />
-            <feDisplacementMap
-              in="SourceGraphic"
-              in2="noise"
-              scale="24"
-              xChannelSelector="R"
-              yChannelSelector="G"
-            />
+          {/* Soft outer glow for the fluid surface tension edge */}
+          <filter id="liquid-edge-glow" x="-10%" y="-10%" width="120%" height="120%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
           </filter>
         </defs>
 
-        {/* When settled, no off-center SVG gradient is rendered; the uniform dark viewport background displays cleanly */}
+        {/* When settled, no off-center SVG gradient is rendered */}
         {isSettled && !isClosing ? null : (
           <>
-            {/* The Solid Fluid Water Blob Body (Visible & Expanding!) */}
+            {/* The Solid Fluid Water Blob Body */}
             {blobPath && (
               <path
                 d={blobPath}
                 fill="url(#liquid-theme-gradient)"
-                filter="url(#water-turbulence-filter)"
               />
             )}
 
@@ -285,9 +276,8 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
                 d={crestPath}
                 fill="none"
                 stroke="url(#aquatic-sheen-grad)"
-                strokeWidth="8"
-                strokeOpacity="0.85"
-                filter="url(#water-turbulence-filter)"
+                strokeWidth="6"
+                filter="url(#liquid-edge-glow)"
               />
             )}
 
@@ -335,7 +325,7 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         className="radial-reveal-header"
         initial={{ opacity: 0 }}
         animate={{ opacity: (isSettled && !isClosing) ? 1 : 0 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: isClosing ? 0.12 : 0.3, ease: [0.16, 1, 0.3, 1] }}
       >
         <BrandLogo theme="dark" />
         <button
@@ -351,18 +341,18 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
         </button>
       </motion.div>
 
-      {/* Auth Card — fades in after blob settles, fades out on close */}
+      {/* Auth Card — fast, crisp float-in after blob settles, instant fadeout on close */}
       <motion.div
         className="radial-reveal-content"
-        initial={{ opacity: 0, scale: 0.93, y: 28 }}
+        initial={{ opacity: 0, scale: 0.96, y: 16 }}
         animate={{
           opacity: (isSettled && !isClosing) ? 1 : 0,
-          scale: (isSettled && !isClosing) ? 1 : 0.93,
-          y: (isSettled && !isClosing) ? 0 : 28
+          scale: (isSettled && !isClosing) ? 1 : 0.96,
+          y: (isSettled && !isClosing) ? 0 : 16
         }}
         transition={{
-          duration: isClosing ? 0.30 : 0.60,
-          delay: isClosing ? 0 : 0.15,
+          duration: isClosing ? 0.12 : 0.35,
+          delay: 0,
           ease: [0.16, 1, 0.3, 1]
         }}
       >

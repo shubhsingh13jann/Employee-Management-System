@@ -203,7 +203,17 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
       origin={revealOrigin}
       role={role}
       alreadyCovered={alreadyCovered}
-      onClose={() => navigate("/")}
+      onClose={() =>
+        navigate("/", {
+          state: {
+            reverseReveal: true,
+            origin: revealOrigin || {
+              x: typeof window !== "undefined" ? window.innerWidth - 85 : 800,
+              y: 38,
+            },
+          },
+        })
+      }
     >
       <div
         ref={containerRef}

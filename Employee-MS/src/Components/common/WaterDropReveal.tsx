@@ -1,13 +1,22 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 
-interface WaterDropRevealProps {
-  /** Viewport coordinates of the click origin */
+export interface WaterDropRevealProps {
+  /** Viewport coordinates of the clicked button (fluid epicenter) */
   origin: { x: number; y: number };
-  /** Called once the blob has fully covered the screen — navigate here */
-  onCovered: () => void;
+  /** "expand" = water spreads over page (opening); "contract" = water sucks back into button (closing) */
+  mode?: "expand" | "contract";
+  /** Triggered when the expansion covers the screen (or alias onCovered) */
+  onCovered?: () => void;
+  /** Triggered when the animation cycle completes */
+  onComplete?: () => void;
 }
 
+/**
+ * Generates an organic, multi-lobed fluid blob SVG path.
+ * Uses 32 harmonic control points with quadratic bezier smoothing
+ * to emulate real water surface tension, fluid lobes, and ripples.
+ */
 function getLiquidBlobPath(
   cx: number,
   cy: number,
@@ -17,7 +26,9 @@ function getLiquidBlobPath(
 ): string {
   if (baseR <= 0) return "";
   const N = 32;
-  const pts: { x: number; y: number }[] = [];
+  const ptsX: number[] = new Array(N);
+  const ptsY: number[] = new Array(N);
+
   for (let i = 0; i < N; i++) {
     const a = (i / N) * Math.PI * 2;
     const w =
@@ -27,89 +38,148 @@ function getLiquidBlobPath(
         0.05 * Math.sin(7 * a + phase * 3.1) +
         0.03 * Math.cos(11 * a - phase * 2.0));
     const r = Math.max(0, baseR * (1 + w));
-    pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+    ptsX[i] = cx + r * Math.cos(a);
+    ptsY[i] = cy + r * Math.sin(a);
   }
-  let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
-  for (let i = 0; i < pts.length; i++) {
-    const c = pts[i];
-    const n = pts[(i + 1) % pts.length];
-    d += ` Q ${c.x.toFixed(1)} ${c.y.toFixed(1)}, ${((c.x + n.x) / 2).toFixed(1)} ${((c.y + n.y) / 2).toFixed(1)}`;
+
+  let d = `M ${ptsX[0].toFixed(1)} ${ptsY[0].toFixed(1)}`;
+  for (let i = 0; i < N; i++) {
+    const next = (i + 1) % N;
+    const midX = (ptsX[i] + ptsX[next]) / 2;
+    const midY = (ptsY[i] + ptsY[next]) / 2;
+    d += ` Q ${ptsX[i].toFixed(1)} ${ptsY[i].toFixed(1)}, ${midX.toFixed(1)} ${midY.toFixed(1)}`;
   }
   return d + " Z";
 }
 
 /**
- * WaterDropReveal — Portal that renders a liquid blob on document.body,
- * growing from `origin` over whatever page is currently visible.
- * Once the blob fully covers the screen, `onCovered` is called so the
- * caller can navigate. The portal is unmounted automatically after that.
+ * High-performance WaterDropReveal Portal:
+ * - Direct DOM manipulation on SVG path refs (zero React re-renders during 60/120fps animation)
+ * - Removed heavy feDisplacementMap filter for butter-smooth native GPU hardware acceleration
+ * - Fast, snappy duration: 650ms expand, 520ms contract
+ * - Dual-mode:
+ *     - "expand": grows from button to cover screen, revealing Login
+ *     - "contract": starts full-screen, shrinks into button, revealing LandingPage underneath
  */
 export const WaterDropReveal: React.FC<WaterDropRevealProps> = ({
   origin,
+  mode = "expand",
   onCovered,
+  onComplete,
 }) => {
-  const W = window.innerWidth;
-  const H = window.innerHeight;
+  const isExpand = mode === "expand";
 
-  const maxR = Math.max(
-    Math.hypot(origin.x, origin.y),
-    Math.hypot(W - origin.x, origin.y),
-    Math.hypot(origin.x, H - origin.y),
-    Math.hypot(W - origin.x, H - origin.y)
-  ) * 1.35;
+  const W = typeof window !== "undefined" ? window.innerWidth : 1920;
+  const H = typeof window !== "undefined" ? window.innerHeight : 1080;
 
-  const DURATION = 1450; // ms
+  // Maximum radius needed to flood comfortably past all 4 corners
+  const maxR =
+    Math.max(
+      Math.hypot(origin.x, origin.y),
+      Math.hypot(W - origin.x, origin.y),
+      Math.hypot(origin.x, H - origin.y),
+      Math.hypot(W - origin.x, H - origin.y)
+    ) * 1.38;
 
-  const [blobPath, setBlobPath] = useState("");
-  const [crestPath, setCrestPath] = useState("");
-  const [ripplePath, setRipplePath] = useState("");
+  // Snappy, energetic fluid timing
+  const DURATION = isExpand ? 650 : 520; // ms
+
+  const blobPathRef = useRef<SVGPathElement>(null);
+  const crestPathRef = useRef<SVGPathElement>(null);
+  const ripplePathRef = useRef<SVGPathElement>(null);
 
   const rafRef = useRef<number>(0);
-  const startRef = useRef(performance.now());
-  const coveredRef = useRef(false);
+  const triggeredRef = useRef(false);
 
   const gradCx = `${((origin.x / W) * 100).toFixed(1)}%`;
   const gradCy = `${((origin.y / H) * 100).toFixed(1)}%`;
 
   useEffect(() => {
-    startRef.current = performance.now();
+    const startTime = performance.now();
 
-    const loop = (now: number) => {
-      const elapsed = now - startRef.current;
-      const progress = Math.min(elapsed / DURATION, 1);
-      const eased = 1 - Math.pow(1 - progress, 3.2);
-      const wobble = Math.max(0.05, 1.2 * (1 - progress * 0.9));
-      const phase = elapsed * 0.0035;
-      const r = maxR * eased;
+    // Initial frame render
+    if (!isExpand && blobPathRef.current) {
+      // For contraction, start at maximum radius covering whole screen
+      const initPath = getLiquidBlobPath(origin.x, origin.y, maxR, 0, 0.2);
+      blobPathRef.current.setAttribute("d", initPath);
+    }
 
-      setBlobPath(getLiquidBlobPath(origin.x, origin.y, r, phase, wobble));
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const rawProgress = Math.min(elapsed / DURATION, 1);
 
-      if (progress < 0.96) {
-        setCrestPath(getLiquidBlobPath(origin.x, origin.y, r * 1.03, phase + 0.5, wobble * 0.9));
-        setRipplePath(getLiquidBlobPath(origin.x, origin.y, r * 0.92, phase - 0.4, wobble * 1.1));
-      } else {
-        setCrestPath("");
-        setRipplePath("");
+      // Fluid easing
+      // Expand: snappy explosive burst with viscous deceleration
+      // Contract: smooth suction rushing into the button
+      const eased = isExpand
+        ? 1 - Math.pow(1 - rawProgress, 3.2)
+        : Math.pow(1 - rawProgress, 2.5);
+
+      const wobble = isExpand
+        ? Math.max(0.04, 1.15 * (1 - rawProgress * 0.9))
+        : Math.max(0.04, 0.95 * (1 - (1 - rawProgress) * 0.6));
+
+      const phase = elapsed * 0.006;
+      const currentR = maxR * eased;
+
+      const mainD = getLiquidBlobPath(origin.x, origin.y, currentR, phase, wobble);
+      if (blobPathRef.current) {
+        blobPathRef.current.setAttribute("d", mainD);
       }
 
-      if (progress < 1) {
-        rafRef.current = requestAnimationFrame(loop);
+      // Leading wet crest & lagging ripple
+      if (
+        (isExpand && rawProgress < 0.96) ||
+        (!isExpand && rawProgress > 0.04 && rawProgress < 0.96)
+      ) {
+        const crestD = getLiquidBlobPath(
+          origin.x,
+          origin.y,
+          currentR * (isExpand ? 1.025 : 1.015),
+          phase + 0.4,
+          wobble * 0.9
+        );
+        const rippleD = getLiquidBlobPath(
+          origin.x,
+          origin.y,
+          currentR * (isExpand ? 0.94 : 0.96),
+          phase - 0.4,
+          wobble * 1.1
+        );
+
+        if (crestPathRef.current) crestPathRef.current.setAttribute("d", crestD);
+        if (ripplePathRef.current) ripplePathRef.current.setAttribute("d", rippleD);
       } else {
-        // Blob has fully covered — navigate
-        if (!coveredRef.current) {
-          coveredRef.current = true;
-          onCovered();
+        if (crestPathRef.current) crestPathRef.current.setAttribute("d", "");
+        if (ripplePathRef.current) ripplePathRef.current.setAttribute("d", "");
+      }
+
+      // Early trigger for expand when screen is comfortably covered (at ~94% progress)
+      // to make page transition feel instant and crisp without any wait
+      if (isExpand && rawProgress >= 0.94 && !triggeredRef.current) {
+        triggeredRef.current = true;
+        if (onCovered) onCovered();
+        if (onComplete) onComplete();
+      }
+
+      if (rawProgress < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        // Animation finished
+        if (!triggeredRef.current) {
+          triggeredRef.current = true;
+          if (onCovered) onCovered();
+          if (onComplete) onComplete();
         }
       }
     };
 
-    rafRef.current = requestAnimationFrame(loop);
+    rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isExpand, origin.x, origin.y, maxR, DURATION, onCovered, onComplete]);
 
   return ReactDOM.createPortal(
-    <svg
+    <div
       style={{
         position: "fixed",
         inset: 0,
@@ -119,70 +189,76 @@ export const WaterDropReveal: React.FC<WaterDropRevealProps> = ({
         pointerEvents: "none",
         overflow: "hidden",
       }}
-      width={W}
-      height={H}
-      viewBox={`0 0 ${W} ${H}`}
       aria-hidden="true"
     >
-      <defs>
-        <radialGradient
-          id="wdr-fill"
-          cx={gradCx}
-          cy={gradCy}
-          r="80%"
-          fx={gradCx}
-          fy={gradCy}
-        >
-          <stop offset="0%"   stopColor="#1e1b4b" stopOpacity="0.97" />
-          <stop offset="35%"  stopColor="#0f172a" stopOpacity="0.98" />
-          <stop offset="70%"  stopColor="#0b1120" stopOpacity="0.99" />
-          <stop offset="100%" stopColor="#090d16" stopOpacity="1" />
-        </radialGradient>
+      <svg
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "block",
+        }}
+        width={W}
+        height={H}
+        viewBox={`0 0 ${W} ${H}`}
+      >
+        <defs>
+          {/* Dynamic Radial Gradient Centered at Clicked Button Origin */}
+          <radialGradient
+            id="wdr-fill"
+            cx={gradCx}
+            cy={gradCy}
+            r="85%"
+            fx={gradCx}
+            fy={gradCy}
+          >
+            <stop offset="0%" stopColor="#1e1b4b" stopOpacity="0.98" />
+            <stop offset="35%" stopColor="#0f172a" stopOpacity="0.99" />
+            <stop offset="70%" stopColor="#0b1120" stopOpacity="1" />
+            <stop offset="100%" stopColor="#090d16" stopOpacity="1" />
+          </radialGradient>
 
-        <linearGradient id="wdr-crest" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%"   stopColor="#38bdf8" stopOpacity="0.95" />
-          <stop offset="50%"  stopColor="#818cf8" stopOpacity="0.85" />
-          <stop offset="100%" stopColor="#c084fc" stopOpacity="0.70" />
-        </linearGradient>
+          {/* Wet Edge Sheen Rim Gradient */}
+          <linearGradient id="wdr-crest" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.95" />
+            <stop offset="50%" stopColor="#818cf8" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#c084fc" stopOpacity="0.75" />
+          </linearGradient>
 
-        <filter id="wdr-turbulence" x="-20%" y="-20%" width="140%" height="140%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.014 0.018" numOctaves="2" result="noise" />
-          <feDisplacementMap in="SourceGraphic" in2="noise" scale="22" xChannelSelector="R" yChannelSelector="G" />
-        </filter>
-      </defs>
+          {/* Soft outer glow for the fluid surface tension edge */}
+          <filter id="wdr-edge-glow" x="-10%" y="-10%" width="120%" height="120%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
 
-      {/* Solid liquid blob body */}
-      {blobPath && (
+        {/* 1. Master Solid Fluid Body */}
         <path
-          d={blobPath}
+          ref={blobPathRef}
           fill="url(#wdr-fill)"
-          filter="url(#wdr-turbulence)"
         />
-      )}
 
-      {/* Leading wet rim crest */}
-      {crestPath && (
+        {/* 2. Leading Aquatic Sheen Wave (Wet Rim with glow) */}
         <path
-          d={crestPath}
+          ref={crestPathRef}
           fill="none"
           stroke="url(#wdr-crest)"
-          strokeWidth="8"
-          strokeOpacity="0.85"
-          filter="url(#wdr-turbulence)"
+          strokeWidth="6"
+          filter="url(#wdr-edge-glow)"
         />
-      )}
 
-      {/* Lagging ripple wave */}
-      {ripplePath && (
+        {/* 3. Lagging Ripple Wave */}
         <path
-          d={ripplePath}
+          ref={ripplePathRef}
           fill="none"
-          stroke="rgba(56,189,248,0.45)"
-          strokeWidth="4"
-          strokeDasharray="16 10"
+          stroke="rgba(56, 189, 248, 0.40)"
+          strokeWidth="3"
+          strokeDasharray="12 8"
         />
-      )}
-    </svg>,
+      </svg>
+    </div>,
     document.body
   );
 };

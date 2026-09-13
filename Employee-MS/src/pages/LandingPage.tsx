@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 import InteractiveBackground from "../components/common/InteractiveBackground";
 import BrandLogo from "../components/common/BrandLogo";
@@ -7,8 +7,29 @@ import WaterDropReveal from "../Components/common/WaterDropReveal";
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Water-drop portal state — shown while landing page is still mounted
+  // Handle reverse water suction animation when returning from Login/Signup
+  const locationState = location.state as {
+    reverseReveal?: boolean;
+    origin?: { x: number; y: number };
+  } | null;
+
+  const [reverseOrigin, setReverseOrigin] = useState<{ x: number; y: number } | null>(() => {
+    if (locationState?.reverseReveal && locationState?.origin) {
+      return locationState.origin;
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (reverseOrigin) {
+      // Clear location state so refreshing does not re-trigger
+      window.history.replaceState({}, document.title);
+    }
+  }, [reverseOrigin]);
+
+  // Water-drop portal state — shown while landing page is still mounted (opening)
   const [pendingReveal, setPendingReveal] = useState<{
     path: "/login" | "/signup";
     origin: { x: number; y: number };
@@ -1578,16 +1599,27 @@ const LandingPage = () => {
           </div>
         </motion.div>
       </div>
-      {/* ── Water-Drop Portal: expands over the current page BEFORE navigating ── */}
+      {/* ── Water-Drop Portal: expands over the current page BEFORE navigating (Opening) ── */}
       {pendingReveal && (
         <WaterDropReveal
           origin={pendingReveal.origin}
+          mode="expand"
           onCovered={() => {
-            // Blob now covers the full screen — navigate to login/signup.
-            // Pass the origin so Login knows it arrived via water-drop (no repeat animation needed).
             navigate(pendingReveal.path, {
               state: { revealOrigin: pendingReveal.origin, alreadyCovered: true },
             });
+            setPendingReveal(null);
+          }}
+        />
+      )}
+
+      {/* ── Water-Drop Reverse Portal: contracts back into the button when returning (Closing) ── */}
+      {reverseOrigin && (
+        <WaterDropReveal
+          origin={reverseOrigin}
+          mode="contract"
+          onComplete={() => {
+            setReverseOrigin(null);
           }}
         />
       )}
