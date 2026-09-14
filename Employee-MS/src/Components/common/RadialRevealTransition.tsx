@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import BrandLogo from "./BrandLogo";
 import VolumetricAtmosphere from "../auth/VolumetricAtmosphere";
+import EnterpriseBackground from "../auth/EnterpriseBackground";
 import { UserRole } from "../auth/auth.types";
 import "./radialReveal.css";
 
@@ -296,6 +297,8 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
 
       {/* Concept 3: Executive Volumetric Spotlight */}
       <VolumetricAtmosphere role={role} />
+      {/* Enterprise SaaS Background Environment */}
+      <EnterpriseBackground />
 
       {/* Subtle Geometric Mesh Overlay */}
       <div className="radial-reveal-mesh-grid" />
@@ -309,6 +312,7 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
           className="radial-reveal-close-btn"
           title="Return to Home"
         >
+          <i className="bi bi-arrow-left me-1.5" style={{ fontSize: "0.85rem" }}></i>
           <span className="close-text">Back to Home</span>
           <div className="close-icon-circle">
             <i className="bi bi-x-lg"></i>
