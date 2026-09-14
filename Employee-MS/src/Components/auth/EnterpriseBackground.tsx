@@ -324,13 +324,14 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     };
 
     /* =========================================================
-       LAYER: PROFESSIONAL HOLOGRAPHIC PERSPECTIVE FLOOR
-       — Trapezoid grid with sloped converging sides
+       LAYER: 3D HOLOGRAPHIC VALLEY TERRAIN FLOOR
+       — Elevated left & right slopes joining a centered depth trough
+       — Parallelogram / diamond perspective mesh with glowing ridge
     ========================================================= */
     const drawPerspectiveFloor = () => {
-      const horizon = height * 0.70;
-      const centerX = width * 0.5;
+      const horizon = height * 0.72;
       const floorBottom = height + 40;
+      const centerX = width * 0.5;
 
       ctx.save();
 
@@ -344,164 +345,210 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       const lr = Math.round(l.r), lg = Math.round(l.g), lb = Math.round(l.b);
       const gr = Math.round(g.r), gg = Math.round(g.g), gb = Math.round(g.b);
 
+      // Grid mesh resolution:
+      // 8 transverse rows creates wide, elongated cells
+      // 30 longitudinal rays fan out across the valley walls
+      const NUM_ROWS = 8;
+      const NUM_COLS = 30;
+
+      interface GridVertex {
+        x: number;
+        y: number;
+        colFrac: number;
+        rowT: number;
+      }
+
+      // Compute 3D valley terrain vertices
+      const grid: GridVertex[][] = [];
+
+      for (let r = 0; r < NUM_ROWS; r++) {
+        const rowT = r / (NUM_ROWS - 1); // 0 at horizon, 1 at foreground
+        const depth = Math.pow(rowT, 1.85); // exponential perspective bunching
+        const baseY = horizon + depth * (floorBottom - horizon);
+
+        const rowVertices: GridVertex[] = [];
+
+        for (let c = 0; c < NUM_COLS; c++) {
+          const colFrac = (c / (NUM_COLS - 1)) * 2 - 1; // -1 to +1
+
+          // 3D Valley Topography:
+          // Left side (colFrac < 0) and right side (colFrac > 0) slope UP into hills
+          // Center (colFrac = 0) dips DOWN into a wide valley basin / depth
+          const slopeElevation =
+            Math.pow(Math.abs(colFrac), 1.8) *
+            (height * 0.115 * (1 - depth * 0.35) + height * 0.035);
+
+          // Subtle organic landscape wave
+          const wave =
+            Math.sin(colFrac * Math.PI * 1.5) *
+            (height * 0.012 * (1 - depth * 0.3));
+
+          const py = baseY - slopeElevation + wave;
+
+          // Horizontal perspective spread:
+          // Spans across full viewport and fans out wider in the foreground
+          const spread = width * 0.54 + depth * (width * 0.16);
+          const px = centerX + colFrac * spread;
+
+          rowVertices.push({ x: px, y: py, colFrac, rowT });
+        }
+        grid.push(rowVertices);
+      }
+
       // ─────────────────────────────────────────────────────
-      // 1. ATMOSPHERIC FLOOR FILL (trapezoid shaped)
+      // 1. ATMOSPHERIC TERRAIN FILL
+      //    Follows the curved ridge silhouette down to bottom
       // ─────────────────────────────────────────────────────
-      const floorFill = ctx.createLinearGradient(0, horizon, 0, floorBottom);
-      floorFill.addColorStop(0,    `rgba(${pr}, ${pg}, ${pb}, 0.14)`);
-      floorFill.addColorStop(0.3,  `rgba(${dr}, ${dg}, ${db}, 0.09)`);
-      floorFill.addColorStop(0.7,  `rgba(${dr}, ${dg}, ${db}, 0.04)`);
-      floorFill.addColorStop(1,    `rgba(4, 6, 20, 0.96)`);
+      ctx.beginPath();
+      ctx.moveTo(-40, height + 40);
+      for (let c = 0; c < NUM_COLS; c++) {
+        ctx.lineTo(grid[0][c].x, grid[0][c].y);
+      }
+      ctx.lineTo(width + 40, height + 40);
+      ctx.closePath();
+
+      const floorFill = ctx.createLinearGradient(0, horizon - 80, 0, floorBottom);
+      floorFill.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0.18)`);
+      floorFill.addColorStop(0.32, `rgba(${dr}, ${dg}, ${db}, 0.12)`);
+      floorFill.addColorStop(0.70, `rgba(${dr}, ${dg}, ${db}, 0.05)`);
+      floorFill.addColorStop(1, `rgba(4, 6, 20, 0.98)`);
       ctx.fillStyle = floorFill;
-      ctx.fillRect(0, horizon, width, floorBottom - horizon);
-
-      // The half-width of the floor at the very bottom edge.
-      // All vertical spokes fan out from centerX to ±halfSpread.
-      // This defines the trapezoid boundary.
-      const halfSpread = width * 0.48;
+      ctx.fill();
 
       // ─────────────────────────────────────────────────────
-      // 2. VERTICAL CONVERGENCE LINES (draw first so H-lines
-      //    can reference the left/right boundary)
-      //    16 spokes fan from vanishing point to ±halfSpread.
+      // 2. LONGITUDINAL RAYS (Down the valley walls)
+      //    Radiate down the slopes, crossing contour lines at
+      //    slanted angles to form distinct PARALLELOGRAM cells
       // ─────────────────────────────────────────────────────
-      const totalV = 16;
-      const vFracs: number[] = []; // stores frac values -1..+1
-
-      for (let i = -totalV / 2; i <= totalV / 2; i++) {
-        const frac = i / (totalV / 2); // -1 to +1
-        vFracs.push(frac);
-        const bottomX = centerX + frac * halfSpread;
-
-        const centerWeight = Math.pow(1 - Math.abs(frac), 1.4);
-        const vAlpha = 0.03 + centerWeight * 0.13;
+      for (let c = 0; c < NUM_COLS; c++) {
+        const colFrac = grid[0][c].colFrac;
+        const centerWeight = 1 - Math.abs(colFrac) * 0.35;
+        const vAlpha = 0.05 + centerWeight * 0.18;
 
         ctx.beginPath();
-        ctx.moveTo(centerX, horizon);
-        ctx.lineTo(bottomX, floorBottom);
+        for (let r = 0; r < NUM_ROWS; r++) {
+          const pt = grid[r][c];
+          if (r === 0) {
+            ctx.moveTo(pt.x, pt.y);
+          } else {
+            ctx.lineTo(pt.x, pt.y);
+          }
+        }
         ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${vAlpha})`;
-        ctx.lineWidth = 0.65;
+        ctx.lineWidth = 0.75;
         ctx.stroke();
       }
 
       // ─────────────────────────────────────────────────────
-      // 3. HORIZONTAL GRID LINES — only 10, CLIPPED to
-      //    the trapezoid boundary (sloped sides)
-      //
-      //    At each row depth t, the left edge is:
-      //      leftX = centerX - halfSpread * t
-      //    and right edge is:
-      //      rightX = centerX + halfSpread * t
-      //
-      //    Lines are drawn as bezier curves (dome effect).
-      //    This gives the parallelogram/square cells and
-      //    the converging sloped sides from the reference.
+      // 3. TRANSVERSE CONTOUR LINES (Across the valley)
+      //    Follow the concave valley curves
       // ─────────────────────────────────────────────────────
-      const totalH = 10;
-      const hRows: { baseY: number; curve: number; t: number }[] = [];
-
-      for (let i = 0; i < totalH; i++) {
-        const t = i / (totalH - 1);  // 0 = horizon, 1 = bottom
-        const baseY = horizon + Math.pow(t, 1.8) * (floorBottom - horizon);
-
-        // Curvature for dome effect
-        const curve = Math.pow(t, 1.3) * height * 0.08;
-        hRows.push({ baseY, curve, t });
-
-        // Trapezoid edges at this depth
-        const leftX  = centerX - halfSpread * t;
-        const rightX = centerX + halfSpread * t;
-
-        // Skip the first line (t=0) — it's at the vanishing point
-        if (t < 0.03) continue;
-
-        const alpha = 0.34 * Math.pow(1 - t, 0.45) + 0.05;
+      for (let r = 1; r < NUM_ROWS; r++) {
+        const rowT = grid[r][0].rowT;
+        const alpha = 0.34 * Math.pow(1 - rowT, 0.5) + 0.06;
 
         ctx.beginPath();
-        ctx.moveTo(leftX,  baseY + curve * 0.7);
-        ctx.quadraticCurveTo(
-          centerX, baseY - curve * 0.6,
-          rightX,  baseY + curve * 0.7
-        );
-        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${Math.min(alpha, 0.38)})`;
-        ctx.lineWidth = 0.85;
+        for (let c = 0; c < NUM_COLS; c++) {
+          const pt = grid[r][c];
+          if (c === 0) {
+            ctx.moveTo(pt.x, pt.y);
+          } else {
+            ctx.lineTo(pt.x, pt.y);
+          }
+        }
+        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${Math.min(alpha, 0.40)})`;
+        ctx.lineWidth = rowT < 0.15 ? 0.65 : 0.9;
         ctx.stroke();
       }
 
       // ─────────────────────────────────────────────────────
-      // 4. INTERSECTION SPARKLE DOTS — sit on curved lines
+      // 4. TOP RIDGE CREST — GLOWING LUMINOUS HORIZON
+      //    Pass 1: Wide neon bloom
+      //    Pass 2: Sharp specular streak with white-hot center
       // ─────────────────────────────────────────────────────
-      for (let row = 0; row < hRows.length; row += 2) {
-        const { baseY, curve, t: rowT } = hRows[row];
-        if (rowT < 0.06) continue;
+      // Bloom pass
+      ctx.beginPath();
+      for (let c = 0; c < NUM_COLS; c++) {
+        const pt = grid[0][c];
+        if (c === 0) ctx.moveTo(pt.x, pt.y);
+        else ctx.lineTo(pt.x, pt.y);
+      }
+      ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, 0.38)`;
+      ctx.lineWidth = 8;
+      ctx.filter = "blur(6px)";
+      ctx.stroke();
+      ctx.filter = "none";
 
-        const leftX  = centerX - halfSpread * rowT;
-        const rightX = centerX + halfSpread * rowT;
-        const rowWidth = rightX - leftX;
+      // Specular crest line
+      const specular = ctx.createLinearGradient(0, 0, width, 0);
+      specular.addColorStop(0, `rgba(${lr}, ${lg}, ${lb}, 0)`);
+      specular.addColorStop(0.12, `rgba(${gr}, ${gg}, ${gb}, 0.25)`);
+      specular.addColorStop(0.35, `rgba(${lr}, ${lg}, ${lb}, 0.70)`);
+      specular.addColorStop(0.50, `rgba(255, 255, 255, 0.94)`);
+      specular.addColorStop(0.65, `rgba(${lr}, ${lg}, ${lb}, 0.70)`);
+      specular.addColorStop(0.88, `rgba(${gr}, ${gg}, ${gb}, 0.25)`);
+      specular.addColorStop(1, `rgba(${lr}, ${lg}, ${lb}, 0)`);
 
-        for (const frac of vFracs) {
-          // Position this spoke at the current row depth
-          const ix = centerX + frac * halfSpread * rowT;
-          if (ix < leftX - 4 || ix > rightX + 4) continue;
+      ctx.beginPath();
+      for (let c = 0; c < NUM_COLS; c++) {
+        const pt = grid[0][c];
+        if (c === 0) ctx.moveTo(pt.x, pt.y);
+        else ctx.lineTo(pt.x, pt.y);
+      }
+      ctx.strokeStyle = specular;
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
 
-          // Bezier Y at this x
-          const u = (ix - leftX) / rowWidth; // 0..1 across the row
-          const p0y = baseY + curve * 0.7;
-          const p1y = baseY - curve * 0.6;
-          const p2y = baseY + curve * 0.7;
-          const curvedY = (1-u)*(1-u)*p0y + 2*u*(1-u)*p1y + u*u*p2y;
+      // ─────────────────────────────────────────────────────
+      // 5. LUMINOUS INTERSECTION NODES / SPARKS
+      // ─────────────────────────────────────────────────────
+      for (let r = 0; r < NUM_ROWS; r++) {
+        const rowT = grid[r][0].rowT;
+        for (let c = 0; c < NUM_COLS; c++) {
+          const pt = grid[r][c];
+          if (pt.x < -15 || pt.x > width + 15) continue;
 
-          const dotAlpha = (1 - rowT) * 0.30 + 0.06;
-          const dotR = 0.55 + (1 - rowT) * 0.70;
+          if (r === 0) {
+            // High-intensity sparks along the mountain ridge
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 1.8, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 255, 255, 0.92)`;
+            ctx.fill();
 
-          ctx.beginPath();
-          ctx.arc(ix, curvedY, dotR, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, ${dotAlpha})`;
-          ctx.fill();
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 3.6, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, 0.28)`;
+            ctx.fill();
+          } else if (c % 2 === 0) {
+            // Subtle diamond nodes in the valley grid
+            const dotAlpha = (1 - rowT) * 0.32 + 0.05;
+            const dotR = 0.6 + (1 - rowT) * 0.75;
+
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, dotR, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, ${dotAlpha})`;
+            ctx.fill();
+          }
         }
       }
 
       // ─────────────────────────────────────────────────────
-      // 5. ATMOSPHERIC HORIZON BAND
+      // 6. ATMOSPHERIC VALLEY BASIN BLOOM
       // ─────────────────────────────────────────────────────
       const hBand = ctx.createRadialGradient(
-        centerX, horizon, 0,
-        centerX, horizon, width * 0.78
+        centerX,
+        horizon + 20,
+        0,
+        centerX,
+        horizon + 20,
+        width * 0.75
       );
-      hBand.addColorStop(0,    `rgba(${pr}, ${pg}, ${pb}, 0.22)`);
-      hBand.addColorStop(0.22, `rgba(${pr}, ${pg}, ${pb}, 0.10)`);
+      hBand.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0.22)`);
+      hBand.addColorStop(0.25, `rgba(${pr}, ${pg}, ${pb}, 0.10)`);
       hBand.addColorStop(0.55, `rgba(${dr}, ${dg}, ${db}, 0.04)`);
-      hBand.addColorStop(1,    `rgba(${dr}, ${dg}, ${db}, 0)`);
+      hBand.addColorStop(1, `rgba(${dr}, ${dg}, ${db}, 0)`);
       ctx.fillStyle = hBand;
-      ctx.fillRect(0, horizon - 130, width, 340);
-
-      // ─────────────────────────────────────────────────────
-      // 6. SPECULAR HORIZON LINE
-      // ─────────────────────────────────────────────────────
-      ctx.beginPath();
-      ctx.moveTo(0, horizon);
-      ctx.lineTo(width, horizon);
-      ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, 0.30)`;
-      ctx.lineWidth = 10;
-      ctx.filter = 'blur(6px)';
-      ctx.stroke();
-      ctx.filter = 'none';
-
-      const specular = ctx.createLinearGradient(0, 0, width, 0);
-      specular.addColorStop(0,    `rgba(${lr}, ${lg}, ${lb}, 0)`);
-      specular.addColorStop(0.08, `rgba(${gr}, ${gg}, ${gb}, 0.22)`);
-      specular.addColorStop(0.32, `rgba(${lr}, ${lg}, ${lb}, 0.65)`);
-      specular.addColorStop(0.50, `rgba(255, 255, 255, 0.88)`);
-      specular.addColorStop(0.68, `rgba(${lr}, ${lg}, ${lb}, 0.65)`);
-      specular.addColorStop(0.92, `rgba(${gr}, ${gg}, ${gb}, 0.22)`);
-      specular.addColorStop(1,    `rgba(${lr}, ${lg}, ${lb}, 0)`);
-
-      ctx.beginPath();
-      ctx.moveTo(0, horizon);
-      ctx.lineTo(width, horizon);
-      ctx.strokeStyle = specular;
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
+      ctx.fillRect(0, horizon - 120, width, 320);
 
       ctx.restore();
     };
