@@ -324,13 +324,17 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     };
 
     /* =========================================================
-       LAYER: PROFESSIONAL HOLOGRAPHIC PERSPECTIVE FLOOR
-       — Curved dome-surface grid for realistic "land" depth
+       LAYER: PERSPECTIVE FLOOR — True geometric implementation
+       Triangle clip + 1/z depth spacing = correct 3D look
     ========================================================= */
     const drawPerspectiveFloor = () => {
-      const horizon = height * 0.70;
-      const centerX = width * 0.5;
-      const floorBottom = height + 40;
+      const horizon     = height * 0.70;
+      const centerX     = width  * 0.5;
+      const floorBottom = height + 50;
+      const floorH      = floorBottom - horizon;
+      const halfSpread  = width  * 0.50;   // half-width at viewer's feet
+      const numSpokes   = 14;              // vertical convergence lines
+      const numRows     = 8;              // perspective depth rows (z=1..8)
 
       ctx.save();
 
@@ -345,138 +349,145 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       const gr = Math.round(g.r), gg = Math.round(g.g), gb = Math.round(g.b);
 
       // ─────────────────────────────────────────────────────
-      // 1. RICH ATMOSPHERIC FLOOR FILL
-      //    Deep tinted gradient — gives the floor a color mass
+      // 1. TRIANGLE FLOOR SHAPE + CLIP
+      //    The floor is a triangle: tip at vanishing point,
+      //    base at viewer's feet.  ctx.clip() means ALL grid
+      //    drawing is auto-masked to this shape — sloped sides
+      //    are now geometric, not drawn by hand.
       // ─────────────────────────────────────────────────────
+      ctx.beginPath();
+      ctx.moveTo(centerX,                   horizon);      // vanishing point (tip)
+      ctx.lineTo(centerX + halfSpread, floorBottom);       // bottom-right
+      ctx.lineTo(centerX - halfSpread, floorBottom);       // bottom-left
+      ctx.closePath();
+
       const floorFill = ctx.createLinearGradient(0, horizon, 0, floorBottom);
-      floorFill.addColorStop(0,    `rgba(${pr}, ${pg}, ${pb}, 0.16)`);
-      floorFill.addColorStop(0.25, `rgba(${dr}, ${dg}, ${db}, 0.12)`);
-      floorFill.addColorStop(0.65, `rgba(${dr}, ${dg}, ${db}, 0.06)`);
-      floorFill.addColorStop(1,    `rgba(4, 6, 20, 0.98)`);
+      floorFill.addColorStop(0,    `rgba(${pr}, ${pg}, ${pb}, 0.20)`);
+      floorFill.addColorStop(0.35, `rgba(${dr}, ${dg}, ${db}, 0.14)`);
+      floorFill.addColorStop(0.75, `rgba(${dr}, ${dg}, ${db}, 0.07)`);
+      floorFill.addColorStop(1,    `rgba(4, 6, 22, 0.95)`);
       ctx.fillStyle = floorFill;
-      ctx.fillRect(0, horizon, width, floorBottom - horizon);
+      ctx.fill();
+
+      ctx.clip(); // ← everything below is masked to the triangle
 
       // ─────────────────────────────────────────────────────
-      // 2. CURVED HORIZONTAL GRID LINES — the "dome" effect
-      //
-      //    Quadratic bezier per line:
-      //      Left  (0,     baseY + curve*0.8)  — edges dip DOWN
-      //      Ctrl  (centerX, baseY - curve)    — center pulled UP
-      //      Right (width, baseY + curve*0.8)  — edges dip DOWN
-      //
-      //    Visual arc at bottom = ~45px → clearly visible dome.
-      //    Previous value was 8px — invisible. Fixed.
+      // 2. VERTICAL CONVERGENCE SPOKES
+      //    All lines fan from the vanishing point outward.
+      //    They're clipped to the triangle automatically.
       // ─────────────────────────────────────────────────────
-      const totalH = 22;
-      const hRows: { baseY: number; curve: number }[] = [];
+      for (let j = 0; j <= numSpokes; j++) {
+        const frac    = (j / numSpokes) * 2 - 1;          // -1 to +1
+        const bottomX = centerX + frac * halfSpread;
 
-      for (let i = 0; i < totalH; i++) {
-        const t = i / (totalH - 1);  // 0 = horizon, 1 = bottom
-        const baseY = horizon + Math.pow(t, 2.0) * (floorBottom - horizon);
-
-        // Curvature grows from 0 at horizon → ~height*0.10 at bottom
-        // Actual visible arc = ~0.9 * curve ≈ 45px at bottom row
-        const curve = Math.pow(t, 1.2) * height * 0.10;
-        hRows.push({ baseY, curve });
-
-        // Lines bright near horizon, fading toward bottom
-        const alpha = 0.36 * Math.pow(1 - t, 0.50) + 0.04;
-
-        ctx.beginPath();
-        ctx.moveTo(0,     baseY + curve * 0.8);           // left: dips DOWN
-        ctx.quadraticCurveTo(
-          centerX, baseY - curve,                          // ctrl: pulled UP
-          width,   baseY + curve * 0.8                    // right: dips DOWN
-        );
-        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${Math.min(alpha, 0.40)})`;
-        ctx.lineWidth = t < 0.12 ? 0.55 : 0.90;
-        ctx.stroke();
-      }
-
-      // ─────────────────────────────────────────────────────
-      // 3. VERTICAL CONVERGENCE LINES
-      //    Fan from single vanishing point on horizon.
-      //    Center lines brighter — outer lines fade to zero.
-      // ─────────────────────────────────────────────────────
-      const totalV = 38;
-      const vBottoms: number[] = [];
-
-      for (let i = -totalV / 2; i <= totalV / 2; i++) {
-        const frac = i / (totalV / 2);
-        const bottomX = centerX + frac * (width * 0.58);
-        vBottoms.push(bottomX);
-
-        const centerWeight = Math.pow(1 - Math.abs(frac), 1.5);
-        const vAlpha = 0.025 + centerWeight * 0.12;
+        const cw     = Math.pow(1 - Math.abs(frac), 1.2);
+        const vAlpha = 0.025 + cw * 0.18;
 
         ctx.beginPath();
         ctx.moveTo(centerX, horizon);
         ctx.lineTo(bottomX, floorBottom);
         ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${vAlpha})`;
-        ctx.lineWidth = 0.65;
+        ctx.lineWidth   = 0.7;
         ctx.stroke();
       }
 
       // ─────────────────────────────────────────────────────
-      // 4. INTERSECTION SPARKLE DOTS — sit on the curved line
+      // 3. HORIZONTAL ROWS — TRUE 1/z PERSPECTIVE SPACING
+      //
+      //    screenY = horizon + floorH / z
+      //    z = 1 → viewer's feet (bottom of floor, widest)
+      //    z = numRows → near horizon (narrowest, compressed)
+      //
+      //    Width at depth z: halfW = halfSpread / z
+      //    This is mathematically correct perspective: rows
+      //    bunch tightly near horizon, spread out near viewer.
+      //    Cells are square near viewer, flat near horizon.
       // ─────────────────────────────────────────────────────
-      for (let row = 0; row < hRows.length; row += 2) {
-        const { baseY, curve } = hRows[row];
-        const rowT = (baseY - horizon) / (floorBottom - horizon);
-        if (rowT < 0.05) continue;
+      for (let z = numRows; z >= 1; z--) {
+        const screenY = horizon + floorH / z;
+        if (screenY > floorBottom + 5) continue;
 
-        for (let col = 0; col < vBottoms.length; col += 2) {
-          const bx = vBottoms[col];
-          const ix = centerX + (bx - centerX) * rowT;
-          if (ix < -6 || ix > width + 6) continue;
+        const halfW  = halfSpread / z;
+        const leftX  = centerX - halfW;
+        const rightX = centerX + halfW;
+        const tRow   = (screenY - horizon) / floorH;  // 0=far, 1=near
 
-          // Quadratic bezier Y at this x:
-          //   P0=(0, baseY+curve*0.8), P1=(centerX, baseY-curve), P2=(width, baseY+curve*0.8)
-          //   u = ix/width  (works because x(u)=u*width for this symmetric setup)
-          const u = ix / width;
-          const p0y = baseY + curve * 0.8;
-          const p1y = baseY - curve;           // matches new control point
-          const p2y = baseY + curve * 0.8;
-          const curvedY = (1-u)*(1-u)*p0y + 2*u*(1-u)*p1y + u*u*p2y;
+        // Subtle dome arc: edges dip slightly, center lifts
+        const curve = tRow * height * 0.028;
 
-          const dotAlpha = (1 - rowT) * 0.30 + 0.05;
-          const dotR = 0.60 + (1 - rowT) * 0.80;
+        // Near-viewer rows are brighter, horizon rows dimmer
+        const alpha = 0.10 + 0.22 * tRow;
+
+        ctx.beginPath();
+        ctx.moveTo(leftX,  screenY + curve * 0.6);
+        ctx.quadraticCurveTo(centerX, screenY - curve * 0.4, rightX, screenY + curve * 0.6);
+        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${alpha})`;
+        ctx.lineWidth   = 0.90;
+        ctx.stroke();
+      }
+
+      // ─────────────────────────────────────────────────────
+      // 4. INTERSECTION SPARKLE DOTS
+      // ─────────────────────────────────────────────────────
+      for (let z = numRows; z >= 1; z -= 2) {
+        const screenY = horizon + floorH / z;
+        if (screenY > floorBottom + 5) continue;
+
+        const halfW  = halfSpread / z;
+        const leftX  = centerX - halfW;
+        const rightX = centerX + halfW;
+        const rowW   = rightX - leftX;
+        const tRow   = (screenY - horizon) / floorH;
+        const curve  = tRow * height * 0.028;
+
+        for (let j = 0; j <= numSpokes; j += 2) {
+          const frac = (j / numSpokes) * 2 - 1;
+          const ix   = centerX + frac * halfW;
+          if (ix < leftX - 2 || ix > rightX + 2) continue;
+
+          const u   = rowW > 0 ? (ix - leftX) / rowW : 0.5;
+          const p0y = screenY + curve * 0.6;
+          const p1y = screenY - curve * 0.4;
+          const p2y = screenY + curve * 0.6;
+          const cy  = (1-u)*(1-u)*p0y + 2*u*(1-u)*p1y + u*u*p2y;
+
+          const dotAlpha = 0.08 + 0.22 * tRow;
+          const dotR     = Math.max(0.3, 0.4 + 0.9 * tRow);
 
           ctx.beginPath();
-          ctx.arc(ix, curvedY, dotR, 0, Math.PI * 2);
+          ctx.arc(ix, cy, dotR, 0, Math.PI * 2);
           ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, ${dotAlpha})`;
           ctx.fill();
         }
       }
 
+      ctx.restore(); // ← removes the triangle clip
+
       // ─────────────────────────────────────────────────────
-      // 5. WIDE ATMOSPHERIC HORIZON BAND
-      //    Radial bloom from horizon — creates the sci-fi depth
+      // 5. ATMOSPHERIC HORIZON BAND (full width, no clip)
       // ─────────────────────────────────────────────────────
       const hBand = ctx.createRadialGradient(
         centerX, horizon, 0,
         centerX, horizon, width * 0.78
       );
       hBand.addColorStop(0,    `rgba(${pr}, ${pg}, ${pb}, 0.22)`);
-      hBand.addColorStop(0.20, `rgba(${pr}, ${pg}, ${pb}, 0.11)`);
-      hBand.addColorStop(0.50, `rgba(${dr}, ${dg}, ${db}, 0.05)`);
+      hBand.addColorStop(0.22, `rgba(${pr}, ${pg}, ${pb}, 0.10)`);
+      hBand.addColorStop(0.55, `rgba(${dr}, ${dg}, ${db}, 0.04)`);
       hBand.addColorStop(1,    `rgba(${dr}, ${dg}, ${db}, 0)`);
       ctx.fillStyle = hBand;
       ctx.fillRect(0, horizon - 130, width, 340);
 
       // ─────────────────────────────────────────────────────
       // 6. SPECULAR HORIZON LINE
-      //    Pass 1: wide soft bloom glow
-      //    Pass 2: tight bright white-hot specular streak
       // ─────────────────────────────────────────────────────
       ctx.beginPath();
       ctx.moveTo(0, horizon);
       ctx.lineTo(width, horizon);
-      ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, 0.30)`;
-      ctx.lineWidth = 10;
-      ctx.filter = 'blur(6px)';
+      ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, 0.28)`;
+      ctx.lineWidth   = 10;
+      ctx.filter      = 'blur(6px)';
       ctx.stroke();
-      ctx.filter = 'none';
+      ctx.filter      = 'none';
 
       const specular = ctx.createLinearGradient(0, 0, width, 0);
       specular.addColorStop(0,    `rgba(${lr}, ${lg}, ${lb}, 0)`);
@@ -491,10 +502,8 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       ctx.moveTo(0, horizon);
       ctx.lineTo(width, horizon);
       ctx.strokeStyle = specular;
-      ctx.lineWidth = 1.2;
+      ctx.lineWidth   = 1.2;
       ctx.stroke();
-
-      ctx.restore();
     };
 
     /* =========================================================
