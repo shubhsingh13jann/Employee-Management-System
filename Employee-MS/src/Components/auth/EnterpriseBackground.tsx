@@ -325,11 +325,13 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
 
     /* =========================================================
        LAYER: 3D HOLOGRAPHIC VALLEY TERRAIN FLOOR
-       — Elevated left & right slopes joining a centered depth trough
-       — Parallelogram / diamond perspective mesh with glowing ridge
+       — Exact 3D wave curvature matching reference image
+       — Elevated left hill (0.22h) sweeping into centered depth (0.84h)
+       — 18 exponential perspective rows & 42 rays forming diamonds
     ========================================================= */
     const drawPerspectiveFloor = () => {
-      const horizon = height * 0.72;
+      // Center valley trough sits right below the login card
+      const horizonBase = height * 0.84;
       const floorBottom = height + 40;
       const centerX = width * 0.5;
 
@@ -345,11 +347,11 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       const lr = Math.round(l.r), lg = Math.round(l.g), lb = Math.round(l.b);
       const gr = Math.round(g.r), gg = Math.round(g.g), gb = Math.round(g.b);
 
-      // Grid mesh resolution:
-      // 8 transverse rows creates wide, elongated cells
-      // 30 longitudinal rays fan out across the valley walls
-      const NUM_ROWS = 8;
-      const NUM_COLS = 30;
+      // Mesh resolution calibrated to reference image density:
+      // 18 transverse rows with exponential bunching near horizon
+      // 42 longitudinal rays fanning down the slopes
+      const NUM_ROWS = 18;
+      const NUM_COLS = 42;
 
       interface GridVertex {
         x: number;
@@ -358,13 +360,13 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         rowT: number;
       }
 
-      // Compute 3D valley terrain vertices
+      // Compute 3D valley terrain vertices with exact elevation profile
       const grid: GridVertex[][] = [];
 
       for (let r = 0; r < NUM_ROWS; r++) {
         const rowT = r / (NUM_ROWS - 1); // 0 at horizon, 1 at foreground
-        const depth = Math.pow(rowT, 1.85); // exponential perspective bunching
-        const baseY = horizon + depth * (floorBottom - horizon);
+        const depth = Math.pow(rowT, 2.1); // exponential perspective compression
+        const baseY = horizonBase + depth * (floorBottom - horizonBase);
 
         const rowVertices: GridVertex[] = [];
 
@@ -372,22 +374,27 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           const colFrac = (c / (NUM_COLS - 1)) * 2 - 1; // -1 to +1
 
           // 3D Valley Topography:
-          // Left side (colFrac < 0) and right side (colFrac > 0) slope UP into hills
-          // Center (colFrac = 0) dips DOWN into a wide valley basin / depth
-          const slopeElevation =
-            Math.pow(Math.abs(colFrac), 1.8) *
-            (height * 0.115 * (1 - depth * 0.35) + height * 0.035);
+          // Left hill rises prominently (height * 0.22)
+          // Right hill rises moderately (height * 0.11)
+          // Center dips into a gentle valley trough (elevation = 0)
+          let baseLift = 0;
+          if (colFrac < 0) {
+            baseLift = Math.pow(Math.abs(colFrac), 1.6) * (height * 0.22);
+          } else {
+            baseLift = Math.pow(colFrac, 1.7) * (height * 0.11);
+          }
 
-          // Subtle organic landscape wave
+          // Natural organic landscape wave
           const wave =
-            Math.sin(colFrac * Math.PI * 1.5) *
-            (height * 0.012 * (1 - depth * 0.3));
+            Math.sin(colFrac * Math.PI * 1.4 - 0.2) * (height * 0.024);
 
-          const py = baseY - slopeElevation + wave;
+          // Elevation diminishes as terrain comes closer to the viewer
+          const elevation = (baseLift + wave) * (1.0 - depth * 0.42);
+          const py = baseY - elevation;
 
           // Horizontal perspective spread:
-          // Spans across full viewport and fans out wider in the foreground
-          const spread = width * 0.54 + depth * (width * 0.16);
+          // Spans across entire width and fans out wider in foreground
+          const spread = width * 0.52 + depth * (width * 0.18);
           const px = centerX + colFrac * spread;
 
           rowVertices.push({ x: px, y: py, colFrac, rowT });
@@ -400,17 +407,17 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       //    Follows the curved ridge silhouette down to bottom
       // ─────────────────────────────────────────────────────
       ctx.beginPath();
-      ctx.moveTo(-40, height + 40);
+      ctx.moveTo(-60, height + 60);
       for (let c = 0; c < NUM_COLS; c++) {
         ctx.lineTo(grid[0][c].x, grid[0][c].y);
       }
-      ctx.lineTo(width + 40, height + 40);
+      ctx.lineTo(width + 60, height + 60);
       ctx.closePath();
 
-      const floorFill = ctx.createLinearGradient(0, horizon - 80, 0, floorBottom);
-      floorFill.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0.18)`);
-      floorFill.addColorStop(0.32, `rgba(${dr}, ${dg}, ${db}, 0.12)`);
-      floorFill.addColorStop(0.70, `rgba(${dr}, ${dg}, ${db}, 0.05)`);
+      const floorFill = ctx.createLinearGradient(0, height * 0.60, 0, floorBottom);
+      floorFill.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0.20)`);
+      floorFill.addColorStop(0.35, `rgba(${dr}, ${dg}, ${db}, 0.12)`);
+      floorFill.addColorStop(0.72, `rgba(${dr}, ${dg}, ${db}, 0.05)`);
       floorFill.addColorStop(1, `rgba(4, 6, 20, 0.98)`);
       ctx.fillStyle = floorFill;
       ctx.fill();
@@ -423,7 +430,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       for (let c = 0; c < NUM_COLS; c++) {
         const colFrac = grid[0][c].colFrac;
         const centerWeight = 1 - Math.abs(colFrac) * 0.35;
-        const vAlpha = 0.05 + centerWeight * 0.18;
+        const vAlpha = 0.05 + centerWeight * 0.19;
 
         ctx.beginPath();
         for (let r = 0; r < NUM_ROWS; r++) {
@@ -445,7 +452,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       // ─────────────────────────────────────────────────────
       for (let r = 1; r < NUM_ROWS; r++) {
         const rowT = grid[r][0].rowT;
-        const alpha = 0.34 * Math.pow(1 - rowT, 0.5) + 0.06;
+        const alpha = 0.32 * Math.pow(1 - rowT, 0.55) + 0.05;
 
         ctx.beginPath();
         for (let c = 0; c < NUM_COLS; c++) {
@@ -456,8 +463,8 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             ctx.lineTo(pt.x, pt.y);
           }
         }
-        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${Math.min(alpha, 0.40)})`;
-        ctx.lineWidth = rowT < 0.15 ? 0.65 : 0.9;
+        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${Math.min(alpha, 0.38)})`;
+        ctx.lineWidth = rowT < 0.20 ? 0.60 : 0.85;
         ctx.stroke();
       }
 
@@ -473,20 +480,20 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         if (c === 0) ctx.moveTo(pt.x, pt.y);
         else ctx.lineTo(pt.x, pt.y);
       }
-      ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, 0.38)`;
-      ctx.lineWidth = 8;
-      ctx.filter = "blur(6px)";
+      ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, 0.42)`;
+      ctx.lineWidth = 9;
+      ctx.filter = "blur(7px)";
       ctx.stroke();
       ctx.filter = "none";
 
       // Specular crest line
       const specular = ctx.createLinearGradient(0, 0, width, 0);
       specular.addColorStop(0, `rgba(${lr}, ${lg}, ${lb}, 0)`);
-      specular.addColorStop(0.12, `rgba(${gr}, ${gg}, ${gb}, 0.25)`);
-      specular.addColorStop(0.35, `rgba(${lr}, ${lg}, ${lb}, 0.70)`);
-      specular.addColorStop(0.50, `rgba(255, 255, 255, 0.94)`);
-      specular.addColorStop(0.65, `rgba(${lr}, ${lg}, ${lb}, 0.70)`);
-      specular.addColorStop(0.88, `rgba(${gr}, ${gg}, ${gb}, 0.25)`);
+      specular.addColorStop(0.12, `rgba(${gr}, ${gg}, ${gb}, 0.28)`);
+      specular.addColorStop(0.35, `rgba(${lr}, ${lg}, ${lb}, 0.72)`);
+      specular.addColorStop(0.50, `rgba(255, 255, 255, 0.95)`);
+      specular.addColorStop(0.65, `rgba(${lr}, ${lg}, ${lb}, 0.72)`);
+      specular.addColorStop(0.88, `rgba(${gr}, ${gg}, ${gb}, 0.28)`);
       specular.addColorStop(1, `rgba(${lr}, ${lg}, ${lb}, 0)`);
 
       ctx.beginPath();
@@ -496,11 +503,11 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         else ctx.lineTo(pt.x, pt.y);
       }
       ctx.strokeStyle = specular;
-      ctx.lineWidth = 1.6;
+      ctx.lineWidth = 1.8;
       ctx.stroke();
 
       // ─────────────────────────────────────────────────────
-      // 5. LUMINOUS INTERSECTION NODES / SPARKS
+      // 5. LUMINOUS INTERSECTION NODES & STARDUST
       // ─────────────────────────────────────────────────────
       for (let r = 0; r < NUM_ROWS; r++) {
         const rowT = grid[r][0].rowT;
@@ -512,17 +519,17 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             // High-intensity sparks along the mountain ridge
             ctx.beginPath();
             ctx.arc(pt.x, pt.y, 1.8, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, 0.92)`;
+            ctx.fillStyle = `rgba(255, 255, 255, 0.94)`;
             ctx.fill();
 
             ctx.beginPath();
-            ctx.arc(pt.x, pt.y, 3.6, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, 0.28)`;
+            ctx.arc(pt.x, pt.y, 3.8, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, 0.32)`;
             ctx.fill();
           } else if (c % 2 === 0) {
             // Subtle diamond nodes in the valley grid
-            const dotAlpha = (1 - rowT) * 0.32 + 0.05;
-            const dotR = 0.6 + (1 - rowT) * 0.75;
+            const dotAlpha = (1 - rowT) * 0.30 + 0.04;
+            const dotR = 0.55 + (1 - rowT) * 0.70;
 
             ctx.beginPath();
             ctx.arc(pt.x, pt.y, dotR, 0, Math.PI * 2);
@@ -537,18 +544,18 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       // ─────────────────────────────────────────────────────
       const hBand = ctx.createRadialGradient(
         centerX,
-        horizon + 20,
+        horizonBase - 30,
         0,
         centerX,
-        horizon + 20,
+        horizonBase - 30,
         width * 0.75
       );
-      hBand.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0.22)`);
-      hBand.addColorStop(0.25, `rgba(${pr}, ${pg}, ${pb}, 0.10)`);
+      hBand.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0.24)`);
+      hBand.addColorStop(0.25, `rgba(${pr}, ${pg}, ${pb}, 0.11)`);
       hBand.addColorStop(0.55, `rgba(${dr}, ${dg}, ${db}, 0.04)`);
       hBand.addColorStop(1, `rgba(${dr}, ${dg}, ${db}, 0)`);
       ctx.fillStyle = hBand;
-      ctx.fillRect(0, horizon - 120, width, 320);
+      ctx.fillRect(0, height * 0.55, width, height * 0.45);
 
       ctx.restore();
     };
