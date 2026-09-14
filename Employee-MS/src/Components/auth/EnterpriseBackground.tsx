@@ -359,39 +359,37 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       // ─────────────────────────────────────────────────────
       // 2. CURVED HORIZONTAL GRID LINES — the "dome" effect
       //
-      //    Each line is a quadratic bezier curve:
-      //      Left edge:   (0,       baseY + curve)   — dips DOWN
-      //      Center ctrl: (centerX, baseY - curve*0.5) — lifts UP
-      //      Right edge:  (width,   baseY + curve)   — dips DOWN
+      //    Quadratic bezier per line:
+      //      Left  (0,     baseY + curve*0.8)  — edges dip DOWN
+      //      Ctrl  (centerX, baseY - curve)    — center pulled UP
+      //      Right (width, baseY + curve*0.8)  — edges dip DOWN
       //
-      //    This makes the floor look like a curved spherical
-      //    surface, not a flat table — exactly like Image 2.
-      //    Curvature = 0 at horizon, grows toward the viewer.
+      //    Visual arc at bottom = ~45px → clearly visible dome.
+      //    Previous value was 8px — invisible. Fixed.
       // ─────────────────────────────────────────────────────
       const totalH = 22;
-      // Store {baseY, curveAmt} for each row so intersection
-      // dots can also sit on the curved line
       const hRows: { baseY: number; curve: number }[] = [];
 
       for (let i = 0; i < totalH; i++) {
         const t = i / (totalH - 1);  // 0 = horizon, 1 = bottom
         const baseY = horizon + Math.pow(t, 2.0) * (floorBottom - horizon);
 
-        // Curvature: 0 at horizon, ~2.5% screen-height at the bottom row
-        const curve = Math.pow(t, 1.5) * height * 0.026;
+        // Curvature grows from 0 at horizon → ~height*0.10 at bottom
+        // Actual visible arc = ~0.9 * curve ≈ 45px at bottom row
+        const curve = Math.pow(t, 1.2) * height * 0.10;
         hRows.push({ baseY, curve });
 
-        // Opacity: strongest near horizon (perspective compression),
-        //          fades smoothly to almost nothing at bottom
-        const alpha = 0.30 * Math.pow(1 - t, 0.55) + 0.03;
+        // Lines bright near horizon, fading toward bottom
+        const alpha = 0.36 * Math.pow(1 - t, 0.50) + 0.04;
 
         ctx.beginPath();
-        // Left endpoint — edges curve DOWN (they "fall away" from viewer)
-        ctx.moveTo(0, baseY + curve);
-        // Control point at center — slightly ABOVE giving the dome bulge
-        ctx.quadraticCurveTo(centerX, baseY - curve * 0.5, width, baseY + curve);
-        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${Math.min(alpha, 0.32)})`;
-        ctx.lineWidth = t < 0.12 ? 0.55 : 0.85;
+        ctx.moveTo(0,     baseY + curve * 0.8);           // left: dips DOWN
+        ctx.quadraticCurveTo(
+          centerX, baseY - curve,                          // ctrl: pulled UP
+          width,   baseY + curve * 0.8                    // right: dips DOWN
+        );
+        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${Math.min(alpha, 0.40)})`;
+        ctx.lineWidth = t < 0.12 ? 0.55 : 0.90;
         ctx.stroke();
       }
 
@@ -420,10 +418,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       }
 
       // ─────────────────────────────────────────────────────
-      // 4. INTERSECTION SPARKLE DOTS
-      //    Dots follow the CURVED horizontal line position.
-      //    At each intersection: y is derived from the bezier
-      //    at that x fraction — so dots sit ON the curve.
+      // 4. INTERSECTION SPARKLE DOTS — sit on the curved line
       // ─────────────────────────────────────────────────────
       for (let row = 0; row < hRows.length; row += 2) {
         const { baseY, curve } = hRows[row];
@@ -432,22 +427,20 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
 
         for (let col = 0; col < vBottoms.length; col += 2) {
           const bx = vBottoms[col];
-          // Perspective-interpolated X position
           const ix = centerX + (bx - centerX) * rowT;
           if (ix < -6 || ix > width + 6) continue;
 
-          // Y position on the bezier curve at this X
-          // Parametric: quadratic bezier at t=xFrac gives
-          //   y = (1-u)^2*(baseY+curve) + 2u(1-u)*(baseY-curve*0.5) + u^2*(baseY+curve)
-          // where u = ix/width (horizontal position fraction)
+          // Quadratic bezier Y at this x:
+          //   P0=(0, baseY+curve*0.8), P1=(centerX, baseY-curve), P2=(width, baseY+curve*0.8)
+          //   u = ix/width  (works because x(u)=u*width for this symmetric setup)
           const u = ix / width;
-          const curvedY =
-            (1 - u) * (1 - u) * (baseY + curve) +
-            2 * u * (1 - u) * (baseY - curve * 0.5) +
-            u * u * (baseY + curve);
+          const p0y = baseY + curve * 0.8;
+          const p1y = baseY - curve;           // matches new control point
+          const p2y = baseY + curve * 0.8;
+          const curvedY = (1-u)*(1-u)*p0y + 2*u*(1-u)*p1y + u*u*p2y;
 
-          const dotAlpha = (1 - rowT) * 0.28 + 0.05;
-          const dotR = 0.55 + (1 - rowT) * 0.75;
+          const dotAlpha = (1 - rowT) * 0.30 + 0.05;
+          const dotR = 0.60 + (1 - rowT) * 0.80;
 
           ctx.beginPath();
           ctx.arc(ix, curvedY, dotR, 0, Math.PI * 2);
