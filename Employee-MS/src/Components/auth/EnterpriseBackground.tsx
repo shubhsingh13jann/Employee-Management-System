@@ -441,8 +441,8 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       // Create a vertical gradient to fade out the longitudinal rays near the horizon
       const rayGrad = ctx.createLinearGradient(0, horizonBase - 40, 0, height);
       rayGrad.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0)`);       // Invisible near horizon
-      rayGrad.addColorStop(0.3, `rgba(${pr}, ${pg}, ${pb}, 0.25)`);  // Becomes visible
-      rayGrad.addColorStop(1, `rgba(${pr}, ${pg}, ${pb}, 0.35)`);    // Bright in foreground
+      rayGrad.addColorStop(0.3, `rgba(${pr}, ${pg}, ${pb}, 0.08)`);  // Very subtle
+      rayGrad.addColorStop(1, `rgba(${pr}, ${pg}, ${pb}, 0.15)`);    // Subtly visible in foreground
 
       ctx.beginPath();
       for (let c = 0; c < NUM_COLS; c++) {
@@ -467,7 +467,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         const rowT = grid[r][0].rowT;
         // Fade out completely near the horizon (rowT = 0) for the infinite carpet effect
         // and brighter in the foreground (rowT = 1)
-        const alpha = 0.50 * Math.pow(rowT, 0.7);
+        const alpha = 0.20 * Math.pow(rowT, 0.7);
 
         ctx.beginPath();
         for (let c = 0; c < NUM_COLS; c++) {
@@ -478,7 +478,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             ctx.lineTo(pt.x, pt.y);
           }
         }
-        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${Math.min(alpha, 0.50)})`;
+        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${Math.min(alpha, 0.20)})`;
         ctx.lineWidth = rowT < 0.20 ? 0.50 : 1.0;
         ctx.stroke();
       }
@@ -827,8 +827,8 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       // 3. Volumetric Atmosphere
       drawAmbientLights();
 
-      // 4. Subtle Grid
-      drawGrid();
+      // 4. Subtle Grid (REMOVED per user request)
+      // drawGrid();
 
       // 5. Ambient Stars
       drawStars();
