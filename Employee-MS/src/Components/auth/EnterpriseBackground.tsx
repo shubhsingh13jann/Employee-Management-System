@@ -485,6 +485,10 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       //    Pass 2: Sharp specular streak with white-hot center
       // ─────────────────────────────────────────────────────
       // Bloom pass
+      // ─────────────────────────────────────────────────────      // 
+      // 4. TOP RIDGE CREST - GLOWING LUMINOUS HORIZON (Mountain Cliffs)
+      // 
+      // Wide bloom pass for the line
       ctx.beginPath();
       for (let c = 0; c < NUM_COLS; c++) {
         const pt = grid[0][c];
@@ -494,6 +498,9 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, 0.42)`;
       ctx.lineWidth = 9;
       ctx.filter = "blur(7px)";
+      ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, 0.65)`;
+      ctx.lineWidth = 8;
+      ctx.filter = "blur(6px)";
       ctx.stroke();
       ctx.filter = "none";
 
@@ -507,6 +514,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       specular.addColorStop(0.88, `rgba(${gr}, ${gg}, ${gb}, 0.28)`);
       specular.addColorStop(1, `rgba(${lr}, ${lg}, ${lb}, 0)`);
 
+      // Sharp specular crest line connecting everything clearly
       ctx.beginPath();
       for (let c = 0; c < NUM_COLS; c++) {
         const pt = grid[0][c];
@@ -515,11 +523,15 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       }
       ctx.strokeStyle = specular;
       ctx.lineWidth = 1.8;
+      // Solid bright line instead of fading out on the edges
+      ctx.strokeStyle = `rgba(${lr}, ${lg}, ${lb}, 0.85)`;
+      ctx.lineWidth = 2.0;
       ctx.stroke();
 
-      // ─────────────────────────────────────────────────────
+      // ─────────────────────────────────────────────────────      // 
+      // 
       // 5. LUMINOUS INTERSECTION NODES & STARDUST
-      // ─────────────────────────────────────────────────────
+      // 
       for (let r = 0; r < NUM_ROWS; r++) {
         const rowT = grid[r][0].rowT;
         for (let c = 0; c < NUM_COLS; c++) {
@@ -527,26 +539,23 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           if (pt.x < -15 || pt.x > width + 15) continue;
 
           if (r === 0) {
-            // High-intensity sparks along the mountain ridge
+            // High-intensity sparks along the mountain ridge (cliffs)
+            // Elegant glowing points along the mountain ridge
             ctx.beginPath();
             ctx.arc(pt.x, pt.y, 1.8, 0, Math.PI * 2);
             ctx.fillStyle = `rgba(255, 255, 255, 0.94)`;
+            ctx.arc(pt.x, pt.y, 1.5, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 255, 255, 0.85)`;
             ctx.fill();
 
             ctx.beginPath();
             ctx.arc(pt.x, pt.y, 3.8, 0, Math.PI * 2);
             ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, 0.32)`;
-            ctx.fill();
-          } else if (c % 2 === 0) {
-            // Subtle diamond nodes in the valley grid
-            const dotAlpha = (1 - rowT) * 0.30 + 0.04;
-            const dotR = 0.55 + (1 - rowT) * 0.70;
-
-            ctx.beginPath();
-            ctx.arc(pt.x, pt.y, dotR, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, ${dotAlpha})`;
+            ctx.arc(pt.x, pt.y, 4.0, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, 0.25)`;
             ctx.fill();
           }
+          // Intentionally removed the dots from the rest of the land (r > 0)
         }
       }
 
