@@ -384,10 +384,12 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           // 3. Right-most side: Hill peaking near or beyond the right edge.
           
           // Gaussian curve for the left hill (peaks around -0.65)
-          const leftHill = Math.exp(-Math.pow(colFrac + 0.65, 2) * 8) * (height * 0.28);
+          // Lowered the height from 0.28 to 0.22 as requested
+          const leftHill = Math.exp(-Math.pow(colFrac + 0.65, 2) * 8) * (height * 0.22);
           
-          // Right hill starts rising from 0.4 and peaks around 1.0
-          const rightHill = colFrac > 0.4 ? Math.pow((colFrac - 0.4) / 0.6, 2) * (height * 0.18) : 0;
+          // Right hill: Gaussian curve peaking exactly at the right edge (colFrac = 1.0)
+          // This makes the left 50% of the curve visible as it smoothly rounds off at the edge
+          const rightHill = Math.exp(-Math.pow(colFrac - 1.0, 2) * 6) * (height * 0.18);
           
           // Combine lifts
           let lift = leftHill + rightHill;
@@ -436,13 +438,14 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       //    Radiate down the slopes, crossing contour lines at
       //    slanted angles to form distinct PARALLELOGRAM cells
       // 
-      for (let c = 0; c < NUM_COLS; c++) {
-        const colFrac = grid[0][c].colFrac;
-        // Make the lines pop more by increasing base alpha and center weight
-        const centerWeight = 1 - Math.abs(colFrac) * 0.25;
-        const vAlpha = 0.10 + centerWeight * 0.25;
+      // Create a vertical gradient to fade out the longitudinal rays near the horizon
+      const rayGrad = ctx.createLinearGradient(0, horizonBase - 40, 0, height);
+      rayGrad.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0)`);       // Invisible near horizon
+      rayGrad.addColorStop(0.3, `rgba(${pr}, ${pg}, ${pb}, 0.25)`);  // Becomes visible
+      rayGrad.addColorStop(1, `rgba(${pr}, ${pg}, ${pb}, 0.35)`);    // Bright in foreground
 
-        ctx.beginPath();
+      ctx.beginPath();
+      for (let c = 0; c < NUM_COLS; c++) {
         for (let r = 0; r < NUM_ROWS; r++) {
           const pt = grid[r][c];
           if (r === 0) {
@@ -451,10 +454,10 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             ctx.lineTo(pt.x, pt.y);
           }
         }
-        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${vAlpha})`;
-        ctx.lineWidth = 0.85;
-        ctx.stroke();
       }
+      ctx.strokeStyle = rayGrad;
+      ctx.lineWidth = 0.85;
+      ctx.stroke();
 
       // 
       // 3. TRANSVERSE CONTOUR LINES (Across the valley)
@@ -462,8 +465,9 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       // 
       for (let r = 1; r < NUM_ROWS; r++) {
         const rowT = grid[r][0].rowT;
-        // Adjust alpha to ensure they are visible even further back
-        const alpha = 0.40 * Math.pow(1 - rowT, 0.4) + 0.08;
+        // Fade out completely near the horizon (rowT = 0) for the infinite carpet effect
+        // and brighter in the foreground (rowT = 1)
+        const alpha = 0.50 * Math.pow(rowT, 0.7);
 
         ctx.beginPath();
         for (let c = 0; c < NUM_COLS; c++) {
@@ -474,18 +478,12 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             ctx.lineTo(pt.x, pt.y);
           }
         }
-        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${Math.min(alpha, 0.45)})`;
-        ctx.lineWidth = rowT < 0.20 ? 0.70 : 1.0;
+        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${Math.min(alpha, 0.50)})`;
+        ctx.lineWidth = rowT < 0.20 ? 0.50 : 1.0;
         ctx.stroke();
       }
 
-      // ─────────────────────────────────────────────────────
-      // 4. TOP RIDGE CREST — GLOWING LUMINOUS HORIZON
-      //    Pass 1: Wide neon bloom
-      //    Pass 2: Sharp specular streak with white-hot center
-      // ─────────────────────────────────────────────────────
-      // Bloom pass
-      // ─────────────────────────────────────────────────────      // 
+      // 
       // 4. TOP RIDGE CREST - GLOWING LUMINOUS HORIZON (Mountain Cliffs)
       // 
       // Wide bloom pass for the line
@@ -495,24 +493,19 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         if (c === 0) ctx.moveTo(pt.x, pt.y);
         else ctx.lineTo(pt.x, pt.y);
       }
-      ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, 0.42)`;
-      ctx.lineWidth = 9;
-      ctx.filter = "blur(7px)";
-      ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, 0.65)`;
+      
+      const bloomGrad = ctx.createLinearGradient(0, 0, width, 0);
+      bloomGrad.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0.8)`); // Bright left hill
+      bloomGrad.addColorStop(0.25, `rgba(${pr}, ${pg}, ${pb}, 0.6)`);
+      bloomGrad.addColorStop(0.45, `rgba(${pr}, ${pg}, ${pb}, 0)`);  // Invisible in center
+      bloomGrad.addColorStop(0.75, `rgba(${pr}, ${pg}, ${pb}, 0)`);
+      bloomGrad.addColorStop(1, `rgba(${pr}, ${pg}, ${pb}, 0.5)`);   // Subtle right hill
+      
+      ctx.strokeStyle = bloomGrad;
       ctx.lineWidth = 8;
       ctx.filter = "blur(6px)";
       ctx.stroke();
       ctx.filter = "none";
-
-      // Specular crest line
-      const specular = ctx.createLinearGradient(0, 0, width, 0);
-      specular.addColorStop(0, `rgba(${lr}, ${lg}, ${lb}, 0)`);
-      specular.addColorStop(0.12, `rgba(${gr}, ${gg}, ${gb}, 0.28)`);
-      specular.addColorStop(0.35, `rgba(${lr}, ${lg}, ${lb}, 0.72)`);
-      specular.addColorStop(0.50, `rgba(255, 255, 255, 0.95)`);
-      specular.addColorStop(0.65, `rgba(${lr}, ${lg}, ${lb}, 0.72)`);
-      specular.addColorStop(0.88, `rgba(${gr}, ${gg}, ${gb}, 0.28)`);
-      specular.addColorStop(1, `rgba(${lr}, ${lg}, ${lb}, 0)`);
 
       // Sharp specular crest line connecting everything clearly
       ctx.beginPath();
@@ -521,44 +514,17 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         if (c === 0) ctx.moveTo(pt.x, pt.y);
         else ctx.lineTo(pt.x, pt.y);
       }
-      ctx.strokeStyle = specular;
-      ctx.lineWidth = 1.8;
-      // Solid bright line instead of fading out on the edges
-      ctx.strokeStyle = `rgba(${lr}, ${lg}, ${lb}, 0.85)`;
+      
+      const specularGrad = ctx.createLinearGradient(0, 0, width, 0);
+      specularGrad.addColorStop(0, `rgba(${lr}, ${lg}, ${lb}, 0.95)`); // Very bright left cliff
+      specularGrad.addColorStop(0.28, `rgba(${lr}, ${lg}, ${lb}, 0.8)`);
+      specularGrad.addColorStop(0.42, `rgba(${lr}, ${lg}, ${lb}, 0)`);   // Fades out into the valley carpet
+      specularGrad.addColorStop(0.78, `rgba(${lr}, ${lg}, ${lb}, 0)`);
+      specularGrad.addColorStop(1, `rgba(${lr}, ${lg}, ${lb}, 0.7)`);    // Right cliff outline
+      
+      ctx.strokeStyle = specularGrad;
       ctx.lineWidth = 2.0;
       ctx.stroke();
-
-      // ─────────────────────────────────────────────────────      // 
-      // 
-      // 5. LUMINOUS INTERSECTION NODES & STARDUST
-      // 
-      for (let r = 0; r < NUM_ROWS; r++) {
-        const rowT = grid[r][0].rowT;
-        for (let c = 0; c < NUM_COLS; c++) {
-          const pt = grid[r][c];
-          if (pt.x < -15 || pt.x > width + 15) continue;
-
-          if (r === 0) {
-            // High-intensity sparks along the mountain ridge (cliffs)
-            // Elegant glowing points along the mountain ridge
-            ctx.beginPath();
-            ctx.arc(pt.x, pt.y, 1.8, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, 0.94)`;
-            ctx.arc(pt.x, pt.y, 1.5, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, 0.85)`;
-            ctx.fill();
-
-            ctx.beginPath();
-            ctx.arc(pt.x, pt.y, 3.8, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, 0.32)`;
-            ctx.arc(pt.x, pt.y, 4.0, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, 0.25)`;
-            ctx.fill();
-          }
-          // Intentionally removed the dots from the rest of the land (r > 0)
-        }
-      }
-
       // ─────────────────────────────────────────────────────
       // 6. ATMOSPHERIC VALLEY BASIN BLOOM
       // ─────────────────────────────────────────────────────
