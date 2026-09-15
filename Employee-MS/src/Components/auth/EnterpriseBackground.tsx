@@ -930,7 +930,6 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         </div>
 
         <div className="globe-orbit orbit-one" />
-        <div className="globe-orbit orbit-two" />
       </div>
 
       {/* ===================================================
