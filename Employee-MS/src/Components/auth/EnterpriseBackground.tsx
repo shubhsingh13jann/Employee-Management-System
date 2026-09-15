@@ -331,7 +331,9 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     ========================================================= */
     const drawPerspectiveFloor = () => {
       // Center valley trough sits right below the login card
-      const horizonBase = height * 0.84;
+      
+      // Valley trough dips downside directly under the card area
+      const horizonBase = height * 0.855;
       const floorBottom = height + 40;
       const centerX = width * 0.5;
 
@@ -350,8 +352,11 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       // Mesh resolution calibrated to reference image density:
       // 18 transverse rows with exponential bunching near horizon
       // 42 longitudinal rays fanning down the slopes
-      const NUM_ROWS = 18;
-      const NUM_COLS = 42;
+      // Mesh resolution:
+      // 18 transverse contour rows with perspective compression
+      // 44 longitudinal rays fanning down the valley walls
+      const NUM_ROWS = 22; // Increased slightly for better depth borders
+      const NUM_COLS = 54; // Increased for smoother hills
 
       interface GridVertex {
         x: number;
@@ -360,41 +365,45 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         rowT: number;
       }
 
-      // Compute 3D valley terrain vertices with exact elevation profile
+      // Compute 3D valley terrain vertices
       const grid: GridVertex[][] = [];
 
       for (let r = 0; r < NUM_ROWS; r++) {
         const rowT = r / (NUM_ROWS - 1); // 0 at horizon, 1 at foreground
-        const depth = Math.pow(rowT, 2.1); // exponential perspective compression
+        const depth = Math.pow(rowT, 1.8); // exponential perspective compression
         const baseY = horizonBase + depth * (floorBottom - horizonBase);
 
         const rowVertices: GridVertex[] = [];
 
         for (let c = 0; c < NUM_COLS; c++) {
-          const colFrac = (c / (NUM_COLS - 1)) * 2 - 1; // -1 to +1
+          const colFrac = (c / (NUM_COLS - 1)) * 2 - 1; // -1 (left) to +1 (right)
 
           // 3D Valley Topography:
-          // Left hill rises prominently (height * 0.22)
-          // Right hill rises moderately (height * 0.11)
-          // Center dips into a gentle valley trough (elevation = 0)
-          let baseLift = 0;
-          if (colFrac < 0) {
-            baseLift = Math.pow(Math.abs(colFrac), 1.6) * (height * 0.22);
-          } else {
-            baseLift = Math.pow(colFrac, 1.7) * (height * 0.11);
-          }
+          // 1. Left-most curve: Bell-shaped hill (Gaussian curve) so it slopes down on both sides.
+          // 2. Under the card & mid-right: Flattened valley trough.
+          // 3. Right-most side: Hill peaking near or beyond the right edge.
+          
+          // Gaussian curve for the left hill (peaks around -0.65)
+          const leftHill = Math.exp(-Math.pow(colFrac + 0.65, 2) * 8) * (height * 0.28);
+          
+          // Right hill starts rising from 0.4 and peaks around 1.0
+          const rightHill = colFrac > 0.4 ? Math.pow((colFrac - 0.4) / 0.6, 2) * (height * 0.18) : 0;
+          
+          // Combine lifts
+          let lift = leftHill + rightHill;
+          
+          // Natural organic landscape wave to add micro-details
+          const wave = Math.sin(colFrac * Math.PI * 2.5) * (height * 0.015);
+          lift += wave;
 
-          // Natural organic landscape wave
-          const wave =
-            Math.sin(colFrac * Math.PI * 1.4 - 0.2) * (height * 0.024);
-
-          // Elevation diminishes as terrain comes closer to the viewer
-          const elevation = (baseLift + wave) * (1.0 - depth * 0.42);
+          // Elevation diminishes smoothly into the foreground
+          const elevation = lift * (1.0 - depth * 0.45);
           const py = baseY - elevation;
 
           // Horizontal perspective spread:
-          // Spans across entire width and fans out wider in foreground
-          const spread = width * 0.52 + depth * (width * 0.18);
+          // Fans out MUCH wider in the foreground to create the deep diamond effect
+          // At rowT=1 (depth=1), spread is width * 1.6, pulling the side lines out of the frame
+          const spread = width * 0.5 + depth * (width * 1.8);
           const px = centerX + colFrac * spread;
 
           rowVertices.push({ x: px, y: py, colFrac, rowT });
@@ -422,15 +431,16 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       ctx.fillStyle = floorFill;
       ctx.fill();
 
-      // ─────────────────────────────────────────────────────
+      // ─────────────────────────────────────────────────────      // 
       // 2. LONGITUDINAL RAYS (Down the valley walls)
       //    Radiate down the slopes, crossing contour lines at
       //    slanted angles to form distinct PARALLELOGRAM cells
-      // ─────────────────────────────────────────────────────
+      // 
       for (let c = 0; c < NUM_COLS; c++) {
         const colFrac = grid[0][c].colFrac;
-        const centerWeight = 1 - Math.abs(colFrac) * 0.35;
-        const vAlpha = 0.05 + centerWeight * 0.19;
+        // Make the lines pop more by increasing base alpha and center weight
+        const centerWeight = 1 - Math.abs(colFrac) * 0.25;
+        const vAlpha = 0.10 + centerWeight * 0.25;
 
         ctx.beginPath();
         for (let r = 0; r < NUM_ROWS; r++) {
@@ -442,17 +452,18 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           }
         }
         ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${vAlpha})`;
-        ctx.lineWidth = 0.75;
+        ctx.lineWidth = 0.85;
         ctx.stroke();
       }
 
-      // ─────────────────────────────────────────────────────
+      // 
       // 3. TRANSVERSE CONTOUR LINES (Across the valley)
       //    Follow the concave valley curves
-      // ─────────────────────────────────────────────────────
+      // 
       for (let r = 1; r < NUM_ROWS; r++) {
         const rowT = grid[r][0].rowT;
-        const alpha = 0.32 * Math.pow(1 - rowT, 0.55) + 0.05;
+        // Adjust alpha to ensure they are visible even further back
+        const alpha = 0.40 * Math.pow(1 - rowT, 0.4) + 0.08;
 
         ctx.beginPath();
         for (let c = 0; c < NUM_COLS; c++) {
@@ -463,8 +474,8 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             ctx.lineTo(pt.x, pt.y);
           }
         }
-        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${Math.min(alpha, 0.38)})`;
-        ctx.lineWidth = rowT < 0.20 ? 0.60 : 0.85;
+        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${Math.min(alpha, 0.45)})`;
+        ctx.lineWidth = rowT < 0.20 ? 0.70 : 1.0;
         ctx.stroke();
       }
 
