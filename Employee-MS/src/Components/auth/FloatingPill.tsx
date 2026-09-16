@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useAnimation } from 'framer-motion';
+import { motion, useAnimation, useMotionValue } from 'framer-motion';
 
 export type FloatingPillProps = {
   id: string;
@@ -21,27 +21,28 @@ export const FloatingPill: React.FC<FloatingPillProps> = ({
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const floatLoopRef = useRef<NodeJS.Timeout | null>(null);
   const pillRef = useRef<HTMLDivElement>(null);
-  const homePos = useRef({ x: 0, y: 0 });
+  
+  // Track x and y explicitly so we can read their exact values at any time
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
 
   useEffect(() => {
-    // Record initial absolute position so we know where "home" is relative to the screen
-    if (pillRef.current) {
-      const rect = pillRef.current.getBoundingClientRect();
-      homePos.current = { x: rect.left, y: rect.top };
-    }
-    
-    // Idle animation: simple hover float (simulating the original CSS animation)
+    // Idle animation: simple hover float 
     if (state === 'idle') {
       controls.start({
         y: [0, -8, 0],
-        transition: {
-          duration: 7,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }
+        transition: { duration: 7, repeat: Infinity, ease: "easeInOut" }
+      });
+    } else if (state === 'anchored') {
+      // In anchored state, we want a gentle hover around its CURRENT dragged position!
+      // We read the current exact y, and animate around it so it doesn't "stick" motionless.
+      const currentY = y.get();
+      controls.start({
+        y: [currentY, currentY - 8, currentY],
+        transition: { duration: 4, repeat: Infinity, ease: "easeInOut" }
       });
     }
-  }, [state, controls]);
+  }, [state, controls, y]);
 
   // Clean up timers
   useEffect(() => {
@@ -52,13 +53,19 @@ export const FloatingPill: React.FC<FloatingPillProps> = ({
   }, []);
 
   const getRandomSafeCoords = () => {
+    if (!pillRef.current) return { x: 0, y: 0 };
+
     const screenW = window.innerWidth;
     const screenH = window.innerHeight;
     
-    // Define No-Go Zones (approximate based on standard layout)
-    // Logo: Top Left (~ 0 to 300px X, 0 to 100px Y)
-    // Card: Center/Right (assuming it's on the right half or center)
-    // Let's create a safe zone logic
+    // Calculate exact Home position based on current DOM rect and current transform
+    const rect = pillRef.current.getBoundingClientRect();
+    const currentX = x.get();
+    const currentY = y.get();
+    
+    // The true CSS origin of the element (if transform was 0)
+    const absoluteHomeX = rect.left - currentX;
+    const absoluteHomeY = rect.top - currentY;
     
     let safe = false;
     let targetAbsX = 0;
@@ -70,9 +77,8 @@ export const FloatingPill: React.FC<FloatingPillProps> = ({
       targetAbsY = Math.random() * (screenH - 50); // 50px padding for pill height
       
       const inLogoZone = targetAbsX < 350 && targetAbsY < 120;
-      // Assume Auth Card is roughly center to right, let's say width 450px, height 600px
-      // For safety, let's just avoid the middle-right area
-      const inCardZone = targetAbsX > (screenW / 2 - 100) && targetAbsX < (screenW - 50) && targetAbsY > (screenH / 2 - 350) && targetAbsY < (screenH / 2 + 350);
+      // Card is roughly center right. Safe margin: avoid middle width
+      const inCardZone = targetAbsX > (screenW / 2 - 450) && targetAbsX < (screenW / 2 + 450) && targetAbsY > (screenH / 2 - 350) && targetAbsY < (screenH / 2 + 350);
       
       if (!inLogoZone && !inCardZone) {
         safe = true;
@@ -80,26 +86,24 @@ export const FloatingPill: React.FC<FloatingPillProps> = ({
       }
     }
     
-    // Convert absolute target to relative (framer-motion x/y are relative to initial layout position)
-    const relX = targetAbsX - homePos.current.x;
-    const relY = targetAbsY - homePos.current.y;
-    
-    return { x: relX, y: relY };
+    // Return relative coordinates needed to reach the target absolute position
+    return { 
+      x: targetAbsX - absoluteHomeX, 
+      y: targetAbsY - absoluteHomeY 
+    };
   };
 
   const floatAround = async () => {
-    // 3 to 5 random jumps around the screen
     const jumps = Math.floor(Math.random() * 3) + 3;
     
     for (let i = 0; i < jumps; i++) {
-      // If state changed (e.g. user grabbed it again), abort
       if (pillRef.current?.getAttribute('data-state') !== 'floating') return;
       
       const nextPos = getRandomSafeCoords();
       await controls.start({
         x: nextPos.x,
         y: nextPos.y,
-        transition: { duration: Math.random() * 4 + 4, ease: "easeInOut" } // 4 to 8 seconds per move
+        transition: { duration: Math.random() * 4 + 4, ease: "easeInOut" }
       });
     }
     
@@ -125,19 +129,17 @@ export const FloatingPill: React.FC<FloatingPillProps> = ({
     setState('dragged');
     if (timerRef.current) clearTimeout(timerRef.current);
     if (floatLoopRef.current) clearTimeout(floatLoopRef.current);
-    controls.stop(); // Stop any current animations
+    controls.stop(); 
   };
 
   const handleDragEnd = () => {
     setState('anchored');
-    // Start the 5-10 second anchor timer
     const delay = Math.random() * 5000 + 5000;
     timerRef.current = setTimeout(() => {
       setState('floating');
     }, delay);
   };
 
-  // We temporarily disable pointer-events in CSS, so we must override it inline to allow drag
   return (
     <motion.div
       ref={pillRef}
@@ -149,9 +151,11 @@ export const FloatingPill: React.FC<FloatingPillProps> = ({
       onDragEnd={handleDragEnd}
       animate={controls}
       style={{ 
+        x, // Bind x and y explicitly
+        y,
         cursor: state === 'dragged' ? 'grabbing' : 'grab',
-        pointerEvents: 'auto', // Override CSS pointer-events: none
-        zIndex: state === 'dragged' || state === 'anchored' || state === 'floating' ? 50 : 5 // bring to front when active
+        pointerEvents: 'auto',
+        zIndex: state === 'dragged' || state === 'anchored' || state === 'floating' ? 50 : 5
       }}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
@@ -163,4 +167,3 @@ export const FloatingPill: React.FC<FloatingPillProps> = ({
     </motion.div>
   );
 };
-
