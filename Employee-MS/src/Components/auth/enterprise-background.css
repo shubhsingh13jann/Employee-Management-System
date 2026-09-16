@@ -13,6 +13,7 @@
   background: #070b13;
   isolation: isolate;
   z-index: 0;
+  pointer-events: none;
   pointer-events: auto; /* Allow events so pills can be dragged */
   user-select: none;
   -webkit-user-select: none;

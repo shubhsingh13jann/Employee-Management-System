@@ -163,3 +163,4 @@ export const FloatingPill: React.FC<FloatingPillProps> = ({
     </motion.div>
   );
 };
+

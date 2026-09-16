@@ -142,6 +142,7 @@
   opacity: 0.8;
 }
 
+/* Header & Return Navigation — Aligned with Landing Page Navbar (height: 74px) */
 /* Header & Return Navigation - Aligned with Landing Page Navbar (height: 74px) */
 .radial-reveal-header {
   position: fixed;
@@ -210,6 +211,7 @@
   background: rgba(255, 255, 255, 0.25);
 }
 
+/* Content Container for Auth Card — perfectly centered in viewport */
 /* Content Container for Auth Card - perfectly centered in viewport */
 .radial-reveal-content {
   position: relative;
