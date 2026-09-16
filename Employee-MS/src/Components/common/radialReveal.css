@@ -157,7 +157,12 @@
   align-items: center;
   justify-content: space-between;
   box-sizing: border-box;
-  pointer-events: auto; /* Re-enable clicks for header */
+  pointer-events: none; /* Let clicks pass through empty header space */
+}
+
+/* Ensure the logo itself inside the header is clickable */
+.radial-reveal-header .brand-logo-root {
+  pointer-events: auto;
 }
 
 @media (min-width: 992px) {
