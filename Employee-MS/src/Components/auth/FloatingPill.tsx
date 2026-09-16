@@ -124,14 +124,13 @@ export const FloatingPill: React.FC<FloatingPillProps> = ({
     const currentX = x.get();
     const currentY = y.get();
     
-    // Push it ~120px away in the direction of the bounce normal
+    // Watery bounce: Gentle, slow push away (like two bubbles touching)
     await controls.start({
-      x: currentX + nx * 120,
-      y: currentY + ny * 120,
+      x: currentX + nx * 45,
+      y: currentY + ny * 45,
       transition: { 
-        duration: 0.8, 
-        type: "spring", 
-        bounce: 0.4 // Physical bounce effect
+        duration: 2.5, 
+        ease: "easeOut" // Start with a bump, but glide to a halt slowly as if in water
       }
     });
     
