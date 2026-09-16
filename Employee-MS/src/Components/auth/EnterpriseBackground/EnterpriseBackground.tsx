@@ -231,10 +231,10 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           y,
           baseX: x,
           baseY: y,
-          radius: random(1.3, 2.7),
+          radius: Math.random() < 0.15 ? random(4, 6) : random(1, 3.5),
           pulse: Math.random() * Math.PI * 2,
           pulseSpeed: random(0.6, 1.4),
-          opacity: random(0.4, 0.85),
+          opacity: Math.random() < 0.15 ? random(0.7, 1) : random(0.3, 0.7),
           drift: random(0.3, 1),
         });
       }
@@ -672,6 +672,29 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       }
     };
 
+    const drawStar = (ctx: CanvasRenderingContext2D, cx: number, cy: number, spikes: number, outerRadius: number, innerRadius: number) => {
+      let rot = (Math.PI / 2) * 3;
+      let x = cx;
+      let y = cy;
+      let step = Math.PI / spikes;
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - outerRadius);
+      for (let i = 0; i < spikes; i++) {
+        x = cx + Math.cos(rot) * outerRadius;
+        y = cy + Math.sin(rot) * outerRadius;
+        ctx.lineTo(x, y);
+        rot += step;
+
+        x = cx + Math.cos(rot) * innerRadius;
+        y = cy + Math.sin(rot) * innerRadius;
+        ctx.lineTo(x, y);
+        rot += step;
+      }
+      ctx.lineTo(cx, cy - outerRadius);
+      ctx.closePath();
+    };
+
     const drawNodes = () => {
       const g = currentColors.glow;
       const d = currentColors.deep;
@@ -683,7 +706,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       nodes.forEach((node) => {
         const pulse =
           1 + Math.sin(time * 0.002 * node.pulseSpeed + node.pulse) * 0.4;
-        const glowRadius = node.radius * 7 * pulse;
+        const glowRadius = node.radius * 6 * pulse;
 
         // Outer halo
         const glow = ctx.createRadialGradient(
@@ -694,7 +717,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           node.y,
           glowRadius
         );
-        glow.addColorStop(0, `rgba(${gr}, ${gg}, ${gb}, ${node.opacity * 0.75})`);
+        glow.addColorStop(0, `rgba(${gr}, ${gg}, ${gb}, ${node.opacity * 0.8})`);
         glow.addColorStop(1, `rgba(${dr}, ${dg}, ${db}, 0)`);
 
         ctx.fillStyle = glow;
@@ -702,9 +725,8 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         ctx.arc(node.x, node.y, glowRadius, 0, Math.PI * 2);
         ctx.fill();
 
-        // Solid core
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, node.radius * pulse, 0, Math.PI * 2);
+        // Solid star core (4 spikes)
+        drawStar(ctx, node.x, node.y, 4, node.radius * 2.5 * pulse, node.radius * 0.6 * pulse);
         ctx.fillStyle = `rgba(${hr}, ${hg}, ${hb}, ${node.opacity})`;
         ctx.fill();
       });
@@ -838,18 +860,18 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       // 6. Perspective Cyber Floor
       drawPerspectiveFloor();
 
-      // 7. Constellation Connections
+      // 7. Constellation Connections (Disabled)
       updateNodes();
-      drawConnections();
+      // drawConnections();
 
-      // 8. Dynamic Data Beacons
-      drawDataPulses();
+      // 8. Dynamic Data Beacons (Disabled)
+      // drawDataPulses();
 
       // 9. Floating Sparkles
       updateParticles();
       drawParticles();
 
-      // 10. Constellation Nodes
+      // 10. Constellation Stars
       drawNodes();
 
       // 11. Dark Vignette
