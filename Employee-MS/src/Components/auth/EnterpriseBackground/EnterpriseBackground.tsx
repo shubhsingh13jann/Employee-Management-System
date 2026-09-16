@@ -208,22 +208,24 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         // Keep nodes away from center so the login card stays clean
         let x: number;
         let y: number;
-        const side = Math.random();
+        const region = Math.random();
 
-        if (side < 0.52) {
-          // Left and right peripheral columns
-          x =
-            Math.random() < 0.5
-              ? random(width * 0.02, width * 0.32)
-              : random(width * 0.68, width * 0.98);
-          y = random(height * 0.08, height * 0.88);
+        if (region < 0.40) {
+          // 40% Top Right (Above buttons, large empty dark space)
+          x = random(width * 0.55, width * 0.98);
+          y = random(height * 0.05, height * 0.35);
+        } else if (region < 0.70) {
+          // 30% Far Right & Bottom Right (Around buttons & EMS watermark)
+          x = random(width * 0.70, width * 0.98);
+          y = random(height * 0.35, height * 0.95);
+        } else if (region < 0.85) {
+          // 15% Top Left (Above the globe)
+          x = random(width * 0.02, width * 0.45);
+          y = random(height * 0.05, height * 0.25);
         } else {
-          // Upper and lower bands
-          x = random(width * 0.05, width * 0.95);
-          y =
-            Math.random() < 0.5
-              ? random(height * 0.04, height * 0.22)
-              : random(height * 0.74, height * 0.92);
+          // 15% Mid/Bottom Left (Sparse on the globe to avoid clutter)
+          x = random(width * 0.02, width * 0.30);
+          y = random(height * 0.25, height * 0.90);
         }
 
         nodes.push({
