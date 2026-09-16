@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { FloatingPill } from "./FloatingPill";
 import { UserRole } from "./auth.types";
 import "./enterprise-background.css";
 
@@ -948,48 +949,14 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           FLOATING ENTERPRISE PILLS (Exact matches to reference)
       =================================================== */}
       {/* Left Side Pills */}
-      <div className="floating-label people">
-        <span className="label-icon">
-          <i className="bi bi-people-fill"></i>
-        </span>
-        <span>People</span>
-      </div>
-
-      <div className="floating-label teams">
-        <span className="label-icon">
-          <i className="bi bi-people"></i>
-        </span>
-        <span>Teams</span>
-      </div>
-
-      <div className="floating-label growth">
-        <span className="label-icon">
-          <i className="bi bi-bar-chart-fill"></i>
-        </span>
-        <span>Growth</span>
-      </div>
+      <FloatingPill id="people" className="people" iconClass="bi bi-people-fill" label="People" />
+      <FloatingPill id="teams" className="teams" iconClass="bi bi-people" label="Teams" />
+      <FloatingPill id="growth" className="growth" iconClass="bi bi-bar-chart-fill" label="Growth" />
 
       {/* Right Side Pills */}
-      <div className="floating-label productivity">
-        <span className="label-icon">
-          <i className="bi bi-lightning-charge-fill"></i>
-        </span>
-        <span>Productivity</span>
-      </div>
-
-      <div className="floating-label security">
-        <span className="label-icon">
-          <i className="bi bi-shield-shaded"></i>
-        </span>
-        <span>Security</span>
-      </div>
-
-      <div className="floating-label collaboration">
-        <span className="label-icon">
-          <i className="bi bi-diagram-3-fill"></i>
-        </span>
-        <span>Collaboration</span>
-      </div>
+      <FloatingPill id="productivity" className="productivity" iconClass="bi bi-lightning-charge-fill" label="Productivity" />
+      <FloatingPill id="security" className="security" iconClass="bi bi-shield-shaded" label="Security" />
+      <FloatingPill id="collaboration" className="collaboration" iconClass="bi bi-diagram-3-fill" label="Collaboration" />
 
       {/* ===================================================
           MICRO-DATA CODES
