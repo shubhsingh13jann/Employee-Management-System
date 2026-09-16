@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useAnimation, useMotionValue } from 'framer-motion';
+import { motion, useAnimation, useMotionValue, MotionValue } from 'framer-motion';
 
 export type FloatingPillProps = {
   id: string;
@@ -8,7 +8,87 @@ export type FloatingPillProps = {
   className: string;
 };
 
-type PillState = 'idle' | 'dragged' | 'anchored' | 'floating' | 'returning';
+type PillState = 'idle' | 'dragged' | 'anchored' | 'floating' | 'returning' | 'bouncing';
+
+// ==========================================
+// CENTRALIZED COLLISION PHYSICS
+// ==========================================
+type PillInstance = {
+  id: string;
+  element: HTMLDivElement;
+  x: MotionValue<number>;
+  y: MotionValue<number>;
+  triggerBounce: (nx: number, ny: number) => void;
+};
+
+export const pillRegistry = new Map<string, PillInstance>();
+const collisionCooldowns = new Map<string, number>();
+let collisionLoopRunning = false;
+
+const startCollisionLoop = () => {
+  if (collisionLoopRunning) return;
+  collisionLoopRunning = true;
+  
+  const loop = () => {
+    const pills = Array.from(pillRegistry.values());
+    
+    for (let i = 0; i < pills.length; i++) {
+      for (let j = i + 1; j < pills.length; j++) {
+        const p1 = pills[i];
+        const p2 = pills[j];
+        
+        if (!p1.element || !p2.element) continue;
+        
+        const r1 = p1.element.getBoundingClientRect();
+        const r2 = p2.element.getBoundingClientRect();
+        
+        // AABB Collision Detection with a tiny padding (so they physically look like they are touching)
+        const pad = 8;
+        const overlapX = (r1.right - pad) > (r2.left + pad) && (r1.left + pad) < (r2.right - pad);
+        const overlapY = (r1.bottom - pad) > (r2.top + pad) && (r1.top + pad) < (r2.bottom - pad);
+        
+        if (overlapX && overlapY) {
+          const pairId = p1.id < p2.id ? `${p1.id}-${p2.id}` : `${p2.id}-${p1.id}`;
+          
+          // Enforce a 1-second cooldown per pair to prevent infinite jittering
+          if (Date.now() - (collisionCooldowns.get(pairId) || 0) < 1000) {
+            continue; 
+          }
+          collisionCooldowns.set(pairId, Date.now());
+          
+          // Calculate center points to find the collision normal vector
+          const c1x = r1.left + r1.width / 2;
+          const c1y = r1.top + r1.height / 2;
+          const c2x = r2.left + r2.width / 2;
+          const c2y = r2.top + r2.height / 2;
+          
+          let dx = c2x - c1x;
+          let dy = c2y - c1y;
+          
+          if (dx === 0 && dy === 0) { dx = 1; dy = 1; } // fallback if perfectly overlapping
+          
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          dx /= dist;
+          dy /= dist;
+          
+          // p1 bounces away from p2 (negative direction)
+          p1.triggerBounce(-dx, -dy);
+          // p2 bounces away from p1 (positive direction)
+          p2.triggerBounce(dx, dy);
+        }
+      }
+    }
+    
+    if (pillRegistry.size > 0) {
+      requestAnimationFrame(loop);
+    } else {
+      collisionLoopRunning = false;
+    }
+  };
+  
+  requestAnimationFrame(loop);
+};
+// ==========================================
 
 export const FloatingPill: React.FC<FloatingPillProps> = ({
   id,
@@ -25,6 +105,56 @@ export const FloatingPill: React.FC<FloatingPillProps> = ({
   // Track x and y explicitly so we can read their exact values at any time
   const x = useMotionValue(0);
   const y = useMotionValue(0);
+
+  // Use a ref to always have the latest state without triggering re-renders in the registry
+  const triggerBounceRef = useRef((nx: number, ny: number) => {});
+
+  triggerBounceRef.current = async (nx: number, ny: number) => {
+    // If the user is currently holding/dragging THIS pill, DO NOT bounce it!
+    // It should have "infinite mass" while held. The OTHER pill will bounce away.
+    const currentState = pillRef.current?.getAttribute('data-state');
+    if (currentState === 'dragged' || currentState === 'bouncing') return;
+    
+    // Stop whatever it was doing (floating, returning, etc)
+    controls.stop();
+    setState('bouncing');
+    if (timerRef.current) clearTimeout(timerRef.current);
+    if (floatLoopRef.current) clearTimeout(floatLoopRef.current);
+    
+    const currentX = x.get();
+    const currentY = y.get();
+    
+    // Push it ~120px away in the direction of the bounce normal
+    await controls.start({
+      x: currentX + nx * 120,
+      y: currentY + ny * 120,
+      transition: { 
+        duration: 0.8, 
+        type: "spring", 
+        bounce: 0.4 // Physical bounce effect
+      }
+    });
+    
+    // After bouncing, resume floating
+    setState('floating');
+  };
+
+  useEffect(() => {
+    // Register this pill for global collision detection
+    pillRegistry.set(id, {
+      id,
+      element: pillRef.current!,
+      x,
+      y,
+      triggerBounce: (nx, ny) => triggerBounceRef.current(nx, ny)
+    });
+    
+    startCollisionLoop();
+    
+    return () => {
+      pillRegistry.delete(id);
+    };
+  }, [id, x, y]);
 
   useEffect(() => {
     // Idle animation: simple hover float 
