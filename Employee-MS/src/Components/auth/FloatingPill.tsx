@@ -94,16 +94,37 @@ export const FloatingPill: React.FC<FloatingPillProps> = ({
   };
 
   const floatAround = async () => {
+    // 3 to 5 jumps
     const jumps = Math.floor(Math.random() * 3) + 3;
     
     for (let i = 0; i < jumps; i++) {
+      // If state changed (e.g. user grabbed it again), abort
       if (pillRef.current?.getAttribute('data-state') !== 'floating') return;
       
       const nextPos = getRandomSafeCoords();
+      
+      // Calculate pixel distance to the next point
+      const currentX = x.get();
+      const currentY = y.get();
+      const dist = Math.sqrt(Math.pow(nextPos.x - currentX, 2) + Math.pow(nextPos.y - currentY, 2));
+      
+      // Calculate a very slow, organic duration (roughly 30px per second)
+      // Clamped between 10s and 25s per jump so it always feels graceful
+      const baseDuration = Math.max(10, Math.min(25, dist / 30));
+      
+      // MAGIC TRICK: Desync X and Y durations slightly.
+      // By making X and Y arrive at slightly different times, Framer Motion
+      // draws a beautiful, organic curved arc instead of a rigid straight diagonal line!
+      const durationX = baseDuration * (0.85 + Math.random() * 0.3);
+      const durationY = baseDuration * (0.85 + Math.random() * 0.3);
+
       await controls.start({
         x: nextPos.x,
         y: nextPos.y,
-        transition: { duration: Math.random() * 4 + 4, ease: "easeInOut" }
+        transition: { 
+          x: { duration: durationX, ease: "easeInOut" },
+          y: { duration: durationY, ease: "easeInOut" }
+        }
       });
     }
     
@@ -115,10 +136,18 @@ export const FloatingPill: React.FC<FloatingPillProps> = ({
     if (state === 'floating') {
       floatAround();
     } else if (state === 'returning') {
+      // Slow, sweeping curved return home
+      const dist = Math.sqrt(Math.pow(x.get(), 2) + Math.pow(y.get(), 2));
+      const duration = Math.max(8, Math.min(18, dist / 40)); 
+      
       controls.start({
         x: 0,
         y: 0,
-        transition: { duration: 3, ease: "easeInOut" }
+        transition: { 
+          // Desync returning arcs too
+          x: { duration: duration * 1.1, ease: "easeInOut" },
+          y: { duration: duration * 0.9, ease: "easeInOut" }
+        }
       }).then(() => {
         setState('idle');
       });
