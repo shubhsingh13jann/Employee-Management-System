@@ -929,7 +929,19 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           <div className="globe-dots" />
         </div>
 
-        <div className="globe-orbit orbit-one" />
+        {/* Stationary orbit path (front glowing, back transparent) */}
+        <div className="globe-orbit orbit-path" />
+        
+        {/* Invisible base that holds the 3D squished space */}
+        <div className="globe-orbit orbit-base">
+          {/* Runner that revolves around the squished space */}
+          <div className="moon-runner">
+            {/* Unsquish container that counter-rotates and un-scales */}
+            <div className="moon-unsquish">
+              <div className="moon-visual"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* ===================================================

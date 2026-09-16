@@ -255,32 +255,87 @@
   transition: border-color 0.6s ease;
 }
 
-.orbit-one {
-  transform: rotate(22deg) scaleY(0.34);
-  animation: orbitRotation 16s linear infinite;
+.orbit-path {
+  transform: rotateZ(22deg) scaleY(0.34);
+  /* Path is completely static */
 }
 
-.orbit-two {
-  transform: rotate(-28deg) scaleY(0.48);
-  animation: orbitRotationReverse 22s linear infinite;
+/* Invisible base that holds the squished 3D space */
+.orbit-base {
+  border: none !important;
+  filter: none !important;
+  transform: rotateZ(22deg) scaleY(0.34);
 }
 
-@keyframes orbitRotation {
-  from {
-    transform: rotate(22deg) scaleY(0.34);
-  }
-  to {
-    transform: rotate(382deg) scaleY(0.34);
-  }
+/* Runner that spins INSIDE the squished space */
+.moon-runner {
+  position: absolute;
+  inset: 0;
+  animation: runnerSpin 8s linear infinite;
 }
 
-@keyframes orbitRotationReverse {
-  from {
-    transform: rotate(-28deg) scaleY(0.48);
-  }
-  to {
-    transform: rotate(-388deg) scaleY(0.48);
-  }
+@keyframes runnerSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================
+   REVOLVING MOON
+   ============================================================ */
+.moon-unsquish {
+  position: absolute;
+  top: -12px; /* Centers the moon on the orbit line */
+  left: calc(50% - 12px);
+  width: 24px;
+  height: 24px;
+  /* Counter-rotate and un-squish so it remains a perfect circle facing the camera */
+  animation: runnerCounterSpin 8s linear infinite, moonVisibility 8s linear infinite;
+  z-index: 10;
+}
+
+@keyframes runnerCounterSpin {
+  from { transform: rotate(0deg) scaleY(2.941); }
+  to { transform: rotate(-360deg) scaleY(2.941); }
+}
+
+.moon-visual {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  /* Bright shiny surface */
+  background: radial-gradient(circle at 30% 30%, #ffffff, rgba(var(--role-light-rgb), 0.9) 50%, rgba(var(--role-deep-rgb), 0.95) 100%);
+  box-shadow: 0 0 12px rgba(var(--role-light-rgb), 0.8), inset -2px -2px 4px rgba(0,0,0,0.4);
+  /* The moon visibly spins on its own axis */
+  animation: moonSpin 4s linear infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+/* A crater/shadow to make the spin clearly visible */
+.moon-visual::after {
+  content: '';
+  position: absolute;
+  top: 15%;
+  right: 15%;
+  width: 35%;
+  height: 35%;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 50%;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.6);
+}
+
+@keyframes moonVisibility {
+  0%   { opacity: 0; }
+  18%  { opacity: 0; }
+  26%  { opacity: 1; }
+  74%  { opacity: 1; }
+  82%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes moonSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* ============================================================
@@ -497,10 +552,5 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .digital-globe *,
-  .floating-label {
-    animation: none !important;
-  }
-}
+
 
