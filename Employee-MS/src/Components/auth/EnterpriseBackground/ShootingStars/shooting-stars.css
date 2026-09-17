@@ -11,66 +11,73 @@
 
 .shooting-star {
   position: absolute;
-  height: 1px;
+  height: 2px; /* Slightly thicker */
   background: linear-gradient(
     90deg, 
     rgba(var(--role-primary-rgb), 0) 0%, 
-    rgba(var(--role-primary-rgb), 0.4) 60%, 
+    rgba(var(--role-primary-rgb), 0.6) 70%, 
     rgba(255, 255, 255, 1) 100%
   );
   border-radius: 999px;
-  filter: drop-shadow(0 0 8px rgba(var(--role-primary-rgb), 0.9));
+  filter: drop-shadow(0 0 10px rgba(var(--role-primary-rgb), 1));
   opacity: 0;
-  /* Rotate to point Down-Left (135 degrees) */
   transform: translate3d(0, 0, 0) rotate(135deg);
-  animation: shootingStar 8s infinite linear;
 }
 
 /* 
-  The star travels Down-Left.
-  We fade it in sharply at 5%, then fade it out softly by 20%, 
-  while translating it continuously so it feels like it burns up.
+  Slower, majestic fall. 
+  Visible for a large portion of the animation so they aren't rarely seen.
 */
 @keyframes shootingStar {
   0% {
-    transform: translate3d(0, 0, 0) rotate(135deg);
+    transform: translate3d(100px, -100px, 0) rotate(135deg);
     opacity: 0;
   }
-  5% {
-    opacity: 1;
+  20% {
+    opacity: 0.8;
   }
-  15% {
+  70% {
     opacity: 0;
   }
   100% {
-    /* Large travel distance so it moves fast while visible, 
-       then spends the rest of the 8s animation cycle invisible (waiting) */
-    transform: translate3d(-1500px, 1500px, 0) rotate(135deg);
+    transform: translate3d(-1000px, 1000px, 0) rotate(135deg);
     opacity: 0;
   }
 }
 
-/* Randomize the 3 stars */
+/* 
+  Use prime-number durations so they constantly weave out of sync,
+  ensuring there are usually 1 or 2 on screen gracefully falling. 
+*/
 .shooting-star.star-1 {
   top: -10%;
-  right: 20%;
-  width: 150px;
-  animation-duration: 9s;
-  animation-delay: 2s;
+  right: 10%;
+  width: 200px;
+  animation: shootingStar 9s infinite linear;
+  animation-delay: 0s;
 }
 
 .shooting-star.star-2 {
-  top: -20%;
-  right: 50%;
+  top: 20%;
+  right: -10%;
   width: 250px;
-  animation-duration: 12s;
-  animation-delay: 6s;
+  animation: shootingStar 13s infinite linear;
+  animation-delay: 2s;
 }
 
 .shooting-star.star-3 {
-  top: 10%;
-  right: -10%;
+  top: -20%;
+  right: 40%;
   width: 180px;
-  animation-duration: 15s;
-  animation-delay: 10s;
+  animation: shootingStar 17s infinite linear;
+  animation-delay: 5s;
 }
+
+.shooting-star.star-4 {
+  top: 40%;
+  right: 20%;
+  width: 300px;
+  animation: shootingStar 23s infinite linear;
+  animation-delay: 8s;
+}
+

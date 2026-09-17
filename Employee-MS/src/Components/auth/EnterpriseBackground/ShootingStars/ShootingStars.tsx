@@ -12,6 +12,8 @@ export const ShootingStars: React.FC = () => {
       <div className="shooting-star star-1"></div>
       <div className="shooting-star star-2"></div>
       <div className="shooting-star star-3"></div>
+      <div className="shooting-star star-4"></div>
     </div>
   );
 };
+
