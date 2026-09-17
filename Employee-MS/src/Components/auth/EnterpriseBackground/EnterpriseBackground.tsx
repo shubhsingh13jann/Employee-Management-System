@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { FloatingPill } from "../FloatingPill/FloatingPill";
 import { UserRole } from "../auth.types";
+import { ShootingStars } from "./ShootingStars/ShootingStars";
 import "./enterprise-background.css";
 
 export interface EnterpriseBackgroundProps {
@@ -904,6 +905,9 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     >
       {/* Hardware-accelerated dynamic canvas */}
       <canvas ref={canvasRef} className="enterprise-canvas" />
+
+      {/* Continuous falling shooting stars */}
+      <ShootingStars />
 
       {/* ===================================================
           LARGE EMS WATERMARK (Bottom Right)
