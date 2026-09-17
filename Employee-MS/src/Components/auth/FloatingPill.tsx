@@ -8,7 +8,7 @@ export type FloatingPillProps = {
   className: string;
 };
 
-type PillState = 'idle' | 'dragged' | 'anchored' | 'floating' | 'returning' | 'bouncing';
+type PillState = 'idle' | 'dragged' | 'anchored' | 'floating' | 'returning' | 'bouncing' | 'thrown';
 
 // ==========================================
 // CENTRALIZED COLLISION PHYSICS
@@ -179,7 +179,7 @@ export const FloatingPill: React.FC<FloatingPillProps> = ({
     });
     
     // Resume previous behavior
-    if (currentState === 'floating') goToNextPoint();
+    if (currentState === 'floating' || currentState === 'thrown') goToNextPoint();
     else if (currentState === 'returning') returnHome();
     else if (currentState === 'idle' || currentState === 'anchored') resumeHover();
   };
@@ -217,8 +217,65 @@ export const FloatingPill: React.FC<FloatingPillProps> = ({
     controls.stop(); 
   };
 
-  const handleDragEnd = () => {
-    setState('anchored');
+  const handleDragEnd = (e: any, info: any) => {
+    const vx = info.velocity.x;
+    const vy = info.velocity.y;
+    const speed = Math.sqrt(vx * vx + vy * vy);
+    
+    // Clear timers
+    if (stateTimerRef.current) clearTimeout(stateTimerRef.current);
+    
+    if (speed > 150) {
+      // User threw it!
+      setState('thrown');
+      controls.stop();
+      
+      const currentX = x.get();
+      const currentY = y.get();
+      
+      // Calculate a friction-decay slide distance
+      const dist = Math.min(speed * 0.4, 600); // Throw up to 600px
+      const nx = vx / speed;
+      const ny = vy / speed;
+      
+      let targetX = currentX + nx * dist;
+      let targetY = currentY + ny * dist;
+      
+      // Clamp exactly to screen bounds so it doesn't get lost
+      if (pillRef.current) {
+        const rect = pillRef.current.getBoundingClientRect();
+        const absHomeX = rect.left - currentX;
+        const absHomeY = rect.top - currentY;
+        const screenW = window.innerWidth;
+        const screenH = window.innerHeight;
+        
+        let absTargetX = absHomeX + targetX;
+        let absTargetY = absHomeY + targetY;
+        
+        absTargetX = Math.max(20, Math.min(absTargetX, screenW - 150));
+        absTargetY = Math.max(20, Math.min(absTargetY, screenH - 60));
+        
+        targetX = absTargetX - absHomeX;
+        targetY = absTargetY - absHomeY;
+      }
+      
+      // Calculate true duration based on clamped distance
+      const finalDist = Math.sqrt(Math.pow(targetX - currentX, 2) + Math.pow(targetY - currentY, 2));
+      const duration = Math.max(0.8, Math.min(2.5, finalDist / 250));
+      
+      controls.start({
+        x: targetX,
+        y: targetY,
+        transition: { duration, ease: "easeOut" } // Slide like ice
+      }).then(() => {
+        // After sliding, it enters the floating cycle seamlessly
+        if (pillRef.current?.getAttribute('data-state') === 'thrown') {
+          setState('floating');
+        }
+      });
+    } else {
+      setState('anchored');
+    }
   };
 
   return (
