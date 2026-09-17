@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import BrandLogo from "./BrandLogo";
-import EnterpriseBackground from "../auth/EnterpriseBackground";
+import EnterpriseBackground from "../auth/EnterpriseBackground/EnterpriseBackground";
 import { UserRole } from "../auth/auth.types";
 import "./radialReveal.css";
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
-import { FloatingPill } from "./FloatingPill";
-import { UserRole } from "./auth.types";
+import { FloatingPill } from "../FloatingPill/FloatingPill";
+import { UserRole } from "../auth.types";
 import "./enterprise-background.css";
 
 export interface EnterpriseBackgroundProps {

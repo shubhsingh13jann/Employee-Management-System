@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useMemo } from "react";
 import { motion } from "framer-motion";
-import { UserRole } from "./auth.types";
+import { UserRole } from "../auth.types";
 import "./volumetricAtmosphere.css";
 
 export interface VolumetricAtmosphereProps {

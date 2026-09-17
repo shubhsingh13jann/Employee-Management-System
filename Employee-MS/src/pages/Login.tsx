@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import api from "../api/axios";
-import CharacterStage from "../components/auth/CharacterStage";
+import CharacterStage from "../components/auth/CharacterStage/CharacterStage";
 import RadialRevealTransition, { RevealOrigin } from "../components/common/RadialRevealTransition";
 import { UserRole, AuthStatus } from "../components/auth/auth.types";
 import "../components/auth/authInteractive.css";

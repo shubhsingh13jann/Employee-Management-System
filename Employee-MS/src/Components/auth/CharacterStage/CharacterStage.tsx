@@ -1,7 +1,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CharacterStageProps } from "./auth.types";
-import { useCharacterKinematics } from "./useCharacterKinematics";
+import { CharacterStageProps } from "../auth.types";
+import { useCharacterKinematics } from "../hooks/useCharacterKinematics";
 
 /**
  * CharacterStage.tsx - TypeScript Refactored Presentation Layer
