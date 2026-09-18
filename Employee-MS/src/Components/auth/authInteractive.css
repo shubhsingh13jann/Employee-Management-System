@@ -27,15 +27,15 @@
 .auth-split-card {
   width: 100%;
   max-width: 940px;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(15, 23, 42, 0.65); /* Dark Glass */
   backdrop-filter: blur(24px) saturate(150%);
   -webkit-backdrop-filter: blur(24px) saturate(150%);
   pointer-events: auto; /* Re-enable clicks for the form and card */
   border-radius: 24px;
   box-shadow:
-    0 25px 60px -15px rgba(0, 0, 0, 0.45),
-    0 10px 25px -5px rgba(15, 23, 42, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+    0 25px 60px -15px rgba(0, 0, 0, 0.65),
+    0 10px 25px -5px rgba(15, 23, 42, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset; /* Shiny glass border */
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -51,7 +51,7 @@
 /* Left Panel: Character Stage */
 .auth-character-stage {
   flex: 1.05;
-  background: rgba(235, 238, 243, 0.4);
+  background: rgba(0, 0, 0, 0.25); /* Darker transparent */
   position: relative;
   display: flex;
   align-items: center;
@@ -104,34 +104,34 @@
 
 .role-pill-btn {
   width: 100%;
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
-  color: #475569;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
   padding: 5px 3px;
   border-radius: 9999px;
   font-size: 10.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 3px;
   white-space: nowrap;
   text-align: center;
+  transition: all 0.2s ease;
 }
 
 .role-pill-btn:hover {
-  background: #f1f5f9;
-  color: #0f172a;
-  border-color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .role-pill-btn.active {
-  background: #0f172a;
+  background: rgba(255, 255, 255, 0.15);
   color: #ffffff;
-  border-color: #0f172a;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* Clean Underline Input Fields */
@@ -144,7 +144,7 @@
   display: block;
   font-size: 10.5px;
   font-weight: 700;
-  color: #64748b;
+  color: #94a3b8; /* Lighter text for dark mode */
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 3px;
@@ -153,19 +153,23 @@
 .auth-clean-input {
   width: 100%;
   border: none;
-  border-bottom: 1.5px solid #cbd5e1;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.2);
   border-radius: 0;
   padding: 5px 36px 5px 0;
   font-size: 13.5px;
-  color: #0f172a;
+  color: #ffffff;
   font-weight: 500;
   background: transparent;
   outline: none;
   transition: all 0.25s ease;
 }
 
+.auth-clean-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
 .auth-clean-input:focus {
-  border-bottom-color: #3b82f6;
+  border-bottom-color: #60a5fa;
 }
 
 .auth-input-focus-line {
@@ -174,7 +178,7 @@
   left: 0;
   width: 0;
   height: 2px;
-  background: #2563eb;
+  background: #60a5fa;
   transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -189,7 +193,7 @@
   bottom: 6px;
   background: transparent;
   border: none;
-  color: #64748b;
+  color: #94a3b8;
   font-size: 16px;
   cursor: pointer;
   padding: 3px;
@@ -201,16 +205,16 @@
 }
 
 .auth-eye-btn:hover {
-  color: #0f172a;
+  color: #ffffff;
   transform: scale(1.1);
 }
 
 /* Submit Button */
 .auth-submit-btn {
   width: 100%;
-  background: #0f172a;
+  background: #3b82f6;
   color: #ffffff;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 10px 16px;
   border-radius: 10px;
   font-weight: 700;
@@ -220,14 +224,14 @@
   justify-content: center;
   gap: 8px;
   cursor: pointer;
-  box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.25);
+  box-shadow: 0 8px 20px -4px rgba(59, 130, 246, 0.4);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .auth-submit-btn:hover:not(:disabled) {
-  background: #1e293b;
+  background: #60a5fa;
   transform: translateY(-2px);
-  box-shadow: 0 12px 25px -4px rgba(15, 23, 42, 0.35);
+  box-shadow: 0 12px 25px -4px rgba(59, 130, 246, 0.6);
 }
 
 .auth-submit-btn:disabled {
@@ -244,13 +248,13 @@
 }
 
 .auth-demo-pill {
-  border: 1px dashed #cbd5e1;
-  background: #f8fafc;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
   padding: 5px 8px;
   border-radius: 7px;
   font-size: 10px;
   font-weight: 600;
-  color: #475569;
+  color: #94a3b8;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -259,8 +263,8 @@
 }
 
 .auth-demo-pill:hover {
-  background: #f1f5f9;
-  border-color: #94a3b8;
-  color: #0f172a;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
   transform: translateY(-1px);
 }

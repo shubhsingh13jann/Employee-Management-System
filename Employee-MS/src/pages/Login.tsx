@@ -281,10 +281,10 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
 
           {/* Heading */}
           <div className="text-center mb-2">
-            <h3 className="fw-bold text-dark mb-0.5 tracking-tight" style={{ fontSize: "19px" }}>
+            <h3 className="fw-bold text-white mb-0.5 tracking-tight" style={{ fontSize: "19px" }}>
               {authMode === "login" ? "Welcome back!" : "Join Enterprise EMS"}
             </h3>
-            <p className="text-muted small mb-0" style={{ fontSize: "12px" }}>
+            <p className="text-white-50 small mb-0" style={{ fontSize: "12px" }}>
               {authMode === "login"
                 ? "Enter your credentials to access your portal"
                 : "Register your workforce account for access"}
@@ -526,7 +526,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
           {authMode === "login" ? (
             <div className="mt-2 pt-1.5 border-top border-slate-100">
               <div className="d-flex align-items-center justify-content-between mb-1.5">
-                <span className="text-muted fw-bold text-uppercase" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
+                <span className="text-white-50 fw-bold text-uppercase" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
                   1-Click Demo Credentials
                 </span>
                 <span className="badge bg-slate-100 text-secondary" style={{ fontSize: "9px" }}>Instant Fill</span>
@@ -569,13 +569,13 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
             </div>
           ) : (
             <div className="text-center mt-3 pt-2 border-top border-slate-100">
-              <span className="text-muted small" style={{ fontSize: "12px" }}>
+              <span className="text-white-50 small" style={{ fontSize: "12px" }}>
                 Already registered with an organization?{" "}
               </span>
               <button
                 type="button"
                 onClick={() => setAuthMode("login")}
-                className="btn btn-link p-0 fw-bold text-dark text-decoration-none small hover-underline"
+                className="btn btn-link p-0 fw-bold text-white text-decoration-none small hover-underline"
               >
                 Sign In Here →
               </button>
