@@ -76,6 +76,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
   const [caretProgress, setCaretProgress] = useState(0);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [authStatus, setAuthStatus] = useState<AuthStatus>("idle");
+  const [capsLockOn, setCapsLockOn] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -423,22 +424,58 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
               </motion.div>
             )}
 
-            {/* Password Field (With Hands-Over-Eyes & Eye Peek Toggle) */}
-            <div className="auth-clean-input-group">
-              <label className="auth-clean-label">Password *</label>
-              <input
-                type={showPassword ? "text" : "password"}
-                required
-                placeholder="••••••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onFocus={() => setActiveField("password")}
-                onBlur={() => setActiveField(null)}
-                className="auth-clean-input"
-              />
-              <div className="auth-input-focus-line"></div>
+              {/* Password Field (With Hands-Over-Eyes & Eye Peek Toggle) */}
+              <div className="auth-clean-input-group position-relative">
+                <label className="auth-clean-label">Password *</label>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  placeholder="            "
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyUp={(e) => setCapsLockOn(e.getModifierState("CapsLock"))}
+                  onKeyDown={(e) => setCapsLockOn(e.getModifierState("CapsLock"))}
+                  onFocus={(e) => {
+                    setActiveField("password");
+                    setCapsLockOn(e.getModifierState("CapsLock"));
+                  }}
+                  onBlur={() => setActiveField(null)}
+                  className="auth-clean-input"
+                />
+                <div className="auth-input-focus-line"></div>
 
-              {/* Eye Toggle Button */}
+                {/* Caps Lock Warning Tooltip */}
+                <AnimatePresence>
+                  {capsLockOn && activeField === "password" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      style={{
+                        position: "absolute",
+                        right: "45px",
+                        top: "30px",
+                        background: "rgba(220, 38, 38, 0.9)",
+                        color: "#fff",
+                        fontSize: "10.5px",
+                        padding: "3px 8px",
+                        borderRadius: "6px",
+                        fontWeight: "600",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        boxShadow: "0 4px 12px rgba(220, 38, 38, 0.4)",
+                        pointerEvents: "none",
+                        zIndex: 10
+                      }}
+                    >
+                      <i className="bi bi-capslock-fill"></i> CAPS LOCK ON
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Eye Toggle Button */}
               <button
                 type="button"
                 className="auth-eye-btn"
@@ -458,7 +495,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
-                className="auth-clean-input-group"
+                className="auth-clean-input-group position-relative"
               >
                 <label className="auth-clean-label">Confirm Password *</label>
                 <input
@@ -467,11 +504,47 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   placeholder="Repeat your password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  onFocus={() => setActiveField("password")}
+                  onKeyUp={(e) => setCapsLockOn(e.getModifierState("CapsLock"))}
+                  onKeyDown={(e) => setCapsLockOn(e.getModifierState("CapsLock"))}
+                  onFocus={(e) => {
+                    setActiveField("password");
+                    setCapsLockOn(e.getModifierState("CapsLock"));
+                  }}
                   onBlur={() => setActiveField(null)}
                   className="auth-clean-input"
                 />
                 <div className="auth-input-focus-line"></div>
+
+                {/* Caps Lock Warning Tooltip (Confirm Password) */}
+                <AnimatePresence>
+                  {capsLockOn && activeField === "password" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      style={{
+                        position: "absolute",
+                        right: "45px",
+                        top: "30px",
+                        background: "rgba(220, 38, 38, 0.9)",
+                        color: "#fff",
+                        fontSize: "10.5px",
+                        padding: "3px 8px",
+                        borderRadius: "6px",
+                        fontWeight: "600",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        boxShadow: "0 4px 12px rgba(220, 38, 38, 0.4)",
+                        pointerEvents: "none",
+                        zIndex: 10
+                      }}
+                    >
+                      <i className="bi bi-capslock-fill"></i> CAPS LOCK ON
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             )}
 
