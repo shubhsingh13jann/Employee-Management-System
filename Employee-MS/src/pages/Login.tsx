@@ -77,12 +77,27 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [authStatus, setAuthStatus] = useState<AuthStatus>("idle");
   const [capsLockOn, setCapsLockOn] = useState(false);
+  const [capsLockWarningVisible, setCapsLockWarningVisible] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const { login, getDefaultRouteForRole } = useAuth();
   const containerRef = useRef(null);
+
+  // Caps Lock Warning Auto-Hide
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    if (capsLockOn && activeField === "password") {
+      setCapsLockWarningVisible(true);
+      timeout = setTimeout(() => {
+        setCapsLockWarningVisible(false);
+      }, 4000); // 4 seconds visibility
+    } else {
+      setCapsLockWarningVisible(false);
+    }
+    return () => clearTimeout(timeout);
+  }, [capsLockOn, activeField]);
 
   // Fetch departments for registration
   useEffect(() => {
@@ -426,7 +441,33 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
 
               {/* Password Field (With Hands-Over-Eyes & Eye Peek Toggle) */}
               <div className="auth-clean-input-group position-relative">
-                <label className="auth-clean-label">Password *</label>
+                <div className="d-flex align-items-center justify-content-between mb-1">
+                  <label className="auth-clean-label mb-0">Password *</label>
+                  <AnimatePresence>
+                    {capsLockWarningVisible && (
+                      <motion.div
+                        initial={{ opacity: 0, x: 5 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 5 }}
+                        transition={{ duration: 0.2 }}
+                        style={{
+                          background: "rgba(255, 255, 255, 0.05)",
+                          color: "#f8fafc",
+                          border: "1px solid rgba(255, 255, 255, 0.2)",
+                          fontSize: "10px",
+                          padding: "2px 8px",
+                          borderRadius: "9999px",
+                          fontWeight: "600",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px"
+                        }}
+                      >
+                        <i className="bi bi-capslock-fill text-warning"></i> Caps Lock ON
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
                 <input
                   type={showPassword ? "text" : "password"}
                   required
@@ -443,37 +484,6 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   className="auth-clean-input"
                 />
                 <div className="auth-input-focus-line"></div>
-
-                {/* Caps Lock Warning Tooltip */}
-                <AnimatePresence>
-                  {capsLockOn && activeField === "password" && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 5, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                      style={{
-                        position: "absolute",
-                        right: "45px",
-                        top: "30px",
-                        background: "rgba(220, 38, 38, 0.9)",
-                        color: "#fff",
-                        fontSize: "10.5px",
-                        padding: "3px 8px",
-                        borderRadius: "6px",
-                        fontWeight: "600",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
-                        boxShadow: "0 4px 12px rgba(220, 38, 38, 0.4)",
-                        pointerEvents: "none",
-                        zIndex: 10
-                      }}
-                    >
-                      <i className="bi bi-capslock-fill"></i> CAPS LOCK ON
-                    </motion.div>
-                  )}
-                </AnimatePresence>
 
                 {/* Eye Toggle Button */}
               <button
@@ -497,7 +507,33 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                 animate={{ opacity: 1, height: "auto" }}
                 className="auth-clean-input-group position-relative"
               >
-                <label className="auth-clean-label">Confirm Password *</label>
+                <div className="d-flex align-items-center justify-content-between mb-1">
+                  <label className="auth-clean-label mb-0">Confirm Password *</label>
+                  <AnimatePresence>
+                    {capsLockWarningVisible && (
+                      <motion.div
+                        initial={{ opacity: 0, x: 5 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 5 }}
+                        transition={{ duration: 0.2 }}
+                        style={{
+                          background: "rgba(255, 255, 255, 0.05)",
+                          color: "#f8fafc",
+                          border: "1px solid rgba(255, 255, 255, 0.2)",
+                          fontSize: "10px",
+                          padding: "2px 8px",
+                          borderRadius: "9999px",
+                          fontWeight: "600",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px"
+                        }}
+                      >
+                        <i className="bi bi-capslock-fill text-warning"></i> Caps Lock ON
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
                 <input
                   type={showPassword ? "text" : "password"}
                   required
@@ -514,37 +550,6 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   className="auth-clean-input"
                 />
                 <div className="auth-input-focus-line"></div>
-
-                {/* Caps Lock Warning Tooltip (Confirm Password) */}
-                <AnimatePresence>
-                  {capsLockOn && activeField === "password" && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 5, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                      style={{
-                        position: "absolute",
-                        right: "45px",
-                        top: "30px",
-                        background: "rgba(220, 38, 38, 0.9)",
-                        color: "#fff",
-                        fontSize: "10.5px",
-                        padding: "3px 8px",
-                        borderRadius: "6px",
-                        fontWeight: "600",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
-                        boxShadow: "0 4px 12px rgba(220, 38, 38, 0.4)",
-                        pointerEvents: "none",
-                        zIndex: 10
-                      }}
-                    >
-                      <i className="bi bi-capslock-fill"></i> CAPS LOCK ON
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </motion.div>
             )}
 
