@@ -212,7 +212,6 @@
 /* Submit Button */
 .auth-submit-btn {
   width: 100%;
-  background: #3b82f6;
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 10px 16px;
@@ -224,14 +223,47 @@
   justify-content: center;
   gap: 8px;
   cursor: pointer;
-  box-shadow: 0 8px 20px -4px rgba(59, 130, 246, 0.4);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.auth-submit-btn:hover:not(:disabled) {
-  background: #60a5fa;
+.auth-submit-btn.theme-admin {
+  background: #8b5cf6;
+  box-shadow: 0 8px 20px -4px rgba(139, 92, 246, 0.4);
+}
+.auth-submit-btn.theme-admin:hover:not(:disabled) {
+  background: #a78bfa;
+  box-shadow: 0 12px 25px -4px rgba(139, 92, 246, 0.6);
   transform: translateY(-2px);
-  box-shadow: 0 12px 25px -4px rgba(59, 130, 246, 0.6);
+}
+
+.auth-submit-btn.theme-manager {
+  background: #2563eb;
+  box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.4);
+}
+.auth-submit-btn.theme-manager:hover:not(:disabled) {
+  background: #60a5fa;
+  box-shadow: 0 12px 25px -4px rgba(37, 99, 235, 0.6);
+  transform: translateY(-2px);
+}
+
+.auth-submit-btn.theme-supervisor {
+  background: #059669;
+  box-shadow: 0 8px 20px -4px rgba(5, 150, 105, 0.4);
+}
+.auth-submit-btn.theme-supervisor:hover:not(:disabled) {
+  background: #34d399;
+  box-shadow: 0 12px 25px -4px rgba(5, 150, 105, 0.6);
+  transform: translateY(-2px);
+}
+
+.auth-submit-btn.theme-employee {
+  background: #d97706;
+  box-shadow: 0 8px 20px -4px rgba(217, 119, 6, 0.4);
+}
+.auth-submit-btn.theme-employee:hover:not(:disabled) {
+  background: #fbbf24;
+  box-shadow: 0 12px 25px -4px rgba(217, 119, 6, 0.6);
+  transform: translateY(-2px);
 }
 
 .auth-submit-btn:disabled {

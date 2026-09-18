@@ -503,11 +503,11 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
             )}
 
             {/* Primary Submit Button */}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="auth-submit-btn mt-1.5"
-            >
+              <button
+                type="submit"
+                disabled={submitting}
+                className={`auth-submit-btn mt-1.5 theme-${role}`}
+              >
               {submitting ? (
                 <>
                   <span className="spinner-border spinner-border-sm" role="status"></span>
