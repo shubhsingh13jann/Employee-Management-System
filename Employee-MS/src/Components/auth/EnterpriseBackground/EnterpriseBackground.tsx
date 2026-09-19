@@ -715,31 +715,47 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           
           if (dist < 250 && dist > 1) {
             // Apply a strong push away from the cursor
-            const force = (1 - dist / 250) * 0.9;
+            const force = (1 - dist / 250) * 1.5;
             node.repelVx += (dx / dist) * force;
             node.repelVy += (dy / dist) * force;
           }
 
-          // Very low friction so they slide freely instead of stopping abruptly
-          node.repelVx *= 0.985;
-          node.repelVy *= 0.985;
+          // Smooth glide friction (like ice)
+          node.repelVx *= 0.98;
+          node.repelVy *= 0.98;
           
-          // Max speed cap
+          // Higher speed cap so they can fly smoothly across the screen
           const speed = Math.sqrt(node.repelVx * node.repelVx + node.repelVy * node.repelVy);
-          if (speed > 4.5) {
-            node.repelVx = (node.repelVx / speed) * 4.5;
-            node.repelVy = (node.repelVy / speed) * 4.5;
+          if (speed > 12) {
+            node.repelVx = (node.repelVx / speed) * 12;
+            node.repelVy = (node.repelVy / speed) * 12;
           }
 
           node.baseX += node.driftVx + node.repelVx;
           node.baseY += node.driftVy + node.repelVy;
           
-          if (node.baseX < -50) node.baseX = width + 50;
-          if (node.baseX > width + 50) node.baseX = -50;
-          if (node.baseY < -50) node.baseY = height + 50;
-          if (node.baseY > height + 50) node.baseY = -50;
+          // Bounce off edges smoothly like the floating pills do
+          if (node.baseX < 0) {
+            node.baseX = 0;
+            node.driftVx *= -1;
+            node.repelVx *= -0.8; // Bounce dampening
+          }
+          if (node.baseX > width) {
+            node.baseX = width;
+            node.driftVx *= -1;
+            node.repelVx *= -0.8;
+          }
+          if (node.baseY < 0) {
+            node.baseY = 0;
+            node.driftVy *= -1;
+            node.repelVy *= -0.8;
+          }
+          if (node.baseY > height) {
+            node.baseY = height;
+            node.driftVy *= -1;
+            node.repelVy *= -0.8;
+          }
 
-          // Pure 1:1 mapping (no ropes or sin/cos orbits)
           node.x = node.baseX;
           node.y = node.baseY;
         }
@@ -754,7 +770,8 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           if (a.isBlasting || b.isBlasting) continue;
           
           const dist = distance(a, b);
-          if (dist < 4.0) { // Close enough to blast
+          // Increased collision radius so they easily blast when pushed into each other
+          if (dist < 15.0) { 
             a.isBlasting = true;
             a.blastRadius = 0;
             b.isBlasting = true;
