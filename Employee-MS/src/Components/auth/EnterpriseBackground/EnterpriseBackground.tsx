@@ -145,6 +145,8 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       z: number;
       vx: number;
       vy: number;
+      baseVx: number;
+      baseVy: number;
       radius: number;
       pulse: number;
       pulseSpeed: number;
@@ -238,14 +240,19 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           y = random(height * 0.25, height * 0.90);
         }
 
+        const initialVx = random(-0.25, 0.25);
+        const initialVy = random(-0.25, 0.25);
+
         nodes.push({
           x,
           y,
           baseX: x,
           baseY: y,
           z: random(0.2, 2.0),
-          vx: random(-0.25, 0.25),
-          vy: random(-0.25, 0.25),
+          vx: initialVx,
+          vy: initialVy,
+          baseVx: initialVx,
+          baseVy: initialVy,
           radius: Math.random() < 0.15 ? random(4, 6) : random(1, 3.5),
           pulse: Math.random() * Math.PI * 2,
           pulseSpeed: random(0.6, 1.4),
@@ -667,8 +674,12 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
               node.stateStartTime = time;
               node.baseX = random(0, width);
               node.baseY = random(0, height);
-              node.vx = random(-0.25, 0.25);
-              node.vy = random(-0.25, 0.25);
+              const initialVx = random(-0.25, 0.25);
+              const initialVy = random(-0.25, 0.25);
+              node.vx = initialVx;
+              node.vy = initialVy;
+              node.baseVx = initialVx;
+              node.baseVy = initialVy;
             }
             break;
           case 'appearing':
@@ -695,6 +706,20 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         if (node.state === 'dead') return; // Don't move dead nodes
 
         if (!prefersReducedMotion) {
+          // Physical magnetic repulsion
+          const dx = node.baseX - smoothMouseX;
+          const dy = node.baseY - smoothMouseY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 200 && dist > 1) {
+            const force = (1 - dist / 200) * 0.15;
+            node.vx += (dx / dist) * force;
+            node.vy += (dy / dist) * force;
+          }
+
+          // Friction (spring back to base speed)
+          node.vx += (node.baseVx - node.vx) * 0.03;
+          node.vy += (node.baseVy - node.vy) * 0.03;
+
           node.baseX += node.vx;
           node.baseY += node.vy;
           
@@ -844,7 +869,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           return; // Skip drawing normal star
         }
 
-        // Feature 3: Cursor Illumination & Magnetic Repulsion
+        // Feature 3: Cursor Illumination
         const dx = px - smoothMouseX;
         const dy = py - smoothMouseY;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -854,10 +879,6 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         if (dist < interactionRadius) {
           const intensity = 1 - dist / interactionRadius;
           finalOpacity = Math.max(currentOpacity, intensity * 0.9);
-          // Magnetic repulsion
-          // Magnetic repulsion (push away from cursor)
-          px += (dx / dist) * intensity * 20;
-          py += (dy / dist) * intensity * 20;
         }
 
         // Save computed position for links and collisions
