@@ -877,15 +877,12 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         const dy = py - smoothMouseY;
         const dist = Math.sqrt(dx * dx + dy * dy);
         const interactionRadius = 200;
-
+        // Feature 3: Cursor Illumination
+        // Make stars glow brightly when near cursor
         let finalOpacity = currentOpacity;
         if (dist < interactionRadius) {
           const intensity = 1 - dist / interactionRadius;
           finalOpacity = Math.max(currentOpacity, intensity * 0.9);
-          // Magnetic repulsion
-          // Magnetic repulsion (push away from cursor)
-          px += (dx / dist) * intensity * 20;
-          py += (dy / dist) * intensity * 20;
         }
 
         // Save computed position for links and collisions
