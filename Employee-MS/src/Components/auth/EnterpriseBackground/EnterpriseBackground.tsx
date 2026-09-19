@@ -164,11 +164,15 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       x: number;
       y: number;
       z: number;
+      vx: number;
+      vy: number;
       radius: number;
       alpha: number;
       twinkle: number;
       phase: number;
       colorOffset: number;
+      isBlasting?: boolean;
+      blastRadius?: number;
     }
 
     let nodes: NetworkNode[] = [];
@@ -267,6 +271,8 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           x: random(0, width),
           y: random(0, height * 0.85),
           z: random(0.2, 2.0),
+          vx: random(-0.15, 0.15),
+          vy: random(-0.15, 0.15),
           radius: random(0.3, 1.1),
           alpha: random(0.1, 0.4),
           twinkle: random(0.4, 1.4),
@@ -628,7 +634,44 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     const drawStars = () => {
       const l = currentColors.light;
       const baseLr = Math.round(l.r), baseLg = Math.round(l.g), baseLb = Math.round(l.b);
+      
       stars.forEach((star) => {
+        // Drift and bounds wrapping
+        if (!prefersReducedMotion) {
+          star.x += star.vx;
+          star.y += star.vy;
+          if (star.x < 0) star.x = width;
+          if (star.x > width) star.x = 0;
+          if (star.y < 0) star.y = height * 0.85;
+          if (star.y > height * 0.85) star.y = 0;
+        }
+
+        // Handle Supernova Blast animation
+        if (star.isBlasting) {
+          star.blastRadius = (star.blastRadius || 0) + 1.5;
+          const blastAlpha = Math.max(0, 1 - (star.blastRadius / 60));
+          if (blastAlpha <= 0) {
+            // Reset star to normal life in a new location
+            star.isBlasting = false;
+            star.x = random(0, width);
+            star.y = random(0, height * 0.85);
+            star.radius = random(0.3, 1.1);
+            star.blastRadius = 0;
+          } else {
+            ctx.beginPath();
+            ctx.arc(star.x, star.y, star.blastRadius, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(255, 255, 255, ${blastAlpha})`;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            // Star core flash
+            ctx.beginPath();
+            ctx.arc(star.x, star.y, star.radius * 3, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 255, 255, ${blastAlpha})`;
+            ctx.fill();
+          }
+          return; // Skip normal draw for blasting star
+        }
+
         // Feature 5: Temperature Color Variance
         const lr = clamp(baseLr + star.colorOffset, 0, 255);
         const lg = clamp(baseLg + star.colorOffset * 0.5, 0, 255);
@@ -671,20 +714,31 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         (star as any).py = py;
       });
 
-      // Feature 4: Dynamic Constellation Links
+      // Feature 4: Dynamic Constellation Links & Collision (Blast)
       ctx.lineWidth = 0.5;
       for (let i = 0; i < stars.length; i++) {
         for (let j = i + 1; j < stars.length; j++) {
           const a = stars[i] as any;
           const b = stars[j] as any;
+          if (a.isBlasting || b.isBlasting) continue;
+          
           const dist = distance({ x: a.px, y: a.py }, { x: b.px, y: b.py });
+          
+          // Feature 6: Supernova Blast on close proximity
+          if (dist < 2.5) {
+            a.isBlasting = true;
+            a.blastRadius = 0;
+            b.isBlasting = true;
+            b.blastRadius = 0;
+            continue;
+          }
           
           if (dist < 40) {
             const linkAlpha = (1 - dist / 40) * 0.3;
             ctx.beginPath();
             ctx.moveTo(a.px, a.py);
             ctx.lineTo(b.px, b.py);
-            ctx.strokeStyle = `rgba(${lr}, ${lg}, ${lb}, ${linkAlpha})`;
+            ctx.strokeStyle = `rgba(${baseLr}, ${baseLg}, ${baseLb}, ${linkAlpha})`;
             ctx.stroke();
           }
         }
