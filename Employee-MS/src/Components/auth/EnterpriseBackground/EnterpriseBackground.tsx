@@ -142,11 +142,17 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       y: number;
       baseX: number;
       baseY: number;
+      z: number;
+      vx: number;
+      vy: number;
       radius: number;
       pulse: number;
       pulseSpeed: number;
       opacity: number;
       drift: number;
+      colorOffset: number;
+      isBlasting?: boolean;
+      blastRadius?: number;
     }
 
     interface Particle {
@@ -163,16 +169,10 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     interface Star {
       x: number;
       y: number;
-      z: number;
-      vx: number;
-      vy: number;
       radius: number;
       alpha: number;
       twinkle: number;
       phase: number;
-      colorOffset: number;
-      isBlasting?: boolean;
-      blastRadius?: number;
     }
 
     let nodes: NetworkNode[] = [];
@@ -239,11 +239,15 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           y,
           baseX: x,
           baseY: y,
+          z: random(0.2, 2.0),
+          vx: random(-0.25, 0.25),
+          vy: random(-0.25, 0.25),
           radius: Math.random() < 0.15 ? random(4, 6) : random(1, 3.5),
           pulse: Math.random() * Math.PI * 2,
           pulseSpeed: random(0.6, 1.4),
           opacity: Math.random() < 0.15 ? random(0.7, 1) : random(0.3, 0.7),
           drift: random(0.3, 1),
+          colorOffset: random(-40, 40),
         });
       }
     };
@@ -270,14 +274,10 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         stars.push({
           x: random(0, width),
           y: random(0, height * 0.85),
-          z: random(0.2, 2.0),
-          vx: random(-0.15, 0.15),
-          vy: random(-0.15, 0.15),
           radius: random(0.3, 1.1),
           alpha: random(0.1, 0.4),
           twinkle: random(0.4, 1.4),
           phase: random(0, Math.PI * 2),
-          colorOffset: random(-30, 30),
         });
       }
     };
@@ -633,116 +633,16 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     ========================================================= */
     const drawStars = () => {
       const l = currentColors.light;
-      const baseLr = Math.round(l.r), baseLg = Math.round(l.g), baseLb = Math.round(l.b);
-      
+      const lr = Math.round(l.r), lg = Math.round(l.g), lb = Math.round(l.b);
       stars.forEach((star) => {
-        // Drift and bounds wrapping
-        if (!prefersReducedMotion) {
-          star.x += star.vx;
-          star.y += star.vy;
-          if (star.x < 0) star.x = width;
-          if (star.x > width) star.x = 0;
-          if (star.y < 0) star.y = height * 0.85;
-          if (star.y > height * 0.85) star.y = 0;
-        }
-
-        // Handle Supernova Blast animation
-        if (star.isBlasting) {
-          star.blastRadius = (star.blastRadius || 0) + 1.5;
-          const blastAlpha = Math.max(0, 1 - (star.blastRadius / 60));
-          if (blastAlpha <= 0) {
-            // Reset star to normal life in a new location
-            star.isBlasting = false;
-            star.x = random(0, width);
-            star.y = random(0, height * 0.85);
-            star.radius = random(0.3, 1.1);
-            star.blastRadius = 0;
-          } else {
-            ctx.beginPath();
-            ctx.arc(star.x, star.y, star.blastRadius, 0, Math.PI * 2);
-            ctx.strokeStyle = `rgba(255, 255, 255, ${blastAlpha})`;
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            // Star core flash
-            ctx.beginPath();
-            ctx.arc(star.x, star.y, star.radius * 3, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, ${blastAlpha})`;
-            ctx.fill();
-          }
-          return; // Skip normal draw for blasting star
-        }
-
-        // Feature 5: Temperature Color Variance
-        const lr = clamp(baseLr + star.colorOffset, 0, 255);
-        const lg = clamp(baseLg + star.colorOffset * 0.5, 0, 255);
-        const lb = clamp(baseLb - star.colorOffset, 0, 255);
-
-        // Feature 1: Deep Random Blinking Effect
         const blinkBase = Math.sin(time * 0.001 * star.twinkle + star.phase);
-        // Math.pow(x, 4) creates sharp peaks and long dark valleys for a deep blink
-        const deepBlink = Math.pow(blinkBase, 4); 
-        const currentAlpha = star.alpha * deepBlink * 1.5;
-
-        // Feature 2: 3D Parallax Depth
-        const parallaxX = (width / 2 - smoothMouseX) * star.z * 0.04;
-        const parallaxY = (height / 2 - smoothMouseY) * star.z * 0.04;
-        let px = star.x + parallaxX;
-        let py = star.y + parallaxY;
-
-        // Feature 3: Cursor Illumination & Magnetic Repulsion
-        const dx = px - smoothMouseX;
-        const dy = py - smoothMouseY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const interactionRadius = 150;
-        
-        let finalAlpha = currentAlpha;
-        if (dist < interactionRadius) {
-          const intensity = 1 - dist / interactionRadius;
-          finalAlpha = Math.max(currentAlpha, intensity * 0.8);
-          // Magnetic repulsion
-          px += (dx / dist) * intensity * 15;
-          py += (dy / dist) * intensity * 15;
-        }
+        const currentAlpha = star.alpha * (0.5 + blinkBase * 0.5);
 
         ctx.beginPath();
-        ctx.arc(px, py, star.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, ${clamp(finalAlpha, 0.02, 1)})`;
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, ${clamp(currentAlpha, 0.02, 1)})`;
         ctx.fill();
-
-        // Save computed position for links and collisions later
-        (star as any).px = px;
-        (star as any).py = py;
       });
-
-      // Feature 4: Dynamic Constellation Links & Collision (Blast)
-      ctx.lineWidth = 0.5;
-      for (let i = 0; i < stars.length; i++) {
-        for (let j = i + 1; j < stars.length; j++) {
-          const a = stars[i] as any;
-          const b = stars[j] as any;
-          if (a.isBlasting || b.isBlasting) continue;
-          
-          const dist = distance({ x: a.px, y: a.py }, { x: b.px, y: b.py });
-          
-          // Feature 6: Supernova Blast on close proximity
-          if (dist < 2.5) {
-            a.isBlasting = true;
-            a.blastRadius = 0;
-            b.isBlasting = true;
-            b.blastRadius = 0;
-            continue;
-          }
-          
-          if (dist < 40) {
-            const linkAlpha = (1 - dist / 40) * 0.3;
-            ctx.beginPath();
-            ctx.moveTo(a.px, a.py);
-            ctx.lineTo(b.px, b.py);
-            ctx.strokeStyle = `rgba(${baseLr}, ${baseLg}, ${baseLb}, ${linkAlpha})`;
-            ctx.stroke();
-          }
-        }
-      }
     };
 
     /* =========================================================
@@ -751,14 +651,35 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     const updateNodes = () => {
       nodes.forEach((node) => {
         if (!prefersReducedMotion) {
-          node.x =
-            node.baseX +
-            Math.sin(time * 0.0003 * node.drift + node.pulse) * 7;
-          node.y =
-            node.baseY +
-            Math.cos(time * 0.00025 * node.drift + node.pulse) * 5;
+          node.baseX += node.vx;
+          node.baseY += node.vy;
+          
+          if (node.baseX < 0) node.baseX = width;
+          if (node.baseX > width) node.baseX = 0;
+          if (node.baseY < 0) node.baseY = height;
+          if (node.baseY > height) node.baseY = 0;
+
+          node.x = node.baseX + Math.sin(time * 0.0003 * node.drift + node.pulse) * 7;
+          node.y = node.baseY + Math.cos(time * 0.00025 * node.drift + node.pulse) * 5;
         }
       });
+
+      // Handle collisions (Supernova blast)
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const a = nodes[i];
+          const b = nodes[j];
+          if (a.isBlasting || b.isBlasting) continue;
+          
+          const dist = distance(a, b);
+          if (dist < 4.0) { // Close enough to blast
+            a.isBlasting = true;
+            a.blastRadius = 0;
+            b.isBlasting = true;
+            b.blastRadius = 0;
+          }
+        }
+      }
     };
 
     const drawConnections = () => {
@@ -811,37 +732,113 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       const g = currentColors.glow;
       const d = currentColors.deep;
       const h = currentColors.highlight;
-      const gr = Math.round(g.r), gg = Math.round(g.g), gb = Math.round(g.b);
-      const dr = Math.round(d.r), dg = Math.round(d.g), db = Math.round(d.b);
+      const baseGr = Math.round(g.r), baseGg = Math.round(g.g), baseGb = Math.round(g.b);
+      const baseDr = Math.round(d.r), baseDg = Math.round(d.g), baseDb = Math.round(d.b);
       const hr = Math.round(h.r), hg = Math.round(h.g), hb = Math.round(h.b);
 
       nodes.forEach((node) => {
-        const pulse =
-          1 + Math.sin(time * 0.002 * node.pulseSpeed + node.pulse) * 0.4;
-        const glowRadius = node.radius * 6 * pulse;
+        // Feature 5: Temperature Color Variance
+        const gr = clamp(baseGr + node.colorOffset, 0, 255);
+        const gg = clamp(baseGg + node.colorOffset * 0.5, 0, 255);
+        const gb = clamp(baseGb - node.colorOffset, 0, 255);
 
-        // Outer halo
-        const glow = ctx.createRadialGradient(
-          node.x,
-          node.y,
-          0,
-          node.x,
-          node.y,
-          glowRadius
-        );
-        glow.addColorStop(0, `rgba(${gr}, ${gg}, ${gb}, ${node.opacity * 0.8})`);
+        const dr = clamp(baseDr + node.colorOffset, 0, 255);
+        const dg = clamp(baseDg + node.colorOffset * 0.5, 0, 255);
+        const db = clamp(baseDb - node.colorOffset, 0, 255);
+
+        // Feature 1: Deep Random Blinking Effect
+        const blinkBase = Math.sin(time * 0.001 * node.pulseSpeed + node.pulse);
+        const deepBlink = Math.pow(blinkBase, 4);
+        let currentOpacity = node.opacity * deepBlink * 1.5;
+        const pulse = 1 + blinkBase * 0.4;
+        
+        // Feature 2: 3D Parallax Depth
+        const parallaxX = (width / 2 - smoothMouseX) * node.z * 0.04;
+        const parallaxY = (height / 2 - smoothMouseY) * node.z * 0.04;
+        let px = node.x + parallaxX;
+        let py = node.y + parallaxY;
+
+        // Save computed position for links and collisions
+        (node as any).px = px;
+        (node as any).py = py;
+
+        // Handle Supernova Blast animation
+        if (node.isBlasting) {
+          node.blastRadius = (node.blastRadius || 0) + 2.5;
+          const blastAlpha = Math.max(0, 1 - (node.blastRadius / 100));
+          if (blastAlpha <= 0) {
+            // Respawn
+            node.isBlasting = false;
+            node.baseX = random(0, width);
+            node.baseY = random(0, height);
+            node.blastRadius = 0;
+          } else {
+            ctx.beginPath();
+            ctx.arc(px, py, node.blastRadius, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(255, 255, 255, ${blastAlpha})`;
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            // Core flash
+            ctx.beginPath();
+            ctx.arc(px, py, node.radius * 6, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 255, 255, ${blastAlpha})`;
+            ctx.fill();
+          }
+          return; // Skip drawing normal star
+        }
+
+        // Feature 3: Cursor Illumination & Magnetic Repulsion
+        const dx = px - smoothMouseX;
+        const dy = py - smoothMouseY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const interactionRadius = 200;
+
+        let finalOpacity = currentOpacity;
+        if (dist < interactionRadius) {
+          const intensity = 1 - dist / interactionRadius;
+          finalOpacity = Math.max(currentOpacity, intensity * 0.9);
+          // Magnetic repulsion
+          px += (dx / dist) * intensity * 20;
+          py += (dy / dist) * intensity * 20;
+        }
+
+        // Draw star
+        const glowRadius = node.radius * 6 * pulse;
+        const glow = ctx.createRadialGradient(px, py, 0, px, py, glowRadius);
+        glow.addColorStop(0, `rgba(${gr}, ${gg}, ${gb}, ${clamp(finalOpacity * 0.8, 0.01, 1)})`);
         glow.addColorStop(1, `rgba(${dr}, ${dg}, ${db}, 0)`);
 
         ctx.fillStyle = glow;
         ctx.beginPath();
-        ctx.arc(node.x, node.y, glowRadius, 0, Math.PI * 2);
+        ctx.arc(px, py, glowRadius, 0, Math.PI * 2);
         ctx.fill();
 
         // Solid star core (4 spikes)
-        drawStar(ctx, node.x, node.y, 4, node.radius * 2.5 * pulse, node.radius * 0.6 * pulse);
-        ctx.fillStyle = `rgba(${hr}, ${hg}, ${hb}, ${node.opacity})`;
+        drawStar(ctx, px, py, 4, node.radius * 2.5 * pulse, node.radius * 0.6 * pulse);
+        ctx.fillStyle = `rgba(${hr}, ${hg}, ${hb}, ${clamp(finalOpacity, 0.01, 1)})`;
         ctx.fill();
       });
+
+      // Feature 4: Dynamic Constellation Links
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const a = nodes[i] as any;
+          const b = nodes[j] as any;
+          if (a.isBlasting || b.isBlasting) continue;
+
+          const dist = distance({ x: a.px, y: a.py }, { x: b.px, y: b.py });
+          
+          if (dist < 120 && dist > 4.0) { // Links for close stars (but not blasting)
+            const linkAlpha = (1 - dist / 120) * 0.4;
+            ctx.beginPath();
+            ctx.moveTo(a.px, a.py);
+            ctx.lineTo(b.px, b.py);
+            ctx.strokeStyle = `rgba(${hr}, ${hg}, ${hb}, ${linkAlpha})`;
+            ctx.stroke();
+          }
+        }
+      }
     };
 
     /* =========================================================
