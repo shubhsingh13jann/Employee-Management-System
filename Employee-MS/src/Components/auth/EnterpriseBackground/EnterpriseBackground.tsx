@@ -143,10 +143,10 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       baseX: number;
       baseY: number;
       z: number;
-      vx: number;
-      vy: number;
-      baseVx: number;
-      baseVy: number;
+      driftVx: number;
+      driftVy: number;
+      repelVx: number;
+      repelVy: number;
       radius: number;
       pulse: number;
       pulseSpeed: number;
@@ -240,19 +240,16 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           y = random(height * 0.25, height * 0.90);
         }
 
-        const initialVx = random(-0.25, 0.25);
-        const initialVy = random(-0.25, 0.25);
-
         nodes.push({
           x,
           y,
           baseX: x,
           baseY: y,
           z: random(0.2, 2.0),
-          vx: initialVx,
-          vy: initialVy,
-          baseVx: initialVx,
-          baseVy: initialVy,
+          driftVx: random(-0.15, 0.15),
+          driftVy: random(-0.15, 0.15),
+          repelVx: 0,
+          repelVy: 0,
           radius: Math.random() < 0.15 ? random(4, 6) : random(1, 3.5),
           pulse: Math.random() * Math.PI * 2,
           pulseSpeed: random(0.6, 1.4),
@@ -674,12 +671,10 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
               node.stateStartTime = time;
               node.baseX = random(0, width);
               node.baseY = random(0, height);
-              const initialVx = random(-0.25, 0.25);
-              const initialVy = random(-0.25, 0.25);
-              node.vx = initialVx;
-              node.vy = initialVy;
-              node.baseVx = initialVx;
-              node.baseVy = initialVy;
+              node.driftVx = random(-0.15, 0.15);
+              node.driftVy = random(-0.15, 0.15);
+              node.repelVx = 0;
+              node.repelVy = 0;
             }
             break;
           case 'appearing':
@@ -698,39 +693,39 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             if (timeInState > 2000) {
               node.state = 'dead';
               node.stateStartTime = time;
-              node.isBlasting = false; // Reset blast if it happens to be disappearing
+              node.isBlasting = false;
             }
             break;
         }
 
-        if (node.state === 'dead') return; // Don't move dead nodes
+        if (node.state === 'dead') return;
 
         if (!prefersReducedMotion) {
           // Physical magnetic repulsion
-          const dx = node.baseX - smoothMouseX;
-          const dy = node.baseY - smoothMouseY;
+          const dx = node.baseX - mouseX; // Use absolute mouseX so it doesn't lag and rotate
+          const dy = node.baseY - mouseY;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 200 && dist > 1) {
-            const force = (1 - dist / 200) * 0.15;
-            node.vx += (dx / dist) * force;
-            node.vy += (dy / dist) * force;
+            const force = (1 - dist / 200) * 0.4;
+            node.repelVx += (dx / dist) * force;
+            node.repelVy += (dy / dist) * force;
           }
 
-          // Friction (spring back to base speed)
-          node.vx += (node.baseVx - node.vx) * 0.03;
-          node.vy += (node.baseVy - node.vy) * 0.03;
+          // Friction only applies to the repulsion force, making it decay naturally
+          node.repelVx *= 0.94;
+          node.repelVy *= 0.94;
 
-          node.baseX += node.vx;
-          node.baseY += node.vy;
+          node.baseX += node.driftVx + node.repelVx;
+          node.baseY += node.driftVy + node.repelVy;
           
-          if (node.baseX < 0) node.baseX = width;
-          if (node.baseX > width) node.baseX = 0;
-          if (node.baseY < 0) node.baseY = height;
-          if (node.baseY > height) node.baseY = 0;
+          if (node.baseX < -50) node.baseX = width + 50;
+          if (node.baseX > width + 50) node.baseX = -50;
+          if (node.baseY < -50) node.baseY = height + 50;
+          if (node.baseY > height + 50) node.baseY = -50;
 
-          // Gentle local wobble
-          node.x = node.baseX + Math.sin(time * 0.0003 * node.drift + node.pulse) * 7;
-          node.y = node.baseY + Math.cos(time * 0.00025 * node.drift + node.pulse) * 5;
+          // Pure 1:1 mapping (no ropes or sin/cos orbits)
+          node.x = node.baseX;
+          node.y = node.baseY;
         }
       });
 
@@ -869,6 +864,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           return; // Skip drawing normal star
         }
 
+        // Feature 3: Cursor Illumination & Magnetic Repulsion
         // Feature 3: Cursor Illumination
         const dx = px - smoothMouseX;
         const dy = py - smoothMouseY;
@@ -879,6 +875,10 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         if (dist < interactionRadius) {
           const intensity = 1 - dist / interactionRadius;
           finalOpacity = Math.max(currentOpacity, intensity * 0.9);
+          // Magnetic repulsion
+          // Magnetic repulsion (push away from cursor)
+          px += (dx / dist) * intensity * 20;
+          py += (dy / dist) * intensity * 20;
         }
 
         // Save computed position for links and collisions
