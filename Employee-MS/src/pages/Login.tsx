@@ -229,6 +229,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
       <div
         ref={containerRef}
         onMouseMove={handleMouseMove}
+        className="auth-split-wrapper position-relative"
         className={`auth-split-wrapper position-relative theme-${role}`}
       >
 

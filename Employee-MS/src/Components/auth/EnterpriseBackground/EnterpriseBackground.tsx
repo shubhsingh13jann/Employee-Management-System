@@ -625,12 +625,15 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       const l = currentColors.light;
       const lr = Math.round(l.r), lg = Math.round(l.g), lb = Math.round(l.b);
       stars.forEach((star) => {
-        const twinkle =
-          star.alpha +
-          Math.sin(time * 0.001 * star.twinkle + star.phase) * 0.12;
+        // Feature 1: Deep Random Blinking Effect
+        const blinkBase = Math.sin(time * 0.001 * star.twinkle + star.phase);
+        // Math.pow(x, 4) creates sharp peaks and long dark valleys for a deep blink
+        const deepBlink = Math.pow(blinkBase, 4); 
+        const currentAlpha = star.alpha * deepBlink * 1.5;
+
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, ${clamp(twinkle, 0.05, 0.65)})`;
+        ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, ${clamp(currentAlpha, 0.02, 1)})`;
         ctx.fill();
       });
     };
