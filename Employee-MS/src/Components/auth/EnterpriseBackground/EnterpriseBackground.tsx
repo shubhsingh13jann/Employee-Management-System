@@ -658,7 +658,30 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         ctx.arc(px, py, star.radius, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, ${clamp(finalAlpha, 0.02, 1)})`;
         ctx.fill();
+
+        // Save computed position for links and collisions later
+        (star as any).px = px;
+        (star as any).py = py;
       });
+
+      // Feature 4: Dynamic Constellation Links
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i < stars.length; i++) {
+        for (let j = i + 1; j < stars.length; j++) {
+          const a = stars[i] as any;
+          const b = stars[j] as any;
+          const dist = distance({ x: a.px, y: a.py }, { x: b.px, y: b.py });
+          
+          if (dist < 40) {
+            const linkAlpha = (1 - dist / 40) * 0.3;
+            ctx.beginPath();
+            ctx.moveTo(a.px, a.py);
+            ctx.lineTo(b.px, b.py);
+            ctx.strokeStyle = `rgba(${lr}, ${lg}, ${lb}, ${linkAlpha})`;
+            ctx.stroke();
+          }
+        }
+      }
     };
 
     /* =========================================================
