@@ -678,8 +678,8 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
               node.stateStartTime = time;
               node.baseX = random(0, width);
               node.baseY = random(0, height);
-              node.driftVx = random(-0.15, 0.15);
-              node.driftVy = random(-0.15, 0.15);
+              node.driftVx = random(-0.25, 0.25);
+              node.driftVy = random(-0.25, 0.25);
               node.repelVx = 0;
               node.repelVy = 0;
             }
@@ -709,18 +709,27 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
 
         if (!prefersReducedMotion) {
           // Physical magnetic repulsion
-          const dx = node.baseX - mouseX; // Use absolute mouseX so it doesn't lag and rotate
+          const dx = node.baseX - mouseX; 
           const dy = node.baseY - mouseY;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 200 && dist > 1) {
-            const force = (1 - dist / 200) * 0.4;
+          
+          if (dist < 250 && dist > 1) {
+            // Apply a strong push away from the cursor
+            const force = (1 - dist / 250) * 0.9;
             node.repelVx += (dx / dist) * force;
             node.repelVy += (dy / dist) * force;
           }
 
-          // Friction only applies to the repulsion force, making it decay naturally
-          node.repelVx *= 0.94;
-          node.repelVy *= 0.94;
+          // Very low friction so they slide freely instead of stopping abruptly
+          node.repelVx *= 0.985;
+          node.repelVy *= 0.985;
+          
+          // Max speed cap
+          const speed = Math.sqrt(node.repelVx * node.repelVx + node.repelVy * node.repelVy);
+          if (speed > 4.5) {
+            node.repelVx = (node.repelVx / speed) * 4.5;
+            node.repelVy = (node.repelVy / speed) * 4.5;
+          }
 
           node.baseX += node.driftVx + node.repelVx;
           node.baseY += node.driftVy + node.repelVy;
