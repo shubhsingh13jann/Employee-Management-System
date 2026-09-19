@@ -143,6 +143,10 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       baseX: number;
       baseY: number;
       z: number;
+      vx: number;
+      vy: number;
+      baseVx: number;
+      baseVy: number;
       driftVx: number;
       driftVy: number;
       repelVx: number;
@@ -239,6 +243,9 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           x = random(width * 0.02, width * 0.30);
           y = random(height * 0.25, height * 0.90);
         }
+
+        const initialVx = random(-0.25, 0.25);
+        const initialVy = random(-0.25, 0.25);
 
         nodes.push({
           x,
