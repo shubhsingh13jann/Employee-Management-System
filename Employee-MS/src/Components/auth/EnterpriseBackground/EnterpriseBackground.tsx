@@ -813,6 +813,10 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         let px = node.x;
         let py = node.y;
 
+        // Save computed position for links and collisions
+        (node as any).px = px;
+        (node as any).py = py;
+
         // Handle Supernova Blast animation
         if (node.isBlasting) {
           node.blastRadius = (node.blastRadius || 0) + 2.5;
@@ -820,6 +824,8 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           if (blastAlpha <= 0) {
             // Respawn
             node.isBlasting = false;
+            node.baseX = random(0, width);
+            node.baseY = random(0, height);
             node.state = 'dead';
             node.stateStartTime = time;
             node.blastRadius = 0;
@@ -848,6 +854,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         if (dist < interactionRadius) {
           const intensity = 1 - dist / interactionRadius;
           finalOpacity = Math.max(currentOpacity, intensity * 0.9);
+          // Magnetic repulsion
           // Magnetic repulsion (push away from cursor)
           px += (dx / dist) * intensity * 20;
           py += (dy / dist) * intensity * 20;
