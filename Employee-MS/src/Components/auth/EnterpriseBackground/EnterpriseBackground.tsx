@@ -151,6 +151,10 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       opacity: number;
       drift: number;
       colorOffset: number;
+      state: 'appearing' | 'alive' | 'disappearing' | 'dead';
+      stateStartTime: number;
+      lifespan: number;
+      deadspan: number;
       isBlasting?: boolean;
       blastRadius?: number;
     }
@@ -248,6 +252,10 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           opacity: Math.random() < 0.15 ? random(0.7, 1) : random(0.3, 0.7),
           drift: random(0.3, 1),
           colorOffset: random(-40, 40),
+          state: 'appearing',
+          stateStartTime: random(-60000, 0), // Start them at random points in their lifecycle so they don't all sync
+          lifespan: random(30000, 60000), // 30-60 seconds alive
+          deadspan: random(10000, 30000), // 10-30 seconds dead
         });
       }
     };
@@ -650,6 +658,42 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     ========================================================= */
     const updateNodes = () => {
       nodes.forEach((node) => {
+        // Handle lifecycle
+        const timeInState = time - node.stateStartTime;
+        switch (node.state) {
+          case 'dead':
+            if (timeInState > node.deadspan) {
+              node.state = 'appearing';
+              node.stateStartTime = time;
+              node.baseX = random(0, width);
+              node.baseY = random(0, height);
+              node.vx = random(-0.25, 0.25);
+              node.vy = random(-0.25, 0.25);
+            }
+            break;
+          case 'appearing':
+            if (timeInState > 2000) {
+              node.state = 'alive';
+              node.stateStartTime = time;
+            }
+            break;
+          case 'alive':
+            if (timeInState > node.lifespan) {
+              node.state = 'disappearing';
+              node.stateStartTime = time;
+            }
+            break;
+          case 'disappearing':
+            if (timeInState > 2000) {
+              node.state = 'dead';
+              node.stateStartTime = time;
+              node.isBlasting = false; // Reset blast if it happens to be disappearing
+            }
+            break;
+        }
+
+        if (node.state === 'dead') return; // Don't move dead nodes
+
         if (!prefersReducedMotion) {
           node.baseX += node.vx;
           node.baseY += node.vy;
@@ -659,6 +703,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           if (node.baseY < 0) node.baseY = height;
           if (node.baseY > height) node.baseY = 0;
 
+          // Gentle local wobble
           node.x = node.baseX + Math.sin(time * 0.0003 * node.drift + node.pulse) * 7;
           node.y = node.baseY + Math.cos(time * 0.00025 * node.drift + node.pulse) * 5;
         }
@@ -669,6 +714,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         for (let j = i + 1; j < nodes.length; j++) {
           const a = nodes[i];
           const b = nodes[j];
+          if (a.state === 'dead' || b.state === 'dead') continue;
           if (a.isBlasting || b.isBlasting) continue;
           
           const dist = distance(a, b);
@@ -737,6 +783,17 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       const hr = Math.round(h.r), hg = Math.round(h.g), hb = Math.round(h.b);
 
       nodes.forEach((node) => {
+        if (node.state === 'dead') return;
+
+        // Lifecycle opacity calculation
+        const timeInState = time - node.stateStartTime;
+        let lifecycleOpacity = node.opacity;
+        if (node.state === 'appearing') {
+          lifecycleOpacity = Math.min(1, timeInState / 2000) * node.opacity;
+        } else if (node.state === 'disappearing') {
+          lifecycleOpacity = Math.max(0, 1 - (timeInState / 2000)) * node.opacity;
+        }
+
         // Feature 5: Temperature Color Variance
         const gr = clamp(baseGr + node.colorOffset, 0, 255);
         const gg = clamp(baseGg + node.colorOffset * 0.5, 0, 255);
@@ -749,18 +806,12 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         // Feature 1: Deep Random Blinking Effect
         const blinkBase = Math.sin(time * 0.001 * node.pulseSpeed + node.pulse);
         const deepBlink = Math.pow(blinkBase, 4);
-        let currentOpacity = node.opacity * deepBlink * 1.5;
+        let currentOpacity = lifecycleOpacity * deepBlink * 1.5;
         const pulse = 1 + blinkBase * 0.4;
         
-        // Feature 2: 3D Parallax Depth
-        const parallaxX = (width / 2 - smoothMouseX) * node.z * 0.04;
-        const parallaxY = (height / 2 - smoothMouseY) * node.z * 0.04;
-        let px = node.x + parallaxX;
-        let py = node.y + parallaxY;
-
-        // Save computed position for links and collisions
-        (node as any).px = px;
-        (node as any).py = py;
+        // Remove global parallax jelly effect, keep local position
+        let px = node.x;
+        let py = node.y;
 
         // Handle Supernova Blast animation
         if (node.isBlasting) {
@@ -769,8 +820,8 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           if (blastAlpha <= 0) {
             // Respawn
             node.isBlasting = false;
-            node.baseX = random(0, width);
-            node.baseY = random(0, height);
+            node.state = 'dead';
+            node.stateStartTime = time;
             node.blastRadius = 0;
           } else {
             ctx.beginPath();
@@ -797,10 +848,14 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         if (dist < interactionRadius) {
           const intensity = 1 - dist / interactionRadius;
           finalOpacity = Math.max(currentOpacity, intensity * 0.9);
-          // Magnetic repulsion
+          // Magnetic repulsion (push away from cursor)
           px += (dx / dist) * intensity * 20;
           py += (dy / dist) * intensity * 20;
         }
+
+        // Save computed position for links and collisions
+        (node as any).px = px;
+        (node as any).py = py;
 
         // Draw star
         const glowRadius = node.radius * 6 * pulse;
@@ -825,12 +880,16 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         for (let j = i + 1; j < nodes.length; j++) {
           const a = nodes[i] as any;
           const b = nodes[j] as any;
+          if (a.state === 'dead' || b.state === 'dead') continue;
           if (a.isBlasting || b.isBlasting) continue;
+
+          // Only use px/py if they are defined (not dead)
+          if (a.px === undefined || b.px === undefined) continue;
 
           const dist = distance({ x: a.px, y: a.py }, { x: b.px, y: b.py });
           
-          if (dist < 120 && dist > 4.0) { // Links for close stars (but not blasting)
-            const linkAlpha = (1 - dist / 120) * 0.4;
+          if (dist < 60 && dist > 4.0) { // Limit to 60px so they don't link when far
+            const linkAlpha = (1 - dist / 60) * 0.4;
             ctx.beginPath();
             ctx.moveTo(a.px, a.py);
             ctx.lineTo(b.px, b.py);
