@@ -636,12 +636,27 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         // Feature 2: 3D Parallax Depth
         const parallaxX = (width / 2 - smoothMouseX) * star.z * 0.04;
         const parallaxY = (height / 2 - smoothMouseY) * star.z * 0.04;
-        const px = star.x + parallaxX;
-        const py = star.y + parallaxY;
+        let px = star.x + parallaxX;
+        let py = star.y + parallaxY;
+
+        // Feature 3: Cursor Illumination & Magnetic Repulsion
+        const dx = px - smoothMouseX;
+        const dy = py - smoothMouseY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const interactionRadius = 150;
+        
+        let finalAlpha = currentAlpha;
+        if (dist < interactionRadius) {
+          const intensity = 1 - dist / interactionRadius;
+          finalAlpha = Math.max(currentAlpha, intensity * 0.8);
+          // Magnetic repulsion
+          px += (dx / dist) * intensity * 15;
+          py += (dy / dist) * intensity * 15;
+        }
 
         ctx.beginPath();
         ctx.arc(px, py, star.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, ${clamp(currentAlpha, 0.02, 1)})`;
+        ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, ${clamp(finalAlpha, 0.02, 1)})`;
         ctx.fill();
       });
     };
