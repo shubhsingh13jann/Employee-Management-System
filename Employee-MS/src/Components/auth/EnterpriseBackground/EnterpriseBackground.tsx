@@ -168,6 +168,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       alpha: number;
       twinkle: number;
       phase: number;
+      colorOffset: number;
     }
 
     let nodes: NetworkNode[] = [];
@@ -270,6 +271,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           alpha: random(0.1, 0.4),
           twinkle: random(0.4, 1.4),
           phase: random(0, Math.PI * 2),
+          colorOffset: random(-30, 30),
         });
       }
     };
@@ -625,8 +627,13 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     ========================================================= */
     const drawStars = () => {
       const l = currentColors.light;
-      const lr = Math.round(l.r), lg = Math.round(l.g), lb = Math.round(l.b);
+      const baseLr = Math.round(l.r), baseLg = Math.round(l.g), baseLb = Math.round(l.b);
       stars.forEach((star) => {
+        // Feature 5: Temperature Color Variance
+        const lr = clamp(baseLr + star.colorOffset, 0, 255);
+        const lg = clamp(baseLg + star.colorOffset * 0.5, 0, 255);
+        const lb = clamp(baseLb - star.colorOffset, 0, 255);
+
         // Feature 1: Deep Random Blinking Effect
         const blinkBase = Math.sin(time * 0.001 * star.twinkle + star.phase);
         // Math.pow(x, 4) creates sharp peaks and long dark valleys for a deep blink
