@@ -163,6 +163,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     interface Star {
       x: number;
       y: number;
+      z: number;
       radius: number;
       alpha: number;
       twinkle: number;
@@ -264,6 +265,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         stars.push({
           x: random(0, width),
           y: random(0, height * 0.85),
+          z: random(0.2, 2.0),
           radius: random(0.3, 1.1),
           alpha: random(0.1, 0.4),
           twinkle: random(0.4, 1.4),
@@ -631,8 +633,14 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         const deepBlink = Math.pow(blinkBase, 4); 
         const currentAlpha = star.alpha * deepBlink * 1.5;
 
+        // Feature 2: 3D Parallax Depth
+        const parallaxX = (width / 2 - smoothMouseX) * star.z * 0.04;
+        const parallaxY = (height / 2 - smoothMouseY) * star.z * 0.04;
+        const px = star.x + parallaxX;
+        const py = star.y + parallaxY;
+
         ctx.beginPath();
-        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.arc(px, py, star.radius, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, ${clamp(currentAlpha, 0.02, 1)})`;
         ctx.fill();
       });
