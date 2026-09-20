@@ -50,10 +50,8 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     let smoothMouseY = 0;
     let time = 0;
 
-    const prefersReducedMotion =
-      typeof window !== "undefined" &&
-      window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Force animations on regardless of OS settings, since the user wants to see the physics
+    const prefersReducedMotion = false;
 
     /* =========================================================
        ROLE COLOR PALETTES & CHROMATIC THEMES
@@ -1086,12 +1084,12 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       // 6. Perspective Cyber Floor
       drawPerspectiveFloor();
 
-      // 7. Constellation Connections (Disabled)
+      // 7. Constellation Connections
       updateNodes();
-      // drawConnections();
+      drawConnections();
 
-      // 8. Dynamic Data Beacons (Disabled)
-      // drawDataPulses();
+      // 8. Dynamic Data Beacons
+      drawDataPulses();
 
       // 9. Floating Sparkles
       updateParticles();
