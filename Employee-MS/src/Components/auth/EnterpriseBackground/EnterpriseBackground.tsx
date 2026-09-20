@@ -163,17 +163,6 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       blastRadius?: number;
     }
 
-    interface Particle {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      size: number;
-      alpha: number;
-      phase: number;
-      speed: number;
-    }
-
     interface Star {
       x: number;
       y: number;
@@ -184,7 +173,6 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     }
 
     let nodes: NetworkNode[] = [];
-    let particles: Particle[] = [];
     let stars: Star[] = [];
 
     const random = (min: number, max: number) => Math.random() * (max - min) + min;
@@ -265,22 +253,6 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           stateStartTime: random(-60000, 0), // Start them at random points in their lifecycle so they don't all sync
           lifespan: random(30000, 60000), // 30-60 seconds alive
           deadspan: random(5000, 7000), // 5-7 seconds dead
-        });
-      }
-    };
-
-    const createParticles = () => {
-      particles = [];
-      for (let i = 0; i < CONFIG.particleCount; i++) {
-        particles.push({
-          x: random(0, width),
-          y: random(0, height),
-          vx: random(-0.06, 0.06),
-          vy: random(-0.04, 0.04),
-          size: random(0.6, 1.8),
-          alpha: random(0.15, 0.65),
-          phase: random(0, Math.PI * 2),
-          speed: random(0.3, 1.1),
         });
       }
     };
@@ -706,13 +678,8 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         if (node.state === 'dead') return;
 
         if (!prefersReducedMotion) {
-          // Physical magnetic repulsion
           if (node !== draggedNode) {
-            const dx = node.baseX - mouseX; 
-            const dy = node.baseY - mouseY;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-  
-            // Smooth glide friction (like ice)
+            // Smooth glide friction for when they are thrown
             node.repelVx *= 0.98;
             node.repelVy *= 0.98;
             
@@ -879,45 +846,33 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             node.stateStartTime = time;
             node.blastRadius = 0;
           } else {
-            // Draw a beautiful sparkling burst instead of a cheap dot
-            ctx.save();
-            ctx.translate(px, py);
-            
-            const progress = node.blastRadius / 100;
-            ctx.rotate(progress * Math.PI / 2); // Slight rotation
-            
-            const spikeCount = 8;
-            const outerRadius = node.blastRadius * 1.5;
-            const innerRadius = node.blastRadius * 0.2;
-            
-            // Sparkle lines shooting outwards
+            // Supernova expanding ring
             ctx.beginPath();
-            for(let i = 0; i < spikeCount; i++) {
-              const angle = (i * Math.PI * 2) / spikeCount;
-              ctx.moveTo(Math.cos(angle) * innerRadius, Math.sin(angle) * innerRadius);
-              ctx.lineTo(Math.cos(angle) * outerRadius, Math.sin(angle) * outerRadius);
-            }
-            ctx.strokeStyle = `rgba(255, 255, 255, ${blastAlpha})`;
-            ctx.lineWidth = 1.5;
+            ctx.arc(px, py, node.blastRadius, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(${hr}, ${hg}, ${hb}, ${blastAlpha * 0.8})`;
+            ctx.lineWidth = 2 + (1 - blastAlpha) * 4;
             ctx.stroke();
 
-            // Glowing halo
-            ctx.beginPath();
-            ctx.arc(0, 0, node.blastRadius * 0.6, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${pr}, ${pg}, ${pb}, ${blastAlpha * 0.3})`;
-            ctx.fill();
+            // Supernova radial glow
+            const glowGrad = ctx.createRadialGradient(px, py, 0, px, py, node.blastRadius * 1.5 + 1);
+            glowGrad.addColorStop(0, `rgba(255, 255, 255, ${blastAlpha})`);
+            glowGrad.addColorStop(0.2, `rgba(${hr}, ${hg}, ${hb}, ${blastAlpha * 0.8})`);
+            glowGrad.addColorStop(1, `rgba(${baseDr}, ${baseDg}, ${baseDb}, 0)`);
             
-            // Shrinking bright core
             ctx.beginPath();
-            ctx.arc(0, 0, Math.max(0.1, node.radius * (1 - progress)), 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, ${blastAlpha})`;
+            ctx.arc(px, py, node.blastRadius * 1.5 + 1, 0, Math.PI * 2);
+            ctx.fillStyle = glowGrad;
             ctx.fill();
-            
-            ctx.restore();
+
+            // Supernova spikes
+            drawStar(ctx, px, py, 8, node.blastRadius * 1.2, node.blastRadius * 0.3);
+            ctx.fillStyle = `rgba(255, 255, 255, ${blastAlpha * 0.9})`;
+            ctx.fill();
           }
           return; // Skip drawing normal star
         }
 
+        // Feature 3: Cursor Illumination & Magnetic Repulsion
         // Feature 3: Cursor Illumination
         const dx = px - smoothMouseX;
         const dy = py - smoothMouseY;
@@ -1009,36 +964,6 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     };
 
     /* =========================================================
-       LAYER: PARTICLES
-    ========================================================= */
-    const updateParticles = () => {
-      particles.forEach((p) => {
-        if (prefersReducedMotion) return;
-        p.x += p.vx * p.speed;
-        p.y += p.vy * p.speed;
-
-        if (p.x < -10) p.x = width + 10;
-        if (p.x > width + 10) p.x = -10;
-        if (p.y < -10) p.y = height + 10;
-        if (p.y > height + 10) p.y = -10;
-      });
-    };
-
-    const drawParticles = () => {
-      const l = currentColors.light;
-      const lr = Math.round(l.r), lg = Math.round(l.g), lb = Math.round(l.b);
-      particles.forEach((p) => {
-        const alpha =
-          p.alpha *
-          (0.75 + Math.sin(time * 0.001 * p.speed + p.phase) * 0.25);
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${lr}, ${lg}, ${lb}, ${alpha})`;
-        ctx.fill();
-      });
-    };
-
-    /* =========================================================
        LAYER: CORNER VIGNETTE
     ========================================================= */
     const drawVignette = () => {
@@ -1113,14 +1038,10 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       // 8. Dynamic Data Beacons
       drawDataPulses();
 
-      // 9. Floating Sparkles
-      updateParticles();
-      drawParticles();
-
-      // 10. Constellation Stars
+      // 9. Constellation Stars
       drawNodes();
 
-      // 11. Dark Vignette
+      // 10. Dark Vignette
       drawVignette();
 
       // Expose smooth mouse parallax offset to CSS
