@@ -264,7 +264,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           state: 'appearing',
           stateStartTime: random(-60000, 0), // Start them at random points in their lifecycle so they don't all sync
           lifespan: random(30000, 60000), // 30-60 seconds alive
-          deadspan: random(10000, 30000), // 10-30 seconds dead
+          deadspan: random(5000, 7000), // 5-7 seconds dead
         });
       }
     };
@@ -707,30 +707,32 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
 
         if (!prefersReducedMotion) {
           // Physical magnetic repulsion
-          const dx = node.baseX - mouseX; 
-          const dy = node.baseY - mouseY;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          
-          if (dist < 250 && dist > 1) {
-            // Apply a strong push away from the cursor
-            const force = (1 - dist / 250) * 1.5;
-            node.repelVx += (dx / dist) * force;
-            node.repelVy += (dy / dist) * force;
+          if (node !== draggedNode) {
+            const dx = node.baseX - mouseX; 
+            const dy = node.baseY - mouseY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist < 250 && dist > 1) {
+              // Apply a strong push away from the cursor
+              const force = (1 - dist / 250) * 1.5;
+              node.repelVx += (dx / dist) * force;
+              node.repelVy += (dy / dist) * force;
+            }
+  
+            // Smooth glide friction (like ice)
+            node.repelVx *= 0.98;
+            node.repelVy *= 0.98;
+            
+            // Higher speed cap so they can fly smoothly across the screen
+            const speed = Math.sqrt(node.repelVx * node.repelVx + node.repelVy * node.repelVy);
+            if (speed > 12) {
+              node.repelVx = (node.repelVx / speed) * 12;
+              node.repelVy = (node.repelVy / speed) * 12;
+            }
+  
+            node.baseX += node.driftVx + node.repelVx;
+            node.baseY += node.driftVy + node.repelVy;
           }
-
-          // Smooth glide friction (like ice)
-          node.repelVx *= 0.98;
-          node.repelVy *= 0.98;
-          
-          // Higher speed cap so they can fly smoothly across the screen
-          const speed = Math.sqrt(node.repelVx * node.repelVx + node.repelVy * node.repelVy);
-          if (speed > 12) {
-            node.repelVx = (node.repelVx / speed) * 12;
-            node.repelVy = (node.repelVy / speed) * 12;
-          }
-
-          node.baseX += node.driftVx + node.repelVx;
-          node.baseY += node.driftVy + node.repelVy;
           
           // Bounce off edges smoothly like the floating pills do
           if (node.baseX < 0) {
@@ -774,6 +776,9 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             a.blastRadius = 0;
             b.isBlasting = true;
             b.blastRadius = 0;
+            if (draggedNode === a || draggedNode === b) {
+              draggedNode = null;
+            }
           }
         }
       }
@@ -1112,21 +1117,82 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     };
 
     /* =========================================================
-       EVENT LISTENERS
+       EVENT LISTENERS & DRAG PHYSICS
     ========================================================= */
-    const handleMouseMove = (e: MouseEvent) => {
+    let draggedNode: NetworkNode | null = null;
+    let lastDragX = 0;
+    let lastDragY = 0;
+    let dragVelocityX = 0;
+    let dragVelocityY = 0;
+
+    const handlePointerDown = (e: PointerEvent) => {
       const rect = wrapper.getBoundingClientRect();
-      mouseX = e.clientX - rect.left;
-      mouseY = e.clientY - rect.top;
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      mouseX = mx;
+      mouseY = my;
+
+      // Find if we clicked on a node
+      for (let i = nodes.length - 1; i >= 0; i--) {
+        const node = nodes[i];
+        if (node.state === 'dead' || node.isBlasting) continue;
+        const dx = node.baseX - mx;
+        const dy = node.baseY - my;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < node.radius + 20) { // 20px padding for easy grabbing
+          draggedNode = node;
+          lastDragX = mx;
+          lastDragY = my;
+          dragVelocityX = 0;
+          dragVelocityY = 0;
+          try { wrapper.setPointerCapture(e.pointerId); } catch(e) {}
+          break;
+        }
+      }
     };
 
-    const handleMouseLeave = () => {
-      mouseX = width / 2;
-      mouseY = height / 2;
+    const handlePointerMove = (e: PointerEvent) => {
+      const rect = wrapper.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      mouseX = mx;
+      mouseY = my;
+
+      if (draggedNode) {
+        dragVelocityX = mx - lastDragX;
+        dragVelocityY = my - lastDragY;
+        lastDragX = mx;
+        lastDragY = my;
+
+        draggedNode.baseX = mx;
+        draggedNode.baseY = my;
+        draggedNode.x = mx;
+        draggedNode.y = my;
+      }
     };
 
-    wrapper.addEventListener("mousemove", handleMouseMove);
-    wrapper.addEventListener("mouseleave", handleMouseLeave);
+    const handlePointerUp = (e: PointerEvent) => {
+      if (draggedNode) {
+        try { wrapper.releasePointerCapture(e.pointerId); } catch(e) {}
+        // Throw the node with recent velocity
+        draggedNode.repelVx = dragVelocityX * 0.9;
+        draggedNode.repelVy = dragVelocityY * 0.9;
+        draggedNode = null;
+      }
+    };
+
+    const handlePointerLeave = (e: PointerEvent) => {
+      if (!draggedNode) {
+        mouseX = width / 2;
+        mouseY = height / 2;
+      }
+    };
+
+    wrapper.addEventListener("pointerdown", handlePointerDown as any);
+    wrapper.addEventListener("pointermove", handlePointerMove as any);
+    wrapper.addEventListener("pointerup", handlePointerUp as any);
+    wrapper.addEventListener("pointercancel", handlePointerUp as any);
+    wrapper.addEventListener("pointerleave", handlePointerLeave as any);
     window.addEventListener("resize", resize);
 
     resize();
@@ -1137,8 +1203,11 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     return () => {
       cancelAnimationFrame(animationFrame);
       window.removeEventListener("resize", resize);
-      wrapper.removeEventListener("mousemove", handleMouseMove);
-      wrapper.removeEventListener("mouseleave", handleMouseLeave);
+      wrapper.removeEventListener("pointerdown", handlePointerDown as any);
+      wrapper.removeEventListener("pointermove", handlePointerMove as any);
+      wrapper.removeEventListener("pointerup", handlePointerUp as any);
+      wrapper.removeEventListener("pointercancel", handlePointerUp as any);
+      wrapper.removeEventListener("pointerleave", handlePointerLeave as any);
     };
   }, []);
 
