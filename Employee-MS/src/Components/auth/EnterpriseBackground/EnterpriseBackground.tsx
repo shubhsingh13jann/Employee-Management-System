@@ -171,6 +171,9 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       life: number;
       decay: number;
       size: number;
+      sides: number;
+      rotation: number;
+      rotSpeed: number;
     }
 
     interface Star {
@@ -752,15 +755,18 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             const cy = (a.baseY + b.baseY) / 2;
             for (let k = 0; k < 12; k++) {
               const angle = Math.random() * Math.PI * 2;
-              const speed = Math.random() * 3 + 0.5;
+              const speed = Math.random() * 2 + 0.5; // Slightly slower initial burst
               blastParticles.push({
                 x: cx,
                 y: cy,
                 vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed, // Drift in all directions evenly
+                vy: Math.sin(angle) * speed,
                 life: 1.0,
-                decay: Math.random() * 0.008 + 0.005, // Slower decay (lasts ~1.5 to 2.5 seconds)
-                size: Math.random() * 2.5 + 1
+                decay: Math.random() * 0.005 + 0.003, // Very slow decay
+                size: Math.random() * 3 + 1,
+                sides: Math.floor(Math.random() * 3) + 3, // 3 to 5 sides (triangle, square, pentagon)
+                rotation: Math.random() * Math.PI * 2,
+                rotSpeed: (Math.random() - 0.5) * 0.1
               });
             }
 
@@ -959,10 +965,11 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           p.x += p.vx;
           p.y += p.vy;
           
-          // Zero-gravity space friction (slow down smoothly)
-          p.vx *= 0.95;
-          p.vy *= 0.95;
+          // Less friction so they float for longer
+          p.vx *= 0.99;
+          p.vy *= 0.99;
           
+          p.rotation += p.rotSpeed;
           p.life -= p.decay;
 
           if (p.life <= 0) {
@@ -970,10 +977,25 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             continue;
           }
 
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rotation);
+          
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          for (let j = 0; j < p.sides; j++) {
+            const a = (Math.PI * 2 * j) / p.sides;
+            // Add a little randomness to the radius to make them jagged shapes
+            const r = p.size;
+            if (j === 0) {
+              ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+            } else {
+              ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+            }
+          }
+          ctx.closePath();
           ctx.fillStyle = `rgba(${hr}, ${hg}, ${hb}, ${p.life})`;
           ctx.fill();
+          ctx.restore();
         }
       };
 
