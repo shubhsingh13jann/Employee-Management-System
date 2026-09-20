@@ -779,26 +779,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     };
 
     const drawConnections = () => {
-      const p = currentColors.primary;
-      const pr = Math.round(p.r), pg = Math.round(p.g), pb = Math.round(p.b);
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const a = nodes[i];
-          const b = nodes[j];
-          const dist = distance(a, b);
-
-          if (dist < CONFIG.maxNetworkDistance) {
-            const opacity =
-              (1 - dist / CONFIG.maxNetworkDistance) * 0.28;
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${opacity})`;
-            ctx.lineWidth = 0.75;
-            ctx.stroke();
-          }
-        }
-      }
+      // Lines removed as requested
     };
 
     const drawStar = (ctx: CanvasRenderingContext2D, cx: number, cy: number, spikes: number, outerRadius: number, innerRadius: number) => {
@@ -934,32 +915,9 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         ctx.fill();
       });
 
-      // Feature 4: Dynamic Constellation Links
-      ctx.lineWidth = 0.5;
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const a = nodes[i] as any;
-          const b = nodes[j] as any;
-          if (a.state === 'dead' || b.state === 'dead') continue;
-          if (a.isBlasting || b.isBlasting) continue;
+      // Links removed as requested
 
-          // Only use px/py if they are defined (not dead)
-          if (a.px === undefined || b.px === undefined) continue;
-
-          const dist = distance({ x: a.px, y: a.py }, { x: b.px, y: b.py });
-          
-          if (dist < 60 && dist > 4.0) { // Limit to 60px so they don't link when far
-            const linkAlpha = (1 - dist / 60) * 0.4;
-            ctx.beginPath();
-            ctx.moveTo(a.px, a.py);
-            ctx.lineTo(b.px, b.py);
-            ctx.strokeStyle = `rgba(${hr}, ${hg}, ${hb}, ${linkAlpha})`;
-            ctx.stroke();
-            }
-          }
-        }
-
-        // Draw and update blast particles
+      // Draw and update blast particles
         for (let i = blastParticles.length - 1; i >= 0; i--) {
           const p = blastParticles[i];
           p.x += p.vx;
