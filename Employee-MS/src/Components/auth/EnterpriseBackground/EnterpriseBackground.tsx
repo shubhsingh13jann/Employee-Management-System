@@ -711,13 +711,6 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             const dx = node.baseX - mouseX; 
             const dy = node.baseY - mouseY;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            
-            if (dist < 250 && dist > 1) {
-              // Apply a strong push away from the cursor
-              const force = (1 - dist / 250) * 1.5;
-              node.repelVx += (dx / dist) * force;
-              node.repelVy += (dy / dist) * force;
-            }
   
             // Smooth glide friction (like ice)
             node.repelVx *= 0.98;
@@ -889,6 +882,8 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             // Draw a beautiful sparkling burst instead of a cheap dot
             ctx.save();
             ctx.translate(px, py);
+            
+            const progress = node.blastRadius / 100;
             ctx.rotate(progress * Math.PI / 2); // Slight rotation
             
             const spikeCount = 8;
