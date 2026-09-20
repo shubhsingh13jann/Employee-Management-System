@@ -778,9 +778,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       }
     };
 
-    const drawConnections = () => {
-      // Lines removed as requested
-    };
+    // drawConnections removed as requested
 
     const drawStar = (ctx: CanvasRenderingContext2D, cx: number, cy: number, spikes: number, outerRadius: number, innerRadius: number) => {
       let rot = (Math.PI / 2) * 3;
@@ -915,9 +913,9 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         ctx.fill();
       });
 
-      // Links removed as requested
+      // Feature 4: Dynamic Constellation Links removed as requested
 
-      // Draw and update blast particles
+        // Draw and update blast particles
         for (let i = blastParticles.length - 1; i >= 0; i--) {
           const p = blastParticles[i];
           p.x += p.vx;
