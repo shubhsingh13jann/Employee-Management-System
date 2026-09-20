@@ -747,19 +747,19 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             b.isBlasting = true;
             b.blastRadius = 0;
 
-            // Spawn split particles falling down
+            // Spawn split particles drifting in space
             const cx = (a.baseX + b.baseX) / 2;
             const cy = (a.baseY + b.baseY) / 2;
             for (let k = 0; k < 12; k++) {
               const angle = Math.random() * Math.PI * 2;
-              const speed = Math.random() * 4 + 1;
+              const speed = Math.random() * 3 + 0.5;
               blastParticles.push({
                 x: cx,
                 y: cy,
                 vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed - 2, // Shoot out and slightly up initially
+                vy: Math.sin(angle) * speed, // Drift in all directions evenly
                 life: 1.0,
-                decay: Math.random() * 0.02 + 0.015,
+                decay: Math.random() * 0.008 + 0.005, // Slower decay (lasts ~1.5 to 2.5 seconds)
                 size: Math.random() * 2.5 + 1
               });
             }
@@ -958,7 +958,11 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           const p = blastParticles[i];
           p.x += p.vx;
           p.y += p.vy;
-          p.vy += 0.15; // Gravity
+          
+          // Zero-gravity space friction (slow down smoothly)
+          p.vx *= 0.95;
+          p.vy *= 0.95;
+          
           p.life -= p.decay;
 
           if (p.life <= 0) {
