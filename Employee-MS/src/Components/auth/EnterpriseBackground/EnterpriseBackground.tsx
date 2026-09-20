@@ -273,7 +273,6 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
 
     const createScene = () => {
       createNetworkNodes();
-      createParticles();
       createStars();
     };
 
