@@ -125,7 +125,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     ========================================================= */
     const CONFIG = {
       background: "#070b13",
-      maxNetworkDistance: 240,
+      maxNetworkDistance: 100, // Reduced from 240 so lines aren't drawn when stars are far apart
       networkNodeCount: 38,
       particleCount: 50,
       starCount: 80,
@@ -163,6 +163,16 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       blastRadius?: number;
     }
 
+    interface BlastParticle {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      life: number;
+      decay: number;
+      size: number;
+    }
+
     interface Star {
       x: number;
       y: number;
@@ -173,6 +183,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
     }
 
     let nodes: NetworkNode[] = [];
+    let blastParticles: BlastParticle[] = [];
     let stars: Star[] = [];
 
     const random = (min: number, max: number) => Math.random() * (max - min) + min;
@@ -735,6 +746,24 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             a.blastRadius = 0;
             b.isBlasting = true;
             b.blastRadius = 0;
+
+            // Spawn split particles falling down
+            const cx = (a.baseX + b.baseX) / 2;
+            const cy = (a.baseY + b.baseY) / 2;
+            for (let k = 0; k < 12; k++) {
+              const angle = Math.random() * Math.PI * 2;
+              const speed = Math.random() * 4 + 1;
+              blastParticles.push({
+                x: cx,
+                y: cy,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - 2, // Shoot out and slightly up initially
+                life: 1.0,
+                decay: Math.random() * 0.02 + 0.015,
+                size: Math.random() * 2.5 + 1
+              });
+            }
+
             if (draggedNode === a || draggedNode === b) {
               draggedNode = null;
             }
@@ -845,27 +874,20 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             node.stateStartTime = time;
             node.blastRadius = 0;
           } else {
-            // Supernova expanding ring
-            ctx.beginPath();
-            ctx.arc(px, py, node.blastRadius, 0, Math.PI * 2);
-            ctx.strokeStyle = `rgba(${hr}, ${hg}, ${hb}, ${blastAlpha * 0.8})`;
-            ctx.lineWidth = 2 + (1 - blastAlpha) * 4;
-            ctx.stroke();
-
-            // Supernova radial glow
-            const glowGrad = ctx.createRadialGradient(px, py, 0, px, py, node.blastRadius * 1.5 + 1);
+            // Supernova bright central flash
+            const glowGrad = ctx.createRadialGradient(px, py, 0, px, py, 40);
             glowGrad.addColorStop(0, `rgba(255, 255, 255, ${blastAlpha})`);
-            glowGrad.addColorStop(0.2, `rgba(${hr}, ${hg}, ${hb}, ${blastAlpha * 0.8})`);
+            glowGrad.addColorStop(0.3, `rgba(${hr}, ${hg}, ${hb}, ${blastAlpha * 0.8})`);
             glowGrad.addColorStop(1, `rgba(${baseDr}, ${baseDg}, ${baseDb}, 0)`);
             
             ctx.beginPath();
-            ctx.arc(px, py, node.blastRadius * 1.5 + 1, 0, Math.PI * 2);
+            ctx.arc(px, py, 40, 0, Math.PI * 2);
             ctx.fillStyle = glowGrad;
             ctx.fill();
 
-            // Supernova spikes
-            drawStar(ctx, px, py, 8, node.blastRadius * 1.2, node.blastRadius * 0.3);
-            ctx.fillStyle = `rgba(255, 255, 255, ${blastAlpha * 0.9})`;
+            // Quick sparkle core
+            drawStar(ctx, px, py, 4, node.radius * 4 * blastAlpha, node.radius * blastAlpha);
+            ctx.fillStyle = `rgba(255, 255, 255, ${blastAlpha})`;
             ctx.fill();
           }
           return; // Skip drawing normal star
@@ -927,12 +949,31 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             ctx.lineTo(b.px, b.py);
             ctx.strokeStyle = `rgba(${hr}, ${hg}, ${hb}, ${linkAlpha})`;
             ctx.stroke();
+            }
           }
         }
-      }
-    };
 
-    /* =========================================================
+        // Draw and update blast particles
+        for (let i = blastParticles.length - 1; i >= 0; i--) {
+          const p = blastParticles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.15; // Gravity
+          p.life -= p.decay;
+
+          if (p.life <= 0) {
+            blastParticles.splice(i, 1);
+            continue;
+          }
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${hr}, ${hg}, ${hb}, ${p.life})`;
+          ctx.fill();
+        }
+      };
+
+      /* =========================================================
        LAYER: TRAVELLING DATA PULSES
     ========================================================= */
     const drawDataPulses = () => {
