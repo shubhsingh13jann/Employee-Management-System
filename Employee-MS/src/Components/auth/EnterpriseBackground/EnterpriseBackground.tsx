@@ -1055,7 +1055,6 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
 
       // 7. Constellation Connections
       updateNodes();
-      drawConnections();
 
       // 8. Dynamic Data Beacons
       drawDataPulses();
