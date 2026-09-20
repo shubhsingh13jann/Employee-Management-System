@@ -886,21 +886,43 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             node.stateStartTime = time;
             node.blastRadius = 0;
           } else {
+            // Draw a beautiful sparkling burst instead of a cheap dot
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(progress * Math.PI / 2); // Slight rotation
+            
+            const spikeCount = 8;
+            const outerRadius = node.blastRadius * 1.5;
+            const innerRadius = node.blastRadius * 0.2;
+            
+            // Sparkle lines shooting outwards
             ctx.beginPath();
-            ctx.arc(px, py, node.blastRadius, 0, Math.PI * 2);
+            for(let i = 0; i < spikeCount; i++) {
+              const angle = (i * Math.PI * 2) / spikeCount;
+              ctx.moveTo(Math.cos(angle) * innerRadius, Math.sin(angle) * innerRadius);
+              ctx.lineTo(Math.cos(angle) * outerRadius, Math.sin(angle) * outerRadius);
+            }
             ctx.strokeStyle = `rgba(255, 255, 255, ${blastAlpha})`;
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 1.5;
             ctx.stroke();
-            // Core flash
+
+            // Glowing halo
             ctx.beginPath();
-            ctx.arc(px, py, node.radius * 6, 0, Math.PI * 2);
+            ctx.arc(0, 0, node.blastRadius * 0.6, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${pr}, ${pg}, ${pb}, ${blastAlpha * 0.3})`;
+            ctx.fill();
+            
+            // Shrinking bright core
+            ctx.beginPath();
+            ctx.arc(0, 0, Math.max(0.1, node.radius * (1 - progress)), 0, Math.PI * 2);
             ctx.fillStyle = `rgba(255, 255, 255, ${blastAlpha})`;
             ctx.fill();
+            
+            ctx.restore();
           }
           return; // Skip drawing normal star
         }
 
-        // Feature 3: Cursor Illumination & Magnetic Repulsion
         // Feature 3: Cursor Illumination
         const dx = px - smoothMouseX;
         const dy = py - smoothMouseY;
