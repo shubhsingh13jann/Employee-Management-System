@@ -203,6 +203,17 @@ export const RadialRevealTransition: React.FC<RadialRevealTransitionProps> = ({
     setIsClosing(true);
   };
 
+  // Keyboard Accessibility: Escape key closes modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !isClosing) {
+        handleTriggerClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isClosing, originX, originY]);
+
   const gradCx = dimensions.width > 0 ? `${((originX / dimensions.width) * 100).toFixed(1)}%` : "50%";
   const gradCy = dimensions.height > 0 ? `${((originY / dimensions.height) * 100).toFixed(1)}%` : "20%";
 

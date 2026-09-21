@@ -63,11 +63,20 @@ export const useCharacterKinematics = ({
     return () => window.removeEventListener("mousemove", handleMove);
   }, []);
 
-  // Periodic blinking cycle
+  // Periodic blinking cycle with organic double-blink variation
   useEffect(() => {
     const interval = setInterval(() => {
       setBlink(true);
-      setTimeout(() => setBlink(false), 160);
+      setTimeout(() => {
+        setBlink(false);
+        // 30% chance of a subtle second flutter-blink (lifelike organic feel)
+        if (Math.random() < 0.3) {
+          setTimeout(() => {
+            setBlink(true);
+            setTimeout(() => setBlink(false), 130);
+          }, 110);
+        }
+      }, 160);
     }, 3600);
     return () => clearInterval(interval);
   }, []);

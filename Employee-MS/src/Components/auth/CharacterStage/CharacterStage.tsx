@@ -339,6 +339,14 @@ export const CharacterStage: React.FC<CharacterStageProps> = ({
                 <circle cx="294" cy="208" r="4.5" fill="#0f172a" />
                 <circle cx="295.6" cy="206.4" r="1.6" fill="#ffffff" />
               </motion.g>
+
+              {/* Blink */}
+              {blink && !isPassword && (
+                <>
+                  <rect x="263" y="196" width="22" height="24" rx="4" fill="url(#pinkGrad)" />
+                  <rect x="284" y="196" width="22" height="24" rx="4" fill="url(#pinkGrad)" />
+                </>
+              )}
             </g>
 
             {/* Mouth */}
@@ -425,6 +433,14 @@ export const CharacterStage: React.FC<CharacterStageProps> = ({
                 <circle cx="386" cy="198" r="4.2" fill="#0f172a" />
                 <circle cx="387.5" cy="196.5" r="1.5" fill="#ffffff" />
               </motion.g>
+
+              {/* Blink */}
+              {blink && !isPassword && (
+                <>
+                  <rect x="346" y="187" width="20" height="22" rx="4" fill="url(#yellowGrad)" />
+                  <rect x="376" y="187" width="20" height="22" rx="4" fill="url(#yellowGrad)" />
+                </>
+              )}
             </g>
 
             {/* Mouth */}
@@ -508,6 +524,14 @@ export const CharacterStage: React.FC<CharacterStageProps> = ({
                 <circle cx="174" cy="245" r="4.5" fill="#0f172a" />
                 <circle cx="175.6" cy="243.4" r="1.6" fill="#ffffff" />
               </motion.g>
+
+              {/* Blink */}
+              {blink && !isPassword && (
+                <>
+                  <rect x="135" y="233" width="22" height="24" rx="4" fill="url(#orangeGrad)" />
+                  <rect x="163" y="233" width="22" height="24" rx="4" fill="url(#orangeGrad)" />
+                </>
+              )}
             </g>
 
             {/* Mouth */}

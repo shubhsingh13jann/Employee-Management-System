@@ -99,6 +99,38 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
     return () => clearTimeout(timeout);
   }, [capsLockOn, activeField]);
 
+  // Remember Me: Load saved email on mount
+  useEffect(() => {
+    try {
+      const savedEmail = localStorage.getItem("ems_remember_email");
+      if (savedEmail) {
+        setEmail(savedEmail);
+        setRememberMe(true);
+        setCaretProgress(Math.min(savedEmail.length / 28, 1));
+      }
+    } catch {}
+  }, []);
+
+  // Live Password Strength Evaluator (for Sign Up mode)
+  const getPasswordStrength = (pwd: string) => {
+    if (!pwd) return { score: 0, label: "", color: "" };
+    let score = 0;
+    if (pwd.length >= 6) score++;
+    if (pwd.length >= 10) score++;
+    if (/[A-Z]/.test(pwd) && /[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    if (score <= 1) return { score: 1, label: "Weak", color: "#f87171" };
+    if (score <= 3) return { score: 2, label: "Medium", color: "#fbbf24" };
+    return { score: 3, label: "Strong", color: "#34d399" };
+  };
+
+  // Forgot Password Modal State
+  const [forgotModalOpen, setForgotModalOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotSent, setForgotSent] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotError, setForgotError] = useState("");
+
   // Fetch departments for registration
   useEffect(() => {
     const fetchDepts = async () => {
@@ -149,6 +181,15 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
         setAuthStatus("submitting");
         const res = await login(email, password, role);
         setAuthStatus("success");
+
+        // Remember Me persistence
+        try {
+          if (rememberMe) {
+            localStorage.setItem("ems_remember_email", email);
+          } else {
+            localStorage.removeItem("ems_remember_email");
+          }
+        } catch {}
 
         setTimeout(() => {
           const targetRoute = getDefaultRouteForRole(res.user.role);
@@ -485,6 +526,37 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                 />
                 <div className="auth-input-focus-line"></div>
 
+                {/* Real-time Password Strength Meter (Only in Sign Up Mode) */}
+                {authMode === "signup" && password.length > 0 && (
+                  <div className="mt-1.5 d-flex align-items-center justify-content-between">
+                    <div className="d-flex gap-1 flex-grow-1 me-2" style={{ height: "3px" }}>
+                      {[1, 2, 3].map((step) => {
+                        const strength = getPasswordStrength(password);
+                        const isActive = strength.score >= step;
+                        return (
+                          <div
+                            key={step}
+                            className="flex-grow-1 rounded-pill"
+                            style={{
+                              background: isActive ? strength.color : "rgba(255, 255, 255, 0.15)",
+                              transition: "background 0.25s ease"
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        fontWeight: "600",
+                        color: getPasswordStrength(password).color
+                      }}
+                    >
+                      {getPasswordStrength(password).label}
+                    </span>
+                  </div>
+                )}
+
                 {/* Eye Toggle Button */}
               <button
                 type="button"
@@ -509,30 +581,43 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
               >
                 <div className="d-flex align-items-center justify-content-between mb-1">
                   <label className="auth-clean-label mb-0">Confirm Password *</label>
-                  <AnimatePresence>
-                    {capsLockWarningVisible && (
-                      <motion.div
-                        initial={{ opacity: 0, x: 5 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 5 }}
-                        transition={{ duration: 0.2 }}
+                  <div className="d-flex align-items-center gap-2">
+                    {confirmPassword.length > 0 && (
+                      <span
                         style={{
-                          background: "rgba(255, 255, 255, 0.05)",
-                          color: "#f8fafc",
-                          border: "1px solid rgba(255, 255, 255, 0.2)",
                           fontSize: "10px",
-                          padding: "2px 8px",
-                          borderRadius: "9999px",
                           fontWeight: "600",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px"
+                          color: confirmPassword === password ? "#34d399" : "#f87171"
                         }}
                       >
-                        <i className="bi bi-capslock-fill text-warning"></i> Caps Lock ON
-                      </motion.div>
+                        {confirmPassword === password ? "✓ Match" : "✗ Do not match"}
+                      </span>
                     )}
-                  </AnimatePresence>
+                    <AnimatePresence>
+                      {capsLockWarningVisible && (
+                        <motion.div
+                          initial={{ opacity: 0, x: 5 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 5 }}
+                          transition={{ duration: 0.2 }}
+                          style={{
+                            background: "rgba(255, 255, 255, 0.05)",
+                            color: "#f8fafc",
+                            border: "1px solid rgba(255, 255, 255, 0.2)",
+                            fontSize: "10px",
+                            padding: "2px 8px",
+                            borderRadius: "9999px",
+                            fontWeight: "600",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px"
+                          }}
+                        >
+                          <i className="bi bi-capslock-fill text-warning"></i> Caps Lock ON
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -571,7 +656,12 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
 
                 <button
                   type="button"
-                  onClick={() => alert("Password reset instructions have been dispatched to your work email.")}
+                  onClick={() => {
+                    setForgotEmail(email || "");
+                    setForgotSent(false);
+                    setForgotError("");
+                    setForgotModalOpen(true);
+                  }}
                   className="btn btn-link p-0 text-decoration-none small text-secondary"
                   style={{ fontSize: "11.5px" }}
                 >
@@ -661,6 +751,183 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
           )}
         </div>
       </div>
+
+      {/* ============================================================
+          MODERN GLASSMORPHIC FORGOT PASSWORD MODAL
+          ============================================================ */}
+      <AnimatePresence>
+        {forgotModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="position-fixed inset-0 w-100 h-100 d-flex align-items-center justify-content-center p-3"
+            style={{
+              zIndex: 99999,
+              background: "rgba(3, 7, 18, 0.75)",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+              pointerEvents: "auto"
+            }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setForgotModalOpen(false);
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.94, opacity: 0, y: 12 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.94, opacity: 0, y: 12 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              className="p-4 rounded-4 position-relative"
+              style={{
+                maxWidth: "420px",
+                width: "100%",
+                background: "rgba(15, 23, 42, 0.92)",
+                backdropFilter: "blur(24px)",
+                WebkitBackdropFilter: "blur(24px)",
+                border: "1px solid rgba(255, 255, 255, 0.18)",
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1) inset",
+                color: "#ffffff"
+              }}
+            >
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={() => setForgotModalOpen(false)}
+                className="btn btn-sm btn-link text-white-50 p-1 position-absolute top-0 end-0 m-3"
+                title="Close"
+              >
+                <i className="bi bi-x-lg" style={{ fontSize: "14px" }}></i>
+              </button>
+
+              {!forgotSent ? (
+                <div>
+                  <div className="d-flex align-items-center gap-2.5 mb-2">
+                    <div
+                      className="rounded-3 d-flex align-items-center justify-content-center"
+                      style={{
+                        width: "38px",
+                        height: "38px",
+                        background: "rgba(59, 130, 246, 0.15)",
+                        border: "1px solid rgba(59, 130, 246, 0.3)",
+                        color: "#60a5fa"
+                      }}
+                    >
+                      <i className="bi bi-key-fill" style={{ fontSize: "18px" }}></i>
+                    </div>
+                    <div>
+                      <h5 className="fw-bold mb-0 text-white" style={{ fontSize: "17px" }}>
+                        Reset Password
+                      </h5>
+                      <small className="text-white-50" style={{ fontSize: "11px" }}>
+                        Enterprise Account Recovery
+                      </small>
+                    </div>
+                  </div>
+
+                  <p className="text-secondary small mb-3" style={{ fontSize: "12px", lineHeight: 1.5 }}>
+                    Enter your registered workforce email and we'll dispatch secure recovery instructions to your inbox.
+                  </p>
+
+                  {forgotError && (
+                    <div className="alert alert-danger py-1.5 px-2.5 rounded-3 small mb-2 border-0" style={{ fontSize: "11.5px" }}>
+                      {forgotError}
+                    </div>
+                  )}
+
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (!forgotEmail.trim()) {
+                        setForgotError("Please enter your work email.");
+                        return;
+                      }
+                      setForgotLoading(true);
+                      setForgotError("");
+                      setTimeout(() => {
+                        setForgotLoading(false);
+                        setForgotSent(true);
+                      }, 900);
+                    }}
+                  >
+                    <div className="auth-clean-input-group mb-3">
+                      <label className="auth-clean-label">Work Email</label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="name@company.com"
+                        value={forgotEmail}
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        className="auth-clean-input"
+                        autoFocus
+                      />
+                    </div>
+
+                    <div className="d-flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setForgotModalOpen(false)}
+                        className="btn btn-sm btn-outline-secondary w-50 rounded-3 text-white border-secondary"
+                        style={{ fontSize: "12.5px" }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={forgotLoading}
+                        className="btn btn-sm btn-primary w-50 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-1.5"
+                        style={{ fontSize: "12.5px" }}
+                      >
+                        {forgotLoading ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm" role="status" />
+                            <span>Sending...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Send Link</span>
+                            <i className="bi bi-send-fill" style={{ fontSize: "11px" }} />
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              ) : (
+                <div className="text-center py-2">
+                  <div
+                    className="mx-auto rounded-circle d-flex align-items-center justify-content-center mb-2.5"
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      background: "rgba(16, 185, 129, 0.15)",
+                      border: "1px solid rgba(16, 185, 129, 0.3)",
+                      color: "#34d399",
+                      fontSize: "24px"
+                    }}
+                  >
+                    <i className="bi bi-check-lg"></i>
+                  </div>
+                  <h5 className="fw-bold text-white mb-1" style={{ fontSize: "17px" }}>
+                    Recovery Link Dispatched
+                  </h5>
+                  <p className="text-secondary small mb-3" style={{ fontSize: "12px", lineHeight: 1.5 }}>
+                    We have dispatched password reset instructions to <strong className="text-white">{forgotEmail}</strong>. Please check your inbox.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setForgotModalOpen(false)}
+                    className="btn btn-sm btn-primary w-100 rounded-3 fw-bold"
+                    style={{ fontSize: "12.5px" }}
+                  >
+                    Back to Sign In
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
     </RadialRevealTransition>
   );
