@@ -15,6 +15,7 @@ import SuspenseFallback from "./Components/common/SuspenseFallback";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ResetPassword from "./pages/ResetPassword";
 
 // 👑 Lazy-Loaded Admin Pages
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -48,7 +49,8 @@ const AnimatedAppContent = () => {
     location.pathname === "/login" ||
     location.pathname === "/signup" ||
     location.pathname === "/adminlogin" ||
-    location.pathname === "/dashboard";
+    location.pathname === "/dashboard" ||
+    location.pathname.startsWith("/reset-password");
   const transitionKey = isAuthRoute ? "auth-root" : location.pathname;
 
   return (
@@ -62,6 +64,7 @@ const AnimatedAppContent = () => {
               <Route path="login" element={<Login initialMode="login" />} />
               <Route path="signup" element={<Login initialMode="signup" />} />
             </Route>
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/adminlogin" element={<Navigate to="/login" replace />} />
             <Route path="/dashboard" element={<Navigate to="/login" replace />} />
 
