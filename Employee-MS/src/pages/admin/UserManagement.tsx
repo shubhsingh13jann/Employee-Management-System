@@ -196,8 +196,16 @@ const UserManagement = () => {
                   <tr key={u.id}>
                     <td className="px-4">
                       <div className="d-flex align-items-center gap-2">
-                        <div className="bg-primary bg-opacity-10 text-primary rounded-circle fw-bold d-flex align-items-center justify-content-center" style={{ width: "36px", height: "36px" }}>
-                          {u.name.charAt(0)}
+                        <div className="bg-primary bg-opacity-10 text-primary rounded-circle fw-bold d-flex align-items-center justify-content-center overflow-hidden flex-shrink-0" style={{ width: "36px", height: "36px" }}>
+                          {u.image_url ? (
+                            <img
+                              src={u.image_url.startsWith("http") ? u.image_url : `http://localhost:3000${u.image_url}`}
+                              alt={u.name}
+                              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                            />
+                          ) : (
+                            u.name.charAt(0)
+                          )}
                         </div>
                         <div>
                           <p className="mb-0 fw-semibold text-dark">{u.name}</p>

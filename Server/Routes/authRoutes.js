@@ -11,10 +11,11 @@ import {
   register
 } from "../controllers/authController.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
+import { uploadAvatar } from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
-router.post("/register", register);
+router.post("/register", uploadAvatar.single("image"), register);
 router.post("/login", login);
 router.post("/verify-2fa", verify2FA);
 router.post("/resend-2fa", resend2FA);

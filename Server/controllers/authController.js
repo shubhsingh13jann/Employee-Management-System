@@ -519,12 +519,13 @@ export const register = async (req, res) => {
     };
     const userSalary = salary || defaultSalaries[userRole] || 50000.00;
     const deptId = userRole === "admin" ? null : (department_id ? Number(department_id) : 1);
+    const imageUrl = req.file ? `/public/uploads/${req.file.filename}` : (req.body.image_url || "");
 
     // 1. Insert into unified users table
     const [result] = await pool.query(
-      `INSERT INTO users (name, email, password_hash, role, department_id, phone, address, salary)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name.trim(), email.trim(), password_hash, userRole, deptId, phone || "", address || "", userSalary]
+      `INSERT INTO users (name, email, password_hash, role, department_id, phone, address, salary, image_url)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name.trim(), email.trim(), password_hash, userRole, deptId, phone || "", address || "", userSalary, imageUrl]
     );
 
     // 2. Also insert into the corresponding separate role table

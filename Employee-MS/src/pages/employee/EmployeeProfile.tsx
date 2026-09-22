@@ -44,10 +44,18 @@ const EmployeeProfile = () => {
             <div className="p-4 text-white" style={{ background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)" }}>
               <div className="d-flex flex-column flex-sm-row align-items-center gap-3">
                 <div
-                  className="bg-white text-primary rounded-circle fw-bold d-flex align-items-center justify-content-center shadow"
+                  className="bg-white text-primary rounded-circle fw-bold d-flex align-items-center justify-content-center shadow overflow-hidden"
                   style={{ width: "80px", height: "80px", fontSize: "32px" }}
                 >
-                  {profile?.name?.charAt(0) || "E"}
+                  {profile?.image_url ? (
+                    <img
+                      src={profile.image_url.startsWith("http") ? profile.image_url : `http://localhost:3000${profile.image_url}`}
+                      alt={profile?.name}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  ) : (
+                    profile?.name?.charAt(0) || "E"
+                  )}
                 </div>
                 <div className="text-center text-sm-start">
                   <h4 className="fw-bold mb-0">{profile?.name}</h4>

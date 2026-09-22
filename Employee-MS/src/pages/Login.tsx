@@ -100,7 +100,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
   const [lockoutSeconds, setLockoutSeconds] = useState(0);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: any;
     if (lockoutSeconds > 0) {
       timer = setInterval(() => {
         setLockoutSeconds((prev) => {
@@ -121,9 +121,54 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
+  // Profile Picture Upload State (Sign Up)
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (avatarPreview) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview]);
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Avatar image must be smaller than 5MB.");
+      return;
+    }
+
+    if (!["image/jpeg", "image/png", "image/webp", "image/jpg"].includes(file.type)) {
+      setError("Please select a valid image file (.png, .jpg, .webp).");
+      return;
+    }
+
+    setAvatarFile(file);
+    const objectUrl = URL.createObjectURL(file);
+    setAvatarPreview(objectUrl);
+    setError("");
+  };
+
+  const handleRemoveAvatar = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setAvatarFile(null);
+    if (avatarPreview) {
+      URL.revokeObjectURL(avatarPreview);
+      setAvatarPreview(null);
+    }
+    if (avatarInputRef.current) {
+      avatarInputRef.current.value = "";
+    }
+  };
+
   // 2FA Resend Countdown Timer
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: any;
     if (twoFactorOpen && resendCooldown > 0) {
       timer = setInterval(() => {
         setResendCooldown((prev) => prev - 1);
@@ -253,7 +298,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
 
   // Caps Lock Warning Auto-Hide
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
+    let timeout: any;
     if (capsLockOn && activeField === "password") {
       setCapsLockWarningVisible(true);
       timeout = setTimeout(() => {
@@ -410,26 +455,36 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
       try {
         setSubmitting(true);
         setAuthStatus("submitting");
-        const res = await api.post("/api/auth/register", {
-          name,
-          email,
-          password,
-          role,
-          department_id: Number(departmentId) || 1,
-          phone,
-          address
+
+        const formData = new FormData();
+        formData.append("name", name.trim());
+        formData.append("email", email.trim());
+        formData.append("password", password);
+        formData.append("role", role);
+        formData.append("department_id", String(Number(departmentId) || 1));
+        if (phone) formData.append("phone", phone);
+        if (address) formData.append("address", address);
+        if (avatarFile) formData.append("image", avatarFile);
+
+        const res = await api.post("/api/auth/register", formData, {
+          headers: { "Content-Type": "multipart/form-data" }
         });
 
         if (res.data.status) {
           setAuthStatus("success");
           setSuccessMsg("Account created successfully! Switching you to Sign In...");
+          setAvatarFile(null);
+          if (avatarPreview) {
+            URL.revokeObjectURL(avatarPreview);
+            setAvatarPreview(null);
+          }
           setTimeout(() => {
             setAuthMode("login");
             setSuccessMsg("");
             setAuthStatus("idle");
           }, 1500);
         }
-      } catch (err) {
+      } catch (err: any) {
         setError(err.response?.data?.error || "Registration failed. Please check information.");
         setAuthStatus("error");
       } finally {
@@ -630,6 +685,102 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
               </div>
             </div>
 
+            {/* If Sign Up Mode: Avatar Upload with Live Circular Preview */}
+            {authMode === "signup" && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-2.5"
+              >
+                <input
+                  type="file"
+                  ref={avatarInputRef}
+                  accept="image/png,image/jpeg,image/jpg,image/webp"
+                  onChange={handleAvatarChange}
+                  style={{ display: "none" }}
+                />
+
+                <div
+                  className="p-2.5 rounded-3 d-flex align-items-center gap-3"
+                  style={{
+                    background: "rgba(255, 255, 255, 0.03)",
+                    border: "1px dashed rgba(255, 255, 255, 0.2)"
+                  }}
+                >
+                  {/* Clickable Circular Avatar Container */}
+                  <div
+                    onClick={() => avatarInputRef.current?.click()}
+                    className="position-relative rounded-circle d-flex align-items-center justify-content-center cursor-pointer flex-shrink-0"
+                    style={{
+                      width: "56px",
+                      height: "56px",
+                      background: avatarPreview ? "#0f172a" : "rgba(255, 255, 255, 0.08)",
+                      border: "2px solid rgba(255, 255, 255, 0.25)",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                      overflow: "hidden"
+                    }}
+                    title="Click to choose profile picture"
+                  >
+                    {avatarPreview ? (
+                      <img
+                        src={avatarPreview}
+                        alt="Avatar Preview"
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    ) : (
+                      <i className="bi bi-camera-fill text-white-50 fs-5"></i>
+                    )}
+
+                    {/* Camera icon badge */}
+                    <div
+                      className="position-absolute bottom-0 end-0 rounded-circle d-flex align-items-center justify-content-center"
+                      style={{
+                        width: "18px",
+                        height: "18px",
+                        background: "#3b82f6",
+                        color: "#ffffff",
+                        fontSize: "9px",
+                        border: "1.5px solid #0f172a"
+                      }}
+                    >
+                      <i className="bi bi-pencil-fill"></i>
+                    </div>
+                  </div>
+
+                  <div className="flex-grow-1">
+                    <div className="d-flex align-items-center justify-content-between">
+                      <label className="auth-clean-label mb-0" style={{ fontSize: "11px" }}>
+                        Profile Picture <span className="text-white-50 fw-normal">(Optional)</span>
+                      </label>
+                      {avatarFile && (
+                        <button
+                          type="button"
+                          onClick={handleRemoveAvatar}
+                          className="btn btn-link p-0 text-danger small text-decoration-none"
+                          style={{ fontSize: "10.5px" }}
+                        >
+                          <i className="bi bi-trash me-1"></i>Remove
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-white-50 mb-1.5" style={{ fontSize: "10px", lineHeight: 1.3 }}>
+                      {avatarFile ? avatarFile.name : "Upload your work photo (PNG, JPG, WEBP • Max 5MB)"}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => avatarInputRef.current?.click()}
+                      className="btn btn-sm btn-outline-light py-0.5 px-2.5 rounded-2"
+                      style={{ fontSize: "10.5px", borderColor: "rgba(255, 255, 255, 0.25)" }}
+                    >
+                      <i className="bi bi-upload me-1"></i>
+                      {avatarFile ? "Change Image" : "Choose File"}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             {/* If Sign Up Mode: Full Name */}
             {authMode === "signup" && (
               <motion.div
@@ -750,9 +901,8 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyUp={(e) => setCapsLockOn(e.getModifierState("CapsLock"))}
                   onKeyDown={(e) => setCapsLockOn(e.getModifierState("CapsLock"))}
-                  onFocus={(e) => {
+                  onFocus={() => {
                     setActiveField("password");
-                    setCapsLockOn(e.getModifierState("CapsLock"));
                   }}
                   onBlur={() => setActiveField(null)}
                   className="auth-clean-input"
@@ -860,9 +1010,8 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   onKeyUp={(e) => setCapsLockOn(e.getModifierState("CapsLock"))}
                   onKeyDown={(e) => setCapsLockOn(e.getModifierState("CapsLock"))}
-                  onFocus={(e) => {
+                  onFocus={() => {
                     setActiveField("password");
-                    setCapsLockOn(e.getModifierState("CapsLock"));
                   }}
                   onBlur={() => setActiveField(null)}
                   className="auth-clean-input"
@@ -1271,7 +1420,9 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   {otpDigits.map((digit, idx) => (
                     <input
                       key={idx}
-                      ref={(el) => (otpInputRefs.current[idx] = el)}
+                      ref={(el) => {
+                        otpInputRefs.current[idx] = el;
+                      }}
                       type="text"
                       inputMode="numeric"
                       maxLength={1}
