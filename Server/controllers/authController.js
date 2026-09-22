@@ -452,9 +452,11 @@ export const register = async (req, res) => {
       return res.status(400).json({ status: false, error: "Name, email, and password are required" });
     }
 
+    // Support all 4 organizational tiers
     const allowedRoles = ["admin", "manager", "supervisor", "employee"];
     const userRole = allowedRoles.includes(role) ? role : "employee";
 
+    // Check if email already exists
     const [existing] = await pool.query("SELECT id FROM users WHERE email = ?", [email.trim()]);
     if (existing.length > 0) {
       return res.status(400).json({ status: false, error: "An account with this email already exists" });
@@ -472,12 +474,14 @@ export const register = async (req, res) => {
     const userSalary = salary || defaultSalaries[userRole] || 50000.00;
     const deptId = userRole === "admin" ? null : (department_id ? Number(department_id) : 1);
 
+    // 1. Insert into unified users table
     const [result] = await pool.query(
       `INSERT INTO users (name, email, password_hash, role, department_id, phone, address, salary)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [name.trim(), email.trim(), password_hash, userRole, deptId, phone || "", address || "", userSalary]
     );
 
+    // 2. Also insert into the corresponding separate role table
     try {
       if (userRole === "admin") {
         await pool.query(
@@ -519,3 +523,4 @@ export const register = async (req, res) => {
     return res.status(500).json({ status: false, error: "Failed to register account" });
   }
 };
+

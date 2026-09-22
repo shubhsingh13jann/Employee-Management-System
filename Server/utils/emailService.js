@@ -272,3 +272,4 @@ export const sendPasswordResetEmail = async (toEmail, userName, resetUrl) => {
     html: getBrandedEmailWrapper({ title, preheader, bodyContent, alertColor: "#6366f1" })
   });
 };
+
