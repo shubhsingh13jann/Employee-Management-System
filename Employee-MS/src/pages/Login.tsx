@@ -82,8 +82,149 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
   const [successMsg, setSuccessMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const { login, getDefaultRouteForRole } = useAuth();
+  const { login, verify2FA, resend2FA, getDefaultRouteForRole } = useAuth();
   const containerRef = useRef(null);
+
+  // 2FA Verification Modal State
+  const [twoFactorOpen, setTwoFactorOpen] = useState(false);
+  const [twoFactorData, setTwoFactorData] = useState<{ tempToken: string; maskedEmail: string } | null>(null);
+  const [otpDigits, setOtpDigits] = useState<string[]>(["", "", "", "", "", ""]);
+  const [twoFactorLoading, setTwoFactorLoading] = useState(false);
+  const [twoFactorError, setTwoFactorError] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(45);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccessMsg, setResendSuccessMsg] = useState("");
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // 2FA Resend Countdown Timer
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (twoFactorOpen && resendCooldown > 0) {
+      timer = setInterval(() => {
+        setResendCooldown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [twoFactorOpen, resendCooldown]);
+
+  // Auto-focus first input when 2FA modal opens
+  useEffect(() => {
+    if (twoFactorOpen) {
+      setOtpDigits(["", "", "", "", "", ""]);
+      setTwoFactorError("");
+      setResendSuccessMsg("");
+      setTimeout(() => {
+        otpInputRefs.current[0]?.focus();
+      }, 250);
+    }
+  }, [twoFactorOpen]);
+
+  // 2FA Input Change Handler
+  const handleOtpChange = (index: number, value: string) => {
+    const cleaned = value.replace(/\D/g, "");
+    if (!cleaned) {
+      const newDigits = [...otpDigits];
+      newDigits[index] = "";
+      setOtpDigits(newDigits);
+      return;
+    }
+
+    const digit = cleaned.slice(-1);
+    const newDigits = [...otpDigits];
+    newDigits[index] = digit;
+    setOtpDigits(newDigits);
+    setTwoFactorError("");
+
+    if (index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+
+    if (newDigits.every((d) => d.length === 1)) {
+      handleVerify2FASubmit(newDigits.join(""));
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (!pastedData) return;
+
+    const newDigits = ["", "", "", "", "", ""];
+    for (let i = 0; i < pastedData.length; i++) {
+      newDigits[i] = pastedData[i];
+    }
+    setOtpDigits(newDigits);
+    setTwoFactorError("");
+
+    const nextFocusIndex = Math.min(pastedData.length, 5);
+    otpInputRefs.current[nextFocusIndex]?.focus();
+
+    if (pastedData.length === 6) {
+      handleVerify2FASubmit(pastedData);
+    }
+  };
+
+  const handleVerify2FASubmit = async (codeToVerify?: string) => {
+    const code = codeToVerify || otpDigits.join("");
+    if (code.length !== 6) {
+      setTwoFactorError("Please enter the complete 6-digit verification code.");
+      return;
+    }
+    if (!twoFactorData?.tempToken) {
+      setTwoFactorError("Verification session expired. Please sign in again.");
+      return;
+    }
+
+    try {
+      setTwoFactorLoading(true);
+      setTwoFactorError("");
+      const res = await verify2FA(twoFactorData.tempToken, code);
+      setAuthStatus("success");
+      setTwoFactorOpen(false);
+
+      // Remember Me persistence
+      try {
+        if (rememberMe) {
+          localStorage.setItem("ems_remember_email", email);
+        } else {
+          localStorage.removeItem("ems_remember_email");
+        }
+      } catch {}
+
+      setTimeout(() => {
+        const targetRoute = getDefaultRouteForRole(res.user.role);
+        navigate(targetRoute, { replace: true });
+      }, 600);
+    } catch (err: any) {
+      setTwoFactorError(err.response?.data?.error || err.message || "Invalid or expired verification code.");
+    } finally {
+      setTwoFactorLoading(false);
+    }
+  };
+
+  const handleResend2FA = async () => {
+    if (resendCooldown > 0 || !twoFactorData?.tempToken || resendLoading) return;
+    try {
+      setResendLoading(true);
+      setTwoFactorError("");
+      const res = await resend2FA(twoFactorData.tempToken);
+      if (res.status) {
+        setResendSuccessMsg("A new verification code has been dispatched.");
+        setResendCooldown(45);
+        setTimeout(() => setResendSuccessMsg(""), 4000);
+      }
+    } catch (err: any) {
+      setTwoFactorError(err.response?.data?.error || "Failed to resend code. Please try again.");
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   // Caps Lock Warning Auto-Hide
   useEffect(() => {
@@ -180,6 +321,18 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
         setSubmitting(true);
         setAuthStatus("submitting");
         const res = await login(email, password, role);
+
+        if (res.requires2FA) {
+          setSubmitting(false);
+          setAuthStatus("idle");
+          setTwoFactorData({
+            tempToken: res.tempToken,
+            maskedEmail: res.maskedEmail || email
+          });
+          setTwoFactorOpen(true);
+          return;
+        }
+
         setAuthStatus("success");
 
         // Remember Me persistence
@@ -195,8 +348,12 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
           const targetRoute = getDefaultRouteForRole(res.user.role);
           navigate(targetRoute, { replace: true });
         }, 700);
-      } catch (err) {
-        setError(err.response?.data?.error || err.message || "Failed to sign in. Please verify credentials.");
+      } catch (err: any) {
+        const backendError = err.response?.data?.error || err.message || "Failed to sign in. Please verify credentials.";
+        const securityAlert = err.response?.data?.securityAlertSent
+          ? " (⚠️ Security warning email dispatched)"
+          : "";
+        setError(backendError + securityAlert);
         setAuthStatus("error");
         setTimeout(() => setAuthStatus("idle"), 1400);
       } finally {
@@ -836,18 +993,24 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   )}
 
                   <form
-                    onSubmit={(e) => {
+                    onSubmit={async (e) => {
                       e.preventDefault();
                       if (!forgotEmail.trim()) {
                         setForgotError("Please enter your work email.");
                         return;
                       }
-                      setForgotLoading(true);
-                      setForgotError("");
-                      setTimeout(() => {
+                      try {
+                        setForgotLoading(true);
+                        setForgotError("");
+                        const res = await api.post("/api/auth/forgot-password", { email: forgotEmail.trim() });
+                        if (res.data.status) {
+                          setForgotSent(true);
+                        }
+                      } catch (err: any) {
+                        setForgotError(err.response?.data?.error || "Failed to dispatch recovery link.");
+                      } finally {
                         setForgotLoading(false);
-                        setForgotSent(true);
-                      }, 900);
+                      }
                     }}
                   >
                     <div className="auth-clean-input-group mb-3">
@@ -924,6 +1087,184 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   </button>
                 </div>
               )}
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* ============================================================
+            TWO-STEP VERIFICATION (2FA / OTP) MODAL
+            ============================================================ */}
+        {twoFactorOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3"
+            style={{
+              background: "rgba(11, 17, 32, 0.78)",
+              backdropFilter: "blur(14px)",
+              WebkitBackdropFilter: "blur(14px)",
+              zIndex: 1000,
+              pointerEvents: "auto"
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.94, opacity: 0, y: 12 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.94, opacity: 0, y: 12 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              className="p-4 rounded-4 position-relative"
+              style={{
+                maxWidth: "440px",
+                width: "100%",
+                background: "rgba(15, 23, 42, 0.94)",
+                backdropFilter: "blur(24px)",
+                WebkitBackdropFilter: "blur(24px)",
+                border: "1px solid rgba(255, 255, 255, 0.18)",
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1) inset",
+                color: "#ffffff"
+              }}
+            >
+              {/* Close / Cancel Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setTwoFactorOpen(false);
+                  setTwoFactorData(null);
+                  setSubmitting(false);
+                }}
+                className="btn btn-sm btn-link text-white-50 p-1 position-absolute top-0 end-0 m-3"
+                title="Cancel"
+              >
+                <i className="bi bi-x-lg" style={{ fontSize: "14px" }}></i>
+              </button>
+
+              <div>
+                <div className="d-flex align-items-center gap-2.5 mb-2">
+                  <div
+                    className="rounded-3 d-flex align-items-center justify-content-center"
+                    style={{
+                      width: "42px",
+                      height: "42px",
+                      background: "rgba(99, 102, 241, 0.18)",
+                      border: "1px solid rgba(99, 102, 241, 0.35)",
+                      color: "#818cf8"
+                    }}
+                  >
+                    <i className="bi bi-shield-lock-fill" style={{ fontSize: "20px" }}></i>
+                  </div>
+                  <div>
+                    <h5 className="fw-bold mb-0 text-white" style={{ fontSize: "18px" }}>
+                      Two-Step Verification
+                    </h5>
+                    <small className="text-white-50" style={{ fontSize: "11px" }}>
+                      Identity Verification Required
+                    </small>
+                  </div>
+                </div>
+
+                <p className="text-secondary small mb-3" style={{ fontSize: "12.5px", lineHeight: 1.5 }}>
+                  Enter the 6-digit verification code sent to <strong className="text-white">{twoFactorData?.maskedEmail}</strong> to authorize this login.
+                </p>
+
+                {twoFactorError && (
+                  <div className="alert alert-danger py-1.5 px-2.5 rounded-3 small mb-2 border-0 d-flex align-items-center gap-2" style={{ fontSize: "11.5px" }}>
+                    <i className="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+                    <span>{twoFactorError}</span>
+                  </div>
+                )}
+
+                {resendSuccessMsg && (
+                  <div className="alert alert-success py-1.5 px-2.5 rounded-3 small mb-2 border-0 d-flex align-items-center gap-2" style={{ fontSize: "11.5px" }}>
+                    <i className="bi bi-check-circle-fill flex-shrink-0"></i>
+                    <span>{resendSuccessMsg}</span>
+                  </div>
+                )}
+
+                {/* 6-Digit OTP Input Grid */}
+                <div className="d-flex justify-content-between gap-1.5 my-3.5" onPaste={handleOtpPaste}>
+                  {otpDigits.map((digit, idx) => (
+                    <input
+                      key={idx}
+                      ref={(el) => (otpInputRefs.current[idx] = el)}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleOtpChange(idx, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                      className="text-center fw-bold rounded-3"
+                      style={{
+                        width: "50px",
+                        height: "56px",
+                        fontSize: "24px",
+                        background: "rgba(30, 41, 59, 0.8)",
+                        color: "#ffffff",
+                        border: digit ? "1.5px solid #6366f1" : "1px solid rgba(255, 255, 255, 0.15)",
+                        outline: "none",
+                        boxShadow: digit ? "0 0 12px rgba(99, 102, 241, 0.35)" : "none",
+                        transition: "all 0.15s ease"
+                      }}
+                    />
+                  ))}
+                </div>
+
+                <div className="d-flex align-items-center justify-content-between mb-3 text-secondary small" style={{ fontSize: "12px" }}>
+                  <span>Didn't receive the code?</span>
+                  <button
+                    type="button"
+                    onClick={handleResend2FA}
+                    disabled={resendCooldown > 0 || resendLoading}
+                    className="btn btn-sm btn-link p-0 text-decoration-none fw-semibold"
+                    style={{
+                      fontSize: "12px",
+                      color: resendCooldown > 0 ? "#64748b" : "#818cf8"
+                    }}
+                  >
+                    {resendLoading ? (
+                      <span>Sending...</span>
+                    ) : resendCooldown > 0 ? (
+                      <span>Resend in {resendCooldown}s</span>
+                    ) : (
+                      <span>Resend Code</span>
+                    )}
+                  </button>
+                </div>
+
+                <div className="d-flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTwoFactorOpen(false);
+                      setTwoFactorData(null);
+                      setSubmitting(false);
+                    }}
+                    className="btn btn-sm btn-outline-secondary w-50 rounded-3 text-white border-secondary"
+                    style={{ fontSize: "12.5px" }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleVerify2FASubmit()}
+                    disabled={twoFactorLoading || otpDigits.some((d) => !d)}
+                    className="btn btn-sm btn-primary w-50 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-1.5"
+                    style={{ fontSize: "12.5px" }}
+                  >
+                    {twoFactorLoading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm" role="status" />
+                        <span>Verifying...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Verify & Sign In</span>
+                        <i className="bi bi-arrow-right-short" style={{ fontSize: "16px" }} />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
             </motion.div>
           </motion.div>
         )}

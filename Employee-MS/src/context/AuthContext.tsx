@@ -43,11 +43,30 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password, role) => {
     const res = await api.post("/api/auth/login", { email, password, role });
+    if (res.data.status) {
+      if (res.data.requires2FA) {
+        return res.data;
+      }
+      if (res.data.user) {
+        setUser(res.data.user);
+        return res.data;
+      }
+    }
+    throw new Error(res.data.error || "Login failed");
+  };
+
+  const verify2FA = async (tempToken, otpCode) => {
+    const res = await api.post("/api/auth/verify-2fa", { tempToken, otpCode });
     if (res.data.status && res.data.user) {
       setUser(res.data.user);
       return res.data;
     }
-    throw new Error(res.data.error || "Login failed");
+    throw new Error(res.data.error || "Verification failed");
+  };
+
+  const resend2FA = async (tempToken) => {
+    const res = await api.post("/api/auth/resend-2fa", { tempToken });
+    return res.data;
   };
 
   const logout = async () => {
@@ -68,6 +87,8 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated: !!user,
         loading,
         login,
+        verify2FA,
+        resend2FA,
         logout,
         refreshUser: verifySession,
         getDefaultRouteForRole
