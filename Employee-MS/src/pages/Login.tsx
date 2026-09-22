@@ -620,8 +620,9 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="p-2.5 rounded-3 mb-2.5 text-center"
+              className="rounded-3 mb-2 text-center"
               style={{
+                padding: "8px 12px",
                 background: "linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(185, 28, 28, 0.25))",
                 border: "1px solid rgba(239, 68, 68, 0.4)",
                 boxShadow: "0 8px 24px rgba(239, 68, 68, 0.2)"
@@ -646,10 +647,10 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   {formatLockoutTime(lockoutSeconds)}
                 </span>
               </div>
-              <p className="text-white-50 small mb-1.5" style={{ fontSize: "11px" }}>
+              <p className="text-white-50 small m-0" style={{ fontSize: "11px", lineHeight: "1.2", margin: 0, padding: 0 }}>
                 Too many invalid password attempts. Login is temporarily disabled.
               </p>
-              <div>
+              <div style={{ marginTop: "4px", lineHeight: 1 }}>
                 <button
                   type="button"
                   onClick={() => {
@@ -659,7 +660,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                     setForgotModalOpen(true);
                   }}
                   className="btn btn-link p-0 text-white-50 small text-decoration-underline"
-                  style={{ fontSize: "11px" }}
+                  style={{ fontSize: "11px", lineHeight: "1.2", verticalAlign: "baseline" }}
                 >
                   Forgot password? Recover account
                 </button>
