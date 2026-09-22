@@ -48,6 +48,16 @@ export async function seedDatabase() {
     console.warn('Migration note (last_failed_login):', err.message);
   }
 
+  try {
+    const [cols] = await pool.query("SHOW COLUMNS FROM users LIKE 'lockout_until'");
+    if (cols.length === 0) {
+      await pool.query("ALTER TABLE users ADD COLUMN lockout_until TIMESTAMP NULL");
+      console.log('✓ Migrated users table: added lockout_until column');
+    }
+  } catch (err) {
+    console.warn('Migration note (lockout_until):', err.message);
+  }
+
   // Check if database is already seeded
   const [existing] = await pool.query("SELECT id FROM users LIMIT 1");
   if (existing.length > 0) {

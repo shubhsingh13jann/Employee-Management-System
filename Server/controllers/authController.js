@@ -6,13 +6,15 @@ import {
   send2FAEmail,
   sendLoginSuccessEmail,
   sendSecurityAlertEmail,
+  sendAccountLockoutEmail,
   sendPasswordResetEmail
 } from "../utils/emailService.js";
 
 /**
  * Step 1: Initial Login Verification (Email, Password, Role)
+ * If locked, rejects with HTTP 429 and remaining lockout seconds.
  * If valid, generates a 6-digit 2FA OTP and dispatches email.
- * If invalid, tracks failed attempts and triggers security alert email on >= 3 attempts.
+ * If invalid, tracks failed attempts: warning email at 3 attempts, 10-minute lockout at 5 attempts.
  */
 export const login = async (req, res) => {
   try {
@@ -39,9 +41,51 @@ export const login = async (req, res) => {
       return res.status(403).json({ status: false, error: "This account has been deactivated. Please contact HR." });
     }
 
+    // Check if account is currently locked out
+    if (user.lockout_until) {
+      const lockoutDate = new Date(user.lockout_until);
+      const now = new Date();
+      if (lockoutDate > now) {
+        const remainingSeconds = Math.ceil((lockoutDate.getTime() - now.getTime()) / 1000);
+        const remainingMinutes = Math.ceil(remainingSeconds / 60);
+        return res.status(429).json({
+          status: false,
+          locked: true,
+          remainingSeconds,
+          error: `Account is temporarily locked due to excessive failed attempts. Please retry in ${remainingMinutes} minute(s) or reset your password.`
+        });
+      }
+    }
+
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) {
       const currentAttempts = (user.failed_login_attempts || 0) + 1;
+      const ip = req.ip || req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "127.0.0.1";
+      const userAgent = req.headers["user-agent"] || "Web Browser";
+
+      // 5th failed attempt: Lock account for 10 minutes
+      if (currentAttempts >= 5) {
+        await pool.query(
+          "UPDATE users SET failed_login_attempts = ?, last_failed_login = NOW(), lockout_until = DATE_ADD(NOW(), INTERVAL 10 MINUTE) WHERE id = ?",
+          [currentAttempts, user.id]
+        );
+
+        sendAccountLockoutEmail(user.email, user.name, {
+          attempts: currentAttempts,
+          ip,
+          userAgent
+        }).catch(emailErr => console.error("[Account Lockout Email] Dispatch failed:", emailErr.message));
+
+        return res.status(429).json({
+          status: false,
+          locked: true,
+          remainingSeconds: 600,
+          error: "Account locked for 10 minutes due to 5 consecutive failed login attempts.",
+          securityAlertSent: true
+        });
+      }
+
+      // Update failed attempts counter
       await pool.query(
         "UPDATE users SET failed_login_attempts = ?, last_failed_login = NOW() WHERE id = ?",
         [currentAttempts, user.id]
@@ -51,21 +95,23 @@ export const login = async (req, res) => {
       if (currentAttempts >= 3) {
         sendSecurityAlertEmail(user.email, user.name, {
           attempts: currentAttempts,
-          ip: req.ip || req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "127.0.0.1",
-          userAgent: req.headers["user-agent"] || "Web Browser"
+          ip,
+          userAgent
         }).catch(emailErr => console.error("[Security Alert] Email dispatch failed:", emailErr.message));
       }
 
+      const attemptsRemaining = Math.max(5 - currentAttempts, 0);
       return res.status(401).json({
         status: false,
-        error: "Invalid email or password",
+        error: `Invalid email or password. ${attemptsRemaining} attempt(s) remaining before account lockout.`,
         attempts: currentAttempts,
+        attemptsRemaining,
         securityAlertSent: currentAttempts >= 3
       });
     }
 
-    // Password verified: Reset failed attempts counter
-    await pool.query("UPDATE users SET failed_login_attempts = 0 WHERE id = ?", [user.id]);
+    // Password verified: Reset failed attempts counter and clear any lockout
+    await pool.query("UPDATE users SET failed_login_attempts = 0, lockout_until = NULL WHERE id = ?", [user.id]);
 
     // Generate 6-digit numeric OTP code
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -383,9 +429,9 @@ export const resetPassword = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const newHash = await bcrypt.hash(newPassword, salt);
 
-    // 1. Update users table and reset failed login attempts
+    // 1. Update users table and reset failed login attempts & lockout
     await pool.query(
-      "UPDATE users SET password_hash = ?, failed_login_attempts = 0 WHERE id = ?",
+      "UPDATE users SET password_hash = ?, failed_login_attempts = 0, lockout_until = NULL WHERE id = ?",
       [newHash, resetRecord.user_id]
     );
 

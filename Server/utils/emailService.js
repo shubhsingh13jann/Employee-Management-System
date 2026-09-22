@@ -236,6 +236,52 @@ export const sendSecurityAlertEmail = async (toEmail, userName, meta = {}) => {
 };
 
 /**
+ * 4. Send Account Lockout Notification Email
+ */
+export const sendAccountLockoutEmail = async (toEmail, userName, meta = {}) => {
+  const title = "🔒 Account Temporarily Locked: Excessive Failed Attempts";
+  const timeStr = new Date().toUTCString();
+  const preheader = "Your Enterprise EMS account has been temporarily locked for 10 minutes.";
+  const bodyContent = `
+    <p style="margin-top: 0;">Hello <strong>${userName || "Team Member"}</strong>,</p>
+    <p>For your security, your Enterprise EMS account has been <strong>temporarily locked for 10 minutes</strong> due to 5 consecutive incorrect password attempts.</p>
+
+    <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 10px; padding: 18px; margin: 20px 0;">
+      <div style="font-size: 14px; font-weight: 700; color: #f87171; margin-bottom: 6px;">
+        🛡️ Account Lockout Protection Triggered
+      </div>
+      <div style="font-size: 13px; color: #cbd5e1; line-height: 1.6;">
+        • Lockout Duration: <strong>10 minutes</strong><br>
+        • Trigger Time: <strong>${timeStr}</strong><br>
+        • Origin IP: <strong>${meta.ip || "127.0.0.1"}</strong><br>
+        • Client: <strong>${meta.userAgent || "Web Browser"}</strong>
+      </div>
+    </div>
+
+    <p style="font-size: 14px; color: #f1f5f9;">
+      During this lockout window, login attempts are blocked. You may wait for the countdown timer on the sign-in portal to expire, or click below to reset your password immediately:
+    </p>
+
+    <div style="margin: 24px 0; text-align: center;">
+      <a href="${meta.resetUrl || (process.env.CLIENT_URL || 'http://localhost:5173') + '/reset-password'}" style="display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, #ef4444, #dc2626); color: #ffffff; text-decoration: none; font-weight: 700; font-size: 14px; border-radius: 8px; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);">
+        Reset Password Now
+      </a>
+    </div>
+
+    <p style="font-size: 13px; color: #94a3b8; margin-bottom: 0;">
+      If you did not initiate these login attempts, your account credentials may be compromised. Please contact your system administrator immediately.
+    </p>
+  `;
+
+  return sendEmail({
+    to: toEmail,
+    subject: `🔒 Urgent: Your Enterprise EMS Account Has Been Temporarily Locked`,
+    text: `Security Notice: Your Enterprise EMS account has been locked for 10 minutes due to 5 consecutive failed login attempts at ${timeStr}.`,
+    html: getBrandedEmailWrapper({ title, preheader, bodyContent, alertColor: "#ef4444" })
+  });
+};
+
+/**
  * 4. Send Password Reset Link Email
  */
 export const sendPasswordResetEmail = async (toEmail, userName, resetUrl) => {

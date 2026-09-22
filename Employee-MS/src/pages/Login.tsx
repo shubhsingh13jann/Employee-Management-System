@@ -96,6 +96,31 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
   const [resendSuccessMsg, setResendSuccessMsg] = useState("");
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  // Brute-force Lockout Countdown State & Timer
+  const [lockoutSeconds, setLockoutSeconds] = useState(0);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (lockoutSeconds > 0) {
+      timer = setInterval(() => {
+        setLockoutSeconds((prev) => {
+          if (prev <= 1) {
+            setError("");
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [lockoutSeconds]);
+
+  const formatLockoutTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
   // 2FA Resend Countdown Timer
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -353,6 +378,11 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
         const securityAlert = err.response?.data?.securityAlertSent
           ? " (⚠️ Security warning email dispatched)"
           : "";
+        const isLocked = err.response?.data?.locked;
+        const remainingSec = err.response?.data?.remainingSeconds;
+        if (isLocked && remainingSec) {
+          setLockoutSeconds(Number(remainingSec));
+        }
         setError(backendError + securityAlert);
         setAuthStatus("error");
         setTimeout(() => setAuthStatus("idle"), 1400);
@@ -527,6 +557,52 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
             >
               <i className="bi bi-check-circle-fill"></i>
               <span>{successMsg}</span>
+            </motion.div>
+          )}
+
+          {/* Brute-force Account Lockout Alert Banner */}
+          {lockoutSeconds > 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="p-2.5 rounded-3 mb-2.5 text-center"
+              style={{
+                background: "linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(185, 28, 28, 0.25))",
+                border: "1px solid rgba(239, 68, 68, 0.4)",
+                boxShadow: "0 8px 24px rgba(239, 68, 68, 0.2)"
+              }}
+            >
+              <div className="d-flex align-items-center justify-content-center gap-2 mb-1 text-danger fw-bold small">
+                <i className="bi bi-shield-lock-fill fs-6"></i>
+                <span>Account Temporarily Locked</span>
+              </div>
+              <p className="text-white-50 small mb-2" style={{ fontSize: "11.5px" }}>
+                Too many invalid password attempts. Login is temporarily disabled.
+              </p>
+              <div
+                className="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill"
+                style={{ background: "rgba(0, 0, 0, 0.45)", border: "1px solid rgba(239, 68, 68, 0.35)" }}
+              >
+                <i className="bi bi-stopwatch text-danger"></i>
+                <span className="text-white fw-bold font-monospace" style={{ fontSize: "14px", letterSpacing: "1px" }}>
+                  {formatLockoutTime(lockoutSeconds)}
+                </span>
+              </div>
+              <div className="mt-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForgotEmail(email || "");
+                    setForgotSent(false);
+                    setForgotError("");
+                    setForgotModalOpen(true);
+                  }}
+                  className="btn btn-link p-0 text-white-50 small text-decoration-underline"
+                  style={{ fontSize: "11px" }}
+                >
+                  Forgot password? Recover account
+                </button>
+              </div>
             </motion.div>
           )}
 
@@ -828,15 +904,24 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
             )}
 
             {/* Primary Submit Button */}
-              <button
-                type="submit"
-                disabled={submitting}
-                className={`auth-submit-btn mt-1.5 theme-${role}`}
-              >
+            <button
+              type="submit"
+              disabled={submitting || (authMode === "login" && lockoutSeconds > 0)}
+              className={`auth-submit-btn mt-1.5 theme-${role}`}
+              style={{
+                opacity: authMode === "login" && lockoutSeconds > 0 ? 0.6 : 1,
+                cursor: authMode === "login" && lockoutSeconds > 0 ? "not-allowed" : "pointer"
+              }}
+            >
               {submitting ? (
                 <>
                   <span className="spinner-border spinner-border-sm" role="status"></span>
                   <span>{authMode === "login" ? "Verifying..." : "Creating Account..."}</span>
+                </>
+              ) : authMode === "login" && lockoutSeconds > 0 ? (
+                <>
+                  <i className="bi bi-shield-lock-fill"></i>
+                  <span>Account Locked ({formatLockoutTime(lockoutSeconds)})</span>
                 </>
               ) : (
                 <>

@@ -86,6 +86,7 @@ CREATE TABLE IF NOT EXISTS users (
     status ENUM('active', 'inactive') DEFAULT 'active',
     failed_login_attempts INT DEFAULT 0,
     last_failed_login TIMESTAMP NULL,
+    lockout_until TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
