@@ -25,7 +25,28 @@ export async function seedDatabase() {
       console.error('Error executing statement:', statement.substring(0, 50), err.message);
     }
   }
-  console.log('✓ All 7 database tables verified.');
+  console.log('✓ All database tables and security schema verified.');
+
+  // Migration check: Add failed_login_attempts and last_failed_login to users if missing
+  try {
+    const [cols] = await pool.query("SHOW COLUMNS FROM users LIKE 'failed_login_attempts'");
+    if (cols.length === 0) {
+      await pool.query("ALTER TABLE users ADD COLUMN failed_login_attempts INT DEFAULT 0");
+      console.log('✓ Migrated users table: added failed_login_attempts column');
+    }
+  } catch (err) {
+    console.warn('Migration note (failed_login_attempts):', err.message);
+  }
+
+  try {
+    const [cols] = await pool.query("SHOW COLUMNS FROM users LIKE 'last_failed_login'");
+    if (cols.length === 0) {
+      await pool.query("ALTER TABLE users ADD COLUMN last_failed_login TIMESTAMP NULL");
+      console.log('✓ Migrated users table: added last_failed_login column');
+    }
+  } catch (err) {
+    console.warn('Migration note (last_failed_login):', err.message);
+  }
 
   // Check if database is already seeded
   const [existing] = await pool.query("SELECT id FROM users LIMIT 1");

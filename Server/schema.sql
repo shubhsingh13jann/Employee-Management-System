@@ -84,6 +84,8 @@ CREATE TABLE IF NOT EXISTS users (
     address VARCHAR(255) DEFAULT '',
     image_url VARCHAR(255) DEFAULT '',
     status ENUM('active', 'inactive') DEFAULT 'active',
+    failed_login_attempts INT DEFAULT 0,
+    last_failed_login TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -149,4 +151,27 @@ CREATE TABLE IF NOT EXISTS leave_requests (
     manager_notes TEXT NULL,
     applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     reviewed_at TIMESTAMP NULL
+);
+
+-- 12. Two-Factor Authentication OTPs Table
+CREATE TABLE IF NOT EXISTS user_otps (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    otp_code VARCHAR(10) NOT NULL,
+    type ENUM('2fa_login', 'password_reset') NOT NULL DEFAULT '2fa_login',
+    expires_at DATETIME NOT NULL,
+    is_used BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 13. Password Reset Tokens Table
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    token VARCHAR(128) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    is_used BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
