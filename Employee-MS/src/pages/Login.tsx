@@ -627,23 +627,29 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                 boxShadow: "0 8px 24px rgba(239, 68, 68, 0.2)"
               }}
             >
-              <div className="d-flex align-items-center justify-content-center gap-2 mb-1 text-danger fw-bold small">
-                <i className="bi bi-shield-lock-fill fs-6"></i>
-                <span>Account Temporarily Locked</span>
-              </div>
-              <p className="text-white-50 small mb-2" style={{ fontSize: "11.5px" }}>
-                Too many invalid password attempts. Login is temporarily disabled.
-              </p>
-              <div
-                className="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill"
-                style={{ background: "rgba(0, 0, 0, 0.45)", border: "1px solid rgba(239, 68, 68, 0.35)" }}
-              >
-                <i className="bi bi-stopwatch text-danger"></i>
-                <span className="text-white fw-bold font-monospace" style={{ fontSize: "14px", letterSpacing: "1px" }}>
+              <div className="d-flex align-items-center justify-content-center gap-2 mb-1 flex-wrap">
+                <div className="d-flex align-items-center gap-1.5 text-danger fw-bold small">
+                  <i className="bi bi-shield-lock-fill fs-6"></i>
+                  <span>Account Temporarily Locked</span>
+                </div>
+                <span
+                  className="badge d-inline-flex align-items-center gap-1 px-2 py-0.5 rounded-pill font-monospace"
+                  style={{
+                    background: "rgba(0, 0, 0, 0.45)",
+                    border: "1px solid rgba(239, 68, 68, 0.45)",
+                    color: "#fca5a5",
+                    fontSize: "11.5px",
+                    letterSpacing: "0.5px"
+                  }}
+                >
+                  <i className="bi bi-stopwatch text-danger" style={{ fontSize: "10px" }}></i>
                   {formatLockoutTime(lockoutSeconds)}
                 </span>
               </div>
-              <div className="mt-1.5">
+              <p className="text-white-50 small mb-1.5" style={{ fontSize: "11px" }}>
+                Too many invalid password attempts. Login is temporarily disabled.
+              </p>
+              <div>
                 <button
                   type="button"
                   onClick={() => {
