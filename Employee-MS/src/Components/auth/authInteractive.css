@@ -42,6 +42,8 @@
   display: flex;
   flex-direction: column;
   max-height: min(880px, calc(100vh - 4.5rem));
+  min-height: 0;
+  height: 100%;
 }
 
 /* Role-Themed Card Top Accent Line */
@@ -82,7 +84,8 @@
   .auth-split-card {
     flex-direction: row;
     max-height: min(880px, calc(100vh - 4.5rem));
-    height: auto;
+    min-height: 0;
+    height: 100%;
   }
 }
 
@@ -101,16 +104,20 @@
 
 /* Right Panel: Form Area */
 .auth-form-panel {
-  flex: 1;
+  flex: 1 1 0%;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
   background: transparent;
   padding: 1.35rem 2rem;
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow-y: auto;
-  overflow-x: hidden;
-  max-height: 100%;
-  overscroll-behavior: contain;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  pointer-events: auto !important;
+  touch-action: pan-y !important;
+  overscroll-behavior-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
 }
@@ -121,6 +128,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
+  pointer-events: auto !important;
 }
 
 .auth-form-panel::-webkit-scrollbar {

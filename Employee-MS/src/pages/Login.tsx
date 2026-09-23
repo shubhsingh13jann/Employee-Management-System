@@ -147,6 +147,16 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
 
   const { login, verify2FA, resend2FA, getDefaultRouteForRole } = useAuth();
   const containerRef = useRef(null);
+  const formPanelRef = useRef<HTMLDivElement | null>(null);
+
+  // Direct mouse wheel scroll handler to ensure smooth wheel scrolling inside card area
+  const handlePanelWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const panel = formPanelRef.current;
+    if (!panel) return;
+    if (panel.scrollHeight > panel.clientHeight) {
+      panel.scrollTop += e.deltaY;
+    }
+  };
 
   // 2FA Verification Modal State
   const [twoFactorOpen, setTwoFactorOpen] = useState(false);
@@ -608,7 +618,11 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
         {/* ============================================================
             RIGHT PANEL: UNIFIED AUTH FORM (SIGN IN <--> SIGN UP)
             ============================================================ */}
-        <div className="auth-form-panel">
+        <div
+          className="auth-form-panel"
+          ref={formPanelRef}
+          onWheel={handlePanelWheel}
+        >
           <div className="auth-form-content">
           
           {/* Sliding Pill Mode Switcher (Option 4: Seamless Switch) */}
