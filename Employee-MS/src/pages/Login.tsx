@@ -609,6 +609,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
             RIGHT PANEL: UNIFIED AUTH FORM (SIGN IN <--> SIGN UP)
             ============================================================ */}
         <div className="auth-form-panel">
+          <div className="auth-form-content">
           
           {/* Sliding Pill Mode Switcher (Option 4: Seamless Switch) */}
           <div className="d-flex justify-content-center mb-2">
@@ -797,7 +798,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mb-2.5"
+                className="mb-3"
               >
                 <input
                   type="file"
@@ -893,7 +894,8 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="auth-clean-input-group"
+                className="auth-clean-input-group mt-3"
+                style={{ marginTop: "14px" }}
               >
                 <label className="auth-clean-label">Full Name *</label>
                 <input
@@ -1246,6 +1248,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
               </button>
             </div>
           )}
+          </div>
         </div>
       </div>
 

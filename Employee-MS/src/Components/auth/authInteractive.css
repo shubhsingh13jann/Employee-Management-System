@@ -41,6 +41,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  max-height: min(880px, calc(100vh - 4.5rem));
 }
 
 /* Role-Themed Card Top Accent Line */
@@ -80,7 +81,8 @@
 @media (min-width: 992px) {
   .auth-split-card {
     flex-direction: row;
-    max-height: calc(100vh - 2.5rem);
+    max-height: min(880px, calc(100vh - 4.5rem));
+    height: auto;
   }
 }
 
@@ -104,20 +106,38 @@
   padding: 1.35rem 2rem;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   position: relative;
   overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 100%;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+/* Inner content wrapper: centered when space is available, scrolls cleanly from top on overflow */
+.auth-form-content {
+  margin: auto 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .auth-form-panel::-webkit-scrollbar {
   width: 5px;
 }
 .auth-form-panel::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 9999px;
+  margin: 10px 0;
 }
 .auth-form-panel::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+.auth-form-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.38);
 }
 
 @media (max-width: 576px) {
