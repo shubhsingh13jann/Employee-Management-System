@@ -571,3 +571,16 @@ export const register = async (req, res) => {
   }
 };
 
+/**
+ * Public departments list for registration dropdown
+ */
+export const getPublicDepartments = async (req, res) => {
+  try {
+    const [departments] = await pool.query("SELECT id, name FROM departments ORDER BY name ASC");
+    return res.json({ status: true, departments });
+  } catch (err) {
+    console.error("Get public departments error:", err);
+    return res.status(500).json({ status: false, error: "Failed to fetch departments" });
+  }
+};
+

@@ -8,13 +8,15 @@ import {
   resetPassword,
   logout,
   getCurrentUser,
-  register
+  register,
+  getPublicDepartments
 } from "../controllers/authController.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
 import { uploadAvatar } from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
+router.get("/departments", getPublicDepartments);
 router.post("/register", uploadAvatar.single("image"), register);
 router.post("/login", login);
 router.post("/verify-2fa", verify2FA);

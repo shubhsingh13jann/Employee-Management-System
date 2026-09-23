@@ -71,6 +71,50 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
     { id: 4, name: "Finance" }
   ]);
 
+  // 1. Remember Me: Pre-fill saved email on mount
+  useEffect(() => {
+    try {
+      const savedEmail = localStorage.getItem("ems_remember_email");
+      if (savedEmail) {
+        setEmail(savedEmail);
+        setRememberMe(true);
+        setCaretProgress(Math.min(savedEmail.length / 28, 1));
+      }
+    } catch {}
+  }, []);
+
+  // 2. Lockout Persistence: Restore countdown timer on refresh
+  useEffect(() => {
+    try {
+      const savedLockoutUntil = localStorage.getItem("ems_lockout_until");
+      if (savedLockoutUntil) {
+        const expiry = Number(savedLockoutUntil);
+        const diffSec = Math.ceil((expiry - Date.now()) / 1000);
+        if (diffSec > 0) {
+          setLockoutSeconds(diffSec);
+        } else {
+          localStorage.removeItem("ems_lockout_until");
+        }
+      }
+    } catch {}
+  }, []);
+
+  // 3. Dynamic Departments: Fetch live department directory on mount
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const res = await api.get("/api/auth/departments");
+        if (res.data?.status && Array.isArray(res.data.departments) && res.data.departments.length > 0) {
+          setDepartments(res.data.departments);
+          setDepartmentId(String(res.data.departments[0].id));
+        }
+      } catch {
+        // Fallback to static initial departments
+      }
+    };
+    fetchDepartments();
+  }, []);
+
   // Interaction & Animation States
   const [activeField, setActiveField] = useState<"email" | "password" | null>(null);
   const [caretProgress, setCaretProgress] = useState(0);
@@ -125,6 +169,9 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
         setLockoutSeconds((prev) => {
           if (prev <= 1) {
             setError("");
+            try {
+              localStorage.removeItem("ems_lockout_until");
+            } catch {}
             return 0;
           }
           return prev - 1;
@@ -284,6 +331,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
         } else {
           localStorage.removeItem("ems_remember_email");
         }
+        localStorage.removeItem("ems_lockout_until");
       } catch {}
 
       setTimeout(() => {
@@ -431,6 +479,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
           } else {
             localStorage.removeItem("ems_remember_email");
           }
+          localStorage.removeItem("ems_lockout_until");
         } catch {}
 
         setTimeout(() => {
@@ -445,7 +494,12 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
         const isLocked = err.response?.data?.locked;
         const remainingSec = err.response?.data?.remainingSeconds;
         if (isLocked && remainingSec) {
-          setLockoutSeconds(Number(remainingSec));
+          const sec = Number(remainingSec);
+          setLockoutSeconds(sec);
+          try {
+            const expiry = Date.now() + sec * 1000;
+            localStorage.setItem("ems_lockout_until", String(expiry));
+          } catch {}
         }
         setError(backendError + securityAlert);
         setAuthStatus("error");
