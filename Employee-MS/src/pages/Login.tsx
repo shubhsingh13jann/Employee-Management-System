@@ -431,20 +431,6 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotError, setForgotError] = useState("");
 
-  // Fetch departments for registration
-  useEffect(() => {
-    const fetchDepts = async () => {
-      try {
-        const res = await api.get("/api/admin/departments");
-        if (res.data.status) {
-          setDepartments(res.data.departments);
-        }
-      } catch {
-        // Fallback default departments
-      }
-    };
-    fetchDepts();
-  }, []);
 
   // 360° Mouse Cursor Kinematics
   const handleMouseMove = (e) => {
