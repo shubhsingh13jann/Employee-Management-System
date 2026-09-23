@@ -146,17 +146,29 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
   }, [successMsg]);
 
   const { login, verify2FA, resend2FA, getDefaultRouteForRole } = useAuth();
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const cardRef = useRef<HTMLDivElement | null>(null);
   const formPanelRef = useRef<HTMLDivElement | null>(null);
 
-  // Direct mouse wheel scroll handler to ensure smooth wheel scrolling inside card area
-  const handlePanelWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+  // Native non-passive mouse wheel listener over card area to ensure smooth scrolling without clicking first
+  useEffect(() => {
+    const card = cardRef.current;
     const panel = formPanelRef.current;
-    if (!panel) return;
-    if (panel.scrollHeight > panel.clientHeight) {
-      panel.scrollTop += e.deltaY;
-    }
-  };
+    if (!card || !panel) return;
+
+    const onWheel = (e: WheelEvent) => {
+      if (panel.scrollHeight > panel.clientHeight) {
+        e.preventDefault();
+        e.stopPropagation();
+        panel.scrollTop += e.deltaY;
+      }
+    };
+
+    card.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      card.removeEventListener("wheel", onWheel);
+    };
+  }, []);
 
   // 2FA Verification Modal State
   const [twoFactorOpen, setTwoFactorOpen] = useState(false);
@@ -600,7 +612,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
 
 
       {/* MASTER 2-PANEL SPLIT CARD */}
-      <div className="auth-split-card">
+      <div className="auth-split-card" ref={cardRef}>
         {/* ============================================================
             LEFT PANEL: INTERACTIVE COMPANION BOT RIG & PRIVACY HANDS
             ============================================================ */}
@@ -621,7 +633,6 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
         <div
           className="auth-form-panel"
           ref={formPanelRef}
-          onWheel={handlePanelWheel}
         >
           <div className="auth-form-content">
           

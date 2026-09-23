@@ -41,9 +41,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  max-height: min(880px, calc(100vh - 4.5rem));
-  min-height: 0;
-  height: 100%;
+  max-height: min(850px, calc(100vh - 4.5rem));
 }
 
 /* Role-Themed Card Top Accent Line */
@@ -83,9 +81,8 @@
 @media (min-width: 992px) {
   .auth-split-card {
     flex-direction: row;
-    max-height: min(880px, calc(100vh - 4.5rem));
-    min-height: 0;
-    height: 100%;
+    max-height: min(850px, calc(100vh - 4.5rem));
+    height: auto;
   }
 }
 
@@ -104,10 +101,10 @@
 
 /* Right Panel: Form Area */
 .auth-form-panel {
-  flex: 1 1 0%;
+  flex: 1;
+  width: 100%;
   min-height: 0;
-  height: 100%;
-  max-height: 100%;
+  max-height: min(850px, calc(100vh - 4.5rem));
   background: transparent;
   padding: 1.35rem 2rem;
   display: flex;
@@ -117,9 +114,10 @@
   overflow-x: hidden !important;
   pointer-events: auto !important;
   touch-action: pan-y !important;
-  overscroll-behavior-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.42) rgba(255, 255, 255, 0.05);
 }
 
 /* Inner content wrapper: centered when space is available, scrolls cleanly from top on overflow */
@@ -132,20 +130,22 @@
 }
 
 .auth-form-panel::-webkit-scrollbar {
-  width: 5px;
+  width: 7px;
+  display: block !important;
 }
 .auth-form-panel::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 9999px;
-  margin: 10px 0;
+  margin: 8px 0;
 }
 .auth-form-panel::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.42);
   border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   transition: background 0.2s ease;
 }
 .auth-form-panel::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.7);
 }
 
 @media (max-width: 576px) {
