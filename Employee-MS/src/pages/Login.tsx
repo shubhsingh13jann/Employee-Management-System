@@ -82,6 +82,25 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
   const [successMsg, setSuccessMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Auto-dismiss alert notifications after 10 seconds of dispatch
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (successMsg) {
+      const timer = setTimeout(() => {
+        setSuccessMsg("");
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMsg]);
+
   const { login, verify2FA, resend2FA, getDefaultRouteForRole } = useAuth();
   const containerRef = useRef(null);
 
@@ -591,29 +610,55 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
           </div>
 
           {/* Alerts */}
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="alert alert-danger py-1.5 px-2.5 rounded-3 small d-flex align-items-center gap-2 mb-2 border-0"
-              style={{ background: "#fef2f2", color: "#991b1b" }}
-            >
-              <i className="bi bi-exclamation-circle-fill"></i>
-              <span>{error}</span>
-            </motion.div>
-          )}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                key="alert-error"
+                initial={{ opacity: 0, y: -6, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: "auto" }}
+                exit={{ opacity: 0, y: -6, height: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}
+                transition={{ duration: 0.3 }}
+                className="alert alert-danger py-1.5 px-2.5 rounded-3 small d-flex align-items-center justify-content-between gap-2 mb-2 border-0 overflow-hidden"
+                style={{ background: "#fef2f2", color: "#991b1b" }}
+              >
+                <div className="d-flex align-items-center gap-2">
+                  <i className="bi bi-exclamation-circle-fill flex-shrink-0"></i>
+                  <span>{error}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setError("")}
+                  className="btn-close p-0 m-0 border-0 flex-shrink-0"
+                  style={{ fontSize: "9px", opacity: 0.6 }}
+                  aria-label="Close"
+                />
+              </motion.div>
+            )}
 
-          {successMsg && (
-            <motion.div
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="alert alert-success py-1.5 px-2.5 rounded-3 small d-flex align-items-center gap-2 mb-2 border-0"
-              style={{ background: "#f0fdf4", color: "#166534" }}
-            >
-              <i className="bi bi-check-circle-fill"></i>
-              <span>{successMsg}</span>
-            </motion.div>
-          )}
+            {successMsg && (
+              <motion.div
+                key="alert-success"
+                initial={{ opacity: 0, y: -6, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: "auto" }}
+                exit={{ opacity: 0, y: -6, height: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}
+                transition={{ duration: 0.3 }}
+                className="alert alert-success py-1.5 px-2.5 rounded-3 small d-flex align-items-center justify-content-between gap-2 mb-2 border-0 overflow-hidden"
+                style={{ background: "#f0fdf4", color: "#166534" }}
+              >
+                <div className="d-flex align-items-center gap-2">
+                  <i className="bi bi-check-circle-fill flex-shrink-0"></i>
+                  <span>{successMsg}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSuccessMsg("")}
+                  className="btn-close p-0 m-0 border-0 flex-shrink-0"
+                  style={{ fontSize: "9px", opacity: 0.6 }}
+                  aria-label="Close"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Brute-force Account Lockout Alert Banner */}
           {lockoutSeconds > 0 && (
