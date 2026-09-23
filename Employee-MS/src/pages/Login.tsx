@@ -679,14 +679,24 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
 
           {/* Heading */}
           <div className="text-center mb-2">
-            <h3 className="fw-bold text-white mb-0.5 tracking-tight" style={{ fontSize: "19px" }}>
-              {authMode === "login" ? "Welcome back!" : "Join Enterprise EMS"}
-            </h3>
-            <p className="text-white-50 small mb-0" style={{ fontSize: "12px" }}>
-              {authMode === "login"
-                ? "Enter your credentials to access your portal"
-                : "Register your workforce account for access"}
-            </p>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={authMode}
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 4 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+              >
+                <h3 className="fw-bold text-white mb-0.5 tracking-tight" style={{ fontSize: "19px" }}>
+                  {authMode === "login" ? "Welcome back!" : "Join Enterprise EMS"}
+                </h3>
+                <p className="text-white-50 small mb-0" style={{ fontSize: "12px" }}>
+                  {authMode === "login"
+                    ? "Enter your credentials to access your portal"
+                    : "Register your workforce account for access"}
+                </p>
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           {/* Alerts */}
@@ -818,122 +828,130 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
             </div>
 
             {/* If Sign Up Mode: Avatar Upload with Live Circular Preview */}
-            {authMode === "signup" && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mb-3"
-              >
-                <input
-                  type="file"
-                  ref={avatarInputRef}
-                  accept="image/png,image/jpeg,image/jpg,image/webp"
-                  onChange={handleAvatarChange}
-                  style={{ display: "none" }}
-                />
-
-                <div
-                  className="p-2.5 rounded-3 d-flex align-items-center gap-3"
-                  style={{
-                    background: "rgba(255, 255, 255, 0.03)",
-                    border: "1px dashed rgba(255, 255, 255, 0.2)"
-                  }}
+            <AnimatePresence initial={false}>
+              {authMode === "signup" && (
+                <motion.div
+                  key="signup-avatar"
+                  initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                  animate={{ opacity: 1, height: "auto", marginBottom: 16 }}
+                  exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                  transition={{ duration: 0.28, ease: "easeInOut" }}
+                  style={{ overflow: "hidden" }}
                 >
-                  {/* Clickable Circular Avatar Container */}
+                  <input
+                    type="file"
+                    ref={avatarInputRef}
+                    accept="image/png,image/jpeg,image/jpg,image/webp"
+                    onChange={handleAvatarChange}
+                    style={{ display: "none" }}
+                  />
+
                   <div
-                    onClick={() => avatarInputRef.current?.click()}
-                    className="position-relative rounded-circle d-flex align-items-center justify-content-center cursor-pointer flex-shrink-0"
+                    className="p-2.5 rounded-3 d-flex align-items-center gap-3"
                     style={{
-                      width: "56px",
-                      height: "56px",
-                      background: avatarPreview ? "#0f172a" : "rgba(255, 255, 255, 0.08)",
-                      border: "2px solid rgba(255, 255, 255, 0.25)",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                      overflow: "hidden"
+                      background: "rgba(255, 255, 255, 0.03)",
+                      border: "1px dashed rgba(255, 255, 255, 0.2)"
                     }}
-                    title="Click to choose profile picture"
                   >
-                    {avatarPreview ? (
-                      <img
-                        src={avatarPreview}
-                        alt="Avatar Preview"
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                      />
-                    ) : (
-                      <i className="bi bi-camera-fill text-white-50 fs-5"></i>
-                    )}
-
-                    {/* Camera icon badge */}
+                    {/* Clickable Circular Avatar Container */}
                     <div
-                      className="position-absolute bottom-0 end-0 rounded-circle d-flex align-items-center justify-content-center"
-                      style={{
-                        width: "18px",
-                        height: "18px",
-                        background: "#3b82f6",
-                        color: "#ffffff",
-                        fontSize: "9px",
-                        border: "1.5px solid #0f172a"
-                      }}
-                    >
-                      <i className="bi bi-pencil-fill"></i>
-                    </div>
-                  </div>
-
-                  <div className="flex-grow-1">
-                    <div className="d-flex align-items-center justify-content-between">
-                      <label className="auth-clean-label mb-0" style={{ fontSize: "11px" }}>
-                        Profile Picture <span className="text-white-50 fw-normal">(Optional)</span>
-                      </label>
-                      {avatarFile && (
-                        <button
-                          type="button"
-                          onClick={handleRemoveAvatar}
-                          className="btn btn-link p-0 text-danger small text-decoration-none"
-                          style={{ fontSize: "10.5px" }}
-                        >
-                          <i className="bi bi-trash me-1"></i>Remove
-                        </button>
-                      )}
-                    </div>
-                    <p className="text-white-50 mb-1.5" style={{ fontSize: "10px", lineHeight: 1.3 }}>
-                      {avatarFile ? avatarFile.name : "Upload your work photo (PNG, JPG, WEBP • Max 5MB)"}
-                    </p>
-                    <button
-                      type="button"
                       onClick={() => avatarInputRef.current?.click()}
-                      className="btn btn-sm btn-outline-light py-0.5 px-2.5 rounded-2"
-                      style={{ fontSize: "10.5px", borderColor: "rgba(255, 255, 255, 0.25)" }}
+                      className="position-relative rounded-circle d-flex align-items-center justify-content-center cursor-pointer flex-shrink-0"
+                      style={{
+                        width: "56px",
+                        height: "56px",
+                        background: avatarPreview ? "#0f172a" : "rgba(255, 255, 255, 0.08)",
+                        border: "2px solid rgba(255, 255, 255, 0.25)",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                        overflow: "hidden"
+                      }}
+                      title="Click to choose profile picture"
                     >
-                      <i className="bi bi-upload me-1"></i>
-                      {avatarFile ? "Change Image" : "Choose File"}
-                    </button>
+                      {avatarPreview ? (
+                        <img
+                          src={avatarPreview}
+                          alt="Avatar Preview"
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        />
+                      ) : (
+                        <i className="bi bi-camera-fill text-white-50 fs-5"></i>
+                      )}
+
+                      {/* Camera icon badge */}
+                      <div
+                        className="position-absolute bottom-0 end-0 rounded-circle d-flex align-items-center justify-content-center"
+                        style={{
+                          width: "18px",
+                          height: "18px",
+                          background: "#3b82f6",
+                          color: "#ffffff",
+                          fontSize: "9px",
+                          border: "1.5px solid #0f172a"
+                        }}
+                      >
+                        <i className="bi bi-pencil-fill"></i>
+                      </div>
+                    </div>
+
+                    <div className="flex-grow-1">
+                      <div className="d-flex align-items-center justify-content-between">
+                        <label className="auth-clean-label mb-0" style={{ fontSize: "11px" }}>
+                          Profile Picture <span className="text-white-50 fw-normal">(Optional)</span>
+                        </label>
+                        {avatarFile && (
+                          <button
+                            type="button"
+                            onClick={handleRemoveAvatar}
+                            className="btn btn-link p-0 text-danger small text-decoration-none"
+                            style={{ fontSize: "10.5px" }}
+                          >
+                            <i className="bi bi-trash me-1"></i>Remove
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-white-50 mb-1.5" style={{ fontSize: "10px", lineHeight: 1.3 }}>
+                        {avatarFile ? avatarFile.name : "Upload your work photo (PNG, JPG, WEBP • Max 5MB)"}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => avatarInputRef.current?.click()}
+                        className="btn btn-sm btn-outline-light py-0.5 px-2.5 rounded-2"
+                        style={{ fontSize: "10.5px", borderColor: "rgba(255, 255, 255, 0.25)" }}
+                      >
+                        <i className="bi bi-upload me-1"></i>
+                        {avatarFile ? "Change Image" : "Choose File"}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            )}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* If Sign Up Mode: Full Name */}
-            {authMode === "signup" && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="auth-clean-input-group mt-3"
-                style={{ marginTop: "14px" }}
-              >
-                <label className="auth-clean-label">Full Name *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Alex Turner"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="auth-clean-input"
-                />
-                <div className="auth-input-focus-line"></div>
-              </motion.div>
-            )}
+            <AnimatePresence initial={false}>
+              {authMode === "signup" && (
+                <motion.div
+                  key="signup-fullname"
+                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                  animate={{ opacity: 1, height: "auto", marginTop: 14 }}
+                  exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                  transition={{ duration: 0.28, ease: "easeInOut" }}
+                  style={{ overflow: "hidden" }}
+                  className="auth-clean-input-group"
+                >
+                  <label className="auth-clean-label">Full Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Alex Turner"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="auth-clean-input"
+                  />
+                  <div className="auth-input-focus-line"></div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Email Field (With Caret Tracking) */}
             <div className="auth-clean-input-group">
@@ -953,49 +971,55 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
             </div>
 
             {/* If Sign Up Mode: Department & Phone */}
-            {authMode === "signup" && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                className="row g-2 mb-2"
-              >
-                <div className="col-6">
-                  <label className="auth-clean-label">Department</label>
-                  <select
-                    className="form-select form-select-sm rounded-2 py-1.5"
-                    value={departmentId}
-                    onChange={(e) => setDepartmentId(e.target.value)}
-                    style={{ fontSize: "12px" }}
-                  >
-                    {departments.map((d) => (
-                      <option key={d.id} value={d.id}>{d.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="col-6">
-                  <label className="auth-clean-label">Phone (+91)</label>
-                  <input
-                    type="tel"
-                    placeholder="+91 98765 43210"
-                    value={phone}
-                    onChange={(e) => {
-                      const digits = e.target.value.replace(/\D/g, "");
-                      let num = digits.startsWith("91") ? digits.slice(2) : digits;
-                      num = num.slice(0, 10);
-                      if (!num) {
-                        setPhone("");
-                      } else if (num.length <= 5) {
-                        setPhone(`+91 ${num}`);
-                      } else {
-                        setPhone(`+91 ${num.slice(0, 5)} ${num.slice(5)}`);
-                      }
-                    }}
-                    className="auth-clean-input py-1"
-                    style={{ fontSize: "12.5px" }}
-                  />
-                </div>
-              </motion.div>
-            )}
+            <AnimatePresence initial={false}>
+              {authMode === "signup" && (
+                <motion.div
+                  key="signup-dept-phone"
+                  initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                  animate={{ opacity: 1, height: "auto", marginBottom: 8 }}
+                  exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                  transition={{ duration: 0.28, ease: "easeInOut" }}
+                  style={{ overflow: "hidden" }}
+                  className="row g-2"
+                >
+                  <div className="col-6">
+                    <label className="auth-clean-label">Department</label>
+                    <select
+                      className="form-select form-select-sm rounded-2 py-1.5"
+                      value={departmentId}
+                      onChange={(e) => setDepartmentId(e.target.value)}
+                      style={{ fontSize: "12px" }}
+                    >
+                      {departments.map((d) => (
+                        <option key={d.id} value={d.id}>{d.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-6">
+                    <label className="auth-clean-label">Phone (+91)</label>
+                    <input
+                      type="tel"
+                      placeholder="+91 98765 43210"
+                      value={phone}
+                      onChange={(e) => {
+                        const digits = e.target.value.replace(/\D/g, "");
+                        let num = digits.startsWith("91") ? digits.slice(2) : digits;
+                        num = num.slice(0, 10);
+                        if (!num) {
+                          setPhone("");
+                        } else if (num.length <= 5) {
+                          setPhone(`+91 ${num}`);
+                        } else {
+                          setPhone(`+91 ${num.slice(0, 5)} ${num.slice(5)}`);
+                        }
+                      }}
+                      className="auth-clean-input py-1"
+                      style={{ fontSize: "12.5px" }}
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
               {/* Password Field (With Hands-Over-Eyes & Eye Peek Toggle) */}
               <div className="auth-clean-input-group position-relative">
@@ -1043,35 +1067,45 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                 <div className="auth-input-focus-line"></div>
 
                 {/* Real-time Password Strength Meter (Only in Sign Up Mode) */}
-                {authMode === "signup" && password.length > 0 && (
-                  <div className="mt-1.5 d-flex align-items-center justify-content-between">
-                    <div className="d-flex gap-1 flex-grow-1 me-2" style={{ height: "3px" }}>
-                      {[1, 2, 3].map((step) => {
-                        const strength = getPasswordStrength(password);
-                        const isActive = strength.score >= step;
-                        return (
-                          <div
-                            key={step}
-                            className="flex-grow-1 rounded-pill"
-                            style={{
-                              background: isActive ? strength.color : "rgba(255, 255, 255, 0.15)",
-                              transition: "background 0.25s ease"
-                            }}
-                          />
-                        );
-                      })}
-                    </div>
-                    <span
-                      style={{
-                        fontSize: "10px",
-                        fontWeight: "600",
-                        color: getPasswordStrength(password).color
-                      }}
+                <AnimatePresence initial={false}>
+                  {authMode === "signup" && password.length > 0 && (
+                    <motion.div
+                      key="signup-password-strength"
+                      initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                      animate={{ opacity: 1, height: "auto", marginTop: 6 }}
+                      exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                      transition={{ duration: 0.22, ease: "easeInOut" }}
+                      style={{ overflow: "hidden" }}
+                      className="d-flex align-items-center justify-content-between"
                     >
-                      {getPasswordStrength(password).label}
-                    </span>
-                  </div>
-                )}
+                      <div className="d-flex gap-1 flex-grow-1 me-2" style={{ height: "3px" }}>
+                        {[1, 2, 3].map((step) => {
+                          const strength = getPasswordStrength(password);
+                          const isActive = strength.score >= step;
+                          return (
+                            <div
+                              key={step}
+                              className="flex-grow-1 rounded-pill"
+                              style={{
+                                background: isActive ? strength.color : "rgba(255, 255, 255, 0.15)",
+                                transition: "background 0.25s ease"
+                              }}
+                            />
+                          );
+                        })}
+                      </div>
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: "600",
+                          color: getPasswordStrength(password).color
+                        }}
+                      >
+                        {getPasswordStrength(password).label}
+                      </span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* Eye Toggle Button */}
               <button
@@ -1089,101 +1123,117 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
             </div>
 
             {/* If Sign Up Mode: Confirm Password */}
-            {authMode === "signup" && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                className="auth-clean-input-group position-relative"
-              >
-                <div className="d-flex align-items-center justify-content-between mb-1">
-                  <label className="auth-clean-label mb-0">Confirm Password *</label>
-                  <div className="d-flex align-items-center gap-2">
-                    {confirmPassword.length > 0 && (
-                      <span
-                        style={{
-                          fontSize: "10px",
-                          fontWeight: "600",
-                          color: confirmPassword === password ? "#34d399" : "#f87171"
-                        }}
-                      >
-                        {confirmPassword === password ? "✓ Match" : "✗ Do not match"}
-                      </span>
-                    )}
-                    <AnimatePresence>
-                      {capsLockWarningVisible && (
-                        <motion.div
-                          initial={{ opacity: 0, x: 5 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: 5 }}
-                          transition={{ duration: 0.2 }}
+            <AnimatePresence initial={false}>
+              {authMode === "signup" && (
+                <motion.div
+                  key="signup-confirm-password"
+                  initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                  animate={{ opacity: 1, height: "auto", marginBottom: 12 }}
+                  exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                  transition={{ duration: 0.28, ease: "easeInOut" }}
+                  style={{ overflow: "hidden" }}
+                  className="auth-clean-input-group position-relative"
+                >
+                  <div className="d-flex align-items-center justify-content-between mb-1">
+                    <label className="auth-clean-label mb-0">Confirm Password *</label>
+                    <div className="d-flex align-items-center gap-2">
+                      {confirmPassword.length > 0 && (
+                        <span
                           style={{
-                            background: "rgba(255, 255, 255, 0.05)",
-                            color: "#f8fafc",
-                            border: "1px solid rgba(255, 255, 255, 0.2)",
                             fontSize: "10px",
-                            padding: "2px 8px",
-                            borderRadius: "9999px",
                             fontWeight: "600",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px"
+                            color: confirmPassword === password ? "#34d399" : "#f87171"
                           }}
                         >
-                          <i className="bi bi-capslock-fill text-warning"></i> Caps Lock ON
-                        </motion.div>
+                          {confirmPassword === password ? "✓ Match" : "✗ Do not match"}
+                        </span>
                       )}
-                    </AnimatePresence>
+                      <AnimatePresence>
+                        {capsLockWarningVisible && (
+                          <motion.div
+                            initial={{ opacity: 0, x: 5 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 5 }}
+                            transition={{ duration: 0.2 }}
+                            style={{
+                              background: "rgba(255, 255, 255, 0.05)",
+                              color: "#f8fafc",
+                              border: "1px solid rgba(255, 255, 255, 0.2)",
+                              fontSize: "10px",
+                              padding: "2px 8px",
+                              borderRadius: "9999px",
+                              fontWeight: "600",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px"
+                            }}
+                          >
+                            <i className="bi bi-capslock-fill text-warning"></i> Caps Lock ON
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
-                </div>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  placeholder="Repeat your password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  onKeyUp={(e) => setCapsLockOn(e.getModifierState("CapsLock"))}
-                  onKeyDown={(e) => setCapsLockOn(e.getModifierState("CapsLock"))}
-                  onFocus={() => {
-                    setActiveField("password");
-                  }}
-                  onBlur={() => setActiveField(null)}
-                  className="auth-clean-input"
-                />
-                <div className="auth-input-focus-line"></div>
-              </motion.div>
-            )}
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    placeholder="Repeat your password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onKeyUp={(e) => setCapsLockOn(e.getModifierState("CapsLock"))}
+                    onKeyDown={(e) => setCapsLockOn(e.getModifierState("CapsLock"))}
+                    onFocus={() => {
+                      setActiveField("password");
+                    }}
+                    onBlur={() => setActiveField(null)}
+                    className="auth-clean-input"
+                  />
+                  <div className="auth-input-focus-line"></div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Remember Me & Forgot Password (Only in Login Mode) */}
-            {authMode === "login" && (
-              <div className="d-flex align-items-center justify-content-between mb-2">
-                <label className="d-flex align-items-center gap-2 cursor-pointer m-0">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="form-check-input mt-0 rounded"
-                    style={{ width: "14px", height: "14px" }}
-                  />
-                  <span className="text-secondary small" style={{ fontSize: "11.5px" }}>
-                    Remember me
-                  </span>
-                </label>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setForgotEmail(email || "");
-                    setForgotSent(false);
-                    setForgotError("");
-                    setForgotModalOpen(true);
-                  }}
-                  className="btn btn-link p-0 text-decoration-none small text-secondary"
-                  style={{ fontSize: "11.5px" }}
+            <AnimatePresence initial={false}>
+              {authMode === "login" && (
+                <motion.div
+                  key="login-remember-forgot"
+                  initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                  animate={{ opacity: 1, height: "auto", marginBottom: 8 }}
+                  exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                  transition={{ duration: 0.25, ease: "easeInOut" }}
+                  style={{ overflow: "hidden" }}
+                  className="d-flex align-items-center justify-content-between"
                 >
-                  Forgot password?
-                </button>
-              </div>
-            )}
+                  <label className="d-flex align-items-center gap-2 cursor-pointer m-0">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="form-check-input mt-0 rounded"
+                      style={{ width: "14px", height: "14px" }}
+                    />
+                    <span className="text-secondary small" style={{ fontSize: "11.5px" }}>
+                      Remember me
+                    </span>
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotEmail(email || "");
+                      setForgotSent(false);
+                      setForgotError("");
+                      setForgotModalOpen(true);
+                    }}
+                    className="btn btn-link p-0 text-decoration-none small text-secondary"
+                    style={{ fontSize: "11.5px" }}
+                  >
+                    Forgot password?
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Primary Submit Button */}
             <button
@@ -1214,65 +1264,81 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
             </button>
           </form>
 
-          {/* Quick-Fill Demo Credentials Bar (Only in Login Mode) */}
-          {authMode === "login" ? (
-            <div className="mt-2 pt-1.5 border-top border-slate-100">
-              <div className="d-flex align-items-center justify-content-between mb-1.5">
-                <span className="text-white-50 fw-bold text-uppercase" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
-                  1-Click Demo Credentials
-                </span>
-                <span className="badge bg-slate-100 text-secondary" style={{ fontSize: "9px" }}>Instant Fill</span>
-              </div>
-
-              <div className="auth-demo-grid">
-                <button
-                  type="button"
-                  className="auth-demo-pill"
-                  onClick={() => handleQuickFill("shubhsingh.13jan@gmail.com", "8859574934", "admin")}
-                >
-                  <span>👑</span>
-                  <span className="text-truncate">Admin (Shubh)</span>
-                </button>
-                <button
-                  type="button"
-                  className="auth-demo-pill"
-                  onClick={() => handleQuickFill("manager@company.com", "Manager@123", "manager")}
-                >
-                  <span>👔</span>
-                  <span className="text-truncate">Manager</span>
-                </button>
-                <button
-                  type="button"
-                  className="auth-demo-pill"
-                  onClick={() => handleQuickFill("supervisor@company.com", "Supervisor@123", "supervisor")}
-                >
-                  <span>👷</span>
-                  <span className="text-truncate">Supervisor</span>
-                </button>
-                <button
-                  type="button"
-                  className="auth-demo-pill"
-                  onClick={() => handleQuickFill("employee@company.com", "Employee@123", "employee")}
-                >
-                  <span>💼</span>
-                  <span className="text-truncate">Employee</span>
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center mt-3 pt-2 border-top border-slate-100">
-              <span className="text-white-50 small" style={{ fontSize: "12px" }}>
-                Already registered with an organization?{" "}
-              </span>
-              <button
-                type="button"
-                onClick={() => setAuthMode("login")}
-                className="btn btn-link p-0 fw-bold text-white text-decoration-none small hover-underline"
+          {/* Quick-Fill Demo Credentials Bar vs Bottom Sign In Link */}
+          <AnimatePresence mode="wait" initial={false}>
+            {authMode === "login" ? (
+              <motion.div
+                key="login-demo-credentials"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.22, ease: "easeInOut" }}
+                className="mt-2 pt-1.5 border-top border-slate-100"
               >
-                Sign In Here →
-              </button>
-            </div>
-          )}
+                <div className="d-flex align-items-center justify-content-between mb-1.5">
+                  <span className="text-white-50 fw-bold text-uppercase" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
+                    1-Click Demo Credentials
+                  </span>
+                  <span className="badge bg-slate-100 text-secondary" style={{ fontSize: "9px" }}>Instant Fill</span>
+                </div>
+
+                <div className="auth-demo-grid">
+                  <button
+                    type="button"
+                    className="auth-demo-pill"
+                    onClick={() => handleQuickFill("shubhsingh.13jan@gmail.com", "8859574934", "admin")}
+                  >
+                    <span>👑</span>
+                    <span className="text-truncate">Admin (Shubh)</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="auth-demo-pill"
+                    onClick={() => handleQuickFill("manager@company.com", "Manager@123", "manager")}
+                  >
+                    <span>👔</span>
+                    <span className="text-truncate">Manager</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="auth-demo-pill"
+                    onClick={() => handleQuickFill("supervisor@company.com", "Supervisor@123", "supervisor")}
+                  >
+                    <span>👷</span>
+                    <span className="text-truncate">Supervisor</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="auth-demo-pill"
+                    onClick={() => handleQuickFill("employee@company.com", "Employee@123", "employee")}
+                  >
+                    <span>💼</span>
+                    <span className="text-truncate">Employee</span>
+                  </button>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="signup-login-prompt"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.22, ease: "easeInOut" }}
+                className="text-center mt-3 pt-2 border-top border-slate-100"
+              >
+                <span className="text-white-50 small" style={{ fontSize: "12px" }}>
+                  Already registered with an organization?{" "}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setAuthMode("login")}
+                  className="btn btn-link p-0 fw-bold text-white text-decoration-none small hover-underline"
+                >
+                  Sign In Here →
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
           </div>
         </div>
       </div>
