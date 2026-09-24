@@ -442,10 +442,10 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       ctx.closePath();
 
       const floorFill = ctx.createLinearGradient(0, height * 0.45, 0, floorBottom);
-      floorFill.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0)`);
-      floorFill.addColorStop(0.35, `rgba(${dr}, ${dg}, ${db}, 0.06)`);
-      floorFill.addColorStop(0.72, `rgba(${dr}, ${dg}, ${db}, 0.05)`);
-      floorFill.addColorStop(1, `rgba(4, 6, 20, 0.98)`);
+      floorFill.addColorStop(0, `rgba(3, 5, 12, 0)`);
+      floorFill.addColorStop(0.30, `rgba(3, 5, 12, 0.55)`);
+      floorFill.addColorStop(0.65, `rgba(2, 4, 10, 0.88)`);
+      floorFill.addColorStop(1, `rgba(2, 3, 8, 0.98)`);
       ctx.fillStyle = floorFill;
       ctx.fill();
 
@@ -458,8 +458,8 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       const rayGrad = ctx.createLinearGradient(0, horizonBase, 0, height);
       rayGrad.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0)`);       // Invisible near horizon
       rayGrad.addColorStop(0.45, `rgba(${pr}, ${pg}, ${pb}, 0)`);     // Keep top region completely invisible
-      rayGrad.addColorStop(0.75, `rgba(${pr}, ${pg}, ${pb}, 0.08)`);  // Very subtle in mid-valley
-      rayGrad.addColorStop(1, `rgba(${pr}, ${pg}, ${pb}, 0.15)`);    // Subtly visible in foreground
+      rayGrad.addColorStop(0.75, `rgba(${pr}, ${pg}, ${pb}, 0.035)`); // Very subtle in mid-valley
+      rayGrad.addColorStop(1, `rgba(${pr}, ${pg}, ${pb}, 0.07)`);    // Subtly visible in foreground
 
       ctx.beginPath();
       for (let c = 0; c < NUM_COLS; c++) {
@@ -473,7 +473,7 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         }
       }
       ctx.strokeStyle = rayGrad;
-      ctx.lineWidth = 0.85;
+      ctx.lineWidth = 0.75;
       ctx.stroke();
 
       // 
@@ -483,8 +483,8 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       for (let r = 5; r < NUM_ROWS; r++) {
         const rowT = grid[r][0].rowT;
         // Fade out completely near the horizon for the infinite carpet effect
-        // and brighter in the foreground
-        const alpha = 0.18 * Math.pow(rowT, 1.8);
+        // and subtle dark grid in the foreground
+        const alpha = 0.08 * Math.pow(rowT, 1.8);
 
         ctx.beginPath();
         for (let c = 0; c < NUM_COLS; c++) {
@@ -495,8 +495,8 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             ctx.lineTo(pt.x, pt.y);
           }
         }
-        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${Math.min(alpha, 0.18)})`;
-        ctx.lineWidth = rowT < 0.20 ? 0.50 : 1.0;
+        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${Math.min(alpha, 0.08)})`;
+        ctx.lineWidth = rowT < 0.20 ? 0.35 : 0.75;
         ctx.stroke();
       }
 
@@ -524,28 +524,28 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           alpha: 0.18,
           r: Math.round(p.r), g: Math.round(p.g), b: Math.round(p.b),
         },
-        // Left globe aura
+        // Left globe aura (softened to keep land dark)
         {
           x: width * 0.14,
           y: height * 0.52,
-          radius: 320,
-          alpha: 0.14,
+          radius: 280,
+          alpha: 0.05,
           r: Math.round(d.r), g: Math.round(d.g), b: Math.round(d.b),
         },
-        // Right watermark aura
+        // Right watermark aura (softened to keep land dark)
         {
           x: width * 0.88,
           y: height * 0.70,
-          radius: 340,
-          alpha: 0.11,
+          radius: 280,
+          alpha: 0.04,
           r: Math.round(l.r), g: Math.round(l.g), b: Math.round(l.b),
         },
-        // Bottom-center horizon upwelling (floor atmospheric glow)
+        // Bottom-center horizon upwelling (subtle floor atmospheric glow)
         {
           x: width * 0.5,
-          y: height * 0.88,
-          radius: Math.max(width * 0.52, 560),
-          alpha: 0.13,
+          y: height * 0.90,
+          radius: Math.max(width * 0.38, 420),
+          alpha: 0.03,
           r: Math.round(p.r), g: Math.round(p.g), b: Math.round(p.b),
         },
       ];
@@ -944,11 +944,19 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         Math.max(width, height) * 0.78
       );
       gradient.addColorStop(0, "rgba(0,0,0,0)");
-      gradient.addColorStop(0.6, "rgba(0,0,0,0.08)");
-      gradient.addColorStop(1, "rgba(3, 6, 12, 0.62)");
+      gradient.addColorStop(0.6, "rgba(0,0,0,0.10)");
+      gradient.addColorStop(1, "rgba(3, 6, 12, 0.70)");
 
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, width, height);
+
+      // Deep bottom dark gradient to ensure floor area is dark, sleek and immersive
+      const bottomShade = ctx.createLinearGradient(0, height * 0.68, 0, height);
+      bottomShade.addColorStop(0, "rgba(3, 6, 12, 0)");
+      bottomShade.addColorStop(0.5, "rgba(2, 4, 10, 0.45)");
+      bottomShade.addColorStop(1, "rgba(2, 3, 7, 0.78)");
+      ctx.fillStyle = bottomShade;
+      ctx.fillRect(0, height * 0.68, width, height * 0.32);
     };
 
     /* =========================================================
