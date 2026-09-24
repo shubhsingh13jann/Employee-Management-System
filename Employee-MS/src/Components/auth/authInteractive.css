@@ -44,38 +44,9 @@
   max-height: min(850px, calc(100vh - 4.5rem));
 }
 
-/* Role-Themed Card Top Accent Line */
+/* Role-Themed Card Top Accent Line (Disabled per user request) */
 .auth-split-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent 5%, rgba(255, 255, 255, 0.4) 50%, transparent 95%);
-  transition: all 0.4s ease;
-  z-index: 10;
-  pointer-events: none;
-}
-
-.theme-admin .auth-split-card::before {
-  background: linear-gradient(90deg, transparent 5%, #8b5cf6 50%, transparent 95%);
-  box-shadow: 0 0 14px rgba(139, 92, 246, 0.6);
-}
-
-.theme-manager .auth-split-card::before {
-  background: linear-gradient(90deg, transparent 5%, #2563eb 50%, transparent 95%);
-  box-shadow: 0 0 14px rgba(37, 99, 235, 0.6);
-}
-
-.theme-supervisor .auth-split-card::before {
-  background: linear-gradient(90deg, transparent 5%, #059669 50%, transparent 95%);
-  box-shadow: 0 0 14px rgba(5, 150, 105, 0.6);
-}
-
-.theme-employee .auth-split-card::before {
-  background: linear-gradient(90deg, transparent 5%, #d97706 50%, transparent 95%);
-  box-shadow: 0 0 14px rgba(217, 119, 6, 0.6);
+  display: none !important;
 }
 
 @media (min-width: 992px) {

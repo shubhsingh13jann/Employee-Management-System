@@ -441,9 +441,9 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       ctx.lineTo(width + 60, height + 60);
       ctx.closePath();
 
-      const floorFill = ctx.createLinearGradient(0, height * 0.60, 0, floorBottom);
-      floorFill.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0.20)`);
-      floorFill.addColorStop(0.35, `rgba(${dr}, ${dg}, ${db}, 0.12)`);
+      const floorFill = ctx.createLinearGradient(0, height * 0.45, 0, floorBottom);
+      floorFill.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0)`);
+      floorFill.addColorStop(0.35, `rgba(${dr}, ${dg}, ${db}, 0.06)`);
       floorFill.addColorStop(0.72, `rgba(${dr}, ${dg}, ${db}, 0.05)`);
       floorFill.addColorStop(1, `rgba(4, 6, 20, 0.98)`);
       ctx.fillStyle = floorFill;
@@ -455,16 +455,17 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       //    slanted angles to form distinct PARALLELOGRAM cells
       // 
       // Create a vertical gradient to fade out the longitudinal rays near the horizon
-      const rayGrad = ctx.createLinearGradient(0, horizonBase - 40, 0, height);
+      const rayGrad = ctx.createLinearGradient(0, horizonBase, 0, height);
       rayGrad.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0)`);       // Invisible near horizon
-      rayGrad.addColorStop(0.3, `rgba(${pr}, ${pg}, ${pb}, 0.08)`);  // Very subtle
+      rayGrad.addColorStop(0.45, `rgba(${pr}, ${pg}, ${pb}, 0)`);     // Keep top region completely invisible
+      rayGrad.addColorStop(0.75, `rgba(${pr}, ${pg}, ${pb}, 0.08)`);  // Very subtle in mid-valley
       rayGrad.addColorStop(1, `rgba(${pr}, ${pg}, ${pb}, 0.15)`);    // Subtly visible in foreground
 
       ctx.beginPath();
       for (let c = 0; c < NUM_COLS; c++) {
-        for (let r = 0; r < NUM_ROWS; r++) {
+        for (let r = 5; r < NUM_ROWS; r++) {
           const pt = grid[r][c];
-          if (r === 0) {
+          if (r === 5) {
             ctx.moveTo(pt.x, pt.y);
           } else {
             ctx.lineTo(pt.x, pt.y);
@@ -479,11 +480,11 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       // 3. TRANSVERSE CONTOUR LINES (Across the valley)
       //    Follow the concave valley curves
       // 
-      for (let r = 1; r < NUM_ROWS; r++) {
+      for (let r = 5; r < NUM_ROWS; r++) {
         const rowT = grid[r][0].rowT;
-        // Fade out completely near the horizon (rowT = 0) for the infinite carpet effect
-        // and brighter in the foreground (rowT = 1)
-        const alpha = 0.20 * Math.pow(rowT, 0.7);
+        // Fade out completely near the horizon for the infinite carpet effect
+        // and brighter in the foreground
+        const alpha = 0.18 * Math.pow(rowT, 1.8);
 
         ctx.beginPath();
         for (let c = 0; c < NUM_COLS; c++) {
@@ -494,31 +495,14 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             ctx.lineTo(pt.x, pt.y);
           }
         }
-        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${Math.min(alpha, 0.20)})`;
+        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${Math.min(alpha, 0.18)})`;
         ctx.lineWidth = rowT < 0.20 ? 0.50 : 1.0;
         ctx.stroke();
       }
 
       // ─────────────────────────────────────────────────────
-      // 4. TOP RIDGE CREST (REMOVED per user request to eliminate partition line)
+      // 4. TOP RIDGE CREST & BASIN BLOOM (REMOVED to eliminate all boundary partition lines)
       // ─────────────────────────────────────────────────────
-      // ─────────────────────────────────────────────────────
-      // 6. ATMOSPHERIC VALLEY BASIN BLOOM
-      // ─────────────────────────────────────────────────────
-      const hBand = ctx.createRadialGradient(
-        centerX,
-        horizonBase - 30,
-        0,
-        centerX,
-        horizonBase - 30,
-        width * 0.75
-      );
-      hBand.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0.24)`);
-      hBand.addColorStop(0.25, `rgba(${pr}, ${pg}, ${pb}, 0.11)`);
-      hBand.addColorStop(0.55, `rgba(${dr}, ${dg}, ${db}, 0.04)`);
-      hBand.addColorStop(1, `rgba(${dr}, ${dg}, ${db}, 0)`);
-      ctx.fillStyle = hBand;
-      ctx.fillRect(0, height * 0.55, width, height * 0.45);
 
       ctx.restore();
     };
