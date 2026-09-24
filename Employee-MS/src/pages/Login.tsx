@@ -1205,15 +1205,41 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   style={{ overflow: "hidden" }}
                   className="flex items-center justify-between"
                 >
-                  <label className="inline-flex items-center gap-2.5 cursor-pointer select-none m-0">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded border border-slate-600 bg-slate-800 text-indigo-600 accent-indigo-500 cursor-pointer m-0 flex-shrink-0"
-                      style={{ width: "15px", height: "15px", margin: 0, padding: 0 }}
-                    />
-                    <span className="text-slate-300 hover:text-white transition-colors select-none font-normal" style={{ fontSize: "12px", color: "#cbd5e1" }}>
+                  <label className="inline-flex items-center gap-3 cursor-pointer select-none m-0 group">
+                    <div className="relative flex items-center justify-center flex-shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
+                        className="sr-only"
+                      />
+                      <div
+                        className={`w-4 h-4 rounded-full flex items-center justify-center transition-all duration-150 border ${
+                          rememberMe
+                            ? "bg-blue-600 border-blue-500 text-white shadow-xs"
+                            : "bg-slate-800/90 border-slate-500 group-hover:border-slate-300"
+                        }`}
+                        style={{ width: "16px", height: "16px" }}
+                      >
+                        {rememberMe && (
+                          <svg
+                            className="w-2.5 h-2.5 text-white"
+                            viewBox="0 0 12 12"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M2.5 6L4.8 8.3L9.5 3.5" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                    <span
+                      className="text-slate-300 group-hover:text-white transition-colors select-none font-normal pl-0.5"
+                      style={{ fontSize: "12px", color: "#cbd5e1" }}
+                    >
                       Remember me
                     </span>
                   </label>
