@@ -1202,28 +1202,55 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   animate={{ opacity: 1, height: "auto", marginBottom: 8 }}
                   exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                   transition={{ duration: 0.25, ease: "easeInOut" }}
-                  style={{ overflow: "hidden" }}
+                  style={{ overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "space-between" }}
                   className="flex items-center justify-between"
                 >
-                  <label className="inline-flex items-center gap-3 cursor-pointer select-none m-0 group">
-                    <div className="relative flex items-center justify-center flex-shrink-0">
+                  <label
+                    className="cursor-pointer select-none m-0 group"
+                    style={{
+                      display: "inline-flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: "10px",
+                      verticalAlign: "middle"
+                    }}
+                  >
+                    <span
+                      className="relative flex-shrink-0"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "16px",
+                        height: "16px"
+                      }}
+                    >
                       <input
                         type="checkbox"
                         checked={rememberMe}
                         onChange={(e) => setRememberMe(e.target.checked)}
                         className="sr-only"
                       />
-                      <div
-                        className={`w-4 h-4 rounded-full flex items-center justify-center transition-all duration-150 border ${
+                      <span
+                        className={`rounded-full transition-all duration-150 border flex items-center justify-center ${
                           rememberMe
                             ? "bg-blue-600 border-blue-500 text-white shadow-xs"
                             : "bg-slate-800/90 border-slate-500 group-hover:border-slate-300"
                         }`}
-                        style={{ width: "16px", height: "16px" }}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: "16px",
+                          height: "16px",
+                          borderRadius: "50%",
+                          backgroundColor: rememberMe ? "#2563eb" : "rgba(30, 41, 59, 0.9)",
+                          borderColor: rememberMe ? "#3b82f6" : "#64748b"
+                        }}
                       >
                         {rememberMe && (
                           <svg
-                            className="w-2.5 h-2.5 text-white"
+                            style={{ width: "10px", height: "10px", color: "#ffffff" }}
                             viewBox="0 0 12 12"
                             fill="none"
                             stroke="currentColor"
@@ -1234,11 +1261,16 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                             <path d="M2.5 6L4.8 8.3L9.5 3.5" />
                           </svg>
                         )}
-                      </div>
-                    </div>
+                      </span>
+                    </span>
                     <span
-                      className="text-slate-300 group-hover:text-white transition-colors select-none font-normal pl-0.5"
-                      style={{ fontSize: "12px", color: "#cbd5e1" }}
+                      className="text-slate-300 group-hover:text-white transition-colors select-none font-normal"
+                      style={{
+                        fontSize: "12px",
+                        color: "#cbd5e1",
+                        lineHeight: 1,
+                        whiteSpace: "nowrap"
+                      }}
                     >
                       Remember me
                     </span>
