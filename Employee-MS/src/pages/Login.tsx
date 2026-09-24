@@ -888,24 +888,24 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                           <button
                             type="button"
                             onClick={handleRemoveAvatar}
-                            className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-link p-0 text-red-600 text-sm text-decoration-none"
+                            className="inline-flex items-center gap-1 text-red-400 hover:text-red-300 font-medium transition-colors cursor-pointer text-xs p-0 bg-transparent border-0"
                             style={{ fontSize: "10.5px" }}
                           >
                             <i className="bi bi-trash mr-1"></i>Remove
                           </button>
                         )}
                       </div>
-                      <p className="text-white-50 mb-1.5" style={{ fontSize: "10px", lineHeight: 1.3 }}>
+                      <p className="text-slate-400 mb-1.5" style={{ fontSize: "10px", lineHeight: 1.3 }}>
                         {avatarFile ? avatarFile.name : "Upload your work photo (PNG, JPG, WEBP • Max 5MB)"}
                       </p>
                       <button
                         type="button"
                         onClick={() => avatarInputRef.current?.click()}
-                        className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm btn-outline-light py-0.5 px-2.5 rounded-md"
-                        style={{ fontSize: "10.5px", borderColor: "rgba(255, 255, 255, 0.25)" }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/25 hover:border-white/40 shadow-xs transition-all cursor-pointer"
+                        style={{ fontSize: "11px", color: "#ffffff" }}
                       >
-                        <i className="bi bi-upload mr-1"></i>
-                        {avatarFile ? "Change Image" : "Choose File"}
+                        <i className="bi bi-upload" style={{ color: "#ffffff" }}></i>
+                        <span style={{ color: "#ffffff" }}>{avatarFile ? "Change Image" : "Choose File"}</span>
                       </button>
                     </div>
                   </div>
@@ -1205,15 +1205,15 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   style={{ overflow: "hidden" }}
                   className="flex items-center justify-between"
                 >
-                  <label className="flex items-center gap-2 cursor-pointer m-0">
+                  <label className="inline-flex items-center gap-2.5 cursor-pointer select-none m-0">
                     <input
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="form-check-input mt-0 rounded"
-                      style={{ width: "14px", height: "14px" }}
+                      className="w-4 h-4 rounded border border-slate-600 bg-slate-800 text-indigo-600 accent-indigo-500 cursor-pointer m-0 flex-shrink-0"
+                      style={{ width: "15px", height: "15px", margin: 0, padding: 0 }}
                     />
-                    <span className="text-gray-600 text-sm" style={{ fontSize: "11.5px" }}>
+                    <span className="text-slate-300 hover:text-white transition-colors select-none font-normal" style={{ fontSize: "12px", color: "#cbd5e1" }}>
                       Remember me
                     </span>
                   </label>
@@ -1226,8 +1226,8 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                       setForgotError("");
                       setForgotModalOpen(true);
                     }}
-                    className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-link p-0 text-decoration-none text-sm text-gray-600"
-                    style={{ fontSize: "11.5px" }}
+                    className="p-0 border-0 bg-transparent text-slate-400 hover:text-indigo-400 transition-colors cursor-pointer font-normal"
+                    style={{ fontSize: "12px", color: "#94a3b8" }}
                   >
                     Forgot password?
                   </button>
@@ -1338,7 +1338,8 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                 <button
                   type="button"
                   onClick={() => setAuthMode("login")}
-                  className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-link p-0 font-bold text-white text-decoration-none text-sm hover-underline"
+                  className="font-bold text-white hover:underline ml-1 inline-block cursor-pointer bg-transparent border-0 p-0"
+                  style={{ fontSize: "12px" }}
                 >
                   Sign In Here →
                 </button>
