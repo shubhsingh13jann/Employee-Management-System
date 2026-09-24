@@ -60,7 +60,7 @@ const AnimatedAppContent = () => {
     <>
       <TopLaserBar />
       <AnimatePresence mode="wait">
-        <PageTransition key={transitionKey}>
+        <PageTransition key={transitionKey} transitionKey={transitionKey}>
           <Routes location={location}>
             {/* Public Landing & Auth Routes (LandingPage persists underneath Auth overlay) */}
             <Route path="/" element={<LandingPage />}>
