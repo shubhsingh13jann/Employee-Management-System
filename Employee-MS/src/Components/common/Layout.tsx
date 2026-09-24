@@ -15,7 +15,7 @@ const Layout = () => {
         <Navbar />
         
         {/* Main Workspace */}
-        <main className="p-4 p-xl-5 flex-grow-1 overflow-y-auto">
+        <main className="p-3 p-md-4 flex-grow-1 overflow-y-auto">
           <Outlet />
         </main>
       </div>

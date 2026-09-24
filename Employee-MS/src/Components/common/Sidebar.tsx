@@ -28,7 +28,7 @@ const Sidebar = () => {
   };
 
   const linkClass = ({ isActive }) =>
-    `nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-3 sidebar-nav-link fw-medium ${isActive ? "active" : ""}`;
+    `nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-3 sidebar-nav-link fw-medium ${isActive ? "active" : ""}`;
 
   const renderNavLinks = () => {
     switch (user?.role) {
@@ -37,25 +37,25 @@ const Sidebar = () => {
           <>
             <li className="nav-item mb-2">
               <NavLink to="/admin/dashboard" end className={linkClass}>
-                <i className="bi bi-grid-1x2-fill fs-5"></i>
+                <i className="bi bi-grid-1x2-fill fs-6"></i>
                 <span>Dashboard</span>
               </NavLink>
             </li>
             <li className="nav-item mb-2">
               <NavLink to="/admin/departments" className={linkClass}>
-                <i className="bi bi-buildings-fill fs-5"></i>
+                <i className="bi bi-buildings-fill fs-6"></i>
                 <span>Departments</span>
               </NavLink>
             </li>
             <li className="nav-item mb-2">
               <NavLink to="/admin/users" className={linkClass}>
-                <i className="bi bi-people-fill fs-5"></i>
+                <i className="bi bi-people-fill fs-6"></i>
                 <span>User Directory</span>
               </NavLink>
             </li>
             <li className="nav-item mb-2">
               <NavLink to="/admin/hierarchy" className={linkClass}>
-                <i className="bi bi-diagram-3-fill fs-5"></i>
+                <i className="bi bi-diagram-3-fill fs-6"></i>
                 <span>Team Hierarchy</span>
               </NavLink>
             </li>
@@ -67,25 +67,25 @@ const Sidebar = () => {
           <>
             <li className="nav-item mb-2">
               <NavLink to="/manager/dashboard" end className={linkClass}>
-                <i className="bi bi-grid-1x2-fill fs-5"></i>
+                <i className="bi bi-grid-1x2-fill fs-6"></i>
                 <span>Manager Dashboard</span>
               </NavLink>
             </li>
             <li className="nav-item mb-2">
               <NavLink to="/manager/projects" className={linkClass}>
-                <i className="bi bi-kanban-fill fs-5"></i>
+                <i className="bi bi-kanban-fill fs-6"></i>
                 <span>Projects & Milestones</span>
               </NavLink>
             </li>
             <li className="nav-item mb-2">
               <NavLink to="/manager/supervisors" className={linkClass}>
-                <i className="bi bi-person-badge-fill fs-5"></i>
+                <i className="bi bi-person-badge-fill fs-6"></i>
                 <span>Dept Supervisors</span>
               </NavLink>
             </li>
             <li className="nav-item mb-2">
               <NavLink to="/manager/leaves" className={linkClass}>
-                <i className="bi bi-calendar-check-fill fs-5"></i>
+                <i className="bi bi-calendar-check-fill fs-6"></i>
                 <span>Escalated Leaves</span>
               </NavLink>
             </li>
@@ -97,25 +97,25 @@ const Sidebar = () => {
           <>
             <li className="nav-item mb-2">
               <NavLink to="/supervisor/dashboard" end className={linkClass}>
-                <i className="bi bi-grid-1x2-fill fs-5"></i>
+                <i className="bi bi-grid-1x2-fill fs-6"></i>
                 <span>Team Dashboard</span>
               </NavLink>
             </li>
             <li className="nav-item mb-2">
               <NavLink to="/supervisor/team" className={linkClass}>
-                <i className="bi bi-people-fill fs-5"></i>
+                <i className="bi bi-people-fill fs-6"></i>
                 <span>Assigned Team</span>
               </NavLink>
             </li>
             <li className="nav-item mb-2">
               <NavLink to="/supervisor/tasks" className={linkClass}>
-                <i className="bi bi-list-check fs-5"></i>
+                <i className="bi bi-list-check fs-6"></i>
                 <span>Task Delegation</span>
               </NavLink>
             </li>
             <li className="nav-item mb-2">
               <NavLink to="/supervisor/leaves" className={linkClass}>
-                <i className="bi bi-calendar-plus-fill fs-5"></i>
+                <i className="bi bi-calendar-plus-fill fs-6"></i>
                 <span>Routine Leaves</span>
               </NavLink>
             </li>
@@ -127,25 +127,25 @@ const Sidebar = () => {
           <>
             <li className="nav-item mb-2">
               <NavLink to="/employee/dashboard" end className={linkClass}>
-                <i className="bi bi-grid-1x2-fill fs-5"></i>
+                <i className="bi bi-grid-1x2-fill fs-6"></i>
                 <span>My Dashboard</span>
               </NavLink>
             </li>
             <li className="nav-item mb-2">
               <NavLink to="/employee/tasks" className={linkClass}>
-                <i className="bi bi-card-checklist fs-5"></i>
+                <i className="bi bi-card-checklist fs-6"></i>
                 <span>My Tasks</span>
               </NavLink>
             </li>
             <li className="nav-item mb-2">
               <NavLink to="/employee/leaves" className={linkClass}>
-                <i className="bi bi-calendar-event-fill fs-5"></i>
+                <i className="bi bi-calendar-event-fill fs-6"></i>
                 <span>Apply / Track Leave</span>
               </NavLink>
             </li>
             <li className="nav-item mb-2">
               <NavLink to="/employee/profile" className={linkClass}>
-                <i className="bi bi-person-circle fs-5"></i>
+                <i className="bi bi-person-circle fs-6"></i>
                 <span>My Profile</span>
               </NavLink>
             </li>
@@ -157,29 +157,29 @@ const Sidebar = () => {
     }
   };
 
-  return (
-    <aside className="sidebar-container text-white d-flex flex-column p-4 vh-100 position-sticky top-0 shadow-lg" style={{ width: "280px", minWidth: "280px", zIndex: 1000 }}>
+      return ( <aside className="sidebar-container text-white d-flex flex-column p-3 vh-100 position-sticky top-0 shadow-lg" style={{ width: "250px", minWidth: "250px", zIndex: 1000, fontSize: "0.9rem" }}>
       {/* Brand Header */}
-      <div className="pb-4 mb-4 border-bottom border-secondary border-opacity-25">
+      <div className="pb-3 mb-3 border-bottom border-secondary border-opacity-25">
         <BrandLogo
           theme="dark"
+          size="sm"
           to={getDefaultRouteForRole ? getDefaultRouteForRole(user?.role) : "/"}
         />
       </div>
 
       {/* User Chip */}
-      <div className="bg-white bg-opacity-10 border border-white border-opacity-10 rounded-4 p-3 mb-4 d-flex align-items-center gap-3 shadow-sm">
-        <div className="sidebar-active-gradient rounded-circle text-white d-flex align-items-center justify-content-center fw-bold shadow-sm" style={{ width: "42px", height: "42px", background: "var(--sidebar-active-gradient)", fontSize: "16px" }}>
+      <div className="bg-white bg-opacity-10 border border-white border-opacity-10 rounded-4 p-2 mb-3 d-flex align-items-center gap-2 shadow-sm">
+        <div className="sidebar-active-gradient rounded-circle text-white d-flex align-items-center justify-content-center fw-bold shadow-sm" style={{ width: "36px", height: "36px", background: "var(--sidebar-active-gradient)", fontSize: "14px" }}>
           {user?.name?.charAt(0) || "U"}
         </div>
         <div className="overflow-hidden">
-          <p className="mb-1 fw-bold text-truncate text-white" style={{ fontSize: "14px" }}>{user?.name || "User"}</p>
-          <div className="d-flex align-items-center">{getRoleBadge(user?.role)}</div>
+          <p className="mb-0 fw-bold text-truncate text-white" style={{ fontSize: "13px" }}>{user?.name || "User"}</p>
+          <div className="d-flex align-items-center mt-1">{getRoleBadge(user?.role)}</div>
         </div>
       </div>
 
       {/* Navigation Menu */}
-      <ul className="nav nav-pills flex-column mb-auto sidebar-scroll overflow-y-auto" style={{ maxHeight: "calc(100vh - 350px)" }}>
+      <ul className="nav nav-pills flex-column mb-auto sidebar-scroll overflow-y-auto" style={{ maxHeight: "calc(100vh - 300px)" }}>
         {renderNavLinks()}
       </ul>
 
@@ -194,7 +194,7 @@ const Sidebar = () => {
           className="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2 py-2 rounded-3 fw-semibold border-opacity-50"
           style={{ transition: "all 0.2s ease" }}
         >
-          <i className="bi bi-box-arrow-right fs-5"></i>
+          <i className="bi bi-box-arrow-right fs-6"></i>
           <span>Sign Out</span>
         </button>
       </div>
