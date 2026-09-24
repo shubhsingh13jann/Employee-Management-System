@@ -499,48 +499,9 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         ctx.stroke();
       }
 
-      // 
-      // 4. TOP RIDGE CREST - GLOWING LUMINOUS HORIZON (Mountain Cliffs)
-      // 
-      // Wide bloom pass for the line
-      ctx.beginPath();
-      for (let c = 0; c < NUM_COLS; c++) {
-        const pt = grid[0][c];
-        if (c === 0) ctx.moveTo(pt.x, pt.y);
-        else ctx.lineTo(pt.x, pt.y);
-      }
-      
-      const bloomGrad = ctx.createLinearGradient(0, 0, width, 0);
-      bloomGrad.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0.8)`); // Bright left hill
-      bloomGrad.addColorStop(0.25, `rgba(${pr}, ${pg}, ${pb}, 0.6)`);
-      bloomGrad.addColorStop(0.45, `rgba(${pr}, ${pg}, ${pb}, 0)`);  // Invisible in center
-      bloomGrad.addColorStop(0.75, `rgba(${pr}, ${pg}, ${pb}, 0)`);
-      bloomGrad.addColorStop(1, `rgba(${pr}, ${pg}, ${pb}, 0.5)`);   // Subtle right hill
-      
-      ctx.strokeStyle = bloomGrad;
-      ctx.lineWidth = 8;
-      ctx.filter = "blur(6px)";
-      ctx.stroke();
-      ctx.filter = "none";
-
-      // Sharp specular crest line connecting everything clearly
-      ctx.beginPath();
-      for (let c = 0; c < NUM_COLS; c++) {
-        const pt = grid[0][c];
-        if (c === 0) ctx.moveTo(pt.x, pt.y);
-        else ctx.lineTo(pt.x, pt.y);
-      }
-      
-      const specularGrad = ctx.createLinearGradient(0, 0, width, 0);
-      specularGrad.addColorStop(0, `rgba(${lr}, ${lg}, ${lb}, 0.95)`); // Very bright left cliff
-      specularGrad.addColorStop(0.28, `rgba(${lr}, ${lg}, ${lb}, 0.8)`);
-      specularGrad.addColorStop(0.42, `rgba(${lr}, ${lg}, ${lb}, 0)`);   // Fades out into the valley carpet
-      specularGrad.addColorStop(0.78, `rgba(${lr}, ${lg}, ${lb}, 0)`);
-      specularGrad.addColorStop(1, `rgba(${lr}, ${lg}, ${lb}, 0.7)`);    // Right cliff outline
-      
-      ctx.strokeStyle = specularGrad;
-      ctx.lineWidth = 2.0;
-      ctx.stroke();
+      // ─────────────────────────────────────────────────────
+      // 4. TOP RIDGE CREST (REMOVED per user request to eliminate partition line)
+      // ─────────────────────────────────────────────────────
       // ─────────────────────────────────────────────────────
       // 6. ATMOSPHERIC VALLEY BASIN BLOOM
       // ─────────────────────────────────────────────────────
