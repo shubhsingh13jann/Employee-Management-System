@@ -1,0 +1,41 @@
+:root {
+  --sidebar-bg: #0b1120;
+  --sidebar-active-gradient: linear-gradient(90deg, #6366f1 0%, #a855f7 100%);
+  --dashboard-bg: #f8fafc;
+}
+
+body {
+  background-color: var(--dashboard-bg);
+}
+
+.sidebar-container {
+  background-color: var(--sidebar-bg) !important;
+}
+
+.sidebar-nav-link {
+  color: #94a3b8 !important;
+  transition: all 0.2s ease-in-out;
+}
+
+.sidebar-nav-link:hover {
+  color: #fff !important;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-nav-link.active {
+  color: #fff !important;
+  background: var(--sidebar-active-gradient) !important;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+/* Optional thin scrollbar for sidebar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
