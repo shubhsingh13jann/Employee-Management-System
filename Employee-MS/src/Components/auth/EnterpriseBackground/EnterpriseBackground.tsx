@@ -441,31 +441,30 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       ctx.lineTo(width + 60, height + 60);
       ctx.closePath();
 
-      const floorFill = ctx.createLinearGradient(0, height * 0.45, 0, floorBottom);
-      floorFill.addColorStop(0, `rgba(3, 5, 12, 0)`);
-      floorFill.addColorStop(0.30, `rgba(3, 5, 12, 0.55)`);
-      floorFill.addColorStop(0.65, `rgba(2, 4, 10, 0.88)`);
-      floorFill.addColorStop(1, `rgba(2, 3, 8, 0.98)`);
+      const floorFill = ctx.createLinearGradient(0, horizonBase - height * 0.25, 0, floorBottom);
+      floorFill.addColorStop(0, `rgba(${Math.round(dr * 0.25 + 6)}, ${Math.round(dg * 0.25 + 8)}, ${Math.round(db * 0.25 + 20)}, 0.88)`);
+      floorFill.addColorStop(0.35, `rgba(${Math.round(dr * 0.15 + 4)}, ${Math.round(dg * 0.15 + 6)}, ${Math.round(db * 0.15 + 15)}, 0.94)`);
+      floorFill.addColorStop(0.70, `rgba(4, 6, 16, 0.98)`);
+      floorFill.addColorStop(1, `rgba(2, 4, 10, 1.0)`);
       ctx.fillStyle = floorFill;
       ctx.fill();
 
-      // ─────────────────────────────────────────────────────      // 
+      // ─────────────────────────────────────────────────────
       // 2. LONGITUDINAL RAYS (Down the valley walls)
       //    Radiate down the slopes, crossing contour lines at
       //    slanted angles to form distinct PARALLELOGRAM cells
-      // 
-      // Create a vertical gradient to fade out the longitudinal rays near the horizon
-      const rayGrad = ctx.createLinearGradient(0, horizonBase, 0, height);
-      rayGrad.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0)`);       // Invisible near horizon
-      rayGrad.addColorStop(0.45, `rgba(${pr}, ${pg}, ${pb}, 0)`);     // Keep top region completely invisible
-      rayGrad.addColorStop(0.75, `rgba(${pr}, ${pg}, ${pb}, 0.035)`); // Very subtle in mid-valley
-      rayGrad.addColorStop(1, `rgba(${pr}, ${pg}, ${pb}, 0.07)`);    // Subtly visible in foreground
+      // ─────────────────────────────────────────────────────
+      const rayGrad = ctx.createLinearGradient(0, horizonBase - height * 0.25, 0, height);
+      rayGrad.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0.12)`);
+      rayGrad.addColorStop(0.35, `rgba(${pr}, ${pg}, ${pb}, 0.22)`);
+      rayGrad.addColorStop(0.70, `rgba(${pr}, ${pg}, ${pb}, 0.32)`);
+      rayGrad.addColorStop(1, `rgba(${pr}, ${pg}, ${pb}, 0.42)`);
 
       ctx.beginPath();
       for (let c = 0; c < NUM_COLS; c++) {
-        for (let r = 5; r < NUM_ROWS; r++) {
+        for (let r = 0; r < NUM_ROWS; r++) {
           const pt = grid[r][c];
-          if (r === 5) {
+          if (r === 0) {
             ctx.moveTo(pt.x, pt.y);
           } else {
             ctx.lineTo(pt.x, pt.y);
@@ -473,18 +472,17 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         }
       }
       ctx.strokeStyle = rayGrad;
-      ctx.lineWidth = 0.75;
+      ctx.lineWidth = 1.0;
       ctx.stroke();
 
-      // 
+      // ─────────────────────────────────────────────────────
       // 3. TRANSVERSE CONTOUR LINES (Across the valley)
       //    Follow the concave valley curves
-      // 
-      for (let r = 5; r < NUM_ROWS; r++) {
+      // ─────────────────────────────────────────────────────
+      for (let r = 1; r < NUM_ROWS; r++) {
         const rowT = grid[r][0].rowT;
-        // Fade out completely near the horizon for the infinite carpet effect
-        // and subtle dark grid in the foreground
-        const alpha = 0.08 * Math.pow(rowT, 1.8);
+        // Visible and crisp cybernetic terrain grid
+        const alpha = Math.min(0.14 + 0.32 * Math.pow(rowT, 1.1), 0.45);
 
         ctx.beginPath();
         for (let c = 0; c < NUM_COLS; c++) {
@@ -495,14 +493,54 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
             ctx.lineTo(pt.x, pt.y);
           }
         }
-        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${Math.min(alpha, 0.08)})`;
-        ctx.lineWidth = rowT < 0.20 ? 0.35 : 0.75;
+        ctx.strokeStyle = `rgba(${pr}, ${pg}, ${pb}, ${alpha.toFixed(3)})`;
+        ctx.lineWidth = rowT < 0.25 ? 0.85 : 1.15;
         ctx.stroke();
       }
 
       // ─────────────────────────────────────────────────────
-      // 4. TOP RIDGE CREST & BASIN BLOOM (REMOVED to eliminate all boundary partition lines)
+      // 4. TOP RIDGE CREST - GLOWING LUMINOUS HILL CURVE
+      //    Follows the organic mountain silhouette grid[0][c]
       // ─────────────────────────────────────────────────────
+      // Wide bloom pass for the glowing mountain crest
+      ctx.beginPath();
+      for (let c = 0; c < NUM_COLS; c++) {
+        const pt = grid[0][c];
+        if (c === 0) ctx.moveTo(pt.x, pt.y);
+        else ctx.lineTo(pt.x, pt.y);
+      }
+
+      const bloomGrad = ctx.createLinearGradient(0, 0, width, 0);
+      bloomGrad.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0.85)`);   // Vibrant left hill peak
+      bloomGrad.addColorStop(0.30, `rgba(${pr}, ${pg}, ${pb}, 0.65)`);
+      bloomGrad.addColorStop(0.48, `rgba(${lr}, ${lg}, ${lb}, 0.20)`); // Soft gently dipping in central valley
+      bloomGrad.addColorStop(0.72, `rgba(${pr}, ${pg}, ${pb}, 0.50)`);
+      bloomGrad.addColorStop(1, `rgba(${pr}, ${pg}, ${pb}, 0.80)`);   // Glowing right hill peak
+
+      ctx.strokeStyle = bloomGrad;
+      ctx.lineWidth = 6;
+      ctx.filter = "blur(4px)";
+      ctx.stroke();
+      ctx.filter = "none";
+
+      // Sharp glowing specular wire along the curve
+      ctx.beginPath();
+      for (let c = 0; c < NUM_COLS; c++) {
+        const pt = grid[0][c];
+        if (c === 0) ctx.moveTo(pt.x, pt.y);
+        else ctx.lineTo(pt.x, pt.y);
+      }
+
+      const specularGrad = ctx.createLinearGradient(0, 0, width, 0);
+      specularGrad.addColorStop(0, `rgba(${lr}, ${lg}, ${lb}, 0.95)`);
+      specularGrad.addColorStop(0.30, `rgba(${lr}, ${lg}, ${lb}, 0.80)`);
+      specularGrad.addColorStop(0.48, `rgba(${lr}, ${lg}, ${lb}, 0.30)`);
+      specularGrad.addColorStop(0.72, `rgba(${lr}, ${lg}, ${lb}, 0.65)`);
+      specularGrad.addColorStop(1, `rgba(${lr}, ${lg}, ${lb}, 0.88)`);
+
+      ctx.strokeStyle = specularGrad;
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
 
       ctx.restore();
     };
@@ -524,28 +562,28 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           alpha: 0.18,
           r: Math.round(p.r), g: Math.round(p.g), b: Math.round(p.b),
         },
-        // Left globe aura (softened to keep land dark)
+        // Left globe aura
         {
           x: width * 0.14,
           y: height * 0.52,
-          radius: 280,
-          alpha: 0.05,
+          radius: 320,
+          alpha: 0.14,
           r: Math.round(d.r), g: Math.round(d.g), b: Math.round(d.b),
         },
-        // Right watermark aura (softened to keep land dark)
+        // Right watermark aura
         {
           x: width * 0.88,
           y: height * 0.70,
-          radius: 280,
-          alpha: 0.04,
+          radius: 340,
+          alpha: 0.11,
           r: Math.round(l.r), g: Math.round(l.g), b: Math.round(l.b),
         },
-        // Bottom-center horizon upwelling (subtle floor atmospheric glow)
+        // Bottom-center horizon upwelling (floor atmospheric glow)
         {
           x: width * 0.5,
-          y: height * 0.90,
-          radius: Math.max(width * 0.38, 420),
-          alpha: 0.03,
+          y: height * 0.88,
+          radius: Math.max(width * 0.52, 560),
+          alpha: 0.13,
           r: Math.round(p.r), g: Math.round(p.g), b: Math.round(p.b),
         },
       ];
@@ -944,19 +982,11 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
         Math.max(width, height) * 0.78
       );
       gradient.addColorStop(0, "rgba(0,0,0,0)");
-      gradient.addColorStop(0.6, "rgba(0,0,0,0.10)");
-      gradient.addColorStop(1, "rgba(3, 6, 12, 0.70)");
+      gradient.addColorStop(0.6, "rgba(0,0,0,0.08)");
+      gradient.addColorStop(1, "rgba(3, 6, 12, 0.62)");
 
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, width, height);
-
-      // Deep bottom dark gradient to ensure floor area is dark, sleek and immersive
-      const bottomShade = ctx.createLinearGradient(0, height * 0.68, 0, height);
-      bottomShade.addColorStop(0, "rgba(3, 6, 12, 0)");
-      bottomShade.addColorStop(0.5, "rgba(2, 4, 10, 0.45)");
-      bottomShade.addColorStop(1, "rgba(2, 3, 7, 0.78)");
-      ctx.fillStyle = bottomShade;
-      ctx.fillRect(0, height * 0.68, width, height * 0.32);
     };
 
     /* =========================================================
