@@ -109,7 +109,7 @@ export const ResetPassword = () => {
 
   return (
     <div
-      className="min-vh-100 w-100 d-flex align-items-center justify-content-center p-3"
+      className="min-h-screen w-full flex items-center justify-center p-6"
       style={{
         background: "radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 60%, #020617 100%)",
         color: "#ffffff"
@@ -119,7 +119,7 @@ export const ResetPassword = () => {
         initial={{ opacity: 0, y: 18, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
-        className="w-100 position-relative rounded-4 p-4 p-md-4"
+        className="w-full relative rounded-xl p-6 p-md-4"
         style={{
           maxWidth: "460px",
           background: "rgba(15, 23, 42, 0.88)",
@@ -131,7 +131,7 @@ export const ResetPassword = () => {
       >
         {/* Top Accent Laser Line */}
         <div
-          className="position-absolute top-0 start-0 end-0 rounded-top-4"
+          className="absolute top-0 left-0 right-0 rounded-top-4"
           style={{
             height: "3.5px",
             background: "linear-gradient(90deg, #6366f1, #38bdf8, #818cf8)"
@@ -139,17 +139,17 @@ export const ResetPassword = () => {
         />
 
         {checkingToken ? (
-          <div className="text-center py-5">
-            <div className="spinner-border text-primary mb-3" role="status" style={{ width: "3rem", height: "3rem" }}>
+          <div className="text-center py-12">
+            <div className="spinner-border text-blue-600 mb-6" role="status" style={{ width: "3rem", height: "3rem" }}>
               <span className="visually-hidden">Validating...</span>
             </div>
-            <h5 className="fw-bold text-white mb-1">Verifying Recovery Link</h5>
-            <p className="text-secondary small mb-0">Checking security authorization token...</p>
+            <h5 className="font-bold text-white mb-1">Verifying Recovery Link</h5>
+            <p className="text-gray-600 text-sm mb-0">Checking security authorization token...</p>
           </div>
         ) : !tokenValid ? (
-          <div className="text-center py-3">
+          <div className="text-center py-6">
             <div
-              className="mx-auto rounded-circle d-flex align-items-center justify-content-center mb-3"
+              className="mx-auto rounded-full flex items-center justify-center mb-6"
               style={{
                 width: "56px",
                 height: "56px",
@@ -161,14 +161,14 @@ export const ResetPassword = () => {
             >
               <i className="bi bi-shield-x"></i>
             </div>
-            <h5 className="fw-bold text-white mb-1">Link Invalid or Expired</h5>
-            <p className="text-secondary small mb-4" style={{ lineHeight: 1.5, fontSize: "13px" }}>
+            <h5 className="font-bold text-white mb-1">Link Invalid or Expired</h5>
+            <p className="text-gray-600 text-sm mb-6" style={{ lineHeight: 1.5, fontSize: "13px" }}>
               {tokenError}
             </p>
-            <div className="d-flex gap-2">
+            <div className="flex gap-2">
               <Link
                 to="/login"
-                className="btn btn-primary w-100 rounded-3 fw-bold py-2"
+                className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center bg-blue-600 text-white hover:bg-blue-700 w-full rounded-lg font-bold py-2"
                 style={{ fontSize: "13px" }}
               >
                 Back to Sign In
@@ -176,9 +176,9 @@ export const ResetPassword = () => {
             </div>
           </div>
         ) : resetSuccess ? (
-          <div className="text-center py-3">
+          <div className="text-center py-6">
             <div
-              className="mx-auto rounded-circle d-flex align-items-center justify-content-center mb-3"
+              className="mx-auto rounded-full flex items-center justify-center mb-6"
               style={{
                 width: "58px",
                 height: "58px",
@@ -190,13 +190,13 @@ export const ResetPassword = () => {
             >
               <i className="bi bi-check2-circle"></i>
             </div>
-            <h4 className="fw-bold text-white mb-1">Password Successfully Updated</h4>
-            <p className="text-secondary small mb-4" style={{ lineHeight: 1.5, fontSize: "13px" }}>
+            <h4 className="font-bold text-white mb-1">Password Successfully Updated</h4>
+            <p className="text-gray-600 text-sm mb-6" style={{ lineHeight: 1.5, fontSize: "13px" }}>
               Your Enterprise EMS account password has been reset. Redirecting you to Sign In in a moment...
             </p>
             <Link
               to="/login"
-              className="btn btn-primary w-100 rounded-3 fw-bold py-2 d-flex align-items-center justify-content-center gap-1.5"
+              className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center bg-blue-600 text-white hover:bg-blue-700 w-full rounded-lg font-bold py-2 flex items-center justify-center gap-1.5"
               style={{ fontSize: "13px" }}
             >
               <span>Sign In Now</span>
@@ -206,9 +206,9 @@ export const ResetPassword = () => {
         ) : (
           <div>
             {/* Header */}
-            <div className="d-flex align-items-center gap-2.5 mb-3">
+            <div className="flex items-center gap-2.5 mb-6">
               <div
-                className="rounded-3 d-flex align-items-center justify-content-center"
+                className="rounded-lg flex items-center justify-center"
                 style={{
                   width: "42px",
                   height: "42px",
@@ -220,7 +220,7 @@ export const ResetPassword = () => {
                 <i className="bi bi-lock-fill" style={{ fontSize: "20px" }}></i>
               </div>
               <div>
-                <h5 className="fw-bold mb-0 text-white" style={{ fontSize: "18px" }}>
+                <h5 className="font-bold mb-0 text-white" style={{ fontSize: "18px" }}>
                   Create New Password
                 </h5>
                 <small className="text-white-50" style={{ fontSize: "11px" }}>
@@ -229,12 +229,12 @@ export const ResetPassword = () => {
               </div>
             </div>
 
-            <p className="text-secondary small mb-3" style={{ fontSize: "12.5px", lineHeight: 1.5 }}>
+            <p className="text-gray-600 text-sm mb-6" style={{ fontSize: "12.5px", lineHeight: 1.5 }}>
               Choose a strong, unique password to secure your Enterprise EMS account.
             </p>
 
             {formError && (
-              <div className="alert alert-danger py-2 px-3 rounded-3 small mb-3 border-0 d-flex align-items-center gap-2" style={{ fontSize: "12px" }}>
+              <div className="px-6 py-4 rounded relative bg-red-100 border border-gray-200 border-red-400 text-red-700 py-2 px-6 rounded-lg text-sm mb-6 border-0 flex items-center gap-2" style={{ fontSize: "12px" }}>
                 <i className="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
                 <span>{formError}</span>
               </div>
@@ -242,18 +242,18 @@ export const ResetPassword = () => {
 
             <form onSubmit={handleSubmit}>
               {/* New Password Input */}
-              <div className="mb-3">
-                <label className="form-label text-white-50 small mb-1" style={{ fontSize: "11.5px" }}>
+              <div className="mb-6">
+                <label className="block mb-2 font-medium text-gray-700 text-white-50 text-sm mb-1" style={{ fontSize: "11.5px" }}>
                   New Password
                 </label>
-                <div className="position-relative">
+                <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
                     required
                     placeholder="At least 6 characters"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="form-control rounded-3 py-2 pe-5"
+                    className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg py-2 pe-5"
                     style={{
                       background: "rgba(30, 41, 59, 0.75)",
                       border: "1px solid rgba(255, 255, 255, 0.15)",
@@ -265,7 +265,7 @@ export const ResetPassword = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="btn btn-link position-absolute end-0 top-50 translate-middle-y text-white-50 p-2 pe-3 text-decoration-none"
+                    className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-link absolute right-0 top-50 translate-middle-y text-white-50 p-2 pe-3 text-decoration-none"
                     style={{ fontSize: "14px" }}
                   >
                     <i className={`bi ${showPassword ? "bi-eye-slash-fill" : "bi-eye-fill"}`}></i>
@@ -275,17 +275,17 @@ export const ResetPassword = () => {
                 {/* Password Strength Meter */}
                 {newPassword && (
                   <div className="mt-2">
-                    <div className="d-flex align-items-center justify-content-between mb-1" style={{ fontSize: "10.5px" }}>
-                      <span className="text-secondary">Password Security:</span>
-                      <span className="fw-semibold" style={{ color: strength.color }}>
+                    <div className="flex items-center justify-between mb-1" style={{ fontSize: "10.5px" }}>
+                      <span className="text-gray-600">Password Security:</span>
+                      <span className="font-semibold" style={{ color: strength.color }}>
                         {strength.label}
                       </span>
                     </div>
-                    <div className="d-flex gap-1" style={{ height: "4px" }}>
+                    <div className="flex gap-1" style={{ height: "4px" }}>
                       {[1, 2, 3].map((step) => (
                         <div
                           key={step}
-                          className="flex-grow-1 rounded-pill"
+                          className="flex-grow-1 rounded-full"
                           style={{
                             height: "100%",
                             background: step <= strength.score ? strength.color : "rgba(255, 255, 255, 0.12)",
@@ -299,18 +299,18 @@ export const ResetPassword = () => {
               </div>
 
               {/* Confirm New Password Input */}
-              <div className="mb-3">
-                <label className="form-label text-white-50 small mb-1" style={{ fontSize: "11.5px" }}>
+              <div className="mb-6">
+                <label className="block mb-2 font-medium text-gray-700 text-white-50 text-sm mb-1" style={{ fontSize: "11.5px" }}>
                   Confirm New Password
                 </label>
-                <div className="position-relative">
+                <div className="relative">
                   <input
                     type={showConfirmPassword ? "text" : "password"}
                     required
                     placeholder="Repeat new password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="form-control rounded-3 py-2 pe-5"
+                    className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg py-2 pe-5"
                     style={{
                       background: "rgba(30, 41, 59, 0.75)",
                       border: confirmPassword
@@ -325,7 +325,7 @@ export const ResetPassword = () => {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="btn btn-link position-absolute end-0 top-50 translate-middle-y text-white-50 p-2 pe-3 text-decoration-none"
+                    className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-link absolute right-0 top-50 translate-middle-y text-white-50 p-2 pe-3 text-decoration-none"
                     style={{ fontSize: "14px" }}
                   >
                     <i className={`bi ${showConfirmPassword ? "bi-eye-slash-fill" : "bi-eye-fill"}`}></i>
@@ -334,16 +334,16 @@ export const ResetPassword = () => {
 
                 {/* Match indicator */}
                 {confirmPassword && (
-                  <div className="d-flex align-items-center gap-1.5 mt-1.5" style={{ fontSize: "10.5px" }}>
+                  <div className="flex items-center gap-1.5 mt-1.5" style={{ fontSize: "10.5px" }}>
                     {newPassword === confirmPassword ? (
                       <>
-                        <i className="bi bi-check-circle-fill text-success" style={{ fontSize: "11px" }}></i>
-                        <span className="text-success fw-medium">Passwords match</span>
+                        <i className="bi bi-check-circle-fill text-green-600" style={{ fontSize: "11px" }}></i>
+                        <span className="text-green-600 font-medium">Passwords match</span>
                       </>
                     ) : (
                       <>
-                        <i className="bi bi-x-circle-fill text-danger" style={{ fontSize: "11px" }}></i>
-                        <span className="text-danger fw-medium">Passwords do not match</span>
+                        <i className="bi bi-x-circle-fill text-red-600" style={{ fontSize: "11px" }}></i>
+                        <span className="text-red-600 font-medium">Passwords do not match</span>
                       </>
                     )}
                   </div>
@@ -354,7 +354,7 @@ export const ResetPassword = () => {
               <button
                 type="submit"
                 disabled={submitting || !newPassword || newPassword !== confirmPassword}
-                className="btn btn-primary w-100 rounded-3 fw-bold py-2 mt-2 d-flex align-items-center justify-content-center gap-2"
+                className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center bg-blue-600 text-white hover:bg-blue-700 w-full rounded-lg font-bold py-2 mt-2 flex items-center justify-center gap-2"
                 style={{ fontSize: "13.5px" }}
               >
                 {submitting ? (
@@ -370,13 +370,13 @@ export const ResetPassword = () => {
                 )}
               </button>
 
-              <div className="text-center mt-3">
+              <div className="text-center mt-6">
                 <Link
                   to="/login"
-                  className="text-decoration-none text-white-50 small hover-white"
+                  className="text-decoration-none text-white-50 text-sm hover-white"
                   style={{ fontSize: "12px" }}
                 >
-                  <i className="bi bi-arrow-left me-1"></i> Cancel and Return to Sign In
+                  <i className="bi bi-arrow-left mr-1"></i> Cancel and Return to Sign In
                 </Link>
               </div>
             </form>

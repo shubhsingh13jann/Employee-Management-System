@@ -43,22 +43,22 @@ export class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="p-3 my-2 rounded-3 border border-danger-subtle bg-danger-subtle text-danger shadow-sm">
-          <div className="d-flex align-items-center gap-2 mb-1">
-            <i className="bi bi-exclamation-triangle-fill fs-5"></i>
-            <strong className="fs-6">{this.props.fallbackTitle || "Section Temporarily Unavailable"}</strong>
+        <div className="p-6 my-2 rounded-lg border border-gray-200 border-gray-200 border-danger-subtle bg-danger-subtle text-red-600 shadow-sm">
+          <div className="flex items-center gap-2 mb-1">
+            <i className="bi bi-exclamation-triangle-fill text-lg"></i>
+            <strong className="text-base">{this.props.fallbackTitle || "Section Temporarily Unavailable"}</strong>
           </div>
-          <p className="small mb-2 text-danger-emphasis" style={{ fontSize: "12.5px" }}>
+          <p className="text-sm mb-2 text-danger-emphasis" style={{ fontSize: "12.5px" }}>
             {this.props.fallbackMessage || "An unexpected error occurred in this module. The rest of the application remains fully functional."}
           </p>
-          <div className="d-flex gap-2">
+          <div className="flex gap-2">
             <button
               type="button"
               onClick={this.handleRetry}
-              className="btn btn-sm btn-outline-danger px-3 rounded-pill fw-medium"
+              className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm btn-outline-danger px-6 rounded-full font-medium"
               style={{ fontSize: "11.5px" }}
             >
-              <i className="bi bi-arrow-clockwise me-1"></i> Retry Section
+              <i className="bi bi-arrow-clockwise mr-1"></i> Retry Section
             </button>
           </div>
         </div>

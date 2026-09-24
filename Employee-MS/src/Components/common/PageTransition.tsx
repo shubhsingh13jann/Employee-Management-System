@@ -17,7 +17,7 @@ const PageTransition = ({ children, transitionKey }) => {
     location.pathname === "/adminlogin";
 
   if (isAuthRoute) {
-    return <div className="w-100 min-vh-100">{children}</div>;
+    return <div className="w-full min-h-screen">{children}</div>;
   }
 
   // Fallback to location.pathname if no transitionKey is provided
@@ -33,7 +33,7 @@ const PageTransition = ({ children, transitionKey }) => {
         duration: 0.3,
         ease: "easeInOut"
       }}
-      className="w-100 min-vh-100"
+      className="w-full min-h-screen"
     >
       {children}
     </motion.div>

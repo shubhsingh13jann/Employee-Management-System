@@ -7,11 +7,11 @@ const ProtectedRoute = ({ allowedRoles = [] }) => {
 
   if (loading) {
     return (
-      <div className="d-flex flex-column justify-content-center align-items-center vh-100 bg-light">
-        <div className="spinner-border text-primary mb-3" style={{ width: "3rem", height: "3rem" }} role="status">
+      <div className="flex flex-col justify-center items-center h-screen bg-gray-50">
+        <div className="spinner-border text-blue-600 mb-6" style={{ width: "3rem", height: "3rem" }} role="status">
           <span className="visually-hidden">Loading session...</span>
         </div>
-        <h5 className="text-secondary fw-semibold">Authenticating Enterprise EMS Session...</h5>
+        <h5 className="text-gray-600 font-semibold">Authenticating Enterprise EMS Session...</h5>
       </div>
     );
   }

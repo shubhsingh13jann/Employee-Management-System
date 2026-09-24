@@ -9,13 +9,13 @@ export const SuspenseFallback: React.FC<SuspenseFallbackProps> = ({
 }) => {
   return (
     <div
-      className="w-100 min-vh-50 d-flex flex-column align-items-center justify-content-center p-5"
+      className="w-full min-vh-50 flex flex-col items-center justify-center p-12"
       style={{ minHeight: "320px" }}
     >
-      <div className="spinner-border text-primary mb-3" role="status" style={{ width: "2.2rem", height: "2.2rem" }}>
+      <div className="spinner-border text-blue-600 mb-6" role="status" style={{ width: "2.2rem", height: "2.2rem" }}>
         <span className="visually-hidden">Loading...</span>
       </div>
-      <span className="text-secondary small fw-medium">{label}</span>
+      <span className="text-gray-600 text-sm font-medium">{label}</span>
     </div>
   );
 };

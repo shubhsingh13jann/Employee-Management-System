@@ -200,7 +200,7 @@ const InteractiveBackground = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="position-absolute top-0 start-0 w-100 h-100"
+      className="absolute top-0 left-0 w-full h-full"
       style={{ zIndex: 0, pointerEvents: "none" }}
     />
   );

@@ -16,14 +16,14 @@ const Employee = () => {
   }, [])
 
   return (
-    <div className="px-5 mt-3">
-      <div className='d-flex justify-content-center'>
+    <div className="px-12 mt-6">
+      <div className='flex justify-center'>
         <h3> Employee List </h3>
       </div>
-      <Link to="/dashboard/add_employee" className="btn btn-success">Add Employee</Link>
+      <Link to="/dashboard/add_employee" className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-success">Add Employee</Link>
 
-      {error && <div className="alert alert-danger mt-3">{error}</div>}
-      <div className='mt-3'>
+      {error && <div className="px-6 py-4 rounded relative bg-red-100 border border-gray-200 border-red-400 text-red-700 mt-6">{error}</div>}
+      <div className='mt-4'>
         <table className='table table-bordered table-striped table-hover'>
           <thead className='table-dark'>
             <tr><th>Name</th><th>Email</th><th>Category</th><th>Salary</th><th>Address</th></tr>

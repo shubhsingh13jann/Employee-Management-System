@@ -62,89 +62,89 @@ const SupervisorTasks = () => {
 
   const getPriorityBadge = (p) => {
     switch (p) {
-      case "urgent": return <span className="badge bg-danger">URGENT</span>;
-      case "high": return <span className="badge bg-warning text-dark">HIGH</span>;
-      case "medium": return <span className="badge bg-primary">MEDIUM</span>;
+      case "urgent": return <span className="badge bg-red-600">URGENT</span>;
+      case "high": return <span className="badge bg-yellow-500 text-gray-900">HIGH</span>;
+      case "medium": return <span className="badge bg-blue-600">MEDIUM</span>;
       default: return <span className="badge bg-secondary">LOW</span>;
     }
   };
 
   const getStatusBadge = (s) => {
     switch (s) {
-      case "completed": return <span className="badge bg-success">COMPLETED</span>;
-      case "in_progress": return <span className="badge bg-info text-dark">IN PROGRESS</span>;
-      case "under_review": return <span className="badge bg-warning text-dark">UNDER REVIEW</span>;
+      case "completed": return <span className="badge bg-green-600">COMPLETED</span>;
+      case "in_progress": return <span className="badge bg-info text-gray-900">IN PROGRESS</span>;
+      case "under_review": return <span className="badge bg-yellow-500 text-gray-900">UNDER REVIEW</span>;
       default: return <span className="badge bg-secondary">PENDING</span>;
     }
   };
 
   return (
-    <div className="container-fluid p-0">
+    <div className="w-full px-6 p-0">
       {msg.text && <div className={`alert alert-${msg.type} alert-dismissible fade show`}>{msg.text}</div>}
 
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h5 className="fw-bold text-dark mb-1">Team Task Delegation & Kanban</h5>
-          <p className="text-muted small mb-0">Assign daily work tickets and conduct two-way task feedback discussions.</p>
+          <h5 className="font-bold text-gray-900 mb-1">Team Task Delegation & Kanban</h5>
+          <p className="text-gray-500 text-sm mb-0">Assign daily work tickets and conduct two-way task feedback discussions.</p>
         </div>
-        <button onClick={() => setShowModal(true)} className="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
+        <button onClick={() => setShowModal(true)} className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2 shadow-sm">
           <i className="bi bi-plus-lg"></i>
           <span>Assign New Task</span>
         </button>
       </div>
 
       {/* Tasks Table Card */}
-      <div className="card shadow-sm border-0 rounded-3 bg-white overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg bg-white overflow-hidden">
         <div className="table-responsive">
           <table className="table table-hover align-middle mb-0">
             <thead className="table-light">
               <tr>
-                <th className="px-4">Task Title & Details</th>
+                <th className="px-6">Task Title & Details</th>
                 <th>Assigned Employee</th>
                 <th>Priority</th>
                 <th>Status</th>
                 <th>Due Date</th>
-                <th className="text-end px-4">Discussion</th>
+                <th className="text-right px-6">Discussion</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-5">
-                    <div className="spinner-border spinner-border-sm text-primary"></div>
-                    <span className="ms-2 text-muted">Loading assigned tasks...</span>
+                  <td colSpan={6} className="text-center py-12">
+                    <div className="spinner-border spinner-border-sm text-blue-600"></div>
+                    <span className="ml-2 text-gray-500">Loading assigned tasks...</span>
                   </td>
                 </tr>
               ) : tasks.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-5 text-muted">
+                  <td colSpan={6} className="text-center py-12 text-gray-500">
                     No tasks currently delegated. Click 'Assign New Task' to create tickets for your team.
                   </td>
                 </tr>
               ) : (
                 tasks.map((t) => (
                   <tr key={t.id}>
-                    <td className="px-4" style={{ maxWidth: "280px" }}>
-                      <p className="mb-0 fw-bold text-dark">{t.title}</p>
-                      <small className="text-muted text-truncate d-block">{t.description || "No description."}</small>
+                    <td className="px-6" style={{ maxWidth: "280px" }}>
+                      <p className="mb-0 font-bold text-gray-900">{t.title}</p>
+                      <small className="text-gray-500 text-truncate block">{t.description || "No description."}</small>
                       {t.project_title && (
-                        <small className="badge bg-light text-primary border mt-1">
-                          <i className="bi bi-kanban me-1"></i>
+                        <small className="badge bg-gray-50 text-blue-600 border border-gray-200 border-gray-200 mt-1">
+                          <i className="bi bi-kanban mr-1"></i>
                           {t.project_title}
                         </small>
                       )}
                     </td>
                     <td>
-                      <span className="fw-semibold text-dark d-block">{t.assigned_to_name}</span>
-                      <small className="text-muted">{t.assigned_to_email}</small>
+                      <span className="font-semibold text-gray-900 block">{t.assigned_to_name}</span>
+                      <small className="text-gray-500">{t.assigned_to_email}</small>
                     </td>
                     <td>{getPriorityBadge(t.priority)}</td>
                     <td>{getStatusBadge(t.status)}</td>
-                    <td className="small text-muted">{new Date(t.due_date).toLocaleDateString()}</td>
-                    <td className="text-end px-4">
+                    <td className="text-sm text-gray-500">{new Date(t.due_date).toLocaleDateString()}</td>
+                    <td className="text-right px-6">
                       <button
                         onClick={() => setActiveChatTask(t)}
-                        className="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1.5 shadow-sm px-3"
+                        className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm border border-gray-200 border-blue-600 text-blue-600 hover:bg-blue-50 inline-flex items-center gap-1.5 shadow-sm px-6"
                       >
                         <i className="bi bi-chat-dots-fill"></i>
                         <span>Chat ({t.comment_count || 0})</span>
@@ -160,30 +160,30 @@ const SupervisorTasks = () => {
 
       {/* New Task Modal */}
       {showModal && (
-        <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div className="modal show block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content border-0 shadow-lg rounded-4">
-              <div className="modal-header bg-dark text-white">
-                <h5 className="modal-title fw-bold">Assign New Task Ticket</h5>
+            <div className="modal-content border-0 shadow-lg rounded-xl">
+              <div className="modal-header bg-gray-900 text-white">
+                <h5 className="modal-title font-bold">Assign New Task Ticket</h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
               </div>
               <form onSubmit={handleCreateTask}>
-                <div className="modal-body p-4">
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold small">Task Title</label>
+                <div className="modal-body p-6">
+                  <div className="mb-6">
+                    <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">Task Title</label>
                     <input
                       type="text"
-                      className="form-control"
+                      className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="e.g. Build User Profile Screen"
                       value={form.title}
                       onChange={(e) => setForm({ ...form, title: e.target.value })}
                       required
                     />
                   </div>
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold small">Assign Subordinate</label>
+                  <div className="mb-6">
+                    <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">Assign Subordinate</label>
                     <select
-                      className="form-select"
+                      className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={form.assigned_to}
                       onChange={(e) => setForm({ ...form, assigned_to: e.target.value })}
                       required
@@ -194,11 +194,11 @@ const SupervisorTasks = () => {
                       ))}
                     </select>
                   </div>
-                  <div className="row g-2 mb-3">
+                  <div className="flex flex-wrap -mx-4 g-2 mb-6">
                     <div className="col-6">
-                      <label className="form-label fw-semibold small">Priority Level</label>
+                      <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">Priority Level</label>
                       <select
-                        className="form-select"
+                        className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={form.priority}
                         onChange={(e) => setForm({ ...form, priority: e.target.value })}
                       >
@@ -209,20 +209,20 @@ const SupervisorTasks = () => {
                       </select>
                     </div>
                     <div className="col-6">
-                      <label className="form-label fw-semibold small">Due Date</label>
+                      <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">Due Date</label>
                       <input
                         type="date"
-                        className="form-control"
+                        className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={form.due_date}
                         onChange={(e) => setForm({ ...form, due_date: e.target.value })}
                         required
                       />
                     </div>
                   </div>
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold small">Description & Acceptance Criteria</label>
+                  <div className="mb-6">
+                    <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">Description & Acceptance Criteria</label>
                     <textarea
-                      className="form-control"
+                      className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                       rows={3}
                       placeholder="Steps to complete, technical requirements..."
                       value={form.description}
@@ -230,9 +230,9 @@ const SupervisorTasks = () => {
                     ></textarea>
                   </div>
                 </div>
-                <div className="modal-footer bg-light">
-                  <button type="button" className="btn btn-outline-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                  <button type="submit" disabled={saving} className="btn btn-primary px-4">
+                <div className="modal-footer bg-gray-50">
+                  <button type="button" className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center border border-gray-200 border-gray-500 text-gray-500 hover:bg-gray-50" onClick={() => setShowModal(false)}>Cancel</button>
+                  <button type="submit" disabled={saving} className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center bg-blue-600 text-white hover:bg-blue-700 px-6">
                     {saving ? <span className="spinner-border spinner-border-sm"></span> : "Assign Task"}
                   </button>
                 </div>

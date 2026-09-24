@@ -5,17 +5,17 @@ import Navbar from "./Navbar";
 
 const Layout = () => {
   return (
-    <div className="d-flex min-vh-100" style={{ backgroundColor: "var(--dashboard-bg)" }}>
+    <div className="flex min-h-screen" style={{ backgroundColor: "var(--dashboard-bg)" }}>
       {/* Sidebar - fixed left */}
       <Sidebar />
       
       {/* Main Content Area */}
-      <div className="d-flex flex-column flex-grow-1 overflow-x-hidden">
+      <div className="flex flex-col flex-grow-1 overflow-x-hidden">
         {/* Top Navigation */}
         <Navbar />
         
         {/* Main Workspace */}
-        <main className="p-3 p-md-4 flex-grow-1 overflow-y-auto">
+        <main className="p-6 p-md-4 flex-grow-1 overflow-y-auto">
           <Outlet />
         </main>
       </div>

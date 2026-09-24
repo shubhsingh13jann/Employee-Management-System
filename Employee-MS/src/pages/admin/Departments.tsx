@@ -62,40 +62,40 @@ const Departments = () => {
   };
 
   return (
-    <div className="container-fluid p-0">
+    <div className="w-full px-6 p-0">
       {msg.text && <div className={`alert alert-${msg.type} alert-dismissible fade show`}>{msg.text}</div>}
 
-      <div className="row g-4">
+      <div className="flex flex-wrap -mx-4 g-4">
         {/* Create Department Form Card */}
-        <div className="col-12 col-lg-4">
-          <div className="card shadow-sm border-0 rounded-3 p-4 bg-white">
-            <h5 className="fw-bold mb-3 d-flex align-items-center gap-2">
-              <i className="bi bi-folder-plus text-primary"></i>
+        <div className="w-full px-6 lg:w-1/3 px-6">
+          <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg p-6 bg-white">
+            <h5 className="font-bold mb-6 flex items-center gap-2">
+              <i className="bi bi-folder-plus text-blue-600"></i>
               Add New Department
             </h5>
             <form onSubmit={handleAddDepartment}>
-              <div className="mb-3">
-                <label className="form-label fw-semibold small">Department Name</label>
+              <div className="mb-6">
+                <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">Department Name</label>
                 <input
                   type="text"
-                  className="form-control"
+                  className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="e.g. Quality Assurance"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
                 />
               </div>
-              <div className="mb-3">
-                <label className="form-label fw-semibold small">Description</label>
+              <div className="mb-6">
+                <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">Description</label>
                 <textarea
-                  className="form-control"
+                  className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   rows={3}
                   placeholder="Responsibilities, scope, and objectives..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 ></textarea>
               </div>
-              <button disabled={saving} className="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2">
+              <button disabled={saving} className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center bg-blue-600 text-white hover:bg-blue-700 w-full py-2 flex items-center justify-center gap-2">
                 {saving ? <span className="spinner-border spinner-border-sm"></span> : <i className="bi bi-plus-circle"></i>}
                 <span>Create Department</span>
               </button>
@@ -104,10 +104,10 @@ const Departments = () => {
         </div>
 
         {/* Department List Table Card */}
-        <div className="col-12 col-lg-8">
-          <div className="card shadow-sm border-0 rounded-3 bg-white overflow-hidden">
-            <div className="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-              <h5 className="fw-bold mb-0">Active Departments</h5>
+        <div className="w-full px-6 col-lg-8">
+          <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg bg-white overflow-hidden">
+            <div className="card-header bg-white py-6 border-b border-gray-200 flex justify-between items-center">
+              <h5 className="font-bold mb-0">Active Departments</h5>
               <span className="badge bg-secondary">{departments.length} Total</span>
             </div>
 
@@ -115,42 +115,42 @@ const Departments = () => {
               <table className="table table-hover align-middle mb-0">
                 <thead className="table-light">
                   <tr>
-                    <th className="px-4">Department Name</th>
+                    <th className="px-6">Department Name</th>
                     <th>Description</th>
                     <th className="text-center">Staff Members</th>
-                    <th className="text-end px-4">Actions</th>
+                    <th className="text-right px-6">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={4} className="text-center py-4">
-                        <div className="spinner-border spinner-border-sm text-primary"></div>
+                      <td colSpan={4} className="text-center py-6">
+                        <div className="spinner-border spinner-border-sm text-blue-600"></div>
                       </td>
                     </tr>
                   ) : departments.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="text-center py-4 text-muted">No departments created yet.</td>
+                      <td colSpan={4} className="text-center py-6 text-gray-500">No departments created yet.</td>
                     </tr>
                   ) : (
                     departments.map((dept) => (
                       <tr key={dept.id}>
-                        <td className="px-4 fw-semibold text-dark">
-                          <i className="bi bi-building me-2 text-primary"></i>
+                        <td className="px-6 font-semibold text-gray-900">
+                          <i className="bi bi-building mr-2 text-blue-600"></i>
                           {dept.name}
                         </td>
-                        <td className="text-muted small" style={{ maxWidth: "250px" }}>
+                        <td className="text-gray-500 text-sm" style={{ maxWidth: "250px" }}>
                           {dept.description || "No description provided"}
                         </td>
                         <td className="text-center">
-                          <span className="badge bg-light text-dark border px-3 py-1.5 rounded-pill">
+                          <span className="badge bg-gray-50 text-gray-900 border border-gray-200 border-gray-200 px-6 py-1.5 rounded-full">
                             {dept.member_count} Members
                           </span>
                         </td>
-                        <td className="text-end px-4">
+                        <td className="text-right px-6">
                           <button
                             onClick={() => handleDelete(dept.id, dept.name)}
-                            className="btn btn-sm btn-outline-danger"
+                            className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm btn-outline-danger"
                             title="Delete Department"
                           >
                             <i className="bi bi-trash"></i>

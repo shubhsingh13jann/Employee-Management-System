@@ -35,7 +35,7 @@ export const CharacterStage: React.FC<CharacterStageProps> = ({
   });
 
   return (
-    <div className="character-stage-container w-100 h-100 d-flex flex-column align-items-center justify-content-between p-2.5 p-md-3 select-none">
+    <div className="character-stage-container w-full h-full flex flex-col items-center justify-between p-2.5 p-md-3 select-none">
       
       {/* 👑 DYNAMIC ROLE BADGE BANNER */}
       <motion.div
@@ -43,28 +43,28 @@ export const CharacterStage: React.FC<CharacterStageProps> = ({
         initial={{ opacity: 0, y: -10, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
-        className="w-100 text-center py-1.5 px-3 rounded-4 shadow-xs"
+        className="w-full text-center py-1.5 px-6 rounded-xl shadow-xs"
         style={{
           background: currentTheme.accentBg,
           border: `1.5px solid ${currentTheme.border}`,
           maxWidth: "340px"
         }}
       >
-        <div className="d-flex align-items-center justify-content-center gap-1.5 mb-0.5">
-          <span className="fw-bold tracking-wider" style={{ color: currentTheme.accent, fontSize: "11.5px", letterSpacing: "0.5px" }}>
+        <div className="flex items-center justify-center gap-1.5 mb-0.5">
+          <span className="font-bold tracking-wider" style={{ color: currentTheme.accent, fontSize: "11.5px", letterSpacing: "0.5px" }}>
             {currentTheme.badgeTitle}
           </span>
         </div>
-        <span className="text-secondary d-block" style={{ fontSize: "10px" }}>
+        <span className="text-gray-600 block" style={{ fontSize: "10px" }}>
           {currentTheme.badgeDesc}
         </span>
       </motion.div>
 
       {/* 🎨 MASTER SVG RIG */}
-      <div className="position-relative d-flex align-items-center justify-content-center my-auto w-100" style={{ maxWidth: "390px", height: "clamp(200px, 28vh, 260px)" }}>
+      <div className="relative flex items-center justify-center my-auto w-full" style={{ maxWidth: "390px", height: "clamp(200px, 28vh, 260px)" }}>
         <svg
           viewBox="0 0 460 340"
-          className="w-100 h-100"
+          className="w-full h-full"
           style={{ overflow: "visible" }}
         >
           <defs>
@@ -719,14 +719,14 @@ export const CharacterStage: React.FC<CharacterStageProps> = ({
       {/* 💬 LIVE NARRATION CAPTION BAR */}
       <div className="text-center mt-2">
         <span
-          className="text-secondary small fw-medium d-inline-flex align-items-center gap-1.5 px-3 py-1 rounded-pill"
+          className="text-gray-600 text-sm font-medium inline-flex items-center gap-1.5 px-6 py-1 rounded-full"
           style={{ background: "rgba(15, 23, 42, 0.04)", fontSize: "11px" }}
         >
           {isPassword ? (
             showPassword ? (
               <>
                 <span>👀</span>
-                <strong className="text-primary">All 4 crew members peeking through their fingers!</strong>
+                <strong className="text-blue-600">All 4 crew members peeking through their fingers!</strong>
               </>
             ) : (
               <>
@@ -742,12 +742,12 @@ export const CharacterStage: React.FC<CharacterStageProps> = ({
           ) : isSuccess ? (
             <>
               <span>🎉</span>
-              <strong className="text-success">Credentials verified! Heading to dashboard...</strong>
+              <strong className="text-green-600">Credentials verified! Heading to dashboard...</strong>
             </>
           ) : isError ? (
             <>
               <span>🤔</span>
-              <strong className="text-danger">Invalid credentials. Let's try again!</strong>
+              <strong className="text-red-600">Invalid credentials. Let's try again!</strong>
             </>
           ) : (
             <>

@@ -51,7 +51,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       </motion.div>
 
       {/* Brand Typography (Centered alignment so Workforce Excellence is centered with respect to Enterprise EMS) */}
-      <div className="d-flex flex-column align-items-center text-center">
+      <div className="flex flex-col items-center text-center">
         <span
           className={`fw-bold tracking-tight leading-tight ${
             isSm ? "small" : "fs-5"
@@ -83,7 +83,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       <Link
         to={to}
         onClick={onClick}
-        className="text-decoration-none d-inline-flex align-items-center"
+        className="text-decoration-none inline-flex items-center"
         style={{ color: "inherit" }}
       >
         {content}

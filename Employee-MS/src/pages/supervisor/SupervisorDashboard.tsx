@@ -27,70 +27,70 @@ const SupervisorDashboard = () => {
 
   if (loading) {
     return (
-      <div className="text-center py-5">
-        <div className="spinner-border text-primary" role="status"></div>
-        <p className="mt-2 text-muted">Loading Team Lead Dashboard...</p>
+      <div className="text-center py-12">
+        <div className="spinner-border text-blue-600" role="status"></div>
+        <p className="mt-2 text-gray-500">Loading Team Lead Dashboard...</p>
       </div>
     );
   }
 
   return (
-    <div className="container-fluid p-0">
-      {error && <div className="alert alert-danger">{error}</div>}
+    <div className="w-full px-6 p-0">
+      {error && <div className="px-6 py-4 rounded relative bg-red-100 border border-gray-200 border-red-400 text-red-700">{error}</div>}
 
       {/* KPI Cards */}
-      <div className="row g-3 mb-4">
-        <div className="col-12 col-sm-6 col-xl-3">
-          <div className="card shadow-sm border-0 rounded-3 p-3 bg-white border-start border-4 border-info">
-            <div className="d-flex justify-content-between align-items-center">
+      <div className="flex flex-wrap -mx-4 g-3 mb-6">
+        <div className="w-full px-6 col-sm-6 col-xl-3">
+          <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg p-6 bg-white border-l border-gray-200 border-4 border-info">
+            <div className="flex justify-between items-center">
               <div>
-                <span className="text-muted small fw-bold text-uppercase">Assigned Team</span>
-                <h3 className="fw-bold mb-0 text-dark mt-1">{stats?.teamSize || 0}</h3>
+                <span className="text-gray-500 text-sm font-bold text-uppercase">Assigned Team</span>
+                <h3 className="font-bold mb-0 text-gray-900 mt-1">{stats?.teamSize || 0}</h3>
               </div>
-              <div className="p-3 bg-info bg-opacity-10 text-info rounded-circle">
-                <i className="bi bi-people fs-4"></i>
+              <div className="p-6 bg-info bg-opacity-10 text-info rounded-full">
+                <i className="bi bi-people text-xl"></i>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="col-12 col-sm-6 col-xl-3">
-          <div className="card shadow-sm border-0 rounded-3 p-3 bg-white border-start border-4 border-primary">
-            <div className="d-flex justify-content-between align-items-center">
+        <div className="w-full px-6 col-sm-6 col-xl-3">
+          <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg p-6 bg-white border-l border-gray-200 border-4 border-primary">
+            <div className="flex justify-between items-center">
               <div>
-                <span className="text-muted small fw-bold text-uppercase">Active Tasks</span>
-                <h3 className="fw-bold mb-0 text-primary mt-1">{stats?.activeTasks || 0}</h3>
+                <span className="text-gray-500 text-sm font-bold text-uppercase">Active Tasks</span>
+                <h3 className="font-bold mb-0 text-blue-600 mt-1">{stats?.activeTasks || 0}</h3>
               </div>
-              <div className="p-3 bg-primary bg-opacity-10 text-primary rounded-circle">
-                <i className="bi bi-list-task fs-4"></i>
+              <div className="p-6 bg-blue-600 bg-opacity-10 text-blue-600 rounded-full">
+                <i className="bi bi-list-task text-xl"></i>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="col-12 col-sm-6 col-xl-3">
-          <div className="card shadow-sm border-0 rounded-3 p-3 bg-white border-start border-4 border-success">
-            <div className="d-flex justify-content-between align-items-center">
+        <div className="w-full px-6 col-sm-6 col-xl-3">
+          <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg p-6 bg-white border-l border-gray-200 border-4 border-success">
+            <div className="flex justify-between items-center">
               <div>
-                <span className="text-muted small fw-bold text-uppercase">Completed Tasks</span>
-                <h3 className="fw-bold mb-0 text-success mt-1">{stats?.completedTasks || 0}</h3>
+                <span className="text-gray-500 text-sm font-bold text-uppercase">Completed Tasks</span>
+                <h3 className="font-bold mb-0 text-green-600 mt-1">{stats?.completedTasks || 0}</h3>
               </div>
-              <div className="p-3 bg-success bg-opacity-10 text-success rounded-circle">
-                <i className="bi bi-check2-all fs-4"></i>
+              <div className="p-6 bg-green-600 bg-opacity-10 text-green-600 rounded-full">
+                <i className="bi bi-check2-all text-xl"></i>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="col-12 col-sm-6 col-xl-3">
-          <div className="card shadow-sm border-0 rounded-3 p-3 bg-white border-start border-4 border-warning">
-            <div className="d-flex justify-content-between align-items-center">
+        <div className="w-full px-6 col-sm-6 col-xl-3">
+          <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg p-6 bg-white border-l border-gray-200 border-4 border-warning">
+            <div className="flex justify-between items-center">
               <div>
-                <span className="text-muted small fw-bold text-uppercase">Pending Leaves</span>
-                <h3 className="fw-bold mb-0 text-warning mt-1">{stats?.pendingLeaves || 0}</h3>
+                <span className="text-gray-500 text-sm font-bold text-uppercase">Pending Leaves</span>
+                <h3 className="font-bold mb-0 text-yellow-500 mt-1">{stats?.pendingLeaves || 0}</h3>
               </div>
-              <div className="p-3 bg-warning bg-opacity-10 text-warning rounded-circle">
-                <i className="bi bi-calendar-check fs-4"></i>
+              <div className="p-6 bg-yellow-500 bg-opacity-10 text-yellow-500 rounded-full">
+                <i className="bi bi-calendar-check text-xl"></i>
               </div>
             </div>
           </div>
@@ -98,28 +98,28 @@ const SupervisorDashboard = () => {
       </div>
 
       {/* Action Panels */}
-      <div className="card shadow-sm border-0 rounded-3 bg-white p-4">
-        <h5 className="fw-bold mb-3">Operational Team Operations</h5>
-        <div className="row g-3">
-          <div className="col-12 col-md-4">
-            <div className="p-3 border rounded-3 bg-light">
-              <h6 className="fw-bold text-dark mb-1">Delegate & Track Tasks</h6>
-              <p className="text-muted small mb-3">Assign daily task tickets, set priorities, and chat on task threads.</p>
-              <Link to="/supervisor/tasks" className="btn btn-sm btn-primary w-100">Open Task Board</Link>
+      <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg bg-white p-6">
+        <h5 className="font-bold mb-6">Operational Team Operations</h5>
+        <div className="flex flex-wrap -mx-4 g-3">
+          <div className="w-full px-6 md:w-1/3 px-6">
+            <div className="p-6 border border-gray-200 border-gray-200 rounded-lg bg-gray-50">
+              <h6 className="font-bold text-gray-900 mb-1">Delegate & Track Tasks</h6>
+              <p className="text-gray-500 text-sm mb-6">Assign daily task tickets, set priorities, and chat on task threads.</p>
+              <Link to="/supervisor/tasks" className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm bg-blue-600 text-white hover:bg-blue-700 w-full">Open Task Board</Link>
             </div>
           </div>
-          <div className="col-12 col-md-4">
-            <div className="p-3 border rounded-3 bg-light">
-              <h6 className="fw-bold text-dark mb-1">Direct Team Members</h6>
-              <p className="text-muted small mb-3">View staff members reporting directly to your supervision.</p>
-              <Link to="/supervisor/team" className="btn btn-sm btn-outline-primary w-100">View Team</Link>
+          <div className="w-full px-6 md:w-1/3 px-6">
+            <div className="p-6 border border-gray-200 border-gray-200 rounded-lg bg-gray-50">
+              <h6 className="font-bold text-gray-900 mb-1">Direct Team Members</h6>
+              <p className="text-gray-500 text-sm mb-6">View staff members reporting directly to your supervision.</p>
+              <Link to="/supervisor/team" className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm border border-gray-200 border-blue-600 text-blue-600 hover:bg-blue-50 w-full">View Team</Link>
             </div>
           </div>
-          <div className="col-12 col-md-4">
-            <div className="p-3 border rounded-3 bg-light">
-              <h6 className="fw-bold text-dark mb-1">Tier-1 Routine Leaves</h6>
-              <p className="text-muted small mb-3">Directly approve casual/sick leaves or escalate long leaves to Manager.</p>
-              <Link to="/supervisor/leaves" className="btn btn-sm btn-outline-warning w-100">Review Leaves</Link>
+          <div className="w-full px-6 md:w-1/3 px-6">
+            <div className="p-6 border border-gray-200 border-gray-200 rounded-lg bg-gray-50">
+              <h6 className="font-bold text-gray-900 mb-1">Tier-1 Routine Leaves</h6>
+              <p className="text-gray-500 text-sm mb-6">Directly approve casual/sick leaves or escalate long leaves to Manager.</p>
+              <Link to="/supervisor/leaves" className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm btn-outline-warning w-full">Review Leaves</Link>
             </div>
           </div>
         </div>

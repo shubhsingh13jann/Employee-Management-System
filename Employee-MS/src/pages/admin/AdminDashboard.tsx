@@ -27,74 +27,74 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="text-center py-5">
-        <div className="spinner-border text-primary" role="status"></div>
-        <p className="mt-2 text-muted">Loading Enterprise Dashboard Metrics...</p>
+      <div className="text-center py-12">
+        <div className="spinner-border text-blue-600" role="status"></div>
+        <p className="mt-2 text-gray-500">Loading Enterprise Dashboard Metrics...</p>
       </div>
     );
   }
 
   return (
-    <div className="container-fluid p-0">
-      {error && <div className="alert alert-danger">{error}</div>}
+    <div className="w-full px-6 p-0">
+      {error && <div className="px-6 py-4 rounded relative bg-red-100 border border-gray-200 border-red-400 text-red-700">{error}</div>}
 
       {/* KPI Cards Row */}
-      <div className="row g-3 mb-4">
+      <div className="flex flex-wrap -mx-4 g-3 mb-6">
         {/* Total Employees */}
-        <div className="col-12 col-sm-6 col-xl-3">
-          <div className="card shadow-sm border-0 rounded-3 p-3 bg-white h-100 border-start border-4 border-info">
-            <div className="d-flex justify-content-between align-items-center">
+        <div className="w-full px-6 col-sm-6 col-xl-3">
+          <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg p-6 bg-white h-full border-l border-gray-200 border-4 border-info">
+            <div className="flex justify-between items-center">
               <div>
-                <span className="text-muted small fw-bold text-uppercase">Total Employees</span>
-                <h3 className="fw-bold mb-0 text-dark mt-1">{stats?.totalEmployees || 0}</h3>
+                <span className="text-gray-500 text-sm font-bold text-uppercase">Total Employees</span>
+                <h3 className="font-bold mb-0 text-gray-900 mt-1">{stats?.totalEmployees || 0}</h3>
               </div>
-              <div className="p-3 bg-info bg-opacity-10 text-info rounded-circle">
-                <i className="bi bi-people fs-4"></i>
+              <div className="p-6 bg-info bg-opacity-10 text-info rounded-full">
+                <i className="bi bi-people text-xl"></i>
               </div>
             </div>
           </div>
         </div>
 
         {/* Supervisors */}
-        <div className="col-12 col-sm-6 col-xl-3">
-          <div className="card shadow-sm border-0 rounded-3 p-3 bg-white h-100 border-start border-4 border-success">
-            <div className="d-flex justify-content-between align-items-center">
+        <div className="w-full px-6 col-sm-6 col-xl-3">
+          <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg p-6 bg-white h-full border-l border-gray-200 border-4 border-success">
+            <div className="flex justify-between items-center">
               <div>
-                <span className="text-muted small fw-bold text-uppercase">Supervisors</span>
-                <h3 className="fw-bold mb-0 text-dark mt-1">{stats?.totalSupervisors || 0}</h3>
+                <span className="text-gray-500 text-sm font-bold text-uppercase">Supervisors</span>
+                <h3 className="font-bold mb-0 text-gray-900 mt-1">{stats?.totalSupervisors || 0}</h3>
               </div>
-              <div className="p-3 bg-success bg-opacity-10 text-success rounded-circle">
-                <i className="bi bi-person-badge fs-4"></i>
+              <div className="p-6 bg-green-600 bg-opacity-10 text-green-600 rounded-full">
+                <i className="bi bi-person-badge text-xl"></i>
               </div>
             </div>
           </div>
         </div>
 
         {/* Managers */}
-        <div className="col-12 col-sm-6 col-xl-3">
-          <div className="card shadow-sm border-0 rounded-3 p-3 bg-white h-100 border-start border-4 border-primary">
-            <div className="d-flex justify-content-between align-items-center">
+        <div className="w-full px-6 col-sm-6 col-xl-3">
+          <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg p-6 bg-white h-full border-l border-gray-200 border-4 border-primary">
+            <div className="flex justify-between items-center">
               <div>
-                <span className="text-muted small fw-bold text-uppercase">Department Managers</span>
-                <h3 className="fw-bold mb-0 text-dark mt-1">{stats?.totalManagers || 0}</h3>
+                <span className="text-gray-500 text-sm font-bold text-uppercase">Department Managers</span>
+                <h3 className="font-bold mb-0 text-gray-900 mt-1">{stats?.totalManagers || 0}</h3>
               </div>
-              <div className="p-3 bg-primary bg-opacity-10 text-primary rounded-circle">
-                <i className="bi bi-person-gear fs-4"></i>
+              <div className="p-6 bg-blue-600 bg-opacity-10 text-blue-600 rounded-full">
+                <i className="bi bi-person-gear text-xl"></i>
               </div>
             </div>
           </div>
         </div>
 
         {/* Departments */}
-        <div className="col-12 col-sm-6 col-xl-3">
-          <div className="card shadow-sm border-0 rounded-3 p-3 bg-white h-100 border-start border-4 border-warning">
-            <div className="d-flex justify-content-between align-items-center">
+        <div className="w-full px-6 col-sm-6 col-xl-3">
+          <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg p-6 bg-white h-full border-l border-gray-200 border-4 border-warning">
+            <div className="flex justify-between items-center">
               <div>
-                <span className="text-muted small fw-bold text-uppercase">Departments</span>
-                <h3 className="fw-bold mb-0 text-dark mt-1">{stats?.totalDepartments || 0}</h3>
+                <span className="text-gray-500 text-sm font-bold text-uppercase">Departments</span>
+                <h3 className="font-bold mb-0 text-gray-900 mt-1">{stats?.totalDepartments || 0}</h3>
               </div>
-              <div className="p-3 bg-warning bg-opacity-10 text-warning rounded-circle">
-                <i className="bi bi-buildings fs-4"></i>
+              <div className="p-6 bg-yellow-500 bg-opacity-10 text-yellow-500 rounded-full">
+                <i className="bi bi-buildings text-xl"></i>
               </div>
             </div>
           </div>
@@ -102,47 +102,47 @@ const AdminDashboard = () => {
       </div>
 
       {/* Secondary Metrics Row */}
-      <div className="row g-3 mb-4">
+      <div className="flex flex-wrap -mx-4 g-3 mb-6">
         {/* Active Projects */}
-        <div className="col-12 col-md-4">
-          <div className="card shadow-sm border-0 rounded-3 p-3 bg-white">
-            <div className="d-flex align-items-center gap-3">
-              <div className="p-3 bg-primary bg-opacity-10 text-primary rounded-3">
-                <i className="bi bi-kanban fs-3"></i>
+        <div className="w-full px-6 md:w-1/3 px-6">
+          <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg p-6 bg-white">
+            <div className="flex items-center gap-6">
+              <div className="p-6 bg-blue-600 bg-opacity-10 text-blue-600 rounded-lg">
+                <i className="bi bi-kanban text-2xl"></i>
               </div>
               <div>
-                <p className="text-muted small mb-0 fw-bold">Active Projects</p>
-                <h4 className="fw-bold mb-0">{stats?.activeProjects || 0}</h4>
+                <p className="text-gray-500 text-sm mb-0 font-bold">Active Projects</p>
+                <h4 className="font-bold mb-0">{stats?.activeProjects || 0}</h4>
               </div>
             </div>
           </div>
         </div>
 
         {/* Pending Leaves */}
-        <div className="col-12 col-md-4">
-          <div className="card shadow-sm border-0 rounded-3 p-3 bg-white">
-            <div className="d-flex align-items-center gap-3">
-              <div className="p-3 bg-danger bg-opacity-10 text-danger rounded-3">
-                <i className="bi bi-calendar-x fs-3"></i>
+        <div className="w-full px-6 md:w-1/3 px-6">
+          <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg p-6 bg-white">
+            <div className="flex items-center gap-6">
+              <div className="p-6 bg-red-600 bg-opacity-10 text-red-600 rounded-lg">
+                <i className="bi bi-calendar-x text-2xl"></i>
               </div>
               <div>
-                <p className="text-muted small mb-0 fw-bold">Pending Leave Requests</p>
-                <h4 className="fw-bold mb-0">{stats?.pendingLeaves || 0}</h4>
+                <p className="text-gray-500 text-sm mb-0 font-bold">Pending Leave Requests</p>
+                <h4 className="font-bold mb-0">{stats?.pendingLeaves || 0}</h4>
               </div>
             </div>
           </div>
         </div>
 
         {/* Monthly Payroll */}
-        <div className="col-12 col-md-4">
-          <div className="card shadow-sm border-0 rounded-3 p-3 bg-white">
-            <div className="d-flex align-items-center gap-3">
-              <div className="p-3 bg-success bg-opacity-10 text-success rounded-3">
-                <i className="bi bi-cash-stack fs-3"></i>
+        <div className="w-full px-6 md:w-1/3 px-6">
+          <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg p-6 bg-white">
+            <div className="flex items-center gap-6">
+              <div className="p-6 bg-green-600 bg-opacity-10 text-green-600 rounded-lg">
+                <i className="bi bi-cash-stack text-2xl"></i>
               </div>
               <div>
-                <p className="text-muted small mb-0 fw-bold">Total Active Salary</p>
-                <h4 className="fw-bold mb-0">${(stats?.totalSalaryPayout || 0).toLocaleString()}</h4>
+                <p className="text-gray-500 text-sm mb-0 font-bold">Total Active Salary</p>
+                <h4 className="font-bold mb-0">${(stats?.totalSalaryPayout || 0).toLocaleString()}</h4>
               </div>
             </div>
           </div>
@@ -150,28 +150,28 @@ const AdminDashboard = () => {
       </div>
 
       {/* Quick Action Navigation Panels */}
-      <div className="card shadow-sm border-0 rounded-3 bg-white p-4">
-        <h5 className="fw-bold mb-3">Enterprise Governance & Actions</h5>
-        <div className="row g-3">
-          <div className="col-12 col-md-4">
-            <div className="p-3 border rounded-3 bg-light">
-              <h6 className="fw-bold text-dark mb-1">Manage Departments</h6>
-              <p className="text-muted small mb-3">Add or modify company departments and organizational categories.</p>
-              <Link to="/admin/departments" className="btn btn-sm btn-outline-primary w-100">Go to Departments</Link>
+      <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg bg-white p-6">
+        <h5 className="font-bold mb-6">Enterprise Governance & Actions</h5>
+        <div className="flex flex-wrap -mx-4 g-3">
+          <div className="w-full px-6 md:w-1/3 px-6">
+            <div className="p-6 border border-gray-200 border-gray-200 rounded-lg bg-gray-50">
+              <h6 className="font-bold text-gray-900 mb-1">Manage Departments</h6>
+              <p className="text-gray-500 text-sm mb-6">Add or modify company departments and organizational categories.</p>
+              <Link to="/admin/departments" className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm border border-gray-200 border-blue-600 text-blue-600 hover:bg-blue-50 w-full">Go to Departments</Link>
             </div>
           </div>
-          <div className="col-12 col-md-4">
-            <div className="p-3 border rounded-3 bg-light">
-              <h6 className="fw-bold text-dark mb-1">Workforce Directory</h6>
-              <p className="text-muted small mb-3">Onboard, view, and manage Managers, Supervisors, and Employees.</p>
-              <Link to="/admin/users" className="btn btn-sm btn-outline-primary w-100">Manage Users</Link>
+          <div className="w-full px-6 md:w-1/3 px-6">
+            <div className="p-6 border border-gray-200 border-gray-200 rounded-lg bg-gray-50">
+              <h6 className="font-bold text-gray-900 mb-1">Workforce Directory</h6>
+              <p className="text-gray-500 text-sm mb-6">Onboard, view, and manage Managers, Supervisors, and Employees.</p>
+              <Link to="/admin/users" className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm border border-gray-200 border-blue-600 text-blue-600 hover:bg-blue-50 w-full">Manage Users</Link>
             </div>
           </div>
-          <div className="col-12 col-md-4">
-            <div className="p-3 border rounded-3 bg-light">
-              <h6 className="fw-bold text-dark mb-1">Hierarchy Allocation</h6>
-              <p className="text-muted small mb-3">Map which Employee reports to which Supervisor and Manager.</p>
-              <Link to="/admin/hierarchy" className="btn btn-sm btn-outline-primary w-100">Team Hierarchy</Link>
+          <div className="w-full px-6 md:w-1/3 px-6">
+            <div className="p-6 border border-gray-200 border-gray-200 rounded-lg bg-gray-50">
+              <h6 className="font-bold text-gray-900 mb-1">Hierarchy Allocation</h6>
+              <p className="text-gray-500 text-sm mb-6">Map which Employee reports to which Supervisor and Manager.</p>
+              <Link to="/admin/hierarchy" className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm border border-gray-200 border-blue-600 text-blue-600 hover:bg-blue-50 w-full">Team Hierarchy</Link>
             </div>
           </div>
         </div>

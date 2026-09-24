@@ -58,15 +58,15 @@ const ProjectsManager = () => {
   };
 
   return (
-    <div className="container-fluid p-0">
+    <div className="w-full px-6 p-0">
       {msg.text && <div className={`alert alert-${msg.type} alert-dismissible fade show`}>{msg.text}</div>}
 
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h5 className="fw-bold text-dark mb-1">Department Projects & Milestones</h5>
-          <p className="text-muted small mb-0">High-level strategic initiatives assigned to operational team leads.</p>
+          <h5 className="font-bold text-gray-900 mb-1">Department Projects & Milestones</h5>
+          <p className="text-gray-500 text-sm mb-0">High-level strategic initiatives assigned to operational team leads.</p>
         </div>
-        <button onClick={() => setShowModal(true)} className="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
+        <button onClick={() => setShowModal(true)} className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2 shadow-sm">
           <i className="bi bi-plus-circle-fill"></i>
           <span>Create Project Milestone</span>
         </button>
@@ -74,56 +74,56 @@ const ProjectsManager = () => {
 
       {/* Projects Grid */}
       {loading ? (
-        <div className="text-center py-5">
-          <div className="spinner-border text-primary" role="status"></div>
-          <p className="mt-2 text-muted">Loading projects...</p>
+        <div className="text-center py-12">
+          <div className="spinner-border text-blue-600" role="status"></div>
+          <p className="mt-2 text-gray-500">Loading projects...</p>
         </div>
       ) : projects.length === 0 ? (
-        <div className="card shadow-sm border-0 rounded-3 p-5 text-center bg-white text-muted">
-          <i className="bi bi-folder2-open fs-1 text-secondary mb-2"></i>
+        <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg p-12 text-center bg-white text-gray-500">
+          <i className="bi bi-folder2-open text-4xl text-gray-600 mb-2"></i>
           <h6>No active projects found.</h6>
-          <p className="small">Click 'Create Project Milestone' to launch your first department initiative.</p>
+          <p className="text-sm">Click 'Create Project Milestone' to launch your first department initiative.</p>
         </div>
       ) : (
-        <div className="row g-4">
+        <div className="flex flex-wrap -mx-4 g-4">
           {projects.map((p) => {
             const completed = Number(p.completed_tasks || 0);
             const total = Number(p.total_tasks || 0);
             const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
 
             return (
-              <div key={p.id} className="col-12 col-lg-6">
-                <div className="card shadow-sm border-0 rounded-3 p-4 bg-white h-100">
-                  <div className="d-flex justify-content-between align-items-start mb-2">
-                    <h5 className="fw-bold text-dark mb-1">{p.title}</h5>
+              <div key={p.id} className="w-full px-6 col-lg-6">
+                <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg p-6 bg-white h-full">
+                  <div className="flex justify-between align-items-start mb-2">
+                    <h5 className="font-bold text-gray-900 mb-1">{p.title}</h5>
                     <span className={`badge ${p.status === "active" ? "bg-primary" : "bg-success"} px-2.5 py-1 text-uppercase`}>
                       {p.status}
                     </span>
                   </div>
-                  <p className="text-muted small mb-3">{p.description || "No description provided."}</p>
+                  <p className="text-gray-500 text-sm mb-6">{p.description || "No description provided."}</p>
 
-                  <div className="bg-light p-3 rounded-3 mb-3">
-                    <div className="d-flex justify-content-between text-secondary small mb-1">
+                  <div className="bg-gray-50 p-6 rounded-lg mb-6">
+                    <div className="flex justify-between text-gray-600 text-sm mb-1">
                       <span>Task Completion Rate</span>
-                      <span className="fw-bold text-dark">{completed} / {total} Tasks ({percent}%)</span>
+                      <span className="font-bold text-gray-900">{completed} / {total} Tasks ({percent}%)</span>
                     </div>
                     <div className="progress" style={{ height: "8px" }}>
                       <div
-                        className="progress-bar bg-success"
+                        className="progress-bar bg-green-600"
                         role="progressbar"
                         style={{ width: `${percent}%` }}
                       ></div>
                     </div>
                   </div>
 
-                  <div className="d-flex justify-content-between align-items-center text-muted small border-top pt-3 mt-auto">
+                  <div className="flex justify-between items-center text-gray-500 text-sm border-t border-gray-200 pt-6 mt-auto">
                     <div>
-                      <i className="bi bi-person-badge text-primary me-1"></i>
-                      Lead Supervisor: <strong className="text-dark">{p.lead_supervisor_name}</strong>
+                      <i className="bi bi-person-badge text-blue-600 mr-1"></i>
+                      Lead Supervisor: <strong className="text-gray-900">{p.lead_supervisor_name}</strong>
                     </div>
                     <div>
-                      <i className="bi bi-calendar-event text-secondary me-1"></i>
-                      Target: <strong className="text-dark">{new Date(p.target_date).toLocaleDateString()}</strong>
+                      <i className="bi bi-calendar-event text-gray-600 mr-1"></i>
+                      Target: <strong className="text-gray-900">{new Date(p.target_date).toLocaleDateString()}</strong>
                     </div>
                   </div>
                 </div>
@@ -135,30 +135,30 @@ const ProjectsManager = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div className="modal show block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content border-0 shadow-lg rounded-4">
-              <div className="modal-header bg-dark text-white">
-                <h5 className="modal-title fw-bold">Create New Project Milestone</h5>
+            <div className="modal-content border-0 shadow-lg rounded-xl">
+              <div className="modal-header bg-gray-900 text-white">
+                <h5 className="modal-title font-bold">Create New Project Milestone</h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
               </div>
               <form onSubmit={handleCreateProject}>
-                <div className="modal-body p-4">
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold small">Project Title</label>
+                <div className="modal-body p-6">
+                  <div className="mb-6">
+                    <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">Project Title</label>
                     <input
                       type="text"
-                      className="form-control"
+                      className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="e.g. Mobile App Redesign 2026"
                       value={form.title}
                       onChange={(e) => setForm({ ...form, title: e.target.value })}
                       required
                     />
                   </div>
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold small">Lead Supervisor</label>
+                  <div className="mb-6">
+                    <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">Lead Supervisor</label>
                     <select
-                      className="form-select"
+                      className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={form.lead_supervisor_id}
                       onChange={(e) => setForm({ ...form, lead_supervisor_id: e.target.value })}
                       required
@@ -169,20 +169,20 @@ const ProjectsManager = () => {
                       ))}
                     </select>
                   </div>
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold small">Target Completion Date</label>
+                  <div className="mb-6">
+                    <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">Target Completion Date</label>
                     <input
                       type="date"
-                      className="form-control"
+                      className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={form.target_date}
                       onChange={(e) => setForm({ ...form, target_date: e.target.value })}
                       required
                     />
                   </div>
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold small">Description & Goals</label>
+                  <div className="mb-6">
+                    <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">Description & Goals</label>
                     <textarea
-                      className="form-control"
+                      className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                       rows={3}
                       placeholder="Deliverables, scope, and objectives..."
                       value={form.description}
@@ -190,9 +190,9 @@ const ProjectsManager = () => {
                     ></textarea>
                   </div>
                 </div>
-                <div className="modal-footer bg-light">
-                  <button type="button" className="btn btn-outline-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                  <button type="submit" disabled={saving} className="btn btn-primary px-4">
+                <div className="modal-footer bg-gray-50">
+                  <button type="button" className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center border border-gray-200 border-gray-500 text-gray-500 hover:bg-gray-50" onClick={() => setShowModal(false)}>Cancel</button>
+                  <button type="submit" disabled={saving} className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center bg-blue-600 text-white hover:bg-blue-700 px-6">
                     {saving ? <span className="spinner-border spinner-border-sm"></span> : "Create Project"}
                   </button>
                 </div>

@@ -67,79 +67,79 @@ const HierarchyMapping = () => {
   };
 
   return (
-    <div className="container-fluid p-0">
+    <div className="w-full px-6 p-0">
       {msg.text && <div className={`alert alert-${msg.type} alert-dismissible fade show`}>{msg.text}</div>}
 
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h5 className="fw-bold text-dark mb-1">Workforce Team Mapping</h5>
-          <p className="text-muted small mb-0">Define which staff member reports to which Supervisor and Department Manager.</p>
+          <h5 className="font-bold text-gray-900 mb-1">Workforce Team Mapping</h5>
+          <p className="text-gray-500 text-sm mb-0">Define which staff member reports to which Supervisor and Department Manager.</p>
         </div>
-        <button onClick={() => setShowModal(true)} className="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
+        <button onClick={() => setShowModal(true)} className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2 shadow-sm">
           <i className="bi bi-diagram-3-fill"></i>
           <span>Assign / Reassign Team</span>
         </button>
       </div>
 
       {/* Mapping Hierarchy Table Card */}
-      <div className="card shadow-sm border-0 rounded-3 bg-white overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg bg-white overflow-hidden">
         <div className="table-responsive">
           <table className="table table-hover align-middle mb-0">
             <thead className="table-light">
               <tr>
-                <th className="px-4">💼 Employee (Subordinate)</th>
+                <th className="px-6">💼 Employee (Subordinate)</th>
                 <th>👷 Direct Supervisor (Team Lead)</th>
                 <th>👔 Department Manager</th>
                 <th>Department</th>
-                <th className="text-end px-4">Assigned Since</th>
+                <th className="text-right px-6">Assigned Since</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-5">
-                    <div className="spinner-border spinner-border-sm text-primary"></div>
-                    <span className="ms-2 text-muted">Loading hierarchy mappings...</span>
+                  <td colSpan={5} className="text-center py-12">
+                    <div className="spinner-border spinner-border-sm text-blue-600"></div>
+                    <span className="ml-2 text-gray-500">Loading hierarchy mappings...</span>
                   </td>
                 </tr>
               ) : hierarchy.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-5 text-muted">
+                  <td colSpan={5} className="text-center py-12 text-gray-500">
                     No active team hierarchy mappings found. Click 'Assign / Reassign Team' to create mappings.
                   </td>
                 </tr>
               ) : (
                 hierarchy.map((h) => (
                   <tr key={h.id}>
-                    <td className="px-4">
-                      <div className="d-flex align-items-center gap-2">
-                        <div className="bg-info bg-opacity-10 text-info rounded-circle fw-bold d-flex align-items-center justify-content-center" style={{ width: "34px", height: "34px" }}>
+                    <td className="px-6">
+                      <div className="flex items-center gap-2">
+                        <div className="bg-info bg-opacity-10 text-info rounded-full font-bold flex items-center justify-center" style={{ width: "34px", height: "34px" }}>
                           {h.employee_name.charAt(0)}
                         </div>
                         <div>
-                          <p className="mb-0 fw-semibold text-dark">{h.employee_name}</p>
-                          <small className="text-muted">{h.employee_email}</small>
+                          <p className="mb-0 font-semibold text-gray-900">{h.employee_name}</p>
+                          <small className="text-gray-500">{h.employee_email}</small>
                         </div>
                       </div>
                     </td>
                     <td>
-                      <span className="badge bg-success bg-opacity-10 text-success border px-2.5 py-1.5 fs-6 fw-semibold">
-                        <i className="bi bi-person-badge me-1"></i>
+                      <span className="badge bg-green-600 bg-opacity-10 text-green-600 border border-gray-200 border-gray-200 px-2.5 py-1.5 text-base font-semibold">
+                        <i className="bi bi-person-badge mr-1"></i>
                         {h.supervisor_name}
                       </span>
                     </td>
                     <td>
-                      <span className="badge bg-primary bg-opacity-10 text-primary border px-2.5 py-1.5 fs-6 fw-semibold">
-                        <i className="bi bi-person-gear me-1"></i>
+                      <span className="badge bg-blue-600 bg-opacity-10 text-blue-600 border border-gray-200 border-gray-200 px-2.5 py-1.5 text-base font-semibold">
+                        <i className="bi bi-person-gear mr-1"></i>
                         {h.manager_name}
                       </span>
                     </td>
                     <td>
-                      <span className="badge bg-light text-dark border">
+                      <span className="badge bg-gray-50 text-gray-900 border border-gray-200 border-gray-200">
                         {h.department_name || "General"}
                       </span>
                     </td>
-                    <td className="text-end px-4 text-muted small">
+                    <td className="text-right px-6 text-gray-500 text-sm">
                       {new Date(h.assigned_at).toLocaleDateString()}
                     </td>
                   </tr>
@@ -152,20 +152,20 @@ const HierarchyMapping = () => {
 
       {/* Assignment Modal */}
       {showModal && (
-        <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div className="modal show block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content border-0 shadow-lg rounded-4">
-              <div className="modal-header bg-dark text-white">
-                <h5 className="modal-title fw-bold">Map Employee to Team</h5>
+            <div className="modal-content border-0 shadow-lg rounded-xl">
+              <div className="modal-header bg-gray-900 text-white">
+                <h5 className="modal-title font-bold">Map Employee to Team</h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
               </div>
               <form onSubmit={handleAssign}>
-                <div className="modal-body p-4">
+                <div className="modal-body p-6">
                   {/* Select Employee */}
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold small">1. Select Employee (Subordinate)</label>
+                  <div className="mb-6">
+                    <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">1. Select Employee (Subordinate)</label>
                     <select
-                      className="form-select"
+                      className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={form.employee_id}
                       onChange={(e) => setForm({ ...form, employee_id: e.target.value })}
                       required
@@ -178,10 +178,10 @@ const HierarchyMapping = () => {
                   </div>
 
                   {/* Select Supervisor */}
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold small">2. Select Direct Supervisor (Team Lead)</label>
+                  <div className="mb-6">
+                    <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">2. Select Direct Supervisor (Team Lead)</label>
                     <select
-                      className="form-select"
+                      className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={form.supervisor_id}
                       onChange={(e) => setForm({ ...form, supervisor_id: e.target.value })}
                       required
@@ -194,10 +194,10 @@ const HierarchyMapping = () => {
                   </div>
 
                   {/* Select Manager */}
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold small">3. Select Department Manager</label>
+                  <div className="mb-6">
+                    <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">3. Select Department Manager</label>
                     <select
-                      className="form-select"
+                      className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={form.manager_id}
                       onChange={(e) => setForm({ ...form, manager_id: e.target.value })}
                       required
@@ -210,9 +210,9 @@ const HierarchyMapping = () => {
                   </div>
                 </div>
 
-                <div className="modal-footer bg-light">
-                  <button type="button" className="btn btn-outline-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                  <button type="submit" disabled={saving} className="btn btn-primary px-4">
+                <div className="modal-footer bg-gray-50">
+                  <button type="button" className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center border border-gray-200 border-gray-500 text-gray-500 hover:bg-gray-50" onClick={() => setShowModal(false)}>Cancel</button>
+                  <button type="submit" disabled={saving} className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center bg-blue-600 text-white hover:bg-blue-700 px-6">
                     {saving ? <span className="spinner-border spinner-border-sm"></span> : "Save Assignment"}
                   </button>
                 </div>

@@ -214,9 +214,10 @@ body {
 
 .showcase-floating-tag {
   position: absolute;
-  top: -18px;
-  right: 24px;
-  z-index: 10;
+  top: -16px;
+  left: 20px;
+  right: auto;
+  z-index: 25;
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
@@ -556,6 +557,7 @@ html {
 /* Active Navbar Pill Indicator */
 .nav-toggle-btn {
   position: relative;
+  isolation: isolate;
   padding: 6px 14px;
   border-radius: 9999px;
   font-size: 13px;
@@ -565,6 +567,9 @@ html {
   border: none;
   cursor: pointer;
   transition: color 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .nav-toggle-btn:hover {
@@ -572,7 +577,7 @@ html {
 }
 
 .nav-toggle-btn.active {
-  color: #ffffff;
+  color: #ffffff !important;
 }
 
 .nav-toggle-active-bg {

@@ -19,78 +19,78 @@ const Dashboard = () => {
             .finally(() => navigate('/adminlogin', { replace: true }))
     }
 
-    if (checkingSession) return <div className='p-5 text-center'>Checking session...</div>
+    if (checkingSession) return <div className='p-12 text-center'>Checking session...</div>
 
     return (
-        <div className='container-fluid'>
-            <div className='row flex-nowrap '>
+        <div className='w-full px-4'>
+            <div className='flex flex-wrap -mx-4 flex-nowrap '>
                 {/* //! Sidebar */}
-                <div className='col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark'>
-                    <div className='d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 min-vh-100'>
+                <div className='col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-gray-900'>
+                    <div className='flex flex-col items-center align-items-sm-start px-4 pt-2 min-h-screen'>
                         <Link 
                           to="/dashboard"
-                          className='d-flex align-items-center pb-3 mb-md-1 mt-md-3 me-md-auto text-white text-decoration-none'
+                          className='flex items-center pb-4 mb-md-1 mt-md-3 me-md-auto text-white text-decoration-none'
                           >
-                            <span className='fs-5 d-none d-sm-inline'>
+                            <span className='text-lg hidden d-sm-inline'>
                                     Code With Shubh
                             </span>
                         </Link>
                         <ul
-                            className='nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start'
+                            className='nav nav-pills flex-col mb-sm-auto mb-0 items-center align-items-sm-start'
                             id='menu'
                         >
-                            <li className='w-100'>
+                            <li className='w-full'>
                                 <Link 
                                     to="/dashboard"
                                     className='nav-link align-middle px-0 text-white'
                                     >
-                                      <i className="fs-4 bi-speedometer2 ms-2"></i>                  
-                                      <span className='ms-2 d-none d-sm-inline '>Dashboard</span>
+                                      <i className="text-xl bi-speedometer2 ml-2"></i>                  
+                                      <span className='ml-2 hidden d-sm-inline '>Dashboard</span>
                                 </Link>
                             </li>
-                            <li className="w-100">
+                            <li className="w-full">
                                 <button
                                     type='button'
                                     onClick={handleLogout}
                                     className="nav-link px-0 align-middle text-white"
                                 >
-                                    <i className="fs-4 bi-people ms-2"></i>
-                                    <span className="ms-2 d-none d-sm-inline">Manage Employees</span>
+                                    <i className="text-xl bi-people ml-2"></i>
+                                    <span className="ml-2 hidden d-sm-inline">Manage Employees</span>
                                 </button>
                             </li>
-                            <li className="w-100">
+                            <li className="w-full">
                                 <Link 
                                     to="/dashboard/category" 
                                     className="nav-link px-0 align-middle text-white"
                                 >
-                                    <i className="fs-4 bi-columns ms-2"></i>
-                                    <span className="ms-2 d-none d-sm-inline">Category</span>
+                                    <i className="text-xl bi-columns ml-2"></i>
+                                    <span className="ml-2 hidden d-sm-inline">Category</span>
                                 </Link>
                             </li>
-                            <li className="w-100">
+                            <li className="w-full">
                                 <Link 
                                     to="/dashboard/profile" 
                                     className="nav-link px-0 align-middle text-white"
                                 >
-                                    <i className="fs-4 bi-person ms-2"></i>
-                                    <span className="ms-2 d-none d-sm-inline">Profile</span>
+                                    <i className="text-xl bi-person ml-2"></i>
+                                    <span className="ml-2 hidden d-sm-inline">Profile</span>
                                 </Link>
                             </li>
-                            <li className="w-100">
+                            <li className="w-full">
                                 <Link 
                                     to="/dashboard/employee" 
                                     className="nav-link px-0 align-middle text-white"
                                 >
-                                    <i className="fs-4 bi-power ms-2"></i>
-                                    <span className="ms-2 d-none d-sm-inline">Logout</span>
+                                    <i className="text-xl bi-power ml-2"></i>
+                                    <span className="ml-2 hidden d-sm-inline">Logout</span>
                                 </Link>
                             </li>
                         </ul>
                     </div>
                 </div>
                 {/* //! Main Body */}
-                <div className='col p-0 m-0'>
-                    <div className='p-2 d-flex justify-content-center shadow'>
+                <div className='flex-1 px-4 p-0 m-0'>
+                    <div className='p-2 flex justify-center shadow'>
                         <h4>Employee Management System</h4>
                     </div>                          
                     <Outlet /> {/* //! It is used to render the child routes */}  
