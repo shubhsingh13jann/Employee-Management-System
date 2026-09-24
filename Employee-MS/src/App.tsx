@@ -17,25 +17,25 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ResetPassword from "./pages/ResetPassword";
 
-// 👑 Lazy-Loaded Admin Pages
+// 💤 Lazy-Loaded Admin Pages
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const Departments = lazy(() => import("./pages/admin/Departments"));
 const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
 const HierarchyMapping = lazy(() => import("./pages/admin/HierarchyMapping"));
 
-// 👔 Lazy-Loaded Manager Pages
+// 💤 Lazy-Loaded Manager Pages
 const ManagerDashboard = lazy(() => import("./pages/manager/ManagerDashboard"));
 const ProjectsManager = lazy(() => import("./pages/manager/ProjectsManager"));
 const DepartmentSupervisors = lazy(() => import("./pages/manager/DepartmentSupervisors"));
 const ManagerLeaves = lazy(() => import("./pages/manager/ManagerLeaves"));
 
-// 👷 Lazy-Loaded Supervisor Pages
+// 💤 Lazy-Loaded Supervisor Pages
 const SupervisorDashboard = lazy(() => import("./pages/supervisor/SupervisorDashboard"));
 const SupervisorTeam = lazy(() => import("./pages/supervisor/SupervisorTeam"));
 const SupervisorTasks = lazy(() => import("./pages/supervisor/SupervisorTasks"));
 const SupervisorLeaves = lazy(() => import("./pages/supervisor/SupervisorLeaves"));
 
-// 💼 Lazy-Loaded Employee Pages
+// 💤 Lazy-Loaded Employee Pages
 const EmployeeDashboard = lazy(() => import("./pages/employee/EmployeeDashboard"));
 const EmployeeTasks = lazy(() => import("./pages/employee/EmployeeTasks"));
 const EmployeeLeaves = lazy(() => import("./pages/employee/EmployeeLeaves"));
@@ -51,7 +51,10 @@ const AnimatedAppContent = () => {
     location.pathname === "/adminlogin" ||
     location.pathname === "/dashboard" ||
     location.pathname.startsWith("/reset-password");
-  const transitionKey = isAuthRoute ? "auth-root" : location.pathname;
+  
+  // FIX: Group all internal dashboard routes under a single transition key 
+  // so the Layout, Sidebar, and Navbar do not unmount and refresh on sub-page clicks.
+  const transitionKey = isAuthRoute ? "auth-root" : "dashboard-root";
 
   return (
     <>
