@@ -23,27 +23,24 @@ const Navbar = () => {
         <div className="flex items-center gap-6">
           
           {/* Search Bar */}
-          <div className="hidden xl:flex items-center bg-gray-50 border border-gray-200 border-gray-200 rounded-full px-6 py-1" style={{ minWidth: "260px", transition: "all 0.2s ease" }}>
-            <i className="bi bi-search text-gray-500" style={{ fontSize: "14px" }}></i>
+          <div className="hidden xl:flex items-center bg-slate-50 border border-slate-200 rounded-full px-4 py-1.5 min-w-[280px] transition-all focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 focus-within:bg-white">
+            <i className="bi bi-search text-slate-400 text-xs mr-2"></i>
             <input 
               type="text" 
-              className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 border-0 bg-transparent shadow-none ml-2 py-1" 
-              placeholder="Search..." 
-              style={{ fontSize: "13px" }}
+              className="w-full text-xs bg-transparent border-none outline-none focus:outline-none placeholder:text-slate-400 text-slate-700" 
+              placeholder="Search users, departments..." 
             />
-            <span className="badge bg-white text-gray-600 border border-gray-200 border-gray-200 rounded-sm ml-2 px-2 py-1 shadow-sm" style={{ fontSize: "10px" }}>⌘K</span>
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium text-slate-500 bg-white border border-slate-200 shadow-xs ml-1">⌘K</span>
           </div>
 
           {/* Icon Actions */}
           <div className="flex items-center gap-2">
-            <button className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-light rounded-full p-2 flex items-center justify-center text-gray-600 border border-gray-200 border-gray-200" style={{ width: "34px", height: "34px" }}>
-              <i className="bi bi-moon-stars" style={{ fontSize: "14px" }}></i>
+            <button className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer border border-slate-200/80">
+              <i className="bi bi-moon-stars text-sm"></i>
             </button>
-            <button className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-light rounded-full p-2 flex items-center justify-center text-gray-600 border border-gray-200 border-gray-200 relative" style={{ width: "34px", height: "34px" }}>
-              <i className="bi bi-bell" style={{ fontSize: "14px" }}></i>
-              <span className="absolute top-0 left-full -translate-x-1/2 -translate-y-1/2 p-1 bg-red-600 border border-gray-200 border-gray-200 border-light rounded-full">
-                <span className="visually-hidden">New alerts</span>
-              </span>
+            <button className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer border border-slate-200/80 relative">
+              <i className="bi bi-bell text-sm"></i>
+              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full"></span>
             </button>
           </div>
 

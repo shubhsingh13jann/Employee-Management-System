@@ -15,13 +15,13 @@ const Sidebar = () => {
   const getRoleBadge = (role) => {
     switch (role) {
       case "admin":
-        return <span className="badge bg-yellow-500 text-gray-900 border border-gray-200 border-gray-200 border-warning" style={{ fontSize: "0.7rem" }}>👑 HR Super Admin</span>;
+        return <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-400/20 text-amber-300 border border-amber-400/30">👑 HR Super Admin</span>;
       case "manager":
-        return <span className="badge bg-blue-600 border border-gray-200 border-gray-200 border-primary" style={{ fontSize: "0.7rem" }}>👔 Manager</span>;
+        return <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-400/30">👔 Manager</span>;
       case "supervisor":
-        return <span className="badge bg-green-600 border border-gray-200 border-gray-200 border-success" style={{ fontSize: "0.7rem" }}>👷 Supervisor</span>;
+        return <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">👷 Supervisor</span>;
       case "employee":
-        return <span className="badge bg-info text-gray-900 border border-gray-200 border-gray-200 border-info" style={{ fontSize: "0.7rem" }}>💼 Employee</span>;
+        return <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">💼 Employee</span>;
       default:
         return null;
     }
@@ -184,15 +184,14 @@ const Sidebar = () => {
       </ul>
 
       {/* Bottom Actions */}
-      <div className="pt-6 mt-auto">
-        <div className="flex items-center gap-2 mb-6 px-2">
-          <span className="badge bg-green-600 p-1 rounded-full"></span>
-          <small className="text-gray-600 font-medium" style={{ fontSize: "11px" }}>System Status: Operational</small>
+      <div className="pt-4 mt-auto">
+        <div className="flex items-center gap-2 mb-4 px-1">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <small className="text-slate-400 font-medium text-[11px]">System Status: Operational</small>
         </div>
         <button
           onClick={handleLogout}
-          className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-outline-danger w-full flex items-center justify-center gap-2 py-2 rounded-lg font-semibold border-opacity-50"
-          style={{ transition: "all 0.2s ease" }}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-600 border border-rose-500/20 hover:border-rose-600 transition-all duration-200 cursor-pointer shadow-sm"
         >
           <i className="bi bi-box-arrow-right text-base"></i>
           <span>Sign Out</span>
