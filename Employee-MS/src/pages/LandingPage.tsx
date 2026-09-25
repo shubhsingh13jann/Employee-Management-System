@@ -620,7 +620,7 @@ const LandingPage = () => {
                     >
                       <div className="flex flex-row" style={{ minHeight: "485px" }}>
                         {/* Full 10-Tab Mock Dark Sidebar */}
-                        <div className="mock-sidebar p-3 flex flex-col justify-between text-white" style={{ width: "205px", background: "#0b1329" }}>
+                        <div className="mock-sidebar p-3 flex flex-col justify-between" style={{ width: "205px", background: "#0b1329" }}>
                           <div>
                             {/* Sidebar Brand */}
                             <div className="mb-2 px-1">
@@ -628,7 +628,7 @@ const LandingPage = () => {
                             </div>
 
                             {/* Full 10 Interactive Sidebar Items */}
-                            <ul className="nav nav-pills flex-col gap-1 list-unstyled p-0 m-0">
+                            <ul className="flex flex-col gap-0.5 list-none p-0 m-0">
                               {[
                                 { name: "Dashboard", icon: "bi-speedometer2" },
                                 { name: "Departments", icon: "bi-building" },
@@ -640,39 +640,64 @@ const LandingPage = () => {
                                 { name: "Payroll", icon: "bi-cash-stack" },
                                 { name: "System Settings", icon: "bi-gear" },
                                 { name: "Audit Logs", icon: "bi-shield-shaded" }
-                              ].map((item) => (
-                                <li key={item.name}>
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setActiveSidebarTab(item.name);
-                                    }}
-                                    className={`w-full text-left flex items-center gap-2 px-2 py-1 rounded-md text-white border-0 transition-all ${
-                                      activeSidebarTab === item.name
-                                        ? "bg-blue-600 font-bold shadow-xs scale-102"
-                                        : "bg-transparent text-white/60 hover:bg-white/10"
-                                    }`}
-                                    style={{ fontSize: "10.5px" }}
-                                  >
-                                    <i className={`bi ${item.icon}`}></i>
-                                    <span>{item.name}</span>
-                                  </button>
-                                </li>
-                              ))}
+                              ].map((item) => {
+                                const isActive = activeSidebarTab === item.name;
+                                return (
+                                  <li key={item.name}>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setActiveSidebarTab(item.name);
+                                      }}
+                                      style={{
+                                        borderRadius: isActive ? "7px" : "6px",
+                                        fontSize: "10.5px",
+                                        color: isActive ? "#ffffff" : "#94a3b8",
+                                        backgroundColor: isActive ? "#1d6fee" : "transparent"
+                                      }}
+                                      className={`w-full text-left flex items-center gap-2 px-2.5 py-1 border-0 transition-colors cursor-pointer ${
+                                        isActive
+                                          ? "font-semibold shadow-xs"
+                                          : "font-normal hover:text-white hover:bg-white/5"
+                                      }`}
+                                    >
+                                      <i
+                                        className={`bi ${item.icon} text-[11px]`}
+                                        style={{ color: isActive ? "#ffffff" : "#94a3b8" }}
+                                      ></i>
+                                      <span>{item.name}</span>
+                                    </button>
+                                  </li>
+                                );
+                              })}
                             </ul>
                           </div>
 
                           {/* Sidebar Footer System Status */}
-                          <div className="p-2 rounded mt-2" style={{ background: "rgba(255, 255, 255, 0.08)", border: "1px solid rgba(255, 255, 255, 0.12)" }}>
+                          <div
+                            className="p-1.5 px-2 mt-2"
+                            style={{
+                              background: "rgba(255, 255, 255, 0.08)",
+                              border: "1px solid rgba(255, 255, 255, 0.12)",
+                              borderRadius: "8px"
+                            }}
+                          >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-1.5">
                                 <span className="pulse-dot-green"></span>
-                                <small className="text-white font-semibold text-[9.5px]">System Status</small>
+                                <small className="text-white font-semibold text-[9px]">System Status</small>
                               </div>
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-semibold bg-emerald-500/20 text-emerald-400">Live</span>
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[7.5px] font-semibold bg-emerald-500/20 text-emerald-400">Live</span>
                             </div>
-                            <small className="text-white/60 block mt-0.5 whitespace-nowrap text-[8.5px] leading-tight">
+                            <small
+                              className="block mt-0.5 whitespace-nowrap leading-tight"
+                              style={{
+                                fontSize: "7px",
+                                color: "#94a3b8",
+                                letterSpacing: "-0.01em"
+                              }}
+                            >
                               All 4 services operational • {currentTime}
                             </small>
                           </div>
