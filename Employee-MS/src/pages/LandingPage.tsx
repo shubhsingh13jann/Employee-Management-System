@@ -797,27 +797,31 @@ const LandingPage = () => {
                           {/* 4 Interactive Stat Cards with Colored Badges */}
                           <div className="grid grid-cols-4 gap-1.5">
                             {[
-                              { id: "employees", label: "Total Employees", val: "248", change: "↑ 12% last mo", icon: "bi-people-fill", badge: "bg-indigo-50 text-indigo-600 border border-indigo-100" },
-                              { id: "departments", label: "Departments", val: "18", change: "↑ 2 new", icon: "bi-building", badge: "bg-blue-50 text-blue-600 border border-blue-100" },
-                              { id: "projects", label: "Active Projects", val: "32", change: "↑ 8 active", icon: "bi-kanban", badge: "bg-emerald-50 text-emerald-600 border border-emerald-100" },
-                              { id: "payroll", label: "Total Payroll", val: "$1.24M", change: "↑ 8.5% mo", icon: "bi-cash-stack", badge: "bg-amber-50 text-amber-600 border border-amber-100" }
+                              { id: "employees", label: "Total Employees", val: "248", change: "↑ 12% last mo", icon: "bi-people-fill", badge: "bg-indigo-50 text-indigo-500 border border-indigo-100" },
+                              { id: "departments", label: "Departments", val: "18", change: "↑ 2 new", icon: "bi-building", badge: "bg-blue-50 text-blue-500 border border-blue-100" },
+                              { id: "projects", label: "Active Projects", val: "32", change: "↑ 8 active", icon: "bi-kanban", badge: "bg-emerald-50 text-emerald-500 border border-emerald-100" },
+                              { id: "payroll", label: "Total Payroll", val: "$1.24M", change: "↑ 8.5% mo", icon: "bi-cash-stack", badge: "bg-amber-50 text-amber-500 border border-amber-100" }
                             ].map((stat) => (
                               <div key={stat.id}>
                                 <div
                                   onClick={() => setSelectedStat(stat.id)}
                                   className={`p-1.5 rounded-lg bg-white transition-all stat-card-interactive cursor-pointer border border-slate-100 ${
-                                    selectedStat === stat.id ? "stat-card-active shadow-md" : "shadow-xs"
+                                    selectedStat === stat.id ? "stat-card-active shadow-sm" : "shadow-2xs"
                                   }`}
                                 >
                                   <div className="flex justify-between items-start">
-                                    <div>
-                                      <small className="text-gray-500 font-semibold block leading-tight text-[8.5px] whitespace-nowrap">{stat.label}</small>
-                                      <h6 className={`font-bold my-0.5 text-slate-900 leading-tight transition-all ${selectedStat === stat.id ? "text-blue-600 scale-105" : ""}`} style={{ fontSize: "12px" }}>
+                                    <div className="text-left flex flex-col items-start">
+                                      <span className="text-slate-500 font-medium block leading-tight text-[8px] whitespace-nowrap text-left">
+                                        {stat.label}
+                                      </span>
+                                      <span className="font-bold my-0.5 text-slate-900 leading-tight text-[12px] block text-left">
                                         {stat.val}
-                                      </h6>
-                                      <small className="text-green-600 font-bold block leading-tight text-[7.5px] whitespace-nowrap">{stat.change}</small>
+                                      </span>
+                                      <span className="text-emerald-600 font-bold block leading-tight text-[7.5px] whitespace-nowrap text-left">
+                                        {stat.change}
+                                      </span>
                                     </div>
-                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all ${stat.badge} ${selectedStat === stat.id ? "rotate-12 scale-110" : ""}`}>
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${stat.badge}`}>
                                       <i className={`bi ${stat.icon}`} style={{ fontSize: "10px" }}></i>
                                     </div>
                                   </div>
