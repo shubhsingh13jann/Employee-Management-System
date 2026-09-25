@@ -451,7 +451,7 @@ const LandingPage = () => {
               <button
                 type="button"
                 onClick={(e) => handleAuthNavigate("/login", e)}
-                className="px-4 py-2 rounded-xl text-sm font-semibold border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-xs cursor-pointer"
+                className="px-5 py-2 rounded-full text-sm font-semibold border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-xs cursor-pointer"
               >
                 <i className="bi bi-person text-base"></i>
                 <span>Login</span>
@@ -461,7 +461,7 @@ const LandingPage = () => {
               <button
                 type="button"
                 onClick={(e) => handleAuthNavigate("/signup", e)}
-                className="btn-gradient-primary px-5 py-2 rounded-xl text-sm font-semibold text-white shadow-sm flex items-center gap-2 transition-all cursor-pointer"
+                className="btn-gradient-primary px-5 py-2 rounded-full text-sm font-semibold text-white shadow-sm flex items-center gap-2 transition-all cursor-pointer"
               >
                 <i className="bi bi-person-plus-fill text-base"></i>
                 <span>Sign Up</span>
@@ -541,7 +541,7 @@ const LandingPage = () => {
                       <button
                         type="button"
                         onClick={(e) => handleAuthNavigate("/signup", e)}
-                        className="btn-gradient-primary px-6 py-2.5 rounded-xl font-bold inline-flex items-center gap-2 text-white shadow-md hero-btn cursor-pointer"
+                        className="btn-gradient-primary px-7 py-2.5 rounded-full font-bold inline-flex items-center gap-2 text-white shadow-md hero-btn cursor-pointer"
                       >
                         <span>Get Started Free</span>
                         <i className="bi bi-arrow-right"></i>
@@ -551,7 +551,7 @@ const LandingPage = () => {
                       <button
                         type="button"
                         onClick={() => handleNavToggle("roles-sec")}
-                        className="px-6 py-2.5 rounded-xl font-semibold inline-flex items-center gap-2 text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 hover:border-slate-400 transition-colors cursor-pointer hero-btn-secondary hover-lift shadow-xs"
+                        className="px-7 py-2.5 rounded-full font-semibold inline-flex items-center gap-2 text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 hover:border-slate-400 transition-colors cursor-pointer hero-btn-secondary hover-lift shadow-xs"
                       >
                         <span>Explore Next Layer</span>
                         <i className="bi bi-arrow-down text-base"></i>
@@ -587,9 +587,9 @@ const LandingPage = () => {
                 {/* COMPLETE, ADVANCED, FULLY-DETAILED 3D LIVING DASHBOARD SHOWCASE */}
                 <div className="w-full xl:col-span-7" id="showcase">
                   <div className="showcase-3d-wrapper relative">
-                    {/* Floating Interactive Tag - Positively Anchored matching Reference */}
+                    {/* Floating Interactive Tag - Positively Anchored on the Left */}
                     <div
-                      style={{ position: "absolute", top: "-14px", right: "32px", left: "auto", zIndex: 30 }}
+                      style={{ position: "absolute", top: "-16px", left: "20px", right: "auto", zIndex: 30 }}
                       className="showcase-floating-tag bg-slate-900 text-white px-4 py-1.5 rounded-full shadow-lg inline-flex items-center gap-2 border border-white/20 backdrop-blur-md pointer-events-none"
                     >
                       <span className="pulse-dot"></span>
@@ -614,12 +614,12 @@ const LandingPage = () => {
                         !isHoveredShowcase ? "omni-floating" : ""
                       }`}
                     >
-                      <div className="flex flex-row" style={{ minHeight: "530px" }}>
+                      <div className="flex flex-row" style={{ minHeight: "485px" }}>
                         {/* Full 10-Tab Mock Dark Sidebar */}
-                        <div className="mock-sidebar p-3.5 flex flex-col justify-between text-white" style={{ width: "215px", background: "#0b1329" }}>
+                        <div className="mock-sidebar p-3 flex flex-col justify-between text-white" style={{ width: "205px", background: "#0b1329" }}>
                           <div>
                             {/* Sidebar Brand */}
-                            <div className="mb-3 px-1">
+                            <div className="mb-2 px-1">
                               <BrandLogo theme="dark" size="sm" clickable={false} />
                             </div>
 
@@ -675,14 +675,14 @@ const LandingPage = () => {
                         </div>
 
                         {/* Mock Main Dashboard Body */}
-                        <div className="mock-body flex-1 p-4 bg-slate-50 overflow-hidden flex flex-col gap-2.5 relative">
+                        <div className="mock-body flex-1 p-3 bg-slate-50 overflow-hidden flex flex-col gap-2 relative">
                           {/* Interactive Topbar */}
-                          <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                          <div className="flex justify-between items-center pb-1.5 border-b border-slate-200">
                             <div>
-                              <h6 className="font-bold mb-0 text-gray-900 flex items-center gap-1.5" style={{ fontSize: "12.5px" }}>
+                              <h6 className="font-bold mb-0 text-gray-900 flex items-center gap-1.5" style={{ fontSize: "12px" }}>
                                 {getGreeting()}, Shubh Singh! 👋
                               </h6>
-                              <small className="text-gray-500" style={{ fontSize: "10px" }}>
+                              <small className="text-gray-500" style={{ fontSize: "9.5px" }}>
                                 Viewing active module: <span className="text-blue-600 font-semibold">{activeSidebarTab}</span>
                               </small>
                             </div>
@@ -766,7 +766,7 @@ const LandingPage = () => {
                           </div>
 
                           {/* 4 Interactive Stat Cards with Colored Badges */}
-                          <div className="grid grid-cols-4 gap-2">
+                          <div className="grid grid-cols-4 gap-1.5">
                             {[
                               { id: "employees", label: "Total Employees", val: "248", change: "↑ 12% last mo", icon: "bi-people-fill", badge: "bg-indigo-50 text-indigo-600 border border-indigo-100" },
                               { id: "departments", label: "Departments", val: "18", change: "↑ 2 new", icon: "bi-building", badge: "bg-blue-50 text-blue-600 border border-blue-100" },
@@ -776,20 +776,20 @@ const LandingPage = () => {
                               <div key={stat.id}>
                                 <div
                                   onClick={() => setSelectedStat(stat.id)}
-                                  className={`p-2 rounded-lg bg-white transition-all stat-card-interactive cursor-pointer border border-slate-100 ${
+                                  className={`p-1.5 rounded-lg bg-white transition-all stat-card-interactive cursor-pointer border border-slate-100 ${
                                     selectedStat === stat.id ? "stat-card-active shadow-md" : "shadow-xs"
                                   }`}
                                 >
                                   <div className="flex justify-between items-start">
                                     <div>
-                                      <small className="text-gray-500 font-semibold block leading-none mb-1 text-[9px]">{stat.label}</small>
-                                      <h6 className={`font-bold mb-0 text-slate-900 transition-all ${selectedStat === stat.id ? "text-blue-600 scale-105" : ""}`} style={{ fontSize: "13px" }}>
+                                      <small className="text-gray-500 font-semibold block leading-tight text-[8.5px] whitespace-nowrap">{stat.label}</small>
+                                      <h6 className={`font-bold my-0.5 text-slate-900 leading-tight transition-all ${selectedStat === stat.id ? "text-blue-600 scale-105" : ""}`} style={{ fontSize: "12px" }}>
                                         {stat.val}
                                       </h6>
-                                      <small className="text-green-600 font-bold block mt-0.5 text-[8px]">{stat.change}</small>
+                                      <small className="text-green-600 font-bold block leading-tight text-[7.5px] whitespace-nowrap">{stat.change}</small>
                                     </div>
-                                    <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all ${stat.badge} ${selectedStat === stat.id ? "rotate-12 scale-110" : ""}`}>
-                                      <i className={`bi ${stat.icon} text-xs`}></i>
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all ${stat.badge} ${selectedStat === stat.id ? "rotate-12 scale-110" : ""}`}>
+                                      <i className={`bi ${stat.icon}`} style={{ fontSize: "10px" }}></i>
                                     </div>
                                   </div>
                                 </div>
@@ -833,7 +833,7 @@ const LandingPage = () => {
                                 </div>
 
                                 {/* Interactive SVG Area Chart with Crosshair Laser & Pulse Ring */}
-                                <div className="relative w-full my-0.5 cursor-crosshair" style={{ height: "100px" }}>
+                                <div className="relative w-full my-0.5 cursor-crosshair" style={{ height: "88px" }}>
                                   {hoveredGraphPoint && (
                                     <div
                                       className="absolute bg-gray-900 text-white px-2 py-0.5 rounded shadow-lg pointer-events-none transition-all"
@@ -931,7 +931,7 @@ const LandingPage = () => {
                                   <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[7.5px] font-semibold bg-rose-500/10 text-rose-600" style={{ fontSize: "7.5px" }}>Action</span>
                                 </div>
 
-                                <div className="flex flex-col gap-1.5">
+                                <div className="flex flex-col gap-1">
                                   {[
                                     { id: 1, title: "Leave Requests", count: "3 pending", icon: "bi-calendar-check", badge: "bg-rose-50 text-rose-600 border border-rose-100" },
                                     { id: 2, title: "Dept Changes", count: "1 pending", icon: "bi-diagram-3", badge: "bg-cyan-50 text-cyan-600 border border-cyan-100" },
@@ -940,19 +940,19 @@ const LandingPage = () => {
                                   ].map((item) => (
                                     <div
                                       key={item.id}
-                                      className={`flex justify-between items-center p-1.5 rounded transition-all cursor-pointer ${
+                                      className={`flex justify-between items-center p-1 rounded transition-all cursor-pointer ${
                                         hoveredApproval === item.id ? "bg-slate-50 shadow-2xs translate-x-0.5" : "bg-slate-50/60 border border-slate-100"
                                       }`}
                                       onMouseEnter={() => setHoveredApproval(item.id)}
                                       onMouseLeave={() => setHoveredApproval(null)}
                                     >
                                       <div className="flex items-center gap-1.5">
-                                        <div className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ${item.badge} transition-all ${hoveredApproval === item.id ? "scale-110" : ""}`}>
-                                          <i className={`bi ${item.icon} text-[11px]`}></i>
+                                        <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${item.badge} transition-all ${hoveredApproval === item.id ? "scale-110" : ""}`}>
+                                          <i className={`bi ${item.icon} text-[9.5px]`}></i>
                                         </div>
                                         <div>
-                                          <span className="font-bold text-gray-900 block leading-none text-[9px]">{item.title}</span>
-                                          <small className="text-gray-500 text-[7.5px]">
+                                          <span className="font-bold text-gray-900 block leading-none text-[8.5px]">{item.title}</span>
+                                          <small className="text-gray-500 text-[7px]">
                                             {approvedItems[item.id] ? <span className="text-green-600 font-bold">✓ Done</span> : item.count}
                                           </small>
                                         </div>
@@ -981,23 +981,23 @@ const LandingPage = () => {
                           </div>
 
                           {/* Bottom Row: Top Departments Progress Bars & Segmented Donut Chart */}
-                          <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col border-0 shadow-xs p-2 rounded-lg bg-white">
-                            <div className="flex justify-between items-center mb-1.5">
+                          <div className="bg-white rounded-lg border border-slate-200 flex flex-col shadow-xs p-1.5">
+                            <div className="flex justify-between items-center mb-1">
                               <div className="flex items-center gap-1.5">
-                                <h6 className="font-bold mb-0 text-gray-900" style={{ fontSize: "11px" }}>Top Departments</h6>
+                                <h6 className="font-bold mb-0 text-gray-900" style={{ fontSize: "10.5px" }}>Top Departments</h6>
                                 {hoveredDept && (
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-semibold bg-blue-500/10 text-blue-600 animate-fade-in">
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[7.5px] font-semibold bg-blue-500/10 text-blue-600 animate-fade-in">
                                     {hoveredDept.name}: {hoveredDept.count} ({hoveredDept.pct}%)
                                   </span>
                                 )}
                               </div>
-                              <span className="text-blue-600 text-sm font-semibold cursor-pointer hover:underline" style={{ fontSize: "9px" }}>View All 18</span>
+                              <span className="text-blue-600 text-xs font-semibold cursor-pointer hover:underline" style={{ fontSize: "8.5px" }}>View All 18</span>
                             </div>
 
                             <div className="grid grid-cols-12 gap-2 items-center">
                               {/* PROGRESS BARS WITH VIBRANT SHIMMER */}
                               <div className="col-span-8">
-                                <div className="flex flex-col gap-1">
+                                <div className="flex flex-col gap-0.5">
                                   {filteredDepts.map((d) => (
                                     <div
                                       key={d.name}
@@ -1007,10 +1007,10 @@ const LandingPage = () => {
                                       onMouseEnter={() => setHoveredDept(d)}
                                       onMouseLeave={() => setHoveredDept(null)}
                                     >
-                                      <small className={`truncate transition-all ${hoveredDept?.name === d.name ? "font-bold text-slate-900" : "text-slate-500"}`} style={{ width: "90px", fontSize: "9px" }}>
+                                      <small className={`truncate transition-all ${hoveredDept?.name === d.name ? "font-bold text-slate-900" : "text-slate-500"}`} style={{ width: "85px", fontSize: "8.5px" }}>
                                         {d.name}
                                       </small>
-                                      <div className="flex-1 bg-slate-100 rounded-full overflow-hidden relative" style={{ height: hoveredDept?.name === d.name ? "7px" : "5px", transition: "height 0.25s ease" }}>
+                                      <div className="flex-1 bg-slate-100 rounded-full overflow-hidden relative" style={{ height: hoveredDept?.name === d.name ? "6px" : "4.5px", transition: "height 0.25s ease" }}>
                                         <div
                                           className={`h-full rounded-full transition-all duration-300 ${d.color} ${hoveredDept?.name === d.name ? "progress-bar-glow progress-bar-striped progress-bar-animated" : ""}`}
                                           style={{
@@ -1020,7 +1020,7 @@ const LandingPage = () => {
                                           }}
                                         ></div>
                                       </div>
-                                      <small className={`font-bold transition-all ${hoveredDept?.name === d.name ? "text-blue-600 scale-110" : "text-slate-900"}`} style={{ width: "20px", fontSize: "9px" }}>
+                                      <small className={`font-bold transition-all ${hoveredDept?.name === d.name ? "text-blue-600 scale-110" : "text-slate-900"}`} style={{ width: "18px", fontSize: "8.5px" }}>
                                         {d.count}
                                       </small>
                                     </div>
@@ -1035,7 +1035,7 @@ const LandingPage = () => {
                                   onMouseEnter={() => setHoveredDonutSegment("Total")}
                                   onMouseLeave={() => setHoveredDonutSegment(null)}
                                 >
-                                  <svg width="70" height="70" viewBox="0 0 36 36" className="circular-chart">
+                                  <svg width="64" height="64" viewBox="0 0 36 36" className="circular-chart">
                                     <path
                                       className="circle-bg"
                                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
