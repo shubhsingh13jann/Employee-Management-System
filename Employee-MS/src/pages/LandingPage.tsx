@@ -451,7 +451,8 @@ const LandingPage = () => {
               <button
                 type="button"
                 onClick={(e) => handleAuthNavigate("/login", e)}
-                className="px-4 py-2 rounded-[10px] text-sm font-semibold border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-xs cursor-pointer"
+                style={{ borderRadius: "10px" }}
+                className="btn-nav-login px-4 py-2 !rounded-[10px] text-sm font-semibold border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-xs cursor-pointer"
               >
                 <i className="bi bi-person text-base"></i>
                 <span>Login</span>
@@ -461,7 +462,8 @@ const LandingPage = () => {
               <button
                 type="button"
                 onClick={(e) => handleAuthNavigate("/signup", e)}
-                className="btn-gradient-primary px-5 py-2 rounded-[10px] text-sm font-semibold text-white shadow-sm flex items-center gap-2 transition-all cursor-pointer"
+                style={{ borderRadius: "10px" }}
+                className="btn-nav-signup btn-gradient-primary px-5 py-2 !rounded-[10px] text-sm font-semibold text-white shadow-sm flex items-center gap-2 transition-all cursor-pointer"
               >
                 <i className="bi bi-person-plus-fill text-base"></i>
                 <span>Sign Up</span>
@@ -541,7 +543,8 @@ const LandingPage = () => {
                       <button
                         type="button"
                         onClick={(e) => handleAuthNavigate("/signup", e)}
-                        className="btn-gradient-primary px-6 py-2.5 rounded-[10px] font-bold inline-flex items-center gap-2 text-white shadow-md hero-btn cursor-pointer"
+                        style={{ borderRadius: "10px" }}
+                        className="btn-gradient-primary px-6 py-2.5 !rounded-[10px] font-bold inline-flex items-center gap-2 text-white shadow-md hero-btn cursor-pointer"
                       >
                         <span>Get Started Free</span>
                         <i className="bi bi-arrow-right"></i>
@@ -551,7 +554,8 @@ const LandingPage = () => {
                       <button
                         type="button"
                         onClick={() => handleNavToggle("roles-sec")}
-                        className="px-6 py-2.5 rounded-[10px] font-semibold inline-flex items-center gap-2 text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 hover:border-slate-400 transition-colors cursor-pointer hero-btn-secondary hover-lift shadow-xs"
+                        style={{ borderRadius: "10px" }}
+                        className="px-6 py-2.5 !rounded-[10px] font-semibold inline-flex items-center gap-2 text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 hover:border-slate-400 transition-colors cursor-pointer hero-btn-secondary hover-lift shadow-xs"
                       >
                         <span>Explore Next Layer</span>
                         <i className="bi bi-arrow-down text-base"></i>
@@ -1182,7 +1186,8 @@ const LandingPage = () => {
                         <button
                           type="button"
                           onClick={(e) => handleAuthNavigate("/login", e)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg shadow-sm transition-colors cursor-pointer inline-flex items-center gap-2"
+                          style={{ borderRadius: "10px" }}
+                          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 !rounded-[10px] shadow-sm transition-colors cursor-pointer inline-flex items-center gap-2"
                         >
                           Explore HR Admin Portal →
                         </button>
@@ -1222,7 +1227,8 @@ const LandingPage = () => {
                         <button
                           type="button"
                           onClick={(e) => handleAuthNavigate("/login", e)}
-                          className="bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg shadow-sm transition-colors cursor-pointer inline-flex items-center gap-2"
+                          style={{ borderRadius: "10px" }}
+                          className="bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold px-5 py-2.5 !rounded-[10px] shadow-sm transition-colors cursor-pointer inline-flex items-center gap-2"
                         >
                           Explore Manager Portal →
                         </button>
@@ -1262,7 +1268,8 @@ const LandingPage = () => {
                         <button
                           type="button"
                           onClick={(e) => handleAuthNavigate("/login", e)}
-                          className="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg shadow-sm transition-colors cursor-pointer inline-flex items-center gap-2"
+                          style={{ borderRadius: "10px" }}
+                          className="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-5 py-2.5 !rounded-[10px] shadow-sm transition-colors cursor-pointer inline-flex items-center gap-2"
                         >
                           Explore Supervisor Portal →
                         </button>
@@ -1302,7 +1309,8 @@ const LandingPage = () => {
                         <button
                           type="button"
                           onClick={(e) => handleAuthNavigate("/login", e)}
-                          className="bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold px-5 py-2.5 rounded-lg shadow-sm transition-colors cursor-pointer inline-flex items-center gap-2"
+                          style={{ borderRadius: "10px" }}
+                          className="bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold px-5 py-2.5 !rounded-[10px] shadow-sm transition-colors cursor-pointer inline-flex items-center gap-2"
                         >
                           Explore Employee Portal →
                         </button>
@@ -1545,7 +1553,8 @@ const LandingPage = () => {
                       <button
                         type="button"
                         onClick={(e) => handleAuthNavigate("/signup", e)}
-                        className="bg-white hover:bg-slate-100 text-indigo-700 font-bold px-6 py-2.5 rounded-xl shadow-md transition-all cursor-pointer text-sm inline-block"
+                        style={{ borderRadius: "10px" }}
+                        className="bg-white hover:bg-slate-100 text-indigo-700 font-bold px-6 py-2.5 !rounded-[10px] shadow-md transition-all cursor-pointer text-sm inline-block"
                       >
                         Create Your Free Account →
                       </button>
@@ -1554,7 +1563,8 @@ const LandingPage = () => {
                       <button
                         type="button"
                         onClick={(e) => handleAuthNavigate("/login", e)}
-                        className="border border-white/60 hover:bg-white/10 text-white font-semibold px-6 py-2.5 rounded-xl transition-all cursor-pointer text-sm inline-block"
+                        style={{ borderRadius: "10px" }}
+                        className="border border-white/60 hover:bg-white/10 text-white font-semibold px-6 py-2.5 !rounded-[10px] transition-all cursor-pointer text-sm inline-block"
                       >
                         Sign In to Portal
                       </button>
