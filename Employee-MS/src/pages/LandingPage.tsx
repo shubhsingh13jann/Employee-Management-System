@@ -451,7 +451,7 @@ const LandingPage = () => {
               <button
                 type="button"
                 onClick={(e) => handleAuthNavigate("/login", e)}
-                className="px-5 py-2 rounded-full text-sm font-semibold border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-xs cursor-pointer"
+                className="px-4 py-2 rounded-[10px] text-sm font-semibold border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-xs cursor-pointer"
               >
                 <i className="bi bi-person text-base"></i>
                 <span>Login</span>
@@ -461,7 +461,7 @@ const LandingPage = () => {
               <button
                 type="button"
                 onClick={(e) => handleAuthNavigate("/signup", e)}
-                className="btn-gradient-primary px-5 py-2 rounded-full text-sm font-semibold text-white shadow-sm flex items-center gap-2 transition-all cursor-pointer"
+                className="btn-gradient-primary px-5 py-2 rounded-[10px] text-sm font-semibold text-white shadow-sm flex items-center gap-2 transition-all cursor-pointer"
               >
                 <i className="bi bi-person-plus-fill text-base"></i>
                 <span>Sign Up</span>
@@ -541,7 +541,7 @@ const LandingPage = () => {
                       <button
                         type="button"
                         onClick={(e) => handleAuthNavigate("/signup", e)}
-                        className="btn-gradient-primary px-7 py-2.5 rounded-full font-bold inline-flex items-center gap-2 text-white shadow-md hero-btn cursor-pointer"
+                        className="btn-gradient-primary px-6 py-2.5 rounded-[10px] font-bold inline-flex items-center gap-2 text-white shadow-md hero-btn cursor-pointer"
                       >
                         <span>Get Started Free</span>
                         <i className="bi bi-arrow-right"></i>
@@ -551,7 +551,7 @@ const LandingPage = () => {
                       <button
                         type="button"
                         onClick={() => handleNavToggle("roles-sec")}
-                        className="px-7 py-2.5 rounded-full font-semibold inline-flex items-center gap-2 text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 hover:border-slate-400 transition-colors cursor-pointer hero-btn-secondary hover-lift shadow-xs"
+                        className="px-6 py-2.5 rounded-[10px] font-semibold inline-flex items-center gap-2 text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 hover:border-slate-400 transition-colors cursor-pointer hero-btn-secondary hover-lift shadow-xs"
                       >
                         <span>Explore Next Layer</span>
                         <i className="bi bi-arrow-down text-base"></i>
