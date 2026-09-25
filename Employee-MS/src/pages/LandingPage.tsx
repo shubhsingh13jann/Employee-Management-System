@@ -664,18 +664,18 @@ const LandingPage = () => {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-1.5">
                                 <span className="pulse-dot-green"></span>
-                                <small className="text-white font-semibold" style={{ fontSize: "9.5px" }}>System Status</small>
+                                <small className="text-white font-semibold text-[9.5px]">System Status</small>
                               </div>
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-semibold bg-emerald-500/20 text-emerald-400" style={{ fontSize: "8px" }}>Live</span>
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-semibold bg-emerald-500/20 text-emerald-400">Live</span>
                             </div>
-                            <small className="text-white/60 block mt-0.5" style={{ fontSize: "8.5px" }}>
+                            <small className="text-white/60 block mt-0.5 whitespace-nowrap text-[8.5px] leading-tight">
                               All 4 services operational • {currentTime}
                             </small>
                           </div>
                         </div>
 
                         {/* Mock Main Dashboard Body */}
-                        <div className="mock-body flex-grow-1 p-6 bg-slate-50 overflow-hidden flex flex-col gap-2.5 relative">
+                        <div className="mock-body flex-1 p-4 bg-slate-50 overflow-hidden flex flex-col gap-2.5 relative">
                           {/* Interactive Topbar */}
                           <div className="flex justify-between items-center pb-2 border-b border-slate-200">
                             <div>
