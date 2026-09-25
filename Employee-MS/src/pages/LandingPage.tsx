@@ -616,10 +616,10 @@ const LandingPage = () => {
                     >
                       <div className="flex flex-row" style={{ minHeight: "530px" }}>
                         {/* Full 10-Tab Mock Dark Sidebar */}
-                        <div className="mock-sidebar p-6 flex flex-col justify-between text-white" style={{ width: "205px", background: "#0b1329" }}>
+                        <div className="mock-sidebar p-3.5 flex flex-col justify-between text-white" style={{ width: "215px", background: "#0b1329" }}>
                           <div>
                             {/* Sidebar Brand */}
-                            <div className="mb-6 px-1">
+                            <div className="mb-3 px-1">
                               <BrandLogo theme="dark" size="sm" clickable={false} />
                             </div>
 

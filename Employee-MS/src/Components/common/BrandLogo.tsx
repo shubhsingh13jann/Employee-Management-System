@@ -31,12 +31,12 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   const isSm = size === "sm";
 
   const content = (
-    <div className={`brand-logo-root d-flex align-items-center gap-3 ${className}`}>
+    <div className={`brand-logo-root flex items-center gap-2.5 ${className}`}>
       {/* 3D Tilt Hover Icon Cube */}
       <motion.div
         whileHover={{ rotateY: 18, rotateX: 12, scale: 1.08 }}
         transition={{ type: "spring", stiffness: 420, damping: 22 }}
-        className={`logo-cube ${isSm ? "logo-cube-sm" : ""} d-flex align-items-center justify-content-center`}
+        className={`logo-cube ${isSm ? "logo-cube-sm" : ""} flex items-center justify-center`}
         style={{
           width: isSm ? "30px" : "38px",
           height: isSm ? "30px" : "38px",
@@ -47,22 +47,22 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
           transformStyle: "preserve-3d"
         }}
       >
-        <i className={`bi bi-box-fill text-white ${isSm ? "small" : "fs-5"}`}></i>
+        <i className={`bi bi-box-fill text-white ${isSm ? "text-xs" : "text-lg"}`}></i>
       </motion.div>
 
       {/* Brand Typography (Centered alignment so Workforce Excellence is centered with respect to Enterprise EMS) */}
-      <div className="flex flex-col items-center text-center">
+      <div className="flex flex-col items-center text-center whitespace-nowrap">
         <span
-          className={`fw-bold tracking-tight leading-tight ${
-            isSm ? "small" : "fs-5"
-          } ${theme === "dark" ? "text-white" : "text-dark"}`}
+          className={`font-bold tracking-tight leading-tight whitespace-nowrap ${
+            isSm ? "text-xs" : "text-lg"
+          } ${theme === "dark" ? "text-white" : "text-gray-900"}`}
           style={{ letterSpacing: "-0.02em" }}
         >
           Enterprise EMS
         </span>
         {subtitle && (
           <small
-            className={theme === "dark" ? "text-white-50" : "text-muted"}
+            className={`whitespace-nowrap ${theme === "dark" ? "text-white/60" : "text-gray-500"}`}
             style={{
               fontSize: isSm ? "10px" : "11px",
               letterSpacing: "0.5px",
