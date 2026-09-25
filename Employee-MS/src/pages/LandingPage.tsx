@@ -398,11 +398,11 @@ const LandingPage = () => {
 
   // Complete departments list
   const initialDepts = [
-    { name: "Engineering", count: 86, color: "bg-primary", glow: "#3b82f6", pct: 38 },
-    { name: "Marketing", count: 45, color: "bg-purple", glow: "#8b5cf6", pct: 20 },
-    { name: "Sales", count: 38, color: "bg-info", glow: "#06b6d4", pct: 17 },
-    { name: "Human Resources", count: 32, color: "bg-success", glow: "#10b981", pct: 14 },
-    { name: "Finance", count: 28, color: "bg-warning", glow: "#f59e0b", pct: 11 }
+    { name: "Engineering", count: 86, color: "bg-blue-600", glow: "#2563eb", pct: 38 },
+    { name: "Marketing", count: 45, color: "bg-purple-600", glow: "#9333ea", pct: 20 },
+    { name: "Sales", count: 38, color: "bg-cyan-500", glow: "#06b6d4", pct: 17 },
+    { name: "Human Resources", count: 32, color: "bg-emerald-500", glow: "#10b981", pct: 14 },
+    { name: "Finance", count: 28, color: "bg-amber-500", glow: "#f59e0b", pct: 11 }
   ];
 
   const filteredDepts = initialDepts.filter((d) =>
@@ -562,16 +562,16 @@ const LandingPage = () => {
                   {/* 3 Value Pillars */}
                   <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200">
                     {[
-                      { title: "Enterprise Secure", desc: "Bank-level bcrypt & JWT security", icon: "bi-shield-check", color: "text-blue-600 bg-indigo-50" },
-                      { title: "Smart Automation", desc: "Two-tier approvals & task sync", icon: "bi-lightning-charge-fill", color: "text-emerald-600 bg-emerald-500/10" },
-                      { title: "People-Centric", desc: "Custom portals for every employee", icon: "bi-people-fill", color: "text-cyan-600 bg-cyan-500/10" }
+                      { title: "Enterprise Secure", desc: "Bank-level bcrypt & JWT security", icon: "bi-shield-check", color: "text-blue-600 bg-blue-50 border border-blue-100" },
+                      { title: "Smart Automation", desc: "Two-tier approvals & task sync", icon: "bi-lightning-charge-fill", color: "text-emerald-600 bg-emerald-50 border border-emerald-100" },
+                      { title: "People-Centric", desc: "Custom portals for every employee", icon: "bi-people-fill", color: "text-cyan-600 bg-cyan-50 border border-cyan-100" }
                     ].map((pillar) => (
                       <div key={pillar.title}>
                         <motion.div
                           whileHover={{ y: -3, scale: 1.02 }}
-                          className="flex items-start gap-1.5 p-1 rounded-lg hover-bg transition-all cursor-pointer"
+                          className="flex items-start gap-1.5 p-1.5 rounded-lg hover-bg transition-all cursor-pointer"
                         >
-                          <div className={`p-1.5 rounded-md shadow-2xs ${pillar.color}`}>
+                          <div className={`p-1.5 rounded-md shadow-2xs flex items-center justify-center shrink-0 ${pillar.color}`}>
                             <i className={`bi ${pillar.icon} text-sm`}></i>
                           </div>
                           <div>
@@ -587,9 +587,9 @@ const LandingPage = () => {
                 {/* COMPLETE, ADVANCED, FULLY-DETAILED 3D LIVING DASHBOARD SHOWCASE */}
                 <div className="w-full xl:col-span-7" id="showcase">
                   <div className="showcase-3d-wrapper relative">
-                    {/* Floating Interactive Tag - Positively Anchored on the Left */}
+                    {/* Floating Interactive Tag - Positively Anchored matching Reference */}
                     <div
-                      style={{ position: "absolute", top: "-16px", left: "20px", right: "auto", zIndex: 30 }}
+                      style={{ position: "absolute", top: "-14px", right: "32px", left: "auto", zIndex: 30 }}
                       className="showcase-floating-tag bg-slate-900 text-white px-4 py-1.5 rounded-full shadow-lg inline-flex items-center gap-2 border border-white/20 backdrop-blur-md pointer-events-none"
                     >
                       <span className="pulse-dot"></span>
@@ -1071,7 +1071,7 @@ const LandingPage = () => {
                                     />
                                   </svg>
 
-                                  <div className="absolute top-50 start-50 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+                                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
                                     <span className="font-bold text-gray-900 block leading-none" style={{ fontSize: "11px" }}>
                                       229
                                     </span>
