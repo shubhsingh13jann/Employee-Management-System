@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import api from "../api/axios";
 import CharacterStage from "../components/auth/CharacterStage/CharacterStage";
 import RadialRevealTransition, { RevealOrigin } from "../components/common/RadialRevealTransition";
-import { UserRole, AuthStatus } from "../components/auth/auth.types";
+import { UserRole, AuthStatus, ActiveField } from "../components/auth/auth.types";
 import "../components/auth/authInteractive.css";
 
 /**
@@ -116,7 +116,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
   }, []);
 
   // Interaction & Animation States
-  const [activeField, setActiveField] = useState<"email" | "password" | null>(null);
+  const [activeField, setActiveField] = useState<ActiveField>(null);
   const [caretProgress, setCaretProgress] = useState(0);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [authStatus, setAuthStatus] = useState<AuthStatus>("idle");

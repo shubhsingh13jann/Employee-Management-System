@@ -141,10 +141,10 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       baseX: number;
       baseY: number;
       z: number;
-      vx: number;
-      vy: number;
-      baseVx: number;
-      baseVy: number;
+      vx?: number;
+      vy?: number;
+      baseVx?: number;
+      baseVy?: number;
       driftVx: number;
       driftVy: number;
       repelVx: number;
@@ -253,6 +253,10 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
           baseX: x,
           baseY: y,
           z: random(0.2, 2.0),
+          vx: initialVx,
+          vy: initialVy,
+          baseVx: initialVx,
+          baseVy: initialVy,
           driftVx: random(-0.15, 0.15),
           driftVy: random(-0.15, 0.15),
           repelVx: 0,
@@ -441,36 +445,30 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       ctx.lineTo(width + 60, height + 60);
       ctx.closePath();
 
-      // Deep dark terrain floor:
-      // Seamlessly matches the dark space background at the horizon (horizonBase)
-      // so in the flat area there is no sharp boundary line between the sky and the ground.
-      // In the foreground, it deepens to pure midnight obsidian black (rgba(2, 3, 8, 1.0)).
       const floorFill = ctx.createLinearGradient(0, horizonBase - height * 0.25, 0, floorBottom);
-      floorFill.addColorStop(0, `rgba(7, 11, 19, 0.95)`);
-      floorFill.addColorStop(0.35, `rgba(5, 8, 16, 0.98)`);
-      floorFill.addColorStop(0.70, `rgba(3, 5, 12, 0.99)`);
-      floorFill.addColorStop(1, `rgba(2, 3, 8, 1.0)`);
+      floorFill.addColorStop(0, `rgba(${Math.round(dr * 0.25 + 6)}, ${Math.round(dg * 0.25 + 8)}, ${Math.round(db * 0.25 + 20)}, 0.88)`);
+      floorFill.addColorStop(0.35, `rgba(${Math.round(dr * 0.15 + 4)}, ${Math.round(dg * 0.15 + 6)}, ${Math.round(db * 0.15 + 15)}, 0.94)`);
+      floorFill.addColorStop(0.70, `rgba(4, 6, 16, 0.98)`);
+      floorFill.addColorStop(1, `rgba(2, 4, 10, 1.0)`);
       ctx.fillStyle = floorFill;
       ctx.fill();
 
       // ─────────────────────────────────────────────────────
       // 2. LONGITUDINAL RAYS (Down the valley walls)
       //    Radiate down the slopes, crossing contour lines at
-      //    slanted angles to form distinct PARALLELOGRAM cells.
-      //    In the flat area, rays fade out smoothly toward the
-      //    horizon for the infinite perspective carpet effect.
+      //    slanted angles to form distinct PARALLELOGRAM cells
       // ─────────────────────────────────────────────────────
-      const rayGrad = ctx.createLinearGradient(0, horizonBase - height * 0.25, 0, height);
-      rayGrad.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0)`);
-      rayGrad.addColorStop(0.28, `rgba(${pr}, ${pg}, ${pb}, 0.05)`);
-      rayGrad.addColorStop(0.65, `rgba(${pr}, ${pg}, ${pb}, 0.22)`);
-      rayGrad.addColorStop(1, `rgba(${pr}, ${pg}, ${pb}, 0.40)`);
+      const rayGrad = ctx.createLinearGradient(0, horizonBase - 30, 0, height);
+      rayGrad.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0)`);       // Invisible at distant horizon for infinite depth
+      rayGrad.addColorStop(0.20, `rgba(${pr}, ${pg}, ${pb}, 0.10)`); // Gently emerges as rays approach
+      rayGrad.addColorStop(0.55, `rgba(${pr}, ${pg}, ${pb}, 0.24)`); // Visible in mid-valley
+      rayGrad.addColorStop(1, `rgba(${pr}, ${pg}, ${pb}, 0.38)`);    // Crisp and bright in foreground
 
       ctx.beginPath();
       for (let c = 0; c < NUM_COLS; c++) {
-        for (let r = 1; r < NUM_ROWS; r++) {
+        for (let r = 0; r < NUM_ROWS; r++) {
           const pt = grid[r][c];
-          if (r === 1) {
+          if (r === 0) {
             ctx.moveTo(pt.x, pt.y);
           } else {
             ctx.lineTo(pt.x, pt.y);
@@ -483,15 +481,13 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
 
       // ─────────────────────────────────────────────────────
       // 3. TRANSVERSE CONTOUR LINES (Across the valley)
-      //    Follow the concave valley curves.
-      //    Near the horizon (rowT -> 0), lines fade out completely
-      //    so the floor feels like it extends infinitely into the distance.
+      //    Follow the concave valley curves, smoothly fading
+      //    towards the horizon to create the infinite carpet effect
       // ─────────────────────────────────────────────────────
-      for (let r = 2; r < NUM_ROWS; r++) {
+      for (let r = 1; r < NUM_ROWS; r++) {
         const rowT = grid[r][0].rowT;
-        // Exponential fade toward the horizon for the infinite floor effect
-        const alpha = 0.40 * Math.pow(rowT, 1.6);
-        if (alpha < 0.012) continue;
+        // Smooth perspective fade towards horizon so the flat valley feels infinite
+        const alpha = Math.min(0.38 * Math.pow(rowT, 1.25), 0.42);
 
         ctx.beginPath();
         for (let c = 0; c < NUM_COLS; c++) {
@@ -508,116 +504,75 @@ const EnterpriseBackground: React.FC<EnterpriseBackgroundProps> = ({ role = "adm
       }
 
       // ─────────────────────────────────────────────────────
-      // 4. TOP RIDGE CREST - GLOWING LUMINOUS HILL CURVES
-      //    ONLY the curved hill areas glow (left hill & right hill).
-      //    The flat valley floor does NOT glow and has NO line,
-      //    allowing the grid to recede into infinity seamlessly.
+      // 4. TOP RIDGE CREST - GLOWING LUMINOUS HILL CURVE
+      //    Only the curve (hill) areas glow; the flat central
+      //    valley has 0 glow so it feels like it is infinitely
+      //    going into deep space. The glow slowly disappears
+      //    as the hill slope descends to the valley floor.
       // ─────────────────────────────────────────────────────
-      // Detect left hill curve boundaries (where hill is elevated above baseline)
-      let leftEndCol = 0;
+      // Wide bloom pass for the glowing mountain crest
+      ctx.beginPath();
       for (let c = 0; c < NUM_COLS; c++) {
-        const colFrac = grid[0][c].colFrac;
-        if (colFrac < 0 && (horizonBase - grid[0][c].y) > 6) {
-          leftEndCol = c;
-        }
-      }
-      leftEndCol = Math.min(NUM_COLS - 1, leftEndCol + 1);
-
-      // Detect right hill curve boundaries
-      let rightStartCol = NUM_COLS - 1;
-      for (let c = NUM_COLS - 1; c >= 0; c--) {
-        const colFrac = grid[0][c].colFrac;
-        if (colFrac > 0 && (horizonBase - grid[0][c].y) > 6) {
-          rightStartCol = c;
-        }
-      }
-      rightStartCol = Math.max(0, rightStartCol - 1);
-
-      // Render glowing left hill curve (peaks around the left-side pills)
-      if (leftEndCol > 2) {
-        const xStart = grid[0][0].x;
-        const xEnd = grid[0][leftEndCol].x;
-
-        // Wide bloom pass along the curve
-        ctx.beginPath();
-        for (let c = 0; c <= leftEndCol; c++) {
-          const pt = grid[0][c];
-          if (c === 0) ctx.moveTo(pt.x, pt.y);
-          else ctx.lineTo(pt.x, pt.y);
-        }
-
-        const bloomGrad = ctx.createLinearGradient(xStart, 0, xEnd, 0);
-        bloomGrad.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0.85)`);
-        bloomGrad.addColorStop(0.35, `rgba(${pr}, ${pg}, ${pb}, 0.95)`); // Glowing hill peak
-        bloomGrad.addColorStop(0.75, `rgba(${pr}, ${pg}, ${pb}, 0.45)`);
-        bloomGrad.addColorStop(1, `rgba(${pr}, ${pg}, ${pb}, 0)`); // Vanishes into the floor
-
-        ctx.strokeStyle = bloomGrad;
-        ctx.lineWidth = 6;
-        ctx.filter = "blur(4px)";
-        ctx.stroke();
-        ctx.filter = "none";
-
-        // Crisp specular wire along the curve
-        ctx.beginPath();
-        for (let c = 0; c <= leftEndCol; c++) {
-          const pt = grid[0][c];
-          if (c === 0) ctx.moveTo(pt.x, pt.y);
-          else ctx.lineTo(pt.x, pt.y);
-        }
-
-        const specularGrad = ctx.createLinearGradient(xStart, 0, xEnd, 0);
-        specularGrad.addColorStop(0, `rgba(${lr}, ${lg}, ${lb}, 0.95)`);
-        specularGrad.addColorStop(0.35, `rgba(${lr}, ${lg}, ${lb}, 1.0)`);
-        specularGrad.addColorStop(0.75, `rgba(${lr}, ${lg}, ${lb}, 0.60)`);
-        specularGrad.addColorStop(1, `rgba(${lr}, ${lg}, ${lb}, 0)`); // Vanishes into the floor
-
-        ctx.strokeStyle = specularGrad;
-        ctx.lineWidth = 1.8;
-        ctx.stroke();
+        const pt = grid[0][c];
+        if (c === 0) ctx.moveTo(pt.x, pt.y);
+        else ctx.lineTo(pt.x, pt.y);
       }
 
-      // Render glowing right hill curve (only if elevated and separated from left curve)
-      if (rightStartCol < NUM_COLS - 2 && rightStartCol > leftEndCol) {
-        const xStart = grid[0][rightStartCol].x;
-        const xEnd = grid[0][NUM_COLS - 1].x;
+      const bloomGrad = ctx.createLinearGradient(0, 0, width, 0);
+      // Left hill curve: glowing crest slowly and smoothly disappearing down the slope
+      bloomGrad.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0.85)`);
+      bloomGrad.addColorStop(0.18, `rgba(${pr}, ${pg}, ${pb}, 0.95)`); // Peak of left hill
+      bloomGrad.addColorStop(0.28, `rgba(${pr}, ${pg}, ${pb}, 0.60)`); // Descending left slope
+      bloomGrad.addColorStop(0.35, `rgba(${pr}, ${pg}, ${pb}, 0.22)`); // Slowly fading
+      bloomGrad.addColorStop(0.40, `rgba(${pr}, ${pg}, ${pb}, 0.05)`); // Almost reached valley floor
+      bloomGrad.addColorStop(0.43, `rgba(${pr}, ${pg}, ${pb}, 0)`);    // Completely 0 before flat valley
 
-        // Wide bloom pass along the curve
-        ctx.beginPath();
-        for (let c = rightStartCol; c < NUM_COLS; c++) {
-          const pt = grid[0][c];
-          if (c === rightStartCol) ctx.moveTo(pt.x, pt.y);
-          else ctx.lineTo(pt.x, pt.y);
-        }
+      // Flat valley area: ABSOLUTELY ZERO GLOW (infinitely receding expanse)
+      bloomGrad.addColorStop(0.60, `rgba(${pr}, ${pg}, ${pb}, 0)`);    // Zero throughout flat valley
 
-        const bloomGrad = ctx.createLinearGradient(xStart, 0, xEnd, 0);
-        bloomGrad.addColorStop(0, `rgba(${pr}, ${pg}, ${pb}, 0)`); // Starts from 0 at the floor
-        bloomGrad.addColorStop(0.35, `rgba(${pr}, ${pg}, ${pb}, 0.40)`);
-        bloomGrad.addColorStop(1, `rgba(${pr}, ${pg}, ${pb}, 0.80)`);
+      // Right hill curve: slowly emerges and glows up the right slope
+      bloomGrad.addColorStop(0.63, `rgba(${pr}, ${pg}, ${pb}, 0.05)`); // Gently begins rising
+      bloomGrad.addColorStop(0.68, `rgba(${pr}, ${pg}, ${pb}, 0.22)`); // Ascending right slope
+      bloomGrad.addColorStop(0.78, `rgba(${pr}, ${pg}, ${pb}, 0.55)`); // Mid-right hill
+      bloomGrad.addColorStop(0.90, `rgba(${pr}, ${pg}, ${pb}, 0.80)`); // Approaching peak
+      bloomGrad.addColorStop(1.0, `rgba(${pr}, ${pg}, ${pb}, 0.90)`);  // Peak of right hill
 
-        ctx.strokeStyle = bloomGrad;
-        ctx.lineWidth = 6;
-        ctx.filter = "blur(4px)";
-        ctx.stroke();
-        ctx.filter = "none";
+      ctx.strokeStyle = bloomGrad;
+      ctx.lineWidth = 6;
+      ctx.filter = "blur(4px)";
+      ctx.stroke();
+      ctx.filter = "none";
 
-        // Crisp specular wire along the curve
-        ctx.beginPath();
-        for (let c = rightStartCol; c < NUM_COLS; c++) {
-          const pt = grid[0][c];
-          if (c === rightStartCol) ctx.moveTo(pt.x, pt.y);
-          else ctx.lineTo(pt.x, pt.y);
-        }
-
-        const specularGrad = ctx.createLinearGradient(xStart, 0, xEnd, 0);
-        specularGrad.addColorStop(0, `rgba(${lr}, ${lg}, ${lb}, 0)`); // Starts from 0 at the floor
-        specularGrad.addColorStop(0.35, `rgba(${lr}, ${lg}, ${lb}, 0.55)`);
-        specularGrad.addColorStop(1, `rgba(${lr}, ${lg}, ${lb}, 0.88)`);
-
-        ctx.strokeStyle = specularGrad;
-        ctx.lineWidth = 1.8;
-        ctx.stroke();
+      // Sharp glowing specular wire along the curve
+      ctx.beginPath();
+      for (let c = 0; c < NUM_COLS; c++) {
+        const pt = grid[0][c];
+        if (c === 0) ctx.moveTo(pt.x, pt.y);
+        else ctx.lineTo(pt.x, pt.y);
       }
+
+      const specularGrad = ctx.createLinearGradient(0, 0, width, 0);
+      // Left hill specular crest
+      specularGrad.addColorStop(0, `rgba(${lr}, ${lg}, ${lb}, 0.90)`);
+      specularGrad.addColorStop(0.18, `rgba(${lr}, ${lg}, ${lb}, 0.98)`); // Crisp peak
+      specularGrad.addColorStop(0.28, `rgba(${lr}, ${lg}, ${lb}, 0.65)`);
+      specularGrad.addColorStop(0.35, `rgba(${lr}, ${lg}, ${lb}, 0.25)`); // Slowly fading
+      specularGrad.addColorStop(0.40, `rgba(${lr}, ${lg}, ${lb}, 0.06)`);
+      specularGrad.addColorStop(0.43, `rgba(${lr}, ${lg}, ${lb}, 0)`);    // Zero at flat area
+
+      // Flat valley area: ZERO GLOW
+      specularGrad.addColorStop(0.60, `rgba(${lr}, ${lg}, ${lb}, 0)`);
+
+      // Right hill specular crest
+      specularGrad.addColorStop(0.63, `rgba(${lr}, ${lg}, ${lb}, 0.06)`);
+      specularGrad.addColorStop(0.68, `rgba(${lr}, ${lg}, ${lb}, 0.25)`);
+      specularGrad.addColorStop(0.78, `rgba(${lr}, ${lg}, ${lb}, 0.60)`);
+      specularGrad.addColorStop(0.90, `rgba(${lr}, ${lg}, ${lb}, 0.85)`);
+      specularGrad.addColorStop(1.0, `rgba(${lr}, ${lg}, ${lb}, 0.95)`);
+
+      ctx.strokeStyle = specularGrad;
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
 
       ctx.restore();
     };

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { UserRole, AuthStatus, ActiveField, RoleTheme } from "./auth.types";
+import { UserRole, AuthStatus, ActiveField, RoleTheme } from "../auth.types";
 
 export const roleThemes: Record<UserRole, RoleTheme> = {
   admin: {

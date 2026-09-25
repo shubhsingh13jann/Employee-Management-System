@@ -92,7 +92,7 @@ export const FloatingPill: React.FC<FloatingPillProps> = ({
 }) => {
   const [state, setState] = useState<PillState>('idle');
   const controls = useAnimation();
-  const stateTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const stateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pillRef = useRef<HTMLDivElement>(null);
   
   const x = useMotionValue(0);

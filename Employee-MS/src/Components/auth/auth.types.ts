@@ -1,6 +1,6 @@
 export type UserRole = "admin" | "manager" | "supervisor" | "employee";
 export type AuthStatus = "idle" | "submitting" | "success" | "error";
-export type ActiveField = "email" | "password" | null;
+export type ActiveField = "email" | "password" | "dept" | "phone" | null;
 
 export interface CharacterStageProps {
   mousePos?: { x: number; y: number };
