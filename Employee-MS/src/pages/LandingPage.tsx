@@ -979,17 +979,17 @@ const LandingPage = () => {
                                       onMouseEnter={() => setHoveredApproval(item.id)}
                                       onMouseLeave={() => setHoveredApproval(null)}
                                     >
-                                      <div className="flex items-center gap-1.5">
-                                        <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${item.badge} transition-all ${hoveredApproval === item.id ? "scale-110" : ""}`}>
-                                          <i className={`bi ${item.icon} text-[9.5px]`}></i>
+                                      <div className="flex items-center gap-2">
+                                        <div className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ${item.badge} transition-all ${hoveredApproval === item.id ? "scale-110" : ""}`}>
+                                          <i className={`bi ${item.icon} text-[11px]`}></i>
                                         </div>
                                         <div className="text-left flex flex-col justify-center">
-                                          <span className="font-bold text-gray-900 block leading-tight text-left" style={{ fontSize: "8.5px" }}>
+                                          <span className="font-bold text-gray-900 block leading-tight text-left" style={{ fontSize: "9.5px" }}>
                                             {item.title}
                                           </span>
-                                          <span className="text-slate-500 block leading-tight text-left" style={{ fontSize: "7px" }}>
+                                          <span className="text-slate-500 block leading-tight text-left mt-0.5" style={{ fontSize: "8px" }}>
                                             {approvedItems[item.id] ? (
-                                              <span className="text-green-600 font-bold" style={{ fontSize: "7px" }}>✓ Done</span>
+                                              <span className="text-green-600 font-bold" style={{ fontSize: "8px" }}>✓ Done</span>
                                             ) : (
                                               item.count
                                             )}
@@ -1004,13 +1004,13 @@ const LandingPage = () => {
                                             e.stopPropagation();
                                             setApprovedItems({ ...approvedItems, [item.id]: true });
                                           }}
-                                          className="py-0.5 px-1.5 rounded text-[7.5px] font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors inline-block text-center cursor-pointer shadow-2xs"
-                                          style={{ fontSize: "7.5px" }}
+                                          className="py-0.5 px-2 rounded text-[8px] font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors inline-block text-center cursor-pointer shadow-2xs"
+                                          style={{ fontSize: "8px" }}
                                         >
                                           Approve
                                         </button>
                                       ) : (
-                                        <i className="bi bi-chevron-right text-gray-500" style={{ fontSize: "8px" }}></i>
+                                        <i className="bi bi-chevron-right text-gray-500" style={{ fontSize: "8.5px" }}></i>
                                       )}
                                     </div>
                                   ))}
