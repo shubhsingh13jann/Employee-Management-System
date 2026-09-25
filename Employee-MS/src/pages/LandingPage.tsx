@@ -768,28 +768,28 @@ const LandingPage = () => {
                           {/* 4 Interactive Stat Cards with Colored Badges */}
                           <div className="grid grid-cols-4 gap-2">
                             {[
-                              { id: "employees", label: "Total Employees", val: "248", change: "↑ 12% last mo", icon: "bi-people", color: "purple" },
-                              { id: "departments", label: "Departments", val: "18", change: "↑ 2 new", icon: "bi-building", color: "blue" },
-                              { id: "projects", label: "Active Projects", val: "32", change: "↑ 8 active", icon: "bi-kanban", color: "green" },
-                              { id: "payroll", label: "Total Payroll", val: "$1.24M", change: "↑ 8.5% mo", icon: "bi-cash-stack", color: "orange" }
+                              { id: "employees", label: "Total Employees", val: "248", change: "↑ 12% last mo", icon: "bi-people-fill", badge: "bg-indigo-50 text-indigo-600 border border-indigo-100" },
+                              { id: "departments", label: "Departments", val: "18", change: "↑ 2 new", icon: "bi-building", badge: "bg-blue-50 text-blue-600 border border-blue-100" },
+                              { id: "projects", label: "Active Projects", val: "32", change: "↑ 8 active", icon: "bi-kanban", badge: "bg-emerald-50 text-emerald-600 border border-emerald-100" },
+                              { id: "payroll", label: "Total Payroll", val: "$1.24M", change: "↑ 8.5% mo", icon: "bi-cash-stack", badge: "bg-amber-50 text-amber-600 border border-amber-100" }
                             ].map((stat) => (
                               <div key={stat.id}>
                                 <div
                                   onClick={() => setSelectedStat(stat.id)}
-                                  className={`border-0 p-1.5 rounded-lg bg-white transition-all stat-card-interactive cursor-pointer ${
+                                  className={`p-2 rounded-lg bg-white transition-all stat-card-interactive cursor-pointer border border-slate-100 ${
                                     selectedStat === stat.id ? "stat-card-active shadow-md" : "shadow-xs"
                                   }`}
                                 >
                                   <div className="flex justify-between items-start">
                                     <div>
-                                      <small className="text-gray-500 font-semibold" style={{ fontSize: "9px" }}>{stat.label}</small>
+                                      <small className="text-gray-500 font-semibold block leading-none mb-1 text-[9px]">{stat.label}</small>
                                       <h6 className={`font-bold mb-0 text-slate-900 transition-all ${selectedStat === stat.id ? "text-blue-600 scale-105" : ""}`} style={{ fontSize: "13px" }}>
                                         {stat.val}
                                       </h6>
-                                      <small className="text-green-600 font-bold block" style={{ fontSize: "8px" }}>{stat.change}</small>
+                                      <small className="text-green-600 font-bold block mt-0.5 text-[8px]">{stat.change}</small>
                                     </div>
-                                    <div className={`p-1 rounded-full transition-all stat-icon-badge ${stat.color} ${selectedStat === stat.id ? "rotate-12 scale-110" : ""}`}>
-                                      <i className={`bi ${stat.icon}`} style={{ fontSize: "11px" }}></i>
+                                    <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all ${stat.badge} ${selectedStat === stat.id ? "rotate-12 scale-110" : ""}`}>
+                                      <i className={`bi ${stat.icon} text-xs`}></i>
                                     </div>
                                   </div>
                                 </div>
@@ -931,28 +931,28 @@ const LandingPage = () => {
                                   <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[7.5px] font-semibold bg-rose-500/10 text-rose-600" style={{ fontSize: "7.5px" }}>Action</span>
                                 </div>
 
-                                <div className="flex flex-col gap-1">
+                                <div className="flex flex-col gap-1.5">
                                   {[
-                                    { id: 1, title: "Leave Requests", count: "3 pending", icon: "bi-calendar-check", color: "text-rose-600 bg-rose-500" },
-                                    { id: 2, title: "Dept Changes", count: "1 pending", icon: "bi-diagram-3", color: "text-cyan-600 bg-cyan-500" },
-                                    { id: 3, title: "Team Assign", count: "1 pending", icon: "bi-person-badge", color: "text-blue-600 bg-blue-500" },
-                                    { id: 4, title: "Salary Approvals", count: "2 pending", icon: "bi-cash", color: "text-amber-600 bg-amber-500" }
+                                    { id: 1, title: "Leave Requests", count: "3 pending", icon: "bi-calendar-check", badge: "bg-rose-50 text-rose-600 border border-rose-100" },
+                                    { id: 2, title: "Dept Changes", count: "1 pending", icon: "bi-diagram-3", badge: "bg-cyan-50 text-cyan-600 border border-cyan-100" },
+                                    { id: 3, title: "Team Assign", count: "1 pending", icon: "bi-person-badge", badge: "bg-blue-50 text-blue-600 border border-blue-100" },
+                                    { id: 4, title: "Salary Approvals", count: "2 pending", icon: "bi-cash", badge: "bg-amber-50 text-amber-600 border border-amber-100" }
                                   ].map((item) => (
                                     <div
                                       key={item.id}
-                                      className={`flex justify-between items-center p-1 rounded transition-all cursor-pointer ${
-                                        hoveredApproval === item.id ? "bg-slate-50 shadow-2xs translate-x-1" : "bg-slate-50/50 border border-slate-100"
+                                      className={`flex justify-between items-center p-1.5 rounded transition-all cursor-pointer ${
+                                        hoveredApproval === item.id ? "bg-slate-50 shadow-2xs translate-x-0.5" : "bg-slate-50/60 border border-slate-100"
                                       }`}
                                       onMouseEnter={() => setHoveredApproval(item.id)}
                                       onMouseLeave={() => setHoveredApproval(null)}
                                     >
-                                      <div className="flex items-center gap-1">
-                                        <div className={`p-1 rounded ${item.color} bg-opacity-10 transition-all ${hoveredApproval === item.id ? "scale-110" : ""}`}>
-                                          <i className={`bi ${item.icon}`} style={{ fontSize: "9px" }}></i>
+                                      <div className="flex items-center gap-1.5">
+                                        <div className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ${item.badge} transition-all ${hoveredApproval === item.id ? "scale-110" : ""}`}>
+                                          <i className={`bi ${item.icon} text-[11px]`}></i>
                                         </div>
                                         <div>
-                                          <span className="font-bold text-gray-900 block leading-none" style={{ fontSize: "9px" }}>{item.title}</span>
-                                          <small className="text-gray-500" style={{ fontSize: "7.5px" }}>
+                                          <span className="font-bold text-gray-900 block leading-none text-[9px]">{item.title}</span>
+                                          <small className="text-gray-500 text-[7.5px]">
                                             {approvedItems[item.id] ? <span className="text-green-600 font-bold">✓ Done</span> : item.count}
                                           </small>
                                         </div>
