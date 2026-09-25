@@ -413,10 +413,10 @@ const LandingPage = () => {
     <div className="bg-slate-50 text-slate-900 landing-container relative" style={{ overflowX: "clip" }}>
       {/* 1. FIXED TOP NAVBAR - ALWAYS VISIBLE, NEVER DISAPPEARS (zIndex: 9999) */}
       <nav
-        className="navbar navbar-expand-lg py-2 px-6 px-lg-5 fixed-top bg-white bg-opacity-95 backdrop-blur border-b border-gray-200 border-light shadow-xs"
+        className="w-full py-2 px-6 lg:px-10 fixed top-0 left-0 right-0 bg-white/95 backdrop-blur border-b border-slate-200 shadow-xs flex items-center"
         style={{ height: "74px", zIndex: 9999 }}
       >
-        <div className="w-full px-6 p-0 flex justify-between items-center">
+        <div className="w-full flex justify-between items-center">
           {/* Brand Logo with 3D Tilt Hover */}
           <BrandLogo theme="light" />
 
@@ -496,17 +496,17 @@ const LandingPage = () => {
           }}
           className="bg-white w-full flex flex-col justify-center items-center overflow-y-auto"
         >
-          <div className="w-full h-full relative flex items-center justify-center px-6 px-lg-5 overflow-hidden hero-interactive-section">
+          <div className="w-full h-full relative flex items-center justify-center px-6 lg:px-10 overflow-hidden hero-interactive-section">
             <InteractiveBackground />
 
             <div className="ambient-orb orb-1"></div>
             <div className="ambient-orb orb-2"></div>
             <div className="ambient-orb orb-3"></div>
 
-            <div className="w-full px-6 p-0 relative z-1 my-auto">
-              <div className="flex flex-wrap -mx-4 items-center g-4">
+            <div className="w-full relative z-1 my-auto">
+              <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-center">
                 {/* Hero Content */}
-                <div className="w-full px-6 xl:w-5/12 px-6">
+                <div className="w-full xl:col-span-5">
                   <div className="inline-flex items-center gap-2 px-6 py-1.5 rounded-full bg-purple-soft text-purple-deep mb-6 border border-gray-200 border-gray-200 border-purple-subtle shadow-2xs hover-scale transition-all cursor-pointer">
                     <span className="pulse-dot"></span>
                     <span className="text-sm font-semibold">Trusted by 1000+ Organizations Worldwide</span>
@@ -541,7 +541,7 @@ const LandingPage = () => {
                       <button
                         type="button"
                         onClick={(e) => handleAuthNavigate("/signup", e)}
-                        className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-gradient-primary btn-lg px-6 py-2 rounded-lg font-bold inline-flex items-center gap-2 text-white shadow-md hero-btn"
+                        className="btn-gradient-primary px-6 py-2.5 rounded-lg font-bold inline-flex items-center gap-2 text-white shadow-md hero-btn cursor-pointer"
                       >
                         <span>Get Started Free</span>
                         <i className="bi bi-arrow-right"></i>
@@ -551,7 +551,7 @@ const LandingPage = () => {
                       <button
                         type="button"
                         onClick={() => handleNavToggle("roles-sec")}
-                        className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center border border-gray-200 border-gray-500 text-gray-500 hover:bg-gray-50 btn-lg px-6 py-2 rounded-lg font-semibold inline-flex items-center gap-2 hero-btn-secondary hover-lift"
+                        className="px-6 py-2.5 rounded-lg font-semibold inline-flex items-center gap-2 text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 hover:border-slate-400 transition-colors cursor-pointer hero-btn-secondary hover-lift"
                       >
                         <span>Explore Next Layer</span>
                         <i className="bi bi-arrow-down text-base"></i>
@@ -560,19 +560,19 @@ const LandingPage = () => {
                   </div>
 
                   {/* 3 Value Pillars */}
-                  <div className="flex flex-wrap -mx-4 g-2 pt-2 border-t border-gray-200 border-light">
+                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200">
                     {[
-                      { title: "Enterprise Secure", desc: "Bank-level bcrypt & JWT security", icon: "bi-shield-check", color: "text-primary bg-purple-soft" },
-                      { title: "Smart Automation", desc: "Two-tier approvals & task sync", icon: "bi-lightning-charge-fill", color: "text-success bg-success bg-opacity-10" },
-                      { title: "People-Centric", desc: "Custom portals for every employee", icon: "bi-people-fill", color: "text-info bg-info bg-opacity-10" }
+                      { title: "Enterprise Secure", desc: "Bank-level bcrypt & JWT security", icon: "bi-shield-check", color: "text-blue-600 bg-indigo-50" },
+                      { title: "Smart Automation", desc: "Two-tier approvals & task sync", icon: "bi-lightning-charge-fill", color: "text-emerald-600 bg-emerald-500/10" },
+                      { title: "People-Centric", desc: "Custom portals for every employee", icon: "bi-people-fill", color: "text-cyan-600 bg-cyan-500/10" }
                     ].map((pillar) => (
-                      <div key={pillar.title} className="w-1/3 px-6">
+                      <div key={pillar.title}>
                         <motion.div
                           whileHover={{ y: -3, scale: 1.02 }}
-                          className="flex align-items-start gap-1.5 p-1 rounded-lg hover-bg transition-all cursor-pointer"
+                          className="flex items-start gap-1.5 p-1 rounded-lg hover-bg transition-all cursor-pointer"
                         >
-                          <div className={`p-1.5 rounded-2 shadow-2xs ${pillar.color}`}>
-                            <i className={`bi ${pillar.icon} fs-6`}></i>
+                          <div className={`p-1.5 rounded-md shadow-2xs ${pillar.color}`}>
+                            <i className={`bi ${pillar.icon} text-sm`}></i>
                           </div>
                           <div>
                             <h6 className="font-bold mb-0 text-gray-900" style={{ fontSize: "11px" }}>{pillar.title}</h6>
@@ -585,7 +585,7 @@ const LandingPage = () => {
                 </div>
 
                 {/* COMPLETE, ADVANCED, FULLY-DETAILED 3D LIVING DASHBOARD SHOWCASE */}
-                <div className="w-full px-6 xl:w-7/12 px-6" id="showcase">
+                <div className="w-full xl:col-span-7" id="showcase">
                   <div className="showcase-3d-wrapper relative">
                     {/* Floating Interactive Tag - Positively Anchored on the Left */}
                     <div
@@ -610,7 +610,7 @@ const LandingPage = () => {
                           ? "scale 0.25s ease-out"
                           : "scale 0.4s ease-out, rotateX 0.4s ease-out, rotateY 0.4s ease-out"
                       }}
-                      className={`showcase-dashboard-card rounded-4 shadow-2xl overflow-hidden border border-slate-200 bg-white position-relative ${
+                      className={`showcase-dashboard-card rounded-2xl shadow-2xl overflow-hidden border border-slate-200 bg-white relative ${
                         !isHoveredShowcase ? "omni-floating" : ""
                       }`}
                     >
@@ -644,10 +644,10 @@ const LandingPage = () => {
                                       e.stopPropagation();
                                       setActiveSidebarTab(item.name);
                                     }}
-                                    className={`w-100 text-start d-flex align-items-center gap-2 px-2 py-1 rounded-2 text-white border-0 transition-all ${
+                                    className={`w-full text-left flex items-center gap-2 px-2 py-1 rounded-md text-white border-0 transition-all ${
                                       activeSidebarTab === item.name
-                                        ? "bg-primary fw-bold shadow-xs scale-102"
-                                        : "bg-transparent text-white-50 hover-light"
+                                        ? "bg-blue-600 font-bold shadow-xs scale-102"
+                                        : "bg-transparent text-white/60 hover:bg-white/10"
                                     }`}
                                     style={{ fontSize: "10.5px" }}
                                   >
@@ -666,9 +666,9 @@ const LandingPage = () => {
                                 <span className="pulse-dot-green"></span>
                                 <small className="text-white font-semibold" style={{ fontSize: "9.5px" }}>System Status</small>
                               </div>
-                              <span className="badge bg-green-600 bg-opacity-25 text-green-600 text-sm" style={{ fontSize: "8px" }}>Live</span>
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-semibold bg-emerald-500/20 text-emerald-400" style={{ fontSize: "8px" }}>Live</span>
                             </div>
-                            <small className="text-white-50 block mt-0.5" style={{ fontSize: "8.5px" }}>
+                            <small className="text-white/60 block mt-0.5" style={{ fontSize: "8.5px" }}>
                               All 4 services operational • {currentTime}
                             </small>
                           </div>
@@ -677,7 +677,7 @@ const LandingPage = () => {
                         {/* Mock Main Dashboard Body */}
                         <div className="mock-body flex-grow-1 p-6 bg-slate-50 overflow-hidden flex flex-col gap-2.5 relative">
                           {/* Interactive Topbar */}
-                          <div className="flex justify-between items-center pb-2 border-b border-gray-200 border-light">
+                          <div className="flex justify-between items-center pb-2 border-b border-slate-200">
                             <div>
                               <h6 className="font-bold mb-0 text-gray-900 flex items-center gap-1.5" style={{ fontSize: "12.5px" }}>
                                 {getGreeting()}, Shubh Singh! 👋
@@ -716,7 +716,7 @@ const LandingPage = () => {
                               >
                                 <i className="bi bi-bell text-gray-600 text-sm"></i>
                                 {unreadNotifs > 0 && (
-                                  <span className="absolute top-0 left-full -translate-x-1/2 -translate-y-1/2 badge rounded-full bg-red-600" style={{ fontSize: "7px" }}>
+                                  <span className="absolute top-0 left-full -translate-x-1/2 -translate-y-1/2 inline-flex items-center justify-center px-1 py-0.5 min-w-[14px] rounded-full bg-rose-600 text-white font-bold leading-none" style={{ fontSize: "7px" }}>
                                     {unreadNotifs}
                                   </span>
                                 )}
@@ -724,7 +724,7 @@ const LandingPage = () => {
                                 {/* Notification Popup Dropdown */}
                                 {notifOpen && (
                                   <div
-                                    className="absolute top-100 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 border-gray-200 border-light p-2.5 text-left animate-fade-in"
+                                    className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl border border-slate-200 p-2.5 text-left animate-fade-in"
                                     style={{ width: "220px", zIndex: 100 }}
                                     onClick={(e) => e.stopPropagation()}
                                   >
@@ -766,29 +766,29 @@ const LandingPage = () => {
                           </div>
 
                           {/* 4 Interactive Stat Cards with Colored Badges */}
-                          <div className="flex flex-wrap -mx-4 g-2">
+                          <div className="grid grid-cols-4 gap-2">
                             {[
                               { id: "employees", label: "Total Employees", val: "248", change: "↑ 12% last mo", icon: "bi-people", color: "purple" },
                               { id: "departments", label: "Departments", val: "18", change: "↑ 2 new", icon: "bi-building", color: "blue" },
                               { id: "projects", label: "Active Projects", val: "32", change: "↑ 8 active", icon: "bi-kanban", color: "green" },
                               { id: "payroll", label: "Total Payroll", val: "$1.24M", change: "↑ 8.5% mo", icon: "bi-cash-stack", color: "orange" }
                             ].map((stat) => (
-                              <div key={stat.id} className="col-3">
+                              <div key={stat.id}>
                                 <div
                                   onClick={() => setSelectedStat(stat.id)}
-                                  className={`card border-0 p-1.5 rounded-3 bg-white transition-all stat-card-interactive ${
+                                  className={`border-0 p-1.5 rounded-lg bg-white transition-all stat-card-interactive cursor-pointer ${
                                     selectedStat === stat.id ? "stat-card-active shadow-md" : "shadow-xs"
                                   }`}
                                 >
-                                  <div className="flex justify-between align-items-start">
+                                  <div className="flex justify-between items-start">
                                     <div>
                                       <small className="text-gray-500 font-semibold" style={{ fontSize: "9px" }}>{stat.label}</small>
-                                      <h6 className={`fw-bold mb-0 text-dark transition-all ${selectedStat === stat.id ? "text-primary scale-105" : ""}`} style={{ fontSize: "13px" }}>
+                                      <h6 className={`font-bold mb-0 text-slate-900 transition-all ${selectedStat === stat.id ? "text-blue-600 scale-105" : ""}`} style={{ fontSize: "13px" }}>
                                         {stat.val}
                                       </h6>
                                       <small className="text-green-600 font-bold block" style={{ fontSize: "8px" }}>{stat.change}</small>
                                     </div>
-                                    <div className={`p-1 rounded-circle transition-all stat-icon-badge ${stat.color} ${selectedStat === stat.id ? "rotate-12 scale-110" : ""}`}>
+                                    <div className={`p-1 rounded-full transition-all stat-icon-badge ${stat.color} ${selectedStat === stat.id ? "rotate-12 scale-110" : ""}`}>
                                       <i className={`bi ${stat.icon}`} style={{ fontSize: "11px" }}></i>
                                     </div>
                                   </div>
@@ -798,14 +798,14 @@ const LandingPage = () => {
                           </div>
 
                           {/* Middle Row: Full Area Chart + Pending Approvals */}
-                          <div className="flex flex-wrap -mx-4 g-2">
+                          <div className="grid grid-cols-12 gap-2">
                             {/* Workforce Overview Chart Card */}
-                            <div className="col-8">
+                            <div className="col-span-8">
                               <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col border-0 shadow-xs p-2 rounded-lg bg-white h-full transition-all chart-container-card chart-card-glow">
                                 <div className="flex justify-between items-center mb-1">
                                   <div className="flex items-center gap-1.5">
                                     <h6 className="font-bold mb-0 text-gray-900" style={{ fontSize: "11px" }}>Workforce Overview</h6>
-                                    <span className="badge bg-purple-soft text-blue-600 animate-fade-in" style={{ fontSize: "8px" }}>
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-semibold bg-indigo-50 text-indigo-600 animate-fade-in" style={{ fontSize: "8px" }}>
                                       ● {activePt.label}: {activePt.count} Staff ({activePt.change})
                                     </span>
                                   </div>
@@ -821,8 +821,8 @@ const LandingPage = () => {
                                           setGraphTimeframe(tf);
                                           setHoveredGraphPoint(null);
                                         }}
-                                        className={`btn btn-xs py-0 px-1 border-0 rounded ${
-                                          graphTimeframe === tf ? "bg-white fw-bold text-primary shadow-xs" : "text-muted"
+                                        className={`py-0.5 px-1.5 rounded text-[8px] transition-colors cursor-pointer ${
+                                          graphTimeframe === tf ? "bg-white font-bold text-blue-600 shadow-xs" : "text-slate-500 hover:text-slate-800"
                                         }`}
                                         style={{ fontSize: "8px" }}
                                       >
@@ -903,14 +903,14 @@ const LandingPage = () => {
                                 </div>
 
                                 {/* 4 Mini metrics at bottom of chart */}
-                                <div className="flex flex-wrap -mx-4 g-1 pt-1.5 border-t border-gray-200 border-light">
+                                <div className="grid grid-cols-4 gap-1.5 pt-1.5 border-t border-slate-200">
                                   {[
-                                    { title: "New Hires", val: "15", badge: "↑ 28%", badgeColor: "text-success" },
-                                    { title: "Attrition", val: "2.4%", badge: "↓ 0.8%", badgeColor: "text-danger" },
-                                    { title: "Avg. Tenure", val: "2.8 Yrs", badge: "↑ 0.6", badgeColor: "text-primary" },
-                                    { title: "Satisfaction", val: "4.6/5", badge: "★ 0.3", badgeColor: "text-success" }
+                                    { title: "New Hires", val: "15", badge: "↑ 28%", badgeColor: "text-emerald-600" },
+                                    { title: "Attrition", val: "2.4%", badge: "↓ 0.8%", badgeColor: "text-rose-600" },
+                                    { title: "Avg. Tenure", val: "2.8 Yrs", badge: "↑ 0.6", badgeColor: "text-blue-600" },
+                                    { title: "Satisfaction", val: "4.6/5", badge: "★ 0.3", badgeColor: "text-emerald-600" }
                                   ].map((m) => (
-                                    <div key={m.title} className="col-3">
+                                    <div key={m.title}>
                                       <div className="p-0.5 bg-gray-50 rounded text-center transition-all hover-lift cursor-pointer">
                                         <small className="text-gray-500 block" style={{ fontSize: "7.5px" }}>{m.title}</small>
                                         <strong className="text-gray-900 block" style={{ fontSize: "9.5px" }}>
@@ -924,24 +924,24 @@ const LandingPage = () => {
                             </div>
 
                             {/* Pending Approvals Card with Instant Action */}
-                            <div className="w-1/3 px-6">
+                            <div className="col-span-4">
                               <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col border-0 shadow-xs p-2 rounded-lg bg-white h-full">
                                 <div className="flex justify-between items-center mb-1.5">
                                   <h6 className="font-bold mb-0 text-gray-900" style={{ fontSize: "11px" }}>Pending Approvals</h6>
-                                  <span className="badge bg-red-600 bg-opacity-10 text-red-600 text-sm" style={{ fontSize: "7.5px" }}>Action</span>
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[7.5px] font-semibold bg-rose-500/10 text-rose-600" style={{ fontSize: "7.5px" }}>Action</span>
                                 </div>
 
                                 <div className="flex flex-col gap-1">
                                   {[
-                                    { id: 1, title: "Leave Requests", count: "3 pending", icon: "bi-calendar-check", color: "text-danger bg-danger" },
-                                    { id: 2, title: "Dept Changes", count: "1 pending", icon: "bi-diagram-3", color: "text-info bg-info" },
-                                    { id: 3, title: "Team Assign", count: "1 pending", icon: "bi-person-badge", color: "text-primary bg-primary" },
-                                    { id: 4, title: "Salary Approvals", count: "2 pending", icon: "bi-cash", color: "text-warning bg-warning" }
+                                    { id: 1, title: "Leave Requests", count: "3 pending", icon: "bi-calendar-check", color: "text-rose-600 bg-rose-500" },
+                                    { id: 2, title: "Dept Changes", count: "1 pending", icon: "bi-diagram-3", color: "text-cyan-600 bg-cyan-500" },
+                                    { id: 3, title: "Team Assign", count: "1 pending", icon: "bi-person-badge", color: "text-blue-600 bg-blue-500" },
+                                    { id: 4, title: "Salary Approvals", count: "2 pending", icon: "bi-cash", color: "text-amber-600 bg-amber-500" }
                                   ].map((item) => (
                                     <div
                                       key={item.id}
-                                      className={`d-flex justify-content-between align-items-center p-1 rounded transition-all cursor-pointer ${
-                                        hoveredApproval === item.id ? "bg-light shadow-2xs translate-x-2" : "bg-light border border-light"
+                                      className={`flex justify-between items-center p-1 rounded transition-all cursor-pointer ${
+                                        hoveredApproval === item.id ? "bg-slate-50 shadow-2xs translate-x-1" : "bg-slate-50/50 border border-slate-100"
                                       }`}
                                       onMouseEnter={() => setHoveredApproval(item.id)}
                                       onMouseLeave={() => setHoveredApproval(null)}
@@ -965,7 +965,7 @@ const LandingPage = () => {
                                             e.stopPropagation();
                                             setApprovedItems({ ...approvedItems, [item.id]: true });
                                           }}
-                                          className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-xs bg-blue-600 text-white hover:bg-blue-700 py-0 px-1 rounded text-sm"
+                                          className="py-0.5 px-1.5 rounded text-[7.5px] font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors inline-block text-center cursor-pointer shadow-2xs"
                                           style={{ fontSize: "7.5px" }}
                                         >
                                           Approve
@@ -986,33 +986,33 @@ const LandingPage = () => {
                               <div className="flex items-center gap-1.5">
                                 <h6 className="font-bold mb-0 text-gray-900" style={{ fontSize: "11px" }}>Top Departments</h6>
                                 {hoveredDept && (
-                                  <span className="badge bg-blue-600 bg-opacity-10 text-blue-600 animate-fade-in" style={{ fontSize: "8px" }}>
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-semibold bg-blue-500/10 text-blue-600 animate-fade-in">
                                     {hoveredDept.name}: {hoveredDept.count} ({hoveredDept.pct}%)
                                   </span>
                                 )}
                               </div>
-                              <span className="text-blue-600 text-sm font-semibold cursor-pointer hover-underline" style={{ fontSize: "9px" }}>View All 18</span>
+                              <span className="text-blue-600 text-sm font-semibold cursor-pointer hover:underline" style={{ fontSize: "9px" }}>View All 18</span>
                             </div>
 
-                            <div className="flex flex-wrap -mx-4 items-center">
+                            <div className="grid grid-cols-12 gap-2 items-center">
                               {/* PROGRESS BARS WITH VIBRANT SHIMMER */}
-                              <div className="col-8">
+                              <div className="col-span-8">
                                 <div className="flex flex-col gap-1">
                                   {filteredDepts.map((d) => (
                                     <div
                                       key={d.name}
-                                      className={`d-flex align-items-center gap-2 p-0.5 rounded transition-all cursor-pointer ${
+                                      className={`flex items-center gap-2 p-0.5 rounded transition-all cursor-pointer ${
                                         hoveredDept?.name === d.name ? "bg-slate-100 shadow-2xs" : ""
                                       }`}
                                       onMouseEnter={() => setHoveredDept(d)}
                                       onMouseLeave={() => setHoveredDept(null)}
                                     >
-                                      <small className={`text-truncate transition-all ${hoveredDept?.name === d.name ? "fw-bold text-dark" : "text-muted"}`} style={{ width: "90px", fontSize: "9px" }}>
+                                      <small className={`truncate transition-all ${hoveredDept?.name === d.name ? "font-bold text-slate-900" : "text-slate-500"}`} style={{ width: "90px", fontSize: "9px" }}>
                                         {d.name}
                                       </small>
-                                      <div className="progress flex-grow-1 relative overflow-hidden" style={{ height: hoveredDept?.name === d.name ? "7px" : "5px", transition: "height 0.25s ease" }}>
+                                      <div className="flex-1 bg-slate-100 rounded-full overflow-hidden relative" style={{ height: hoveredDept?.name === d.name ? "7px" : "5px", transition: "height 0.25s ease" }}>
                                         <div
-                                          className={`progress-bar ${d.color} ${hoveredDept?.name === d.name ? "progress-bar-glow progress-bar-striped progress-bar-animated" : ""}`}
+                                          className={`h-full rounded-full transition-all duration-300 ${d.color} ${hoveredDept?.name === d.name ? "progress-bar-glow progress-bar-striped progress-bar-animated" : ""}`}
                                           style={{
                                             width: `${(d.count / 86) * 100}%`,
                                             boxShadow: hoveredDept?.name === d.name ? `0 0 10px ${d.glow}` : "none",
@@ -1020,7 +1020,7 @@ const LandingPage = () => {
                                           }}
                                         ></div>
                                       </div>
-                                      <small className={`fw-bold transition-all ${hoveredDept?.name === d.name ? "text-primary scale-110" : "text-dark"}`} style={{ width: "20px", fontSize: "9px" }}>
+                                      <small className={`font-bold transition-all ${hoveredDept?.name === d.name ? "text-blue-600 scale-110" : "text-slate-900"}`} style={{ width: "20px", fontSize: "9px" }}>
                                         {d.count}
                                       </small>
                                     </div>
@@ -1029,7 +1029,7 @@ const LandingPage = () => {
                               </div>
 
                               {/* SEGMENTED INTERACTIVE DONUT CHART */}
-                              <div className="w-1/3 px-6 text-center">
+                              <div className="col-span-4 text-center">
                                 <div
                                   className="relative inline-block transition-all cursor-pointer donut-interactive-wrapper"
                                   onMouseEnter={() => setHoveredDonutSegment("Total")}
@@ -1116,10 +1116,10 @@ const LandingPage = () => {
           }}
           className="bg-white w-full flex flex-col justify-center items-center overflow-y-auto"
         >
-          <div className="w-full h-full flex flex-col justify-center items-center px-6 px-lg-5 my-auto">
-            <div className="w-full px-6 p-0 max-w-5xl">
+          <div className="w-full h-full flex flex-col justify-center items-center px-6 lg:px-10 my-auto">
+            <div className="w-full max-w-5xl">
               <div className="text-center mx-auto mb-6">
-                <span className="badge bg-purple-soft text-purple-deep px-6 py-1 rounded-full text-uppercase font-bold mb-2 tracking-wider" style={{ fontSize: "11px" }}>
+                <span className="inline-flex items-center px-4 py-1 rounded-full uppercase font-bold text-[11px] tracking-wider mb-2 bg-indigo-50 text-indigo-700" style={{ fontSize: "11px" }}>
                   4-TIER WORKFORCE ARCHITECTURE
                 </span>
                 <h2 className="font-extrabold text-gray-900 tracking-tight mb-1">Dedicated Dashboards for Every Corporate Tier</h2>
@@ -1137,8 +1137,8 @@ const LandingPage = () => {
                       key={r.id}
                       type="button"
                       onClick={() => setActiveRoleTab(r.id)}
-                      className={`btn btn-sm rounded-pill px-3 py-1.5 fw-semibold position-relative z-1 transition-all ${
-                        activeRoleTab === r.id ? "text-white" : "text-muted hover-text-dark"
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold relative z-1 transition-all cursor-pointer ${
+                        activeRoleTab === r.id ? "text-white" : "text-slate-500 hover:text-slate-900"
                       }`}
                       style={{ fontSize: "12px", border: "none" }}
                     >
@@ -1354,10 +1354,10 @@ const LandingPage = () => {
           }}
           className="bg-slate-50 w-full flex flex-col justify-center items-center overflow-y-auto"
         >
-          <div className="w-full h-full flex flex-col justify-center items-center px-6 px-lg-5 my-auto">
-            <div className="w-full px-6 p-0 max-w-4xl">
+          <div className="w-full h-full flex flex-col justify-center items-center px-6 lg:px-10 my-auto">
+            <div className="w-full max-w-4xl">
               <div className="text-center mx-auto mb-6">
-                <span className="badge bg-green-600 bg-opacity-10 text-green-600 px-6 py-1 rounded-full text-uppercase font-bold mb-2 tracking-wider" style={{ fontSize: "11px" }}>
+                <span className="inline-flex items-center px-4 py-1 rounded-full uppercase font-bold text-[11px] tracking-wider mb-2 bg-emerald-500/10 text-emerald-700" style={{ fontSize: "11px" }}>
                   INTERACTIVE ROI CALCULATOR
                 </span>
                 <h2 className="font-extrabold text-gray-900 tracking-tight mb-1">Quantify Your Operational Capital Savings</h2>
@@ -1368,7 +1368,7 @@ const LandingPage = () => {
                 <div className="mb-6">
                   <div className="flex justify-between items-center mb-2">
                     <label className="font-bold text-gray-900 text-base">Current Headcount</label>
-                    <span className="badge bg-blue-600 text-base px-6 py-1.5 rounded-full">{employeeCount} Employees</span>
+                    <span className="inline-flex items-center text-sm font-bold px-4 py-1 rounded-full bg-blue-600 text-white shadow-xs">{employeeCount} Employees</span>
                   </div>
                   <input
                     type="range"
@@ -1377,7 +1377,7 @@ const LandingPage = () => {
                     step="5"
                     value={employeeCount}
                     onChange={(e) => setEmployeeCount(Number(e.target.value))}
-                    className="form-range calc-slider w-full"
+                    className="calc-slider w-full cursor-pointer"
                   />
                   <div className="flex justify-between text-gray-500 text-sm mt-1">
                     <span>10 staff</span>
@@ -1428,10 +1428,10 @@ const LandingPage = () => {
           }}
           className="bg-white w-full flex flex-col justify-center items-center overflow-y-auto"
         >
-          <div className="w-full h-full flex flex-col justify-center items-center px-6 px-lg-5 my-auto">
-            <div className="w-full px-6 p-0 max-w-6xl">
+          <div className="w-full h-full flex flex-col justify-center items-center px-6 lg:px-10 my-auto">
+            <div className="w-full max-w-6xl">
               <div className="text-center mx-auto mb-6">
-                <span className="badge bg-purple-soft text-purple-deep px-6 py-1 rounded-full text-uppercase font-bold mb-2 tracking-wider" style={{ fontSize: "11px" }}>
+                <span className="inline-flex items-center px-4 py-1 rounded-full uppercase font-bold text-[11px] tracking-wider mb-2 bg-indigo-50 text-indigo-700" style={{ fontSize: "11px" }}>
                   ENTERPRISE PLATFORM
                 </span>
                 <h2 className="font-extrabold text-gray-900 tracking-tight mb-1">Everything You Need to Scale Operations</h2>
@@ -1486,10 +1486,10 @@ const LandingPage = () => {
           }}
           className="bg-slate-50 w-full flex flex-col justify-center items-center overflow-y-auto"
         >
-          <div className="w-full h-full flex flex-col justify-center items-center px-6 px-lg-5 my-auto">
-            <div className="w-full px-6 p-0 max-w-4xl">
+          <div className="w-full h-full flex flex-col justify-center items-center px-6 lg:px-10 my-auto">
+            <div className="w-full max-w-4xl">
               <div className="text-center mx-auto mb-6">
-                <span className="badge bg-info bg-opacity-10 text-info px-6 py-1 rounded-full text-uppercase font-bold mb-2 tracking-wider" style={{ fontSize: "11px" }}>
+                <span className="inline-flex items-center px-4 py-1 rounded-full uppercase font-bold text-[11px] tracking-wider mb-2 bg-cyan-500/10 text-cyan-700" style={{ fontSize: "11px" }}>
                   COMMON QUESTIONS
                 </span>
                 <h2 className="font-extrabold text-gray-900 tracking-tight mb-1">Frequently Asked Questions</h2>

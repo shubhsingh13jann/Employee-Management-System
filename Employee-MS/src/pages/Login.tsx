@@ -632,10 +632,10 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   setError("");
                   setSuccessMsg("");
                 }}
-                className={`btn btn-sm rounded-pill px-3 py-1 fw-bold transition-all ${
+                className={`px-3 py-1 text-sm rounded-full font-bold transition-all ${
                   authMode === "login"
-                    ? "bg-dark text-white shadow-xs"
-                    : "text-secondary hover-dark border-0 bg-transparent"
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "text-slate-500 hover:text-slate-900 border-0 bg-transparent"
                 }`}
                 style={{ fontSize: "11px" }}
               >
@@ -650,10 +650,10 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   setError("");
                   setSuccessMsg("");
                 }}
-                className={`btn btn-sm rounded-pill px-3 py-1 fw-bold transition-all ${
+                className={`px-3 py-1 text-sm rounded-full font-bold transition-all ${
                   authMode === "signup"
-                    ? "bg-dark text-white shadow-xs"
-                    : "text-secondary hover-dark border-0 bg-transparent"
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "text-slate-500 hover:text-slate-900 border-0 bg-transparent"
                 }`}
                 style={{ fontSize: "11px" }}
               >
@@ -676,7 +676,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                 <h3 className="font-bold text-white mb-0.5 tracking-tight" style={{ fontSize: "19px" }}>
                   {authMode === "login" ? "Welcome back!" : "Join Enterprise EMS"}
                 </h3>
-                <p className="text-white-50 text-sm mb-0" style={{ fontSize: "12px" }}>
+                <p className="text-white/60 text-sm mb-0" style={{ fontSize: "12px" }}>
                   {authMode === "login"
                     ? "Enter your credentials to access your portal"
                     : "Register your workforce account for access"}
@@ -704,10 +704,12 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                 <button
                   type="button"
                   onClick={() => setError("")}
-                  className="btn-close p-0 m-0 border-0 flex-shrink-0"
-                  style={{ fontSize: "9px", opacity: 0.6 }}
+                  className="p-0.5 text-current opacity-60 hover:opacity-100 transition-opacity text-xs leading-none shrink-0 cursor-pointer"
+                  style={{ fontSize: "9px" }}
                   aria-label="Close"
-                />
+                >
+                  <i className="bi bi-x-lg"></i>
+                </button>
               </motion.div>
             )}
 
@@ -728,10 +730,12 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                 <button
                   type="button"
                   onClick={() => setSuccessMsg("")}
-                  className="btn-close p-0 m-0 border-0 flex-shrink-0"
-                  style={{ fontSize: "9px", opacity: 0.6 }}
+                  className="p-0.5 text-current opacity-60 hover:opacity-100 transition-opacity text-xs leading-none shrink-0 cursor-pointer"
+                  style={{ fontSize: "9px" }}
                   aria-label="Close"
-                />
+                >
+                  <i className="bi bi-x-lg"></i>
+                </button>
               </motion.div>
             )}
           </AnimatePresence>
@@ -755,7 +759,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   <span>Account Temporarily Locked</span>
                 </div>
                 <span
-                  className="badge inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-monospace"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono text-xs font-semibold"
                   style={{
                     background: "rgba(0, 0, 0, 0.45)",
                     border: "1px solid rgba(239, 68, 68, 0.45)",
@@ -768,7 +772,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   {formatLockoutTime(lockoutSeconds)}
                 </span>
               </div>
-              <p className="text-white-50 text-sm m-0" style={{ fontSize: "11px", lineHeight: "1.2", margin: 0, padding: 0 }}>
+              <p className="text-white/60 text-sm m-0" style={{ fontSize: "11px", lineHeight: "1.2", margin: 0, padding: 0 }}>
                 Too many invalid password attempts. Login is temporarily disabled.
               </p>
               <div style={{ marginTop: "4px", lineHeight: 1 }}>
@@ -780,7 +784,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                     setForgotError("");
                     setForgotModalOpen(true);
                   }}
-                  className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-link p-0 text-white-50 text-sm text-decoration-underline"
+                  className="p-0 text-white/60 hover:text-white text-sm underline transition-colors cursor-pointer inline-block"
                   style={{ fontSize: "11px", lineHeight: "1.2", verticalAlign: "baseline" }}
                 >
                   Forgot password? Recover account
@@ -860,7 +864,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                           style={{ width: "100%", height: "100%", objectFit: "cover" }}
                         />
                       ) : (
-                        <i className="bi bi-camera-fill text-white-50 text-lg"></i>
+                        <i className="bi bi-camera-fill text-white/60 text-lg"></i>
                       )}
 
                       {/* Camera icon badge */}
@@ -882,7 +886,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                     <div className="flex-grow-1">
                       <div className="flex items-center justify-between">
                         <label className="auth-clean-label mb-0" style={{ fontSize: "11px" }}>
-                          Profile Picture <span className="text-white-50 font-normal">(Optional)</span>
+                          Profile Picture <span className="text-white/60 font-normal">(Optional)</span>
                         </label>
                         {avatarFile && (
                           <button
@@ -1305,7 +1309,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
             >
               {submitting ? (
                 <>
-                  <span className="spinner-border spinner-border-sm" role="status"></span>
+                  <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" role="status"></span>
                   <span>{authMode === "login" ? "Verifying..." : "Creating Account..."}</span>
                 </>
               ) : authMode === "login" && lockoutSeconds > 0 ? (
@@ -1334,7 +1338,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                 className="mt-2 pt-1.5 border-t border-gray-200 border-slate-100"
               >
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-white-50 font-bold text-uppercase" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
+                  <span className="text-white/60 font-bold uppercase" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
                     1-Click Demo Credentials
                   </span>
                   <span
@@ -1353,7 +1357,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                     onClick={() => handleQuickFill("shubhsingh.13jan@gmail.com", "8859574934", "admin")}
                   >
                     <span>👑</span>
-                    <span className="text-truncate">Admin (Shubh)</span>
+                    <span className="truncate">Admin (Shubh)</span>
                   </button>
                   <button
                     type="button"
@@ -1361,7 +1365,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                     onClick={() => handleQuickFill("manager@company.com", "Manager@123", "manager")}
                   >
                     <span>👔</span>
-                    <span className="text-truncate">Manager</span>
+                    <span className="truncate">Manager</span>
                   </button>
                   <button
                     type="button"
@@ -1369,7 +1373,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                     onClick={() => handleQuickFill("supervisor@company.com", "Supervisor@123", "supervisor")}
                   >
                     <span>👷</span>
-                    <span className="text-truncate">Supervisor</span>
+                    <span className="truncate">Supervisor</span>
                   </button>
                   <button
                     type="button"
@@ -1377,7 +1381,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                     onClick={() => handleQuickFill("employee@company.com", "Employee@123", "employee")}
                   >
                     <span>💼</span>
-                    <span className="text-truncate">Employee</span>
+                    <span className="truncate">Employee</span>
                   </button>
                 </div>
               </motion.div>
@@ -1390,7 +1394,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                 transition={{ duration: 0.22, ease: "easeInOut" }}
                 className="text-center mt-6 pt-2 border-t border-gray-200 border-slate-100"
               >
-                <span className="text-white-50 text-sm" style={{ fontSize: "12px" }}>
+                <span className="text-white/60 text-sm" style={{ fontSize: "12px" }}>
                   Already registered with an organization?{" "}
                 </span>
                 <button
@@ -1450,7 +1454,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
               <button
                 type="button"
                 onClick={() => setForgotModalOpen(false)}
-                className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm btn-link text-white-50 p-1 absolute top-0 right-0 m-6"
+                className="p-1 text-white/60 hover:text-white text-sm transition-colors cursor-pointer absolute top-0 right-0 m-4"
                 title="Close"
               >
                 <i className="bi bi-x-lg" style={{ fontSize: "14px" }}></i>
@@ -1475,7 +1479,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                       <h5 className="font-bold mb-0 text-white" style={{ fontSize: "17px" }}>
                         Reset Password
                       </h5>
-                      <small className="text-white-50" style={{ fontSize: "11px" }}>
+                      <small className="text-white/60" style={{ fontSize: "11px" }}>
                         Enterprise Account Recovery
                       </small>
                     </div>
@@ -1529,7 +1533,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                       <button
                         type="button"
                         onClick={() => setForgotModalOpen(false)}
-                        className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm border border-gray-200 border-gray-500 text-gray-500 hover:bg-gray-50 w-50 rounded-lg text-white border-secondary"
+                        className="w-1/2 py-2 px-4 rounded-lg text-sm font-medium text-slate-300 hover:text-white border border-slate-600 hover:border-slate-500 hover:bg-slate-800/50 transition-colors inline-flex items-center justify-center cursor-pointer"
                         style={{ fontSize: "12.5px" }}
                       >
                         Cancel
@@ -1537,12 +1541,12 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                       <button
                         type="submit"
                         disabled={forgotLoading}
-                        className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm bg-blue-600 text-white hover:bg-blue-700 w-50 rounded-lg font-bold flex items-center justify-center gap-1.5"
+                        className="w-1/2 py-2 px-4 rounded-lg text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors inline-flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                         style={{ fontSize: "12.5px" }}
                       >
                         {forgotLoading ? (
                           <>
-                            <span className="spinner-border spinner-border-sm" role="status" />
+                            <span className="inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" role="status" />
                             <span>Sending...</span>
                           </>
                         ) : (
@@ -1579,7 +1583,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   <button
                     type="button"
                     onClick={() => setForgotModalOpen(false)}
-                    className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm bg-blue-600 text-white hover:bg-blue-700 w-full rounded-lg font-bold"
+                    className="w-full py-2 px-4 rounded-lg text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors inline-flex items-center justify-center cursor-pointer shadow-sm"
                     style={{ fontSize: "12.5px" }}
                   >
                     Back to Sign In
@@ -1632,7 +1636,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   setTwoFactorData(null);
                   setSubmitting(false);
                 }}
-                className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm btn-link text-white-50 p-1 absolute top-0 right-0 m-6"
+                className="p-1 text-white/60 hover:text-white text-sm transition-colors cursor-pointer absolute top-0 right-0 m-4"
                 title="Cancel"
               >
                 <i className="bi bi-x-lg" style={{ fontSize: "14px" }}></i>
@@ -1656,7 +1660,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                     <h5 className="font-bold mb-0 text-white" style={{ fontSize: "18px" }}>
                       Two-Step Verification
                     </h5>
-                    <small className="text-white-50" style={{ fontSize: "11px" }}>
+                    <small className="text-white/60" style={{ fontSize: "11px" }}>
                       Identity Verification Required
                     </small>
                   </div>
@@ -1716,7 +1720,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                     type="button"
                     onClick={handleResend2FA}
                     disabled={resendCooldown > 0 || resendLoading}
-                    className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm btn-link p-0 text-decoration-none font-semibold"
+                    className="p-0 text-sm font-semibold hover:underline transition-colors cursor-pointer inline-block"
                     style={{
                       fontSize: "12px",
                       color: resendCooldown > 0 ? "#64748b" : "#818cf8"
@@ -1740,7 +1744,7 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                       setTwoFactorData(null);
                       setSubmitting(false);
                     }}
-                    className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm border border-gray-200 border-gray-500 text-gray-500 hover:bg-gray-50 w-50 rounded-lg text-white border-secondary"
+                    className="w-1/2 py-2 px-4 rounded-lg text-sm font-medium text-slate-300 hover:text-white border border-slate-600 hover:border-slate-500 hover:bg-slate-800/50 transition-colors inline-flex items-center justify-center cursor-pointer"
                     style={{ fontSize: "12.5px" }}
                   >
                     Cancel
@@ -1749,12 +1753,12 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                     type="button"
                     onClick={() => handleVerify2FASubmit()}
                     disabled={twoFactorLoading || otpDigits.some((d) => !d)}
-                    className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm bg-blue-600 text-white hover:bg-blue-700 w-50 rounded-lg font-bold flex items-center justify-center gap-1.5"
+                    className="w-1/2 py-2 px-4 rounded-lg text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors inline-flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                     style={{ fontSize: "12.5px" }}
                   >
                     {twoFactorLoading ? (
                       <>
-                        <span className="spinner-border spinner-border-sm" role="status" />
+                        <span className="inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" role="status" />
                         <span>Verifying...</span>
                       </>
                     ) : (
