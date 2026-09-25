@@ -983,11 +983,17 @@ const LandingPage = () => {
                                         <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${item.badge} transition-all ${hoveredApproval === item.id ? "scale-110" : ""}`}>
                                           <i className={`bi ${item.icon} text-[9.5px]`}></i>
                                         </div>
-                                        <div>
-                                          <span className="font-bold text-gray-900 block leading-none text-[8.5px]">{item.title}</span>
-                                          <small className="text-gray-500 text-[7px]">
-                                            {approvedItems[item.id] ? <span className="text-green-600 font-bold">✓ Done</span> : item.count}
-                                          </small>
+                                        <div className="text-left flex flex-col justify-center">
+                                          <span className="font-bold text-gray-900 block leading-tight text-left" style={{ fontSize: "8.5px" }}>
+                                            {item.title}
+                                          </span>
+                                          <span className="text-slate-500 block leading-tight text-left" style={{ fontSize: "7px" }}>
+                                            {approvedItems[item.id] ? (
+                                              <span className="text-green-600 font-bold" style={{ fontSize: "7px" }}>✓ Done</span>
+                                            ) : (
+                                              item.count
+                                            )}
+                                          </span>
                                         </div>
                                       </div>
 
