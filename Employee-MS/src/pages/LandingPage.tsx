@@ -628,7 +628,7 @@ const LandingPage = () => {
                             </div>
 
                             {/* Full 10 Interactive Sidebar Items */}
-                            <ul className="flex flex-col gap-0.5 list-none p-0 m-0">
+                            <ul className="flex flex-col gap-1 list-none p-0 m-0">
                               {[
                                 { name: "Dashboard", icon: "bi-speedometer2" },
                                 { name: "Departments", icon: "bi-building" },
@@ -652,18 +652,18 @@ const LandingPage = () => {
                                       }}
                                       style={{
                                         borderRadius: isActive ? "7px" : "6px",
-                                        fontSize: "10.5px",
+                                        fontSize: "11.5px",
                                         color: isActive ? "#ffffff" : "#94a3b8",
                                         backgroundColor: isActive ? "#1d6fee" : "transparent"
                                       }}
-                                      className={`w-full text-left flex items-center gap-2 px-2.5 py-1 border-0 transition-colors cursor-pointer ${
+                                      className={`w-full text-left flex items-center gap-2.5 px-2.5 py-1.5 border-0 transition-colors cursor-pointer ${
                                         isActive
                                           ? "font-semibold shadow-xs"
                                           : "font-normal hover:text-white hover:bg-white/5"
                                       }`}
                                     >
                                       <i
-                                        className={`bi ${item.icon} text-[11px]`}
+                                        className={`bi ${item.icon} text-[12px]`}
                                         style={{ color: isActive ? "#ffffff" : "#94a3b8" }}
                                       ></i>
                                       <span>{item.name}</span>
