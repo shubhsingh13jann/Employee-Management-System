@@ -7,14 +7,14 @@ const Navbar = () => {
   const firstName = user?.name?.split(' ')[0] || "User";
 
   return (
-    <header className="navbar navbar-expand bg-white border-b border-gray-200 px-6 py-2 sticky-top shadow-sm" style={{ zIndex: 900 }}>
-      <div className="w-full px-6 p-0 flex justify-between items-center">
+    <header className="w-full bg-white border-b border-slate-200 px-6 lg:px-8 py-3 sticky top-0 shadow-xs z-30">
+      <div className="w-full flex justify-between items-center">
         {/* Welcome Section */}
         <div>
-          <h5 className="font-bold text-gray-900 mb-0 flex items-center gap-2">
+          <h5 className="font-bold text-gray-900 mb-0 flex items-center gap-2 text-base lg:text-lg">
             Welcome back, {firstName}! <span className="text-lg">👋</span>
           </h5>
-          <p className="text-gray-600 mb-0 font-medium" style={{ fontSize: "13px" }}>
+          <p className="text-slate-500 mb-0 font-medium text-xs lg:text-sm">
             Here's what's happening in your organization today.
           </p>
         </div>

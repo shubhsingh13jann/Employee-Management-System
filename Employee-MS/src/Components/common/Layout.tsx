@@ -10,12 +10,12 @@ const Layout = () => {
       <Sidebar />
       
       {/* Main Content Area */}
-      <div className="flex flex-col flex-grow-1 overflow-x-hidden">
+      <div className="flex flex-col flex-1 min-w-0 overflow-x-hidden">
         {/* Top Navigation */}
         <Navbar />
         
         {/* Main Workspace */}
-        <main className="p-6 p-md-4 flex-grow-1 overflow-y-auto">
+        <main className="p-6 lg:p-8 flex-1 overflow-y-auto">
           <Outlet />
         </main>
       </div>
