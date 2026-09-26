@@ -44,9 +44,39 @@
   max-height: min(850px, calc(100vh - 4.5rem));
 }
 
-/* Role-Themed Card Top Accent Line (Disabled per user request) */
+/* Role-Themed Card Top Accent Line (Glowing Laser Effect) */
 .auth-split-card::before {
-  display: none !important;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 2%, rgba(255, 255, 255, 0.7) 50%, transparent 98%);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 15;
+  pointer-events: none;
+}
+
+.theme-admin .auth-split-card::before {
+  background: linear-gradient(90deg, transparent 2%, rgba(139, 92, 246, 0.2) 15%, #c4b5fd 48%, #ffffff 50%, #c4b5fd 52%, rgba(139, 92, 246, 0.2) 85%, transparent 98%);
+  box-shadow: 0 0 16px 2px rgba(139, 92, 246, 0.75), 0 0 6px 1px rgba(167, 139, 250, 0.9);
+}
+
+.theme-manager .auth-split-card::before {
+  background: linear-gradient(90deg, transparent 2%, rgba(37, 99, 235, 0.2) 15%, #93c5fd 48%, #ffffff 50%, #93c5fd 52%, rgba(37, 99, 235, 0.2) 85%, transparent 98%);
+  box-shadow: 0 0 16px 2px rgba(37, 99, 235, 0.75), 0 0 6px 1px rgba(96, 165, 250, 0.9);
+}
+
+.theme-supervisor .auth-split-card::before {
+  background: linear-gradient(90deg, transparent 2%, rgba(5, 150, 105, 0.2) 15%, #6ee7b7 48%, #ffffff 50%, #6ee7b7 52%, rgba(5, 150, 105, 0.2) 85%, transparent 98%);
+  box-shadow: 0 0 16px 2px rgba(5, 150, 105, 0.75), 0 0 6px 1px rgba(52, 211, 153, 0.9);
+}
+
+.theme-employee .auth-split-card::before {
+  background: linear-gradient(90deg, transparent 2%, rgba(217, 119, 6, 0.2) 15%, #fde68a 48%, #ffffff 50%, #fde68a 52%, rgba(217, 119, 6, 0.2) 85%, transparent 98%);
+  box-shadow: 0 0 16px 2px rgba(217, 119, 6, 0.75), 0 0 6px 1px rgba(251, 191, 36, 0.9);
 }
 
 @media (min-width: 992px) {
