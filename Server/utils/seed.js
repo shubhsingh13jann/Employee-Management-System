@@ -58,6 +58,53 @@ export async function seedDatabase() {
     console.warn('Migration note (lockout_until):', err.message);
   }
 
+  // Migration checks for departments: code, head_id, parent_id
+  try {
+    const [cols] = await pool.query("SHOW COLUMNS FROM departments LIKE 'code'");
+    if (cols.length === 0) {
+      await pool.query("ALTER TABLE departments ADD COLUMN code VARCHAR(10) NULL AFTER name");
+      console.log('✓ Migrated departments table: added code column');
+    }
+  } catch (err) {
+    console.warn('Migration note (departments.code):', err.message);
+  }
+
+  try {
+    const [cols] = await pool.query("SHOW COLUMNS FROM departments LIKE 'head_id'");
+    if (cols.length === 0) {
+      await pool.query("ALTER TABLE departments ADD COLUMN head_id INT NULL AFTER description");
+      console.log('✓ Migrated departments table: added head_id column');
+    }
+  } catch (err) {
+    console.warn('Migration note (departments.head_id):', err.message);
+  }
+
+  try {
+    const [cols] = await pool.query("SHOW COLUMNS FROM departments LIKE 'parent_id'");
+    if (cols.length === 0) {
+      await pool.query("ALTER TABLE departments ADD COLUMN parent_id INT NULL AFTER head_id");
+      console.log('✓ Migrated departments table: added parent_id column');
+    }
+  } catch (err) {
+    console.warn('Migration note (departments.parent_id):', err.message);
+  }
+
+  // Backfill department codes and default HOD if missing
+  try {
+    await pool.query("UPDATE departments SET code = 'ENG' WHERE name = 'Engineering' AND (code IS NULL OR code = '')");
+    await pool.query("UPDATE departments SET code = 'HR' WHERE name = 'Human Resources' AND (code IS NULL OR code = '')");
+    await pool.query("UPDATE departments SET code = 'MKT' WHERE name = 'Marketing' AND (code IS NULL OR code = '')");
+    await pool.query("UPDATE departments SET code = 'FIN' WHERE name = 'Finance' AND (code IS NULL OR code = '')");
+
+    const [mgr] = await pool.query("SELECT id FROM users WHERE email = 'manager@company.com' LIMIT 1");
+    if (mgr.length > 0) {
+      await pool.query("UPDATE departments SET head_id = ? WHERE name = 'Engineering' AND head_id IS NULL", [mgr[0].id]);
+    }
+    console.log('✓ Verified department codes and default HOD mappings.');
+  } catch (err) {
+    console.warn('Migration note (departments backfill):', err.message);
+  }
+
   // Check if database is already seeded
   const [existing] = await pool.query("SELECT id FROM users LIMIT 1");
   if (existing.length > 0) {
@@ -67,12 +114,12 @@ export async function seedDatabase() {
 
   console.log('Inserting seed departments...');
   await pool.query(`
-    INSERT INTO departments (name, description) VALUES
-    ('Engineering', 'Software engineering, architecture, and IT operations'),
-    ('Human Resources', 'Talent acquisition, employee welfare, and operations'),
-    ('Marketing', 'Digital marketing, sales outreach, and brand management'),
-    ('Finance', 'Payroll, accounting, budgeting, and financial analysis')
-    ON DUPLICATE KEY UPDATE name = name;
+    INSERT INTO departments (name, code, description) VALUES
+    ('Engineering', 'ENG', 'Software engineering, architecture, and IT operations'),
+    ('Human Resources', 'HR', 'Talent acquisition, employee welfare, and operations'),
+    ('Marketing', 'MKT', 'Digital marketing, sales outreach, and brand management'),
+    ('Finance', 'FIN', 'Payroll, accounting, budgeting, and financial analysis')
+    ON DUPLICATE KEY UPDATE code = VALUES(code), description = VALUES(description);
   `);
 
   const [engDept] = await pool.query("SELECT id FROM departments WHERE name = 'Engineering'");
@@ -98,6 +145,9 @@ export async function seedDatabase() {
     VALUES ('Sarah Jenkins', 'manager@company.com', ?, 'manager', ?, 85000.00, '+1 555-0102', 'Building B, Floor 4')
   `, [managerPass, engId]);
   const managerId = mgrRes.insertId;
+
+  // Link Sarah Jenkins as default HOD for Engineering
+  await pool.query("UPDATE departments SET head_id = ? WHERE id = ?", [managerId, engId]);
 
   // 3. Supervisor
   const [supRes] = await pool.query(`
