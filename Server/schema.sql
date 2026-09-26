@@ -5,8 +5,14 @@ USE employeems;
 CREATE TABLE IF NOT EXISTS departments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
+    code VARCHAR(10) NULL,
     description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    head_id INT NULL,
+    parent_id INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (parent_id) REFERENCES departments(id) ON DELETE SET NULL,
+    INDEX idx_department_code (code),
+    INDEX idx_department_head (head_id)
 );
 
 -- 2. Dedicated Admin (HR) Table
