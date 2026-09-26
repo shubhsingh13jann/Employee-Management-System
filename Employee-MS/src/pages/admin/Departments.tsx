@@ -104,10 +104,10 @@ const Departments = () => {
         </div>
 
         {/* Department List Table Card */}
-        <div className="w-full px-6 col-lg-8">
-          <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg bg-white overflow-hidden">
-            <div className="card-header bg-white py-6 border-b border-gray-200 flex justify-between items-center">
-              <h5 className="font-bold mb-0">Active Departments</h5>
+        <div className="w-full lg:w-2/3 lg:col-span-8">
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs flex flex-col overflow-hidden">
+            <div className="px-6 py-4.5 bg-white border-b border-slate-100 flex justify-between items-center">
+              <h5 className="font-bold text-slate-900 text-base mb-0">Active Departments</h5>
               <span className="badge bg-secondary">{departments.length} Total</span>
             </div>
 
