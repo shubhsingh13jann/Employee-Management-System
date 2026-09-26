@@ -610,3 +610,53 @@ button.rounded-full,
 button.\!rounded-full {
   border-radius: 9999px !important;
 }
+
+/* ============================================================
+   ENTERPRISE GOVERNANCE PATHWAY BUTTON HOVER STATES
+   ============================================================ */
+.dashboard-pathway-btn {
+  text-decoration: none !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.dashboard-pathway-btn:hover {
+  text-decoration: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+}
+
+.dashboard-pathway-btn-blue:hover {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #2563eb !important;
+}
+
+.dashboard-pathway-btn-blue:hover span,
+.dashboard-pathway-btn-blue:hover i {
+  color: #ffffff !important;
+}
+
+.dashboard-pathway-btn-indigo:hover {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+  border-color: #4f46e5 !important;
+}
+
+.dashboard-pathway-btn-indigo:hover span,
+.dashboard-pathway-btn-indigo:hover i {
+  color: #ffffff !important;
+}
+
+.dashboard-pathway-btn-purple:hover {
+  background-color: #9333ea !important;
+  color: #ffffff !important;
+  border-color: #9333ea !important;
+}
+
+.dashboard-pathway-btn-purple:hover span,
+.dashboard-pathway-btn-purple:hover i {
+  color: #ffffff !important;
+}
+
+.dashboard-pathway-btn:hover .dashboard-arrow-icon {
+  transform: translateX(4px) !important;
+}
