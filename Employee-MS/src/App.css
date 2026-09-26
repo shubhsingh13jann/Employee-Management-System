@@ -603,3 +603,10 @@ html {
   z-index: -1;
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
 }
+
+/* Ensure button capsule pills and rounded-full elements are strictly preserved against Bootstrap reboot */
+.auth-mode-pill,
+button.rounded-full,
+button.\!rounded-full {
+  border-radius: 9999px !important;
+}

@@ -624,7 +624,10 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
           
           {/* Sliding Pill Mode Switcher (Option 4: Seamless Switch) */}
           <div className="flex justify-center mb-2">
-            <div className="inline-flex p-1 bg-slate-100 rounded-full border border-gray-200 border-gray-200 border-slate-200">
+            <div
+              className="inline-flex p-1 bg-slate-100 rounded-full border border-slate-200"
+              style={{ borderRadius: "9999px" }}
+            >
               <button
                 type="button"
                 onClick={() => {
@@ -632,12 +635,12 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   setError("");
                   setSuccessMsg("");
                 }}
-                className={`px-3 py-1 text-sm rounded-full font-bold transition-all ${
+                className={`auth-mode-pill px-3 py-1 text-sm !rounded-full font-bold transition-all cursor-pointer ${
                   authMode === "login"
                     ? "bg-slate-900 text-white shadow-xs"
                     : "text-slate-500 hover:text-slate-900 border-0 bg-transparent"
                 }`}
-                style={{ fontSize: "11px" }}
+                style={{ fontSize: "11px", borderRadius: "9999px" }}
               >
                 <i className="bi bi-box-arrow-in-right mr-1"></i>
                 <span>Sign In</span>
@@ -650,12 +653,12 @@ const Login: React.FC<LoginProps> = ({ initialMode = "login" }) => {
                   setError("");
                   setSuccessMsg("");
                 }}
-                className={`px-3 py-1 text-sm rounded-full font-bold transition-all ${
+                className={`auth-mode-pill px-3 py-1 text-sm !rounded-full font-bold transition-all cursor-pointer ${
                   authMode === "signup"
                     ? "bg-slate-900 text-white shadow-xs"
                     : "text-slate-500 hover:text-slate-900 border-0 bg-transparent"
                 }`}
-                style={{ fontSize: "11px" }}
+                style={{ fontSize: "11px", borderRadius: "9999px" }}
               >
                 <i className="bi bi-person-plus-fill mr-1"></i>
                 <span>Create Account</span>
