@@ -95,8 +95,16 @@ const Departments = () => {
                   onChange={(e) => setDescription(e.target.value)}
                 ></textarea>
               </div>
-              <button disabled={saving} className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center bg-blue-600 text-white hover:bg-blue-700 w-full py-2 flex items-center justify-center gap-2">
-                {saving ? <span className="spinner-border spinner-border-sm"></span> : <i className="bi bi-plus-circle"></i>}
+              <button
+                type="submit"
+                disabled={saving}
+                className="w-full py-2.5 px-4 rounded-xl font-semibold transition-all duration-200 cursor-pointer inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs hover:shadow disabled:opacity-60"
+              >
+                {saving ? (
+                  <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                ) : (
+                  <i className="bi bi-plus-circle"></i>
+                )}
                 <span>Create Department</span>
               </button>
             </form>
@@ -108,7 +116,9 @@ const Departments = () => {
           <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs flex flex-col overflow-hidden">
             <div className="px-6 py-4.5 bg-white border-b border-slate-100 flex justify-between items-center">
               <h5 className="font-bold text-slate-900 text-base mb-0">Active Departments</h5>
-              <span className="badge bg-secondary">{departments.length} Total</span>
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100/80">
+                {departments.length} Departments
+              </span>
             </div>
 
             <div className="overflow-x-auto">
@@ -124,33 +134,34 @@ const Departments = () => {
                 <tbody className="divide-y divide-slate-100">
                   {loading ? (
                     <tr>
-                      <td colSpan={4} className="text-center py-6">
-                        <div className="spinner-border spinner-border-sm text-blue-600"></div>
+                      <td colSpan={4} className="text-center py-8">
+                        <div className="inline-block w-6 h-6 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
                       </td>
                     </tr>
                   ) : departments.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="text-center py-6 text-gray-500">No departments created yet.</td>
+                      <td colSpan={4} className="text-center py-8 text-slate-500 text-sm">No departments created yet.</td>
                     </tr>
                   ) : (
                     departments.map((dept) => (
-                      <tr key={dept.id}>
-                        <td className="px-6 font-semibold text-gray-900">
-                          <i className="bi bi-building mr-2 text-blue-600"></i>
+                      <tr key={dept.id} className="hover:bg-slate-50/60 transition-colors">
+                        <td className="px-6 py-4 font-semibold text-slate-900">
+                          <i className="bi bi-building mr-2 text-indigo-600"></i>
                           {dept.name}
                         </td>
-                        <td className="text-gray-500 text-sm" style={{ maxWidth: "250px" }}>
+                        <td className="px-4 py-4 text-slate-500 text-sm" style={{ maxWidth: "250px" }}>
                           {dept.description || "No description provided"}
                         </td>
-                        <td className="text-center">
-                          <span className="badge bg-gray-50 text-gray-900 border border-gray-200 border-gray-200 px-6 py-1.5 rounded-full">
+                        <td className="px-4 py-4 text-center">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
                             {dept.member_count} Members
                           </span>
                         </td>
-                        <td className="text-right px-6">
+                        <td className="px-6 py-4 text-right">
                           <button
+                            type="button"
                             onClick={() => handleDelete(dept.id, dept.name)}
-                            className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm btn-outline-danger"
+                            className="w-8 h-8 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer inline-flex items-center justify-center border border-transparent hover:border-rose-200"
                             title="Delete Department"
                           >
                             <i className="bi bi-trash"></i>
