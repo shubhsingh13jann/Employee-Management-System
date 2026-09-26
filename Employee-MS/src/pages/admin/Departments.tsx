@@ -111,17 +111,17 @@ const Departments = () => {
               <span className="badge bg-secondary">{departments.length} Total</span>
             </div>
 
-            <div className="table-responsive">
-              <table className="table table-hover align-middle mb-0">
-                <thead className="table-light">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-slate-50 border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                   <tr>
-                    <th className="px-6">Department Name</th>
-                    <th>Description</th>
-                    <th className="text-center">Staff Members</th>
-                    <th className="text-right px-6">Actions</th>
+                    <th className="px-6 py-3.5">Department Name</th>
+                    <th className="px-4 py-3.5">Description</th>
+                    <th className="px-4 py-3.5 text-center">Staff Members</th>
+                    <th className="px-6 py-3.5 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-100">
                   {loading ? (
                     <tr>
                       <td colSpan={4} className="text-center py-6">
