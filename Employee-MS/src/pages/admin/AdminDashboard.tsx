@@ -180,75 +180,79 @@ const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Enterprise Governance & Actions (Row 3) */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-6">
-        <div className="flex items-center justify-between mb-5">
+      {/* Enterprise Governance & Actions (Row 3 - Compact Executive Density) */}
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs p-4 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3.5">
           <div>
-            <h5 className="font-bold text-slate-900 text-lg mb-0.5">Enterprise Governance & Actions</h5>
-            <p className="text-xs font-medium text-slate-500 mb-0">
-              Quick administrative pathways to manage company topology and accounts.
+            <h5 className="font-bold text-slate-900 text-sm sm:text-base mb-0.5">Enterprise Governance & Quick Pathways</h5>
+            <p className="text-xs text-slate-500 mb-0">
+              Administrative gateways to manage organizational topology, workforce, and operational structures.
             </p>
           </div>
+          <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200/60 self-start">
+            <i className="bi bi-shield-lock-fill text-indigo-500 text-[10px]"></i>
+            <span>Super Admin Access</span>
+          </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4">
           {/* Manage Departments */}
-          <div className="p-5 border border-slate-200/80 rounded-xl bg-slate-50/70 hover:bg-white hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group shadow-sm hover:shadow">
+          <div className="p-3.5 sm:p-4 border border-slate-200/70 rounded-xl bg-slate-50/50 hover:bg-white hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group shadow-2xs hover:shadow-xs">
             <div>
-              <div className="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center text-lg mb-3">
+              <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 border border-blue-100/70 flex items-center justify-center text-sm mb-2.5 transition-transform duration-200 group-hover:scale-105">
                 <i className="bi bi-buildings"></i>
               </div>
-              <h6 className="font-bold text-slate-900 text-base mb-1">Manage Departments</h6>
-              <p className="text-slate-500 text-xs mb-5 leading-relaxed">
-                Add or modify company departments and organizational categories.
+              <h6 className="font-bold text-slate-900 text-sm mb-1">Departments Hub</h6>
+              <p className="text-slate-500 text-xs mb-3.5 leading-relaxed">
+                Configure corporate units, assign department heads, and manage charters.
               </p>
             </div>
             <Link
               to="/admin/departments"
-              className="inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold text-blue-600 bg-white hover:bg-blue-600 hover:text-white border border-blue-200 hover:border-blue-600 transition-all duration-200 shadow-sm cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold text-blue-700 bg-white hover:bg-blue-600 hover:text-white border border-blue-200 hover:border-blue-600 transition-all duration-150 shadow-2xs cursor-pointer"
             >
-              <span>Go to Departments</span>
-              <i className="bi bi-arrow-right text-xs"></i>
+              <span>Manage Departments</span>
+              <i className="bi bi-arrow-right text-[11px]"></i>
             </Link>
           </div>
 
           {/* Workforce Directory */}
-          <div className="p-5 border border-slate-200/80 rounded-xl bg-slate-50/70 hover:bg-white hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group shadow-sm hover:shadow">
+          <div className="p-3.5 sm:p-4 border border-slate-200/70 rounded-xl bg-slate-50/50 hover:bg-white hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group shadow-2xs hover:shadow-xs">
             <div>
-              <div className="w-10 h-10 rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center text-lg mb-3">
+              <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100/70 flex items-center justify-center text-sm mb-2.5 transition-transform duration-200 group-hover:scale-105">
                 <i className="bi bi-people"></i>
               </div>
-              <h6 className="font-bold text-slate-900 text-base mb-1">Workforce Directory</h6>
-              <p className="text-slate-500 text-xs mb-5 leading-relaxed">
-                Onboard, view, and manage Managers, Supervisors, and Employees.
+              <h6 className="font-bold text-slate-900 text-sm mb-1">Workforce Directory</h6>
+              <p className="text-slate-500 text-xs mb-3.5 leading-relaxed">
+                Onboard and manage Managers, Supervisors, and Employees across all roles.
               </p>
             </div>
             <Link
               to="/admin/users"
-              className="inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold text-indigo-600 bg-white hover:bg-indigo-600 hover:text-white border border-indigo-200 hover:border-indigo-600 transition-all duration-200 shadow-sm cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold text-indigo-700 bg-white hover:bg-indigo-600 hover:text-white border border-indigo-200 hover:border-indigo-600 transition-all duration-150 shadow-2xs cursor-pointer"
             >
               <span>Manage Users</span>
-              <i className="bi bi-arrow-right text-xs"></i>
+              <i className="bi bi-arrow-right text-[11px]"></i>
             </Link>
           </div>
 
           {/* Hierarchy Allocation */}
-          <div className="p-5 border border-slate-200/80 rounded-xl bg-slate-50/70 hover:bg-white hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group shadow-sm hover:shadow">
+          <div className="p-3.5 sm:p-4 border border-slate-200/70 rounded-xl bg-slate-50/50 hover:bg-white hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group shadow-2xs hover:shadow-xs">
             <div>
-              <div className="w-10 h-10 rounded-lg bg-purple-500/10 text-purple-600 flex items-center justify-center text-lg mb-3">
+              <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 border border-purple-100/70 flex items-center justify-center text-sm mb-2.5 transition-transform duration-200 group-hover:scale-105">
                 <i className="bi bi-diagram-3"></i>
               </div>
-              <h6 className="font-bold text-slate-900 text-base mb-1">Hierarchy Allocation</h6>
-              <p className="text-slate-500 text-xs mb-5 leading-relaxed">
-                Map which Employee reports to which Supervisor and Manager.
+              <h6 className="font-bold text-slate-900 text-sm mb-1">Hierarchy Allocation</h6>
+              <p className="text-slate-500 text-xs mb-3.5 leading-relaxed">
+                Map supervisory reporting lines and manage multi-tier chain-of-command.
               </p>
             </div>
             <Link
               to="/admin/hierarchy"
-              className="inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold text-purple-600 bg-white hover:bg-purple-600 hover:text-white border border-purple-200 hover:border-purple-600 transition-all duration-200 shadow-sm cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold text-purple-700 bg-white hover:bg-purple-600 hover:text-white border border-purple-200 hover:border-purple-600 transition-all duration-150 shadow-2xs cursor-pointer"
             >
               <span>Team Hierarchy</span>
-              <i className="bi bi-arrow-right text-xs"></i>
+              <i className="bi bi-arrow-right text-[11px]"></i>
             </Link>
           </div>
         </div>
