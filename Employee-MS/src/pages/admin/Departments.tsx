@@ -5,6 +5,7 @@ const Departments = () => {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
+  const [code, setCode] = useState("");
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState({ type: "", text: "" });
@@ -34,10 +35,16 @@ const Departments = () => {
     try {
       setSaving(true);
       setMsg({ type: "", text: "" });
-      const res = await api.post("/api/admin/departments", { name: name.trim(), description: description.trim() });
+      const payload = {
+        name: name.trim(),
+        code: code.trim().toUpperCase(),
+        description: description.trim()
+      };
+      const res = await api.post("/api/admin/departments", payload);
       if (res.data.status) {
         setMsg({ type: "success", text: "Department created successfully!" });
         setName("");
+        setCode("");
         setDescription("");
         fetchDepartments();
       }
@@ -93,7 +100,7 @@ const Departments = () => {
               <div>
                 <h5 className="font-bold text-slate-900 text-base mb-0.5">Add New Department</h5>
                 <p className="text-xs text-slate-500 mb-0 font-medium leading-relaxed">
-                  Create a new department or organizational unit
+                  Define corporate organizational charter & unit
                 </p>
               </div>
             </div>
@@ -118,8 +125,32 @@ const Departments = () => {
 
               <div>
                 <div className="flex justify-between items-center mb-1.5">
+                  <label className="font-semibold text-slate-700 text-xs">Department Code</label>
+                  <span className="text-[10px] text-slate-400 font-medium">3-4 letters unique identifier</span>
+                </div>
+                <div className="relative flex items-center">
+                  <span className="absolute left-3 text-slate-400 text-xs">
+                    <i className="bi bi-upc-scan"></i>
+                  </span>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    className="w-full pl-8 pr-4 py-2.5 text-xs bg-slate-50/60 border border-slate-200 rounded-xl outline-none focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-800 transition-all placeholder:text-slate-400 font-bold uppercase tracking-wider"
+                    placeholder="e.g., ENG, MKT, FIN"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.toUpperCase())}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-1.5">
                   <label className="font-semibold text-slate-700 text-xs">Description</label>
-                  <span className="text-[10px] text-slate-400 font-medium">{description.length}/250</span>
+                  <span className={`text-[10px] font-semibold transition-colors ${
+                    description.length > 220 ? "text-amber-600" : "text-slate-400"
+                  }`}>
+                    {description.length}/250 characters
+                  </span>
                 </div>
                 <textarea
                   className="w-full p-3 text-xs bg-slate-50/60 border border-slate-200 rounded-xl outline-none focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-800 transition-all placeholder:text-slate-400 font-medium resize-none"
