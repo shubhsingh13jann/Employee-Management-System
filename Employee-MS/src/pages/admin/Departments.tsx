@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/axios";
 import { DepartmentRosterModal } from "../../Components/DepartmentRosterModal";
+import { TransferMemberModal } from "../../Components/TransferMemberModal";
 
 const Departments = () => {
   const [departments, setDepartments] = useState([]);
@@ -15,6 +16,11 @@ const Departments = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeActionMenuId, setActiveActionMenuId] = useState(null);
   const [rosterDept, setRosterDept] = useState<any>(null);
+  const [transferModal, setTransferModal] = useState<{
+    isOpen: boolean;
+    userId: number | null;
+    deptId: number | null;
+  }>({ isOpen: false, userId: null, deptId: null });
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState({ type: "", text: "" });
 
@@ -606,7 +612,7 @@ const Departments = () => {
                                     type="button"
                                     onClick={() => {
                                       setActiveActionMenuId(null);
-                                      setMsg({ type: "success", text: `Workforce mobility transfer for ${dept.name} is ready for Phase 2.6 transfer tool.` });
+                                      setTransferModal({ isOpen: true, userId: null, deptId: dept.id });
                                     }}
                                     className="w-full px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-blue-600 flex items-center gap-2 transition-colors cursor-pointer"
                                   >
@@ -666,11 +672,23 @@ const Departments = () => {
           handleStartEdit(deptToEdit);
         }}
         onTransferClick={(userId) => {
-          setRosterDept(null);
-          setMsg({
-            type: "success",
-            text: `Workforce mobility transfer initiated for member #${userId || "selected"}. Transfer tool will open in Phase 2.6.`
-          });
+          setTransferModal({ isOpen: true, userId: userId || null, deptId: rosterDept?.id || null });
+        }}
+      />
+
+      {/* Workforce Mobility Personnel Transfer Modal */}
+      <TransferMemberModal
+        isOpen={transferModal.isOpen}
+        onClose={() => setTransferModal({ isOpen: false, userId: null, deptId: null })}
+        departments={departments}
+        initialUserId={transferModal.userId}
+        initialDeptId={transferModal.deptId}
+        onTransferSuccess={(successMsg) => {
+          setMsg({ type: "success", text: successMsg });
+          fetchDepartments();
+          if (rosterDept) {
+            setRosterDept({ ...rosterDept });
+          }
         }}
       />
     </div>

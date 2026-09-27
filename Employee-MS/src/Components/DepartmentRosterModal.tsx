@@ -47,6 +47,29 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
     setCollapsedTreeSupervisors([]);
   };
 
+  const handleExportCSV = () => {
+    if (!roster?.all_members) return;
+    const headers = ["Employee ID", "Full Name", "Email", "Role", "Department", "Direct Supervisor", "Status"];
+    const rows = roster.all_members.map((m: any) => [
+      m.id,
+      `"${(m.name || "").replace(/"/g, '""')}"`,
+      `"${m.email || ""}"`,
+      m.role,
+      `"${(department?.name || departmentName).replace(/"/g, '""')}"`,
+      `"${m.supervisor_name || (department?.head_id === m.id ? "HOD (Tier 1)" : "Reports to HOD")}"`,
+      m.status || "active"
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e: any[]) => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `department_${department?.code || "roster"}_export.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   useEffect(() => {
     if (!isOpen || !departmentId) return;
 
@@ -136,7 +159,18 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            {roster?.all_members?.length > 0 && (
+              <button
+                type="button"
+                onClick={handleExportCSV}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/10 transition-colors flex items-center gap-1.5 cursor-pointer"
+                title="Export Department Roster to CSV"
+              >
+                <i className="bi bi-download text-[11px]"></i>
+                <span>Export CSV</span>
+              </button>
+            )}
             {department && onEditClick && (
               <button
                 type="button"
