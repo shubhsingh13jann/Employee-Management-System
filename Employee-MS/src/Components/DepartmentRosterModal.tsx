@@ -23,11 +23,28 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
   const [error, setError] = useState<string>("");
   const [activeTab, setActiveTab] = useState<"leadership" | "staff" | "tree">("leadership");
   const [expandedSupervisorIds, setExpandedSupervisorIds] = useState<number[]>([]);
+  const [staffSearchQuery, setStaffSearchQuery] = useState("");
+  const [staffFilterMode, setStaffFilterMode] = useState<"all" | "assigned" | "direct_hod">("all");
+  const [collapsedTreeSupervisors, setCollapsedTreeSupervisors] = useState<number[]>([]);
 
   const toggleSupervisorExpand = (supId: number) => {
     setExpandedSupervisorIds((prev) =>
       prev.includes(supId) ? prev.filter((id) => id !== supId) : [...prev, supId]
     );
+  };
+
+  const toggleTreeSupervisorCollapse = (supId: number) => {
+    setCollapsedTreeSupervisors((prev) =>
+      prev.includes(supId) ? prev.filter((id) => id !== supId) : [...prev, supId]
+    );
+  };
+
+  const collapseAllTreeSupervisors = (allIds: number[]) => {
+    setCollapsedTreeSupervisors(allIds);
+  };
+
+  const expandAllTreeSupervisors = () => {
+    setCollapsedTreeSupervisors([]);
   };
 
   useEffect(() => {
@@ -68,6 +85,22 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
 
   const department = data?.department;
   const roster = data?.roster;
+
+  const filteredEmployees = (roster?.employees || []).filter((emp: any) => {
+    if (staffFilterMode === "assigned" && !emp.supervisor_name) return false;
+    if (staffFilterMode === "direct_hod" && emp.supervisor_name) return false;
+
+    if (!staffSearchQuery.trim()) return true;
+    const query = staffSearchQuery.toLowerCase();
+    return (
+      emp.name?.toLowerCase().includes(query) ||
+      emp.email?.toLowerCase().includes(query) ||
+      emp.role?.toLowerCase().includes(query) ||
+      emp.supervisor_name?.toLowerCase().includes(query)
+    );
+  });
+
+  const directHodEmployees = (roster?.employees || []).filter((emp: any) => !emp.supervisor_name);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
@@ -462,62 +495,138 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
 
               {/* Tab 2: Staff Members List */}
               {activeTab === "staff" && (
-                <div>
-                  <div className="overflow-x-auto rounded-xl border border-slate-200">
+                <div className="space-y-4">
+                  {/* Search & Filter Toolbar */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                    <div className="relative flex-1 max-w-md">
+                      <i className="bi bi-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                      <input
+                        type="text"
+                        value={staffSearchQuery}
+                        onChange={(e) => setStaffSearchQuery(e.target.value)}
+                        placeholder="Search staff by name, email, role, or supervisor..."
+                        className="w-full pl-9 pr-8 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                      />
+                      {staffSearchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setStaffSearchQuery("")}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Filter Pills */}
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+                      <button
+                        type="button"
+                        onClick={() => setStaffFilterMode("all")}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer shrink-0 ${
+                          staffFilterMode === "all"
+                            ? "bg-indigo-600 text-white shadow-2xs"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        All Staff ({roster?.employees?.length || 0})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setStaffFilterMode("assigned")}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer shrink-0 ${
+                          staffFilterMode === "assigned"
+                            ? "bg-indigo-600 text-white shadow-2xs"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        Under Supervisor ({(roster?.employees || []).filter((e: any) => e.supervisor_name).length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setStaffFilterMode("direct_hod")}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer shrink-0 ${
+                          staffFilterMode === "direct_hod"
+                            ? "bg-indigo-600 text-white shadow-2xs"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        Direct to HOD ({directHodEmployees.length})
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Staff Table */}
+                  <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-2xs bg-white">
                     <table className="w-full text-left border-collapse text-xs">
                       <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                         <tr>
-                          <th className="px-4 py-3">Employee</th>
-                          <th className="px-4 py-3">Role</th>
-                          <th className="px-4 py-3">Direct Supervisor</th>
-                          <th className="px-4 py-3">Status</th>
-                          <th className="px-4 py-3 text-right">Action</th>
+                          <th className="px-4 py-3.5">Employee Name & Email</th>
+                          <th className="px-4 py-3.5">Designation / Role</th>
+                          <th className="px-4 py-3.5">Reporting Line</th>
+                          <th className="px-4 py-3.5">Status</th>
+                          <th className="px-4 py-3.5 text-right">Mobility Action</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {roster?.employees?.length > 0 ? (
-                          roster.employees.map((emp: any) => (
+                        {filteredEmployees.length > 0 ? (
+                          filteredEmployees.map((emp: any) => (
                             <tr key={emp.id} className="hover:bg-slate-50/70 transition-colors">
-                              <td className="px-4 py-3">
-                                <div className="flex items-center gap-2.5">
-                                  <div className="w-7 h-7 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-[10px]">
-                                    {emp.name.charAt(0)}
-                                  </div>
+                              <td className="px-4 py-3.5">
+                                <div className="flex items-center gap-3">
+                                  {emp.image_url ? (
+                                    <img
+                                      src={emp.image_url}
+                                      alt={emp.name}
+                                      className="w-8 h-8 rounded-full object-cover border border-slate-200 shadow-2xs shrink-0"
+                                    />
+                                  ) : (
+                                    <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200 shadow-2xs shrink-0">
+                                      {emp.name.charAt(0)}
+                                    </div>
+                                  )}
                                   <div>
-                                    <span className="font-semibold text-slate-800 block text-xs">{emp.name}</span>
-                                    <span className="text-[10px] text-slate-400">{emp.email}</span>
+                                    <span className="font-semibold text-slate-900 block text-xs leading-tight">
+                                      {emp.name}
+                                    </span>
+                                    <span className="text-[11px] text-slate-400 block mt-0.5">{emp.email}</span>
                                   </div>
                                 </div>
                               </td>
-                              <td className="px-4 py-3">
-                                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">
-                                  {emp.role}
+                              <td className="px-4 py-3.5">
+                                <span className="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                  {emp.role || "Employee"}
                                 </span>
                               </td>
-                              <td className="px-4 py-3">
+                              <td className="px-4 py-3.5">
                                 {emp.supervisor_name ? (
-                                  <span className="font-medium text-slate-700 text-xs flex items-center gap-1.5">
-                                    <i className="bi bi-person text-slate-400"></i>
-                                    {emp.supervisor_name}
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                    <i className="bi bi-shield-check text-emerald-600"></i>
+                                    <span>{emp.supervisor_name}</span>
                                   </span>
                                 ) : (
-                                  <span className="text-slate-400 italic text-[11px]">Reports to HOD</span>
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                    <i className="bi bi-award text-indigo-600"></i>
+                                    <span>Direct to HOD</span>
+                                  </span>
                                 )}
                               </td>
-                              <td className="px-4 py-3">
-                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                  {emp.status || "active"}
+                              <td className="px-4 py-3.5">
+                                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
+                                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                  <span>Active</span>
                                 </span>
                               </td>
-                              <td className="px-4 py-3 text-right">
+                              <td className="px-4 py-3.5 text-right">
                                 {onTransferClick && (
                                   <button
                                     type="button"
                                     onClick={() => onTransferClick(emp.id)}
-                                    className="px-2.5 py-1 rounded-md text-[11px] font-semibold text-indigo-600 hover:bg-indigo-50 border border-indigo-200 transition-colors cursor-pointer"
+                                    className="px-3 py-1 rounded-lg text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 border border-indigo-200 transition-colors cursor-pointer inline-flex items-center gap-1"
+                                    title="Initiate transfer for this staff member"
                                   >
-                                    Transfer
+                                    <i className="bi bi-arrow-left-right text-[10px]"></i>
+                                    <span>Transfer</span>
                                   </button>
                                 )}
                               </td>
@@ -525,8 +634,17 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
                           ))
                         ) : (
                           <tr>
-                            <td colSpan={5} className="py-8 text-center text-slate-400 text-xs font-medium">
-                              No operational staff members currently assigned to this department.
+                            <td colSpan={5} className="py-12 text-center text-slate-400 text-xs">
+                              <i className="bi bi-people text-slate-300 text-2xl block mb-2"></i>
+                              {staffSearchQuery ? (
+                                <p className="font-medium text-slate-600 mb-0">
+                                  No department members match your search "{staffSearchQuery}".
+                                </p>
+                              ) : (
+                                <p className="font-medium text-slate-600 mb-0">
+                                  No operational staff members currently assigned to this department.
+                                </p>
+                              )}
                             </td>
                           </tr>
                         )}
@@ -538,58 +656,251 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
 
               {/* Tab 3: Org Hierarchy Tree */}
               {activeTab === "tree" && (
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
-                  {/* Root: HOD */}
-                  <div className="flex flex-col items-center">
-                    <div className="px-4 py-2.5 rounded-xl bg-indigo-900 text-white text-center shadow-xs border border-indigo-800 max-w-xs w-full">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-indigo-300">
-                        Department Head (Tier 1)
+                <div className="space-y-6">
+                  {/* Tree Toolbar */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-100 flex items-center justify-center font-bold text-xs">
+                        <i className="bi bi-diagram-3"></i>
                       </div>
-                      <div className="font-bold text-sm">{roster?.head?.name || "Vacant HOD"}</div>
-                      <div className="text-[11px] text-indigo-200">{department?.name}</div>
+                      <div>
+                        <h5 className="font-bold text-slate-800 text-xs mb-0">Interactive Organization Chart</h5>
+                        <p className="text-[11px] text-slate-400 mb-0">
+                          Three-tier operational reporting structure: HOD &rarr; Supervisors &rarr; Staff
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Stem down to supervisors */}
-                    <div className="w-0.5 h-6 bg-indigo-300"></div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={expandAllTreeSupervisors}
+                        className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors shadow-2xs cursor-pointer"
+                      >
+                        Expand All
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          collapseAllTreeSupervisors(roster?.supervisors?.map((s: any) => s.id) || [])
+                        }
+                        className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors shadow-2xs cursor-pointer"
+                      >
+                        Collapse All
+                      </button>
+                    </div>
+                  </div>
 
-                    {/* Supervisors Tier */}
-                    {roster?.supervisors?.length > 0 ? (
-                      <div className="w-full flex flex-wrap justify-center gap-6">
-                        {roster.supervisors.map((sup: any) => (
-                          <div key={sup.id} className="flex flex-col items-center min-w-[200px] max-w-xs">
-                            <div className="px-3.5 py-2 rounded-xl bg-white border border-emerald-200 shadow-2xs text-center w-full">
-                              <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
-                                Pod Lead (Tier 2)
-                              </span>
-                              <div className="font-bold text-xs text-slate-800 mt-1">{sup.name}</div>
-                              <div className="text-[10px] text-slate-400">{sup.direct_reports_count} direct reports</div>
+                  {/* Visual Hierarchy Diagram */}
+                  <div className="p-6 rounded-2xl bg-gradient-to-b from-slate-50/70 to-slate-100/40 border border-slate-200/90 overflow-x-auto">
+                    {/* Tier 1: Department Head (Apex) */}
+                    <div className="flex flex-col items-center min-w-[600px]">
+                      <div className="w-full max-w-sm rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-4 shadow-md border border-indigo-400/30 text-center relative group">
+                        <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 inline-block mb-2">
+                          Tier 1 Apex • Department Head
+                        </span>
+
+                        <div className="flex items-center justify-center gap-3">
+                          {roster?.head?.image_url ? (
+                            <img
+                              src={roster.head.image_url}
+                              alt={roster.head.name}
+                              className="w-10 h-10 rounded-full object-cover border-2 border-indigo-400/50 shadow-xs"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-indigo-600 text-white font-bold text-sm flex items-center justify-center border-2 border-indigo-400/50 shadow-xs">
+                              {roster?.head?.name ? roster.head.name.charAt(0) : "?"}
                             </div>
-
-                            {/* Stem down to direct reports */}
-                            {sup.direct_reports?.length > 0 && (
-                              <>
-                                <div className="w-0.5 h-4 bg-emerald-300"></div>
-                                <div className="p-2 rounded-lg bg-emerald-50/50 border border-emerald-100 w-full space-y-1">
-                                  {sup.direct_reports.map((dr: any) => (
-                                    <div
-                                      key={dr.id}
-                                      className="px-2 py-1 rounded bg-white border border-slate-200/80 text-[10px] font-medium text-slate-700 flex items-center justify-between"
-                                    >
-                                      <span>{dr.name}</span>
-                                      <span className="text-[9px] text-slate-400">Employee</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </>
-                            )}
+                          )}
+                          <div className="text-left">
+                            <h6 className="font-bold text-sm text-white mb-0 leading-tight">
+                              {roster?.head?.name || "Vacant HOD"}
+                            </h6>
+                            <span className="text-[11px] text-indigo-200 block">
+                              {roster?.head?.email || "No email assigned"}
+                            </span>
                           </div>
-                        ))}
+                        </div>
+
+                        <div className="mt-2.5 pt-2 border-t border-indigo-800/80 flex items-center justify-between text-[10px] text-indigo-300">
+                          <span>Charter: {department?.name}</span>
+                          <span className="font-semibold text-white">
+                            {roster?.total_members || 0} Total Staff
+                          </span>
+                        </div>
                       </div>
-                    ) : (
-                      <div className="p-3 rounded-lg bg-white border border-slate-200 text-xs text-slate-400">
-                        No subordinate team leads reporting to this department.
+
+                      {/* Stem from Tier 1 to Tier 2 */}
+                      <div className="flex flex-col items-center">
+                        <div className="w-0.5 h-6 bg-indigo-300"></div>
+                        <div className="w-5 h-5 rounded-full bg-white border border-indigo-300 text-indigo-600 text-[10px] flex items-center justify-center shadow-2xs font-bold">
+                          <i className="bi bi-chevron-down"></i>
+                        </div>
+                        <div className="w-0.5 h-4 bg-indigo-300"></div>
                       </div>
-                    )}
+
+                      {/* Tier 2: Supervisors & Functional Pods */}
+                      {roster?.supervisors?.length > 0 || directHodEmployees.length > 0 ? (
+                        <div className="w-full flex flex-wrap justify-center gap-6 pt-2">
+                          {/* Supervisor Pods */}
+                          {roster?.supervisors?.map((sup: any) => {
+                            const isCollapsed = collapsedTreeSupervisors.includes(sup.id);
+                            return (
+                              <div
+                                key={sup.id}
+                                className="flex flex-col items-center min-w-[240px] max-w-xs transition-all"
+                              >
+                                {/* Supervisor Node Card */}
+                                <div className="w-full rounded-2xl bg-white border border-emerald-200 shadow-xs p-3.5 text-center relative hover:border-emerald-300 transition-colors">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                      Tier 2 Pod Lead
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => toggleTreeSupervisorCollapse(sup.id)}
+                                      className="text-[10px] font-semibold text-slate-500 hover:text-emerald-700 cursor-pointer flex items-center gap-1"
+                                      title={isCollapsed ? "Expand pod direct reports" : "Collapse pod"}
+                                    >
+                                      <span>{isCollapsed ? "Expand" : "Collapse"}</span>
+                                      <i className={`bi bi-chevron-${isCollapsed ? "down" : "up"}`}></i>
+                                    </button>
+                                  </div>
+
+                                  <div className="flex items-center gap-2.5 text-left mb-2">
+                                    <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center justify-center font-bold text-xs shrink-0">
+                                      {sup.name.charAt(0)}
+                                    </div>
+                                    <div>
+                                      <div className="font-bold text-slate-900 text-xs leading-tight">
+                                        {sup.name}
+                                      </div>
+                                      <span className="text-[10px] text-slate-400 block">{sup.email}</span>
+                                    </div>
+                                  </div>
+
+                                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+                                    <span>Pod Span:</span>
+                                    <span className="font-bold text-emerald-700">
+                                      {sup.direct_reports_count} Direct Reports
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Connecting Stem to Tier 3 Direct Reports */}
+                                {!isCollapsed && sup.direct_reports?.length > 0 && (
+                                  <>
+                                    <div className="w-0.5 h-4 bg-emerald-300"></div>
+
+                                    {/* Tier 3: Subordinate Employees */}
+                                    <div className="w-full space-y-1.5 p-2 rounded-xl bg-emerald-50/40 border border-emerald-100">
+                                      <div className="text-[9px] font-bold uppercase tracking-wider text-emerald-700 px-1 mb-1">
+                                        Tier 3 Staff Members ({sup.direct_reports.length})
+                                      </div>
+                                      {sup.direct_reports.map((dr: any) => (
+                                        <div
+                                          key={dr.id}
+                                          className="p-2 rounded-lg bg-white border border-slate-200 shadow-2xs flex items-center justify-between text-[11px] gap-2"
+                                        >
+                                          <div className="flex items-center gap-2 overflow-hidden">
+                                            <div className="w-5 h-5 rounded-full bg-slate-100 text-slate-600 font-bold text-[9px] flex items-center justify-center shrink-0">
+                                              {dr.name.charAt(0)}
+                                            </div>
+                                            <span className="font-semibold text-slate-800 text-xs truncate">
+                                              {dr.name}
+                                            </span>
+                                          </div>
+                                          {onTransferClick && (
+                                            <button
+                                              type="button"
+                                              onClick={() => onTransferClick(dr.id)}
+                                              className="text-[10px] text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer shrink-0"
+                                              title="Transfer member"
+                                            >
+                                              Transfer
+                                            </button>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </>
+                                )}
+
+                                {isCollapsed && (
+                                  <div className="text-[10px] text-slate-400 mt-1 font-medium">
+                                    +{sup.direct_reports_count} direct reports hidden
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+
+                          {/* Direct HOD Reportees Branch (if any staff report directly to HOD without supervisor) */}
+                          {directHodEmployees.length > 0 && (
+                            <div className="flex flex-col items-center min-w-[240px] max-w-xs">
+                              <div className="w-full rounded-2xl bg-white border border-indigo-200 shadow-xs p-3.5 text-center">
+                                <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200 inline-block mb-1">
+                                  Tier 2/3 Direct HOD Line
+                                </span>
+                                <div className="font-bold text-slate-800 text-xs mt-1">Direct Operational Staff</div>
+                                <span className="text-[10px] text-slate-400">
+                                  {directHodEmployees.length} employees reporting directly to HOD
+                                </span>
+                              </div>
+
+                              <div className="w-0.5 h-4 bg-indigo-300"></div>
+
+                              <div className="w-full space-y-1.5 p-2 rounded-xl bg-indigo-50/40 border border-indigo-100">
+                                {directHodEmployees.map((emp: any) => (
+                                  <div
+                                    key={emp.id}
+                                    className="p-2 rounded-lg bg-white border border-slate-200 shadow-2xs flex items-center justify-between text-[11px] gap-2"
+                                  >
+                                    <div className="flex items-center gap-2 overflow-hidden">
+                                      <div className="w-5 h-5 rounded-full bg-slate-100 text-slate-600 font-bold text-[9px] flex items-center justify-center shrink-0">
+                                        {emp.name.charAt(0)}
+                                      </div>
+                                      <span className="font-semibold text-slate-800 text-xs truncate">
+                                        {emp.name}
+                                      </span>
+                                    </div>
+                                    {onTransferClick && (
+                                      <button
+                                        type="button"
+                                        onClick={() => onTransferClick(emp.id)}
+                                        className="text-[10px] text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer shrink-0"
+                                      >
+                                        Transfer
+                                      </button>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="p-6 rounded-2xl bg-white border border-slate-200 text-center text-xs text-slate-400 mt-4">
+                          No subordinate team leads or staff members currently assigned to this department.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Hierarchy Legend */}
+                  <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-slate-500 pt-2 border-t border-slate-100">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-3 h-3 rounded-md bg-slate-900 border border-slate-700"></span>
+                      <strong className="text-slate-700">Tier 1:</strong> Department Head (Apex Governance)
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-3 h-3 rounded-md bg-emerald-100 border border-emerald-300"></span>
+                      <strong className="text-slate-700">Tier 2:</strong> Supervisors & Pod Leads (Operations)
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-3 h-3 rounded-md bg-slate-100 border border-slate-300"></span>
+                      <strong className="text-slate-700">Tier 3:</strong> Operational Staff Members
+                    </span>
                   </div>
                 </div>
               )}
