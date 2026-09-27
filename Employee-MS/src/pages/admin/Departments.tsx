@@ -12,6 +12,7 @@ const Departments = () => {
   const [eligibleHeads, setEligibleHeads] = useState([]);
   const [editingDeptId, setEditingDeptId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeActionMenuId, setActiveActionMenuId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState({ type: "", text: "" });
 
@@ -55,6 +56,16 @@ const Departments = () => {
   useEffect(() => {
     fetchDepartments();
     fetchEligibleHeads();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest(".action-menu-container")) {
+        setActiveActionMenuId(null);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
   const handleStartEdit = (dept) => {
@@ -518,36 +529,99 @@ const Departments = () => {
                             )}
                           </td>
 
-                          {/* Members Count */}
+                          {/* Members Count with Breakdown */}
                           <td className="px-4 py-4 text-center">
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold border ${memberBadgeClass}`}>
-                              {dept.member_count} Members
-                            </span>
+                            <div className="inline-flex flex-col items-center">
+                              <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold border ${memberBadgeClass} shadow-2xs`}>
+                                <i className="bi bi-people-fill text-[10px]"></i>
+                                {dept.member_count} Members
+                              </span>
+                              {(dept.supervisor_count > 0 || dept.employee_count > 0) && (
+                                <span className="text-[10px] text-slate-400 font-medium mt-1">
+                                  {dept.supervisor_count > 0 ? `${dept.supervisor_count} lead${dept.supervisor_count > 1 ? "s" : ""}` : ""}
+                                  {dept.supervisor_count > 0 && dept.employee_count > 0 ? " • " : ""}
+                                  {dept.employee_count > 0 ? `${dept.employee_count} staff` : ""}
+                                </span>
+                              )}
+                            </div>
                           </td>
 
-                          {/* Actions */}
+                          {/* Actions: 3-Dots Dropdown Menu */}
                           <td className="px-6 py-4 text-right">
-                            <div className="inline-flex items-center gap-1">
+                            <div className="relative inline-block text-left action-menu-container">
                               <button
                                 type="button"
-                                onClick={() => handleStartEdit(dept)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveActionMenuId(activeActionMenuId === dept.id ? null : dept.id);
+                                }}
                                 className={`w-8 h-8 rounded-lg transition-colors cursor-pointer inline-flex items-center justify-center border ${
-                                  editingDeptId === dept.id
-                                    ? "bg-amber-100 text-amber-700 border-amber-200"
-                                    : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border-transparent hover:border-indigo-100"
+                                  activeActionMenuId === dept.id
+                                    ? "bg-slate-100 text-slate-800 border-slate-300 shadow-2xs"
+                                    : "text-slate-400 hover:text-slate-700 hover:bg-slate-100 border-transparent hover:border-slate-200"
                                 }`}
-                                title="Edit Department"
+                                title="Department Actions"
                               >
-                                <i className="bi bi-pencil text-xs"></i>
+                                <i className="bi bi-three-dots-vertical text-xs"></i>
                               </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDelete(dept.id, dept.name)}
-                                className="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer inline-flex items-center justify-center border border-transparent hover:border-rose-100"
-                                title="Delete Department"
-                              >
-                                <i className="bi bi-trash text-sm"></i>
-                              </button>
+
+                              {activeActionMenuId === dept.id && (
+                                <div className="absolute right-0 mt-1 w-48 rounded-xl bg-white border border-slate-200/90 shadow-lg py-1.5 z-40 text-left animate-in fade-in zoom-in-95 duration-100">
+                                  <div className="px-3 py-1.5 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                    {dept.code || dept.name} Actions
+                                  </div>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setActiveActionMenuId(null);
+                                      setMsg({ type: "success", text: `Department Roster for ${dept.name} will be displayed in Phase 2.5 modal.` });
+                                    }}
+                                    className="w-full px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-indigo-600 flex items-center gap-2 transition-colors cursor-pointer"
+                                  >
+                                    <i className="bi bi-people text-slate-400"></i>
+                                    <span>View Roster & Org</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setActiveActionMenuId(null);
+                                      handleStartEdit(dept);
+                                    }}
+                                    className="w-full px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-amber-600 flex items-center gap-2 transition-colors cursor-pointer"
+                                  >
+                                    <i className="bi bi-pencil text-slate-400"></i>
+                                    <span>Edit Department</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setActiveActionMenuId(null);
+                                      setMsg({ type: "success", text: `Workforce mobility transfer for ${dept.name} is ready for Phase 2.6 transfer tool.` });
+                                    }}
+                                    className="w-full px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-blue-600 flex items-center gap-2 transition-colors cursor-pointer"
+                                  >
+                                    <i className="bi bi-arrow-left-right text-slate-400"></i>
+                                    <span>Transfer Members</span>
+                                  </button>
+
+                                  <div className="my-1 border-t border-slate-100"></div>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setActiveActionMenuId(null);
+                                      handleDelete(dept.id, dept.name);
+                                    }}
+                                    className="w-full px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition-colors cursor-pointer font-medium"
+                                  >
+                                    <i className="bi bi-trash text-rose-500"></i>
+                                    <span>Delete Department</span>
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -560,7 +634,7 @@ const Departments = () => {
 
             {/* Table Footer / Pagination Note */}
             <div className="px-6 py-3.5 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400 font-medium">
-              <span>Showing 1 to {departments.length} of {departments.length} departments</span>
+              <span>Showing 1 to {filteredDepartments.length} of {departments.length} departments</span>
               <div className="flex items-center gap-1">
                 <button type="button" disabled className="w-7 h-7 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-400 opacity-50 cursor-not-allowed">
                   <i className="bi bi-chevron-left text-[10px]"></i>
