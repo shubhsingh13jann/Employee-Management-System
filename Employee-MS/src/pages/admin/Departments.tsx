@@ -10,6 +10,7 @@ const Departments = () => {
   const [headId, setHeadId] = useState("");
   const [parentId, setParentId] = useState("");
   const [eligibleHeads, setEligibleHeads] = useState([]);
+  const [editingDeptId, setEditingDeptId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState({ type: "", text: "" });
 
@@ -43,7 +44,28 @@ const Departments = () => {
     fetchEligibleHeads();
   }, []);
 
-  const handleAddDepartment = async (e) => {
+  const handleStartEdit = (dept) => {
+    setEditingDeptId(dept.id);
+    setName(dept.name || "");
+    setCode(dept.code || "");
+    setDescription(dept.description || "");
+    setHeadId(dept.head_id ? String(dept.head_id) : "");
+    setParentId(dept.parent_id ? String(dept.parent_id) : "");
+    setMsg({ type: "", text: "" });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingDeptId(null);
+    setName("");
+    setCode("");
+    setDescription("");
+    setHeadId("");
+    setParentId("");
+    setMsg({ type: "", text: "" });
+  };
+
+  const handleSubmitDepartment = async (e) => {
     e.preventDefault();
     if (!name.trim()) return;
 
@@ -57,19 +79,26 @@ const Departments = () => {
         head_id: headId ? Number(headId) : null,
         parent_id: parentId ? Number(parentId) : null
       };
-      const res = await api.post("/api/admin/departments", payload);
-      if (res.data.status) {
-        setMsg({ type: "success", text: "Department created successfully!" });
-        setName("");
-        setCode("");
-        setDescription("");
-        setHeadId("");
-        setParentId("");
-        fetchDepartments();
-        fetchEligibleHeads();
+
+      if (editingDeptId) {
+        const res = await api.put(`/api/admin/departments/${editingDeptId}`, payload);
+        if (res.data.status) {
+          setMsg({ type: "success", text: "Department updated successfully!" });
+          handleCancelEdit();
+          fetchDepartments();
+          fetchEligibleHeads();
+        }
+      } else {
+        const res = await api.post("/api/admin/departments", payload);
+        if (res.data.status) {
+          setMsg({ type: "success", text: "Department created successfully!" });
+          handleCancelEdit();
+          fetchDepartments();
+          fetchEligibleHeads();
+        }
       }
     } catch (err) {
-      setMsg({ type: "danger", text: err.response?.data?.error || "Failed to create department" });
+      setMsg({ type: "danger", text: err.response?.data?.error || "Failed to save department" });
     } finally {
       setSaving(false);
     }
@@ -81,6 +110,9 @@ const Departments = () => {
       const res = await api.delete(`/api/admin/departments/${id}`);
       if (res.data.status) {
         setMsg({ type: "success", text: "Department removed successfully" });
+        if (editingDeptId === id) {
+          handleCancelEdit();
+        }
         fetchDepartments();
       }
     } catch (err) {
@@ -109,23 +141,47 @@ const Departments = () => {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Create Department Form Card */}
+        {/* Create / Edit Department Form Card */}
         <div className="lg:col-span-4 w-full">
           <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 flex flex-col">
-            {/* Header with Purple Icon */}
-            <div className="flex items-start gap-3.5 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100/80 flex items-center justify-center text-purple-600 shadow-2xs shrink-0 mt-0.5">
-                <i className="bi bi-folder-plus text-lg"></i>
+            {/* Header with Icon and Edit Mode Toggle */}
+            <div className="flex items-start justify-between gap-3.5 mb-6">
+              <div className="flex items-start gap-3.5">
+                <div className={`w-10 h-10 rounded-xl ${
+                  editingDeptId ? "bg-amber-50 border-amber-100/80 text-amber-600" : "bg-purple-50 border-purple-100/80 text-purple-600"
+                } border flex items-center justify-center shadow-2xs shrink-0 mt-0.5 transition-colors`}>
+                  <i className={`bi ${editingDeptId ? "bi-pencil-square" : "bi-folder-plus"} text-lg`}></i>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h5 className="font-bold text-slate-900 text-base mb-0.5">
+                      {editingDeptId ? "Edit Department" : "Add New Department"}
+                    </h5>
+                    {editingDeptId && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 uppercase tracking-wider">
+                        Edit Mode
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-500 mb-0 font-medium leading-relaxed">
+                    {editingDeptId
+                      ? "Modify corporate charter & leadership assignment"
+                      : "Define corporate organizational charter & unit"}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h5 className="font-bold text-slate-900 text-base mb-0.5">Add New Department</h5>
-                <p className="text-xs text-slate-500 mb-0 font-medium leading-relaxed">
-                  Define corporate organizational charter & unit
-                </p>
-              </div>
+              {editingDeptId && (
+                <button
+                  type="button"
+                  onClick={handleCancelEdit}
+                  className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer shrink-0"
+                >
+                  Cancel
+                </button>
+              )}
             </div>
 
-            <form onSubmit={handleAddDepartment} className="space-y-4">
+            <form onSubmit={handleSubmitDepartment} className="space-y-4">
               <div>
                 <label className="block mb-1.5 font-semibold text-slate-700 text-xs">Department Name</label>
                 <div className="relative flex items-center">
@@ -260,18 +316,33 @@ const Departments = () => {
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={saving}
-                className="w-full py-3 px-4 rounded-xl font-semibold text-xs tracking-wide transition-all duration-200 cursor-pointer inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white shadow-xs hover:shadow disabled:opacity-60"
-              >
-                {saving ? (
-                  <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                ) : (
-                  <i className="bi bi-plus-lg text-xs font-bold"></i>
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className={`flex-1 py-3 px-4 rounded-xl font-semibold text-xs tracking-wide transition-all duration-200 cursor-pointer inline-flex items-center justify-center gap-2 ${
+                    editingDeptId
+                      ? "bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white shadow-xs hover:shadow"
+                      : "bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white shadow-xs hover:shadow"
+                  } disabled:opacity-60`}
+                >
+                  {saving ? (
+                    <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                  ) : (
+                    <i className={`bi ${editingDeptId ? "bi-check-lg" : "bi-plus-lg"} text-xs font-bold`}></i>
+                  )}
+                  <span>{editingDeptId ? "Save Department Changes" : "Create Department"}</span>
+                </button>
+                {editingDeptId && (
+                  <button
+                    type="button"
+                    onClick={handleCancelEdit}
+                    className="py-3 px-4 rounded-xl font-semibold text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
                 )}
-                <span>Create Department</span>
-              </button>
+              </div>
             </form>
           </div>
         </div>
@@ -362,7 +433,7 @@ const Departments = () => {
                               <div>
                                 <span className="font-bold text-slate-800 block text-xs">{dept.name}</span>
                                 <span className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">
-                                  {dept.name.substring(0, 3)}
+                                  {dept.code || dept.name.substring(0, 3)}
                                 </span>
                               </div>
                             </div>
@@ -376,14 +447,28 @@ const Departments = () => {
                             </span>
                           </td>
                           <td className="px-6 py-4 text-right">
-                            <button
-                              type="button"
-                              onClick={() => handleDelete(dept.id, dept.name)}
-                              className="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer inline-flex items-center justify-center border border-transparent hover:border-rose-100"
-                              title="Delete Department"
-                            >
-                              <i className="bi bi-trash text-sm"></i>
-                            </button>
+                            <div className="inline-flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => handleStartEdit(dept)}
+                                className={`w-8 h-8 rounded-lg transition-colors cursor-pointer inline-flex items-center justify-center border ${
+                                  editingDeptId === dept.id
+                                    ? "bg-amber-100 text-amber-700 border-amber-200"
+                                    : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border-transparent hover:border-indigo-100"
+                                }`}
+                                title="Edit Department"
+                              >
+                                <i className="bi bi-pencil text-xs"></i>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDelete(dept.id, dept.name)}
+                                className="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer inline-flex items-center justify-center border border-transparent hover:border-rose-100"
+                                title="Delete Department"
+                              >
+                                <i className="bi bi-trash text-sm"></i>
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
