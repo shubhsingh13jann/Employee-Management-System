@@ -108,8 +108,8 @@ const Departments = () => {
       <div className="w-full">
         <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs flex flex-col overflow-hidden">
           {/* Active Departments Header with Search and Actions */}
-          <div className="px-6 py-4 bg-white border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5">
+          <div className="px-6 py-4 bg-white border-b border-slate-100 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5 shrink-0">
               <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100/70 flex items-center justify-center text-purple-600 shadow-2xs shrink-0">
                 <i className="bi bi-buildings text-base"></i>
               </div>
@@ -126,18 +126,19 @@ const Departments = () => {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex items-center gap-2 sm:gap-2.5 flex-nowrap overflow-x-auto py-1">
               {/* Search Bar */}
-              <div className="relative flex items-center">
+              <div className="relative flex items-center shrink-0">
                 <span className="absolute left-3 text-slate-400 text-xs pointer-events-none">
                   <i className="bi bi-search"></i>
                 </span>
                 <input
                   type="text"
-                  placeholder="Search departments or HOD..."
+                  placeholder="Search departments..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8 pr-7 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-700 placeholder:text-slate-400 w-48 sm:w-56 transition-all font-medium"
+                  style={{ borderRadius: "0.75rem" }}
+                  className="pl-8 pr-7 py-2 text-xs bg-slate-50/70 border border-slate-200 !rounded-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-700 placeholder:text-slate-400 w-36 sm:w-44 transition-all font-medium"
                 />
                 {searchQuery && (
                   <button
@@ -154,7 +155,8 @@ const Departments = () => {
               <button
                 type="button"
                 onClick={() => setFormModal({ isOpen: true, dept: null })}
-                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition-all flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-xs shrink-0"
+                style={{ borderRadius: "0.75rem" }}
+                className="px-3.5 py-2 !rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-xs shrink-0 whitespace-nowrap"
                 title="Create New Corporate Department"
               >
                 <i className="bi bi-plus-lg text-xs font-extrabold"></i>
@@ -165,22 +167,24 @@ const Departments = () => {
               <button
                 type="button"
                 onClick={() => setTransferModal({ isOpen: true, userId: null, deptId: null })}
-                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 border border-indigo-200/80 transition-all flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-xs shrink-0"
+                style={{ borderRadius: "0.75rem" }}
+                className="px-3.5 py-2 !rounded-xl text-xs font-bold bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 border border-indigo-200/80 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-xs shrink-0 whitespace-nowrap"
                 title="Initiate Personnel or Squad Transfer"
               >
                 <i className="bi bi-arrow-left-right text-xs"></i>
-                <span className="hidden sm:inline">Mobility Transfer</span>
+                <span>Mobility Transfer</span>
               </button>
 
               {/* Company-Wide Mobility Ledger Action */}
               <button
                 type="button"
                 onClick={() => setGlobalMobilityOpen(true)}
-                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 transition-all flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-xs shrink-0"
+                style={{ borderRadius: "0.75rem" }}
+                className="px-3.5 py-2 !rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-xs shrink-0 whitespace-nowrap"
                 title="View Company-Wide Mobility Audit Ledger"
               >
                 <i className="bi bi-clock-history text-xs text-indigo-600"></i>
-                <span className="hidden sm:inline">Org Mobility Ledger</span>
+                <span>Org Mobility Ledger</span>
               </button>
             </div>
           </div>

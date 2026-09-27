@@ -604,11 +604,35 @@ html {
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
 }
 
-/* Ensure button capsule pills and rounded-full elements are strictly preserved against Bootstrap reboot */
+/* Ensure button capsule pills and rounded border-radius classes are strictly preserved against Bootstrap reboot */
 .auth-mode-pill,
 button.rounded-full,
 button.\!rounded-full {
   border-radius: 9999px !important;
+}
+
+button.rounded-2xl,
+button.\!rounded-2xl,
+.btn-rounded-2xl {
+  border-radius: 1rem !important;
+}
+
+button.rounded-xl,
+button.\!rounded-xl,
+.btn-rounded-xl {
+  border-radius: 0.75rem !important;
+}
+
+button.rounded-lg,
+button.\!rounded-lg,
+.btn-rounded-lg {
+  border-radius: 0.5rem !important;
+}
+
+button.rounded-md,
+button.\!rounded-md,
+.btn-rounded-md {
+  border-radius: 0.375rem !important;
 }
 
 /* ============================================================
