@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/axios";
+import { DepartmentRosterModal } from "../../Components/DepartmentRosterModal";
 
 const Departments = () => {
   const [departments, setDepartments] = useState([]);
@@ -13,6 +14,7 @@ const Departments = () => {
   const [editingDeptId, setEditingDeptId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeActionMenuId, setActiveActionMenuId] = useState(null);
+  const [rosterDept, setRosterDept] = useState<any>(null);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState({ type: "", text: "" });
 
@@ -531,19 +533,24 @@ const Departments = () => {
 
                           {/* Members Count with Breakdown */}
                           <td className="px-4 py-4 text-center">
-                            <div className="inline-flex flex-col items-center">
-                              <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold border ${memberBadgeClass} shadow-2xs`}>
+                            <button
+                              type="button"
+                              onClick={() => setRosterDept(dept)}
+                              className="inline-flex flex-col items-center group cursor-pointer"
+                              title={`View ${dept.name} Roster & Org`}
+                            >
+                              <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold border ${memberBadgeClass} shadow-2xs group-hover:ring-2 group-hover:ring-indigo-400/50 transition-all`}>
                                 <i className="bi bi-people-fill text-[10px]"></i>
                                 {dept.member_count} Members
                               </span>
                               {(dept.supervisor_count > 0 || dept.employee_count > 0) && (
-                                <span className="text-[10px] text-slate-400 font-medium mt-1">
+                                <span className="text-[10px] text-slate-400 group-hover:text-indigo-600 font-medium mt-1 transition-colors">
                                   {dept.supervisor_count > 0 ? `${dept.supervisor_count} lead${dept.supervisor_count > 1 ? "s" : ""}` : ""}
                                   {dept.supervisor_count > 0 && dept.employee_count > 0 ? " • " : ""}
                                   {dept.employee_count > 0 ? `${dept.employee_count} staff` : ""}
                                 </span>
                               )}
-                            </div>
+                            </button>
                           </td>
 
                           {/* Actions: 3-Dots Dropdown Menu */}
@@ -575,7 +582,7 @@ const Departments = () => {
                                     type="button"
                                     onClick={() => {
                                       setActiveActionMenuId(null);
-                                      setMsg({ type: "success", text: `Department Roster for ${dept.name} will be displayed in Phase 2.5 modal.` });
+                                      setRosterDept(dept);
                                     }}
                                     className="w-full px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-indigo-600 flex items-center gap-2 transition-colors cursor-pointer"
                                   >
@@ -648,6 +655,24 @@ const Departments = () => {
           </div>
         </div>
       </div>
+
+      {/* Enterprise Department Roster & Org Hierarchy Modal */}
+      <DepartmentRosterModal
+        isOpen={!!rosterDept}
+        onClose={() => setRosterDept(null)}
+        departmentId={rosterDept?.id || null}
+        departmentName={rosterDept?.name}
+        onEditClick={(deptToEdit) => {
+          handleStartEdit(deptToEdit);
+        }}
+        onTransferClick={(userId) => {
+          setRosterDept(null);
+          setMsg({
+            type: "success",
+            text: `Workforce mobility transfer initiated for member #${userId || "selected"}. Transfer tool will open in Phase 2.6.`
+          });
+        }}
+      />
     </div>
   );
 };
