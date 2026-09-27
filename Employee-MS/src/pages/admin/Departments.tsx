@@ -191,14 +191,14 @@ const Departments = () => {
 
             {/* Table Area */}
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full text-left border-collapse table-fixed">
                 <thead className="bg-slate-50/70 border-b border-slate-100 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                   <tr>
-                    <th className="px-6 py-3.5">Department</th>
-                    <th className="px-4 py-3.5">Description</th>
-                    <th className="px-4 py-3.5">Head of Dept</th>
-                    <th className="px-4 py-3.5 text-center">Members</th>
-                    <th className="px-6 py-3.5 text-right">Actions</th>
+                    <th className="w-[28%] px-6 py-3.5">Department</th>
+                    <th className="w-[36%] px-4 py-3.5">Description</th>
+                    <th className="w-[18%] px-4 py-3.5">Head of Dept</th>
+                    <th className="w-[11%] px-3 py-3.5 text-center">Members</th>
+                    <th className="w-[7%] px-3 py-3.5 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs">
@@ -227,7 +227,8 @@ const Departments = () => {
                             <button
                               type="button"
                               onClick={() => setFormModal({ isOpen: true, dept: null })}
-                              className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition-all flex items-center gap-2 shadow-2xs cursor-pointer mt-1"
+                              style={{ borderRadius: "0.75rem" }}
+                              className="px-4 py-2 !rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition-all flex items-center gap-2 shadow-2xs cursor-pointer mt-1"
                             >
                               <i className="bi bi-plus-lg text-xs"></i>
                               <span>Add First Department</span>
@@ -267,14 +268,14 @@ const Departments = () => {
                               <div className={`w-9 h-9 rounded-xl flex items-center justify-center border text-xs font-bold ${colorClass} shrink-0 shadow-2xs`}>
                                 <i className={`bi ${iconClass}`}></i>
                               </div>
-                              <div>
-                                <span className="font-bold text-slate-800 block text-xs">{dept.name}</span>
+                              <div className="min-w-0">
+                                <span className="font-bold text-slate-800 block text-xs truncate">{dept.name}</span>
                                 <div className="flex items-center gap-1.5 mt-0.5">
                                   <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase bg-slate-100 text-slate-600 border border-slate-200/80">
                                     {dept.code || dept.name.substring(0, 3).toUpperCase()}
                                   </span>
                                   {dept.parent_name && (
-                                    <span className="text-[10px] text-slate-400 font-medium">
+                                    <span className="text-[10px] text-slate-400 font-medium truncate">
                                       ↳ {dept.parent_name}
                                     </span>
                                   )}
@@ -284,7 +285,7 @@ const Departments = () => {
                           </td>
 
                           {/* Description */}
-                          <td className="px-4 py-4 text-slate-500 font-medium text-xs max-w-[220px]">
+                          <td className="px-4 py-4 text-slate-500 font-medium text-xs">
                             <p className="truncate mb-0" title={dept.description}>
                               {dept.description || "No description provided"}
                             </p>
@@ -293,7 +294,7 @@ const Departments = () => {
                           {/* Department Head (HOD) */}
                           <td className="px-4 py-4">
                             {dept.head_name ? (
-                              <div className="flex items-center gap-2.5">
+                              <div className="flex items-center gap-2.5 min-w-0">
                                 {dept.head_image_url ? (
                                   <img
                                     src={dept.head_image_url}
@@ -305,11 +306,11 @@ const Departments = () => {
                                     {dept.head_name.charAt(0)}
                                   </div>
                                 )}
-                                <div>
-                                  <span className="font-semibold text-slate-800 text-xs block leading-tight">
+                                <div className="min-w-0">
+                                  <span className="font-semibold text-slate-800 text-xs block leading-tight truncate">
                                     {dept.head_name}
                                   </span>
-                                  <span className="text-[10px] text-indigo-600 font-medium">
+                                  <span className="text-[10px] text-indigo-600 font-medium block truncate">
                                     {dept.head_role ? `${dept.head_role.toUpperCase()} / HOD` : "HOD"}
                                   </span>
                                 </div>
@@ -322,8 +323,8 @@ const Departments = () => {
                             )}
                           </td>
 
-                          {/* Members Count with Breakdown */}
-                          <td className="px-4 py-4 text-center">
+                          {/* Members Count with Breakdown - Centered & Compact */}
+                          <td className="px-3 py-4 text-center whitespace-nowrap">
                             <button
                               type="button"
                               onClick={() => setRosterDept(dept)}
@@ -344,16 +345,17 @@ const Departments = () => {
                             </button>
                           </td>
 
-                          {/* Actions: 3-Dots Dropdown Menu */}
-                          <td className="px-6 py-4 text-right">
-                            <div className="relative inline-block text-left action-menu-container">
+                          {/* Actions: 3-Dots Dropdown Menu - Centered & Compact */}
+                          <td className="px-3 py-4 text-center whitespace-nowrap">
+                            <div className="relative inline-flex items-center justify-center action-menu-container">
                               <button
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setActiveActionMenuId(activeActionMenuId === dept.id ? null : dept.id);
                                 }}
-                                className={`w-8 h-8 rounded-xl transition-all cursor-pointer inline-flex items-center justify-center border ${
+                                style={{ borderRadius: "0.75rem" }}
+                                className={`w-8 h-8 !rounded-xl transition-all cursor-pointer inline-flex items-center justify-center border ${
                                   activeActionMenuId === dept.id
                                     ? "bg-slate-100 text-slate-800 border-slate-300 shadow-2xs"
                                     : "text-slate-400 hover:text-slate-700 hover:bg-slate-100 border-transparent hover:border-slate-200"
