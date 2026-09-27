@@ -22,8 +22,11 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
   const [users, setUsers] = useState<any[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [targetDeptId, setTargetDeptId] = useState<string>("");
+  const [targetSupervisorId, setTargetSupervisorId] = useState<string>("");
+  const [targetSupervisors, setTargetSupervisors] = useState<any[]>([]);
+  const [loadingSupervisors, setLoadingSupervisors] = useState(false);
   const [userSearchQuery, setUserSearchQuery] = useState("");
-  const [step, setStep] = useState<1 | 2>(1);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   // Fetch users when modal opens
@@ -53,24 +56,53 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
   useEffect(() => {
     if (initialUserId) {
       setSelectedUserId(String(initialUserId));
-      setStep(1);
     } else {
       setSelectedUserId("");
     }
     setTargetDeptId("");
+    setTargetSupervisorId("");
+    setTargetSupervisors([]);
     setError("");
   }, [isOpen, initialUserId, initialDeptId]);
+
+  // Load target department supervisors when targetDeptId changes
+  useEffect(() => {
+    if (!targetDeptId) {
+      setTargetSupervisors([]);
+      setTargetSupervisorId("");
+      return;
+    }
+
+    const fetchSupervisors = async () => {
+      try {
+        setLoadingSupervisors(true);
+        const res = await api.get(`/api/admin/departments/${targetDeptId}/roster`);
+        if (res.data.status && res.data.roster?.supervisors) {
+          setTargetSupervisors(res.data.roster.supervisors);
+        } else {
+          setTargetSupervisors([]);
+        }
+      } catch (err) {
+        console.error("Failed to load destination supervisors:", err);
+        setTargetSupervisors([]);
+      } finally {
+        setLoadingSupervisors(false);
+      }
+    };
+
+    fetchSupervisors();
+  }, [targetDeptId]);
 
   // Handle escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
+      if (e.key === "Escape" && isOpen && !submitting) {
         onClose();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, submitting]);
 
   if (!isOpen) return null;
 
@@ -78,6 +110,9 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
   const currentDept = departments.find((d) => d.id === selectedUser?.department_id);
   const availableTargetDepts = departments.filter((d) => d.id !== selectedUser?.department_id);
   const selectedTargetDept = departments.find((d) => String(d.id) === String(targetDeptId));
+
+  const isSupervisor = selectedUser?.role === "supervisor";
+  const isSourceHod = currentDept && currentDept.head_id === selectedUser?.id;
 
   const filteredUsers = users.filter((u) => {
     if (initialDeptId && u.department_id !== initialDeptId && !initialUserId) return false;
@@ -90,6 +125,37 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
       u.department_name?.toLowerCase().includes(q)
     );
   });
+
+  const handleExecuteTransfer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUserId || !targetDeptId) {
+      setError("Please select both a candidate and target destination department.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError("");
+      const res = await api.post("/api/admin/departments/transfer-member", {
+        user_id: Number(selectedUserId),
+        target_department_id: Number(targetDeptId),
+        target_supervisor_id: targetSupervisorId ? Number(targetSupervisorId) : null
+      });
+
+      if (res.data.status) {
+        if (onTransferSuccess) {
+          onTransferSuccess(res.data.message || `Successfully transferred ${selectedUser?.name}`);
+        }
+        onClose();
+      } else {
+        setError(res.data.error || "Failed to execute transfer");
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Error executing personnel transfer");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
@@ -109,7 +175,7 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
                   Workforce Mobility Transfer
                 </h3>
                 <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-indigo-500/30 text-indigo-200 border border-indigo-400/40">
-                  Step {step} of 2
+                  Governance Protocol
                 </span>
               </div>
               <p className="text-xs text-slate-300 mt-1 mb-0">
@@ -121,177 +187,254 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-sm font-bold"
+            disabled={submitting}
+            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-sm font-bold disabled:opacity-50"
             title="Close"
           >
             ✕
           </button>
         </div>
 
-        {/* Modal Body */}
-        <div className="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
-          {error && (
-            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
-              <i className="bi bi-exclamation-triangle-fill text-rose-500"></i>
-              <span>{error}</span>
-            </div>
-          )}
-
-          {/* Section 1: Member Selection */}
-          <div className="space-y-3">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">
-              1. Select Employee / Leader to Transfer
-            </label>
-
-            {!initialUserId ? (
-              <div className="space-y-2">
-                <div className="relative">
-                  <i className="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                  <input
-                    type="text"
-                    value={userSearchQuery}
-                    onChange={(e) => setUserSearchQuery(e.target.value)}
-                    placeholder="Search candidate by name, email, or role..."
-                    className="w-full pl-8 pr-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
-                  />
-                </div>
-
-                <div className="max-h-40 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100">
-                  {loadingUsers ? (
-                    <div className="p-4 text-center text-xs text-slate-400">Loading directory...</div>
-                  ) : filteredUsers.length > 0 ? (
-                    filteredUsers.map((u) => (
-                      <button
-                        key={u.id}
-                        type="button"
-                        onClick={() => setSelectedUserId(String(u.id))}
-                        className={`w-full p-2.5 text-left text-xs flex items-center justify-between transition-colors cursor-pointer ${
-                          String(selectedUserId) === String(u.id)
-                            ? "bg-indigo-50/80 text-indigo-900 font-semibold"
-                            : "hover:bg-slate-50 text-slate-700"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] flex items-center justify-center">
-                            {u.name.charAt(0)}
-                          </div>
-                          <div>
-                            <span className="font-semibold block text-xs leading-tight">{u.name}</span>
-                            <span className="text-[10px] text-slate-400">{u.email}</span>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600 block mb-0.5">
-                            {u.role}
-                          </span>
-                          <span className="text-[10px] text-slate-400 font-medium">
-                            {u.department_name || "Unassigned"}
-                          </span>
-                        </div>
-                      </button>
-                    ))
-                  ) : (
-                    <div className="p-4 text-center text-xs text-slate-400">No personnel match search query</div>
-                  )}
-                </div>
+        {/* Modal Form Body */}
+        <form onSubmit={handleExecuteTransfer} className="flex-1 flex flex-col overflow-hidden">
+          <div className="p-6 space-y-5 overflow-y-auto max-h-[70vh]">
+            {error && (
+              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                <i className="bi bi-exclamation-triangle-fill text-rose-500"></i>
+                <span>{error}</span>
               </div>
-            ) : null}
+            )}
 
-            {/* Selected User Details Card */}
-            {selectedUser && (
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/90 flex items-center justify-between gap-3 shadow-2xs">
-                <div className="flex items-center gap-3">
-                  {selectedUser.image_url ? (
-                    <img
-                      src={selectedUser.image_url}
-                      alt={selectedUser.name}
-                      className="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-2xs"
+            {/* Section 1: Member Selection */}
+            <div className="space-y-3">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">
+                1. Select Candidate to Transfer
+              </label>
+
+              {!initialUserId ? (
+                <div className="space-y-2">
+                  <div className="relative">
+                    <i className="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input
+                      type="text"
+                      value={userSearchQuery}
+                      onChange={(e) => setUserSearchQuery(e.target.value)}
+                      placeholder="Search candidate by name, email, or role..."
+                      className="w-full pl-8 pr-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
                     />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-600 to-slate-800 text-white font-bold text-sm flex items-center justify-center shadow-2xs">
-                      {selectedUser.name.charAt(0)}
+                  </div>
+
+                  <div className="max-h-36 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100">
+                    {loadingUsers ? (
+                      <div className="p-4 text-center text-xs text-slate-400">Loading directory...</div>
+                    ) : filteredUsers.length > 0 ? (
+                      filteredUsers.map((u) => (
+                        <button
+                          key={u.id}
+                          type="button"
+                          onClick={() => setSelectedUserId(String(u.id))}
+                          className={`w-full p-2.5 text-left text-xs flex items-center justify-between transition-colors cursor-pointer ${
+                            String(selectedUserId) === String(u.id)
+                              ? "bg-indigo-50/80 text-indigo-900 font-semibold"
+                              : "hover:bg-slate-50 text-slate-700"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] flex items-center justify-center">
+                              {u.name.charAt(0)}
+                            </div>
+                            <div>
+                              <span className="font-semibold block text-xs leading-tight">{u.name}</span>
+                              <span className="text-[10px] text-slate-400">{u.email}</span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600 block mb-0.5">
+                              {u.role}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-medium">
+                              {u.department_name || "Unassigned"}
+                            </span>
+                          </div>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="p-4 text-center text-xs text-slate-400">No personnel match search query</div>
+                    )}
+                  </div>
+                </div>
+              ) : null}
+
+              {/* Selected User Details Card */}
+              {selectedUser && (
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/90 flex items-center justify-between gap-3 shadow-2xs">
+                  <div className="flex items-center gap-3">
+                    {selectedUser.image_url ? (
+                      <img
+                        src={selectedUser.image_url}
+                        alt={selectedUser.name}
+                        className="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-2xs"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-600 to-slate-800 text-white font-bold text-sm flex items-center justify-center shadow-2xs">
+                        {selectedUser.name.charAt(0)}
+                      </div>
+                    )}
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h6 className="font-bold text-slate-900 text-xs mb-0">{selectedUser.name}</h6>
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-slate-200 text-slate-700">
+                          {selectedUser.role}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-slate-400 block">{selectedUser.email}</span>
                     </div>
-                  )}
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h6 className="font-bold text-slate-900 text-xs mb-0">{selectedUser.name}</h6>
-                      <span className="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-slate-200 text-slate-700">
-                        {selectedUser.role}
+                  </div>
+
+                  <div className="text-right text-xs">
+                    <span className="text-[10px] text-slate-400 block font-medium">Source Department</span>
+                    <span className="font-bold text-indigo-700">
+                      {currentDept?.name || selectedUser.department_name || "Unassigned"}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Section 2: Destination Department */}
+            <div className="space-y-3 pt-2 border-t border-slate-100">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">
+                2. Target Destination Department
+              </label>
+
+              <select
+                value={targetDeptId}
+                onChange={(e) => setTargetDeptId(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all cursor-pointer font-medium text-slate-800"
+              >
+                <option value="">-- Choose Target Department --</option>
+                {availableTargetDepts.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name} {d.code ? `(${d.code})` : ""} • {d.member_count || 0} members
+                  </option>
+                ))}
+              </select>
+
+              {/* Target Department Overview Card */}
+              {selectedTargetDept && (
+                <div className="p-3.5 rounded-xl bg-indigo-50/50 border border-indigo-100 flex items-center justify-between text-xs animate-in fade-in duration-150">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white font-bold flex items-center justify-center text-xs">
+                      <i className="bi bi-building"></i>
+                    </div>
+                    <div>
+                      <span className="font-bold text-slate-900 block leading-tight">
+                        {selectedTargetDept.name}
+                      </span>
+                      <span className="text-[11px] text-indigo-700 font-medium">
+                        HOD: {selectedTargetDept.head_name || "Vacant"}
                       </span>
                     </div>
-                    <span className="text-[11px] text-slate-400 block">{selectedUser.email}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-white text-indigo-700 border border-indigo-200">
+                      {selectedTargetDept.member_count || 0} Current Staff
+                    </span>
                   </div>
                 </div>
+              )}
+            </div>
 
-                <div className="text-right text-xs">
-                  <span className="text-[10px] text-slate-400 block font-medium">Source Department</span>
-                  <span className="font-bold text-indigo-700">
-                    {currentDept?.name || selectedUser.department_name || "Unassigned"}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Section 2: Destination Department */}
-          <div className="space-y-3 pt-2 border-t border-slate-100">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">
-              2. Target Destination Department
-            </label>
-
-            <select
-              value={targetDeptId}
-              onChange={(e) => setTargetDeptId(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all cursor-pointer font-medium text-slate-800"
-            >
-              <option value="">-- Choose Target Department --</option>
-              {availableTargetDepts.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name} {d.code ? `(${d.code})` : ""} • {d.member_count || 0} members
-                </option>
-              ))}
-            </select>
-
-            {/* Target Department Overview Card */}
+            {/* Section 3: Target Reporting Structure */}
             {selectedTargetDept && (
-              <div className="p-3.5 rounded-xl bg-indigo-50/50 border border-indigo-100 flex items-center justify-between text-xs animate-in fade-in duration-150">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white font-bold flex items-center justify-center text-xs">
-                    <i className="bi bi-building"></i>
-                  </div>
-                  <div>
-                    <span className="font-bold text-slate-900 block leading-tight">
-                      {selectedTargetDept.name}
-                    </span>
-                    <span className="text-[11px] text-indigo-700 font-medium">
-                      HOD: {selectedTargetDept.head_name || "Vacant"}
-                    </span>
-                  </div>
+              <div className="space-y-3 pt-2 border-t border-slate-100 animate-in fade-in duration-150">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-0">
+                    3. Destination Reporting Line (Tier 2/3)
+                  </label>
+                  <span className="text-[11px] text-slate-400">Optional Supervisor Allocation</span>
                 </div>
-                <div className="text-right">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-white text-indigo-700 border border-indigo-200">
-                    {selectedTargetDept.member_count || 0} Current Staff
-                  </span>
+
+                <select
+                  value={targetSupervisorId}
+                  onChange={(e) => setTargetSupervisorId(e.target.value)}
+                  disabled={loadingSupervisors}
+                  className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all cursor-pointer font-medium text-slate-800 disabled:opacity-50"
+                >
+                  <option value="">
+                    Direct to Department Head ({selectedTargetDept.head_name || "HOD Apex"})
+                  </option>
+                  {targetSupervisors.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} (Pod Lead • {s.direct_reports_count} direct reports)
+                    </option>
+                  ))}
+                </select>
+
+                <p className="text-[11px] text-slate-400 mb-0">
+                  {targetSupervisorId
+                    ? `Candidate will report to selected team supervisor in ${selectedTargetDept.name}.`
+                    : `Candidate will report directly to the department head without an intermediate lead.`}
+                </p>
+              </div>
+            )}
+
+            {/* Safeguard & Policy Alerts */}
+            {isSupervisor && (
+              <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-1 animate-in fade-in duration-150">
+                <div className="font-bold flex items-center gap-1.5 text-amber-800">
+                  <i className="bi bi-shield-exclamation text-amber-600"></i>
+                  <span>Managerial Span Safeguard Active</span>
                 </div>
+                <p className="text-[11px] text-amber-700 mb-0">
+                  Transferring this supervisor will automatically reassign any direct reportees in {currentDept?.name} directly to the source Department Head to prevent orphaned reporting lines.
+                </p>
+              </div>
+            )}
+
+            {isSourceHod && (
+              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs space-y-1 animate-in fade-in duration-150">
+                <div className="font-bold flex items-center gap-1.5 text-rose-800">
+                  <i className="bi bi-exclamation-octagon text-rose-600"></i>
+                  <span>Department Head Vacancy Alert</span>
+                </div>
+                <p className="text-[11px] text-rose-700 mb-0">
+                  {selectedUser?.name} is the designated Head of Department for {currentDept?.name}. Completing this transfer will leave {currentDept?.name} vacant until an interim or replacement HOD is appointed.
+                </p>
               </div>
             )}
           </div>
-        </div>
 
-        {/* Modal Footer */}
-        <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 rounded-xl font-semibold text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
-          >
-            Cancel
-          </button>
+          {/* Modal Footer */}
+          <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={submitting}
+              className="px-4 py-2 rounded-xl font-semibold text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer disabled:opacity-50"
+            >
+              Cancel
+            </button>
 
-          <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
-            Enterprise Transfer Governance
-          </span>
-        </div>
+            <button
+              type="submit"
+              disabled={!selectedUserId || !targetDeptId || submitting}
+              className="px-5 py-2.5 rounded-xl font-bold text-xs bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+            >
+              {submitting ? (
+                <>
+                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span>Executing Transfer...</span>
+                </>
+              ) : (
+                <>
+                  <span>Confirm & Execute Transfer</span>
+                  <i className="bi bi-arrow-right"></i>
+                </>
+              )}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
