@@ -4,17 +4,12 @@ import { DepartmentRosterModal } from "../../Components/DepartmentRosterModal";
 import { TransferMemberModal } from "../../Components/TransferMemberModal";
 import { GlobalMobilityModal } from "../../Components/GlobalMobilityModal";
 import { DecommissionDepartmentModal } from "../../Components/DecommissionDepartmentModal";
+import { DepartmentFormModal } from "../../Components/DepartmentFormModal";
 
 const Departments = () => {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [name, setName] = useState("");
-  const [code, setCode] = useState("");
-  const [description, setDescription] = useState("");
-  const [headId, setHeadId] = useState("");
-  const [parentId, setParentId] = useState("");
   const [eligibleHeads, setEligibleHeads] = useState([]);
-  const [editingDeptId, setEditingDeptId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeActionMenuId, setActiveActionMenuId] = useState(null);
   const [rosterDept, setRosterDept] = useState<any>(null);
@@ -25,7 +20,7 @@ const Departments = () => {
   }>({ isOpen: false, userId: null, deptId: null });
   const [globalMobilityOpen, setGlobalMobilityOpen] = useState(false);
   const [decommissionDeptId, setDecommissionDeptId] = useState<number | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [formModal, setFormModal] = useState<{ isOpen: boolean; dept: any | null }>({ isOpen: false, dept: null });
   const [msg, setMsg] = useState({ type: "", text: "" });
 
   const filteredDepartments = departments.filter((dept) => {
@@ -80,64 +75,9 @@ const Departments = () => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  const handleStartEdit = (dept) => {
-    setEditingDeptId(dept.id);
-    setName(dept.name || "");
-    setCode(dept.code || "");
-    setDescription(dept.description || "");
-    setHeadId(dept.head_id ? String(dept.head_id) : "");
-    setParentId(dept.parent_id ? String(dept.parent_id) : "");
-    setMsg({ type: "", text: "" });
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handleCancelEdit = () => {
-    setEditingDeptId(null);
-    setName("");
-    setCode("");
-    setDescription("");
-    setHeadId("");
-    setParentId("");
-    setMsg({ type: "", text: "" });
-  };
-
-  const handleSubmitDepartment = async (e) => {
-    e.preventDefault();
-    if (!name.trim()) return;
-
-    try {
-      setSaving(true);
-      setMsg({ type: "", text: "" });
-      const payload = {
-        name: name.trim(),
-        code: code.trim().toUpperCase(),
-        description: description.trim(),
-        head_id: headId ? Number(headId) : null,
-        parent_id: parentId ? Number(parentId) : null
-      };
-
-      if (editingDeptId) {
-        const res = await api.put(`/api/admin/departments/${editingDeptId}`, payload);
-        if (res.data.status) {
-          setMsg({ type: "success", text: "Department updated successfully!" });
-          handleCancelEdit();
-          fetchDepartments();
-          fetchEligibleHeads();
-        }
-      } else {
-        const res = await api.post("/api/admin/departments", payload);
-        if (res.data.status) {
-          setMsg({ type: "success", text: "Department created successfully!" });
-          handleCancelEdit();
-          fetchDepartments();
-          fetchEligibleHeads();
-        }
-      }
-    } catch (err) {
-      setMsg({ type: "danger", text: err.response?.data?.error || "Failed to save department" });
-    } finally {
-      setSaving(false);
-    }
+  const handleStartEdit = (dept: any) => {
+    setActiveActionMenuId(null);
+    setFormModal({ isOpen: true, dept });
   };
 
   const handleDelete = (id: number) => {
@@ -164,279 +104,86 @@ const Departments = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Create / Edit Department Form Card */}
-        <div className="lg:col-span-4 w-full">
-          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 flex flex-col">
-            {/* Header with Icon and Edit Mode Toggle */}
-            <div className="flex items-start justify-between gap-3.5 mb-6">
-              <div className="flex items-start gap-3.5">
-                <div className={`w-10 h-10 rounded-xl ${
-                  editingDeptId ? "bg-amber-50 border-amber-100/80 text-amber-600" : "bg-purple-50 border-purple-100/80 text-purple-600"
-                } border flex items-center justify-center shadow-2xs shrink-0 mt-0.5 transition-colors`}>
-                  <i className={`bi ${editingDeptId ? "bi-pencil-square" : "bi-folder-plus"} text-lg`}></i>
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h5 className="font-bold text-slate-900 text-base mb-0.5">
-                      {editingDeptId ? "Edit Department" : "Add New Department"}
-                    </h5>
-                    {editingDeptId && (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 uppercase tracking-wider">
-                        Edit Mode
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-slate-500 mb-0 font-medium leading-relaxed">
-                    {editingDeptId
-                      ? "Modify corporate charter & leadership assignment"
-                      : "Define corporate organizational charter & unit"}
-                  </p>
-                </div>
+      {/* Full-Width Active Departments Card */}
+      <div className="w-full">
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs flex flex-col overflow-hidden">
+          {/* Active Departments Header with Search and Actions */}
+          <div className="px-6 py-4 bg-white border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100/70 flex items-center justify-center text-purple-600 shadow-2xs shrink-0">
+                <i className="bi bi-buildings text-base"></i>
               </div>
-              {editingDeptId && (
-                <button
-                  type="button"
-                  onClick={handleCancelEdit}
-                  className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer shrink-0"
-                >
-                  Cancel
-                </button>
-              )}
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <h5 className="font-bold text-slate-900 text-base mb-0">Active Departments</h5>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200/60">
+                    {filteredDepartments.length} {filteredDepartments.length === 1 ? "Unit" : "Units"}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 mb-0 font-medium">
+                  Corporate organizational hierarchy, department charters & leadership topology
+                </p>
+              </div>
             </div>
 
-            <form onSubmit={handleSubmitDepartment} className="space-y-4">
-              <div>
-                <label className="block mb-1.5 font-semibold text-slate-700 text-xs">Department Name</label>
-                <div className="relative flex items-center">
-                  <span className="absolute left-3 text-slate-400 text-xs">
-                    <i className="bi bi-building"></i>
-                  </span>
-                  <input
-                    type="text"
-                    className="w-full pl-8 pr-4 py-2.5 text-xs bg-slate-50/60 border border-slate-200 rounded-xl outline-none focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-800 transition-all placeholder:text-slate-400 font-medium"
-                    placeholder="e.g., Engineering, Marketing, Finance"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <label className="font-semibold text-slate-700 text-xs">Department Code</label>
-                  <span className="text-[10px] text-slate-400 font-medium">3-4 letters unique identifier</span>
-                </div>
-                <div className="relative flex items-center">
-                  <span className="absolute left-3 text-slate-400 text-xs">
-                    <i className="bi bi-upc-scan"></i>
-                  </span>
-                  <input
-                    type="text"
-                    maxLength={6}
-                    className="w-full pl-8 pr-4 py-2.5 text-xs bg-slate-50/60 border border-slate-200 rounded-xl outline-none focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-800 transition-all placeholder:text-slate-400 font-bold uppercase tracking-wider"
-                    placeholder="e.g., ENG, MKT, FIN"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value.toUpperCase())}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <label className="font-semibold text-slate-700 text-xs">Description</label>
-                  <span className={`text-[10px] font-semibold transition-colors ${
-                    description.length > 220 ? "text-amber-600" : "text-slate-400"
-                  }`}>
-                    {description.length}/250 characters
-                  </span>
-                </div>
-                <textarea
-                  className="w-full p-3 text-xs bg-slate-50/60 border border-slate-200 rounded-xl outline-none focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-800 transition-all placeholder:text-slate-400 font-medium resize-none"
-                  rows={3}
-                  maxLength={250}
-                  placeholder="Describe the department's purpose, responsibilities, and key functions..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                ></textarea>
-              </div>
-
-              {/* Department Head (HOD) Selector */}
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <label className="font-semibold text-slate-700 text-xs">Department Head (HOD)</label>
-                  <span className="text-[10px] text-slate-400 font-medium">Designated Leader</span>
-                </div>
-                <div className="relative flex items-center">
-                  <span className="absolute left-3 text-slate-400 text-xs pointer-events-none">
-                    <i className="bi bi-person-badge"></i>
-                  </span>
-                  <select
-                    className="w-full pl-8 pr-8 py-2.5 text-xs bg-slate-50/60 border border-slate-200 rounded-xl outline-none focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-800 transition-all font-medium appearance-none cursor-pointer"
-                    value={headId}
-                    onChange={(e) => setHeadId(e.target.value)}
-                  >
-                    <option value="">— Unassigned / Vacant —</option>
-                    {eligibleHeads.map((head) => (
-                      <option key={head.id} value={head.id}>
-                        {head.name} ({head.role?.toUpperCase() || "MANAGER"}) {head.department_name ? `• ${head.department_name}` : ""}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="absolute right-3 text-slate-400 text-xs pointer-events-none">
-                    <i className="bi bi-chevron-down text-[10px]"></i>
-                  </span>
-                </div>
-
-                {/* HOD Preview Badge if selected */}
-                {headId && (() => {
-                  const selectedHead = eligibleHeads.find((h) => String(h.id) === String(headId));
-                  if (!selectedHead) return null;
-                  return (
-                    <div className="mt-2 p-2.5 rounded-xl bg-indigo-50/60 border border-indigo-100 flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-[10px] shadow-2xs shrink-0">
-                          {selectedHead.name.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-slate-800 text-[11px] leading-tight">{selectedHead.name}</div>
-                          <div className="text-[10px] text-slate-400">{selectedHead.email}</div>
-                        </div>
-                      </div>
-                      <span className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-700">
-                        {selectedHead.role}
-                      </span>
-                    </div>
-                  );
-                })()}
-              </div>
-
-              {/* Parent Department Selector */}
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <label className="font-semibold text-slate-700 text-xs">Parent Department</label>
-                  <span className="text-[10px] text-slate-400 font-medium">Optional hierarchy</span>
-                </div>
-                <div className="relative flex items-center">
-                  <span className="absolute left-3 text-slate-400 text-xs pointer-events-none">
-                    <i className="bi bi-diagram-3"></i>
-                  </span>
-                  <select
-                    className="w-full pl-8 pr-8 py-2.5 text-xs bg-slate-50/60 border border-slate-200 rounded-xl outline-none focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-800 transition-all font-medium appearance-none cursor-pointer"
-                    value={parentId}
-                    onChange={(e) => setParentId(e.target.value)}
-                  >
-                    <option value="">— None (Top-Level Department) —</option>
-                    {departments.map((dept) => (
-                      <option key={dept.id} value={dept.id}>
-                        {dept.name} {dept.code ? `(${dept.code})` : ""}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="absolute right-3 text-slate-400 text-xs pointer-events-none">
-                    <i className="bi bi-chevron-down text-[10px]"></i>
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 pt-1">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className={`flex-1 py-3 px-4 rounded-xl font-semibold text-xs tracking-wide transition-all duration-200 cursor-pointer inline-flex items-center justify-center gap-2 ${
-                    editingDeptId
-                      ? "bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white shadow-xs hover:shadow"
-                      : "bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white shadow-xs hover:shadow"
-                  } disabled:opacity-60`}
-                >
-                  {saving ? (
-                    <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                  ) : (
-                    <i className={`bi ${editingDeptId ? "bi-check-lg" : "bi-plus-lg"} text-xs font-bold`}></i>
-                  )}
-                  <span>{editingDeptId ? "Save Department Changes" : "Create Department"}</span>
-                </button>
-                {editingDeptId && (
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Search Bar */}
+              <div className="relative flex items-center">
+                <span className="absolute left-3 text-slate-400 text-xs pointer-events-none">
+                  <i className="bi bi-search"></i>
+                </span>
+                <input
+                  type="text"
+                  placeholder="Search departments or HOD..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8 pr-7 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-700 placeholder:text-slate-400 w-48 sm:w-56 transition-all font-medium"
+                />
+                {searchQuery && (
                   <button
-                    type="button"
-                    onClick={handleCancelEdit}
-                    className="py-3 px-4 rounded-xl font-semibold text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2.5 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
+                    title="Clear search"
                   >
-                    Cancel
+                    ✕
                   </button>
                 )}
               </div>
-            </form>
-          </div>
-        </div>
 
-        {/* Department List Table Card */}
-        <div className="lg:col-span-8 w-full">
-          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs flex flex-col overflow-hidden">
-            {/* Active Departments Header with Search */}
-            <div className="px-6 py-4 bg-white border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-purple-50 border border-purple-100/70 flex items-center justify-center text-purple-600 shrink-0">
-                  <i className="bi bi-people text-sm"></i>
-                </div>
-                <div>
-                  <h5 className="font-bold text-slate-900 text-sm mb-0">Active Departments</h5>
-                  <p className="text-[11px] text-slate-400 mb-0 font-medium">
-                    Corporate organizational hierarchy & management
-                  </p>
-                </div>
-              </div>
+              {/* Primary + Add Department Button */}
+              <button
+                type="button"
+                onClick={() => setFormModal({ isOpen: true, dept: null })}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition-all flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-xs shrink-0"
+                title="Create New Corporate Department"
+              >
+                <i className="bi bi-plus-lg text-xs font-extrabold"></i>
+                <span>Add Department</span>
+              </button>
 
-              <div className="flex items-center gap-2">
-                {/* Search Bar */}
-                <div className="relative flex items-center">
-                  <span className="absolute left-2.5 text-slate-400 text-xs pointer-events-none">
-                    <i className="bi bi-search"></i>
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="Search departments or HOD..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-7 pr-7 py-1.5 text-xs bg-slate-50/70 border border-slate-200 rounded-lg outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-700 placeholder:text-slate-400 w-44 sm:w-56 transition-all"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery("")}
-                      className="absolute right-2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
-                      title="Clear search"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
+              {/* Mobility Transfer Action */}
+              <button
+                type="button"
+                onClick={() => setTransferModal({ isOpen: true, userId: null, deptId: null })}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 border border-indigo-200/80 transition-all flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-xs shrink-0"
+                title="Initiate Personnel or Squad Transfer"
+              >
+                <i className="bi bi-arrow-left-right text-xs"></i>
+                <span className="hidden sm:inline">Mobility Transfer</span>
+              </button>
 
-                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-100 shrink-0">
-                  {filteredDepartments.length} {filteredDepartments.length === 1 ? "Dept" : "Depts"}
-                </span>
-
-                <button
-                  type="button"
-                  onClick={() => setTransferModal({ isOpen: true, userId: null, deptId: null })}
-                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs shrink-0"
-                  title="Initiate Personnel or Squad Transfer"
-                >
-                  <i className="bi bi-arrow-left-right text-[11px]"></i>
-                  <span className="hidden sm:inline">Mobility Transfer</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setGlobalMobilityOpen(true)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs shrink-0"
-                  title="View Company-Wide Mobility Audit Ledger"
-                >
-                  <i className="bi bi-clock-history text-[11px] text-indigo-600"></i>
-                  <span className="hidden sm:inline">Org Mobility Ledger</span>
-                </button>
-              </div>
+              {/* Company-Wide Mobility Ledger Action */}
+              <button
+                type="button"
+                onClick={() => setGlobalMobilityOpen(true)}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 transition-all flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-xs shrink-0"
+                title="View Company-Wide Mobility Audit Ledger"
+              >
+                <i className="bi bi-clock-history text-xs text-indigo-600"></i>
+                <span className="hidden sm:inline">Org Mobility Ledger</span>
+              </button>
             </div>
+          </div>
 
             {/* Table Area */}
             <div className="overflow-x-auto">
@@ -672,7 +419,6 @@ const Departments = () => {
             </div>
           </div>
         </div>
-      </div>
 
       {/* Enterprise Department Roster & Org Hierarchy Modal */}
       <DepartmentRosterModal
@@ -714,6 +460,20 @@ const Departments = () => {
         departments={departments}
       />
 
+      {/* Department Create & Edit Modal */}
+      <DepartmentFormModal
+        isOpen={formModal.isOpen}
+        onClose={() => setFormModal({ isOpen: false, dept: null })}
+        department={formModal.dept}
+        departments={departments}
+        eligibleHeads={eligibleHeads}
+        onSuccess={(successMsg) => {
+          setMsg({ type: "success", text: successMsg });
+          fetchDepartments();
+          fetchEligibleHeads();
+        }}
+      />
+
       {/* Enterprise Safe Decommissioning & Sunset Modal */}
       <DecommissionDepartmentModal
         isOpen={!!decommissionDeptId}
@@ -722,8 +482,8 @@ const Departments = () => {
         departments={departments}
         onDecommissionSuccess={(successMsg) => {
           setMsg({ type: "success", text: successMsg });
-          if (editingDeptId === decommissionDeptId) {
-            handleCancelEdit();
+          if (formModal.dept?.id === decommissionDeptId) {
+            setFormModal({ isOpen: false, dept: null });
           }
           fetchDepartments();
           fetchEligibleHeads();
