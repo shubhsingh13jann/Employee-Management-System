@@ -89,10 +89,10 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
   const selectedHead = eligibleHeads.find((h) => String(h.id) === String(headId));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-fadeIn">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-xl overflow-hidden flex flex-col max-h-[92vh] transition-all">
-        {/* Executive Header Banner */}
-        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 px-6 py-4.5 text-white flex items-center justify-between border-b border-indigo-900/40">
+    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-xs animate-fadeIn">
+      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-xl flex flex-col max-h-[88vh] sm:max-h-[90vh] my-auto overflow-hidden transition-all">
+        {/* Pinned Executive Header Banner */}
+        <div className="shrink-0 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 px-6 py-4 text-white flex items-center justify-between border-b border-indigo-900/40">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 flex items-center justify-center text-lg shadow-2xs shrink-0">
               <i className={`bi ${isEditMode ? "bi-pencil-square" : "bi-buildings"}`}></i>
@@ -118,15 +118,16 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-sm font-bold"
+            style={{ borderRadius: "0.5rem" }}
+            className="w-8 h-8 !rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-sm font-bold"
             title="Close"
           >
             ✕
           </button>
         </div>
 
-        {/* Modal Form Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4.5">
+        {/* Scrollable Modal Form Body with Native Scrollbar */}
+        <form id="department-form" onSubmit={handleSubmit} className="flex-1 min-h-0 overflow-y-auto p-5 sm:p-6 space-y-4">
           {error && (
             <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2 shadow-2xs">
               <i className="bi bi-exclamation-triangle-fill text-rose-500 text-sm"></i>
@@ -146,7 +147,8 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
                 </span>
                 <input
                   type="text"
-                  className="w-full pl-8 pr-4 py-2.5 text-xs bg-slate-50/70 border border-slate-200 rounded-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-800 transition-all placeholder:text-slate-400 font-medium"
+                  style={{ borderRadius: "0.75rem" }}
+                  className="w-full pl-8 pr-4 py-2.5 text-xs bg-slate-50/70 border border-slate-200 !rounded-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-800 transition-all placeholder:text-slate-400 font-medium"
                   placeholder="e.g., Engineering, Marketing, Finance"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -168,7 +170,8 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
                 <input
                   type="text"
                   maxLength={6}
-                  className="w-full pl-8 pr-3 py-2.5 text-xs bg-slate-50/70 border border-slate-200 rounded-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-800 transition-all placeholder:text-slate-400 font-bold uppercase tracking-wider"
+                  style={{ borderRadius: "0.75rem" }}
+                  className="w-full pl-8 pr-3 py-2.5 text-xs bg-slate-50/70 border border-slate-200 !rounded-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-800 transition-all placeholder:text-slate-400 font-bold uppercase tracking-wider"
                   placeholder="ENG"
                   value={code}
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
@@ -190,7 +193,8 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
               </span>
             </div>
             <textarea
-              className="w-full p-3 text-xs bg-slate-50/70 border border-slate-200 rounded-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-800 transition-all placeholder:text-slate-400 font-medium resize-none leading-relaxed"
+              style={{ borderRadius: "0.75rem" }}
+              className="w-full p-3 text-xs bg-slate-50/70 border border-slate-200 !rounded-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-800 transition-all placeholder:text-slate-400 font-medium resize-none leading-relaxed"
               rows={3}
               maxLength={250}
               placeholder="Detail the department's mandate, operational responsibilities, and corporate objectives..."
@@ -210,7 +214,8 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
                 <i className="bi bi-person-badge"></i>
               </span>
               <select
-                className="w-full pl-8 pr-8 py-2.5 text-xs bg-slate-50/70 border border-slate-200 rounded-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-800 transition-all font-medium appearance-none cursor-pointer"
+                style={{ borderRadius: "0.75rem" }}
+                className="w-full pl-8 pr-8 py-2.5 text-xs bg-slate-50/70 border border-slate-200 !rounded-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-800 transition-all font-medium appearance-none cursor-pointer"
                 value={headId}
                 onChange={(e) => setHeadId(e.target.value)}
               >
@@ -256,7 +261,8 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
                 <i className="bi bi-diagram-3"></i>
               </span>
               <select
-                className="w-full pl-8 pr-8 py-2.5 text-xs bg-slate-50/70 border border-slate-200 rounded-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-800 transition-all font-medium appearance-none cursor-pointer"
+                style={{ borderRadius: "0.75rem" }}
+                className="w-full pl-8 pr-8 py-2.5 text-xs bg-slate-50/70 border border-slate-200 !rounded-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-800 transition-all font-medium appearance-none cursor-pointer"
                 value={parentId}
                 onChange={(e) => setParentId(e.target.value)}
               >
@@ -274,34 +280,37 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
               </span>
             </div>
           </div>
-
-          {/* Modal Actions Footer */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className={`px-5 py-2.5 rounded-xl font-semibold text-xs tracking-wide transition-all duration-200 cursor-pointer inline-flex items-center gap-2 shadow-sm ${
-                isEditMode
-                  ? "bg-amber-600 hover:bg-amber-700 text-white"
-                  : "bg-indigo-600 hover:bg-indigo-700 text-white"
-              } disabled:opacity-60`}
-            >
-              {saving ? (
-                <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-              ) : (
-                <i className={`bi ${isEditMode ? "bi-check-lg" : "bi-plus-lg"} text-xs font-bold`}></i>
-              )}
-              <span>{isEditMode ? "Save Charter Changes" : "Create Department"}</span>
-            </button>
-          </div>
         </form>
+
+        {/* Pinned Modal Actions Footer - Always Visible */}
+        <div className="shrink-0 px-6 py-3.5 bg-slate-50/90 border-t border-slate-200/80 flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            style={{ borderRadius: "0.75rem" }}
+            className="px-4 py-2 !rounded-xl text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer shadow-2xs"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            form="department-form"
+            disabled={saving}
+            style={{ borderRadius: "0.75rem" }}
+            className={`px-5 py-2 !rounded-xl font-semibold text-xs tracking-wide transition-all duration-200 cursor-pointer inline-flex items-center gap-2 shadow-2xs ${
+              isEditMode
+                ? "bg-amber-600 hover:bg-amber-700 text-white"
+                : "bg-indigo-600 hover:bg-indigo-700 text-white"
+            } disabled:opacity-60`}
+          >
+            {saving ? (
+              <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+            ) : (
+              <i className={`bi ${isEditMode ? "bi-check-lg" : "bi-plus-lg"} text-xs font-bold`}></i>
+            )}
+            <span>{isEditMode ? "Save Charter Changes" : "Create Department"}</span>
+          </button>
+        </div>
       </div>
     </div>
   );
