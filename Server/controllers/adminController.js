@@ -32,10 +32,27 @@ export const getStats = async (req, res) => {
 export const getDepartments = async (req, res) => {
   try {
     const [departments] = await pool.query(`
-      SELECT d.*, COUNT(u.id) AS member_count
+      SELECT 
+        d.id,
+        d.name,
+        d.code,
+        d.description,
+        d.head_id,
+        d.parent_id,
+        d.created_at,
+        u_head.name AS head_name,
+        u_head.email AS head_email,
+        u_head.image_url AS head_image_url,
+        u_head.role AS head_role,
+        p.name AS parent_name,
+        COUNT(DISTINCT u_mem.id) AS member_count,
+        COUNT(DISTINCT CASE WHEN u_mem.role = 'supervisor' THEN u_mem.id END) AS supervisor_count,
+        COUNT(DISTINCT CASE WHEN u_mem.role = 'employee' THEN u_mem.id END) AS employee_count
       FROM departments d
-      LEFT JOIN users u ON d.id = u.department_id
-      GROUP BY d.id
+      LEFT JOIN users u_head ON d.head_id = u_head.id
+      LEFT JOIN departments p ON d.parent_id = p.id
+      LEFT JOIN users u_mem ON d.id = u_mem.department_id
+      GROUP BY d.id, u_head.id, p.id
       ORDER BY d.name ASC
     `);
     return res.json({ status: true, departments });
@@ -47,12 +64,31 @@ export const getDepartments = async (req, res) => {
 
 export const addDepartment = async (req, res) => {
   try {
-    const { name, description = "" } = req.body;
+    const { name, code = "", description = "", head_id = null, parent_id = null } = req.body;
     if (!name || !name.trim()) {
       return res.status(400).json({ status: false, error: "Department name is required" });
     }
-    await pool.query("INSERT INTO departments (name, description) VALUES (?, ?)", [name.trim(), description.trim()]);
-    return res.json({ status: true, message: "Department created successfully" });
+
+    let deptCode = code.trim().toUpperCase();
+    if (!deptCode) {
+      deptCode = name.trim().replace(/[^A-Za-z]/g, "").slice(0, 4).toUpperCase() || "DPT";
+    }
+
+    const validHeadId = head_id ? Number(head_id) : null;
+    const validParentId = parent_id ? Number(parent_id) : null;
+
+    const [result] = await pool.query(
+      "INSERT INTO departments (name, code, description, head_id, parent_id) VALUES (?, ?, ?, ?, ?)",
+      [name.trim(), deptCode, description.trim(), validHeadId, validParentId]
+    );
+
+    const newDeptId = result.insertId;
+
+    if (validHeadId) {
+      await pool.query("UPDATE users SET department_id = ? WHERE id = ?", [newDeptId, validHeadId]);
+    }
+
+    return res.json({ status: true, message: "Department created successfully", departmentId: newDeptId });
   } catch (err) {
     if (err.code === "ER_DUP_ENTRY") {
       return res.status(400).json({ status: false, error: "Department name already exists" });
@@ -62,14 +98,222 @@ export const addDepartment = async (req, res) => {
   }
 };
 
+export const updateDepartment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, code = "", description = "", head_id = null, parent_id = null } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ status: false, error: "Department name is required" });
+    }
+
+    let deptCode = code.trim().toUpperCase();
+    if (!deptCode) {
+      deptCode = name.trim().replace(/[^A-Za-z]/g, "").slice(0, 4).toUpperCase() || "DPT";
+    }
+
+    const validHeadId = head_id ? Number(head_id) : null;
+    let validParentId = parent_id ? Number(parent_id) : null;
+
+    if (validParentId && Number(validParentId) === Number(id)) {
+      validParentId = null;
+    }
+
+    await pool.query(
+      "UPDATE departments SET name = ?, code = ?, description = ?, head_id = ?, parent_id = ? WHERE id = ?",
+      [name.trim(), deptCode, description.trim(), validHeadId, validParentId, id]
+    );
+
+    if (validHeadId) {
+      await pool.query("UPDATE users SET department_id = ? WHERE id = ?", [id, validHeadId]);
+    }
+
+    return res.json({ status: true, message: "Department updated successfully" });
+  } catch (err) {
+    if (err.code === "ER_DUP_ENTRY") {
+      return res.status(400).json({ status: false, error: "Department name already exists" });
+    }
+    console.error("Update department error:", err);
+    return res.status(500).json({ status: false, error: "Failed to update department" });
+  }
+};
+
 export const deleteDepartment = async (req, res) => {
   try {
     const { id } = req.params;
+    const { action, reassign_to } = req.query;
+
+    const [[{ member_count }]] = await pool.query(
+      "SELECT COUNT(*) AS member_count FROM users WHERE department_id = ?",
+      [id]
+    );
+
+    if (member_count > 0) {
+      if (reassign_to) {
+        await pool.query("UPDATE users SET department_id = ? WHERE department_id = ?", [reassign_to, id]);
+      } else if (action === "unassign") {
+        await pool.query("UPDATE users SET department_id = NULL WHERE department_id = ?", [id]);
+      } else {
+        return res.status(400).json({
+          status: false,
+          error: "Department has active members",
+          member_count,
+          requires_action: true
+        });
+      }
+    }
+
+    await pool.query("UPDATE departments SET parent_id = NULL WHERE parent_id = ?", [id]);
     await pool.query("DELETE FROM departments WHERE id = ?", [id]);
+
     return res.json({ status: true, message: "Department deleted successfully" });
   } catch (err) {
     console.error("Delete department error:", err);
     return res.status(500).json({ status: false, error: "Failed to delete department" });
+  }
+};
+
+export const getEligibleHeads = async (req, res) => {
+  try {
+    const [heads] = await pool.query(`
+      SELECT u.id, u.name, u.email, u.role, u.department_id, u.image_url, d.name AS department_name
+      FROM users u
+      LEFT JOIN departments d ON u.department_id = d.id
+      WHERE u.role IN ('manager', 'supervisor')
+      ORDER BY u.name ASC
+    `);
+    return res.json({ status: true, eligibleHeads: heads });
+  } catch (err) {
+    console.error("Get eligible heads error:", err);
+    return res.status(500).json({ status: false, error: "Failed to fetch eligible leaders" });
+  }
+};
+
+export const getDepartmentRoster = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [deptRows] = await pool.query(`
+      SELECT d.*, p.name AS parent_name,
+             u.name AS head_name, u.email AS head_email, u.image_url AS head_image_url, u.role AS head_role
+      FROM departments d
+      LEFT JOIN departments p ON d.parent_id = p.id
+      LEFT JOIN users u ON d.head_id = u.id
+      WHERE d.id = ?
+    `, [id]);
+
+    if (deptRows.length === 0) {
+      return res.status(404).json({ status: false, error: "Department not found" });
+    }
+
+    const department = deptRows[0];
+
+    const [members] = await pool.query(`
+      SELECT u.id, u.name, u.email, u.role, u.salary, u.phone, u.image_url, u.status, u.created_at,
+             th.supervisor_id, sup.name AS supervisor_name, sup.email AS supervisor_email,
+             th.manager_id, mgr.name AS manager_name
+      FROM users u
+      LEFT JOIN team_hierarchy th ON u.id = th.employee_id
+      LEFT JOIN users sup ON th.supervisor_id = sup.id
+      LEFT JOIN users mgr ON th.manager_id = mgr.id
+      WHERE u.department_id = ?
+      ORDER BY FIELD(u.role, 'manager', 'supervisor', 'employee'), u.name ASC
+    `, [id]);
+
+    const supervisors = members
+      .filter(m => m.role === "supervisor")
+      .map(s => {
+        const directReports = members.filter(m => m.supervisor_id === s.id);
+        return {
+          ...s,
+          direct_reports_count: directReports.length,
+          direct_reports: directReports.map(dr => ({ id: dr.id, name: dr.name, email: dr.email }))
+        };
+      });
+
+    const employees = members.filter(m => m.role === "employee");
+    const managers = members.filter(m => m.role === "manager");
+
+    return res.json({
+      status: true,
+      department,
+      roster: {
+        total_members: members.length,
+        head: department.head_id ? {
+          id: department.head_id,
+          name: department.head_name,
+          email: department.head_email,
+          image_url: department.head_image_url,
+          role: department.head_role
+        } : null,
+        managers,
+        supervisors,
+        employees,
+        all_members: members
+      }
+    });
+  } catch (err) {
+    console.error("Get department roster error:", err);
+    return res.status(500).json({ status: false, error: "Failed to fetch department roster" });
+  }
+};
+
+export const transferMember = async (req, res) => {
+  try {
+    const { user_id, target_department_id, target_supervisor_id } = req.body;
+
+    if (!user_id || !target_department_id) {
+      return res.status(400).json({ status: false, error: "User and target department are required" });
+    }
+
+    const [userRows] = await pool.query("SELECT * FROM users WHERE id = ?", [user_id]);
+    if (userRows.length === 0) {
+      return res.status(404).json({ status: false, error: "User not found" });
+    }
+    const user = userRows[0];
+    const oldDeptId = user.department_id;
+
+    const [deptRows] = await pool.query("SELECT * FROM departments WHERE id = ?", [target_department_id]);
+    if (deptRows.length === 0) {
+      return res.status(404).json({ status: false, error: "Target department not found" });
+    }
+    const targetDept = deptRows[0];
+
+    await pool.query("UPDATE users SET department_id = ? WHERE id = ?", [target_department_id, user_id]);
+
+    if (target_supervisor_id) {
+      let managerId = targetDept.head_id;
+      if (!managerId) {
+        const [mgrRows] = await pool.query("SELECT id FROM users WHERE department_id = ? AND role = 'manager' LIMIT 1", [target_department_id]);
+        if (mgrRows.length > 0) {
+          managerId = mgrRows[0].id;
+        } else {
+          const [anyMgr] = await pool.query("SELECT id FROM users WHERE role = 'manager' LIMIT 1");
+          managerId = anyMgr[0]?.id || 1;
+        }
+      }
+
+      await pool.query(`
+        INSERT INTO team_hierarchy (employee_id, supervisor_id, manager_id)
+        VALUES (?, ?, ?)
+        ON DUPLICATE KEY UPDATE supervisor_id = VALUES(supervisor_id), manager_id = VALUES(manager_id)
+      `, [user_id, target_supervisor_id, managerId]);
+    } else if (user.role === "employee" && oldDeptId !== target_department_id) {
+      await pool.query("DELETE FROM team_hierarchy WHERE employee_id = ?", [user_id]);
+    }
+
+    if (oldDeptId) {
+      await pool.query("UPDATE departments SET head_id = NULL WHERE id = ? AND head_id = ?", [oldDeptId, user_id]);
+    }
+
+    return res.json({
+      status: true,
+      message: `Successfully transferred ${user.name} to ${targetDept.name}`,
+      user: { id: user.id, name: user.name, department_id: target_department_id }
+    });
+  } catch (err) {
+    console.error("Transfer member error:", err);
+    return res.status(500).json({ status: false, error: "Failed to transfer member" });
   }
 };
 
