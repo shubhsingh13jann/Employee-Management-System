@@ -7,6 +7,9 @@ const Departments = () => {
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [description, setDescription] = useState("");
+  const [headId, setHeadId] = useState("");
+  const [parentId, setParentId] = useState("");
+  const [eligibleHeads, setEligibleHeads] = useState([]);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState({ type: "", text: "" });
 
@@ -24,8 +27,20 @@ const Departments = () => {
     }
   };
 
+  const fetchEligibleHeads = async () => {
+    try {
+      const res = await api.get("/api/admin/departments/eligible-heads");
+      if (res.data.status) {
+        setEligibleHeads(res.data.eligibleHeads || []);
+      }
+    } catch (err) {
+      console.error("Failed to load eligible department heads:", err);
+    }
+  };
+
   useEffect(() => {
     fetchDepartments();
+    fetchEligibleHeads();
   }, []);
 
   const handleAddDepartment = async (e) => {
@@ -38,7 +53,9 @@ const Departments = () => {
       const payload = {
         name: name.trim(),
         code: code.trim().toUpperCase(),
-        description: description.trim()
+        description: description.trim(),
+        head_id: headId ? Number(headId) : null,
+        parent_id: parentId ? Number(parentId) : null
       };
       const res = await api.post("/api/admin/departments", payload);
       if (res.data.status) {
@@ -46,7 +63,10 @@ const Departments = () => {
         setName("");
         setCode("");
         setDescription("");
+        setHeadId("");
+        setParentId("");
         fetchDepartments();
+        fetchEligibleHeads();
       }
     } catch (err) {
       setMsg({ type: "danger", text: err.response?.data?.error || "Failed to create department" });
@@ -160,6 +180,84 @@ const Departments = () => {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 ></textarea>
+              </div>
+
+              {/* Department Head (HOD) Selector */}
+              <div>
+                <div className="flex justify-between items-center mb-1.5">
+                  <label className="font-semibold text-slate-700 text-xs">Department Head (HOD)</label>
+                  <span className="text-[10px] text-slate-400 font-medium">Designated Leader</span>
+                </div>
+                <div className="relative flex items-center">
+                  <span className="absolute left-3 text-slate-400 text-xs pointer-events-none">
+                    <i className="bi bi-person-badge"></i>
+                  </span>
+                  <select
+                    className="w-full pl-8 pr-8 py-2.5 text-xs bg-slate-50/60 border border-slate-200 rounded-xl outline-none focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-800 transition-all font-medium appearance-none cursor-pointer"
+                    value={headId}
+                    onChange={(e) => setHeadId(e.target.value)}
+                  >
+                    <option value="">— Unassigned / Vacant —</option>
+                    {eligibleHeads.map((head) => (
+                      <option key={head.id} value={head.id}>
+                        {head.name} ({head.role?.toUpperCase() || "MANAGER"}) {head.department_name ? `• ${head.department_name}` : ""}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="absolute right-3 text-slate-400 text-xs pointer-events-none">
+                    <i className="bi bi-chevron-down text-[10px]"></i>
+                  </span>
+                </div>
+
+                {/* HOD Preview Badge if selected */}
+                {headId && (() => {
+                  const selectedHead = eligibleHeads.find((h) => String(h.id) === String(headId));
+                  if (!selectedHead) return null;
+                  return (
+                    <div className="mt-2 p-2.5 rounded-xl bg-indigo-50/60 border border-indigo-100 flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-[10px] shadow-2xs shrink-0">
+                          {selectedHead.name.charAt(0)}
+                        </div>
+                        <div>
+                          <div className="font-semibold text-slate-800 text-[11px] leading-tight">{selectedHead.name}</div>
+                          <div className="text-[10px] text-slate-400">{selectedHead.email}</div>
+                        </div>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-700">
+                        {selectedHead.role}
+                      </span>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Parent Department Selector */}
+              <div>
+                <div className="flex justify-between items-center mb-1.5">
+                  <label className="font-semibold text-slate-700 text-xs">Parent Department</label>
+                  <span className="text-[10px] text-slate-400 font-medium">Optional hierarchy</span>
+                </div>
+                <div className="relative flex items-center">
+                  <span className="absolute left-3 text-slate-400 text-xs pointer-events-none">
+                    <i className="bi bi-diagram-3"></i>
+                  </span>
+                  <select
+                    className="w-full pl-8 pr-8 py-2.5 text-xs bg-slate-50/60 border border-slate-200 rounded-xl outline-none focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-slate-800 transition-all font-medium appearance-none cursor-pointer"
+                    value={parentId}
+                    onChange={(e) => setParentId(e.target.value)}
+                  >
+                    <option value="">— None (Top-Level Department) —</option>
+                    {departments.map((dept) => (
+                      <option key={dept.id} value={dept.id}>
+                        {dept.name} {dept.code ? `(${dept.code})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="absolute right-3 text-slate-400 text-xs pointer-events-none">
+                    <i className="bi bi-chevron-down text-[10px]"></i>
+                  </span>
+                </div>
               </div>
 
               <button
