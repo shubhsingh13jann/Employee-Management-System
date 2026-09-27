@@ -206,8 +206,30 @@ const Departments = () => {
                     </tr>
                   ) : filteredDepartments.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="text-center py-10 text-slate-400 text-xs font-medium">
-                        {searchQuery ? "No departments match your search query." : "No departments created yet. Use the form on the left to add one."}
+                      <td colSpan={5} className="text-center py-12 text-slate-400 text-xs font-medium">
+                        <div className="flex flex-col items-center justify-center gap-2.5">
+                          <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 text-lg">
+                            <i className="bi bi-buildings"></i>
+                          </div>
+                          <span className="font-semibold text-slate-600 text-sm">
+                            {searchQuery ? "No matching departments found" : "No departments established yet"}
+                          </span>
+                          <p className="text-xs text-slate-400 max-w-sm mb-1">
+                            {searchQuery
+                              ? `No departments match "${searchQuery}". Try a different keyword.`
+                              : "Get started by establishing corporate departmental units, assigning leadership, and mapping teams."}
+                          </p>
+                          {!searchQuery && (
+                            <button
+                              type="button"
+                              onClick={() => setFormModal({ isOpen: true, dept: null })}
+                              className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition-all flex items-center gap-2 shadow-2xs cursor-pointer mt-1"
+                            >
+                              <i className="bi bi-plus-lg text-xs"></i>
+                              <span>Add First Department</span>
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ) : (
@@ -327,7 +349,7 @@ const Departments = () => {
                                   e.stopPropagation();
                                   setActiveActionMenuId(activeActionMenuId === dept.id ? null : dept.id);
                                 }}
-                                className={`w-8 h-8 rounded-lg transition-colors cursor-pointer inline-flex items-center justify-center border ${
+                                className={`w-8 h-8 rounded-xl transition-all cursor-pointer inline-flex items-center justify-center border ${
                                   activeActionMenuId === dept.id
                                     ? "bg-slate-100 text-slate-800 border-slate-300 shadow-2xs"
                                     : "text-slate-400 hover:text-slate-700 hover:bg-slate-100 border-transparent hover:border-slate-200"
@@ -338,8 +360,8 @@ const Departments = () => {
                               </button>
 
                               {activeActionMenuId === dept.id && (
-                                <div className="absolute right-0 mt-1 w-48 rounded-xl bg-white border border-slate-200/90 shadow-lg py-1.5 z-40 text-left animate-in fade-in zoom-in-95 duration-100">
-                                  <div className="px-3 py-1.5 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                <div className="absolute right-0 mt-1.5 w-52 rounded-2xl bg-white border border-slate-200/90 shadow-xl p-1.5 z-40 text-left animate-in fade-in zoom-in-95 duration-100">
+                                  <div className="px-3 py-1.5 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
                                     {dept.code || dept.name} Actions
                                   </div>
 
@@ -349,7 +371,7 @@ const Departments = () => {
                                       setActiveActionMenuId(null);
                                       setRosterDept(dept);
                                     }}
-                                    className="w-full px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-indigo-600 flex items-center gap-2 transition-colors cursor-pointer"
+                                    className="w-full px-2.5 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer"
                                   >
                                     <i className="bi bi-people text-slate-400"></i>
                                     <span>View Roster & Org</span>
@@ -361,7 +383,7 @@ const Departments = () => {
                                       setActiveActionMenuId(null);
                                       handleStartEdit(dept);
                                     }}
-                                    className="w-full px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-amber-600 flex items-center gap-2 transition-colors cursor-pointer"
+                                    className="w-full px-2.5 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-amber-600 rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer"
                                   >
                                     <i className="bi bi-pencil text-slate-400"></i>
                                     <span>Edit Department</span>
@@ -373,7 +395,7 @@ const Departments = () => {
                                       setActiveActionMenuId(null);
                                       setTransferModal({ isOpen: true, userId: null, deptId: dept.id });
                                     }}
-                                    className="w-full px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-blue-600 flex items-center gap-2 transition-colors cursor-pointer"
+                                    className="w-full px-2.5 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-blue-600 rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer"
                                   >
                                     <i className="bi bi-arrow-left-right text-slate-400"></i>
                                     <span>Transfer Members</span>
@@ -387,7 +409,7 @@ const Departments = () => {
                                       setActiveActionMenuId(null);
                                       handleDelete(dept.id);
                                     }}
-                                    className="w-full px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition-colors cursor-pointer font-medium"
+                                    className="w-full px-2.5 py-2 text-xs text-rose-600 hover:bg-rose-50 rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer font-medium"
                                   >
                                     <i className="bi bi-shield-slash text-rose-500"></i>
                                     <span>Decommission Unit</span>
@@ -408,11 +430,11 @@ const Departments = () => {
             <div className="px-6 py-3.5 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400 font-medium">
               <span>Showing 1 to {filteredDepartments.length} of {departments.length} departments</span>
               <div className="flex items-center gap-1">
-                <button type="button" disabled className="w-7 h-7 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-400 opacity-50 cursor-not-allowed">
+                <button type="button" disabled className="w-7 h-7 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 opacity-50 cursor-not-allowed">
                   <i className="bi bi-chevron-left text-[10px]"></i>
                 </button>
-                <span className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-2xs">1</span>
-                <button type="button" disabled className="w-7 h-7 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-400 opacity-50 cursor-not-allowed">
+                <span className="w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-2xs">1</span>
+                <button type="button" disabled className="w-7 h-7 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 opacity-50 cursor-not-allowed">
                   <i className="bi bi-chevron-right text-[10px]"></i>
                 </button>
               </div>
