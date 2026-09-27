@@ -3,7 +3,11 @@ import {
   getStats,
   getDepartments,
   addDepartment,
+  updateDepartment,
   deleteDepartment,
+  getEligibleHeads,
+  getDepartmentRoster,
+  transferMember,
   getUsers,
   addUser,
   deleteUser,
@@ -18,8 +22,14 @@ const router = express.Router();
 router.use(verifyToken, authorizeRoles("admin"));
 
 router.get("/stats", getStats);
+
+// Department & Leadership Management Routes
 router.get("/departments", getDepartments);
+router.get("/departments/eligible-heads", getEligibleHeads);
 router.post("/departments", addDepartment);
+router.post("/departments/transfer-member", transferMember);
+router.get("/departments/:id/roster", getDepartmentRoster);
+router.put("/departments/:id", updateDepartment);
 router.delete("/departments/:id", deleteDepartment);
 
 router.get("/users", getUsers);
