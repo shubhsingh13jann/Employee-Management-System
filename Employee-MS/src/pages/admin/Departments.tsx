@@ -75,6 +75,34 @@ const Departments = () => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
+  // Lock background window and main workspace scroll whenever any modal dialog is active
+  const isAnyModalActive = Boolean(
+    formModal.isOpen ||
+    rosterDept ||
+    transferModal.isOpen ||
+    globalMobilityOpen ||
+    decommissionDeptId
+  );
+
+  useEffect(() => {
+    if (!isAnyModalActive) return;
+    const originalBodyOverflow = document.body.style.overflow;
+    const mainEl = document.querySelector("main");
+    const originalMainOverflow = mainEl ? mainEl.style.overflow : "";
+
+    document.body.style.overflow = "hidden";
+    if (mainEl) {
+      mainEl.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.body.style.overflow = originalBodyOverflow;
+      if (mainEl) {
+        mainEl.style.overflow = originalMainOverflow;
+      }
+    };
+  }, [isAnyModalActive]);
+
   const handleStartEdit = (dept: any) => {
     setActiveActionMenuId(null);
     setFormModal({ isOpen: true, dept });

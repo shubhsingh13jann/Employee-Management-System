@@ -45,6 +45,26 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
     setError("");
   }, [isOpen, department]);
 
+  // Lock background window and main workspace scroll while modal is active
+  useEffect(() => {
+    if (!isOpen) return;
+    const originalBodyOverflow = document.body.style.overflow;
+    const mainEl = document.querySelector("main");
+    const originalMainOverflow = mainEl ? mainEl.style.overflow : "";
+
+    document.body.style.overflow = "hidden";
+    if (mainEl) {
+      mainEl.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.body.style.overflow = originalBodyOverflow;
+      if (mainEl) {
+        mainEl.style.overflow = originalMainOverflow;
+      }
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -89,7 +109,14 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
   const selectedHead = eligibleHeads.find((h) => String(h.id) === String(headId));
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-xs animate-fadeIn">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-xs overscroll-contain animate-fadeIn"
+      onWheel={(e) => {
+        if (e.target === e.currentTarget) {
+          e.preventDefault();
+        }
+      }}
+    >
       <div className="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-xl flex flex-col max-h-[88vh] sm:max-h-[90vh] my-auto overflow-hidden transition-all">
         {/* Pinned Executive Header Banner */}
         <div className="shrink-0 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 px-6 py-4 text-white flex items-center justify-between border-b border-indigo-900/40">
@@ -126,8 +153,8 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
           </button>
         </div>
 
-        {/* Scrollable Modal Form Body with Native Scrollbar */}
-        <form id="department-form" onSubmit={handleSubmit} className="flex-1 min-h-0 overflow-y-auto p-5 sm:p-6 space-y-4">
+        {/* Scrollable Modal Form Body with Native Scrollbar & Overscroll Containment */}
+        <form id="department-form" onSubmit={handleSubmit} className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-6 space-y-4">
           {error && (
             <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2 shadow-2xs">
               <i className="bi bi-exclamation-triangle-fill text-rose-500 text-sm"></i>
