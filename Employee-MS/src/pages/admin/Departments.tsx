@@ -423,6 +423,16 @@ const Departments = () => {
                 <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-100 shrink-0">
                   {filteredDepartments.length} {filteredDepartments.length === 1 ? "Dept" : "Depts"}
                 </span>
+
+                <button
+                  type="button"
+                  onClick={() => setTransferModal({ isOpen: true, userId: null, deptId: null })}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs shrink-0"
+                  title="Initiate Personnel or Squad Transfer"
+                >
+                  <i className="bi bi-arrow-left-right text-[11px]"></i>
+                  <span className="hidden sm:inline">Mobility Transfer</span>
+                </button>
               </div>
             </div>
 

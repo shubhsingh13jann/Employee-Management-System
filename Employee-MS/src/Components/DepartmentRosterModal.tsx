@@ -21,7 +21,11 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<"leadership" | "staff" | "tree">("leadership");
+  const [activeTab, setActiveTab] = useState<"leadership" | "staff" | "tree" | "history">("leadership");
+  const [transfers, setTransfers] = useState<any[]>([]);
+  const [loadingTransfers, setLoadingTransfers] = useState<boolean>(false);
+  const [transfersError, setTransfersError] = useState<string>("");
+  const [transferFilterMode, setTransferFilterMode] = useState<"all" | "inbound" | "outbound">("all");
   const [expandedSupervisorIds, setExpandedSupervisorIds] = useState<number[]>([]);
   const [staffSearchQuery, setStaffSearchQuery] = useState("");
   const [staffFilterMode, setStaffFilterMode] = useState<"all" | "assigned" | "direct_hod">("all");
@@ -90,7 +94,25 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
       }
     };
 
+    const fetchTransfers = async () => {
+      try {
+        setLoadingTransfers(true);
+        setTransfersError("");
+        const res = await api.get(`/api/admin/departments/${departmentId}/transfers`);
+        if (res.data.status) {
+          setTransfers(res.data.transfers || []);
+        } else {
+          setTransfersError(res.data.error || "Failed to load mobility history");
+        }
+      } catch (err: any) {
+        setTransfersError(err.response?.data?.error || "Error fetching mobility history");
+      } finally {
+        setLoadingTransfers(false);
+      }
+    };
+
     fetchRoster();
+    fetchTransfers();
   }, [isOpen, departmentId]);
 
   // Handle escape key
@@ -124,6 +146,12 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
   });
 
   const directHodEmployees = (roster?.employees || []).filter((emp: any) => !emp.supervisor_name);
+
+  const filteredTransfers = transfers.filter((t: any) => {
+    if (transferFilterMode === "inbound") return t.target_department_id === departmentId;
+    if (transferFilterMode === "outbound") return t.source_department_id === departmentId;
+    return true;
+  });
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
@@ -252,6 +280,22 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
               }`}
             >
               Hierarchy Tree
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("history")}
+              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeTab === "history"
+                  ? "bg-white text-slate-800 shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <span>Mobility Audit</span>
+              {transfers.length > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700">
+                  {transfers.length}
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -936,6 +980,169 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
                       <strong className="text-slate-700">Tier 3:</strong> Operational Staff Members
                     </span>
                   </div>
+                </div>
+              )}
+
+              {/* TAB 4: MOBILITY & TRANSFER HISTORY AUDIT */}
+              {activeTab === "history" && (
+                <div className="space-y-4 animate-in fade-in duration-150">
+                  {/* Filter & Metric Pill Bar */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1.5 text-xs text-slate-700">
+                        <span className="font-bold">{transfers.length}</span>
+                        <span className="text-slate-400">Total Events</span>
+                      </div>
+                      <span className="text-slate-300">•</span>
+                      <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-semibold">
+                        <span>{transfers.filter((t: any) => t.target_department_id === departmentId).length}</span>
+                        <span className="text-slate-500 font-normal">Inbound</span>
+                      </div>
+                      <span className="text-slate-300">•</span>
+                      <div className="flex items-center gap-1.5 text-xs text-amber-700 font-semibold">
+                        <span>{transfers.filter((t: any) => t.source_department_id === departmentId).length}</span>
+                        <span className="text-slate-500 font-normal">Outbound</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-2xs">
+                      <button
+                        type="button"
+                        onClick={() => setTransferFilterMode("all")}
+                        className={`px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer transition-colors ${
+                          transferFilterMode === "all" ? "bg-slate-900 text-white" : "text-slate-600 hover:text-slate-900"
+                        }`}
+                      >
+                        All ({transfers.length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTransferFilterMode("inbound")}
+                        className={`px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer transition-colors ${
+                          transferFilterMode === "inbound" ? "bg-emerald-600 text-white" : "text-slate-600 hover:text-slate-900"
+                        }`}
+                      >
+                        Inbound
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTransferFilterMode("outbound")}
+                        className={`px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer transition-colors ${
+                          transferFilterMode === "outbound" ? "bg-amber-600 text-white" : "text-slate-600 hover:text-slate-900"
+                        }`}
+                      >
+                        Outbound
+                      </button>
+                    </div>
+                  </div>
+
+                  {loadingTransfers ? (
+                    <div className="py-16 text-center text-xs text-slate-400 flex flex-col items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                      <span>Loading mobility audit trail...</span>
+                    </div>
+                  ) : transfersError ? (
+                    <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                      <i className="bi bi-exclamation-triangle-fill"></i>
+                      <span>{transfersError}</span>
+                    </div>
+                  ) : filteredTransfers.length > 0 ? (
+                    <div className="rounded-xl border border-slate-200 overflow-hidden divide-y divide-slate-100 bg-white shadow-2xs">
+                      {filteredTransfers.map((t: any) => {
+                        const isInbound = t.target_department_id === departmentId;
+                        return (
+                          <div key={t.id} className="p-4 hover:bg-slate-50/70 transition-colors space-y-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                              <div className="flex items-center gap-3">
+                                <span
+                                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                                    isInbound
+                                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                      : "bg-amber-50 text-amber-700 border border-amber-200"
+                                  }`}
+                                >
+                                  <i className={`bi ${isInbound ? "bi-arrow-down-left" : "bi-arrow-up-right"}`}></i>
+                                  <span>{isInbound ? "Inbound Transfer" : "Outbound Transfer"}</span>
+                                </span>
+
+                                <div className="flex items-center gap-2">
+                                  {t.user_image_url ? (
+                                    <img
+                                      src={t.user_image_url}
+                                      alt={t.user_name}
+                                      className="w-6 h-6 rounded-full object-cover border border-slate-200"
+                                    />
+                                  ) : (
+                                    <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] flex items-center justify-center">
+                                      {t.user_name ? t.user_name.charAt(0) : "U"}
+                                    </div>
+                                  )}
+                                  <span className="font-bold text-xs text-slate-900">{t.user_name}</span>
+                                  <span className="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-slate-100 text-slate-600">
+                                    {t.user_role}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="text-[11px] text-slate-400 font-medium">
+                                <i className="bi bi-clock-history mr-1 text-[10px]"></i>
+                                <span>{new Date(t.transferred_at).toLocaleString()}</span>
+                              </div>
+                            </div>
+
+                            {/* Movement Route & Reporting Line */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-slate-50/80 p-3 rounded-xl border border-slate-100">
+                              <div>
+                                <span className="text-[10px] text-slate-400 block font-bold uppercase tracking-wider mb-0.5">
+                                  Operational Route
+                                </span>
+                                <div className="flex items-center gap-2 font-semibold text-slate-800">
+                                  <span className={t.source_department_id === departmentId ? "text-amber-800 font-bold" : ""}>
+                                    {t.source_dept_name || "Unassigned"}
+                                  </span>
+                                  <i className="bi bi-arrow-right text-slate-400 text-xs"></i>
+                                  <span className={t.target_department_id === departmentId ? "text-emerald-800 font-bold" : ""}>
+                                    {t.target_dept_name}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div>
+                                <span className="text-[10px] text-slate-400 block font-bold uppercase tracking-wider mb-0.5">
+                                  Reporting Line Realignment
+                                </span>
+                                <div className="text-slate-600 text-[11px]">
+                                  <span>From: <strong className="text-slate-700">{t.previous_supervisor_name || "Direct to HOD"}</strong></span>
+                                  <span className="mx-1.5 text-slate-300">→</span>
+                                  <span>To: <strong className="text-indigo-700">{t.new_supervisor_name || "Direct to HOD"}</strong></span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Governance Justification Note */}
+                            {t.reason && (
+                              <div className="text-[11px] text-slate-600 flex items-start gap-1.5 bg-white p-2 rounded-lg border border-slate-100">
+                                <i className="bi bi-chat-left-quote text-slate-400 mt-0.5 shrink-0"></i>
+                                <span className="italic">"{t.reason}"</span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="p-12 text-center rounded-2xl bg-white border border-slate-200 space-y-3">
+                      <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center text-xl mx-auto">
+                        <i className="bi bi-arrow-left-right"></i>
+                      </div>
+                      <div>
+                        <h5 className="text-xs font-bold text-slate-800 mb-1">No Mobility Records Found</h5>
+                        <p className="text-[11px] text-slate-400 max-w-sm mx-auto mb-0">
+                          Cross-department transfers involving {department?.name || "this department"} will appear here with complete audit trail history.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
