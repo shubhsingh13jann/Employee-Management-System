@@ -5,17 +5,19 @@ import Navbar from "./Navbar";
 
 const Layout = () => {
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "var(--dashboard-bg)" }}>
+    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "var(--dashboard-bg)" }}>
       {/* Sidebar - fixed left */}
       <Sidebar />
       
       {/* Main Content Area */}
-      <div className="flex flex-col flex-1 min-w-0 overflow-x-hidden">
-        {/* Top Navigation */}
-        <Navbar />
+      <div className="flex flex-col flex-1 min-w-0 h-screen overflow-hidden">
+        {/* Top Navigation - Strictly Pinned at Top */}
+        <div className="shrink-0 z-30">
+          <Navbar />
+        </div>
         
-        {/* Main Workspace */}
-        <main className="p-6 lg:p-8 flex-1 overflow-y-auto">
+        {/* Main Workspace - Scrollable */}
+        <main className="p-6 lg:p-8 flex-1 min-h-0 overflow-y-auto">
           <Outlet />
         </main>
       </div>
