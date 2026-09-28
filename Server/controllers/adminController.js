@@ -260,7 +260,7 @@ export const getDepartmentRoster = async (req, res) => {
 
 export const transferMember = async (req, res) => {
   try {
-    const { user_id, target_department_id, target_supervisor_id } = req.body;
+    const { user_id, target_department_id, target_supervisor_id, reason } = req.body;
 
     if (!user_id || !target_department_id) {
       return res.status(400).json({ status: false, error: "User and target department are required" });
@@ -278,6 +278,10 @@ export const transferMember = async (req, res) => {
       return res.status(404).json({ status: false, error: "Target department not found" });
     }
     const targetDept = deptRows[0];
+
+    // Find previous supervisor
+    const [prevSupRows] = await pool.query("SELECT supervisor_id FROM team_hierarchy WHERE employee_id = ?", [user_id]);
+    const previousSupervisorId = prevSupRows.length > 0 ? prevSupRows[0].supervisor_id : null;
 
     await pool.query("UPDATE users SET department_id = ? WHERE id = ?", [target_department_id, user_id]);
 
@@ -306,6 +310,12 @@ export const transferMember = async (req, res) => {
       await pool.query("UPDATE departments SET head_id = NULL WHERE id = ? AND head_id = ?", [oldDeptId, user_id]);
     }
 
+    // Insert into department_transfers audit table
+    await pool.query(`
+      INSERT INTO department_transfers (user_id, source_department_id, target_department_id, previous_supervisor_id, new_supervisor_id, transferred_by, reason)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `, [user_id, oldDeptId, target_department_id, previousSupervisorId, target_supervisor_id || null, req.user?.id || 1, reason || null]);
+
     return res.json({
       status: true,
       message: `Successfully transferred ${user.name} to ${targetDept.name}`,
@@ -314,6 +324,34 @@ export const transferMember = async (req, res) => {
   } catch (err) {
     console.error("Transfer member error:", err);
     return res.status(500).json({ status: false, error: "Failed to transfer member" });
+  }
+};
+
+export const getDepartmentTransfers = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await pool.query(`
+      SELECT dt.*,
+             u.name AS user_name, u.email AS user_email, u.role AS user_role, u.image_url AS user_image_url,
+             sd.name AS source_dept_name, sd.code AS source_dept_code,
+             td.name AS target_dept_name, td.code AS target_dept_code,
+             prev_sup.name AS previous_supervisor_name,
+             new_sup.name AS new_supervisor_name
+      FROM department_transfers dt
+      LEFT JOIN users u ON dt.user_id = u.id
+      LEFT JOIN departments sd ON dt.source_department_id = sd.id
+      LEFT JOIN departments td ON dt.target_department_id = td.id
+      LEFT JOIN users prev_sup ON dt.previous_supervisor_id = prev_sup.id
+      LEFT JOIN users new_sup ON dt.new_supervisor_id = new_sup.id
+      WHERE dt.source_department_id = ? OR dt.target_department_id = ?
+      ORDER BY dt.transferred_at DESC
+      LIMIT 50
+    `, [id, id]);
+
+    return res.json({ status: true, transfers: rows });
+  } catch (err) {
+    console.error("Get department transfers error:", err);
+    return res.status(500).json({ status: false, error: "Failed to fetch department transfer history" });
   }
 };
 

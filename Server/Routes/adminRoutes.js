@@ -7,6 +7,7 @@ import {
   deleteDepartment,
   getEligibleHeads,
   getDepartmentRoster,
+  getDepartmentTransfers,
   transferMember,
   getUsers,
   addUser,
@@ -29,6 +30,7 @@ router.get("/departments/eligible-heads", getEligibleHeads);
 router.post("/departments", addDepartment);
 router.post("/departments/transfer-member", transferMember);
 router.get("/departments/:id/roster", getDepartmentRoster);
+router.get("/departments/:id/transfers", getDepartmentTransfers);
 router.put("/departments/:id", updateDepartment);
 router.delete("/departments/:id", deleteDepartment);
 
