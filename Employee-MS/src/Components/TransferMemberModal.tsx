@@ -18,11 +18,19 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
   initialDeptId,
   onTransferSuccess
 }) => {
-  // Wizard Step: 1 = Candidate, 2 = Destination, 3 = Reporting & Reason, 4 = Diff Review
+  // Transfer Mode: 'single' | 'batch'
+  const [transferMode, setTransferMode] = useState<"single" | "batch">("single");
+  // Wizard Step: 1 = Candidate(s), 2 = Destination, 3 = Reporting & Reason, 4 = Diff Review
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
+
+  // Single candidate ID
   const [selectedUserId, setSelectedUserId] = useState<string>("");
+  // Batch candidate IDs
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+
+  const [sourceDeptFilter, setSourceDeptFilter] = useState<string>(initialDeptId ? String(initialDeptId) : "");
   const [targetDeptId, setTargetDeptId] = useState<string>("");
   const [targetSupervisorId, setTargetSupervisorId] = useState<string>("");
   const [targetSupervisors, setTargetSupervisors] = useState<any[]>([]);
@@ -59,12 +67,16 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
   // Set initial selected user or department and reset step
   useEffect(() => {
     if (initialUserId) {
+      setTransferMode("single");
       setSelectedUserId(String(initialUserId));
-      setCurrentStep(2); // If candidate pre-selected from row action, jump directly to destination step!
+      setSelectedUserIds([String(initialUserId)]);
+      setCurrentStep(2); // Jump directly to destination step if user was pre-picked
     } else {
       setSelectedUserId("");
+      setSelectedUserIds([]);
       setCurrentStep(1);
     }
+    setSourceDeptFilter(initialDeptId ? String(initialDeptId) : "");
     setTargetDeptId("");
     setTargetSupervisorId("");
     setTargetSupervisors([]);
@@ -114,17 +126,13 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
 
   if (!isOpen) return null;
 
-  const selectedUser = users.find((u) => String(u.id) === String(selectedUserId));
-  const currentDept = departments.find((d) => d.id === selectedUser?.department_id);
-  const availableTargetDepts = departments.filter((d) => d.id !== selectedUser?.department_id);
-  const selectedTargetDept = departments.find((d) => String(d.id) === String(targetDeptId));
-  const selectedSupervisor = targetSupervisors.find((s) => String(s.id) === String(targetSupervisorId));
+  const isBatch = transferMode === "batch";
 
-  const isSupervisor = selectedUser?.role === "supervisor";
-  const isSourceHod = currentDept && currentDept.head_id === selectedUser?.id;
-
+  // Filtered users list
   const filteredUsers = users.filter((u) => {
-    if (initialDeptId && u.department_id !== initialDeptId && !initialUserId) return false;
+    if (sourceDeptFilter && String(u.department_id) !== String(sourceDeptFilter) && !initialUserId) {
+      return false;
+    }
     if (!userSearchQuery.trim()) return true;
     const q = userSearchQuery.toLowerCase();
     return (
@@ -135,12 +143,56 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
     );
   });
 
+  const selectedUser = users.find((u) => String(u.id) === String(selectedUserId));
+  const selectedBatchUsers = users.filter((u) => selectedUserIds.includes(String(u.id)));
+
+  const currentDept = departments.find((d) => d.id === selectedUser?.department_id);
+  const availableTargetDepts = departments.filter((d) => {
+    if (!isBatch && selectedUser?.department_id) {
+      return d.id !== selectedUser.department_id;
+    }
+    if (isBatch && sourceDeptFilter) {
+      return String(d.id) !== String(sourceDeptFilter);
+    }
+    return true;
+  });
+
+  const selectedTargetDept = departments.find((d) => String(d.id) === String(targetDeptId));
+  const selectedSupervisor = targetSupervisors.find((s) => String(s.id) === String(targetSupervisorId));
+
+  const isSupervisor = selectedUser?.role === "supervisor";
+  const isSourceHod = currentDept && currentDept.head_id === selectedUser?.id;
+
+  // Toggle candidate selection in batch mode
+  const handleToggleBatchUser = (idStr: string) => {
+    setSelectedUserIds((prev) =>
+      prev.includes(idStr) ? prev.filter((id) => id !== idStr) : [...prev, idStr]
+    );
+  };
+
+  const handleSelectAllFiltered = () => {
+    const ids = filteredUsers.map((u) => String(u.id));
+    setSelectedUserIds((prev) => Array.from(new Set([...prev, ...ids])));
+  };
+
+  const handleClearSelection = () => {
+    setSelectedUserIds([]);
+    setSelectedUserId("");
+  };
+
   const handleNextStep = () => {
     setError("");
     if (currentStep === 1) {
-      if (!selectedUserId) {
-        setError("Please select a candidate to initiate transfer.");
-        return;
+      if (isBatch) {
+        if (selectedUserIds.length === 0) {
+          setError("Please select at least one candidate for squad reorganization.");
+          return;
+        }
+      } else {
+        if (!selectedUserId) {
+          setError("Please select a candidate to initiate transfer.");
+          return;
+        }
       }
       setCurrentStep(2);
     } else if (currentStep === 2) {
@@ -157,7 +209,6 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
   const handlePrevStep = () => {
     setError("");
     if (currentStep > 1) {
-      // If candidate was pre-selected through direct row action, don't go back to step 1
       if (currentStep === 2 && initialUserId) {
         return;
       }
@@ -167,28 +218,51 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
 
   const handleExecuteTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedUserId || !targetDeptId) {
-      setError("Candidate and target destination department are required.");
+    if (isBatch ? selectedUserIds.length === 0 : !selectedUserId) {
+      setError("Please select candidate(s) to transfer.");
+      return;
+    }
+    if (!targetDeptId) {
+      setError("Destination department is required.");
       return;
     }
 
     try {
       setSubmitting(true);
       setError("");
-      const res = await api.post("/api/admin/departments/transfer-member", {
-        user_id: Number(selectedUserId),
-        target_department_id: Number(targetDeptId),
-        target_supervisor_id: targetSupervisorId ? Number(targetSupervisorId) : null,
-        reason: transferReason.trim() || "Workforce mobility realignment"
-      });
 
-      if (res.data.status) {
-        if (onTransferSuccess) {
-          onTransferSuccess(res.data.message || `Successfully transferred ${selectedUser?.name}`);
+      if (isBatch) {
+        const res = await api.post("/api/admin/departments/batch-transfer", {
+          user_ids: selectedUserIds.map((id) => Number(id)),
+          target_department_id: Number(targetDeptId),
+          target_supervisor_id: targetSupervisorId ? Number(targetSupervisorId) : null,
+          reason: transferReason.trim() || "Batch Squad Reorganization"
+        });
+
+        if (res.data.status) {
+          if (onTransferSuccess) {
+            onTransferSuccess(res.data.message || `Successfully transferred ${selectedUserIds.length} personnel`);
+          }
+          onClose();
+        } else {
+          setError(res.data.error || "Failed to execute batch transfer");
         }
-        onClose();
       } else {
-        setError(res.data.error || "Failed to execute transfer");
+        const res = await api.post("/api/admin/departments/transfer-member", {
+          user_id: Number(selectedUserId),
+          target_department_id: Number(targetDeptId),
+          target_supervisor_id: targetSupervisorId ? Number(targetSupervisorId) : null,
+          reason: transferReason.trim() || "Workforce mobility realignment"
+        });
+
+        if (res.data.status) {
+          if (onTransferSuccess) {
+            onTransferSuccess(res.data.message || `Successfully transferred ${selectedUser?.name}`);
+          }
+          onClose();
+        } else {
+          setError(res.data.error || "Failed to execute transfer");
+        }
       }
     } catch (err: any) {
       setError(err.response?.data?.error || "Error executing personnel transfer");
@@ -198,7 +272,7 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
   };
 
   const stepsList = [
-    { num: 1, label: "Candidate", icon: "bi-person-check" },
+    { num: 1, label: isBatch ? "Squad Roster" : "Candidate", icon: "bi-person-check" },
     { num: 2, label: "Destination", icon: "bi-building-up" },
     { num: 3, label: "Reporting", icon: "bi-diagram-3" },
     { num: 4, label: "Diff Review", icon: "bi-file-earmark-diff" }
@@ -222,11 +296,13 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
                   Workforce Mobility Transfer
                 </h3>
                 <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-indigo-500/30 text-indigo-200 border border-indigo-400/40">
-                  Step {currentStep} of 4
+                  {isBatch ? "Batch Squad Mode" : "Single Candidate"} • Step {currentStep} of 4
                 </span>
               </div>
               <p className="text-xs text-slate-300 mt-0.5 mb-0">
-                Cross-department personnel transfer & reporting structure alignment
+                {isBatch
+                  ? "Multi-member squad reassignment and organizational realignment"
+                  : "Cross-department personnel transfer & reporting structure alignment"}
               </p>
             </div>
           </div>
@@ -310,13 +386,121 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
             {/* STEP 1: Candidate Selection */}
             {currentStep === 1 && (
               <div className="space-y-4 animate-in fade-in duration-200">
-                <div>
-                  <h4 className="text-sm font-bold text-slate-900 mb-1">Select Transfer Candidate</h4>
-                  <p className="text-xs text-slate-500 mb-0">
-                    Search and choose the employee or team lead you wish to mobilize.
-                  </p>
+                {/* Mode Selector Toggle (Disabled if opened for pre-selected user) */}
+                {!initialUserId && (
+                  <div className="flex items-center justify-between p-1.5 rounded-xl bg-slate-100 border border-slate-200/80">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTransferMode("single");
+                        setSelectedUserIds([]);
+                      }}
+                      className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                        transferMode === "single"
+                          ? "bg-white text-indigo-900 shadow-2xs"
+                          : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      <i className="bi bi-person"></i>
+                      <span>Single Candidate Transfer</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTransferMode("batch");
+                        if (selectedUserId && !selectedUserIds.includes(selectedUserId)) {
+                          setSelectedUserIds([selectedUserId]);
+                        }
+                      }}
+                      className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                        transferMode === "batch"
+                          ? "bg-white text-indigo-900 shadow-2xs"
+                          : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      <i className="bi bi-people"></i>
+                      <span>Batch Squad Reorganization</span>
+                    </button>
+                  </div>
+                )}
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900 mb-0.5">
+                      {isBatch ? "Select Squad Members" : "Select Candidate"}
+                    </h4>
+                    <p className="text-xs text-slate-500 mb-0">
+                      {isBatch
+                        ? "Select multiple employees to reassign as a cohesive squad."
+                        : "Search and choose an individual employee to mobilize."}
+                    </p>
+                  </div>
+
+                  {/* Filter by source department */}
+                  <select
+                    value={sourceDeptFilter}
+                    onChange={(e) => setSourceDeptFilter(e.target.value)}
+                    className="px-2.5 py-1.5 rounded-lg text-xs bg-slate-50 border border-slate-200 text-slate-700 outline-none focus:border-indigo-500 font-medium cursor-pointer"
+                  >
+                    <option value="">All Departments</option>
+                    {departments.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        Filter: {d.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
+                {/* Batch multi-select utility bar */}
+                {isBatch && (
+                  <div className="flex items-center justify-between px-3 py-2 bg-indigo-50/70 border border-indigo-100 rounded-xl text-xs">
+                    <span className="font-semibold text-indigo-950">
+                      {selectedUserIds.length} candidate(s) queued for transfer
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleSelectAllFiltered}
+                        className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-white text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-colors cursor-pointer"
+                      >
+                        Select All Visible
+                      </button>
+                      {selectedUserIds.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleClearSelection}
+                          className="px-2.5 py-1 rounded-md text-[11px] font-bold text-slate-600 hover:text-slate-900 hover:bg-white transition-colors cursor-pointer"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Selected members badge cloud in batch mode */}
+                {isBatch && selectedBatchUsers.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-2 rounded-xl bg-slate-50 border border-slate-200/80">
+                    {selectedBatchUsers.map((u) => (
+                      <span
+                        key={u.id}
+                        className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-semibold bg-white border border-slate-200 text-slate-800 shadow-2xs"
+                      >
+                        <span>{u.name}</span>
+                        <span className="text-[9px] text-slate-400">({u.role})</span>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleBatchUser(String(u.id))}
+                          className="text-slate-400 hover:text-rose-600 transition-colors cursor-pointer font-bold ml-0.5"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Search Bar */}
                 <div className="space-y-2">
                   <div className="relative">
                     <i className="bi bi-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -329,7 +513,7 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
                     />
                   </div>
 
-                  <div className="max-h-56 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100 bg-white shadow-2xs">
+                  <div className="max-h-52 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100 bg-white shadow-2xs">
                     {loadingUsers ? (
                       <div className="p-6 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
                         <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
@@ -337,12 +521,20 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
                       </div>
                     ) : filteredUsers.length > 0 ? (
                       filteredUsers.map((u) => {
-                        const isSelected = String(selectedUserId) === String(u.id);
+                        const isSelected = isBatch
+                          ? selectedUserIds.includes(String(u.id))
+                          : String(selectedUserId) === String(u.id);
+
                         return (
-                          <button
+                          <div
                             key={u.id}
-                            type="button"
-                            onClick={() => setSelectedUserId(String(u.id))}
+                            onClick={() => {
+                              if (isBatch) {
+                                handleToggleBatchUser(String(u.id));
+                              } else {
+                                setSelectedUserId(String(u.id));
+                              }
+                            }}
                             className={`w-full p-3 text-left text-xs flex items-center justify-between transition-colors cursor-pointer ${
                               isSelected
                                 ? "bg-indigo-50/90 text-indigo-950 font-semibold"
@@ -350,6 +542,15 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
                             }`}
                           >
                             <div className="flex items-center gap-3">
+                              {isBatch ? (
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => {}} // Managed by parent click
+                                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer pointer-events-none"
+                                />
+                              ) : null}
+
                               {u.image_url ? (
                                 <img
                                   src={u.image_url}
@@ -375,7 +576,7 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
                                 {u.department_name || "Unassigned"}
                               </span>
                             </div>
-                          </button>
+                          </div>
                         );
                       })
                     ) : (
@@ -386,7 +587,7 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
                   </div>
                 </div>
 
-                {selectedUser && (
+                {!isBatch && selectedUser && (
                   <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/90 flex items-center justify-between gap-3 shadow-2xs">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center">
@@ -419,28 +620,36 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
                 <div>
                   <h4 className="text-sm font-bold text-slate-900 mb-1">Target Destination Department</h4>
                   <p className="text-xs text-slate-500 mb-0">
-                    Select the operational unit where {selectedUser?.name || "the candidate"} will be deployed.
+                    {isBatch
+                      ? `Select the operational unit where ${selectedUserIds.length} personnel will be deployed.`
+                      : `Select the operational unit where ${selectedUser?.name || "the candidate"} will be deployed.`}
                   </p>
                 </div>
 
                 {/* Candidate Summary Mini Bar */}
-                {selectedUser && (
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-full bg-indigo-600 text-white font-bold text-[11px] flex items-center justify-center">
-                        {selectedUser.name.charAt(0)}
-                      </div>
-                      <div>
-                        <span className="font-bold text-slate-900 leading-tight block">{selectedUser.name}</span>
-                        <span className="text-[10px] text-slate-400">{selectedUser.role}</span>
-                      </div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-full bg-indigo-600 text-white font-bold text-[11px] flex items-center justify-center">
+                      {isBatch ? selectedUserIds.length : selectedUser?.name?.charAt(0) || "1"}
                     </div>
-                    <div className="text-right">
-                      <span className="text-[10px] text-slate-400 block">Origin</span>
-                      <span className="font-bold text-slate-700 text-xs">{currentDept?.name || "Unassigned"}</span>
+                    <div>
+                      <span className="font-bold text-slate-900 leading-tight block">
+                        {isBatch
+                          ? `${selectedUserIds.length} Candidates Selected`
+                          : selectedUser?.name || "Candidate"}
+                      </span>
+                      <span className="text-[10px] text-slate-400">
+                        {isBatch ? "Squad Batch Mobility" : selectedUser?.role || "Staff"}
+                      </span>
                     </div>
                   </div>
-                )}
+                  <div className="text-right">
+                    <span className="text-[10px] text-slate-400 block">Origin</span>
+                    <span className="font-bold text-slate-700 text-xs">
+                      {isBatch ? "Cross-Departmental" : currentDept?.name || "Unassigned"}
+                    </span>
+                  </div>
+                </div>
 
                 <div className="space-y-2">
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -477,7 +686,7 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
                     </div>
                     <div className="text-right">
                       <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-indigo-700 border border-indigo-200 shadow-2xs block">
-                        {(selectedTargetDept.member_count || 0) + 1} Staff Post-Transfer
+                        {(selectedTargetDept.member_count || 0) + (isBatch ? selectedUserIds.length : 1)} Staff Post-Transfer
                       </span>
                     </div>
                   </div>
@@ -534,7 +743,7 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
                 </div>
 
                 {/* Safeguard & Policy Alerts */}
-                {isSupervisor && (
+                {!isBatch && isSupervisor && (
                   <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-1 animate-in fade-in duration-150">
                     <div className="font-bold flex items-center gap-1.5 text-amber-800">
                       <i className="bi bi-shield-exclamation text-amber-600"></i>
@@ -546,7 +755,7 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
                   </div>
                 )}
 
-                {isSourceHod && (
+                {!isBatch && isSourceHod && (
                   <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs space-y-1 animate-in fade-in duration-150">
                     <div className="font-bold flex items-center gap-1.5 text-rose-800">
                       <i className="bi bi-exclamation-octagon text-rose-600"></i>
@@ -570,74 +779,99 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
                   </p>
                 </div>
 
-                {/* Side-by-side Before & After Diff Card */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                  {/* Before / Source State */}
-                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/90 space-y-3">
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                        Current Assignment
+                {/* Roster of members being transferred */}
+                {isBatch ? (
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/90 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-900">
+                        Squad Members Queued ({selectedBatchUsers.length})
                       </span>
-                      <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-slate-200 text-slate-700">
-                        Source
+                      <span className="text-[11px] text-indigo-700 font-semibold">
+                        Reassigning to {selectedTargetDept?.name}
                       </span>
                     </div>
 
-                    <div className="space-y-2 text-xs">
-                      <div>
-                        <span className="text-[10px] text-slate-400 block font-medium">Department</span>
-                        <span className="font-bold text-slate-800">{currentDept?.name || "Unassigned"}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-slate-400 block font-medium">Leadership Tier</span>
-                        <span className="font-semibold text-slate-700">
-                          {isSourceHod ? "Head of Department (HOD)" : "Staff / Functional"}
+                    <div className="max-h-36 overflow-y-auto divide-y divide-slate-100 bg-white rounded-lg border border-slate-200">
+                      {selectedBatchUsers.map((u) => (
+                        <div key={u.id} className="p-2 px-3 flex items-center justify-between text-xs">
+                          <span className="font-semibold text-slate-800">{u.name}</span>
+                          <span className="text-[11px] text-slate-400">
+                            {u.department_name || "Unassigned"} → {selectedTargetDept?.name}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  /* Single Member Diff Card */
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    {/* Before / Source State */}
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/90 space-y-3">
+                      <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                          Current Assignment
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-slate-200 text-slate-700">
+                          Source
                         </span>
                       </div>
-                      <div>
-                        <span className="text-[10px] text-slate-400 block font-medium">Headcount Impact</span>
-                        <span className="font-semibold text-slate-600">
-                          {currentDept ? `${currentDept.member_count || 1} → ${(currentDept.member_count || 1) - 1} members` : "N/A"}
+
+                      <div className="space-y-2 text-xs">
+                        <div>
+                          <span className="text-[10px] text-slate-400 block font-medium">Department</span>
+                          <span className="font-bold text-slate-800">{currentDept?.name || "Unassigned"}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-slate-400 block font-medium">Leadership Tier</span>
+                          <span className="font-semibold text-slate-700">
+                            {isSourceHod ? "Head of Department (HOD)" : "Staff / Functional"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-slate-400 block font-medium">Headcount Impact</span>
+                          <span className="font-semibold text-slate-600">
+                            {currentDept ? `${currentDept.member_count || 1} → ${(currentDept.member_count || 1) - 1} members` : "N/A"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* After / Target State */}
+                    <div className="p-4 rounded-xl bg-indigo-50/70 border border-indigo-200 space-y-3">
+                      <div className="flex items-center justify-between pb-2 border-b border-indigo-200/70">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700">
+                          Proposed Assignment
                         </span>
+                        <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-indigo-600 text-white">
+                          Destination
+                        </span>
+                      </div>
+
+                      <div className="space-y-2 text-xs">
+                        <div>
+                          <span className="text-[10px] text-indigo-500 block font-medium">Department</span>
+                          <span className="font-bold text-indigo-950">{selectedTargetDept?.name}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-indigo-500 block font-medium">Assigned Reporting Line</span>
+                          <span className="font-semibold text-indigo-900">
+                            {selectedSupervisor
+                              ? `Pod Lead: ${selectedSupervisor.name}`
+                              : `Direct to HOD: ${selectedTargetDept?.head_name || "Apex Leader"}`}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-indigo-500 block font-medium">Headcount Impact</span>
+                          <span className="font-semibold text-emerald-700">
+                            {selectedTargetDept
+                              ? `${selectedTargetDept.member_count || 0} → ${(selectedTargetDept.member_count || 0) + 1} members`
+                              : "N/A"}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-
-                  {/* After / Target State */}
-                  <div className="p-4 rounded-xl bg-indigo-50/70 border border-indigo-200 space-y-3">
-                    <div className="flex items-center justify-between pb-2 border-b border-indigo-200/70">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700">
-                        Proposed Assignment
-                      </span>
-                      <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-indigo-600 text-white">
-                        Destination
-                      </span>
-                    </div>
-
-                    <div className="space-y-2 text-xs">
-                      <div>
-                        <span className="text-[10px] text-indigo-500 block font-medium">Department</span>
-                        <span className="font-bold text-indigo-950">{selectedTargetDept?.name}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-indigo-500 block font-medium">Assigned Reporting Line</span>
-                        <span className="font-semibold text-indigo-900">
-                          {selectedSupervisor
-                            ? `Pod Lead: ${selectedSupervisor.name}`
-                            : `Direct to HOD: ${selectedTargetDept?.head_name || "Apex Leader"}`}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-indigo-500 block font-medium">Headcount Impact</span>
-                        <span className="font-semibold text-emerald-700">
-                          {selectedTargetDept
-                            ? `${selectedTargetDept.member_count || 0} → ${(selectedTargetDept.member_count || 0) + 1} members`
-                            : "N/A"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                )}
 
                 {/* Justification summary */}
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
@@ -645,7 +879,7 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
                     Recorded Transfer Justification
                   </span>
                   <p className="text-slate-700 italic mb-0">
-                    "{transferReason.trim() || "Workforce mobility realignment and strategic resource balancing."}"
+                    "{transferReason.trim() || (isBatch ? "Batch Squad Reorganization and resource rebalancing." : "Workforce mobility realignment and strategic resource balancing.")}"
                   </p>
                 </div>
 
@@ -658,7 +892,7 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
                     className="mt-0.5 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                   />
                   <span className="text-slate-700 leading-snug">
-                    I confirm this workforce transfer complies with organizational governance protocols and approve
+                    I confirm this workforce {isBatch ? "squad reorganization" : "transfer"} complies with organizational governance protocols and approve
                     immediate reporting realignment.
                   </span>
                 </label>
@@ -694,7 +928,7 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
                 type="button"
                 onClick={handleNextStep}
                 disabled={
-                  (currentStep === 1 && !selectedUserId) ||
+                  (currentStep === 1 && (isBatch ? selectedUserIds.length === 0 : !selectedUserId)) ||
                   (currentStep === 2 && !targetDeptId)
                 }
                 className="px-5 py-2.5 rounded-xl font-bold text-xs bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xs flex items-center gap-2 cursor-pointer"

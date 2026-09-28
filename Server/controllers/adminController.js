@@ -355,6 +355,86 @@ export const getDepartmentTransfers = async (req, res) => {
   }
 };
 
+export const batchTransferMembers = async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const { user_ids, target_department_id, target_supervisor_id, reason } = req.body;
+
+    if (!Array.isArray(user_ids) || user_ids.length === 0 || !target_department_id) {
+      connection.release();
+      return res.status(400).json({ status: false, error: "User IDs array and target department are required" });
+    }
+
+    const [deptRows] = await connection.query("SELECT * FROM departments WHERE id = ?", [target_department_id]);
+    if (deptRows.length === 0) {
+      await connection.rollback();
+      connection.release();
+      return res.status(404).json({ status: false, error: "Target destination department not found" });
+    }
+    const targetDept = deptRows[0];
+
+    for (const uid of user_ids) {
+      const [uRows] = await connection.query("SELECT * FROM users WHERE id = ?", [uid]);
+      if (uRows.length === 0) continue;
+      const user = uRows[0];
+      const oldDeptId = user.department_id;
+
+      // Previous supervisor
+      const [prevSupRows] = await connection.query("SELECT supervisor_id FROM team_hierarchy WHERE employee_id = ?", [uid]);
+      const prevSupervisorId = prevSupRows.length > 0 ? prevSupRows[0].supervisor_id : null;
+
+      // Move user
+      await connection.query("UPDATE users SET department_id = ? WHERE id = ?", [target_department_id, uid]);
+
+      // Update reporting hierarchy
+      if (target_supervisor_id) {
+        await connection.query(`
+          INSERT INTO team_hierarchy (supervisor_id, employee_id)
+          VALUES (?, ?)
+          ON DUPLICATE KEY UPDATE supervisor_id = VALUES(supervisor_id)
+        `, [target_supervisor_id, uid]);
+      } else {
+        await connection.query("DELETE FROM team_hierarchy WHERE employee_id = ?", [uid]);
+      }
+
+      // Safeguard: If moved user was supervisor, cascade orphans to old dept head
+      if (user.role === "supervisor" && oldDeptId) {
+        const [oldDeptRows] = await connection.query("SELECT head_id FROM departments WHERE id = ?", [oldDeptId]);
+        const oldHeadId = oldDeptRows.length > 0 ? oldDeptRows[0].head_id : null;
+        if (oldHeadId) {
+          await connection.query("UPDATE team_hierarchy SET supervisor_id = ? WHERE supervisor_id = ?", [oldHeadId, uid]);
+        } else {
+          await connection.query("DELETE FROM team_hierarchy WHERE supervisor_id = ?", [uid]);
+        }
+      }
+
+      // Safeguard: If moved user was HOD of old department, vacate
+      if (oldDeptId) {
+        await connection.query("UPDATE departments SET head_id = NULL WHERE id = ? AND head_id = ?", [oldDeptId, uid]);
+      }
+
+      // Audit log entry
+      await connection.query(`
+        INSERT INTO department_transfers (user_id, source_department_id, target_department_id, previous_supervisor_id, new_supervisor_id, transferred_by, reason)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `, [uid, oldDeptId, target_department_id, prevSupervisorId, target_supervisor_id || null, req.user?.id || 1, reason || "Batch Squad Reorganization"]);
+    }
+
+    await connection.commit();
+    return res.json({
+      status: true,
+      message: `Successfully transferred ${user_ids.length} personnel to ${targetDept.name}`
+    });
+  } catch (err) {
+    await connection.rollback();
+    console.error("Batch transfer members error:", err);
+    return res.status(500).json({ status: false, error: "Failed to execute batch transfer" });
+  } finally {
+    connection.release();
+  }
+};
+
 export const getUsers = async (req, res) => {
   try {
     const { role } = req.query;
