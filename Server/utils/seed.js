@@ -105,6 +105,29 @@ export async function seedDatabase() {
     console.warn('Migration note (departments backfill):', err.message);
   }
 
+  // Migration check for department_transfers audit table
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS department_transfers (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        source_department_id INT NULL,
+        target_department_id INT NOT NULL,
+        previous_supervisor_id INT NULL,
+        new_supervisor_id INT NULL,
+        transferred_by INT NULL,
+        reason TEXT NULL,
+        transferred_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_transfer_user (user_id),
+        INDEX idx_transfer_source (source_department_id),
+        INDEX idx_transfer_target (target_department_id)
+      )
+    `);
+    console.log('✓ Verified department_transfers audit logging schema.');
+  } catch (err) {
+    console.warn('Migration note (department_transfers):', err.message);
+  }
+
   // Check if database is already seeded
   const [existing] = await pool.query("SELECT id FROM users LIMIT 1");
   if (existing.length > 0) {

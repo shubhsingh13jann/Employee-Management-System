@@ -182,3 +182,22 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- 14. Department Transfers Audit Log
+CREATE TABLE IF NOT EXISTS department_transfers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    source_department_id INT NULL,
+    target_department_id INT NOT NULL,
+    previous_supervisor_id INT NULL,
+    new_supervisor_id INT NULL,
+    transferred_by INT NULL,
+    reason TEXT NULL,
+    transferred_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (source_department_id) REFERENCES departments(id) ON DELETE SET NULL,
+    FOREIGN KEY (target_department_id) REFERENCES departments(id) ON DELETE CASCADE,
+    INDEX idx_transfer_user (user_id),
+    INDEX idx_transfer_source (source_department_id),
+    INDEX idx_transfer_target (target_department_id)
+);
