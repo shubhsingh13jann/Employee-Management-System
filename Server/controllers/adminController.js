@@ -435,6 +435,31 @@ export const batchTransferMembers = async (req, res) => {
   }
 };
 
+export const getGlobalTransfers = async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT dt.*,
+             u.name AS user_name, u.email AS user_email, u.role AS user_role, u.image_url AS user_image_url,
+             sd.name AS source_dept_name, sd.code AS source_dept_code,
+             td.name AS target_dept_name, td.code AS target_dept_code,
+             prev_sup.name AS previous_supervisor_name,
+             new_sup.name AS new_supervisor_name
+      FROM department_transfers dt
+      LEFT JOIN users u ON dt.user_id = u.id
+      LEFT JOIN departments sd ON dt.source_department_id = sd.id
+      LEFT JOIN departments td ON dt.target_department_id = td.id
+      LEFT JOIN users prev_sup ON dt.previous_supervisor_id = prev_sup.id
+      LEFT JOIN users new_sup ON dt.new_supervisor_id = new_sup.id
+      ORDER BY dt.transferred_at DESC
+      LIMIT 100
+    `);
+    return res.json({ status: true, transfers: rows });
+  } catch (err) {
+    console.error("Get global transfers error:", err);
+    return res.status(500).json({ status: false, error: "Failed to fetch global transfers ledger" });
+  }
+};
+
 export const getUsers = async (req, res) => {
   try {
     const { role } = req.query;

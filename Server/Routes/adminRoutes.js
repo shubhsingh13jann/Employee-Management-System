@@ -8,6 +8,7 @@ import {
   getEligibleHeads,
   getDepartmentRoster,
   getDepartmentTransfers,
+  getGlobalTransfers,
   transferMember,
   batchTransferMembers,
   getUsers,
@@ -28,6 +29,7 @@ router.get("/stats", getStats);
 // Department & Leadership Management Routes
 router.get("/departments", getDepartments);
 router.get("/departments/eligible-heads", getEligibleHeads);
+router.get("/departments/transfers/global", getGlobalTransfers);
 router.post("/departments", addDepartment);
 router.post("/departments/transfer-member", transferMember);
 router.post("/departments/batch-transfer", batchTransferMembers);

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "../../api/axios";
 import { DepartmentRosterModal } from "../../Components/DepartmentRosterModal";
 import { TransferMemberModal } from "../../Components/TransferMemberModal";
+import { GlobalMobilityModal } from "../../Components/GlobalMobilityModal";
 
 const Departments = () => {
   const [departments, setDepartments] = useState([]);
@@ -21,6 +22,7 @@ const Departments = () => {
     userId: number | null;
     deptId: number | null;
   }>({ isOpen: false, userId: null, deptId: null });
+  const [globalMobilityOpen, setGlobalMobilityOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState({ type: "", text: "" });
 
@@ -433,6 +435,16 @@ const Departments = () => {
                   <i className="bi bi-arrow-left-right text-[11px]"></i>
                   <span className="hidden sm:inline">Mobility Transfer</span>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => setGlobalMobilityOpen(true)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs shrink-0"
+                  title="View Company-Wide Mobility Audit Ledger"
+                >
+                  <i className="bi bi-clock-history text-[11px] text-indigo-600"></i>
+                  <span className="hidden sm:inline">Org Mobility Ledger</span>
+                </button>
               </div>
             </div>
 
@@ -700,6 +712,13 @@ const Departments = () => {
             setRosterDept({ ...rosterDept });
           }
         }}
+      />
+
+      {/* Global Organization-Wide Workforce Mobility Ledger */}
+      <GlobalMobilityModal
+        isOpen={globalMobilityOpen}
+        onClose={() => setGlobalMobilityOpen(false)}
+        departments={departments}
       />
     </div>
   );
