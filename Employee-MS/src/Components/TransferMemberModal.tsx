@@ -64,6 +64,27 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
     fetchUsers();
   }, [isOpen]);
 
+  // Prevent background scrolling while modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const mainContainer = document.querySelector("main");
+    const originalMainOverflow = mainContainer ? mainContainer.style.overflow : "";
+    if (mainContainer) {
+      mainContainer.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      if (mainContainer) {
+        mainContainer.style.overflow = originalMainOverflow;
+      }
+    };
+  }, [isOpen]);
+
   // Set initial selected user or department and reset step
   useEffect(() => {
     if (initialUserId) {
@@ -279,27 +300,29 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-xs overscroll-contain animate-in fade-in duration-200"
+      onWheel={(e) => {
+        if (e.target === e.currentTarget) {
+          e.preventDefault();
+        }
+      }}
+    >
       <div
-        className="w-full max-w-2xl bg-white rounded-2xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-150"
+        className="w-full max-w-2xl lg:max-w-3xl bg-white rounded-2xl border border-slate-200/80 shadow-2xl flex flex-col max-h-[88vh] sm:max-h-[90vh] my-auto overflow-hidden transition-all animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header Banner */}
-        <div className="px-6 py-4.5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between border-b border-slate-800">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 text-lg font-bold shadow-inner shrink-0">
+        {/* Pinned Executive Header Banner */}
+        <div className="shrink-0 px-5 sm:px-6 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between gap-4 border-b border-indigo-900/40">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 text-base sm:text-lg font-bold shadow-inner shrink-0">
               <i className="bi bi-arrow-left-right"></i>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-white tracking-tight mb-0">
-                  Workforce Mobility Transfer
-                </h3>
-                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-indigo-500/30 text-indigo-200 border border-indigo-400/40">
-                  {isBatch ? "Batch Squad Mode" : "Single Candidate"} • Step {currentStep} of 4
-                </span>
-              </div>
-              <p className="text-xs text-slate-300 mt-0.5 mb-0">
+            <div className="min-w-0">
+              <h3 className="font-bold text-base sm:text-lg text-white tracking-tight mb-0.5 whitespace-nowrap truncate">
+                Workforce Mobility Transfer
+              </h3>
+              <p className="text-xs text-indigo-200/70 mb-0 font-normal truncate">
                 {isBatch
                   ? "Multi-member squad reassignment and organizational realignment"
                   : "Cross-department personnel transfer & reporting structure alignment"}
@@ -307,19 +330,27 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={submitting}
-            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-sm font-bold disabled:opacity-50"
-            title="Close"
-          >
-            ✕
-          </button>
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+            <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[11px] font-semibold bg-indigo-500/20 text-indigo-200 border border-indigo-400/30 whitespace-nowrap shadow-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
+              <span className="hidden sm:inline">{isBatch ? "Batch Squad Reorg" : "Single Candidate"} • </span>
+              <span>Step {currentStep} of 4</span>
+            </span>
+
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={submitting}
+              className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer text-sm font-bold disabled:opacity-50"
+              title="Close modal"
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         {/* Stepper Wizard Progress Indicator */}
-        <div className="px-6 py-3 bg-slate-50 border-b border-slate-200/80">
+        <div className="shrink-0 px-6 py-3 bg-slate-50/80 border-b border-slate-200/80">
           <div className="flex items-center justify-between">
             {stepsList.map((s, idx) => {
               const isPassed = currentStep > s.num;
@@ -374,7 +405,7 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
         </div>
 
         {/* Modal Wizard Body */}
-        <form onSubmit={handleExecuteTransfer} className="flex-1 flex flex-col overflow-hidden">
+        <form onSubmit={handleExecuteTransfer} className="flex-1 flex flex-col overflow-hidden min-h-0">
           <div className="p-6 space-y-5 overflow-y-auto max-h-[64vh]">
             {error && (
               <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 animate-in fade-in duration-150">
@@ -901,7 +932,7 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
           </div>
 
           {/* Modal Footer with Stepper Navigation */}
-          <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs">
+          <div className="shrink-0 px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs">
             {currentStep > 1 && (!initialUserId || currentStep > 2) ? (
               <button
                 type="button"
