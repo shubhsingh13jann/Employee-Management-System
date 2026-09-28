@@ -26,6 +26,7 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
   const [loadingTransfers, setLoadingTransfers] = useState<boolean>(false);
   const [transfersError, setTransfersError] = useState<string>("");
   const [transferFilterMode, setTransferFilterMode] = useState<"all" | "inbound" | "outbound">("all");
+  const [historySearchQuery, setHistorySearchQuery] = useState("");
   const [expandedSupervisorIds, setExpandedSupervisorIds] = useState<number[]>([]);
   const [staffSearchQuery, setStaffSearchQuery] = useState("");
   const [staffFilterMode, setStaffFilterMode] = useState<"all" | "assigned" | "direct_hod">("all");
@@ -69,6 +70,45 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
     link.setAttribute("download", `department_${department?.code || "roster"}_export.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExportMobilityCSV = () => {
+    if (!transfers || transfers.length === 0) return;
+    const headers = [
+      "Transfer ID",
+      "Employee Name",
+      "Email",
+      "Role",
+      "Direction",
+      "Source Department",
+      "Destination Department",
+      "Previous Supervisor",
+      "New Supervisor",
+      "Governance Justification",
+      "Transferred At"
+    ];
+    const rows = transfers.map((t: any) => [
+      t.id,
+      `"${(t.user_name || "").replace(/"/g, '""')}"`,
+      `"${t.user_email || ""}"`,
+      t.user_role || "employee",
+      t.target_department_id === departmentId ? "INBOUND" : "OUTBOUND",
+      `"${(t.source_dept_name || "Unassigned").replace(/"/g, '""')}"`,
+      `"${(t.target_dept_name || "").replace(/"/g, '""')}"`,
+      `"${(t.previous_supervisor_name || "Direct to HOD").replace(/"/g, '""')}"`,
+      `"${(t.new_supervisor_name || "Direct to HOD").replace(/"/g, '""')}"`,
+      `"${(t.reason || "Realignment").replace(/"/g, '""')}"`,
+      `"${new Date(t.transferred_at).toLocaleString()}"`
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e: any[]) => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `department_${department?.code || "mobility"}_audit_trail.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -148,9 +188,19 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
   const directHodEmployees = (roster?.employees || []).filter((emp: any) => !emp.supervisor_name);
 
   const filteredTransfers = transfers.filter((t: any) => {
-    if (transferFilterMode === "inbound") return t.target_department_id === departmentId;
-    if (transferFilterMode === "outbound") return t.source_department_id === departmentId;
-    return true;
+    if (transferFilterMode === "inbound" && t.target_department_id !== departmentId) return false;
+    if (transferFilterMode === "outbound" && t.source_department_id !== departmentId) return false;
+    if (!historySearchQuery.trim()) return true;
+    const q = historySearchQuery.toLowerCase();
+    return (
+      t.user_name?.toLowerCase().includes(q) ||
+      t.user_email?.toLowerCase().includes(q) ||
+      t.reason?.toLowerCase().includes(q) ||
+      t.source_dept_name?.toLowerCase().includes(q) ||
+      t.target_dept_name?.toLowerCase().includes(q) ||
+      t.previous_supervisor_name?.toLowerCase().includes(q) ||
+      t.new_supervisor_name?.toLowerCase().includes(q)
+    );
   });
 
   return (
@@ -1005,34 +1055,69 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-2xs">
-                      <button
-                        type="button"
-                        onClick={() => setTransferFilterMode("all")}
-                        className={`px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer transition-colors ${
-                          transferFilterMode === "all" ? "bg-slate-900 text-white" : "text-slate-600 hover:text-slate-900"
-                        }`}
-                      >
-                        All ({transfers.length})
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setTransferFilterMode("inbound")}
-                        className={`px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer transition-colors ${
-                          transferFilterMode === "inbound" ? "bg-emerald-600 text-white" : "text-slate-600 hover:text-slate-900"
-                        }`}
-                      >
-                        Inbound
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setTransferFilterMode("outbound")}
-                        className={`px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer transition-colors ${
-                          transferFilterMode === "outbound" ? "bg-amber-600 text-white" : "text-slate-600 hover:text-slate-900"
-                        }`}
-                      >
-                        Outbound
-                      </button>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* Search in Mobility History */}
+                      <div className="relative">
+                        <i className="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                        <input
+                          type="text"
+                          value={historySearchQuery}
+                          onChange={(e) => setHistorySearchQuery(e.target.value)}
+                          placeholder="Search audit events..."
+                          className="pl-7 pr-3 py-1 rounded-lg text-xs bg-white border border-slate-200 focus:border-indigo-400 outline-none w-36 sm:w-44 text-slate-700 placeholder:text-slate-400"
+                        />
+                        {historySearchQuery && (
+                          <button
+                            type="button"
+                            onClick={() => setHistorySearchQuery("")}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-2xs">
+                        <button
+                          type="button"
+                          onClick={() => setTransferFilterMode("all")}
+                          className={`px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer transition-colors ${
+                            transferFilterMode === "all" ? "bg-slate-900 text-white" : "text-slate-600 hover:text-slate-900"
+                          }`}
+                        >
+                          All ({transfers.length})
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setTransferFilterMode("inbound")}
+                          className={`px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer transition-colors ${
+                            transferFilterMode === "inbound" ? "bg-emerald-600 text-white" : "text-slate-600 hover:text-slate-900"
+                          }`}
+                        >
+                          Inbound
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setTransferFilterMode("outbound")}
+                          className={`px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer transition-colors ${
+                            transferFilterMode === "outbound" ? "bg-amber-600 text-white" : "text-slate-600 hover:text-slate-900"
+                          }`}
+                        >
+                          Outbound
+                        </button>
+                      </div>
+
+                      {transfers.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleExportMobilityCSV}
+                          className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-50 text-indigo-700 border border-slate-200 shadow-2xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                          title="Export Mobility Audit Trail to CSV"
+                        >
+                          <i className="bi bi-download text-[11px]"></i>
+                          <span className="hidden sm:inline">Export Audit</span>
+                        </button>
+                      )}
                     </div>
                   </div>
 
