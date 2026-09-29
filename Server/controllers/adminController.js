@@ -199,39 +199,115 @@ export const getDecommissionPreview = async (req, res) => {
   }
 };
 
-export const deleteDepartment = async (req, res) => {
+export const decommissionDepartment = async (req, res) => {
+  const connection = await pool.getConnection();
   try {
+    await connection.beginTransaction();
     const { id } = req.params;
-    const { action, reassign_to } = req.query;
+    const { action, target_department_id, target_supervisor_id, reason } = req.body || {};
 
-    const [[{ member_count }]] = await pool.query(
-      "SELECT COUNT(*) AS member_count FROM users WHERE department_id = ?",
-      [id]
-    );
+    const [deptRows] = await connection.query("SELECT * FROM departments WHERE id = ?", [id]);
+    if (deptRows.length === 0) {
+      await connection.rollback();
+      connection.release();
+      return res.status(404).json({ status: false, error: "Department not found" });
+    }
+    const department = deptRows[0];
 
-    if (member_count > 0) {
-      if (reassign_to) {
-        await pool.query("UPDATE users SET department_id = ? WHERE department_id = ?", [reassign_to, id]);
+    const [members] = await connection.query("SELECT * FROM users WHERE department_id = ?", [id]);
+
+    if (members.length > 0) {
+      if (action === "reassign") {
+        if (!target_department_id || Number(target_department_id) === Number(id)) {
+          await connection.rollback();
+          connection.release();
+          return res.status(400).json({ status: false, error: "A valid distinct destination department is required for reallocation" });
+        }
+
+        const [targetDeptRows] = await connection.query("SELECT * FROM departments WHERE id = ?", [target_department_id]);
+        if (targetDeptRows.length === 0) {
+          await connection.rollback();
+          connection.release();
+          return res.status(404).json({ status: false, error: "Destination department not found" });
+        }
+        const targetDept = targetDeptRows[0];
+
+        for (const member of members) {
+          const [prevSupRows] = await connection.query("SELECT supervisor_id FROM team_hierarchy WHERE employee_id = ?", [member.id]);
+          const prevSupervisorId = prevSupRows.length > 0 ? prevSupRows[0].supervisor_id : null;
+
+          await connection.query("UPDATE users SET department_id = ? WHERE id = ?", [target_department_id, member.id]);
+
+          if (target_supervisor_id) {
+            await connection.query(`
+              INSERT INTO team_hierarchy (supervisor_id, employee_id)
+              VALUES (?, ?)
+              ON DUPLICATE KEY UPDATE supervisor_id = VALUES(supervisor_id)
+            `, [target_supervisor_id, member.id]);
+          } else {
+            await connection.query("DELETE FROM team_hierarchy WHERE employee_id = ?", [member.id]);
+          }
+
+          await connection.query(`
+            INSERT INTO department_transfers (user_id, source_department_id, target_department_id, previous_supervisor_id, new_supervisor_id, transferred_by, reason)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+          `, [member.id, id, target_department_id, prevSupervisorId, target_supervisor_id || null, req.user?.id || 1, reason || `Department Sunset Reallocation: ${department.name} decommissioned`]);
+        }
       } else if (action === "unassign") {
-        await pool.query("UPDATE users SET department_id = NULL WHERE department_id = ?", [id]);
+        for (const member of members) {
+          const [prevSupRows] = await connection.query("SELECT supervisor_id FROM team_hierarchy WHERE employee_id = ?", [member.id]);
+          const prevSupervisorId = prevSupRows.length > 0 ? prevSupRows[0].supervisor_id : null;
+
+          await connection.query("UPDATE users SET department_id = NULL WHERE id = ?", [member.id]);
+          await connection.query("DELETE FROM team_hierarchy WHERE employee_id = ? OR supervisor_id = ?", [member.id, member.id]);
+
+          await connection.query(`
+            INSERT INTO department_transfers (user_id, source_department_id, target_department_id, previous_supervisor_id, new_supervisor_id, transferred_by, reason)
+            VALUES (?, ?, NULL, ?, NULL, ?, ?)
+          `, [member.id, id, prevSupervisorId, req.user?.id || 1, reason || `Department Sunset: ${department.name} decommissioned, personnel unassigned`]);
+        }
       } else {
+        await connection.rollback();
+        connection.release();
         return res.status(400).json({
           status: false,
-          error: "Department has active members",
-          member_count,
-          requires_action: true
+          error: "Department has active members. Please choose 'reassign' or 'unassign' before decommissioning.",
+          member_count: members.length
         });
       }
     }
 
-    await pool.query("UPDATE departments SET parent_id = NULL WHERE parent_id = ?", [id]);
-    await pool.query("DELETE FROM departments WHERE id = ?", [id]);
+    // Detach child departments to root level
+    await connection.query("UPDATE departments SET parent_id = NULL WHERE parent_id = ?", [id]);
 
-    return res.json({ status: true, message: "Department deleted successfully" });
+    // Unlink head
+    await connection.query("UPDATE departments SET head_id = NULL WHERE id = ?", [id]);
+
+    // Delete department record
+    await connection.query("DELETE FROM departments WHERE id = ?", [id]);
+
+    await connection.commit();
+    return res.json({
+      status: true,
+      message: `Department "${department.name}" has been safely decommissioned and all personnel governance rules executed.`
+    });
   } catch (err) {
-    console.error("Delete department error:", err);
-    return res.status(500).json({ status: false, error: "Failed to delete department" });
+    await connection.rollback();
+    console.error("Decommission department error:", err);
+    return res.status(500).json({ status: false, error: "Failed to decommission department safely" });
+  } finally {
+    connection.release();
   }
+};
+
+export const deleteDepartment = async (req, res) => {
+  req.body = {
+    action: req.body?.action || req.query?.action,
+    target_department_id: req.body?.target_department_id || req.query?.reassign_to,
+    target_supervisor_id: req.body?.target_supervisor_id,
+    reason: req.body?.reason || req.query?.reason
+  };
+  return decommissionDepartment(req, res);
 };
 
 export const getEligibleHeads = async (req, res) => {
