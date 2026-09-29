@@ -686,6 +686,9 @@ const Departments = () => {
         onTransferClick={(userId) => {
           setTransferModal({ isOpen: true, userId: userId || null, deptId: rosterDept?.id || null });
         }}
+        onDecommissionClick={(dept) => {
+          setDecommissionDeptId(dept.id);
+        }}
       />
 
       {/* Workforce Mobility Personnel Transfer Modal */}

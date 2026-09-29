@@ -8,6 +8,7 @@ interface DepartmentRosterModalProps {
   departmentName?: string;
   onTransferClick?: (userId?: number) => void;
   onEditClick?: (dept: any) => void;
+  onDecommissionClick?: (dept: any) => void;
 }
 
 export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
@@ -16,7 +17,8 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
   departmentId,
   departmentName = "Department",
   onTransferClick,
-  onEditClick
+  onEditClick,
+  onDecommissionClick
 }) => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
@@ -260,6 +262,20 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
               >
                 <i className="bi bi-pencil text-[11px]"></i>
                 <span>Edit Dept</span>
+              </button>
+            )}
+            {department && onDecommissionClick && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onDecommissionClick(department);
+                }}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-400/30 transition-colors flex items-center gap-1.5 cursor-pointer"
+                title="Decommission Department Charter"
+              >
+                <i className="bi bi-shield-slash text-[11px]"></i>
+                <span className="hidden sm:inline">Decommission</span>
               </button>
             )}
             <button
