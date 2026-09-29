@@ -276,53 +276,51 @@ const UserManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Filter, Search & Utility Bar */}
-      <div className="p-3 sm:p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-3">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+      {/* Filter, Search & Role Bar - Single Row */}
+      <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-between gap-2.5 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-2 shrink-0">
           {/* Search Box */}
-          <div className="relative flex-1 max-w-md">
-            <i className="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+          <div className="relative w-44 sm:w-56">
+            <i className="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[11px] pointer-events-none"></i>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by name, email, phone, or department..."
-              className="w-full pl-9 pr-7 py-1.5 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800 placeholder:text-slate-400"
+              placeholder="Search workforce..."
+              className="w-full pl-7 pr-6 py-1 rounded-lg text-[11px] bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 outline-none transition-all text-slate-800 placeholder:text-slate-400"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-[10px] cursor-pointer"
               >
                 ✕
               </button>
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Department Filter */}
-            <select
-              value={selectedDept}
-              onChange={(e) => setSelectedDept(e.target.value)}
-              className="px-3 py-1.5 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 outline-none font-medium text-slate-700 cursor-pointer"
-            >
-              <option value="">All Departments</option>
-              {departments.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name} {d.code ? `(${d.code})` : ""}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Department Filter */}
+          <select
+            value={selectedDept}
+            onChange={(e) => setSelectedDept(e.target.value)}
+            className="px-2.5 py-1 rounded-lg text-[11px] bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 outline-none font-medium text-slate-700 cursor-pointer"
+          >
+            <option value="">All Departments</option>
+            {departments.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name} {d.code ? `(${d.code})` : ""}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Role Tabs */}
-        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pt-1 border-t border-slate-100">
+        <div className="flex items-center gap-1 shrink-0">
           <button
             type="button"
             onClick={() => setSelectedRole("")}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
               selectedRole === ""
                 ? "bg-slate-900 text-white shadow-2xs"
                 : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -333,7 +331,7 @@ const UserManagement: React.FC = () => {
           <button
             type="button"
             onClick={() => setSelectedRole("manager")}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
               selectedRole === "manager"
                 ? "bg-indigo-600 text-white shadow-2xs"
                 : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -344,7 +342,7 @@ const UserManagement: React.FC = () => {
           <button
             type="button"
             onClick={() => setSelectedRole("supervisor")}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
               selectedRole === "supervisor"
                 ? "bg-emerald-600 text-white shadow-2xs"
                 : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -355,7 +353,7 @@ const UserManagement: React.FC = () => {
           <button
             type="button"
             onClick={() => setSelectedRole("employee")}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
               selectedRole === "employee"
                 ? "bg-sky-600 text-white shadow-2xs"
                 : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -366,7 +364,7 @@ const UserManagement: React.FC = () => {
           <button
             type="button"
             onClick={() => setSelectedRole("admin")}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
               selectedRole === "admin"
                 ? "bg-rose-600 text-white shadow-2xs"
                 : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -377,13 +375,13 @@ const UserManagement: React.FC = () => {
           <button
             type="button"
             onClick={() => setSelectedRole("hod")}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
               selectedRole === "hod"
                 ? "bg-amber-600 text-white shadow-2xs"
                 : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
             }`}
           >
-            👑 Dept Heads (HOD)
+            Dept Heads (HOD)
           </button>
         </div>
       </div>
