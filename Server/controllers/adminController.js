@@ -599,18 +599,47 @@ export const getGlobalTransfers = async (req, res) => {
 
 export const getUsers = async (req, res) => {
   try {
-    const { role } = req.query;
+    const { role, department_id, search } = req.query;
     let query = `
       SELECT u.id, u.name, u.email, u.role, u.department_id, u.salary, u.phone, u.address, u.image_url, u.status, u.created_at,
-             d.name AS department_name
+             d.name AS department_name, d.code AS department_code,
+             sup.id AS supervisor_id, sup.name AS supervisor_name,
+             (SELECT COUNT(*) FROM team_hierarchy WHERE supervisor_id = u.id) AS direct_reports_count,
+             CASE WHEN d_head.id IS NOT NULL THEN 1 ELSE 0 END AS is_hod,
+             d_head.name AS head_of_department_name
       FROM users u
       LEFT JOIN departments d ON u.department_id = d.id
+      LEFT JOIN team_hierarchy th ON u.id = th.employee_id
+      LEFT JOIN users sup ON th.supervisor_id = sup.id
+      LEFT JOIN departments d_head ON d_head.head_id = u.id
     `;
     const params = [];
-    if (role && ["admin", "manager", "supervisor", "employee"].includes(role)) {
-      query += " WHERE u.role = ?";
-      params.push(role);
+    const conditions = [];
+
+    if (role) {
+      if (role === "hod") {
+        conditions.push("d_head.id IS NOT NULL");
+      } else if (["admin", "manager", "supervisor", "employee"].includes(role)) {
+        conditions.push("u.role = ?");
+        params.push(role);
+      }
     }
+
+    if (department_id) {
+      conditions.push("u.department_id = ?");
+      params.push(department_id);
+    }
+
+    if (search && search.trim()) {
+      const term = `%${search.trim()}%`;
+      conditions.push("(u.name LIKE ? OR u.email LIKE ? OR u.phone LIKE ? OR d.name LIKE ? OR sup.name LIKE ?)");
+      params.push(term, term, term, term, term);
+    }
+
+    if (conditions.length > 0) {
+      query += " WHERE " + conditions.join(" AND ");
+    }
+
     query += " ORDER BY u.created_at DESC";
 
     const [users] = await pool.query(query, params);
@@ -621,46 +650,340 @@ export const getUsers = async (req, res) => {
   }
 };
 
-export const addUser = async (req, res) => {
+export const getAvailableSupervisors = async (req, res) => {
   try {
-    const { name, email, password, role = "employee", department_id, salary = 0, phone = "", address = "", image_url = "" } = req.body;
+    const { department_id } = req.query;
+    let query = `
+      SELECT u.id, u.name, u.email, u.role, u.department_id, u.image_url,
+             d.name AS department_name, d.code AS department_code,
+             (SELECT COUNT(*) FROM team_hierarchy WHERE supervisor_id = u.id) AS direct_reports_count
+      FROM users u
+      LEFT JOIN departments d ON u.department_id = d.id
+      WHERE u.role IN ('supervisor', 'manager') AND u.status = 'active'
+    `;
+    const params = [];
+    if (department_id) {
+      query += " AND u.department_id = ?";
+      params.push(department_id);
+    }
+    query += " ORDER BY d.name ASC, u.name ASC";
+
+    const [supervisors] = await pool.query(query, params);
+    return res.json({ status: true, supervisors });
+  } catch (err) {
+    console.error("Get available supervisors error:", err);
+    return res.status(500).json({ status: false, error: "Failed to fetch supervisors" });
+  }
+};
+
+export const getUserDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [[user]] = await pool.query(`
+      SELECT u.id, u.name, u.email, u.role, u.department_id, u.salary, u.phone, u.address, u.image_url, u.status, u.created_at,
+             d.name AS department_name, d.code AS department_code, d.head_id AS dept_head_id,
+             sup.id AS supervisor_id, sup.name AS supervisor_name, sup.email AS supervisor_email,
+             mgr.id AS manager_id, mgr.name AS manager_name,
+             CASE WHEN d_head.id IS NOT NULL THEN 1 ELSE 0 END AS is_hod,
+             d_head.name AS head_of_department_name
+      FROM users u
+      LEFT JOIN departments d ON u.department_id = d.id
+      LEFT JOIN team_hierarchy th ON u.id = th.employee_id
+      LEFT JOIN users sup ON th.supervisor_id = sup.id
+      LEFT JOIN users mgr ON th.manager_id = mgr.id
+      LEFT JOIN departments d_head ON d_head.head_id = u.id
+      WHERE u.id = ?
+    `, [id]);
+
+    if (!user) {
+      return res.status(404).json({ status: false, error: "User not found" });
+    }
+
+    // Direct reports if supervisor or manager
+    let direct_reports = [];
+    if (user.role === "supervisor" || user.role === "manager") {
+      const [reports] = await pool.query(`
+        SELECT u.id, u.name, u.email, u.role, u.image_url, u.status, th.assigned_at
+        FROM team_hierarchy th
+        JOIN users u ON th.employee_id = u.id
+        WHERE th.supervisor_id = ?
+        ORDER BY u.name ASC
+      `, [id]);
+      direct_reports = reports;
+    }
+
+    // Recent transfer history
+    const [transfers] = await pool.query(`
+      SELECT dt.*,
+             sd.name AS source_dept_name,
+             td.name AS target_dept_name
+      FROM department_transfers dt
+      LEFT JOIN departments sd ON dt.source_department_id = sd.id
+      LEFT JOIN departments td ON dt.target_department_id = td.id
+      WHERE dt.user_id = ?
+      ORDER BY dt.transferred_at DESC
+      LIMIT 5
+    `, [id]);
+
+    return res.json({
+      status: true,
+      user: {
+        ...user,
+        direct_reports,
+        transfers
+      }
+    });
+  } catch (err) {
+    console.error("Get user details error:", err);
+    return res.status(500).json({ status: false, error: "Failed to fetch user details" });
+  }
+};
+
+export const addUser = async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const {
+      name,
+      email,
+      password,
+      role = "employee",
+      department_id,
+      supervisor_id,
+      is_hod = false,
+      salary = 0,
+      phone = "",
+      address = "",
+      image_url = "",
+      status = "active"
+    } = req.body;
+
     if (!name || !email || !password) {
+      await connection.rollback();
       return res.status(400).json({ status: false, error: "Name, email, and password are required" });
     }
     if (!["admin", "manager", "supervisor", "employee"].includes(role)) {
+      await connection.rollback();
       return res.status(400).json({ status: false, error: "Invalid role specified" });
     }
 
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
 
-    const [result] = await pool.query(
-      `INSERT INTO users (name, email, password_hash, role, department_id, salary, phone, address, image_url)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name.trim(), email.trim().toLowerCase(), password_hash, role, department_id || null, salary || 0, phone, address, image_url]
+    const [result] = await connection.query(
+      `INSERT INTO users (name, email, password_hash, role, department_id, salary, phone, address, image_url, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name.trim(), email.trim().toLowerCase(), password_hash, role, department_id || null, Number(salary) || 0, phone ? phone.trim() : "", address ? address.trim() : "", image_url ? image_url.trim() : "", status || "active"]
     );
+    const newUserId = result.insertId;
 
-    return res.json({ status: true, message: "User created successfully", userId: result.insertId });
+    // Handle supervisor assignment for employees
+    if (supervisor_id && role === "employee") {
+      let managerId = null;
+      if (department_id) {
+        const [[dept]] = await connection.query("SELECT head_id FROM departments WHERE id = ?", [department_id]);
+        managerId = dept?.head_id || null;
+      }
+      if (!managerId) {
+        managerId = supervisor_id;
+      }
+      await connection.query(
+        `INSERT INTO team_hierarchy (employee_id, supervisor_id, manager_id)
+         VALUES (?, ?, ?)
+         ON DUPLICATE KEY UPDATE supervisor_id = VALUES(supervisor_id), manager_id = VALUES(manager_id)`,
+        [newUserId, supervisor_id, managerId]
+      );
+    }
+
+    // Handle HOD assignment
+    if (is_hod && department_id) {
+      await connection.query("UPDATE departments SET head_id = ? WHERE id = ?", [newUserId, department_id]);
+    }
+
+    await connection.commit();
+    return res.json({ status: true, message: "User onboarded successfully", userId: newUserId });
   } catch (err) {
+    await connection.rollback();
     if (err.code === "ER_DUP_ENTRY") {
       return res.status(400).json({ status: false, error: "Email address is already registered" });
     }
     console.error("Add user error:", err);
     return res.status(500).json({ status: false, error: "Failed to create user" });
+  } finally {
+    connection.release();
+  }
+};
+
+export const updateUser = async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const { id } = req.params;
+    const {
+      name,
+      email,
+      password,
+      role,
+      department_id,
+      supervisor_id,
+      is_hod,
+      salary,
+      phone,
+      address,
+      image_url,
+      status
+    } = req.body;
+
+    const [[existingUser]] = await connection.query("SELECT * FROM users WHERE id = ?", [id]);
+    if (!existingUser) {
+      await connection.rollback();
+      return res.status(404).json({ status: false, error: "User not found" });
+    }
+
+    let password_hash = existingUser.password_hash;
+    if (password && password.trim().length > 0) {
+      const salt = await bcrypt.genSalt(10);
+      password_hash = await bcrypt.hash(password.trim(), salt);
+    }
+
+    const updatedRole = role || existingUser.role;
+    const updatedDeptId = department_id !== undefined ? (department_id ? Number(department_id) : null) : existingUser.department_id;
+    const updatedSalary = salary !== undefined ? Number(salary) : existingUser.salary;
+    const updatedPhone = phone !== undefined ? phone.trim() : existingUser.phone;
+    const updatedAddress = address !== undefined ? address.trim() : existingUser.address;
+    const updatedImageUrl = image_url !== undefined ? image_url.trim() : existingUser.image_url;
+    const updatedStatus = status || existingUser.status;
+
+    await connection.query(
+      `UPDATE users
+       SET name = ?, email = ?, password_hash = ?, role = ?, department_id = ?, salary = ?, phone = ?, address = ?, image_url = ?, status = ?
+       WHERE id = ?`,
+      [
+        name ? name.trim() : existingUser.name,
+        email ? email.trim().toLowerCase() : existingUser.email,
+        password_hash,
+        updatedRole,
+        updatedDeptId,
+        updatedSalary,
+        updatedPhone,
+        updatedAddress,
+        updatedImageUrl,
+        updatedStatus,
+        id
+      ]
+    );
+
+    // Handle reporting line in team_hierarchy
+    if (updatedRole === "employee") {
+      if (supervisor_id) {
+        let managerId = null;
+        if (updatedDeptId) {
+          const [[dept]] = await connection.query("SELECT head_id FROM departments WHERE id = ?", [updatedDeptId]);
+          managerId = dept?.head_id || null;
+        }
+        if (!managerId) {
+          managerId = supervisor_id;
+        }
+        await connection.query(
+          `INSERT INTO team_hierarchy (employee_id, supervisor_id, manager_id)
+           VALUES (?, ?, ?)
+           ON DUPLICATE KEY UPDATE supervisor_id = VALUES(supervisor_id), manager_id = VALUES(manager_id)`,
+          [id, supervisor_id, managerId]
+        );
+      } else {
+        await connection.query("DELETE FROM team_hierarchy WHERE employee_id = ?", [id]);
+      }
+    } else {
+      // If role is supervisor/manager/admin, they are not an employee under another supervisor
+      await connection.query("DELETE FROM team_hierarchy WHERE employee_id = ?", [id]);
+    }
+
+    // Role demotion / status safeguard: if user was supervisor and is demoted or inactivated
+    if (existingUser.role === "supervisor" && (updatedRole !== "supervisor" || updatedStatus === "inactive")) {
+      // Reallocate direct reports to department head
+      const [reports] = await connection.query("SELECT employee_id FROM team_hierarchy WHERE supervisor_id = ?", [id]);
+      if (reports.length > 0 && updatedDeptId) {
+        const [[dept]] = await connection.query("SELECT head_id FROM departments WHERE id = ?", [updatedDeptId]);
+        if (dept?.head_id && dept.head_id !== Number(id)) {
+          await connection.query("UPDATE team_hierarchy SET supervisor_id = ? WHERE supervisor_id = ?", [dept.head_id, id]);
+        }
+      }
+    }
+
+    // Handle HOD assignment
+    if (is_hod !== undefined) {
+      if (is_hod && updatedDeptId) {
+        await connection.query("UPDATE departments SET head_id = ? WHERE id = ?", [id, updatedDeptId]);
+      } else if (!is_hod) {
+        // If explicitly unset, remove as HOD if they were HOD
+        await connection.query("UPDATE departments SET head_id = NULL WHERE head_id = ?", [id]);
+      }
+    }
+
+    await connection.commit();
+    return res.json({ status: true, message: "User updated successfully" });
+  } catch (err) {
+    await connection.rollback();
+    if (err.code === "ER_DUP_ENTRY") {
+      return res.status(400).json({ status: false, error: "Email address is already in use by another account" });
+    }
+    console.error("Update user error:", err);
+    return res.status(500).json({ status: false, error: "Failed to update user" });
+  } finally {
+    connection.release();
   }
 };
 
 export const deleteUser = async (req, res) => {
+  const connection = await pool.getConnection();
   try {
+    await connection.beginTransaction();
+
     const { id } = req.params;
     if (Number(id) === req.user.id) {
+      await connection.rollback();
       return res.status(400).json({ status: false, error: "You cannot delete your own account" });
     }
-    await pool.query("DELETE FROM users WHERE id = ?", [id]);
-    return res.json({ status: true, message: "User deleted successfully" });
+
+    const [[user]] = await connection.query("SELECT * FROM users WHERE id = ?", [id]);
+    if (!user) {
+      await connection.rollback();
+      return res.status(404).json({ status: false, error: "User not found" });
+    }
+
+    // Unset HOD if this user was head of any department
+    await connection.query("UPDATE departments SET head_id = NULL WHERE head_id = ?", [id]);
+
+    // Reassign direct reports if user was supervisor
+    if (user.role === "supervisor" || user.role === "manager") {
+      if (user.department_id) {
+        const [[dept]] = await connection.query("SELECT head_id FROM departments WHERE id = ?", [user.department_id]);
+        if (dept?.head_id && dept.head_id !== Number(id)) {
+          await connection.query("UPDATE team_hierarchy SET supervisor_id = ? WHERE supervisor_id = ?", [dept.head_id, id]);
+        } else {
+          await connection.query("DELETE FROM team_hierarchy WHERE supervisor_id = ?", [id]);
+        }
+      } else {
+        await connection.query("DELETE FROM team_hierarchy WHERE supervisor_id = ?", [id]);
+      }
+    }
+
+    // Clean up hierarchy
+    await connection.query("DELETE FROM team_hierarchy WHERE employee_id = ? OR supervisor_id = ? OR manager_id = ?", [id, id, id]);
+
+    // Delete user
+    await connection.query("DELETE FROM users WHERE id = ?", [id]);
+
+    await connection.commit();
+    return res.json({ status: true, message: "User removed successfully" });
   } catch (err) {
+    await connection.rollback();
     console.error("Delete user error:", err);
     return res.status(500).json({ status: false, error: "Failed to delete user" });
+  } finally {
+    connection.release();
   }
 };
 

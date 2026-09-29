@@ -14,7 +14,10 @@ import {
   transferMember,
   batchTransferMembers,
   getUsers,
+  getAvailableSupervisors,
+  getUserDetails,
   addUser,
+  updateUser,
   deleteUser,
   getHierarchy,
   assignHierarchy
@@ -42,8 +45,12 @@ router.get("/departments/:id/transfers", getDepartmentTransfers);
 router.put("/departments/:id", updateDepartment);
 router.delete("/departments/:id", deleteDepartment);
 
+// Workforce Management Routes
 router.get("/users", getUsers);
+router.get("/users/supervisors", getAvailableSupervisors);
+router.get("/users/:id", getUserDetails);
 router.post("/users", addUser);
+router.put("/users/:id", updateUser);
 router.delete("/users/:id", deleteUser);
 
 router.get("/hierarchy", getHierarchy);
