@@ -5,6 +5,7 @@ import {
   addDepartment,
   updateDepartment,
   deleteDepartment,
+  getDecommissionPreview,
   getEligibleHeads,
   getDepartmentRoster,
   getDepartmentTransfers,
@@ -30,6 +31,7 @@ router.get("/stats", getStats);
 router.get("/departments", getDepartments);
 router.get("/departments/eligible-heads", getEligibleHeads);
 router.get("/departments/transfers/global", getGlobalTransfers);
+router.get("/departments/:id/decommission-preview", getDecommissionPreview);
 router.post("/departments", addDepartment);
 router.post("/departments/transfer-member", transferMember);
 router.post("/departments/batch-transfer", batchTransferMembers);

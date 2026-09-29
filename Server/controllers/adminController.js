@@ -138,6 +138,67 @@ export const updateDepartment = async (req, res) => {
   }
 };
 
+export const getDecommissionPreview = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [deptRows] = await pool.query(`
+      SELECT d.*, u.name AS head_name, u.email AS head_email, u.role AS head_role, u.image_url AS head_image_url
+      FROM departments d
+      LEFT JOIN users u ON d.head_id = u.id
+      WHERE d.id = ?
+    `, [id]);
+
+    if (deptRows.length === 0) {
+      return res.status(404).json({ status: false, error: "Department not found" });
+    }
+    const department = deptRows[0];
+
+    const [members] = await pool.query(`
+      SELECT u.id, u.name, u.email, u.role, u.image_url,
+             (SELECT COUNT(*) FROM team_hierarchy WHERE supervisor_id = u.id) AS direct_reports_count
+      FROM users u
+      WHERE u.department_id = ?
+      ORDER BY u.role = 'manager' DESC, u.role = 'supervisor' DESC, u.name ASC
+    `, [id]);
+
+    const [childDepts] = await pool.query(`
+      SELECT id, name, code, (SELECT COUNT(*) FROM users WHERE department_id = departments.id) AS member_count
+      FROM departments
+      WHERE parent_id = ?
+    `, [id]);
+
+    const supervisors = members.filter((m) => m.role === "supervisor");
+    const employees = members.filter((m) => m.role === "employee");
+
+    return res.json({
+      status: true,
+      department: {
+        id: department.id,
+        name: department.name,
+        code: department.code,
+        description: department.description,
+        head_id: department.head_id,
+        head_name: department.head_name,
+        head_email: department.head_email
+      },
+      impact: {
+        total_members: members.length,
+        supervisors_count: supervisors.length,
+        employees_count: employees.length,
+        child_departments_count: childDepts.length,
+        child_departments: childDepts,
+        has_head: !!department.head_id,
+        can_hard_delete: members.length === 0 && childDepts.length === 0
+      },
+      members
+    });
+  } catch (err) {
+    console.error("Get decommission preview error:", err);
+    return res.status(500).json({ status: false, error: "Failed to evaluate department decommissioning impact" });
+  }
+};
+
 export const deleteDepartment = async (req, res) => {
   try {
     const { id } = req.params;
