@@ -1,36 +1,44 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import api from "../../api/axios";
+import { UserFormModal } from "../../Components/UserFormModal";
+import { UserProfileModal } from "../../Components/UserProfileModal";
 
-const UserManagement = () => {
-  const [users, setUsers] = useState([]);
-  const [departments, setDepartments] = useState([]);
+const UserManagement: React.FC = () => {
+  const [users, setUsers] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [supervisors, setSupervisors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedRole, setSelectedRole] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [msg, setMsg] = useState({ type: "", text: "" });
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    role: "employee",
-    department_id: "",
-    salary: "",
-    phone: "",
-    address: ""
-  });
-  const [saving, setSaving] = useState(false);
+  // Filter & Search states
+  const [selectedRole, setSelectedRole] = useState("");
+  const [selectedDept, setSelectedDept] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [msg, setMsg] = useState<{ type: "success" | "danger" | ""; text: string }>({ type: "", text: "" });
+
+  // Modal states
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [selectedUserForEdit, setSelectedUserForEdit] = useState<any | null>(null);
+
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [selectedUserIdForProfile, setSelectedUserIdForProfile] = useState<number | null>(null);
+
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const url = selectedRole ? `/api/admin/users?role=${selectedRole}` : "/api/admin/users";
-      const res = await api.get(url);
+      const params: any = {};
+      if (selectedRole) params.role = selectedRole;
+      if (selectedDept) params.department_id = selectedDept;
+      if (searchQuery.trim()) params.search = searchQuery.trim();
+
+      const res = await api.get("/api/admin/users", { params });
       if (res.data.status) {
-        setUsers(res.data.users);
+        setUsers(res.data.users || []);
       }
-    } catch (err) {
-      setMsg({ type: "danger", text: err.response?.data?.error || "Failed to load users" });
+    } catch (err: any) {
+      console.error("Fetch users error:", err);
+      setMsg({ type: "danger", text: err.response?.data?.error || "Failed to load workforce directory" });
     } finally {
       setLoading(false);
     }
@@ -40,200 +48,516 @@ const UserManagement = () => {
     try {
       const res = await api.get("/api/admin/departments");
       if (res.data.status) {
-        setDepartments(res.data.departments);
+        setDepartments(res.data.departments || []);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Fetch departments error:", err);
+    }
+  };
+
+  const fetchSupervisors = async () => {
+    try {
+      const res = await api.get("/api/admin/users/supervisors");
+      if (res.data.status) {
+        setSupervisors(res.data.supervisors || []);
+      }
+    } catch (err) {
+      console.error("Fetch supervisors error:", err);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
     fetchDepartments();
-  }, [selectedRole]);
+    fetchSupervisors();
+  }, []);
 
-  const handleCreateUser = async (e) => {
-    e.preventDefault();
-    try {
-      setSaving(true);
-      setMsg({ type: "", text: "" });
-      const res = await api.post("/api/admin/users", formData);
-      if (res.data.status) {
-        setMsg({ type: "success", text: "New user onboarded successfully!" });
-        setShowModal(false);
-        setFormData({
-          name: "",
-          email: "",
-          password: "",
-          role: "employee",
-          department_id: "",
-          salary: "",
-          phone: "",
-          address: ""
-        });
-        fetchUsers();
-      }
-    } catch (err) {
-      setMsg({ type: "danger", text: err.response?.data?.error || "Failed to onboard user" });
-    } finally {
-      setSaving(false);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchUsers();
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [selectedRole, selectedDept, searchQuery]);
+
+  const handleDeleteUser = async (id: number, name: string) => {
+    if (!window.confirm(`Are you sure you want to offboard/delete '${name}'? This action cannot be undone.`)) {
+      return;
     }
-  };
 
-  const handleDeleteUser = async (id, name) => {
-    if (!window.confirm(`Are you sure you want to delete user '${name}'?`)) return;
     try {
+      setDeletingId(id);
       const res = await api.delete(`/api/admin/users/${id}`);
       if (res.data.status) {
-        setMsg({ type: "success", text: "User removed successfully" });
+        setMsg({ type: "success", text: `Staff member '${name}' removed successfully` });
         fetchUsers();
+        fetchSupervisors();
       }
-    } catch (err) {
+    } catch (err: any) {
+      console.error("Delete user error:", err);
       setMsg({ type: "danger", text: err.response?.data?.error || "Failed to delete user" });
+    } finally {
+      setDeletingId(null);
     }
   };
 
-  const getRoleBadge = (role) => {
-    switch (role) {
+  const handleOpenOnboard = () => {
+    setSelectedUserForEdit(null);
+    setIsFormModalOpen(true);
+  };
+
+  const handleOpenEdit = (user: any) => {
+    setSelectedUserForEdit(user);
+    setIsFormModalOpen(true);
+  };
+
+  const handleOpenProfile = (id: number) => {
+    setSelectedUserIdForProfile(id);
+    setIsProfileModalOpen(true);
+  };
+
+  // CSV Export
+  const handleExportCSV = () => {
+    if (users.length === 0) return;
+    const headers = ["ID", "Name", "Email", "Role", "Department", "Supervisor", "Salary", "Phone", "Status", "Joined"];
+    const rows = users.map((u) => [
+      u.id,
+      `"${u.name.replace(/"/g, '""')}"`,
+      `"${u.email}"`,
+      u.role,
+      `"${(u.department_name || "Unassigned").replace(/"/g, '""')}"`,
+      `"${(u.supervisor_name || "Direct to HOD").replace(/"/g, '""')}"`,
+      u.salary || 0,
+      `"${(u.phone || "").replace(/"/g, '""')}"`,
+      u.status || "active",
+      u.created_at ? new Date(u.created_at).toISOString().slice(0, 10) : ""
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `workforce_directory_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // KPI Calculations
+  const metrics = useMemo(() => {
+    const total = users.length;
+    const active = users.filter((u) => u.status === "active").length;
+    const supervisorsCount = users.filter((u) => u.role === "supervisor").length;
+    const leadersCount = users.filter((u) => u.role === "manager" || u.is_hod).length;
+    return { total, active, supervisorsCount, leadersCount };
+  }, [users]);
+
+  const getRoleBadge = (u: any) => {
+    switch (u.role) {
       case "admin":
-        return <span className="badge bg-red-600">👑 HR Admin</span>;
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+            👑 HR Admin
+          </span>
+        );
       case "manager":
-        return <span className="badge bg-blue-600">👔 Manager</span>;
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+            👔 Manager
+          </span>
+        );
       case "supervisor":
-        return <span className="badge bg-green-600">👷 Supervisor</span>;
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span>👷 Supervisor</span>
+            {u.direct_reports_count > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold bg-emerald-200/60 text-emerald-900">
+                {u.direct_reports_count}
+              </span>
+            )}
+          </span>
+        );
       case "employee":
-        return <span className="badge bg-info text-gray-900">💼 Employee</span>;
       default:
-        return <span className="badge bg-secondary">{role}</span>;
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-sky-50 text-sky-700 border border-sky-200">
+            💼 Employee
+          </span>
+        );
     }
   };
 
   return (
-    <div className="w-full px-6 p-0">
-      {msg.text && <div className={`alert alert-${msg.type} alert-dismissible fade show`}>{msg.text}</div>}
-
-      {/* Header Actions */}
-      <div className="flex flex-col flex-md-row justify-between align-items-md-center gap-6 mb-6">
-        {/* Role Filters */}
-        <div className="btn-group shadow-sm" role="group">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      {/* Alert Notification */}
+      {msg.text && (
+        <div
+          className={`p-3.5 rounded-xl border text-xs flex items-center justify-between gap-3 animate-in fade-in duration-200 ${
+            msg.type === "success"
+              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+              : "bg-rose-50 border-rose-200 text-rose-800"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <i className={`bi ${msg.type === "success" ? "bi-check-circle-fill text-emerald-600" : "bi-exclamation-triangle-fill text-rose-600"}`}></i>
+            <span className="font-medium">{msg.text}</span>
+          </div>
           <button
             type="button"
-            className={`btn btn-sm ${selectedRole === "" ? "btn-dark" : "btn-outline-dark"}`}
+            onClick={() => setMsg({ type: "", text: "" })}
+            className="text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Executive Header Banner */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-500/20 shrink-0">
+              <i className="bi bi-people-fill text-lg"></i>
+            </div>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight mb-0">
+                Workforce Management
+              </h1>
+              <p className="text-xs text-slate-500 mt-0.5 mb-0">
+                Enterprise Personnel Directory, Reporting Line Hierarchy & Governance Operations
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            type="button"
+            onClick={handleExportCSV}
+            disabled={users.length === 0}
+            className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            title="Export Workforce Directory as CSV"
+          >
+            <i className="bi bi-download text-[11px]"></i>
+            <span>Export CSV</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleOpenOnboard}
+            className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-600/30 transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <i className="bi bi-person-plus-fill text-sm"></i>
+            <span>Onboard Member</span>
+          </button>
+        </div>
+      </div>
+
+      {/* KPI Metrics Ribbon */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-1">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Total Workforce</span>
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-black text-slate-900">{metrics.total}</span>
+            <span className="text-[11px] text-slate-500 font-medium">Headcount</span>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-1">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Active Status</span>
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-black text-emerald-600">{metrics.active}</span>
+            <span className="text-[11px] text-emerald-700 font-medium bg-emerald-50 px-1.5 py-0.5 rounded">
+              {metrics.total > 0 ? `${Math.round((metrics.active / metrics.total) * 100)}%` : "0%"}
+            </span>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-1">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Supervisors / Pod Leads</span>
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-black text-indigo-600">{metrics.supervisorsCount}</span>
+            <span className="text-[11px] text-slate-500 font-medium">Operational Leads</span>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-1">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Leadership & HODs</span>
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-black text-violet-600">{metrics.leadersCount}</span>
+            <span className="text-[11px] text-slate-500 font-medium">Apex Authorities</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter, Search & Utility Bar */}
+      <div className="p-3 sm:p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-3">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          {/* Search Box */}
+          <div className="relative flex-1 max-w-md">
+            <i className="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by name, email, phone, or department..."
+              className="w-full pl-9 pr-7 py-1.5 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800 placeholder:text-slate-400"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Department Filter */}
+            <select
+              value={selectedDept}
+              onChange={(e) => setSelectedDept(e.target.value)}
+              className="px-3 py-1.5 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 outline-none font-medium text-slate-700 cursor-pointer"
+            >
+              <option value="">All Departments</option>
+              {departments.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name} {d.code ? `(${d.code})` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Role Tabs */}
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pt-1 border-t border-slate-100">
+          <button
+            type="button"
             onClick={() => setSelectedRole("")}
+            className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap ${
+              selectedRole === ""
+                ? "bg-slate-900 text-white shadow-2xs"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            }`}
           >
             All Roles ({users.length})
           </button>
           <button
             type="button"
-            className={`btn btn-sm ${selectedRole === "manager" ? "btn-primary" : "btn-outline-primary"}`}
             onClick={() => setSelectedRole("manager")}
+            className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap ${
+              selectedRole === "manager"
+                ? "bg-indigo-600 text-white shadow-2xs"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            }`}
           >
             Managers
           </button>
           <button
             type="button"
-            className={`btn btn-sm ${selectedRole === "supervisor" ? "btn-success" : "btn-outline-success"}`}
             onClick={() => setSelectedRole("supervisor")}
+            className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap ${
+              selectedRole === "supervisor"
+                ? "bg-emerald-600 text-white shadow-2xs"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            }`}
           >
             Supervisors
           </button>
           <button
             type="button"
-            className={`btn btn-sm ${selectedRole === "employee" ? "btn-info" : "btn-outline-info"}`}
             onClick={() => setSelectedRole("employee")}
+            className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap ${
+              selectedRole === "employee"
+                ? "bg-sky-600 text-white shadow-2xs"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            }`}
           >
             Employees
           </button>
           <button
             type="button"
-            className={`btn btn-sm ${selectedRole === "admin" ? "btn-danger" : "btn-outline-danger"}`}
             onClick={() => setSelectedRole("admin")}
+            className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap ${
+              selectedRole === "admin"
+                ? "bg-rose-600 text-white shadow-2xs"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            }`}
           >
             Admins
           </button>
+          <button
+            type="button"
+            onClick={() => setSelectedRole("hod")}
+            className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap ${
+              selectedRole === "hod"
+                ? "bg-amber-600 text-white shadow-2xs"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            }`}
+          >
+            👑 Dept Heads (HOD)
+          </button>
         </div>
-
-        <button
-          onClick={() => setShowModal(true)}
-          className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2 px-6 py-2 rounded-lg shadow-sm"
-        >
-          <i className="bi bi-person-plus-fill"></i>
-          <span>Onboard New User</span>
-        </button>
       </div>
 
-      {/* Users Table Card */}
-      <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg bg-white overflow-hidden">
-        <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0">
-            <thead className="table-light">
+      {/* Workforce Directory Table */}
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               <tr>
-                <th className="px-6">Staff Member</th>
-                <th>Role Tier</th>
-                <th>Department</th>
-                <th>Annual Salary</th>
-                <th>Phone</th>
-                <th>Status</th>
-                <th className="text-right px-6">Actions</th>
+                <th className="px-5 py-3.5">Staff Member</th>
+                <th className="px-4 py-3.5">Governance Role</th>
+                <th className="px-4 py-3.5">Department & Reporting</th>
+                <th className="px-4 py-3.5">Annual Salary</th>
+                <th className="px-4 py-3.5">Contact</th>
+                <th className="px-4 py-3.5">Status</th>
+                <th className="px-5 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-12">
-                    <div className="spinner-border spinner-border-sm text-blue-600"></div>
-                    <span className="ml-2 text-gray-500">Loading user directory...</span>
+                  <td colSpan={7} className="px-6 py-20 text-center text-slate-400">
+                    <div className="flex flex-col items-center justify-center gap-2.5">
+                      <div className="w-7 h-7 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-xs">Loading workforce directory...</span>
+                    </div>
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-12 text-gray-500">
-                    No users found matching the selected criteria.
+                  <td colSpan={7} className="px-6 py-16 text-center text-slate-400 text-xs">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <i className="bi bi-people text-3xl text-slate-300"></i>
+                      <p className="font-medium text-slate-600 mb-0">No workforce personnel found</p>
+                      <p className="text-[11px] text-slate-400 mb-0">
+                        Try adjusting your filters, search terms, or onboard a new team member.
+                      </p>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 users.map((u) => (
-                  <tr key={u.id}>
-                    <td className="px-6">
-                      <div className="flex items-center gap-2">
-                        <div className="bg-blue-600 bg-opacity-10 text-blue-600 rounded-full font-bold flex items-center justify-center overflow-hidden flex-shrink-0" style={{ width: "36px", height: "36px" }}>
+                  <tr key={u.id} className="hover:bg-slate-50/70 transition-colors">
+                    {/* Staff Member Identity */}
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200 shadow-2xs shrink-0 overflow-hidden">
                           {u.image_url ? (
-                            <img
-                              src={u.image_url.startsWith("http") ? u.image_url : `http://localhost:3000${u.image_url}`}
-                              alt={u.name}
-                              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                            />
+                            <img src={u.image_url} alt={u.name} className="w-full h-full object-cover" />
                           ) : (
-                            u.name.charAt(0)
+                            <span>{u.name ? u.name.charAt(0) : "U"}</span>
                           )}
                         </div>
-                        <div>
-                          <p className="mb-0 font-semibold text-gray-900">{u.name}</p>
-                          <small className="text-gray-500">{u.email}</small>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-bold text-slate-900 text-xs leading-tight">
+                              {u.name}
+                            </span>
+                            {u.is_hod ? (
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase bg-amber-100 text-amber-800 border border-amber-200 shadow-2xs">
+                                👑 HOD
+                              </span>
+                            ) : null}
+                          </div>
+                          <span className="text-[11px] text-slate-400 block truncate mt-0.5">{u.email}</span>
                         </div>
                       </div>
                     </td>
-                    <td>{getRoleBadge(u.role)}</td>
-                    <td>
-                      <span className="badge bg-gray-50 text-gray-900 border border-gray-200 border-gray-200">
-                        {u.department_name || "Unassigned"}
-                      </span>
+
+                    {/* Role Tier */}
+                    <td className="px-4 py-3.5 whitespace-nowrap">
+                      {getRoleBadge(u)}
                     </td>
-                    <td className="font-semibold text-gray-900">${Number(u.salary).toLocaleString()}</td>
-                    <td className="text-gray-500 text-sm">{u.phone || "—"}</td>
-                    <td>
-                      <span className={`badge ${u.status === "active" ? "bg-success bg-opacity-10 text-success" : "bg-danger bg-opacity-10 text-danger"} border px-2 py-1`}>
-                        {u.status?.toUpperCase()}
-                      </span>
+
+                    {/* Department & Reporting Line */}
+                    <td className="px-4 py-3.5">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-semibold text-slate-800 text-xs">
+                            {u.department_name || "Unassigned"}
+                          </span>
+                          {u.department_code && (
+                            <span className="px-1 py-0.2 rounded text-[9px] font-bold uppercase bg-slate-100 text-slate-600">
+                              {u.department_code}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[11px] text-slate-400 flex items-center gap-1">
+                          <i className="bi bi-arrow-return-right text-[10px] text-indigo-400"></i>
+                          <span>{u.supervisor_name ? `Reports to: ${u.supervisor_name}` : "Direct to HOD"}</span>
+                        </div>
+                      </div>
                     </td>
-                    <td className="text-right px-6">
-                      <button
-                        onClick={() => handleDeleteUser(u.id, u.name)}
-                        className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center btn-sm btn-outline-danger"
-                        title="Delete User"
+
+                    {/* Compensation */}
+                    <td className="px-4 py-3.5 whitespace-nowrap">
+                      <span className="font-semibold text-slate-800 text-xs">
+                        ${Number(u.salary || 0).toLocaleString()}
+                      </span>
+                      <span className="text-[10px] text-slate-400 block">/ year</span>
+                    </td>
+
+                    {/* Contact */}
+                    <td className="px-4 py-3.5">
+                      <div className="text-[11px] text-slate-600 space-y-0.5">
+                        <span className="block">{u.phone || "—"}</span>
+                        <span className="block text-slate-400 text-[10px] truncate max-w-[140px]" title={u.address}>
+                          {u.address || "HQ Office"}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Status */}
+                    <td className="px-4 py-3.5 whitespace-nowrap">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                          u.status === "active"
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            : "bg-slate-100 text-slate-600 border border-slate-200"
+                        }`}
                       >
-                        <i className="bi bi-trash"></i>
-                      </button>
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            u.status === "active" ? "bg-emerald-500" : "bg-slate-400"
+                          }`}
+                        ></span>
+                        <span className="capitalize">{u.status || "active"}</span>
+                      </span>
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenProfile(u.id)}
+                          className="w-7 h-7 rounded-lg bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 border border-slate-200 hover:border-indigo-200 flex items-center justify-center transition-all cursor-pointer text-xs"
+                          title="View Full Profile & Hierarchy"
+                        >
+                          <i className="bi bi-eye"></i>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEdit(u)}
+                          className="w-7 h-7 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 flex items-center justify-center transition-all cursor-pointer text-xs"
+                          title="Edit Member Details"
+                        >
+                          <i className="bi bi-pencil-square"></i>
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={deletingId === u.id}
+                          onClick={() => handleDeleteUser(u.id, u.name)}
+                          className="w-7 h-7 rounded-lg bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 hover:border-rose-200 flex items-center justify-center transition-all cursor-pointer text-xs disabled:opacity-50"
+                          title="Offboard / Remove Member"
+                        >
+                          <i className="bi bi-trash3"></i>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -243,120 +567,41 @@ const UserManagement = () => {
         </div>
       </div>
 
-      {/* Onboard User Modal */}
-      {showModal && (
-        <div className="modal show block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <div className="modal-dialog modal-dialog-centered modal-lg">
-            <div className="modal-content border-0 shadow-lg rounded-xl">
-              <div className="modal-header bg-gray-900 text-white">
-                <h5 className="modal-title font-bold">Onboard New Team Member</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
-              </div>
-              <form onSubmit={handleCreateUser}>
-                <div className="modal-body p-6">
-                  <div className="flex flex-wrap -mx-4 g-3">
-                    <div className="md:w-1/2 px-6">
-                      <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">Full Name</label>
-                      <input
-                        type="text"
-                        className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="John Doe"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="md:w-1/2 px-6">
-                      <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">Email Address</label>
-                      <input
-                        type="email"
-                        className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="john@company.com"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="md:w-1/2 px-6">
-                      <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">Initial Password</label>
-                      <input
-                        type="password"
-                        className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Secure password"
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="md:w-1/2 px-6">
-                      <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">Assigned Role Tier</label>
-                      <select
-                        className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value={formData.role}
-                        onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                      >
-                        <option value="employee">💼 Employee (Individual Contributor)</option>
-                        <option value="supervisor">👷 Supervisor (Team Lead)</option>
-                        <option value="manager">👔 Manager (Department Lead)</option>
-                        <option value="admin">👑 HR / Super Admin</option>
-                      </select>
-                    </div>
-                    <div className="md:w-1/2 px-6">
-                      <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">Department</label>
-                      <select
-                        className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value={formData.department_id}
-                        onChange={(e) => setFormData({ ...formData, department_id: e.target.value })}
-                      >
-                        <option value="">Select Department...</option>
-                        {departments.map((d) => (
-                          <option key={d.id} value={d.id}>{d.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="md:w-1/2 px-6">
-                      <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">Annual Salary ($)</label>
-                      <input
-                        type="number"
-                        className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="55000"
-                        value={formData.salary}
-                        onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
-                      />
-                    </div>
-                    <div className="md:w-1/2 px-6">
-                      <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">Phone Number</label>
-                      <input
-                        type="text"
-                        className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="+1 555-0199"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      />
-                    </div>
-                    <div className="md:w-1/2 px-6">
-                      <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">Address / Office Location</label>
-                      <input
-                        type="text"
-                        className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Building A, Floor 3"
-                        value={formData.address}
-                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="modal-footer bg-gray-50">
-                  <button type="button" className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center border border-gray-200 border-gray-500 text-gray-500 hover:bg-gray-50" onClick={() => setShowModal(false)}>Cancel</button>
-                  <button type="submit" disabled={saving} className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center bg-blue-600 text-white hover:bg-blue-700 px-6">
-                    {saving ? <span className="spinner-border spinner-border-sm"></span> : "Save & Onboard"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* User Form Modal (Onboard & Edit) */}
+      <UserFormModal
+        isOpen={isFormModalOpen}
+        onClose={() => {
+          setIsFormModalOpen(false);
+          setSelectedUserForEdit(null);
+        }}
+        onSuccess={() => {
+          fetchUsers();
+          fetchSupervisors();
+          setMsg({
+            type: "success",
+            text: selectedUserForEdit
+              ? "Member profile updated successfully"
+              : "New workforce member onboarded successfully"
+          });
+        }}
+        departments={departments}
+        supervisors={supervisors}
+        editUser={selectedUserForEdit}
+      />
+
+      {/* User Profile Modal */}
+      <UserProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => {
+          setIsProfileModalOpen(false);
+          setSelectedUserIdForProfile(null);
+        }}
+        userId={selectedUserIdForProfile}
+        onEditUser={(user) => {
+          setSelectedUserForEdit(user);
+          setIsFormModalOpen(true);
+        }}
+      />
     </div>
   );
 };
