@@ -222,7 +222,7 @@ export const GlobalMobilityModal: React.FC<GlobalMobilityModalProps> = ({
                 className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/15 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
                 title="Download Organization Ledger (CSV)"
               >
-                <i className="bi bi-download text-[11px]"></i>
+                <i className="bi bi-download text-[10px] leading-none"></i>
                 <span className="hidden sm:inline">Export Org Ledger</span>
               </button>
             )}
@@ -256,14 +256,15 @@ export const GlobalMobilityModal: React.FC<GlobalMobilityModalProps> = ({
 
           {/* Quick Search & Filter Controls */}
           <div className="flex items-center gap-2">
-            <div className="relative">
-              <i className="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <div className="relative flex items-center">
+              <i className="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none leading-none"></i>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by name, dept, lead, reason..."
-                className="pl-7 pr-3 py-1.5 rounded-lg text-xs bg-white border border-slate-200 focus:border-indigo-500 outline-none w-48 sm:w-60 text-slate-700 placeholder:text-slate-400"
+                className="pr-3 py-1.5 rounded-lg text-xs bg-white border border-slate-200 focus:border-indigo-500 outline-none w-48 sm:w-60 text-slate-700 placeholder:text-slate-400"
+                style={{ paddingLeft: "1.9rem" }}
               />
               {searchQuery && (
                 <button

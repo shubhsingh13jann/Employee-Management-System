@@ -1101,20 +1101,21 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
 
                     <div className="flex items-center gap-1.5 sm:gap-2 flex-nowrap shrink-0">
                       {/* Search in Mobility History */}
-                      <div className="relative">
-                        <i className="bi bi-search absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-[9px]"></i>
+                      <div className="relative flex items-center">
+                        <i className="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[9px] pointer-events-none leading-none"></i>
                         <input
                           type="text"
                           value={historySearchQuery}
                           onChange={(e) => setHistorySearchQuery(e.target.value)}
                           placeholder="Search audit..."
-                          className="pl-6 pr-5 py-1 rounded-lg text-[11px] bg-white border border-slate-200 focus:border-indigo-400 outline-none w-28 sm:w-36 text-slate-700 placeholder:text-slate-400 shadow-2xs transition-all"
+                          className="pr-5 py-1 rounded-lg text-[11px] bg-white border border-slate-200 focus:border-indigo-400 outline-none w-28 sm:w-36 text-slate-700 placeholder:text-slate-400 shadow-2xs transition-all"
+                          style={{ paddingLeft: "1.75rem" }}
                         />
                         {historySearchQuery && (
                           <button
                             type="button"
                             onClick={() => setHistorySearchQuery("")}
-                            className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-[10px] cursor-pointer"
+                            className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-[9px] cursor-pointer"
                           >
                             ✕
                           </button>
@@ -1155,10 +1156,10 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
                         <button
                           type="button"
                           onClick={handleExportMobilityCSV}
-                          className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white hover:bg-indigo-50/80 text-indigo-700 border border-indigo-200/80 shadow-2xs transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0"
+                          className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white hover:bg-indigo-50/80 text-indigo-700 border border-indigo-200/80 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0"
                           title="Export Mobility Audit Trail to CSV"
                         >
-                          <i className="bi bi-download text-[10px]"></i>
+                          <i className="bi bi-download text-[9px] leading-none"></i>
                           <span>Export Audit</span>
                         </button>
                       )}
