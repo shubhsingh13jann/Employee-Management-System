@@ -684,3 +684,31 @@ button.\!rounded-md,
 .dashboard-pathway-btn:hover .dashboard-arrow-icon {
   transform: translateX(4px) !important;
 }
+
+/* ============================================================
+   EXECUTIVE MODAL AD-TICKER / MARQUEE ANIMATIONS
+   ============================================================ */
+@keyframes adTickerSlide {
+  0% {
+    transform: translateX(0);
+  }
+  15% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(var(--ticker-scroll, -80px));
+  }
+  75% {
+    transform: translateX(var(--ticker-scroll, -80px));
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.title-ad-marquee-hover {
+  animation: adTickerSlide 3.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  display: inline-block;
+  will-change: transform;
+}
+

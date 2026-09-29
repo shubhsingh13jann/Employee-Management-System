@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import api from "../api/axios";
 
 interface GlobalMobilityModalProps {
@@ -17,6 +17,29 @@ export const GlobalMobilityModal: React.FC<GlobalMobilityModalProps> = ({
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [deptFilter, setDeptFilter] = useState("");
+
+  // Executive Title Hover Ad-Ticker Animation State
+  const [isTitleHovered, setIsTitleHovered] = useState(false);
+  const [titleScrollDist, setTitleScrollDist] = useState(0);
+  const titleContainerRef = useRef<HTMLDivElement>(null);
+  const titleTextRef = useRef<HTMLHeadingElement>(null);
+
+  const handleTitleMouseEnter = () => {
+    if (titleTextRef.current && titleContainerRef.current) {
+      const textWidth = titleTextRef.current.scrollWidth;
+      const containerWidth = titleContainerRef.current.clientWidth;
+      const overflow = textWidth - containerWidth;
+      setTitleScrollDist(overflow > 0 ? overflow + 16 : 85);
+      setIsTitleHovered(true);
+    } else {
+      setTitleScrollDist(85);
+      setIsTitleHovered(true);
+    }
+  };
+
+  const handleTitleMouseLeave = () => {
+    setIsTitleHovered(false);
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -154,16 +177,34 @@ export const GlobalMobilityModal: React.FC<GlobalMobilityModalProps> = ({
       >
         {/* Pinned Executive Header Banner */}
         <div className="shrink-0 px-5 sm:px-6 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between gap-4 border-b border-indigo-900/40">
-          <div className="flex items-center gap-3.5 min-w-0">
+          <div className="flex items-center gap-3.5 min-w-0 flex-1">
             <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 text-base sm:text-lg font-bold shadow-inner shrink-0">
               <i className="bi bi-clock-history"></i>
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-base sm:text-lg text-white tracking-tight mb-0 whitespace-nowrap truncate">
-                  Workforce Mobility Audit Ledger
-                </h3>
-                <span className="hidden sm:inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-200 border border-indigo-400/30 whitespace-nowrap shadow-xs">
+                <div
+                  ref={titleContainerRef}
+                  onMouseEnter={handleTitleMouseEnter}
+                  onMouseLeave={handleTitleMouseLeave}
+                  className="relative overflow-hidden max-w-[210px] sm:max-w-xs md:max-w-md lg:max-w-xl group/title cursor-pointer py-0.5"
+                  title="Workforce Mobility Audit Ledger (Hover to see complete title)"
+                >
+                  <h3
+                    ref={titleTextRef}
+                    className={`font-bold text-base sm:text-lg text-white tracking-tight mb-0 whitespace-nowrap ${
+                      isTitleHovered ? "title-ad-marquee-hover overflow-visible" : "truncate"
+                    }`}
+                    style={
+                      {
+                        "--ticker-scroll": `-${titleScrollDist}px`,
+                      } as React.CSSProperties
+                    }
+                  >
+                    Workforce Mobility Audit Ledger
+                  </h3>
+                </div>
+                <span className="hidden sm:inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-200 border border-indigo-400/30 whitespace-nowrap shadow-xs shrink-0">
                   Global Enterprise Scope
                 </span>
               </div>
