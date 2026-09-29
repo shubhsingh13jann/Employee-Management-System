@@ -600,7 +600,17 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
                             </div>
 
                             <div className="text-right">
-                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 block mb-0.5 uppercase tracking-wider">
+                              <span
+                                className={`px-2 py-0.5 rounded-md text-[10px] font-bold block mb-0.5 uppercase tracking-wider border ${
+                                  u.role === "manager"
+                                    ? "bg-blue-50 text-blue-700 border-blue-200"
+                                    : u.role === "supervisor"
+                                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                    : u.role === "admin"
+                                    ? "bg-purple-50 text-purple-700 border-purple-200"
+                                    : "bg-slate-100 text-slate-700 border-slate-200"
+                                }`}
+                              >
                                 {u.role}
                               </span>
                               <span className="text-[11px] text-slate-500 font-medium">
@@ -842,7 +852,7 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
                         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
                           Current Assignment
                         </span>
-                        <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-slate-200 text-slate-700">
+                        <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-slate-200 text-slate-700">
                           Source
                         </span>
                       </div>
@@ -873,7 +883,7 @@ export const TransferMemberModal: React.FC<TransferMemberModalProps> = ({
                         <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700">
                           Proposed Assignment
                         </span>
-                        <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-indigo-600 text-white">
+                        <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-indigo-600 text-white shadow-2xs">
                           Destination
                         </span>
                       </div>
