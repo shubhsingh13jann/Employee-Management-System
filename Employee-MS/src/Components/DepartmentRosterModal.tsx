@@ -1081,52 +1081,52 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
               {activeTab === "history" && (
                 <div className="space-y-4 animate-in fade-in duration-150">
                   {/* Filter & Metric Pill Bar */}
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1.5 text-xs text-slate-700">
-                        <span className="font-bold">{transfers.length}</span>
-                        <span className="text-slate-400">Total Events</span>
+                  <div className="flex items-center justify-between gap-3 px-3 py-2 bg-slate-50/90 border border-slate-200/90 rounded-xl overflow-x-auto no-scrollbar shadow-2xs">
+                    <div className="flex items-center gap-2 sm:gap-2.5 text-xs shrink-0 whitespace-nowrap">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-slate-800">{transfers.length}</span>
+                        <span className="text-slate-500 whitespace-nowrap text-[11px]">Total Events</span>
                       </div>
                       <span className="text-slate-300">•</span>
-                      <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-semibold">
+                      <div className="flex items-center gap-1 text-[11px] text-emerald-700 font-semibold whitespace-nowrap">
                         <span>{transfers.filter((t: any) => t.target_department_id === departmentId).length}</span>
                         <span className="text-slate-500 font-normal">Inbound</span>
                       </div>
                       <span className="text-slate-300">•</span>
-                      <div className="flex items-center gap-1.5 text-xs text-amber-700 font-semibold">
+                      <div className="flex items-center gap-1 text-[11px] text-amber-700 font-semibold whitespace-nowrap">
                         <span>{transfers.filter((t: any) => t.source_department_id === departmentId).length}</span>
                         <span className="text-slate-500 font-normal">Outbound</span>
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-nowrap shrink-0">
                       {/* Search in Mobility History */}
                       <div className="relative">
-                        <i className="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                        <i className="bi bi-search absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-[9px]"></i>
                         <input
                           type="text"
                           value={historySearchQuery}
                           onChange={(e) => setHistorySearchQuery(e.target.value)}
-                          placeholder="Search audit events..."
-                          className="pl-7 pr-3 py-1 rounded-lg text-xs bg-white border border-slate-200 focus:border-indigo-400 outline-none w-36 sm:w-44 text-slate-700 placeholder:text-slate-400"
+                          placeholder="Search audit..."
+                          className="pl-6 pr-5 py-1 rounded-lg text-[11px] bg-white border border-slate-200 focus:border-indigo-400 outline-none w-28 sm:w-36 text-slate-700 placeholder:text-slate-400 shadow-2xs transition-all"
                         />
                         {historySearchQuery && (
                           <button
                             type="button"
                             onClick={() => setHistorySearchQuery("")}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
+                            className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-[10px] cursor-pointer"
                           >
                             ✕
                           </button>
                         )}
                       </div>
 
-                      <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-2xs">
+                      <div className="flex items-center bg-slate-200/60 p-0.5 rounded-lg border border-slate-200/80">
                         <button
                           type="button"
                           onClick={() => setTransferFilterMode("all")}
-                          className={`px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer transition-colors ${
-                            transferFilterMode === "all" ? "bg-slate-900 text-white" : "text-slate-600 hover:text-slate-900"
+                          className={`px-2 py-0.5 rounded-md text-[11px] font-semibold cursor-pointer transition-all ${
+                            transferFilterMode === "all" ? "bg-white text-slate-900 shadow-2xs font-bold" : "text-slate-600 hover:text-slate-900"
                           }`}
                         >
                           All ({transfers.length})
@@ -1134,8 +1134,8 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
                         <button
                           type="button"
                           onClick={() => setTransferFilterMode("inbound")}
-                          className={`px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer transition-colors ${
-                            transferFilterMode === "inbound" ? "bg-emerald-600 text-white" : "text-slate-600 hover:text-slate-900"
+                          className={`px-2 py-0.5 rounded-md text-[11px] font-semibold cursor-pointer transition-all ${
+                            transferFilterMode === "inbound" ? "bg-emerald-600 text-white shadow-2xs font-bold" : "text-slate-600 hover:text-slate-900"
                           }`}
                         >
                           Inbound
@@ -1143,8 +1143,8 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
                         <button
                           type="button"
                           onClick={() => setTransferFilterMode("outbound")}
-                          className={`px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer transition-colors ${
-                            transferFilterMode === "outbound" ? "bg-amber-600 text-white" : "text-slate-600 hover:text-slate-900"
+                          className={`px-2 py-0.5 rounded-md text-[11px] font-semibold cursor-pointer transition-all ${
+                            transferFilterMode === "outbound" ? "bg-amber-600 text-white shadow-2xs font-bold" : "text-slate-600 hover:text-slate-900"
                           }`}
                         >
                           Outbound
@@ -1155,11 +1155,11 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
                         <button
                           type="button"
                           onClick={handleExportMobilityCSV}
-                          className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-50 text-indigo-700 border border-slate-200 shadow-2xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                          className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white hover:bg-indigo-50/80 text-indigo-700 border border-indigo-200/80 shadow-2xs transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0"
                           title="Export Mobility Audit Trail to CSV"
                         >
-                          <i className="bi bi-download text-[11px]"></i>
-                          <span className="hidden sm:inline">Export Audit</span>
+                          <i className="bi bi-download text-[10px]"></i>
+                          <span>Export Audit</span>
                         </button>
                       )}
                     </div>
