@@ -3,6 +3,7 @@ import api from "../../api/axios";
 import { DepartmentRosterModal } from "../../Components/DepartmentRosterModal";
 import { TransferMemberModal } from "../../Components/TransferMemberModal";
 import { GlobalMobilityModal } from "../../Components/GlobalMobilityModal";
+import { DecommissionDepartmentModal } from "../../Components/DecommissionDepartmentModal";
 
 const Departments = () => {
   const [departments, setDepartments] = useState([]);
@@ -23,6 +24,7 @@ const Departments = () => {
     deptId: number | null;
   }>({ isOpen: false, userId: null, deptId: null });
   const [globalMobilityOpen, setGlobalMobilityOpen] = useState(false);
+  const [decommissionDeptId, setDecommissionDeptId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState({ type: "", text: "" });
 
@@ -138,20 +140,8 @@ const Departments = () => {
     }
   };
 
-  const handleDelete = async (id, deptName) => {
-    if (!window.confirm(`Are you sure you want to delete department '${deptName}'?`)) return;
-    try {
-      const res = await api.delete(`/api/admin/departments/${id}`);
-      if (res.data.status) {
-        setMsg({ type: "success", text: "Department removed successfully" });
-        if (editingDeptId === id) {
-          handleCancelEdit();
-        }
-        fetchDepartments();
-      }
-    } catch (err) {
-      setMsg({ type: "danger", text: err.response?.data?.error || "Failed to delete department" });
-    }
+  const handleDelete = (id: number) => {
+    setDecommissionDeptId(id);
   };
 
   return (
@@ -648,12 +638,12 @@ const Departments = () => {
                                     type="button"
                                     onClick={() => {
                                       setActiveActionMenuId(null);
-                                      handleDelete(dept.id, dept.name);
+                                      handleDelete(dept.id);
                                     }}
                                     className="w-full px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition-colors cursor-pointer font-medium"
                                   >
-                                    <i className="bi bi-trash text-rose-500"></i>
-                                    <span>Delete Department</span>
+                                    <i className="bi bi-shield-slash text-rose-500"></i>
+                                    <span>Decommission Unit</span>
                                   </button>
                                 </div>
                               )}
@@ -719,6 +709,22 @@ const Departments = () => {
         isOpen={globalMobilityOpen}
         onClose={() => setGlobalMobilityOpen(false)}
         departments={departments}
+      />
+
+      {/* Enterprise Safe Decommissioning & Sunset Modal */}
+      <DecommissionDepartmentModal
+        isOpen={!!decommissionDeptId}
+        onClose={() => setDecommissionDeptId(null)}
+        departmentId={decommissionDeptId}
+        departments={departments}
+        onDecommissionSuccess={(successMsg) => {
+          setMsg({ type: "success", text: successMsg });
+          if (editingDeptId === decommissionDeptId) {
+            handleCancelEdit();
+          }
+          fetchDepartments();
+          fetchEligibleHeads();
+        }}
       />
     </div>
   );
