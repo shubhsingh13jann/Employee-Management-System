@@ -157,6 +157,27 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
     fetchTransfers();
   }, [isOpen, departmentId]);
 
+  // Prevent background scrolling while modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const mainContainer = document.querySelector("main");
+    const originalMainOverflow = mainContainer ? mainContainer.style.overflow : "";
+    if (mainContainer) {
+      mainContainer.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      if (mainContainer) {
+        mainContainer.style.overflow = originalMainOverflow;
+      }
+    };
+  }, [isOpen]);
+
   // Handle escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -206,49 +227,56 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-xs overscroll-contain animate-in fade-in duration-200"
+      onWheel={(e) => {
+        if (e.target === e.currentTarget) {
+          e.preventDefault();
+        }
+      }}
+    >
       <div
-        className="w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-150"
+        className="w-full max-w-4xl max-h-[88vh] sm:max-h-[90vh] bg-white rounded-2xl border border-slate-200/80 shadow-2xl flex flex-col my-auto overflow-hidden animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header Banner */}
-        <div className="px-6 py-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-start justify-between border-b border-slate-800">
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 text-xl font-bold shadow-inner shrink-0">
+        {/* Pinned Executive Header Banner */}
+        <div className="shrink-0 px-5 sm:px-6 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between gap-4 border-b border-indigo-900/40">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 text-base sm:text-lg font-bold shadow-inner shrink-0">
               <i className="bi bi-diagram-3"></i>
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold text-white tracking-tight mb-0">
+                <h3 className="font-bold text-base sm:text-lg text-white tracking-tight mb-0 whitespace-nowrap truncate">
                   {department?.name || departmentName}
                 </h3>
                 {department?.code && (
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-indigo-500/30 text-indigo-200 border border-indigo-400/40">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-indigo-500/20 text-indigo-200 border border-indigo-400/30 whitespace-nowrap shadow-xs">
                     {department.code}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-300 mt-1 mb-0 flex items-center gap-2">
+              <p className="text-xs text-indigo-200/70 mt-0.5 mb-0 font-normal truncate">
                 <span>{department?.description || "Corporate organizational unit charter & span of control"}</span>
                 {department?.parent_name && (
-                  <span className="text-[11px] text-indigo-300 font-medium">
-                    • Sub-unit of {department.parent_name}
+                  <span className="text-[11px] text-indigo-300/80 font-medium">
+                    {" "}• Sub-unit of {department.parent_name}
                   </span>
                 )}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             {roster?.all_members?.length > 0 && (
               <button
                 type="button"
                 onClick={handleExportCSV}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/10 transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/15 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
                 title="Export Department Roster to CSV"
               >
                 <i className="bi bi-download text-[11px]"></i>
-                <span>Export CSV</span>
+                <span className="hidden sm:inline">Export CSV</span>
               </button>
             )}
             {department && onEditClick && (
@@ -258,10 +286,10 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
                   onClose();
                   onEditClick(department);
                 }}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/10 transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/15 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
                 <i className="bi bi-pencil text-[11px]"></i>
-                <span>Edit Dept</span>
+                <span className="hidden sm:inline">Edit Dept</span>
               </button>
             )}
             {department && onDecommissionClick && (
@@ -271,7 +299,7 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
                   onClose();
                   onDecommissionClick(department);
                 }}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-400/30 transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-400/30 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
                 title="Decommission Department Charter"
               >
                 <i className="bi bi-shield-slash text-[11px]"></i>
@@ -281,7 +309,7 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-sm font-bold"
+              className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer text-sm font-bold disabled:opacity-50"
               title="Close Roster"
             >
               ✕
@@ -290,7 +318,7 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
         </div>
 
         {/* Quick Metrics Bar */}
-        <div className="px-6 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="shrink-0 px-6 py-3 bg-slate-50/80 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <span className="text-slate-400 font-medium">Headcount:</span>
@@ -367,7 +395,7 @@ export const DepartmentRosterModal: React.FC<DepartmentRosterModalProps> = ({
         </div>
 
         {/* Content Body */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 min-h-0 overflow-y-auto p-6">
           {loading ? (
             <div className="py-20 flex flex-col items-center justify-center gap-3">
               <div className="w-8 h-8 border-3 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
