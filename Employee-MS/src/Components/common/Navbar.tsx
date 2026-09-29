@@ -8,6 +8,7 @@ const Navbar = () => {
 
   const firstName = user?.name?.split(' ')[0] || "User";
   const isDepartmentsPage = location.pathname.includes("/admin/departments");
+  const isUsersPage = location.pathname.includes("/admin/users");
 
   return (
     <header className="w-full bg-white border-b border-slate-200/90 px-6 lg:px-8 py-3.5 sticky top-0 shadow-xs z-30">
@@ -26,6 +27,22 @@ const Navbar = () => {
                 <span className="hover:text-slate-600 transition-colors cursor-pointer">Home</span>
                 <i className="bi bi-chevron-right text-[9px] text-slate-300"></i>
                 <span className="text-slate-600">Departments</span>
+              </div>
+            </div>
+          </div>
+        ) : isUsersPage ? (
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100/80 flex items-center justify-center text-indigo-600 shadow-2xs">
+              <i className="bi bi-people text-lg"></i>
+            </div>
+            <div>
+              <h5 className="font-bold text-slate-900 mb-0 text-base lg:text-lg tracking-tight">
+                Workforce Management
+              </h5>
+              <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+                <span className="hover:text-slate-600 transition-colors cursor-pointer">Home</span>
+                <i className="bi bi-chevron-right text-[9px] text-slate-300"></i>
+                <span className="text-slate-600">User Directory</span>
               </div>
             </div>
           </div>
