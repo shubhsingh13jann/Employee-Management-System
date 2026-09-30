@@ -7,8 +7,8 @@ const Navbar = () => {
   const location = useLocation();
 
   const firstName = user?.name?.split(' ')[0] || "User";
-  const isDepartmentsPage = location.pathname.includes("/admin/departments");
-  const isUsersPage = location.pathname.includes("/admin/users");
+  const isDepartmentsPage = location.pathname.toLowerCase().includes("department");
+  const isUsersPage = location.pathname.toLowerCase().includes("user");
 
   return (
     <header className="w-full bg-white border-b border-slate-200/90 px-6 lg:px-8 py-3.5 sticky top-0 shadow-xs z-30">
@@ -32,18 +32,16 @@ const Navbar = () => {
           </div>
         ) : isUsersPage ? (
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100/80 flex items-center justify-center text-indigo-600 shadow-2xs">
-              <i className="bi bi-people text-lg"></i>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-500/20 shrink-0">
+              <i className="bi bi-people-fill text-lg"></i>
             </div>
             <div>
               <h5 className="font-bold text-slate-900 mb-0 text-base lg:text-lg tracking-tight">
                 Workforce Management
               </h5>
-              <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-                <span className="hover:text-slate-600 transition-colors cursor-pointer">Home</span>
-                <i className="bi bi-chevron-right text-[9px] text-slate-300"></i>
-                <span className="text-slate-600">User Directory</span>
-              </div>
+              <p className="text-slate-500 mb-0 font-medium text-xs lg:text-sm">
+                Enterprise Personnel Directory, Reporting Line Hierarchy & Governance Operations
+              </p>
             </div>
           </div>
         ) : (

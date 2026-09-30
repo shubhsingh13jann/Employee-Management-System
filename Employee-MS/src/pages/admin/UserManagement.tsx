@@ -210,69 +210,72 @@ const UserManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Top Action Controls */}
-      <div className="flex items-center justify-end gap-2.5">
-        <button
-          type="button"
-          onClick={handleExportCSV}
-          disabled={users.length === 0}
-          className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-          title="Export Workforce Directory as CSV"
-        >
-          <i className="bi bi-download text-[11px]"></i>
-          <span>Export CSV</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={handleOpenOnboard}
-          className="px-4 py-1.5 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-600/30 transition-all flex items-center gap-2 cursor-pointer"
-        >
-          <i className="bi bi-person-plus-fill text-xs"></i>
-          <span>Onboard Member</span>
-        </button>
-      </div>
-
-      {/* Compact KPI Metrics Ribbon */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-        <div className="px-3.5 py-2 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Workforce</span>
-            <span className="text-base sm:text-lg font-black text-slate-900 leading-tight block">{metrics.total}</span>
+      {/* KPI Metrics & Action Controls - Unified Single Row */}
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-2.5 sm:gap-3">
+        {/* Compact KPI Metric Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 flex-1">
+          <div className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Workforce</span>
+              <span className="text-base sm:text-lg font-black text-slate-900 leading-tight block">{metrics.total}</span>
+            </div>
+            <span className="text-[10px] text-slate-500 font-semibold bg-slate-100 px-2 py-0.5 rounded-md">
+              Headcount
+            </span>
           </div>
-          <span className="text-[10px] text-slate-500 font-semibold bg-slate-100 px-2 py-0.5 rounded-md">
-            Headcount
-          </span>
+
+          <div className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Active Status</span>
+              <span className="text-base sm:text-lg font-black text-emerald-600 leading-tight block">{metrics.active}</span>
+            </div>
+            <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+              {metrics.total > 0 ? `${Math.round((metrics.active / metrics.total) * 100)}%` : "0%"}
+            </span>
+          </div>
+
+          <div className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Supervisors / Leads</span>
+              <span className="text-base sm:text-lg font-black text-indigo-600 leading-tight block">{metrics.supervisorsCount}</span>
+            </div>
+            <span className="text-[10px] text-indigo-700 font-semibold bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
+              Pod Leads
+            </span>
+          </div>
+
+          <div className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Leadership & HODs</span>
+              <span className="text-base sm:text-lg font-black text-violet-600 leading-tight block">{metrics.leadersCount}</span>
+            </div>
+            <span className="text-[10px] text-violet-700 font-semibold bg-violet-50 px-2 py-0.5 rounded-md border border-violet-100">
+              Authorities
+            </span>
+          </div>
         </div>
 
-        <div className="px-3.5 py-2 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Active Status</span>
-            <span className="text-base sm:text-lg font-black text-emerald-600 leading-tight block">{metrics.active}</span>
-          </div>
-          <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
-            {metrics.total > 0 ? `${Math.round((metrics.active / metrics.total) * 100)}%` : "0%"}
-          </span>
-        </div>
+        {/* Action Controls in the exact same row */}
+        <div className="flex items-center gap-2 shrink-0 self-end xl:self-center">
+          <button
+            type="button"
+            onClick={handleExportCSV}
+            disabled={users.length === 0}
+            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 whitespace-nowrap"
+            title="Export Workforce Directory as CSV"
+          >
+            <i className="bi bi-download text-[11px]"></i>
+            <span>Export CSV</span>
+          </button>
 
-        <div className="px-3.5 py-2 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Supervisors / Leads</span>
-            <span className="text-base sm:text-lg font-black text-indigo-600 leading-tight block">{metrics.supervisorsCount}</span>
-          </div>
-          <span className="text-[10px] text-indigo-700 font-semibold bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
-            Pod Leads
-          </span>
-        </div>
-
-        <div className="px-3.5 py-2 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Leadership & HODs</span>
-            <span className="text-base sm:text-lg font-black text-violet-600 leading-tight block">{metrics.leadersCount}</span>
-          </div>
-          <span className="text-[10px] text-violet-700 font-semibold bg-violet-50 px-2 py-0.5 rounded-md border border-violet-100">
-            Authorities
-          </span>
+          <button
+            type="button"
+            onClick={handleOpenOnboard}
+            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-600/30 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+          >
+            <i className="bi bi-person-plus-fill text-xs"></i>
+            <span>Onboard Member</span>
+          </button>
         </div>
       </div>
 
