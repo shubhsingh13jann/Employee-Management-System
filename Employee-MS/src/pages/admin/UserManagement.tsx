@@ -658,7 +658,7 @@ const UserManagement: React.FC = () => {
             </div>
           )}
 
-          {/* Role Filter Tabs & Workforce Overview Tab */}
+          {/* Role Filter Tabs (Clean Floating Pills Matching Image 2) */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar shrink-0">
             {roleTabs.map((tab) => {
               const isActive = selectedRole === tab.id;
@@ -684,28 +684,6 @@ const UserManagement: React.FC = () => {
                 </button>
               );
             })}
-
-            {/* Toggle Workforce Overview Tab */}
-            <button
-              type="button"
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shadow-2xs shrink-0 ml-auto ${
-                isSidebarOpen
-                  ? "bg-indigo-600 text-white border-indigo-600 shadow-indigo-500/20"
-                  : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90 hover:border-slate-300"
-              }`}
-              title="Toggle Workforce Overview Sidebar"
-            >
-              <i className={`bi ${isSidebarOpen ? "bi-pie-chart-fill" : "bi-pie-chart"} text-xs ${isSidebarOpen ? "text-white" : "text-indigo-600"}`}></i>
-              <span>Workforce Overview</span>
-              <span
-                className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold transition-colors ${
-                  isSidebarOpen ? "bg-white/20 text-white" : "bg-indigo-50 text-indigo-700"
-                }`}
-              >
-                {isSidebarOpen ? "Open" : "View"}
-              </span>
-            </button>
           </div>
 
           {/* Workforce Directory Table */}
