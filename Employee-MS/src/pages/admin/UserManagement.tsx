@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { UserFormModal } from "../../Components/admin/users/UserFormModal";
 import { UserProfileModal } from "../../Components/admin/users/UserProfileModal";
 import { ConfirmOffboardModal } from "../../Components/admin/users/ConfirmOffboardModal";
+import { WorkforceAnalyticsSidebar } from "../../Components/admin/users/WorkforceAnalyticsSidebar";
 
 const UserManagement: React.FC = () => {
   const { user: currentUser } = useAuth();
@@ -340,7 +341,7 @@ const UserManagement: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
       {/* Alert Notification */}
       {msg.text && (
         <div
@@ -364,8 +365,12 @@ const UserManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Executive Gradient Hero Banner & Action Toolbar */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 border border-indigo-900/40 shadow-xl text-white flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Main Responsive 2-Column Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 sm:gap-6 items-start">
+        {/* Left Column (Hero, Tabs, Table) */}
+        <div className="xl:col-span-8 space-y-4 sm:space-y-5 min-w-0">
+          {/* Executive Gradient Hero Banner & Action Toolbar */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 border border-indigo-900/40 shadow-xl text-white flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Left Side: Icon & Title */}
         <div className="flex items-center gap-3.5 min-w-0">
           <div className="w-11 h-11 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 text-lg font-bold shadow-inner shrink-0">
@@ -510,71 +515,35 @@ const UserManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Role Filter Tabs & Directory Quick Search Bar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white p-2.5 sm:p-3 rounded-2xl border border-slate-200/80 shadow-2xs">
-        {/* Role Tabs Group */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
-          {roleTabs.map((tab) => {
-            const isActive = selectedRole === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setSelectedRole(tab.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
-                  isActive
-                    ? tab.activeStyles
-                    : "bg-white hover:bg-slate-50/80 text-slate-600 hover:text-slate-900 border-slate-200/80"
-                }`}
-              >
-                <span>{tab.label}</span>
-                <span
-                  className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold transition-colors ${
-                    isActive ? tab.badgeActive : "bg-slate-100 text-slate-500"
-                  }`}
-                >
-                  {tab.count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Quick Search & Department selector */}
-        <div className="flex items-center gap-2 shrink-0 self-end lg:self-center">
-          <div className="relative w-44 sm:w-56">
-            <i className="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search directory..."
-              className="w-full pl-7 pr-6 py-1.5 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 outline-none transition-all text-slate-800 placeholder:text-slate-400"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
-              >
-                ✕
-              </button>
-            )}
+          {/* Role Filter Tabs Bar */}
+          <div className="bg-white p-2 sm:p-2.5 rounded-2xl border border-slate-200/80 shadow-2xs overflow-x-auto no-scrollbar">
+            <div className="flex items-center gap-2 min-w-max py-0.5">
+              {roleTabs.map((tab) => {
+                const isActive = selectedRole === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setSelectedRole(tab.id)}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
+                      isActive
+                        ? tab.activeStyles
+                        : "bg-white hover:bg-slate-50/80 text-slate-600 hover:text-slate-900 border-slate-200/80 font-medium"
+                    }`}
+                  >
+                    <span>{tab.label}</span>
+                    <span
+                      className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold transition-colors ${
+                        isActive ? tab.badgeActive : "bg-slate-100 text-slate-500"
+                      }`}
+                    >
+                      {tab.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <select
-            value={selectedDept}
-            onChange={(e) => setSelectedDept(e.target.value)}
-            className="px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 outline-none font-medium text-slate-700 cursor-pointer"
-          >
-            <option value="">All Departments</option>
-            {departments.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name} {d.code ? `(${d.code})` : ""}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
 
       {/* Workforce Directory Table */}
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
@@ -872,9 +841,19 @@ const UserManagement: React.FC = () => {
           </div>
         </div>
       </div>
+    </div>
 
-      {/* User Form Modal (Onboard & Edit) */}
-      <UserFormModal
+    {/* Right Column: Executive Workforce Analytics Sidebar */}
+    <div className="xl:col-span-4 min-w-0">
+      <WorkforceAnalyticsSidebar
+        allUsers={allUsers}
+        departments={departments}
+      />
+    </div>
+  </div>
+
+  {/* User Form Modal (Onboard & Edit) */}
+  <UserFormModal
         isOpen={isFormModalOpen}
         onClose={() => {
           setIsFormModalOpen(false);

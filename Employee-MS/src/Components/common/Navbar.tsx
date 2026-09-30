@@ -59,14 +59,14 @@ const Navbar = () => {
         <div className="flex items-center gap-6">
           
           {/* Search Bar */}
-          <div className="hidden xl:flex items-center bg-slate-50 border border-slate-200 rounded-full px-4 py-1.5 min-w-[280px] transition-all focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 focus-within:bg-white">
+          <div className="hidden md:flex items-center bg-slate-50 border border-slate-200 rounded-full px-4 py-1.5 w-64 lg:w-80 transition-all focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 focus-within:bg-white shadow-2xs">
             <i className="bi bi-search text-slate-400 text-xs mr-2"></i>
             <input 
               type="text" 
               className="w-full text-xs bg-transparent border-none outline-none focus:outline-none placeholder:text-slate-400 text-slate-700" 
               placeholder="Search by name, email, department..." 
             />
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium text-slate-500 bg-white border border-slate-200 shadow-xs ml-1">Ctrl K</span>
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium text-slate-500 bg-white border border-slate-200 shadow-2xs ml-1 shrink-0">Ctrl K</span>
           </div>
 
           {/* Icon Actions */}
