@@ -3,11 +3,13 @@ import React, { useMemo, useState } from "react";
 interface WorkforceAnalyticsSidebarProps {
   allUsers: any[];
   departments: any[];
+  onClose?: () => void;
 }
 
 export const WorkforceAnalyticsSidebar: React.FC<WorkforceAnalyticsSidebarProps> = ({
   allUsers,
   departments,
+  onClose,
 }) => {
   const [timeframe, setTimeframe] = useState("This Month");
   const [selectedDeptFilter, setSelectedDeptFilter] = useState("all");
@@ -140,15 +142,27 @@ export const WorkforceAnalyticsSidebar: React.FC<WorkforceAnalyticsSidebarProps>
               Workforce Overview
             </h6>
           </div>
-          <select
-            value={timeframe}
-            onChange={(e) => setTimeframe(e.target.value)}
-            className="text-[11px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 outline-none cursor-pointer hover:border-slate-300 transition-colors"
-          >
-            <option>This Month</option>
-            <option>This Quarter</option>
-            <option>This Year</option>
-          </select>
+          <div className="flex items-center gap-1.5">
+            <select
+              value={timeframe}
+              onChange={(e) => setTimeframe(e.target.value)}
+              className="text-[11px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 outline-none cursor-pointer hover:border-slate-300 transition-colors"
+            >
+              <option>This Month</option>
+              <option>This Quarter</option>
+              <option>This Year</option>
+            </select>
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer text-xs"
+                title="Collapse Sidebar"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center justify-center gap-4 sm:gap-6 py-2">

@@ -38,6 +38,7 @@ const UserManagement: React.FC = () => {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [offboardTarget, setOffboardTarget] = useState<{ id: number; name: string; role?: string } | null>(null);
   const [activeActionMenuId, setActiveActionMenuId] = useState<number | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -391,10 +392,14 @@ const UserManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Main Responsive 2-Column Grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 sm:gap-6 items-start xl:flex-1 xl:min-h-0 xl:h-full">
-        {/* Left Column (Hero, Tabs, Table) - Independently Scrollable */}
-        <div className="xl:col-span-8 min-w-0 xl:h-full xl:overflow-y-auto xl:pr-1.5 space-y-4 sm:space-y-5 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
+      {/* Main Responsive Layout with Smooth Sidebar Expansion */}
+      <div className="flex flex-col xl:flex-row gap-5 sm:gap-6 items-start xl:flex-1 xl:min-h-0 xl:h-full w-full">
+        {/* Left Column (Hero, Tabs, Table) */}
+        <div
+          className={`min-w-0 xl:h-full xl:overflow-y-auto space-y-4 sm:space-y-5 transition-all duration-300 ease-in-out [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300 ${
+            isSidebarOpen ? "xl:w-2/3 xl:pr-1.5" : "w-full"
+          }`}
+        >
           {/* Executive Gradient Hero Banner & Action Toolbar */}
           <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 border border-indigo-900/40 shadow-xl text-white flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
             {/* Left Side: Icon & Title */}
@@ -414,6 +419,21 @@ const UserManagement: React.FC = () => {
 
             {/* Right Side: Action Buttons */}
             <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+              {/* Workforce Overview Toggle Button */}
+              <button
+                type="button"
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border backdrop-blur-xs transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
+                  isSidebarOpen
+                    ? "bg-indigo-600 border-indigo-400 text-white shadow-indigo-500/30 ring-2 ring-indigo-400/30"
+                    : "bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border-white/20"
+                }`}
+                title="Toggle Workforce Overview Analytics"
+              >
+                <i className={`bi ${isSidebarOpen ? "bi-pie-chart-fill" : "bi-pie-chart"} text-xs`}></i>
+                <span>Workforce Overview</span>
+              </button>
+
               {/* Filter Button */}
               <button
                 type="button"
@@ -541,7 +561,7 @@ const UserManagement: React.FC = () => {
             </div>
           )}
 
-          {/* Role Filter Tabs (Clean Floating Pills Matching Image 2) */}
+          {/* Role Filter Tabs & Workforce Overview Tab */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar shrink-0">
             {roleTabs.map((tab) => {
               const isActive = selectedRole === tab.id;
@@ -567,12 +587,34 @@ const UserManagement: React.FC = () => {
                 </button>
               );
             })}
+
+            {/* Toggle Workforce Overview Tab */}
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shadow-2xs shrink-0 ml-auto ${
+                isSidebarOpen
+                  ? "bg-indigo-600 text-white border-indigo-600 shadow-indigo-500/20"
+                  : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90 hover:border-slate-300"
+              }`}
+              title="Toggle Workforce Overview Sidebar"
+            >
+              <i className={`bi ${isSidebarOpen ? "bi-pie-chart-fill" : "bi-pie-chart"} text-xs ${isSidebarOpen ? "text-white" : "text-indigo-600"}`}></i>
+              <span>Workforce Overview</span>
+              <span
+                className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold transition-colors ${
+                  isSidebarOpen ? "bg-white/20 text-white" : "bg-indigo-50 text-indigo-700"
+                }`}
+              >
+                {isSidebarOpen ? "Open" : "View"}
+              </span>
+            </button>
           </div>
 
           {/* Workforce Directory Table */}
           <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
+            <div className="overflow-x-auto [scrollbar-width:thin] [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
+              <table className="w-full min-w-[780px] text-left border-collapse text-xs">
                 <thead className="bg-slate-50/80 border-b border-slate-200/90 text-xs font-semibold text-slate-600 normal-case tracking-normal">
                   <tr>
                     <th
@@ -684,11 +726,11 @@ const UserManagement: React.FC = () => {
                                       You
                                     </span>
                                   )}
-                                  {u.is_hod && !isCurrentUser && (
+                                  {Boolean(u.is_hod) && !isCurrentUser ? (
                                     <span className="px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs shrink-0">
                                       👑 HOD
                                     </span>
-                                  )}
+                                  ) : null}
                                 </div>
                                 <span className="text-[11px] text-slate-400 block truncate mt-0.5">{u.email}</span>
                               </div>
@@ -884,13 +926,16 @@ const UserManagement: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column: Executive Workforce Analytics Sidebar - Independently Scrollable */}
-        <div className="xl:col-span-4 min-w-0 xl:h-full xl:overflow-y-auto xl:pl-1 space-y-4 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
-          <WorkforceAnalyticsSidebar
-            allUsers={allUsers}
-            departments={departments}
-          />
-        </div>
+        {/* Right Column: Workforce Analytics Sidebar with Smooth Slide-in */}
+        {isSidebarOpen && (
+          <div className="w-full xl:w-1/3 xl:min-w-[340px] xl:max-w-[420px] min-w-0 xl:h-full xl:overflow-y-auto xl:pl-1 space-y-4 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300 animate-in fade-in slide-in-from-right-4 duration-300">
+            <WorkforceAnalyticsSidebar
+              allUsers={allUsers}
+              departments={departments}
+              onClose={() => setIsSidebarOpen(false)}
+            />
+          </div>
+        )}
       </div>
 
   {/* User Form Modal (Onboard & Edit) */}
