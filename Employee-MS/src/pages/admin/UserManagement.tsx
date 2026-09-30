@@ -749,7 +749,7 @@ const UserManagement: React.FC = () => {
                     </th>
                     <th className="px-3 py-3 font-semibold text-slate-600 whitespace-nowrap">Phone</th>
                     <th className="px-3 py-3 font-semibold text-slate-600 whitespace-nowrap">Status</th>
-                    <th className="px-4 py-3 font-semibold text-slate-600 text-right whitespace-nowrap">Actions</th>
+                    <th className="px-4 py-3 font-semibold text-slate-600 text-center whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -861,9 +861,9 @@ const UserManagement: React.FC = () => {
                             </span>
                           </td>
 
-                          {/* Actions */}
-                          <td className="px-4 py-3 text-right whitespace-nowrap">
-                            <div className="relative inline-flex items-center justify-end action-menu-container">
+                          {/* Actions (Centered Matching Option 2) */}
+                          <td className="px-4 py-3 text-center whitespace-nowrap">
+                            <div className="relative inline-flex items-center justify-center action-menu-container">
                               <button
                                 type="button"
                                 onClick={(e) => {

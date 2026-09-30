@@ -166,14 +166,13 @@ export const WorkforceAnalyticsSidebar: React.FC<WorkforceAnalyticsSidebarProps>
         </div>
 
         <div className="flex items-center justify-center gap-4 sm:gap-6 py-2">
-          {/* Circular Gradient Donut Chart */}
+          {/* Circular Donut Chart Matching Legend Colors */}
           <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex items-center justify-center shrink-0">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
               <defs>
-                <linearGradient id="workforceGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#2563eb" />
-                  <stop offset="60%" stopColor="#8b5cf6" />
-                  <stop offset="100%" stopColor="#c026d3" />
+                <linearGradient id="activeWheelGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#10b981" />
+                  <stop offset="100%" stopColor="#059669" />
                 </linearGradient>
               </defs>
 
@@ -187,12 +186,12 @@ export const WorkforceAnalyticsSidebar: React.FC<WorkforceAnalyticsSidebarProps>
                 fill="none"
               />
 
-              {/* Active Segment (Gradient) */}
+              {/* Active Segment (Emerald Green matching Active dot) */}
               <circle
                 cx="50"
                 cy="50"
                 r={radius}
-                stroke="url(#workforceGradient)"
+                stroke="url(#activeWheelGradient)"
                 strokeWidth="11"
                 strokeDasharray={`${activeStroke} ${circumference}`}
                 strokeDashoffset="0"
@@ -201,7 +200,7 @@ export const WorkforceAnalyticsSidebar: React.FC<WorkforceAnalyticsSidebarProps>
                 className="transition-all duration-700 ease-out"
               />
 
-              {/* Inactive Segment */}
+              {/* Inactive Segment (Slate matching Inactive dot) */}
               {inactiveUsers > 0 && (
                 <circle
                   cx="50"
@@ -216,13 +215,13 @@ export const WorkforceAnalyticsSidebar: React.FC<WorkforceAnalyticsSidebarProps>
                 />
               )}
 
-              {/* On Leave Segment */}
+              {/* On Leave Segment (Amber matching On Leave dot) */}
               {onLeaveUsers > 0 && (
                 <circle
                   cx="50"
                   cy="50"
                   r={radius}
-                  className="stroke-amber-400 transition-all duration-700 ease-out"
+                  className="stroke-amber-500 transition-all duration-700 ease-out"
                   strokeWidth="11"
                   strokeDasharray={`${onLeaveStroke} ${circumference}`}
                   strokeDashoffset={-(activeStroke + inactiveStroke)}
