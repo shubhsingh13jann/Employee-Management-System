@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import api from "../api/axios";
 
 interface UserFormModalProps {
@@ -151,9 +152,9 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
     }
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-xs overscroll-contain animate-in fade-in duration-200"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-xs overscroll-contain animate-in fade-in duration-200"
       onWheel={(e) => {
         if (e.target === e.currentTarget) {
           e.preventDefault();
@@ -449,6 +450,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
