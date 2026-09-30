@@ -14,6 +14,8 @@ const UserManagement: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedDept, setSelectedDept] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [msg, setMsg] = useState<{ type: "success" | "danger" | ""; text: string }>({ type: "", text: "" });
 
   // Modal states
@@ -155,6 +157,20 @@ const UserManagement: React.FC = () => {
     return { total, active, supervisorsCount, leadersCount };
   }, [users]);
 
+  // Filtered users considering selected status
+  const displayedUsers = useMemo(() => {
+    if (!selectedStatus) return users;
+    return users.filter((u) => u.status === selectedStatus);
+  }, [users, selectedStatus]);
+
+  const activeFilterCount = (selectedDept ? 1 : 0) + (selectedStatus ? 1 : 0) + (searchQuery.trim() ? 1 : 0);
+
+  const handleClearFilters = () => {
+    setSelectedDept("");
+    setSelectedStatus("");
+    setSearchQuery("");
+  };
+
   const getRoleBadge = (u: any) => {
     switch (u.role) {
       case "admin":
@@ -215,74 +231,151 @@ const UserManagement: React.FC = () => {
         </div>
       )}
 
-      {/* KPI Metrics & Action Controls - Unified Single Row */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-2.5 sm:gap-3">
-        {/* Compact KPI Metric Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 flex-1">
-          <div className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Workforce</span>
-              <span className="text-base sm:text-lg font-black text-slate-900 leading-tight block">{metrics.total}</span>
-            </div>
-            <span className="text-[10px] text-slate-500 font-semibold bg-slate-100 px-2 py-0.5 rounded-md">
-              Headcount
-            </span>
+      {/* Executive Gradient Hero Banner & Action Toolbar */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 border border-indigo-900/40 shadow-xl text-white flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* Left Side: Icon & Title */}
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div className="w-11 h-11 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 text-lg font-bold shadow-inner shrink-0">
+            <i className="bi bi-people-fill"></i>
           </div>
-
-          <div className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Active Status</span>
-              <span className="text-base sm:text-lg font-black text-emerald-600 leading-tight block">{metrics.active}</span>
-            </div>
-            <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
-              {metrics.total > 0 ? `${Math.round((metrics.active / metrics.total) * 100)}%` : "0%"}
-            </span>
-          </div>
-
-          <div className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Supervisors / Leads</span>
-              <span className="text-base sm:text-lg font-black text-indigo-600 leading-tight block">{metrics.supervisorsCount}</span>
-            </div>
-            <span className="text-[10px] text-indigo-700 font-semibold bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
-              Pod Leads
-            </span>
-          </div>
-
-          <div className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Leadership & HODs</span>
-              <span className="text-base sm:text-lg font-black text-violet-600 leading-tight block">{metrics.leadersCount}</span>
-            </div>
-            <span className="text-[10px] text-violet-700 font-semibold bg-violet-50 px-2 py-0.5 rounded-md border border-violet-100">
-              Authorities
-            </span>
+          <div className="min-w-0">
+            <h2 className="text-base sm:text-lg font-bold tracking-tight text-white mb-0.5 truncate">
+              Workforce Management
+            </h2>
+            <p className="text-xs text-indigo-200/70 mb-0 font-normal truncate">
+              Enterprise Personnel Directory, Reporting Line Hierarchy & Governance Operations
+            </p>
           </div>
         </div>
 
-        {/* Action Controls in the exact same row */}
-        <div className="flex items-center gap-2 shrink-0 self-end xl:self-center">
+        {/* Right Side: Action Buttons */}
+        <div className="flex items-center gap-2.5 shrink-0 self-end md:self-center">
+          {/* Filter Button */}
+          <button
+            type="button"
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className={`px-3.5 py-2 rounded-xl text-xs font-semibold border backdrop-blur-xs transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
+              isFilterOpen || activeFilterCount > 0
+                ? "bg-indigo-600/40 border-indigo-400 text-white shadow-indigo-500/20"
+                : "bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border-white/20"
+            }`}
+          >
+            <i className="bi bi-funnel text-xs"></i>
+            <span>Filter</span>
+            {activeFilterCount > 0 && (
+              <span className="w-4 h-4 rounded-full bg-indigo-500 text-white text-[10px] font-bold flex items-center justify-center">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+
+          {/* Export Button */}
           <button
             type="button"
             onClick={handleExportCSV}
             disabled={users.length === 0}
-            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 whitespace-nowrap"
+            className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border border-white/20 backdrop-blur-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-50"
             title="Export Workforce Directory as CSV"
           >
-            <i className="bi bi-download text-[11px]"></i>
-            <span>Export CSV</span>
+            <i className="bi bi-download text-xs"></i>
+            <span>Export</span>
           </button>
 
+          {/* Onboard Member Button */}
           <button
             type="button"
             onClick={handleOpenOnboard}
-            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-600/30 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+            className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/30 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
           >
-            <i className="bi bi-person-plus-fill text-xs"></i>
+            <i className="bi bi-plus-lg font-bold text-xs"></i>
             <span>Onboard Member</span>
           </button>
         </div>
       </div>
+
+      {/* Expandable Filter Drawer Panel */}
+      {isFilterOpen && (
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm animate-in fade-in slide-in-from-top-2 duration-150">
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-3 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <i className="bi bi-sliders2 text-indigo-600 text-sm"></i>
+              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Directory Filters</span>
+              {activeFilterCount > 0 && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  {activeFilterCount} active
+                </span>
+              )}
+            </div>
+            {activeFilterCount > 0 && (
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                className="text-[11px] font-semibold text-rose-600 hover:text-rose-700 cursor-pointer flex items-center gap-1"
+              >
+                <i className="bi bi-x-circle text-[11px]"></i>
+                <span>Clear All Filters</span>
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Search Input */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 mb-1">Search Keywords</label>
+              <div className="relative">
+                <i className="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Filter by name, email..."
+                  className="w-full pl-8 pr-7 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 outline-none transition-all text-slate-800 placeholder:text-slate-400"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Department Filter */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 mb-1">Department</label>
+              <select
+                value={selectedDept}
+                onChange={(e) => setSelectedDept(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 outline-none font-medium text-slate-700 cursor-pointer"
+              >
+                <option value="">All Departments</option>
+                {departments.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name} {d.code ? `(${d.code})` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Account Status Filter */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 mb-1">Account Status</label>
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 outline-none font-medium text-slate-700 cursor-pointer"
+              >
+                <option value="">All Statuses</option>
+                <option value="active">Active Members</option>
+                <option value="inactive">Inactive / Suspended</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filter, Search & Role Bar - Single Row */}
       <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-between gap-2.5 overflow-x-auto no-scrollbar">
@@ -419,7 +512,7 @@ const UserManagement: React.FC = () => {
                     </div>
                   </td>
                 </tr>
-              ) : users.length === 0 ? (
+              ) : displayedUsers.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-16 text-center text-slate-400 text-xs">
                     <div className="flex flex-col items-center justify-center gap-2">
@@ -432,7 +525,7 @@ const UserManagement: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                users.map((u) => (
+                displayedUsers.map((u) => (
                   <tr key={u.id} className="hover:bg-slate-50/70 transition-colors">
                     {/* Staff Member Identity */}
                     <td className="px-5 py-3.5">
