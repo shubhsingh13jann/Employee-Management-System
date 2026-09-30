@@ -28,34 +28,34 @@ const Sidebar = () => {
   };
 
   const linkClass = ({ isActive }) =>
-    `nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-3 sidebar-nav-link fw-medium ${isActive ? "active" : ""}`;
+    `nav-link d-flex align-items-center gap-2 px-2.5 py-1.5 rounded-lg sidebar-nav-link text-xs font-medium transition-all ${isActive ? "active" : ""}`;
 
   const renderNavLinks = () => {
     switch (user?.role) {
       case "admin":
         return (
           <>
-            <li className="nav-item mb-2">
+            <li className="nav-item mb-1">
               <NavLink to="/admin/dashboard" end className={linkClass}>
-                <i className="bi bi-grid-1x2-fill text-base"></i>
+                <i className="bi bi-grid-1x2-fill text-sm"></i>
                 <span>Dashboard</span>
               </NavLink>
             </li>
-            <li className="nav-item mb-2">
+            <li className="nav-item mb-1">
               <NavLink to="/admin/departments" className={linkClass}>
-                <i className="bi bi-buildings-fill text-base"></i>
+                <i className="bi bi-buildings-fill text-sm"></i>
                 <span>Departments</span>
               </NavLink>
             </li>
-            <li className="nav-item mb-2">
+            <li className="nav-item mb-1">
               <NavLink to="/admin/users" className={linkClass}>
-                <i className="bi bi-people-fill text-base"></i>
+                <i className="bi bi-people-fill text-sm"></i>
                 <span>User Directory</span>
               </NavLink>
             </li>
-            <li className="nav-item mb-2">
+            <li className="nav-item mb-1">
               <NavLink to="/admin/hierarchy" className={linkClass}>
-                <i className="bi bi-diagram-3-fill text-base"></i>
+                <i className="bi bi-diagram-3-fill text-sm"></i>
                 <span>Team Hierarchy</span>
               </NavLink>
             </li>
@@ -65,27 +65,27 @@ const Sidebar = () => {
       case "manager":
         return (
           <>
-            <li className="nav-item mb-2">
+            <li className="nav-item mb-1">
               <NavLink to="/manager/dashboard" end className={linkClass}>
-                <i className="bi bi-grid-1x2-fill text-base"></i>
+                <i className="bi bi-grid-1x2-fill text-sm"></i>
                 <span>Manager Dashboard</span>
               </NavLink>
             </li>
-            <li className="nav-item mb-2">
+            <li className="nav-item mb-1">
               <NavLink to="/manager/projects" className={linkClass}>
-                <i className="bi bi-kanban-fill text-base"></i>
+                <i className="bi bi-kanban-fill text-sm"></i>
                 <span>Projects & Milestones</span>
               </NavLink>
             </li>
-            <li className="nav-item mb-2">
+            <li className="nav-item mb-1">
               <NavLink to="/manager/supervisors" className={linkClass}>
-                <i className="bi bi-person-badge-fill text-base"></i>
+                <i className="bi bi-person-badge-fill text-sm"></i>
                 <span>Dept Supervisors</span>
               </NavLink>
             </li>
-            <li className="nav-item mb-2">
+            <li className="nav-item mb-1">
               <NavLink to="/manager/leaves" className={linkClass}>
-                <i className="bi bi-calendar-check-fill text-base"></i>
+                <i className="bi bi-calendar-check-fill text-sm"></i>
                 <span>Escalated Leaves</span>
               </NavLink>
             </li>
@@ -95,27 +95,27 @@ const Sidebar = () => {
       case "supervisor":
         return (
           <>
-            <li className="nav-item mb-2">
+            <li className="nav-item mb-1">
               <NavLink to="/supervisor/dashboard" end className={linkClass}>
-                <i className="bi bi-grid-1x2-fill text-base"></i>
+                <i className="bi bi-grid-1x2-fill text-sm"></i>
                 <span>Team Dashboard</span>
               </NavLink>
             </li>
-            <li className="nav-item mb-2">
+            <li className="nav-item mb-1">
               <NavLink to="/supervisor/team" className={linkClass}>
-                <i className="bi bi-people-fill text-base"></i>
+                <i className="bi bi-people-fill text-sm"></i>
                 <span>Assigned Team</span>
               </NavLink>
             </li>
-            <li className="nav-item mb-2">
+            <li className="nav-item mb-1">
               <NavLink to="/supervisor/tasks" className={linkClass}>
-                <i className="bi bi-list-check text-base"></i>
+                <i className="bi bi-list-check text-sm"></i>
                 <span>Task Delegation</span>
               </NavLink>
             </li>
-            <li className="nav-item mb-2">
+            <li className="nav-item mb-1">
               <NavLink to="/supervisor/leaves" className={linkClass}>
-                <i className="bi bi-calendar-plus-fill text-base"></i>
+                <i className="bi bi-calendar-plus-fill text-sm"></i>
                 <span>Routine Leaves</span>
               </NavLink>
             </li>
@@ -125,27 +125,27 @@ const Sidebar = () => {
       case "employee":
         return (
           <>
-            <li className="nav-item mb-2">
+            <li className="nav-item mb-1">
               <NavLink to="/employee/dashboard" end className={linkClass}>
-                <i className="bi bi-grid-1x2-fill text-base"></i>
+                <i className="bi bi-grid-1x2-fill text-sm"></i>
                 <span>My Dashboard</span>
               </NavLink>
             </li>
-            <li className="nav-item mb-2">
+            <li className="nav-item mb-1">
               <NavLink to="/employee/tasks" className={linkClass}>
-                <i className="bi bi-card-checklist text-base"></i>
+                <i className="bi bi-card-checklist text-sm"></i>
                 <span>My Tasks</span>
               </NavLink>
             </li>
-            <li className="nav-item mb-2">
+            <li className="nav-item mb-1">
               <NavLink to="/employee/leaves" className={linkClass}>
-                <i className="bi bi-calendar-event-fill text-base"></i>
+                <i className="bi bi-calendar-event-fill text-sm"></i>
                 <span>Apply / Track Leave</span>
               </NavLink>
             </li>
-            <li className="nav-item mb-2">
+            <li className="nav-item mb-1">
               <NavLink to="/employee/profile" className={linkClass}>
-                <i className="bi bi-person-circle text-base"></i>
+                <i className="bi bi-person-circle text-sm"></i>
                 <span>My Profile</span>
               </NavLink>
             </li>
@@ -157,9 +157,10 @@ const Sidebar = () => {
     }
   };
 
-      return ( <aside className="sidebar-container text-white flex flex-col p-6 h-screen sticky top-0 shadow-lg" style={{ width: "250px", minWidth: "250px", zIndex: 1000, fontSize: "0.9rem" }}>
+  return (
+    <aside className="sidebar-container text-white flex flex-col px-3.5 py-4 h-screen sticky top-0 shadow-lg" style={{ width: "240px", minWidth: "240px", zIndex: 1000, fontSize: "0.82rem" }}>
       {/* Brand Header */}
-      <div className="pb-6 mb-6 border-b border-gray-200 border-secondary border-opacity-25">
+      <div className="pb-3.5 mb-3.5 border-b border-white/10">
         <BrandLogo
           theme="dark"
           size="sm"
@@ -168,32 +169,32 @@ const Sidebar = () => {
       </div>
 
       {/* User Chip */}
-      <div className="bg-white bg-opacity-10 border border-gray-200 border-gray-200 border-white border-opacity-10 rounded-xl p-2 mb-6 flex items-center gap-2 shadow-sm">
-        <div className="sidebar-active-gradient rounded-full text-white flex items-center justify-center font-bold shadow-sm" style={{ width: "36px", height: "36px", background: "var(--sidebar-active-gradient)", fontSize: "14px" }}>
+      <div className="bg-white/5 border border-white/10 rounded-xl p-2 mb-3.5 flex items-center gap-2.5 shadow-xs">
+        <div className="sidebar-active-gradient rounded-full text-white flex items-center justify-center font-bold shadow-sm" style={{ width: "32px", height: "32px", background: "var(--sidebar-active-gradient)", fontSize: "13px" }}>
           {user?.name?.charAt(0) || "U"}
         </div>
         <div className="overflow-hidden">
-          <p className="mb-0 font-bold text-truncate text-white" style={{ fontSize: "13px" }}>{user?.name || "User"}</p>
-          <div className="flex items-center mt-1">{getRoleBadge(user?.role)}</div>
+          <p className="mb-0 font-bold text-truncate text-white" style={{ fontSize: "12px" }}>{user?.name || "User"}</p>
+          <div className="flex items-center mt-0.5">{getRoleBadge(user?.role)}</div>
         </div>
       </div>
 
       {/* Navigation Menu */}
-      <ul className="nav nav-pills flex-col mb-auto sidebar-scroll overflow-y-auto" style={{ maxHeight: "calc(100vh - 300px)" }}>
+      <ul className="nav nav-pills flex-col mb-auto sidebar-scroll overflow-y-auto" style={{ maxHeight: "calc(100vh - 230px)" }}>
         {renderNavLinks()}
       </ul>
 
       {/* Bottom Actions */}
-      <div className="pt-4 mt-auto">
-        <div className="flex items-center gap-2 mb-4 px-1">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <small className="text-slate-400 font-medium text-[11px]">System Status: Operational</small>
+      <div className="pt-3 mt-auto border-t border-white/10">
+        <div className="flex items-center gap-2 mb-2.5 px-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <small className="text-slate-400 font-medium text-[10.5px]">System Status: Operational</small>
         </div>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-600 border border-rose-500/20 hover:border-rose-600 transition-all duration-200 cursor-pointer shadow-sm"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-600 border border-rose-500/20 hover:border-rose-600 transition-all duration-200 cursor-pointer shadow-xs"
         >
-          <i className="bi bi-box-arrow-right text-base"></i>
+          <i className="bi bi-box-arrow-right text-sm"></i>
           <span>Sign Out</span>
         </button>
       </div>

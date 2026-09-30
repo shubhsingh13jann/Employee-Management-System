@@ -32,15 +32,15 @@ const Navbar = () => {
           </div>
         ) : isUsersPage ? (
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-500/20 shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100/80 flex items-center justify-center text-purple-600 shadow-2xs shrink-0">
               <i className="bi bi-people-fill text-lg"></i>
             </div>
             <div>
               <h5 className="font-bold text-slate-900 mb-0 text-base lg:text-lg tracking-tight">
-                Workforce Management
+                User Directory
               </h5>
-              <p className="text-slate-500 mb-0 font-medium text-xs lg:text-sm">
-                Enterprise Personnel Directory, Reporting Line Hierarchy & Governance Operations
+              <p className="text-slate-500 mb-0 font-normal text-xs lg:text-sm">
+                Manage your workforce, roles, departments and reporting structure.
               </p>
             </div>
           </div>
@@ -64,9 +64,9 @@ const Navbar = () => {
             <input 
               type="text" 
               className="w-full text-xs bg-transparent border-none outline-none focus:outline-none placeholder:text-slate-400 text-slate-700" 
-              placeholder="Search users, departments..." 
+              placeholder="Search by name, email, department..." 
             />
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium text-slate-500 bg-white border border-slate-200 shadow-xs ml-1">⌘K</span>
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium text-slate-500 bg-white border border-slate-200 shadow-xs ml-1">Ctrl K</span>
           </div>
 
           {/* Icon Actions */}
@@ -99,9 +99,9 @@ const Navbar = () => {
               </div>
               <div className="hidden md:block" style={{ lineHeight: "1.2" }}>
                 <p className="mb-0 font-bold text-gray-900" style={{ fontSize: "13px" }}>{user.name || "User"}</p>
-                <small className="text-gray-600 font-medium" style={{ fontSize: "11px" }}>
-                  {user.department_name ? `${user.department_name} • ` : ""}
-                  {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : ""}
+                <small className="text-gray-500 font-medium" style={{ fontSize: "11px" }}>
+                  {user.role === "admin" ? "HR Super Admin" : user.department_name ? `${user.department_name} • ` : ""}
+                  {user.role !== "admin" && user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : ""}
                 </small>
               </div>
               <i className="bi bi-chevron-down text-gray-500 ml-1" style={{ fontSize: "12px", cursor: "pointer" }}></i>
