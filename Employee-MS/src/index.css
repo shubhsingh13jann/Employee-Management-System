@@ -2,8 +2,8 @@
 
 
 :root {
-  --sidebar-bg: #0b1120;
-  --sidebar-active-gradient: linear-gradient(90deg, #6366f1 0%, #a855f7 100%);
+  --sidebar-bg: #070d24;
+  --sidebar-active-gradient: linear-gradient(90deg, #2563eb 0%, #4f46e5 50%, #7c3aed 100%);
   --dashboard-bg: #f8fafc;
 }
 
@@ -17,7 +17,7 @@ body {
 }
 
 .sidebar-container {
-  background-color: var(--sidebar-bg) !important;
+  background: linear-gradient(180deg, #070d24 0%, #0c1445 50%, #060b21 100%) !important;
 }
 
 .sidebar-nav-link {
@@ -27,13 +27,14 @@ body {
 
 .sidebar-nav-link:hover {
   color: #fff !important;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.06);
 }
 
 .sidebar-nav-link.active {
   color: #fff !important;
   background: var(--sidebar-active-gradient) !important;
-  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
+  border: 1px solid rgba(165, 180, 252, 0.3) !important;
 }
 
 /* Optional thin scrollbar for sidebar */
@@ -46,6 +47,34 @@ body {
 .sidebar-scroll::-webkit-scrollbar-thumb {
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
+}
+
+@keyframes microLightningPulse {
+  0%, 100% {
+    opacity: 0.75;
+    filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.3));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.6)) drop-shadow(0 0 14px rgba(129, 140, 248, 0.35));
+  }
+}
+
+@keyframes microWaveShift {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.micro-lightning-waves {
+  animation: microLightningPulse 4s ease-in-out infinite, microWaveShift 7s ease-in-out infinite;
+}
+
+.ambient-bloom {
+  animation: microLightningPulse 6s ease-in-out infinite alternate;
 }
 
 

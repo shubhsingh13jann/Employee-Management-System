@@ -404,18 +404,95 @@ const UserManagement: React.FC = () => {
             isSidebarOpen ? "xl:w-2/3 xl:pr-1.5" : "w-full"
           }`}
         >
-          {/* Executive Gradient Hero Banner & Action Toolbar */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 border border-indigo-900/40 shadow-xl text-white flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+          {/* Executive Gradient Hero Banner & Action Toolbar with Micro-Lightning / Wave Effect */}
+          <div className="relative overflow-hidden p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#070d28] via-[#0d164d] to-[#1c1252] border border-indigo-500/30 shadow-2xl text-white flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 select-none">
+            {/* Ambient Lighting & Micro-Lightning Wave Effect Background */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+              {/* Ambient Blooms */}
+              <div className="absolute -top-12 left-12 w-64 h-32 bg-blue-600/20 rounded-full blur-3xl ambient-bloom"></div>
+              <div
+                className="absolute top-0 right-1/4 w-80 h-32 bg-cyan-500/15 rounded-full blur-3xl ambient-bloom"
+                style={{ animationDelay: "2.5s" }}
+              ></div>
+              <div
+                className="absolute -bottom-10 right-10 w-96 h-36 bg-purple-600/20 rounded-full blur-3xl ambient-bloom"
+                style={{ animationDelay: "1.2s" }}
+              ></div>
+
+              {/* Harmonic Waves / Micro Lightning SVG */}
+              <svg
+                className="absolute right-0 bottom-0 w-[65%] sm:w-[52%] h-full text-cyan-400 micro-lightning-waves opacity-85"
+                viewBox="0 0 600 120"
+                preserveAspectRatio="none"
+                fill="none"
+              >
+                <defs>
+                  <linearGradient id="heroWaveGradient1" x1="0%" y1="100%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.2" />
+                    <stop offset="45%" stopColor="#818cf8" stopOpacity="0.85" />
+                    <stop offset="100%" stopColor="#c084fc" stopOpacity="0.35" />
+                  </linearGradient>
+                  <linearGradient id="heroWaveCyan" x1="0%" y1="100%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.1" />
+                    <stop offset="55%" stopColor="#38bdf8" stopOpacity="0.75" />
+                    <stop offset="100%" stopColor="#818cf8" stopOpacity="0.2" />
+                  </linearGradient>
+                </defs>
+
+                {/* Primary Harmonic Fan */}
+                {Array.from({ length: 24 }).map((_, i) => {
+                  const startX = 50 + i * 14;
+                  const cp1x = 180 + i * 11;
+                  const cp1y = 110 - i * 3.2;
+                  const cp2x = 340 + i * 8;
+                  const cp2y = 35 - i * 1.5;
+                  const endX = 490 + i * 6;
+                  const endY = -10 + i * 1.8;
+                  const opacity = 0.08 + Math.sin((i / 24) * Math.PI) * 0.32;
+                  return (
+                    <path
+                      key={`hero-wave-1-${i}`}
+                      d={`M ${startX},130 C ${cp1x},${cp1y} ${cp2x},${cp2y} ${endX},${endY}`}
+                      stroke="url(#heroWaveGradient1)"
+                      strokeWidth={i % 3 === 0 ? "1.2" : "0.75"}
+                      strokeOpacity={opacity}
+                    />
+                  );
+                })}
+
+                {/* Intersecting Silk Filament Ribbon */}
+                {Array.from({ length: 16 }).map((_, i) => {
+                  const startX = 140 + i * 16;
+                  const cp1x = 260 + i * 10;
+                  const cp1y = 95 - i * 2.5;
+                  const cp2x = 400 + i * 7;
+                  const cp2y = 45 - i * 1.2;
+                  const endX = 550 + i * 5;
+                  const endY = 5 + i * 2.2;
+                  const opacity = 0.05 + Math.sin((i / 16) * Math.PI) * 0.22;
+                  return (
+                    <path
+                      key={`hero-wave-2-${i}`}
+                      d={`M ${startX},130 C ${cp1x},${cp1y} ${cp2x},${cp2y} ${endX},${endY}`}
+                      stroke="url(#heroWaveCyan)"
+                      strokeWidth="0.8"
+                      strokeOpacity={opacity}
+                    />
+                  );
+                })}
+              </svg>
+            </div>
+
             {/* Left Side: Icon & Title */}
-            <div className="flex items-center gap-3.5 min-w-0">
-              <div className="w-11 h-11 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 text-lg font-bold shadow-inner shrink-0">
-                <i className="bi bi-people-fill"></i>
+            <div className="relative z-10 flex items-center gap-3.5 min-w-0">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500/30 to-indigo-600/30 border border-blue-400/40 flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-blue-500/25 shrink-0 backdrop-blur-xs">
+                <i className="bi bi-people-fill text-blue-200"></i>
               </div>
               <div className="min-w-0">
                 <h2 className="text-base sm:text-lg font-bold tracking-tight text-white mb-0.5 whitespace-nowrap">
                   Workforce Management
                 </h2>
-                <p className="text-xs text-indigo-200/70 mb-0 font-normal truncate max-w-[280px] sm:max-w-md">
+                <p className="text-xs text-indigo-200/80 mb-0 font-normal truncate max-w-[280px] sm:max-w-md">
                   Enterprise Personnel Directory, Reporting Line Hierarchy & Governance Operations
                 </p>
               </div>
@@ -423,7 +500,7 @@ const UserManagement: React.FC = () => {
 
             {/* Right Side: Action Buttons or 3-Lines Dropdown Menu */}
             {isSidebarOpen ? (
-              <div className="relative hero-menu-container shrink-0 self-end md:self-center">
+              <div className="relative z-10 hero-menu-container shrink-0 self-end md:self-center">
                 <button
                   type="button"
                   onClick={() => setIsHeroMenuOpen(!isHeroMenuOpen)}
@@ -514,7 +591,7 @@ const UserManagement: React.FC = () => {
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+              <div className="relative z-10 flex items-center gap-2 shrink-0 self-end md:self-center">
                 {/* Workforce Overview Toggle Button */}
                 <button
                   type="button"
