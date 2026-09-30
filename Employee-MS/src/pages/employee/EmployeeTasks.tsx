@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/axios";
-import TaskDiscussionModal from "../../components/common/TaskDiscussionModal";
+import TaskDiscussionModal from "../../Components/tasks/TaskDiscussionModal";
 
 const EmployeeTasks = () => {
   const [tasks, setTasks] = useState([]);

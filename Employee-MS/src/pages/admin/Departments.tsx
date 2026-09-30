@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/axios";
-import { DepartmentRosterModal } from "../../Components/DepartmentRosterModal";
-import { TransferMemberModal } from "../../Components/TransferMemberModal";
-import { GlobalMobilityModal } from "../../Components/GlobalMobilityModal";
-import { DecommissionDepartmentModal } from "../../Components/DecommissionDepartmentModal";
-import { DepartmentFormModal } from "../../Components/DepartmentFormModal";
+import { DepartmentRosterModal } from "../../Components/admin/departments/DepartmentRosterModal";
+import { TransferMemberModal } from "../../Components/admin/departments/TransferMemberModal";
+import { GlobalMobilityModal } from "../../Components/admin/departments/GlobalMobilityModal";
+import { DecommissionDepartmentModal } from "../../Components/admin/departments/DecommissionDepartmentModal";
+import { DepartmentFormModal } from "../../Components/admin/departments/DepartmentFormModal";
 
 const Departments = () => {
   const [departments, setDepartments] = useState([]);

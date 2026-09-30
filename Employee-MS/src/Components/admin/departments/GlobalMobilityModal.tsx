@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import api from "../api/axios";
+import api from "../../../api/axios";
 
 interface GlobalMobilityModalProps {
   isOpen: boolean;

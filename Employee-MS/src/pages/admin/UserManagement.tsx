@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useMemo } from "react";
 import api from "../../api/axios";
-import { UserFormModal } from "../../Components/UserFormModal";
-import { UserProfileModal } from "../../Components/UserProfileModal";
-import { ConfirmOffboardModal } from "../../Components/ConfirmOffboardModal";
+import { UserFormModal } from "../../Components/admin/users/UserFormModal";
+import { UserProfileModal } from "../../Components/admin/users/UserProfileModal";
+import { ConfirmOffboardModal } from "../../Components/admin/users/ConfirmOffboardModal";
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
