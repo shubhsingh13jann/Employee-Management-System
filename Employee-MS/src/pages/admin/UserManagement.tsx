@@ -6,6 +6,7 @@ import { ConfirmOffboardModal } from "../../Components/admin/users/ConfirmOffboa
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
   const [supervisors, setSupervisors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,6 +16,8 @@ const UserManagement: React.FC = () => {
   const [selectedDept, setSelectedDept] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [sortField, setSortField] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [msg, setMsg] = useState<{ type: "success" | "danger" | ""; text: string }>({ type: "", text: "" });
 
@@ -32,13 +35,14 @@ const UserManagement: React.FC = () => {
     try {
       setLoading(true);
       const params: any = {};
-      if (selectedRole) params.role = selectedRole;
       if (selectedDept) params.department_id = selectedDept;
       if (searchQuery.trim()) params.search = searchQuery.trim();
 
       const res = await api.get("/api/admin/users", { params });
       if (res.data.status) {
-        setUsers(res.data.users || []);
+        const fetched = res.data.users || [];
+        setAllUsers(fetched);
+        setUsers(fetched);
       }
     } catch (err: any) {
       console.error("Fetch users error:", err);
@@ -80,7 +84,7 @@ const UserManagement: React.FC = () => {
       fetchUsers();
     }, 250);
     return () => clearTimeout(timer);
-  }, [selectedRole, selectedDept, searchQuery]);
+  }, [selectedDept, searchQuery]);
 
   const handleRequestDelete = (user: any) => {
     setOffboardTarget({ id: user.id, name: user.name, role: user.role });
@@ -148,28 +152,135 @@ const UserManagement: React.FC = () => {
     document.body.removeChild(link);
   };
 
+  // Role Counts for Tabs
+  const roleCounts = useMemo(() => {
+    return {
+      all: allUsers.length,
+      manager: allUsers.filter((u) => u.role === "manager").length,
+      supervisor: allUsers.filter((u) => u.role === "supervisor").length,
+      employee: allUsers.filter((u) => u.role === "employee").length,
+      admin: allUsers.filter((u) => u.role === "admin").length,
+      hod: allUsers.filter((u) => u.is_hod).length,
+    };
+  }, [allUsers]);
+
   // KPI Calculations
   const metrics = useMemo(() => {
-    const total = users.length;
-    const active = users.filter((u) => u.status === "active").length;
-    const supervisorsCount = users.filter((u) => u.role === "supervisor").length;
-    const leadersCount = users.filter((u) => u.role === "manager" || u.is_hod).length;
+    const total = allUsers.length;
+    const active = allUsers.filter((u) => u.status === "active").length;
+    const supervisorsCount = allUsers.filter((u) => u.role === "supervisor").length;
+    const leadersCount = allUsers.filter((u) => u.role === "manager" || u.is_hod).length;
     return { total, active, supervisorsCount, leadersCount };
-  }, [users]);
+  }, [allUsers]);
 
-  // Filtered users considering selected status
+  // Sorting
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      if (sortOrder === "asc") {
+        setSortOrder("desc");
+      } else {
+        setSortField(null);
+        setSortOrder("asc");
+      }
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  };
+
+  // Filtered and sorted users
   const displayedUsers = useMemo(() => {
-    if (!selectedStatus) return users;
-    return users.filter((u) => u.status === selectedStatus);
-  }, [users, selectedStatus]);
+    let list = [...allUsers];
+
+    // Filter by role
+    if (selectedRole === "hod") {
+      list = list.filter((u) => u.is_hod);
+    } else if (selectedRole) {
+      list = list.filter((u) => u.role === selectedRole);
+    }
+
+    // Filter by account status
+    if (selectedStatus) {
+      list = list.filter((u) => u.status === selectedStatus);
+    }
+
+    // Sort
+    if (sortField) {
+      list.sort((a, b) => {
+        let valA: any = a[sortField] ?? "";
+        let valB: any = b[sortField] ?? "";
+
+        if (sortField === "salary") {
+          valA = Number(valA) || 0;
+          valB = Number(valB) || 0;
+          return sortOrder === "asc" ? valA - valB : valB - valA;
+        }
+
+        if (typeof valA === "string") valA = valA.toLowerCase();
+        if (typeof valB === "string") valB = valB.toLowerCase();
+
+        if (valA < valB) return sortOrder === "asc" ? -1 : 1;
+        if (valA > valB) return sortOrder === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return list;
+  }, [allUsers, selectedRole, selectedStatus, sortField, sortOrder]);
 
   const activeFilterCount = (selectedDept ? 1 : 0) + (selectedStatus ? 1 : 0) + (searchQuery.trim() ? 1 : 0);
 
   const handleClearFilters = () => {
+    setSelectedRole("");
     setSelectedDept("");
     setSelectedStatus("");
     setSearchQuery("");
   };
+
+  const roleTabs = [
+    {
+      id: "",
+      label: "All Users",
+      count: roleCounts.all,
+      activeStyles: "bg-indigo-50/80 border-indigo-400 text-indigo-700 ring-1 ring-indigo-400/25 shadow-xs",
+      badgeActive: "bg-indigo-100 text-indigo-700",
+    },
+    {
+      id: "manager",
+      label: "Managers",
+      count: roleCounts.manager,
+      activeStyles: "bg-indigo-50/80 border-indigo-400 text-indigo-700 ring-1 ring-indigo-400/25 shadow-xs",
+      badgeActive: "bg-indigo-100 text-indigo-700",
+    },
+    {
+      id: "supervisor",
+      label: "Supervisors",
+      count: roleCounts.supervisor,
+      activeStyles: "bg-emerald-50/80 border-emerald-400 text-emerald-700 ring-1 ring-emerald-400/25 shadow-xs",
+      badgeActive: "bg-emerald-100 text-emerald-700",
+    },
+    {
+      id: "employee",
+      label: "Employees",
+      count: roleCounts.employee,
+      activeStyles: "bg-sky-50/80 border-sky-400 text-sky-700 ring-1 ring-sky-400/25 shadow-xs",
+      badgeActive: "bg-sky-100 text-sky-700",
+    },
+    {
+      id: "admin",
+      label: "Admins",
+      count: roleCounts.admin,
+      activeStyles: "bg-rose-50/80 border-rose-400 text-rose-700 ring-1 ring-rose-400/25 shadow-xs",
+      badgeActive: "bg-rose-100 text-rose-700",
+    },
+    {
+      id: "hod",
+      label: "Dept Heads",
+      count: roleCounts.hod,
+      activeStyles: "bg-amber-50/80 border-amber-400 text-amber-700 ring-1 ring-amber-400/25 shadow-xs",
+      badgeActive: "bg-amber-100 text-amber-800",
+    },
+  ];
 
   const getRoleBadge = (u: any) => {
     switch (u.role) {
@@ -377,35 +488,61 @@ const UserManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Filter, Search & Role Bar - Single Row */}
-      <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-between gap-2.5 overflow-x-auto no-scrollbar">
-        <div className="flex items-center gap-2 shrink-0">
-          {/* Search Box */}
+      {/* Role Filter Tabs & Directory Quick Search Bar */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white p-2.5 sm:p-3 rounded-2xl border border-slate-200/80 shadow-2xs">
+        {/* Role Tabs Group */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+          {roleTabs.map((tab) => {
+            const isActive = selectedRole === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setSelectedRole(tab.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
+                  isActive
+                    ? tab.activeStyles
+                    : "bg-white hover:bg-slate-50/80 text-slate-600 hover:text-slate-900 border-slate-200/80"
+                }`}
+              >
+                <span>{tab.label}</span>
+                <span
+                  className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold transition-colors ${
+                    isActive ? tab.badgeActive : "bg-slate-100 text-slate-500"
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Quick Search & Department selector */}
+        <div className="flex items-center gap-2 shrink-0 self-end lg:self-center">
           <div className="relative w-44 sm:w-56">
-            <i className="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[11px] pointer-events-none"></i>
+            <i className="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search workforce..."
-              className="w-full pl-7 pr-6 py-1 rounded-lg text-[11px] bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 outline-none transition-all text-slate-800 placeholder:text-slate-400"
+              placeholder="Search directory..."
+              className="w-full pl-7 pr-6 py-1.5 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 outline-none transition-all text-slate-800 placeholder:text-slate-400"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-[10px] cursor-pointer"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
               >
                 ✕
               </button>
             )}
           </div>
-
-          {/* Department Filter */}
           <select
             value={selectedDept}
             onChange={(e) => setSelectedDept(e.target.value)}
-            className="px-2.5 py-1 rounded-lg text-[11px] bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 outline-none font-medium text-slate-700 cursor-pointer"
+            className="px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 outline-none font-medium text-slate-700 cursor-pointer"
           >
             <option value="">All Departments</option>
             {departments.map((d) => (
@@ -415,91 +552,72 @@ const UserManagement: React.FC = () => {
             ))}
           </select>
         </div>
-
-        {/* Role Tabs */}
-        <div className="flex items-center gap-1 shrink-0">
-          <button
-            type="button"
-            onClick={() => setSelectedRole("")}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
-              selectedRole === ""
-                ? "bg-slate-900 text-white shadow-2xs"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            }`}
-          >
-            All Roles ({users.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedRole("manager")}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
-              selectedRole === "manager"
-                ? "bg-indigo-600 text-white shadow-2xs"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            }`}
-          >
-            Managers
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedRole("supervisor")}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
-              selectedRole === "supervisor"
-                ? "bg-emerald-600 text-white shadow-2xs"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            }`}
-          >
-            Supervisors
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedRole("employee")}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
-              selectedRole === "employee"
-                ? "bg-sky-600 text-white shadow-2xs"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            }`}
-          >
-            Employees
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedRole("admin")}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
-              selectedRole === "admin"
-                ? "bg-rose-600 text-white shadow-2xs"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            }`}
-          >
-            Admins
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedRole("hod")}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
-              selectedRole === "hod"
-                ? "bg-amber-600 text-white shadow-2xs"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            }`}
-          >
-            Dept Heads (HOD)
-          </button>
-        </div>
       </div>
 
       {/* Workforce Directory Table */}
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
-            <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            <thead className="bg-slate-50/80 border-b border-slate-200/90 text-xs font-semibold text-slate-600 normal-case tracking-normal">
               <tr>
-                <th className="px-5 py-3.5">Staff Member</th>
-                <th className="px-4 py-3.5">Governance Role</th>
-                <th className="px-4 py-3.5">Department & Reporting</th>
-                <th className="px-4 py-3.5">Annual Salary</th>
-                <th className="px-4 py-3.5">Contact</th>
-                <th className="px-4 py-3.5">Status</th>
-                <th className="px-5 py-3.5 text-right">Actions</th>
+                <th
+                  className="px-5 py-3.5 cursor-pointer select-none hover:text-slate-900 transition-colors"
+                  onClick={() => handleSort("name")}
+                  title="Click to sort by Name"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>User</span>
+                    <i
+                      className={`bi ${
+                        sortField === "name"
+                          ? sortOrder === "asc"
+                            ? "bi-arrow-up text-indigo-600 font-bold"
+                            : "bi-arrow-down text-indigo-600 font-bold"
+                          : "bi-arrow-down-up text-slate-400 text-[10px]"
+                      }`}
+                    ></i>
+                  </div>
+                </th>
+                <th
+                  className="px-4 py-3.5 cursor-pointer select-none hover:text-slate-900 transition-colors"
+                  onClick={() => handleSort("role")}
+                  title="Click to sort by Role Tier"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Role Tier</span>
+                    <i
+                      className={`bi ${
+                        sortField === "role"
+                          ? sortOrder === "asc"
+                            ? "bi-arrow-up text-indigo-600 font-bold"
+                            : "bi-arrow-down text-indigo-600 font-bold"
+                          : "bi-arrow-down-up text-slate-400 text-[10px]"
+                      }`}
+                    ></i>
+                  </div>
+                </th>
+                <th className="px-4 py-3.5 font-semibold text-slate-600">Department</th>
+                <th
+                  className="px-4 py-3.5 cursor-pointer select-none hover:text-slate-900 transition-colors"
+                  onClick={() => handleSort("salary")}
+                  title="Click to sort by Annual Salary"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Annual Salary</span>
+                    <i
+                      className={`bi ${
+                        sortField === "salary"
+                          ? sortOrder === "asc"
+                            ? "bi-arrow-up text-indigo-600 font-bold"
+                            : "bi-arrow-down text-indigo-600 font-bold"
+                          : "bi-arrow-down-up text-slate-400 text-[10px]"
+                      }`}
+                    ></i>
+                  </div>
+                </th>
+                <th className="px-4 py-3.5 font-semibold text-slate-600">Phone</th>
+                <th className="px-4 py-3.5 font-semibold text-slate-600">Status</th>
+                <th className="px-5 py-3.5 font-semibold text-slate-600 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
