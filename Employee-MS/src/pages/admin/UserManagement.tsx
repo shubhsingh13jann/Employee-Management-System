@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import api from "../../api/axios";
 import { UserFormModal } from "../../Components/UserFormModal";
 import { UserProfileModal } from "../../Components/UserProfileModal";
+import { ConfirmOffboardModal } from "../../Components/ConfirmOffboardModal";
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
@@ -23,6 +24,7 @@ const UserManagement: React.FC = () => {
   const [selectedUserIdForProfile, setSelectedUserIdForProfile] = useState<number | null>(null);
 
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [offboardTarget, setOffboardTarget] = useState<{ id: number; name: string; role?: string } | null>(null);
 
   const fetchUsers = async () => {
     try {
@@ -78,24 +80,27 @@ const UserManagement: React.FC = () => {
     return () => clearTimeout(timer);
   }, [selectedRole, selectedDept, searchQuery]);
 
-  const handleDeleteUser = async (id: number, name: string) => {
-    if (!window.confirm(`Are you sure you want to offboard/delete '${name}'? This action cannot be undone.`)) {
-      return;
-    }
+  const handleRequestDelete = (user: any) => {
+    setOffboardTarget({ id: user.id, name: user.name, role: user.role });
+  };
+
+  const handleConfirmOffboard = async () => {
+    if (!offboardTarget) return;
 
     try {
-      setDeletingId(id);
-      const res = await api.delete(`/api/admin/users/${id}`);
+      setDeletingId(offboardTarget.id);
+      const res = await api.delete(`/api/admin/users/${offboardTarget.id}`);
       if (res.data.status) {
-        setMsg({ type: "success", text: `Staff member '${name}' removed successfully` });
+        setMsg({ type: "success", text: `Staff member '${offboardTarget.name}' offboarded successfully` });
         fetchUsers();
         fetchSupervisors();
       }
     } catch (err: any) {
       console.error("Delete user error:", err);
-      setMsg({ type: "danger", text: err.response?.data?.error || "Failed to delete user" });
+      setMsg({ type: "danger", text: err.response?.data?.error || "Failed to offboard user" });
     } finally {
       setDeletingId(null);
+      setOffboardTarget(null);
     }
   };
 
@@ -540,7 +545,7 @@ const UserManagement: React.FC = () => {
                         <button
                           type="button"
                           disabled={deletingId === u.id}
-                          onClick={() => handleDeleteUser(u.id, u.name)}
+                          onClick={() => handleRequestDelete(u)}
                           className="w-7 h-7 rounded-lg bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 hover:border-rose-200 flex items-center justify-center transition-all cursor-pointer text-xs disabled:opacity-50"
                           title="Offboard / Remove Member"
                         >
@@ -590,6 +595,16 @@ const UserManagement: React.FC = () => {
           setSelectedUserForEdit(user);
           setIsFormModalOpen(true);
         }}
+      />
+
+      {/* Enterprise Personnel Offboard Confirmation Modal */}
+      <ConfirmOffboardModal
+        isOpen={Boolean(offboardTarget)}
+        onClose={() => setOffboardTarget(null)}
+        onConfirm={handleConfirmOffboard}
+        memberName={offboardTarget?.name || ""}
+        memberRole={offboardTarget?.role}
+        isDeleting={deletingId !== null}
       />
     </div>
   );
