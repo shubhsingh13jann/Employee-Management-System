@@ -39,11 +39,15 @@ const UserManagement: React.FC = () => {
   const [offboardTarget, setOffboardTarget] = useState<{ id: number; name: string; role?: string } | null>(null);
   const [activeActionMenuId, setActiveActionMenuId] = useState<number | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isHeroMenuOpen, setIsHeroMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (!(e.target as HTMLElement).closest(".action-menu-container")) {
         setActiveActionMenuId(null);
+      }
+      if (!(e.target as HTMLElement).closest(".hero-menu-container")) {
+        setIsHeroMenuOpen(false);
       }
     };
     document.addEventListener("click", handleClickOutside);
@@ -417,64 +421,157 @@ const UserManagement: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Side: Action Buttons */}
-            <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
-              {/* Workforce Overview Toggle Button */}
-              <button
-                type="button"
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border backdrop-blur-xs transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
-                  isSidebarOpen
-                    ? "bg-indigo-600 border-indigo-400 text-white shadow-indigo-500/30 ring-2 ring-indigo-400/30"
-                    : "bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border-white/20"
-                }`}
-                title="Toggle Workforce Overview Analytics"
-              >
-                <i className={`bi ${isSidebarOpen ? "bi-pie-chart-fill" : "bi-pie-chart"} text-xs`}></i>
-                <span>Workforce Overview</span>
-              </button>
+            {/* Right Side: Action Buttons or 3-Lines Dropdown Menu */}
+            {isSidebarOpen ? (
+              <div className="relative hero-menu-container shrink-0 self-end md:self-center">
+                <button
+                  type="button"
+                  onClick={() => setIsHeroMenuOpen(!isHeroMenuOpen)}
+                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer shadow-md ${
+                    isHeroMenuOpen
+                      ? "bg-indigo-600 text-white border border-indigo-400/50 shadow-indigo-500/30 ring-2 ring-indigo-400/30"
+                      : "bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-xs"
+                  }`}
+                  title="Menu Options"
+                  aria-label="Toggle Actions Menu"
+                >
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
+                  </svg>
+                  {activeFilterCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-indigo-500 border-2 border-slate-900 text-[9px] font-bold flex items-center justify-center text-white">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </button>
 
-              {/* Filter Button */}
-              <button
-                type="button"
-                onClick={() => setIsFilterOpen(!isFilterOpen)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border backdrop-blur-xs transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
-                  isFilterOpen || activeFilterCount > 0
-                    ? "bg-indigo-600/40 border-indigo-400 text-white shadow-indigo-500/20"
-                    : "bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border-white/20"
-                }`}
-              >
-                <i className="bi bi-funnel text-xs"></i>
-                <span>Filter</span>
-                {activeFilterCount > 0 && (
-                  <span className="w-4 h-4 rounded-full bg-indigo-500 text-white text-[10px] font-bold flex items-center justify-center">
-                    {activeFilterCount}
-                  </span>
+                {/* Dropdown Menu */}
+                {isHeroMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl bg-slate-900/95 backdrop-blur-xl border border-indigo-500/30 shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 text-white">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsHeroMenuOpen(false);
+                        handleOpenOnboard();
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer shadow-sm text-left"
+                    >
+                      <i className="bi bi-plus-lg text-xs font-bold"></i>
+                      <span>Onboard Member</span>
+                    </button>
+
+                    <div className="h-px bg-white/10 my-1"></div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsHeroMenuOpen(false);
+                        setIsSidebarOpen(!isSidebarOpen);
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <i className={`bi ${isSidebarOpen ? "bi-pie-chart-fill" : "bi-pie-chart"} text-indigo-400 text-xs`}></i>
+                        <span>Workforce Overview</span>
+                      </div>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-500/30 text-indigo-300">
+                        {isSidebarOpen ? "Open" : "Closed"}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsHeroMenuOpen(false);
+                        setIsFilterOpen(!isFilterOpen);
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <i className="bi bi-funnel text-indigo-400 text-xs"></i>
+                        <span>Filter Directory</span>
+                      </div>
+                      {activeFilterCount > 0 && (
+                        <span className="w-4 h-4 rounded-full bg-indigo-500 text-white text-[10px] font-bold flex items-center justify-center">
+                          {activeFilterCount}
+                        </span>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsHeroMenuOpen(false);
+                        handleExportCSV();
+                      }}
+                      disabled={users.length === 0}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer disabled:opacity-50 text-left"
+                    >
+                      <i className="bi bi-download text-indigo-400 text-xs"></i>
+                      <span>Export Directory</span>
+                    </button>
+                  </div>
                 )}
-              </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+                {/* Workforce Overview Toggle Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border backdrop-blur-xs transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
+                    isSidebarOpen
+                      ? "bg-indigo-600 border-indigo-400 text-white shadow-indigo-500/30 ring-2 ring-indigo-400/30"
+                      : "bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border-white/20"
+                  }`}
+                  title="Toggle Workforce Overview Analytics"
+                >
+                  <i className={`bi ${isSidebarOpen ? "bi-pie-chart-fill" : "bi-pie-chart"} text-xs`}></i>
+                  <span>Workforce Overview</span>
+                </button>
 
-              {/* Export Button */}
-              <button
-                type="button"
-                onClick={handleExportCSV}
-                disabled={users.length === 0}
-                className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border border-white/20 backdrop-blur-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-50"
-                title="Export Workforce Directory as CSV"
-              >
-                <i className="bi bi-download text-xs"></i>
-                <span>Export</span>
-              </button>
+                {/* Filter Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border backdrop-blur-xs transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
+                    isFilterOpen || activeFilterCount > 0
+                      ? "bg-indigo-600/40 border-indigo-400 text-white shadow-indigo-500/20"
+                      : "bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border-white/20"
+                  }`}
+                >
+                  <i className="bi bi-funnel text-xs"></i>
+                  <span>Filter</span>
+                  {activeFilterCount > 0 && (
+                    <span className="w-4 h-4 rounded-full bg-indigo-500 text-white text-[10px] font-bold flex items-center justify-center">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </button>
 
-              {/* Onboard Member Button */}
-              <button
-                type="button"
-                onClick={handleOpenOnboard}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/30 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
-              >
-                <i className="bi bi-plus-lg font-bold text-xs"></i>
-                <span>Onboard Member</span>
-              </button>
-            </div>
+                {/* Export Button */}
+                <button
+                  type="button"
+                  onClick={handleExportCSV}
+                  disabled={users.length === 0}
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border border-white/20 backdrop-blur-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-50"
+                  title="Export Workforce Directory as CSV"
+                >
+                  <i className="bi bi-download text-xs"></i>
+                  <span>Export</span>
+                </button>
+
+                {/* Onboard Member Button */}
+                <button
+                  type="button"
+                  onClick={handleOpenOnboard}
+                  className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/30 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                >
+                  <i className="bi bi-plus-lg font-bold text-xs"></i>
+                  <span>Onboard Member</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Expandable Filter Drawer Panel */}
