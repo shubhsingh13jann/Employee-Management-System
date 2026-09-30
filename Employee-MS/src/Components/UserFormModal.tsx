@@ -162,11 +162,11 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
       }}
     >
       <div
-        className="w-full max-w-2xl max-h-[90vh] bg-white rounded-2xl border border-slate-200/80 shadow-2xl flex flex-col my-auto overflow-hidden animate-in zoom-in-95 duration-150"
+        className="w-full max-w-4xl lg:max-w-5xl max-h-[92vh] bg-white rounded-2xl border border-slate-200/80 shadow-2xl flex flex-col my-auto overflow-hidden animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Pinned Executive Header Banner */}
-        <div className="shrink-0 px-5 sm:px-6 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between gap-4 border-b border-indigo-900/40">
+        <div className="shrink-0 px-6 py-4.5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between gap-4 border-b border-indigo-900/40">
           <div className="flex items-center gap-3.5 min-w-0">
             <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 text-base sm:text-lg font-bold shadow-inner shrink-0">
               <i className={`bi ${isEditMode ? "bi-pencil-square" : "bi-person-plus-fill"}`}></i>
@@ -205,7 +205,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
         </div>
 
         {/* Modal Form Scrollable Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 sm:p-7 space-y-6">
           {errorMsg && (
             <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2.5 animate-in fade-in">
               <i className="bi bi-exclamation-triangle-fill shrink-0 text-sm"></i>
@@ -214,15 +214,18 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
           )}
 
           {/* Section 1: Core Identity */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-0">
-              <i className="bi bi-person-circle text-indigo-600"></i>
-              <span>Core Identity & Credentials</span>
-            </h4>
+          <div className="space-y-3.5">
+            <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
+              <span className="w-5 h-5 rounded-md bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-bold">1</span>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-0">
+                Core Identity & Access Credentials
+              </h4>
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              {/* Full Name */}
+              <div className="relative group">
+                <label className="absolute -top-2.5 left-3.5 px-1.5 bg-white text-[11px] font-semibold text-slate-500 group-focus-within:text-indigo-600 transition-colors z-10 pointer-events-none">
                   Full Name <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -231,12 +234,13 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g. Sarah Jenkins"
-                  className="w-full px-3 py-2 rounded-lg text-xs bg-slate-50/80 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-white border border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800 placeholder:text-slate-400 font-medium"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+              {/* Work Email */}
+              <div className="relative group">
+                <label className="absolute -top-2.5 left-3.5 px-1.5 bg-white text-[11px] font-semibold text-slate-500 group-focus-within:text-indigo-600 transition-colors z-10 pointer-events-none">
                   Work Email <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -245,49 +249,51 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="s.jenkins@enterprise.com"
-                  className="w-full px-3 py-2 rounded-lg text-xs bg-slate-50/80 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-white border border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800 placeholder:text-slate-400 font-medium"
                 />
               </div>
 
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  {isEditMode ? "Update Password (Optional)" : "Initial Password"} {!isEditMode && <span className="text-rose-500">*</span>}
+              {/* Password */}
+              <div className="relative group">
+                <label className="absolute -top-2.5 left-3.5 px-1.5 bg-white text-[11px] font-semibold text-slate-500 group-focus-within:text-indigo-600 transition-colors z-10 pointer-events-none">
+                  {isEditMode ? "Password (Optional)" : "Initial Password"} {!isEditMode && <span className="text-rose-500">*</span>}
                 </label>
                 <input
                   type="password"
                   required={!isEditMode}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  placeholder={isEditMode ? "Leave blank to preserve current password" : "Minimum 6 characters"}
-                  className="w-full px-3 py-2 rounded-lg text-xs bg-slate-50/80 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800"
+                  placeholder={isEditMode ? "Leave blank to preserve" : "Min. 6 characters"}
+                  className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-white border border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800 placeholder:text-slate-400 font-medium"
                 />
-                {isEditMode && (
-                  <p className="text-[11px] text-slate-400 mt-1 mb-0 font-normal">
-                    Leave empty unless you wish to reset or change this member's password.
-                  </p>
-                )}
               </div>
             </div>
+            {isEditMode && (
+              <p className="text-[11px] text-slate-400 font-normal px-1">
+                Leave password blank to preserve the member's current credentials.
+              </p>
+            )}
           </div>
 
-          <hr className="border-slate-100 my-1" />
-
           {/* Section 2: Organizational Topology */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-0">
-              <i className="bi bi-diagram-3 text-indigo-600"></i>
-              <span>Organizational Topology & Hierarchy</span>
-            </h4>
+          <div className="space-y-3.5">
+            <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
+              <span className="w-5 h-5 rounded-md bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-bold">2</span>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-0">
+                Organizational Topology & Hierarchy
+              </h4>
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              {/* Governance Role Tier */}
+              <div className="relative group">
+                <label className="absolute -top-2.5 left-3.5 px-1.5 bg-white text-[11px] font-semibold text-slate-500 group-focus-within:text-indigo-600 transition-colors z-10 pointer-events-none">
                   Governance Role Tier <span className="text-rose-500">*</span>
                 </label>
                 <select
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg text-xs bg-slate-50/80 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800 font-medium cursor-pointer"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-white border border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800 font-medium cursor-pointer"
                 >
                   <option value="employee">💼 Employee (Staff Member)</option>
                   <option value="supervisor">👷 Supervisor (Pod Lead / Team Lead)</option>
@@ -296,14 +302,15 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                 </select>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+              {/* Assigned Department */}
+              <div className="relative group">
+                <label className="absolute -top-2.5 left-3.5 px-1.5 bg-white text-[11px] font-semibold text-slate-500 group-focus-within:text-indigo-600 transition-colors z-10 pointer-events-none">
                   Assigned Department
                 </label>
                 <select
                   value={formData.department_id}
                   onChange={(e) => setFormData({ ...formData, department_id: e.target.value, supervisor_id: "" })}
-                  className="w-full px-3 py-2 rounded-lg text-xs bg-slate-50/80 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800 font-medium cursor-pointer"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-white border border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800 font-medium cursor-pointer"
                 >
                   <option value="">Unassigned / Floating Pool</option>
                   {departments.map((dept) => (
@@ -314,15 +321,16 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                 </select>
               </div>
 
+              {/* Direct Supervisor (if employee) */}
               {formData.role === "employee" && (
-                <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <div className="relative group md:col-span-2">
+                  <label className="absolute -top-2.5 left-3.5 px-1.5 bg-white text-[11px] font-semibold text-slate-500 group-focus-within:text-indigo-600 transition-colors z-10 pointer-events-none">
                     Direct Supervisor (Reporting Line)
                   </label>
                   <select
                     value={formData.supervisor_id}
                     onChange={(e) => setFormData({ ...formData, supervisor_id: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg text-xs bg-slate-50/80 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800 font-medium cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-white border border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800 font-medium cursor-pointer"
                   >
                     <option value="">Direct to HOD / Unassigned Supervisor</option>
                     {filteredSupervisors.map((sup) => (
@@ -331,20 +339,18 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                       </option>
                     ))}
                   </select>
-                  <p className="text-[11px] text-slate-400 mt-1 mb-0">
-                    Establishes who approves leaves, reviews performance, and receives operational check-ins.
-                  </p>
                 </div>
               )}
 
+              {/* HOD Checkbox Banner */}
               {formData.department_id && (
-                <div className="sm:col-span-2 bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 flex items-start gap-2.5">
+                <div className="md:col-span-2 bg-indigo-50/60 p-3.5 rounded-xl border border-indigo-100 flex items-start gap-3">
                   <input
                     type="checkbox"
                     id="is_hod_checkbox"
                     checked={formData.is_hod}
                     onChange={(e) => setFormData({ ...formData, is_hod: e.target.checked })}
-                    className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                    className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer h-4 w-4"
                   />
                   <label htmlFor="is_hod_checkbox" className="text-xs text-slate-700 cursor-pointer select-none">
                     <strong className="font-semibold text-indigo-950 block">
@@ -359,20 +365,23 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
             </div>
           </div>
 
-          <hr className="border-slate-100 my-1" />
-
           {/* Section 3: Compensation & Operational Details */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-0">
-              <i className="bi bi-wallet2 text-indigo-600"></i>
-              <span>Compensation & Operational Profile</span>
-            </h4>
+          <div className="space-y-3.5">
+            <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
+              <span className="w-5 h-5 rounded-md bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-bold">3</span>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-0">
+                Compensation & Operational Profile
+              </h4>
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Annual Salary ($)</label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              {/* Annual Salary */}
+              <div className="relative group">
+                <label className="absolute -top-2.5 left-3.5 px-1.5 bg-white text-[11px] font-semibold text-slate-500 group-focus-within:text-indigo-600 transition-colors z-10 pointer-events-none">
+                  Annual Salary ($)
+                </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-semibold">$</span>
                   <input
                     type="number"
                     min="0"
@@ -380,60 +389,69 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                     value={formData.salary}
                     onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
                     placeholder="75,000"
-                    className="w-full pl-7 pr-3 py-2 rounded-lg text-xs bg-slate-50/80 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800"
+                    className="w-full pl-8 pr-3.5 py-2.5 rounded-xl text-xs bg-white border border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800 font-medium placeholder:text-slate-400"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Contact Phone</label>
+              {/* Contact Phone */}
+              <div className="relative group">
+                <label className="absolute -top-2.5 left-3.5 px-1.5 bg-white text-[11px] font-semibold text-slate-500 group-focus-within:text-indigo-600 transition-colors z-10 pointer-events-none">
+                  Contact Phone
+                </label>
                 <input
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   placeholder="+1 (555) 000-0000"
-                  className="w-full px-3 py-2 rounded-lg text-xs bg-slate-50/80 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-white border border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800 placeholder:text-slate-400 font-medium"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Account Status</label>
+              {/* Account Status */}
+              <div className="relative group">
+                <label className="absolute -top-2.5 left-3.5 px-1.5 bg-white text-[11px] font-semibold text-slate-500 group-focus-within:text-indigo-600 transition-colors z-10 pointer-events-none">
+                  Account Status <span className="text-rose-500">*</span>
+                </label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg text-xs bg-slate-50/80 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800 font-medium cursor-pointer"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-white border border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800 font-medium cursor-pointer"
                 >
                   <option value="active">Active (Full Access)</option>
                   <option value="inactive">Inactive (Suspended)</option>
                 </select>
               </div>
 
-              <div className="sm:col-span-3">
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Office / Work Address</label>
+              {/* Office / Work Address */}
+              <div className="relative group md:col-span-3">
+                <label className="absolute -top-2.5 left-3.5 px-1.5 bg-white text-[11px] font-semibold text-slate-500 group-focus-within:text-indigo-600 transition-colors z-10 pointer-events-none">
+                  Office / Work Address
+                </label>
                 <input
                   type="text"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   placeholder="e.g. Building 4, Floor 3, Suite 302, San Francisco, CA"
-                  className="w-full px-3 py-2 rounded-lg text-xs bg-slate-50/80 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-white border border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-slate-800 placeholder:text-slate-400 font-medium"
                 />
               </div>
             </div>
           </div>
 
           {/* Modal Footer Controls */}
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
+              className="px-4.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-all flex items-center gap-1.5 shadow-sm shadow-indigo-600/30 cursor-pointer disabled:opacity-50"
+              className="px-6 py-2.5 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-all flex items-center gap-2 shadow-sm shadow-indigo-600/30 cursor-pointer disabled:opacity-50"
             >
               {saving ? (
                 <>
