@@ -341,7 +341,7 @@ const UserManagement: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
+    <div className="w-full space-y-5">
       {/* Alert Notification */}
       {msg.text && (
         <div
