@@ -110,5 +110,107 @@ body {
   will-change: transform;
 }
 
+/* --- Watery Ripple & Fluid Wave Drawer Collapse / Expand --- */
+@keyframes waterFlowDrift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-1.5%, 2px, 0) scale(1.025);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.watery-silk-waves {
+  animation: waterFlowDrift 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform;
+}
+
+/* Smooth Flowing Water Cascade (Zero Bounce, Pure Silky Fluid Stream) */
+@keyframes waterFlowCascade {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px);
+    filter: blur(2px);
+  }
+  50% {
+    opacity: 0.85;
+    filter: blur(0.5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Expanding Concentric Water Ripple Ring */
+@keyframes concentricWaterRipple {
+  0% {
+    transform: scale(0.2) translateY(-20px);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.2) translateY(0);
+    opacity: 0;
+  }
+}
+
+/* Diagonal Water Caustic Light Shimmer */
+@keyframes waterCausticSweep {
+  0% {
+    transform: translateX(-120%) skewX(-20deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.5;
+  }
+  70% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateX(250%) skewX(-20deg);
+    opacity: 0;
+  }
+}
+
+.water-drawer-wrapper {
+  display: grid;
+  transition: grid-template-rows 0.42s cubic-bezier(0.25, 1, 0.5, 1),
+              opacity 0.32s cubic-bezier(0.25, 1, 0.5, 1),
+              transform 0.42s cubic-bezier(0.25, 1, 0.5, 1),
+              margin 0.38s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: grid-template-rows, opacity, transform;
+}
+
+.water-drawer-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  margin-bottom: 0.875rem;
+  pointer-events: auto;
+}
+
+.water-drawer-open .water-drop-card {
+  animation: waterFlowCascade 0.42s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.water-drawer-open .water-ripple-ring {
+  animation: concentricWaterRipple 0.65s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.water-drawer-open .water-caustic-gleam {
+  animation: waterCausticSweep 0.85s cubic-bezier(0.25, 1, 0.5, 1) 0.05s forwards;
+}
+
+.water-drawer-closed {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateY(-6px);
+  margin-bottom: 0;
+  pointer-events: none;
+}
+
 
 
