@@ -43,10 +43,11 @@ const UserManagement: React.FC = () => {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (!(e.target as HTMLElement).closest(".action-menu-container")) {
+      const target = e.target as HTMLElement;
+      if (!target.closest(".action-menu-container")) {
         setActiveActionMenuId(null);
       }
-      if (!(e.target as HTMLElement).closest(".hero-menu-container")) {
+      if (!target.closest(".hero-menu-container")) {
         setIsHeroMenuOpen(false);
       }
     };
@@ -64,8 +65,15 @@ const UserManagement: React.FC = () => {
       const res = await api.get("/api/admin/users", { params });
       if (res.data.status) {
         const fetched = res.data.users || [];
-        setAllUsers(fetched);
-        setUsers(fetched);
+        const uniqueMap = new Map();
+        fetched.forEach((u: any) => {
+          if (!uniqueMap.has(u.id)) {
+            uniqueMap.set(u.id, u);
+          }
+        });
+        const uniqueUsers = Array.from(uniqueMap.values());
+        setAllUsers(uniqueUsers);
+        setUsers(uniqueUsers);
       }
     } catch (err: any) {
       console.error("Fetch users error:", err);
@@ -754,7 +762,7 @@ const UserManagement: React.FC = () => {
 
           {/* Workforce Directory Table */}
           <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
-            <div className="overflow-x-auto [scrollbar-width:thin] [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
+            <div className="overflow-x-auto min-h-[340px] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
               <table className="w-full min-w-[780px] text-left border-collapse text-xs">
                 <thead className="bg-slate-50/80 border-b border-slate-200/90 text-xs font-semibold text-slate-600 normal-case tracking-normal">
                   <tr>
@@ -841,12 +849,19 @@ const UserManagement: React.FC = () => {
                       </td>
                     </tr>
                   ) : (
-                    paginatedUsers.map((u) => {
+                    paginatedUsers.map((u, index) => {
                       const isCurrentUser = currentUser?.id === u.id || currentUser?.email === u.email;
                       const deptInfo = getDepartmentIcon(u.department_name);
+                      const isMenuActive = activeActionMenuId === u.id;
+                      const isNearBottom = index >= paginatedUsers.length - 2 && paginatedUsers.length > 2;
 
                       return (
-                        <tr key={u.id} className="hover:bg-slate-50/70 transition-colors">
+                        <tr
+                          key={u.id}
+                          className={`hover:bg-slate-50/70 transition-colors ${
+                            isMenuActive ? "relative z-30 bg-slate-50/60" : "relative z-0"
+                          }`}
+                        >
                           {/* Staff Member Identity */}
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
@@ -928,16 +943,16 @@ const UserManagement: React.FC = () => {
                           </td>
 
                           {/* Actions (Centered Matching Option 2) */}
-                          <td className="px-4 py-3 text-center whitespace-nowrap">
+                          <td className={`px-4 py-3 text-center whitespace-nowrap ${isMenuActive ? "relative z-40" : ""}`}>
                             <div className="relative inline-flex items-center justify-center action-menu-container">
                               <button
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setActiveActionMenuId(activeActionMenuId === u.id ? null : u.id);
+                                  setActiveActionMenuId((prev) => (prev === u.id ? null : u.id));
                                 }}
                                 className={`w-8 h-8 rounded-xl border transition-all inline-flex items-center justify-center cursor-pointer ${
-                                  activeActionMenuId === u.id
+                                  isMenuActive
                                     ? "bg-slate-100 text-slate-800 border-slate-300 shadow-2xs"
                                     : "border-slate-200/80 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 shadow-2xs"
                                 }`}
@@ -946,8 +961,12 @@ const UserManagement: React.FC = () => {
                                 <i className="bi bi-three-dots text-xs"></i>
                               </button>
 
-                              {activeActionMenuId === u.id && (
-                                <div className="absolute right-0 top-full mt-1.5 w-48 rounded-2xl bg-white border border-slate-200/90 shadow-xl p-1.5 z-50 text-left animate-in fade-in zoom-in-95 duration-100">
+                              {isMenuActive && (
+                                <div
+                                  className={`absolute right-0 ${
+                                    isNearBottom ? "bottom-full mb-1.5" : "top-full mt-1.5"
+                                  } w-48 rounded-2xl bg-white border border-slate-200/90 shadow-xl p-1.5 z-50 text-left animate-in fade-in zoom-in-95 duration-100`}
+                                >
                                   <button
                                     type="button"
                                     onClick={() => {

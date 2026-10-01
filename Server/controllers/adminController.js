@@ -605,20 +605,19 @@ export const getUsers = async (req, res) => {
              d.name AS department_name, d.code AS department_code,
              sup.id AS supervisor_id, sup.name AS supervisor_name,
              (SELECT COUNT(*) FROM team_hierarchy WHERE supervisor_id = u.id) AS direct_reports_count,
-             CASE WHEN d_head.id IS NOT NULL THEN 1 ELSE 0 END AS is_hod,
-             d_head.name AS head_of_department_name
+             CASE WHEN EXISTS (SELECT 1 FROM departments WHERE head_id = u.id) THEN 1 ELSE 0 END AS is_hod,
+             (SELECT GROUP_CONCAT(name SEPARATOR ', ') FROM departments WHERE head_id = u.id) AS head_of_department_name
       FROM users u
       LEFT JOIN departments d ON u.department_id = d.id
       LEFT JOIN team_hierarchy th ON u.id = th.employee_id
       LEFT JOIN users sup ON th.supervisor_id = sup.id
-      LEFT JOIN departments d_head ON d_head.head_id = u.id
     `;
     const params = [];
     const conditions = [];
 
     if (role) {
       if (role === "hod") {
-        conditions.push("d_head.id IS NOT NULL");
+        conditions.push("EXISTS (SELECT 1 FROM departments WHERE head_id = u.id)");
       } else if (["admin", "manager", "supervisor", "employee"].includes(role)) {
         conditions.push("u.role = ?");
         params.push(role);
@@ -684,14 +683,13 @@ export const getUserDetails = async (req, res) => {
              d.name AS department_name, d.code AS department_code, d.head_id AS dept_head_id,
              sup.id AS supervisor_id, sup.name AS supervisor_name, sup.email AS supervisor_email,
              mgr.id AS manager_id, mgr.name AS manager_name,
-             CASE WHEN d_head.id IS NOT NULL THEN 1 ELSE 0 END AS is_hod,
-             d_head.name AS head_of_department_name
+             CASE WHEN EXISTS (SELECT 1 FROM departments WHERE head_id = u.id) THEN 1 ELSE 0 END AS is_hod,
+             (SELECT GROUP_CONCAT(name SEPARATOR ', ') FROM departments WHERE head_id = u.id) AS head_of_department_name
       FROM users u
       LEFT JOIN departments d ON u.department_id = d.id
       LEFT JOIN team_hierarchy th ON u.id = th.employee_id
       LEFT JOIN users sup ON th.supervisor_id = sup.id
       LEFT JOIN users mgr ON th.manager_id = mgr.id
-      LEFT JOIN departments d_head ON d_head.head_id = u.id
       WHERE u.id = ?
     `, [id]);
 
