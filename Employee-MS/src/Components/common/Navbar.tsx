@@ -2,64 +2,122 @@ import React from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
+interface PageMeta {
+  title: string;
+  subtitle: string;
+  icon: string;
+}
+
+const getPageMeta = (pathname: string, firstName: string): PageMeta => {
+  const path = pathname.toLowerCase();
+
+  if (path.includes("department")) {
+    return {
+      title: "Department Management",
+      subtitle: "Organize departments, structures, and departmental heads.",
+      icon: "bi-building",
+    };
+  }
+  if (path.includes("user")) {
+    return {
+      title: "User Directory",
+      subtitle: "Manage your workforce, roles, departments and reporting structure.",
+      icon: "bi-people-fill",
+    };
+  }
+  if (path.includes("hierarchy")) {
+    return {
+      title: "Team Hierarchy",
+      subtitle: "Visual organizational chart and department reporting lines.",
+      icon: "bi-diagram-3-fill",
+    };
+  }
+  if (path.includes("project")) {
+    return {
+      title: "Projects & Milestones",
+      subtitle: "Track project timelines, deliverables, and assignments.",
+      icon: "bi-kanban-fill",
+    };
+  }
+  if (path.includes("supervisor")) {
+    return {
+      title: "Department Supervisors",
+      subtitle: "Monitor team leaders and supervisor performance metrics.",
+      icon: "bi-person-badge-fill",
+    };
+  }
+  if (path.includes("leave")) {
+    return {
+      title: "Leave Management",
+      subtitle: "Review leave balances, approvals, and employee time off.",
+      icon: "bi-calendar-check-fill",
+    };
+  }
+  if (path.includes("task")) {
+    return {
+      title: "Task Delegation",
+      subtitle: "Assign deliverables, monitor deadlines, and track progress.",
+      icon: "bi-list-check",
+    };
+  }
+  if (path.includes("team")) {
+    return {
+      title: "Assigned Team",
+      subtitle: "Direct reports and member workload breakdown.",
+      icon: "bi-people-fill",
+    };
+  }
+  if (path.includes("profile")) {
+    return {
+      title: "My Profile",
+      subtitle: "Personal details, credentials, and work assignments.",
+      icon: "bi-person-circle",
+    };
+  }
+
+  return {
+    title: `Welcome back, ${firstName}! 👋`,
+    subtitle: "Here's what's happening in your organization today.",
+    icon: "bi-grid-1x2-fill",
+  };
+};
+
 const Navbar = () => {
   const { user } = useAuth();
   const location = useLocation();
 
   const firstName = user?.name?.split(' ')[0] || "User";
-  const isDepartmentsPage = location.pathname.toLowerCase().includes("department");
-  const isUsersPage = location.pathname.toLowerCase().includes("user");
+  const pageMeta = getPageMeta(location.pathname, firstName);
 
   return (
-    <header className="w-full bg-white border-b border-slate-200/90 px-6 lg:px-8 py-3.5 sticky top-0 shadow-xs z-30">
-      <div className="w-full flex justify-between items-center">
+    <header className="w-full h-[68px] min-h-[68px] max-h-[68px] box-border navbar-frosted-glass px-6 lg:px-8 sticky top-0 z-30 relative transition-colors duration-300 flex items-center">
+      {/* 1px "Linear Edge" Laser Border Horizon (Option 1) */}
+      <div className="absolute bottom-0 left-0 right-0 h-[1.5px] overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 bg-slate-200/60" />
+        <div className="navbar-laser-beam" />
+      </div>
+
+      <div className="w-full h-full flex justify-between items-center relative z-10">
         {/* Welcome / Page Title Section */}
-        {isDepartmentsPage ? (
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100/80 flex items-center justify-center text-purple-600 shadow-2xs">
-              <i className="bi bi-building text-lg"></i>
-            </div>
-            <div>
-              <h5 className="font-bold text-slate-900 mb-0 text-base lg:text-lg tracking-tight">
-                Department Management
-              </h5>
-              <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-                <span className="hover:text-slate-600 transition-colors cursor-pointer">Home</span>
-                <i className="bi bi-chevron-right text-[9px] text-slate-300"></i>
-                <span className="text-slate-600">Departments</span>
-              </div>
-            </div>
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-purple-50/80 border border-purple-100/80 flex items-center justify-center text-purple-600 shadow-2xs shrink-0 backdrop-blur-xs">
+            <i className={`bi ${pageMeta.icon} text-lg`}></i>
           </div>
-        ) : isUsersPage ? (
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100/80 flex items-center justify-center text-purple-600 shadow-2xs shrink-0">
-              <i className="bi bi-people-fill text-lg"></i>
-            </div>
-            <div>
-              <h5 className="font-bold text-slate-900 mb-0 text-base lg:text-lg tracking-tight">
-                User Directory
-              </h5>
-              <p className="text-slate-500 mb-0 font-normal text-xs lg:text-sm">
-                Manage your workforce, roles, departments and reporting structure.
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div>
-            <h5 className="font-bold text-gray-900 mb-0 flex items-center gap-2 text-base lg:text-lg">
-              Welcome back, {firstName}! <span className="text-lg">👋</span>
+          <div className="min-w-0 flex flex-col justify-center">
+            <h5 className="font-bold text-slate-900 mb-0 text-base tracking-tight leading-tight truncate">
+              {pageMeta.title}
             </h5>
-            <p className="text-slate-500 mb-0 font-medium text-xs lg:text-sm">
-              Here's what's happening in your organization today.
+            <p className="text-slate-500 mb-0 font-normal text-xs leading-normal truncate">
+              {pageMeta.subtitle}
             </p>
           </div>
-        )}
+        </div>
 
         {/* Global Search & Actions */}
         <div className="flex items-center gap-6">
           
           {/* Search Bar */}
-          <div className="hidden md:flex items-center bg-slate-50 border border-slate-200 rounded-full px-4 py-1.5 w-64 lg:w-80 transition-all focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 focus-within:bg-white shadow-2xs">
+          <div className="hidden md:flex items-center bg-slate-50/80 hover:bg-white border border-slate-200/90 rounded-full px-4 py-1.5 w-64 lg:w-80 transition-all focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 focus-within:bg-white shadow-2xs backdrop-blur-xs">
             <i className="bi bi-search text-slate-400 text-xs mr-2"></i>
             <input 
               type="text" 
@@ -71,10 +129,10 @@ const Navbar = () => {
 
           {/* Icon Actions */}
           <div className="flex items-center gap-2">
-            <button className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer border border-slate-200/80">
+            <button className="w-9 h-9 rounded-full bg-white/70 hover:bg-slate-100/80 text-slate-600 flex items-center justify-center transition-colors cursor-pointer border border-slate-200/80 shadow-2xs">
               <i className="bi bi-moon-stars text-sm"></i>
             </button>
-            <button className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer border border-slate-200/80 relative">
+            <button className="w-9 h-9 rounded-full bg-white/70 hover:bg-slate-100/80 text-slate-600 flex items-center justify-center transition-colors cursor-pointer border border-slate-200/80 shadow-2xs relative">
               <i className="bi bi-bell text-sm"></i>
               <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full"></span>
             </button>
