@@ -90,7 +90,7 @@ const Navbar = () => {
   const pageMeta = getPageMeta(location.pathname, firstName);
 
   return (
-    <header className="w-full h-[68px] min-h-[68px] max-h-[68px] box-border navbar-frosted-glass px-6 lg:px-8 sticky top-0 z-30 relative transition-colors duration-300 flex items-center">
+    <header className="w-full h-[68px] min-h-[68px] max-h-[68px] box-border navbar-frosted-glass px-6 lg:px-8 sticky top-0 z-30 transition-colors duration-300 flex items-center">
       {/* 1px "Linear Edge" Laser Border Horizon (Option 1) */}
       <div className="absolute bottom-0 left-0 right-0 h-[1.5px] overflow-hidden pointer-events-none">
         <div className="absolute inset-0 bg-slate-200/60" />
