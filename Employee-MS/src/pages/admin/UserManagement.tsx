@@ -344,25 +344,25 @@ const UserManagement: React.FC = () => {
     switch (u.role) {
       case "admin":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200/80 shadow-2xs">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200/80 shadow-2xs">
             <span>👑</span>
             <span>HR Admin</span>
           </span>
         );
       case "manager":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/80 shadow-2xs">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/80 shadow-2xs">
             <span>👔</span>
             <span>Manager</span>
           </span>
         );
       case "supervisor":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
             <span>👷</span>
             <span>Supervisor</span>
             {u.direct_reports_count > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full text-[8.5px] font-extrabold bg-emerald-200/70 text-emerald-900">
+              <span className="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold bg-emerald-200/70 text-emerald-900">
                 {u.direct_reports_count}
               </span>
             )}
@@ -371,7 +371,7 @@ const UserManagement: React.FC = () => {
       case "employee":
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-sky-50 text-sky-700 border border-sky-200/80 shadow-2xs">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-sky-50 text-sky-700 border border-sky-200/80 shadow-2xs">
             <span>💼</span>
             <span>Employee</span>
           </span>
@@ -741,7 +741,7 @@ const UserManagement: React.FC = () => {
                   key={tab.id}
                   type="button"
                   onClick={() => setSelectedRole(tab.id)}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                     isActive
                       ? tab.activeStyles
                       : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90 shadow-2xs hover:border-slate-300"
@@ -749,7 +749,7 @@ const UserManagement: React.FC = () => {
                 >
                   <span>{tab.label}</span>
                   <span
-                    className={`px-1.5 py-0.2 rounded-full text-[9.5px] font-bold transition-colors ${
+                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold transition-colors ${
                       isActive ? tab.badgeActive : "bg-slate-100 text-slate-600"
                     }`}
                   >
@@ -764,15 +764,15 @@ const UserManagement: React.FC = () => {
           <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
             <div className="overflow-x-auto min-h-[340px] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
               <table className="w-full min-w-[760px] text-left border-collapse text-xs">
-                <thead className="bg-slate-50/80 border-b border-slate-200/90 text-[11px] font-semibold text-slate-600 normal-case tracking-normal">
+                <thead className="bg-slate-50/80 border-b border-slate-200/90 text-xs font-semibold text-slate-700 normal-case tracking-normal">
                   <tr>
                     <th
-                      className="px-3.5 py-2 cursor-pointer select-none hover:text-slate-900 transition-colors"
+                      className="px-4 py-2.5 cursor-pointer select-none hover:text-slate-900 transition-colors"
                       onClick={() => handleSort("name")}
                       title="Click to sort by Name"
                     >
                       <div className="flex items-center gap-1.5">
-                        <span>User</span>
+                        <span className="text-xs font-semibold text-slate-700">User</span>
                         <i
                           className={`bi ${
                             sortField === "name"
@@ -785,12 +785,12 @@ const UserManagement: React.FC = () => {
                       </div>
                     </th>
                     <th
-                      className="px-3 py-2 cursor-pointer select-none hover:text-slate-900 transition-colors whitespace-nowrap"
+                      className="px-3.5 py-2.5 cursor-pointer select-none hover:text-slate-900 transition-colors whitespace-nowrap"
                       onClick={() => handleSort("role")}
                       title="Click to sort by Role Tier"
                     >
                       <div className="flex items-center gap-1.5">
-                        <span>Role Tier</span>
+                        <span className="text-xs font-semibold text-slate-700">Role Tier</span>
                         <i
                           className={`bi ${
                             sortField === "role"
@@ -802,14 +802,14 @@ const UserManagement: React.FC = () => {
                         ></i>
                       </div>
                     </th>
-                    <th className="px-3 py-2 font-semibold text-slate-600 whitespace-nowrap">Department</th>
+                    <th className="px-3.5 py-2.5 font-semibold text-slate-700 text-xs whitespace-nowrap">Department</th>
                     <th
-                      className="px-3 py-2 cursor-pointer select-none hover:text-slate-900 transition-colors whitespace-nowrap"
+                      className="px-3.5 py-2.5 cursor-pointer select-none hover:text-slate-900 transition-colors whitespace-nowrap"
                       onClick={() => handleSort("salary")}
                       title="Click to sort by Annual Salary"
                     >
                       <div className="flex items-center gap-1.5">
-                        <span>Annual Salary</span>
+                        <span className="text-xs font-semibold text-slate-700">Annual Salary</span>
                         <i
                           className={`bi ${
                             sortField === "salary"
@@ -821,9 +821,9 @@ const UserManagement: React.FC = () => {
                         ></i>
                       </div>
                     </th>
-                    <th className="px-3 py-2 font-semibold text-slate-600 whitespace-nowrap">Phone</th>
-                    <th className="px-3 py-2 font-semibold text-slate-600 whitespace-nowrap">Status</th>
-                    <th className="px-3.5 py-2 font-semibold text-slate-600 text-center whitespace-nowrap">Actions</th>
+                    <th className="px-3.5 py-2.5 font-semibold text-slate-700 text-xs whitespace-nowrap">Phone</th>
+                    <th className="px-3.5 py-2.5 font-semibold text-slate-700 text-xs whitespace-nowrap">Status</th>
+                    <th className="px-4 py-2.5 font-semibold text-slate-700 text-xs text-center whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -863,9 +863,9 @@ const UserManagement: React.FC = () => {
                           }`}
                         >
                           {/* Staff Member Identity */}
-                          <td className="px-3.5 py-2">
+                          <td className="px-4 py-2.5">
                             <div className="flex items-center gap-2.5">
-                              <div className="w-7 h-7 rounded-full bg-slate-100 text-slate-700 font-bold text-[11px] flex items-center justify-center border border-slate-200/90 shadow-2xs shrink-0 overflow-hidden ring-1 ring-slate-200/50">
+                              <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200/90 shadow-2xs shrink-0 overflow-hidden ring-1 ring-slate-200/50">
                                 {u.image_url ? (
                                    <img src={u.image_url} alt={u.name} className="w-full h-full object-cover" />
                                 ) : (
@@ -874,60 +874,60 @@ const UserManagement: React.FC = () => {
                               </div>
                               <div className="min-w-0">
                                 <div className="flex items-center gap-1.5 flex-nowrap">
-                                  <span className="font-semibold text-slate-900 text-xs leading-tight truncate">
+                                  <span className="font-semibold text-slate-900 text-xs sm:text-[13px] leading-tight truncate">
                                     {u.name}
                                   </span>
                                   {isCurrentUser && (
-                                    <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs shrink-0">
+                                    <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs shrink-0">
                                       You
                                     </span>
                                   )}
                                   {Boolean(u.is_hod) && !isCurrentUser ? (
-                                    <span className="px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs shrink-0">
+                                    <span className="px-1.5 py-0.2 rounded text-[9.5px] font-extrabold uppercase bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs shrink-0">
                                       👑 HOD
                                     </span>
                                   ) : null}
                                 </div>
-                                <span className="text-[10.5px] text-slate-400 block truncate mt-0.5">{u.email}</span>
+                                <span className="text-[11px] text-slate-500 block truncate mt-0.5">{u.email}</span>
                               </div>
                             </div>
                           </td>
 
                           {/* Role Tier */}
-                          <td className="px-3 py-2 whitespace-nowrap">
+                          <td className="px-3.5 py-2.5 whitespace-nowrap">
                             {getRoleBadge(u)}
                           </td>
 
                           {/* Department */}
-                          <td className="px-3 py-2 whitespace-nowrap">
+                          <td className="px-3.5 py-2.5 whitespace-nowrap">
                             <div className="flex items-center gap-2">
                               <i className={`bi ${deptInfo.icon} ${deptInfo.color} text-xs shrink-0`}></i>
-                              <span className="font-medium text-slate-700 text-xs">
+                              <span className="font-medium text-slate-800 text-xs sm:text-[12.5px]">
                                 {u.department_name || "Unassigned"}
                               </span>
                             </div>
                           </td>
 
                           {/* Compensation */}
-                          <td className="px-3 py-2 whitespace-nowrap">
-                            <span className="font-semibold text-slate-900 text-xs">
+                          <td className="px-3.5 py-2.5 whitespace-nowrap">
+                            <span className="font-semibold text-slate-900 text-xs sm:text-[12.5px]">
                               ${Number(u.salary || 0).toLocaleString()}
                             </span>
                           </td>
 
                           {/* Contact */}
-                          <td className="px-3 py-2 whitespace-nowrap text-xs text-slate-700">
+                          <td className="px-3.5 py-2.5 whitespace-nowrap text-xs text-slate-700">
                             {u.phone ? (
-                              <span className="font-medium text-slate-700">{u.phone}</span>
+                              <span className="font-medium text-slate-800 text-xs sm:text-[12.5px]">{u.phone}</span>
                             ) : (
                               <span className="text-slate-400">—</span>
                             )}
                           </td>
 
                           {/* Status */}
-                          <td className="px-3 py-2 whitespace-nowrap">
+                          <td className="px-3.5 py-2.5 whitespace-nowrap">
                             <span
-                              className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
                                 u.status === "active"
                                   ? "bg-emerald-50 text-emerald-700 border border-emerald-200/70"
                                   : "bg-slate-100 text-slate-600 border border-slate-200/70"
@@ -943,7 +943,7 @@ const UserManagement: React.FC = () => {
                           </td>
 
                           {/* Actions (Centered Matching Option 2) */}
-                          <td className={`px-3.5 py-2 text-center whitespace-nowrap ${isMenuActive ? "relative z-40" : ""}`}>
+                          <td className={`px-4 py-2.5 text-center whitespace-nowrap ${isMenuActive ? "relative z-40" : ""}`}>
                             <div className="relative inline-flex items-center justify-center action-menu-container">
                               <button
                                 type="button"
@@ -951,7 +951,7 @@ const UserManagement: React.FC = () => {
                                   e.stopPropagation();
                                   setActiveActionMenuId((prev) => (prev === u.id ? null : u.id));
                                 }}
-                                className={`w-7 h-7 rounded-lg border transition-all inline-flex items-center justify-center cursor-pointer ${
+                                className={`w-7.5 h-7.5 rounded-lg border transition-all inline-flex items-center justify-center cursor-pointer ${
                                   isMenuActive
                                     ? "bg-slate-100 text-slate-800 border-slate-300 shadow-2xs"
                                     : "border-slate-200/80 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 shadow-2xs"
@@ -1015,12 +1015,12 @@ const UserManagement: React.FC = () => {
             </div>
 
             {/* Bottom Pagination Bar */}
-            <div className="px-3.5 sm:px-4 py-2 bg-white border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-[11.5px]">
+            <div className="px-4 py-2.5 bg-white border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
               {/* Left Counter */}
-              <div className="text-slate-500 font-medium">
-                Showing <span className="font-semibold text-slate-800">{displayedUsers.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}</span> to{" "}
-                <span className="font-semibold text-slate-800">{Math.min(currentPage * pageSize, displayedUsers.length)}</span> of{" "}
-                <span className="font-semibold text-slate-800">{displayedUsers.length}</span> users
+              <div className="text-slate-600 font-medium">
+                Showing <span className="font-semibold text-slate-900">{displayedUsers.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}</span> to{" "}
+                <span className="font-semibold text-slate-900">{Math.min(currentPage * pageSize, displayedUsers.length)}</span> of{" "}
+                <span className="font-semibold text-slate-900">{displayedUsers.length}</span> users
               </div>
 
               {/* Right Controls */}
@@ -1030,10 +1030,10 @@ const UserManagement: React.FC = () => {
                   type="button"
                   disabled={currentPage <= 1}
                   onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                  className="w-7 h-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center transition-colors cursor-pointer text-xs"
+                  className="w-7.5 h-7.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center transition-colors cursor-pointer text-xs"
                   title="Previous Page"
                 >
-                  <i className="bi bi-chevron-left text-[10px]"></i>
+                  <i className="bi bi-chevron-left text-[11px]"></i>
                 </button>
 
                 {/* Page Navigation Pills */}
@@ -1043,7 +1043,7 @@ const UserManagement: React.FC = () => {
                       key={page}
                       type="button"
                       onClick={() => setCurrentPage(page)}
-                      className={`w-7 h-7 rounded-lg text-xs transition-all cursor-pointer flex items-center justify-center ${
+                      className={`w-7.5 h-7.5 rounded-lg text-xs transition-all cursor-pointer flex items-center justify-center ${
                         currentPage === page
                           ? "bg-indigo-600 text-white shadow-xs font-bold"
                           : "bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-medium"
@@ -1059,10 +1059,10 @@ const UserManagement: React.FC = () => {
                   type="button"
                   disabled={currentPage >= totalPages}
                   onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                  className="w-7 h-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center transition-colors cursor-pointer text-xs"
+                  className="w-7.5 h-7.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center transition-colors cursor-pointer text-xs"
                   title="Next Page"
                 >
-                  <i className="bi bi-chevron-right text-[10px]"></i>
+                  <i className="bi bi-chevron-right text-[11px]"></i>
                 </button>
 
                 {/* Page Size Selector */}
@@ -1073,7 +1073,7 @@ const UserManagement: React.FC = () => {
                       setPageSize(Number(e.target.value));
                       setCurrentPage(1);
                     }}
-                    className="px-2.5 py-1 rounded-lg text-[11px] bg-white border border-slate-200 text-slate-700 font-medium outline-none cursor-pointer hover:border-slate-300"
+                    className="px-2.5 py-1 rounded-lg text-xs bg-white border border-slate-200 text-slate-700 font-medium outline-none cursor-pointer hover:border-slate-300"
                   >
                     <option value={5}>5 per page</option>
                     <option value={10}>10 per page</option>
@@ -1088,7 +1088,7 @@ const UserManagement: React.FC = () => {
 
         {/* Right Column: Workforce Analytics Sidebar with Smooth Slide-in */}
         {isSidebarOpen && (
-          <div className="w-full xl:w-[290px] xl:min-w-[280px] xl:max-w-[300px] shrink-0 min-w-0 xl:h-full xl:overflow-y-auto xl:pl-0.5 space-y-3 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300 animate-in fade-in slide-in-from-right-4 duration-300">
+          <div className="w-full xl:w-[350px] xl:min-w-[340px] xl:max-w-[360px] shrink-0 min-w-0 xl:h-full xl:overflow-y-auto xl:overflow-x-hidden xl:pl-1 space-y-3 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300 animate-in fade-in slide-in-from-right-4 duration-300">
             <WorkforceAnalyticsSidebar
               allUsers={allUsers}
               departments={departments}

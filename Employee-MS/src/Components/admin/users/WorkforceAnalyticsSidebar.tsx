@@ -134,19 +134,19 @@ export const WorkforceAnalyticsSidebar: React.FC<WorkforceAnalyticsSidebarProps>
   return (
     <div className="space-y-3">
       {/* Card 1: Workforce Overview Donut Chart */}
-      <div className="p-3 sm:p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+      <div className="p-3.5 sm:p-4 rounded-xl bg-white border border-slate-200/80 shadow-2xs overflow-hidden">
         <div className="flex items-center justify-between gap-2 mb-2.5">
-          <div className="flex items-center gap-1.5">
-            <i className="bi bi-pie-chart text-blue-600 text-xs"></i>
-            <h6 className="font-bold text-slate-900 text-xs mb-0 tracking-tight whitespace-nowrap">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <i className="bi bi-pie-chart text-blue-600 text-xs shrink-0"></i>
+            <h6 className="font-bold text-slate-900 text-xs sm:text-[13px] mb-0 tracking-tight whitespace-nowrap">
               Workforce Overview
             </h6>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 shrink-0">
             <select
               value={timeframe}
               onChange={(e) => setTimeframe(e.target.value)}
-              className="text-[10.5px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2 py-0.5 outline-none cursor-pointer hover:border-slate-300 transition-colors"
+              className="text-[11px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2 py-0.5 outline-none cursor-pointer hover:border-slate-300 transition-colors"
             >
               <option>This Month</option>
               <option>This Quarter</option>
@@ -165,9 +165,9 @@ export const WorkforceAnalyticsSidebar: React.FC<WorkforceAnalyticsSidebarProps>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 sm:gap-3.5 py-0.5">
+        <div className="flex items-center gap-3.5 sm:gap-4 py-1">
           {/* Circular Donut Chart Matching Legend Colors */}
-          <div className="relative w-24 h-24 sm:w-26 sm:h-26 flex items-center justify-center shrink-0">
+          <div className="relative w-26 h-26 sm:w-28 sm:h-28 flex items-center justify-center shrink-0">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
               <defs>
                 <linearGradient id="activeWheelGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -233,47 +233,47 @@ export const WorkforceAnalyticsSidebar: React.FC<WorkforceAnalyticsSidebarProps>
 
             {/* Centered Total Headcount */}
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
-              <span className="text-xl font-bold text-slate-900 tracking-tight leading-none">
+              <span className="text-2xl font-bold text-slate-900 tracking-tight leading-none">
                 {totalUsers}
               </span>
-              <span className="text-[9.5px] font-medium text-slate-400 mt-0.5">
+              <span className="text-[10px] font-medium text-slate-400 mt-1">
                 Total Workforce
               </span>
             </div>
           </div>
 
           {/* Legend Items with clean aligned columns */}
-          <div className="flex-1 space-y-1.5 min-w-0">
-            <div className="flex items-center justify-between text-[11px]">
+          <div className="flex-1 space-y-2 min-w-0">
+            <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-[2px] bg-emerald-500 shrink-0"></span>
-                <span className="font-medium text-slate-600">Active</span>
+                <span className="w-2.5 h-2.5 rounded-[2px] bg-emerald-500 shrink-0"></span>
+                <span className="font-medium text-slate-700">Active</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-slate-900 text-[11px]">{activeUsers}</span>
-                <span className="text-[10px] text-slate-400 font-normal w-6 text-right">{activePct}%</span>
+                <span className="font-bold text-slate-900 text-xs">{activeUsers}</span>
+                <span className="text-[11px] text-slate-400 font-normal w-7 text-right">{activePct}%</span>
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-[11px]">
+            <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-[2px] bg-slate-400 shrink-0"></span>
-                <span className="font-medium text-slate-600">Inactive</span>
+                <span className="w-2.5 h-2.5 rounded-[2px] bg-slate-400 shrink-0"></span>
+                <span className="font-medium text-slate-700">Inactive</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-slate-900 text-[11px]">{inactiveUsers}</span>
-                <span className="text-[10px] text-slate-400 font-normal w-6 text-right">{inactivePct}%</span>
+                <span className="font-bold text-slate-900 text-xs">{inactiveUsers}</span>
+                <span className="text-[11px] text-slate-400 font-normal w-7 text-right">{inactivePct}%</span>
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-[11px]">
+            <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-[2px] bg-amber-500 shrink-0"></span>
-                <span className="font-medium text-slate-600">On Leave</span>
+                <span className="w-2.5 h-2.5 rounded-[2px] bg-amber-500 shrink-0"></span>
+                <span className="font-medium text-slate-700">On Leave</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-slate-900 text-[11px]">{onLeaveUsers}</span>
-                <span className="text-[10px] text-slate-400 font-normal w-6 text-right">{onLeavePct}%</span>
+                <span className="font-bold text-slate-900 text-xs">{onLeaveUsers}</span>
+                <span className="text-[11px] text-slate-400 font-normal w-7 text-right">{onLeavePct}%</span>
               </div>
             </div>
           </div>
@@ -281,24 +281,24 @@ export const WorkforceAnalyticsSidebar: React.FC<WorkforceAnalyticsSidebarProps>
       </div>
 
       {/* Card 2: Role Distribution (Compact Single-Row Horizontal Bars) */}
-      <div className="p-3 sm:p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <h6 className="font-bold text-slate-900 text-xs mb-0 tracking-tight">
+      <div className="p-3.5 sm:p-4 rounded-xl bg-white border border-slate-200/80 shadow-2xs overflow-hidden">
+        <div className="flex items-center justify-between gap-2 mb-2.5">
+          <h6 className="font-bold text-slate-900 text-xs sm:text-[13px] mb-0 tracking-tight">
             Role Distribution
           </h6>
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {roleDistribution.map((role) => (
-            <div key={role.label} className="flex items-center justify-between text-[11px]">
+            <div key={role.label} className="flex items-center justify-between text-xs">
               {/* Left Label */}
-              <div className="flex items-center gap-1.5 w-20 sm:w-22 shrink-0">
-                <span className={`w-2 h-2 rounded-[2px] ${role.dotColor} shrink-0`}></span>
-                <span className="font-medium text-slate-700 text-[11px] truncate">{role.label}</span>
+              <div className="flex items-center gap-1.5 w-22 sm:w-24 shrink-0">
+                <span className={`w-2.5 h-2.5 rounded-[2px] ${role.dotColor} shrink-0`}></span>
+                <span className="font-medium text-slate-700 text-xs truncate">{role.label}</span>
               </div>
 
               {/* Center Bar */}
-              <div className="flex-1 h-2 rounded-full bg-slate-100 mx-2 overflow-hidden">
+              <div className="flex-1 h-2 rounded-full bg-slate-100 mx-2.5 overflow-hidden">
                 <div
                   className={`h-full rounded-full ${role.barColor} transition-all duration-500 ease-out`}
                   style={{ width: `${Math.max(role.pct, 3)}%` }}
@@ -306,9 +306,9 @@ export const WorkforceAnalyticsSidebar: React.FC<WorkforceAnalyticsSidebarProps>
               </div>
 
               {/* Right Count and % */}
-              <div className="flex items-center justify-end gap-2 w-12 shrink-0 text-right font-mono">
-                <span className="font-bold text-slate-800 text-[11px]">{role.count}</span>
-                <span className="text-[10px] text-slate-400 font-normal w-6 text-right">{role.pct}%</span>
+              <div className="flex items-center justify-end gap-1.5 w-14 shrink-0 text-right font-mono">
+                <span className="font-bold text-slate-800 text-xs">{role.count}</span>
+                <span className="text-[11px] text-slate-400 font-normal w-7 text-right">{role.pct}%</span>
               </div>
             </div>
           ))}
@@ -316,15 +316,15 @@ export const WorkforceAnalyticsSidebar: React.FC<WorkforceAnalyticsSidebarProps>
       </div>
 
       {/* Card 3: Department Distribution (Compact Single-Row Horizontal Bars) */}
-      <div className="p-3 sm:p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <h6 className="font-bold text-slate-900 text-xs mb-0 tracking-tight whitespace-nowrap">
+      <div className="p-3.5 sm:p-4 rounded-xl bg-white border border-slate-200/80 shadow-2xs overflow-hidden">
+        <div className="flex items-center justify-between gap-2 mb-2.5">
+          <h6 className="font-bold text-slate-900 text-xs sm:text-[13px] mb-0 tracking-tight whitespace-nowrap">
             Department Distribution
           </h6>
           <select
             value={selectedDeptFilter}
             onChange={(e) => setSelectedDeptFilter(e.target.value)}
-            className="text-[10.5px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-1.5 py-0.5 outline-none cursor-pointer hover:border-slate-300 transition-colors max-w-[115px] truncate"
+            className="text-[11px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2 py-0.5 outline-none cursor-pointer hover:border-slate-300 transition-colors max-w-[130px] truncate"
           >
             <option value="all">All Departments</option>
             {departments.map((d) => (
@@ -335,17 +335,17 @@ export const WorkforceAnalyticsSidebar: React.FC<WorkforceAnalyticsSidebarProps>
           </select>
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {topDepartments.map((dept) => (
-            <div key={dept.name} className="flex items-center justify-between text-[11px]">
+            <div key={dept.name} className="flex items-center justify-between text-xs">
               {/* Left Dept Label */}
-              <div className="flex items-center gap-1.5 w-22 sm:w-24 shrink-0 truncate">
-                <span className={`w-2 h-2 rounded-[2px] ${dept.dot} shrink-0`}></span>
-                <span className="font-medium text-slate-700 text-[11px] truncate">{dept.name}</span>
+              <div className="flex items-center gap-1.5 w-24 sm:w-26 shrink-0 truncate">
+                <span className={`w-2.5 h-2.5 rounded-[2px] ${dept.dot} shrink-0`}></span>
+                <span className="font-medium text-slate-700 text-xs truncate">{dept.name}</span>
               </div>
 
               {/* Center Bar */}
-              <div className="flex-1 h-2 rounded-full bg-slate-100 mx-2 overflow-hidden">
+              <div className="flex-1 h-2 rounded-full bg-slate-100 mx-2.5 overflow-hidden">
                 <div
                   className={`h-full rounded-full ${dept.bar} transition-all duration-500 ease-out`}
                   style={{ width: `${Math.max(dept.pct, 3)}%` }}
@@ -353,32 +353,32 @@ export const WorkforceAnalyticsSidebar: React.FC<WorkforceAnalyticsSidebarProps>
               </div>
 
               {/* Right Count and % */}
-              <div className="flex items-center justify-end gap-2 w-12 shrink-0 text-right font-mono">
-                <span className="font-bold text-slate-800 text-[11px]">{dept.count}</span>
-                <span className="text-[10px] text-slate-400 font-normal w-6 text-right">{dept.pct}%</span>
+              <div className="flex items-center justify-end gap-1.5 w-14 shrink-0 text-right font-mono">
+                <span className="font-bold text-slate-800 text-xs">{dept.count}</span>
+                <span className="text-[11px] text-slate-400 font-normal w-7 text-right">{dept.pct}%</span>
               </div>
             </div>
           ))}
 
           {/* Overflow Row (+ X more) */}
           {overflowDepartments.length > 0 && selectedDeptFilter === "all" && (
-            <div className="flex items-center justify-between text-[11px] pt-0.5">
-              <div className="flex items-center gap-1.5 w-22 sm:w-24 shrink-0">
-                <span className="font-medium text-indigo-600 text-[11px] truncate">
+            <div className="flex items-center justify-between text-xs pt-0.5">
+              <div className="flex items-center gap-1.5 w-24 sm:w-26 shrink-0">
+                <span className="font-medium text-indigo-600 text-xs truncate">
                   + {overflowDepartments.length} more
                 </span>
               </div>
 
-              <div className="flex-1 h-2 rounded-full bg-slate-100 mx-2 overflow-hidden">
+              <div className="flex-1 h-2 rounded-full bg-slate-100 mx-2.5 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-indigo-300 transition-all duration-500 ease-out"
                   style={{ width: `${Math.max(overflowPct, 3)}%` }}
                 ></div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 w-12 shrink-0 text-right font-mono">
-                <span className="font-bold text-slate-800 text-[11px]">{overflowCount}</span>
-                <span className="text-[10px] text-slate-400 font-normal w-6 text-right">{overflowPct}%</span>
+              <div className="flex items-center justify-end gap-1.5 w-14 shrink-0 text-right font-mono">
+                <span className="font-bold text-slate-800 text-xs">{overflowCount}</span>
+                <span className="text-[11px] text-slate-400 font-normal w-7 text-right">{overflowPct}%</span>
               </div>
             </div>
           )}
@@ -386,28 +386,28 @@ export const WorkforceAnalyticsSidebar: React.FC<WorkforceAnalyticsSidebarProps>
       </div>
 
       {/* Card 4: Recent Activity Feed (Compact & Pixel-Perfect) */}
-      <div className="p-3 sm:p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <h6 className="font-bold text-slate-900 text-xs mb-0 tracking-tight">
+      <div className="p-3.5 sm:p-4 rounded-xl bg-white border border-slate-200/80 shadow-2xs overflow-hidden">
+        <div className="flex items-center justify-between gap-2 mb-2.5">
+          <h6 className="font-bold text-slate-900 text-xs sm:text-[13px] mb-0 tracking-tight">
             Recent Activity
           </h6>
-          <span className="text-[11px] font-semibold text-blue-600 hover:text-blue-700 cursor-pointer">
+          <span className="text-xs font-semibold text-blue-600 hover:text-blue-700 cursor-pointer">
             View All
           </span>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {/* Activity Item 1 */}
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100/60 flex items-center justify-center shrink-0 shadow-2xs text-xs">
+            <div className="w-7.5 h-7.5 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100/60 flex items-center justify-center shrink-0 shadow-2xs text-xs">
               <i className="bi bi-person-fill"></i>
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-baseline justify-between gap-1.5">
-                <p className="text-[11px] font-bold text-slate-900 mb-0 truncate">New user added</p>
+                <p className="text-xs font-bold text-slate-900 mb-0 truncate">New user added</p>
                 <span className="text-[10px] text-slate-400 shrink-0 font-normal">2h ago</span>
               </div>
-              <p className="text-[10.5px] text-slate-400 mb-0 truncate">
+              <p className="text-[11px] text-slate-500 mb-0 truncate">
                 Emily Davis joined Marketing
               </p>
             </div>
@@ -415,15 +415,15 @@ export const WorkforceAnalyticsSidebar: React.FC<WorkforceAnalyticsSidebarProps>
 
           {/* Activity Item 2 */}
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 border border-purple-100/60 flex items-center justify-center shrink-0 shadow-2xs text-xs">
+            <div className="w-7.5 h-7.5 rounded-lg bg-purple-50 text-purple-600 border border-purple-100/60 flex items-center justify-center shrink-0 shadow-2xs text-xs">
               <i className="bi bi-briefcase-fill"></i>
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-baseline justify-between gap-1.5">
-                <p className="text-[11px] font-bold text-slate-900 mb-0 truncate">Role updated</p>
+                <p className="text-xs font-bold text-slate-900 mb-0 truncate">Role updated</p>
                 <span className="text-[10px] text-slate-400 shrink-0 font-normal">1d ago</span>
               </div>
-              <p className="text-[10.5px] text-slate-400 mb-0 truncate">
+              <p className="text-[11px] text-slate-500 mb-0 truncate">
                 Lisa Anderson → Supervisor
               </p>
             </div>
