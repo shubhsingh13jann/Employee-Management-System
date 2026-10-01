@@ -7,6 +7,8 @@ import { ConfirmOffboardModal } from "../../Components/admin/users/ConfirmOffboa
 import { WorkforceAnalyticsSidebar } from "../../Components/admin/users/WorkforceAnalyticsSidebar";
 import { CsvImportModal } from "../../Components/admin/users/CsvImportModal";
 import { PasswordResetModal } from "../../Components/admin/users/PasswordResetModal";
+import { BulkBroadcastModal } from "../../Components/admin/users/BulkBroadcastModal";
+import { EmployeeIdCardModal } from "../../Components/admin/users/EmployeeIdCardModal";
 interface FilterDropdownOption {
   value: string;
   label: string;
@@ -178,6 +180,7 @@ const UserManagement: React.FC = () => {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [offboardTarget, setOffboardTarget] = useState<{ id: number; name: string; role?: string } | null>(null);
   const [passwordResetTarget, setPasswordResetTarget] = useState<{ id: number; name: string; email: string; role?: string } | null>(null);
+  const [idCardTarget, setIdCardTarget] = useState<any | null>(null);
   const [activeActionMenuId, setActiveActionMenuId] = useState<number | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isHeroMenuOpen, setIsHeroMenuOpen] = useState(false);
@@ -189,6 +192,7 @@ const UserManagement: React.FC = () => {
   const [isBulkOperating, setIsBulkOperating] = useState(false);
   const [isBulkTransferOpen, setIsBulkTransferOpen] = useState(false);
   const [isBulkOffboardConfirmOpen, setIsBulkOffboardConfirmOpen] = useState(false);
+  const [isBulkBroadcastOpen, setIsBulkBroadcastOpen] = useState(false);
   const [copiedEmailId, setCopiedEmailId] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
 
@@ -1944,12 +1948,12 @@ const UserManagement: React.FC = () => {
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       setActiveActionMenuId(null);
-                                      setPasswordResetTarget(u);
+                                      setIdCardTarget(u);
                                     }}
                                     className="w-full px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
                                   >
-                                    <i className="bi bi-key text-slate-400"></i>
-                                    <span>Reset Password</span>
+                                    <i className="bi bi-badge-ad text-slate-400"></i>
+                                    <span>Generate ID Badge</span>
                                   </button>
                                   <button
                                     type="button"
@@ -2143,6 +2147,30 @@ const UserManagement: React.FC = () => {
                                 >
                                   <i className="bi bi-pencil-square text-slate-400"></i>
                                   <span>Edit Details</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActiveActionMenuId(null);
+                                    setPasswordResetTarget(u);
+                                  }}
+                                  className="w-full px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  <i className="bi bi-key text-slate-400"></i>
+                                  <span>Reset Password</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActiveActionMenuId(null);
+                                    setIdCardTarget(u);
+                                  }}
+                                  className="w-full px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  <i className="bi bi-badge-ad text-slate-400"></i>
+                                  <span>Generate ID Badge</span>
                                 </button>
                                 <button
                                   type="button"
@@ -2465,6 +2493,9 @@ const UserManagement: React.FC = () => {
           setSelectedUserIdForProfile(null);
         }}
         userId={selectedUserIdForProfile}
+        onGenerateIdCard={(user) => {
+          setIdCardTarget(user);
+        }}
         onEditUser={(user) => {
           setIsProfileModalOpen(false);
           setSelectedUserIdForProfile(null);
@@ -2491,6 +2522,23 @@ const UserManagement: React.FC = () => {
           setMsg({ type: "success", text });
         }}
         user={passwordResetTarget}
+      />
+
+      {/* Bulk Broadcast / Announcement Modal */}
+      <BulkBroadcastModal
+        isOpen={isBulkBroadcastOpen}
+        onClose={() => setIsBulkBroadcastOpen(false)}
+        onSuccess={(text) => {
+          setMsg({ type: "success", text });
+        }}
+        selectedUsers={users.filter((u) => selectedUserIds.includes(u.id))}
+      />
+
+      {/* Digital Employee ID Card Badge Modal */}
+      <EmployeeIdCardModal
+        isOpen={Boolean(idCardTarget)}
+        onClose={() => setIdCardTarget(null)}
+        user={idCardTarget}
       />
 
       {/* Floating Bulk Action Bar */}
@@ -2568,6 +2616,18 @@ const UserManagement: React.FC = () => {
                   </div>
                 )}
               </div>
+
+              {/* Broadcast Announcement */}
+              <button
+                type="button"
+                disabled={isBulkOperating}
+                onClick={() => setIsBulkBroadcastOpen(true)}
+                className="h-8 px-2.5 sm:px-3 rounded-xl text-xs font-semibold bg-indigo-500/25 hover:bg-indigo-500/35 text-indigo-200 border border-indigo-400/40 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                title="Send Broadcast Announcement"
+              >
+                <i className="bi bi-broadcast text-indigo-300 text-xs"></i>
+                <span className="hidden md:inline">Broadcast</span>
+              </button>
 
               {/* Export Selected */}
               <button
