@@ -2,6 +2,86 @@ import React, { useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
+interface PageMeta {
+  title: string;
+  subtitle: string;
+  icon: string;
+}
+
+const getPageMeta = (pathname: string, firstName: string): PageMeta => {
+  const path = pathname.toLowerCase();
+
+  if (path.includes("department")) {
+    return {
+      title: "Department Management",
+      subtitle: "Organize departments, structures, and departmental heads.",
+      icon: "bi-building",
+    };
+  }
+  if (path.includes("user")) {
+    return {
+      title: "User Directory",
+      subtitle: "Manage your workforce, roles, departments and reporting structure.",
+      icon: "bi-people-fill",
+    };
+  }
+  if (path.includes("hierarchy")) {
+    return {
+      title: "Team Hierarchy",
+      subtitle: "Visual organizational chart and department reporting lines.",
+      icon: "bi-diagram-3-fill",
+    };
+  }
+  if (path.includes("project")) {
+    return {
+      title: "Projects & Milestones",
+      subtitle: "Track project timelines, deliverables, and assignments.",
+      icon: "bi-kanban-fill",
+    };
+  }
+  if (path.includes("supervisor")) {
+    return {
+      title: "Department Supervisors",
+      subtitle: "Monitor team leaders and supervisor performance metrics.",
+      icon: "bi-person-badge-fill",
+    };
+  }
+  if (path.includes("leave")) {
+    return {
+      title: "Leave Management",
+      subtitle: "Review leave balances, approvals, and employee time off.",
+      icon: "bi-calendar-check-fill",
+    };
+  }
+  if (path.includes("task")) {
+    return {
+      title: "Task Delegation",
+      subtitle: "Assign deliverables, monitor deadlines, and track progress.",
+      icon: "bi-list-check",
+    };
+  }
+  if (path.includes("team")) {
+    return {
+      title: "Assigned Team",
+      subtitle: "Direct reports and member workload breakdown.",
+      icon: "bi-people-fill",
+    };
+  }
+  if (path.includes("profile")) {
+    return {
+      title: "My Profile",
+      subtitle: "Personal details, credentials, and work assignments.",
+      icon: "bi-person-circle",
+    };
+  }
+
+  return {
+    title: `Welcome back, ${firstName}! 👋`,
+    subtitle: "Here's what's happening in your organization today.",
+    icon: "bi-grid-1x2-fill",
+  };
+};
+
 const Navbar = () => {
   const { user } = useAuth();
   const location = useLocation();
@@ -9,9 +89,7 @@ const Navbar = () => {
   const [isHovered, setIsHovered] = useState(false);
 
   const firstName = user?.name?.split(' ')[0] || "User";
-  const path = location.pathname.toLowerCase();
-  const isDepartmentsPage = path.includes("department");
-  const isUsersPage = path.includes("user");
+  const pageMeta = getPageMeta(location.pathname, firstName);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
     if (!headerRef.current) return;
@@ -26,7 +104,7 @@ const Navbar = () => {
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="w-full h-[68px] min-h-[68px] max-h-[68px] box-border navbar-frosted-glass px-6 lg:px-8 sticky top-0 z-30 transition-colors duration-300 flex items-center relative overflow-hidden"
+      className="w-full h-[68px] min-h-[68px] max-h-[68px] box-border navbar-frosted-glass px-6 lg:px-8 sticky top-0 z-30 transition-colors duration-300 flex items-center overflow-hidden"
     >
       {/* 1px "Linear Edge" Laser Border Horizon (Option 1) */}
       <div className="absolute bottom-0 left-0 right-0 h-[1.5px] pointer-events-none z-10">
@@ -88,46 +166,19 @@ const Navbar = () => {
 
       <div className="w-full h-full flex justify-between items-center relative z-20">
         {/* Welcome / Page Title Section */}
-        {isDepartmentsPage ? (
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-purple-50/80 border border-purple-100/80 flex items-center justify-center text-purple-600 shadow-2xs backdrop-blur-xs shrink-0">
-              <i className="bi bi-building text-lg"></i>
-            </div>
-            <div className="min-w-0 flex flex-col justify-center">
-              <h5 className="font-bold text-slate-900 mb-0 text-base tracking-tight leading-tight truncate">
-                Department Management
-              </h5>
-              <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium truncate">
-                <span className="hover:text-slate-600 transition-colors cursor-pointer">Home</span>
-                <i className="bi bi-chevron-right text-[9px] text-slate-300"></i>
-                <span className="text-slate-600">Departments</span>
-              </div>
-            </div>
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-purple-50/80 border border-purple-100/80 flex items-center justify-center text-purple-600 shadow-2xs backdrop-blur-xs shrink-0">
+            <i className={`bi ${pageMeta.icon} text-lg`}></i>
           </div>
-        ) : isUsersPage ? (
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-purple-50/80 border border-purple-100/80 flex items-center justify-center text-purple-600 shadow-2xs shrink-0 backdrop-blur-xs">
-              <i className="bi bi-people-fill text-lg"></i>
-            </div>
-            <div className="min-w-0 flex flex-col justify-center">
-              <h5 className="font-bold text-slate-900 mb-0 text-base tracking-tight leading-tight truncate">
-                User Directory
-              </h5>
-              <p className="text-slate-500 mb-0 font-normal text-xs leading-normal truncate">
-                Manage your workforce, roles, departments and reporting structure.
-              </p>
-            </div>
-          </div>
-        ) : (
           <div className="min-w-0 flex flex-col justify-center">
-            <h5 className="font-bold text-slate-900 mb-0 flex items-center gap-2 text-base tracking-tight leading-tight truncate">
-              Welcome back, {firstName}! <span className="text-lg">👋</span>
+            <h5 className="font-bold text-slate-900 mb-0 text-base tracking-tight leading-tight truncate">
+              {pageMeta.title}
             </h5>
             <p className="text-slate-500 mb-0 font-medium text-xs leading-normal truncate">
-              Here's what's happening in your organization today.
+              {pageMeta.subtitle}
             </p>
           </div>
-        )}
+        </div>
 
         {/* Global Search & Actions */}
         <div className="flex items-center gap-6">
