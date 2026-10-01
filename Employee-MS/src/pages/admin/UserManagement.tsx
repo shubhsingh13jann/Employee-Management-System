@@ -696,10 +696,10 @@ const UserManagement: React.FC = () => {
                       </svg>
                     </div>
                     <div className="flex flex-col justify-center">
-                      <h3 className="font-bold text-slate-900 text-[15px] sm:text-base tracking-tight leading-tight mb-0">
+                      <h3 className="font-bold text-slate-900 text-[14px] tracking-tight leading-tight mb-0">
                         Directory Filters
                       </h3>
-                      <p className="text-slate-500 text-[11px] font-normal leading-tight mt-0.5 mb-0">
+                      <p className="text-slate-500 text-[10.5px] font-normal leading-tight mt-0.5 mb-0">
                         Search and refine the workforce directory
                       </p>
                     </div>
@@ -730,8 +730,8 @@ const UserManagement: React.FC = () => {
                 <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
                   {/* Field 1: Search Keywords */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-800 mb-1">
-                      <i className="bi bi-search text-indigo-600 text-xs"></i>
+                    <label className="flex items-center text-xs font-bold text-slate-800 mb-1">
+                      <i className="bi bi-search text-indigo-600 text-xs mr-2"></i>
                       <span>Search Keywords</span>
                     </label>
                     <div className="relative flex items-center h-9 rounded-xl bg-white/70 border border-slate-200 hover:border-indigo-300 focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-100 transition-all px-2.5 shadow-2xs">
@@ -757,8 +757,8 @@ const UserManagement: React.FC = () => {
 
                   {/* Field 2: Department */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-800 mb-1">
-                      <i className="bi bi-building text-indigo-600 text-xs"></i>
+                    <label className="flex items-center text-xs font-bold text-slate-800 mb-1">
+                      <i className="bi bi-building text-indigo-600 text-xs mr-2"></i>
                       <span>Department</span>
                     </label>
                     <div className="relative flex items-center h-9 rounded-xl bg-purple-50/40 border border-purple-200/90 hover:border-purple-300 focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-purple-100 transition-all px-2.5 shadow-2xs">
@@ -781,8 +781,8 @@ const UserManagement: React.FC = () => {
 
                   {/* Field 3: Account Status */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-800 mb-1">
-                      <i className="bi bi-shield-check text-indigo-600 text-xs"></i>
+                    <label className="flex items-center text-xs font-bold text-slate-800 mb-1">
+                      <i className="bi bi-shield-check text-indigo-600 text-xs mr-2"></i>
                       <span>Account Status</span>
                     </label>
                     <div className="relative flex items-center h-9 rounded-xl bg-emerald-50/30 border border-emerald-200/90 hover:border-emerald-300 focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-100 transition-all px-2.5 shadow-2xs">
