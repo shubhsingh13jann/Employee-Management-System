@@ -648,85 +648,161 @@ const UserManagement: React.FC = () => {
             )}
           </div>
 
-          {/* Expandable Filter Drawer Panel */}
+          {/* Expandable Filter Drawer Panel (Matching Reference UI) */}
           {isFilterOpen && (
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm animate-in fade-in slide-in-from-top-2 duration-150 shrink-0">
-              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-3 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                  <i className="bi bi-sliders2 text-indigo-600 text-sm"></i>
-                  <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Directory Filters</span>
-                  {activeFilterCount > 0 && (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                      {activeFilterCount} active
-                    </span>
-                  )}
-                </div>
-                {activeFilterCount > 0 && (
-                  <button
-                    type="button"
-                    onClick={handleClearFilters}
-                    className="text-[11px] font-semibold text-rose-600 hover:text-rose-700 cursor-pointer flex items-center gap-1"
+            <div className="p-[1.5px] rounded-2xl bg-gradient-to-r from-blue-300/50 via-purple-300/60 to-pink-300/50 shadow-lg shadow-indigo-500/5 animate-in fade-in slide-in-from-top-2 duration-200 shrink-0">
+              <div className="relative rounded-[15px] bg-white/95 backdrop-blur-xl p-4 sm:p-5 overflow-hidden">
+                {/* Subtle Pastel Waves in Background */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-50 z-0">
+                  <svg
+                    className="absolute -right-6 -top-6 w-3/4 h-48 text-indigo-100/60"
+                    viewBox="0 0 500 150"
+                    preserveAspectRatio="none"
+                    fill="none"
                   >
-                    <i className="bi bi-x-circle text-[11px]"></i>
-                    <span>Clear All Filters</span>
-                  </button>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {/* Search Input */}
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">Search Keywords</label>
-                  <div className="relative">
-                    <i className="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Filter by name, email..."
-                      className="w-full pl-8 pr-7 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 outline-none transition-all text-slate-800 placeholder:text-slate-400"
+                    <path
+                      d="M 0,40 C 150,110 320,-10 500,50 L 500,0 L 0,0 Z"
+                      fill="url(#filterPastelWave1)"
+                      opacity="0.4"
                     />
-                    {searchQuery && (
-                      <button
-                        type="button"
-                        onClick={() => setSearchQuery("")}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
-                      >
-                        ✕
-                      </button>
-                    )}
+                    <path
+                      d="M 50,70 C 220,130 380,20 500,80 L 500,0 L 50,0 Z"
+                      fill="url(#filterPastelWave2)"
+                      opacity="0.3"
+                    />
+                    <defs>
+                      <linearGradient id="filterPastelWave1" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#bfdbfe" stopOpacity="0.45" />
+                        <stop offset="50%" stopColor="#ddd6fe" stopOpacity="0.55" />
+                        <stop offset="100%" stopColor="#fbcfe8" stopOpacity="0.45" />
+                      </linearGradient>
+                      <linearGradient id="filterPastelWave2" x1="100%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#e9d5ff" stopOpacity="0.5" />
+                        <stop offset="100%" stopColor="#c7d2fe" stopOpacity="0.35" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+
+                {/* Header Row: Title & Action Buttons */}
+                <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 pb-4">
+                  {/* Left: Funnel Badge + Title */}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#3b82f6] via-[#6366f1] to-[#8b5cf6] border border-blue-400/40 flex items-center justify-center text-white shadow-md shadow-indigo-500/25 shrink-0">
+                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.539.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.378-1.007.917-1.096A48.32 48.32 0 0112 3z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-900 mb-0.5 text-base tracking-tight leading-tight">
+                        Directory Filters
+                      </h3>
+                      <p className="text-slate-500 mb-0 text-xs font-normal">
+                        Search and refine the workforce directory
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Right: Reset Filters + OK */}
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={handleClearFilters}
+                      className="h-9 px-3.5 rounded-xl text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-white hover:bg-indigo-50/50 border border-indigo-100/90 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <i className="bi bi-arrow-counterclockwise text-sm text-indigo-600"></i>
+                      <span>Reset Filters</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsFilterOpen(false)}
+                      className="h-9 px-4 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-sm shadow-blue-500/25 transition-all flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.6}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                      <span>OK</span>
+                    </button>
                   </div>
                 </div>
 
-                {/* Department Filter */}
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">Department</label>
-                  <select
-                    value={selectedDept}
-                    onChange={(e) => setSelectedDept(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 outline-none font-medium text-slate-700 cursor-pointer"
-                  >
-                    <option value="">All Departments</option>
-                    {departments.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name} {d.code ? `(${d.code})` : ""}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {/* Filter Fields Row */}
+                <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 lg:gap-6 pt-1">
+                  {/* Field 1: Search Keywords */}
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-800 mb-2">
+                      <i className="bi bi-search text-indigo-600 text-xs font-bold"></i>
+                      <span>Search Keywords</span>
+                    </label>
+                    <div className="relative flex items-center h-10 rounded-xl bg-blue-50/20 border border-indigo-100 hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 transition-all px-3">
+                      <i className="bi bi-search text-slate-400 text-xs mr-2 shrink-0"></i>
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Filter by name, email, department..."
+                        className="w-full text-xs text-slate-800 placeholder:text-slate-400 bg-transparent outline-none font-normal"
+                      />
+                      {searchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setSearchQuery("")}
+                          className="text-slate-400 hover:text-slate-600 text-xs ml-1 cursor-pointer shrink-0"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  </div>
 
-                {/* Account Status Filter */}
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">Account Status</label>
-                  <select
-                    value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 outline-none font-medium text-slate-700 cursor-pointer"
-                  >
-                    <option value="">All Statuses</option>
-                    <option value="active">Active Members</option>
-                    <option value="inactive">Inactive / Suspended</option>
-                  </select>
+                  {/* Field 2: Department */}
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-800 mb-2">
+                      <span className="w-4 h-4 rounded bg-indigo-50 border border-indigo-200/80 flex items-center justify-center text-indigo-600 text-[10px]">
+                        <i className="bi bi-building"></i>
+                      </span>
+                      <span>Department</span>
+                    </label>
+                    <div className="relative flex items-center h-10 rounded-xl bg-purple-50/20 border border-purple-200/80 hover:border-purple-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-purple-100 transition-all px-3">
+                      <span className="w-4 h-4 rounded bg-purple-100/70 border border-purple-200 text-indigo-600 flex items-center justify-center text-[9px] mr-2.5 shrink-0">
+                        <i className="bi bi-building"></i>
+                      </span>
+                      <select
+                        value={selectedDept}
+                        onChange={(e) => setSelectedDept(e.target.value)}
+                        className="w-full text-xs font-semibold text-slate-700 bg-transparent outline-none cursor-pointer appearance-none pr-6"
+                      >
+                        <option value="">All Departments</option>
+                        {departments.map((d) => (
+                          <option key={d.id} value={d.id}>
+                            {d.name} {d.code ? `(${d.code})` : ""}
+                          </option>
+                        ))}
+                      </select>
+                      <i className="bi bi-chevron-down text-indigo-500 text-xs absolute right-3 pointer-events-none"></i>
+                    </div>
+                  </div>
+
+                  {/* Field 3: Account Status */}
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-800 mb-2">
+                      <i className="bi bi-shield-check text-indigo-600 text-xs"></i>
+                      <span>Account Status</span>
+                    </label>
+                    <div className="relative flex items-center h-10 rounded-xl bg-emerald-50/25 border border-emerald-200/80 hover:border-emerald-300 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-100 transition-all px-3">
+                      <span className={`w-2.5 h-2.5 rounded-full mr-2.5 shrink-0 shadow-2xs ${selectedStatus === "inactive" ? "bg-rose-500" : "bg-emerald-500"}`}></span>
+                      <select
+                        value={selectedStatus}
+                        onChange={(e) => setSelectedStatus(e.target.value)}
+                        className="w-full text-xs font-semibold text-slate-700 bg-transparent outline-none cursor-pointer appearance-none pr-6"
+                      >
+                        <option value="">All Statuses</option>
+                        <option value="active">Active Members</option>
+                        <option value="inactive">Inactive / Suspended</option>
+                      </select>
+                      <i className="bi bi-chevron-down text-slate-400 text-xs absolute right-3 pointer-events-none"></i>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
