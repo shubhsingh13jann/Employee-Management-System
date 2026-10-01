@@ -344,25 +344,25 @@ const UserManagement: React.FC = () => {
     switch (u.role) {
       case "admin":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200/80 shadow-2xs">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200/80 shadow-2xs">
             <span>👑</span>
             <span>HR Admin</span>
           </span>
         );
       case "manager":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/80 shadow-2xs">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/80 shadow-2xs">
             <span>👔</span>
             <span>Manager</span>
           </span>
         );
       case "supervisor":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
             <span>👷</span>
             <span>Supervisor</span>
             {u.direct_reports_count > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold bg-emerald-200/70 text-emerald-900">
+              <span className="px-1.5 py-0.2 rounded-full text-[8.5px] font-extrabold bg-emerald-200/70 text-emerald-900">
                 {u.direct_reports_count}
               </span>
             )}
@@ -371,7 +371,7 @@ const UserManagement: React.FC = () => {
       case "employee":
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-sky-50 text-sky-700 border border-sky-200/80 shadow-2xs">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-sky-50 text-sky-700 border border-sky-200/80 shadow-2xs">
             <span>💼</span>
             <span>Employee</span>
           </span>
@@ -380,11 +380,11 @@ const UserManagement: React.FC = () => {
   };
 
   return (
-    <div className="w-full space-y-4 sm:space-y-5 xl:h-full xl:flex xl:flex-col xl:min-h-0 xl:overflow-hidden">
+    <div className="w-full space-y-3 sm:space-y-3.5 xl:h-full xl:flex xl:flex-col xl:min-h-0 xl:overflow-hidden">
       {/* Alert Notification */}
       {msg.text && (
         <div
-          className={`p-3.5 rounded-xl border text-xs flex items-center justify-between gap-3 animate-in fade-in duration-200 shrink-0 ${
+          className={`p-3 rounded-xl border text-xs flex items-center justify-between gap-3 animate-in fade-in duration-200 shrink-0 ${
             msg.type === "success"
               ? "bg-emerald-50 border-emerald-200 text-emerald-800"
               : "bg-rose-50 border-rose-200 text-rose-800"
@@ -405,17 +405,17 @@ const UserManagement: React.FC = () => {
       )}
 
       {/* Main Responsive Layout with Smooth Sidebar Expansion */}
-      <div className="flex flex-col xl:flex-row gap-5 sm:gap-6 items-start xl:flex-1 xl:min-h-0 xl:h-full w-full">
+      <div className="flex flex-col xl:flex-row gap-3.5 items-start xl:flex-1 xl:min-h-0 xl:h-full w-full">
         {/* Left Column (Hero, Tabs, Table) */}
         <div
-          className={`min-w-0 xl:h-full xl:overflow-y-auto space-y-4 sm:space-y-5 transition-all duration-300 ease-in-out [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300 ${
-            isSidebarOpen ? "xl:w-2/3 xl:pr-1.5" : "w-full"
+          className={`min-w-0 xl:h-full xl:overflow-y-auto space-y-3 transition-all duration-300 ease-in-out [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300 ${
+            isSidebarOpen ? "xl:flex-1 xl:pr-1" : "w-full"
           }`}
         >
           {/* Executive Gradient Hero Banner & Action Toolbar with Micro-Lightning / Wave Effect */}
-          <div className="relative p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#070d28] via-[#0d164d] to-[#1c1252] border border-indigo-500/30 shadow-2xl text-white flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 select-none">
+          <div className="relative px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl bg-gradient-to-r from-[#070d28] via-[#0d164d] to-[#1c1252] border border-indigo-500/30 shadow-xl text-white flex flex-col md:flex-row md:items-center justify-between gap-3 shrink-0 select-none">
             {/* Micro-Lightning Wave Effect Background */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl z-0">
+            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl z-0">
               {/* Harmonic Waves / Micro Lightning SVG */}
               <svg
                 className="absolute right-0 bottom-0 w-[65%] sm:w-[52%] h-full text-cyan-400 micro-lightning-waves opacity-85"
@@ -481,15 +481,15 @@ const UserManagement: React.FC = () => {
             </div>
 
             {/* Left Side: Icon & Title */}
-            <div className="relative z-10 flex items-center gap-3.5 min-w-0">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500/30 to-indigo-600/30 border border-blue-400/40 flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-blue-500/25 shrink-0 backdrop-blur-xs">
+            <div className="relative z-10 flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-blue-500/30 to-indigo-600/30 border border-blue-400/40 flex items-center justify-center text-white text-sm sm:text-base font-bold shadow-md shadow-blue-500/25 shrink-0 backdrop-blur-xs">
                 <i className="bi bi-people-fill text-blue-200"></i>
               </div>
               <div className="min-w-0">
-                <h2 className="text-base sm:text-lg font-bold tracking-tight text-white mb-0.5 whitespace-nowrap">
+                <h2 className="text-sm sm:text-base font-bold tracking-tight text-white mb-0.5 whitespace-nowrap">
                   Workforce Management
                 </h2>
-                <p className="text-xs text-indigo-200/80 mb-0 font-normal truncate max-w-[280px] sm:max-w-md">
+                <p className="text-[11px] text-indigo-200/80 mb-0 font-normal truncate max-w-[280px] sm:max-w-md">
                   Enterprise Personnel Directory, Reporting Line Hierarchy & Governance Operations
                 </p>
               </div>
@@ -501,7 +501,7 @@ const UserManagement: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsHeroMenuOpen(!isHeroMenuOpen)}
-                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer shadow-md ${
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer shadow-xs ${
                     isHeroMenuOpen
                       ? "bg-indigo-600 text-white border border-indigo-400/50 shadow-indigo-500/30 ring-2 ring-indigo-400/30"
                       : "bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-xs"
@@ -509,11 +509,11 @@ const UserManagement: React.FC = () => {
                   title="Menu Options"
                   aria-label="Toggle Actions Menu"
                 >
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
                   </svg>
                   {activeFilterCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-indigo-500 border-2 border-slate-900 text-[9px] font-bold flex items-center justify-center text-white">
+                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-indigo-500 border-2 border-slate-900 text-[8px] font-bold flex items-center justify-center text-white">
                       {activeFilterCount}
                     </span>
                   )}
@@ -521,16 +521,16 @@ const UserManagement: React.FC = () => {
 
                 {/* Dropdown Menu */}
                 {isHeroMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl bg-slate-900/95 backdrop-blur-xl border border-indigo-500/30 shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 text-white">
+                  <div className="absolute right-0 top-full mt-1.5 w-48 rounded-xl bg-slate-900/95 backdrop-blur-xl border border-indigo-500/30 shadow-2xl p-1 z-50 animate-in fade-in zoom-in-95 duration-150 text-white">
                     <button
                       type="button"
                       onClick={() => {
                         setIsHeroMenuOpen(false);
                         handleOpenOnboard();
                       }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer shadow-sm text-left"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer shadow-xs text-left"
                     >
-                      <i className="bi bi-plus-lg text-xs font-bold"></i>
+                      <i className="bi bi-plus-lg text-[10px] font-bold"></i>
                       <span>Onboard Member</span>
                     </button>
 
@@ -542,13 +542,13 @@ const UserManagement: React.FC = () => {
                         setIsHeroMenuOpen(false);
                         setIsSidebarOpen(!isSidebarOpen);
                       }}
-                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
+                      className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
                     >
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex items-center gap-2">
                         <i className={`bi ${isSidebarOpen ? "bi-pie-chart-fill" : "bi-pie-chart"} text-indigo-400 text-xs`}></i>
                         <span>Workforce Overview</span>
                       </div>
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-500/30 text-indigo-300">
+                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-indigo-300">
                         {isSidebarOpen ? "Open" : "Closed"}
                       </span>
                     </button>
@@ -559,14 +559,14 @@ const UserManagement: React.FC = () => {
                         setIsHeroMenuOpen(false);
                         setIsFilterOpen(!isFilterOpen);
                       }}
-                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
+                      className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
                     >
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex items-center gap-2">
                         <i className="bi bi-funnel text-indigo-400 text-xs"></i>
                         <span>Filter Directory</span>
                       </div>
                       {activeFilterCount > 0 && (
-                        <span className="w-4 h-4 rounded-full bg-indigo-500 text-white text-[10px] font-bold flex items-center justify-center">
+                        <span className="w-3.5 h-3.5 rounded-full bg-indigo-500 text-white text-[9px] font-bold flex items-center justify-center">
                           {activeFilterCount}
                         </span>
                       )}
@@ -579,7 +579,7 @@ const UserManagement: React.FC = () => {
                         handleExportCSV();
                       }}
                       disabled={users.length === 0}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer disabled:opacity-50 text-left"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer disabled:opacity-50 text-left"
                     >
                       <i className="bi bi-download text-indigo-400 text-xs"></i>
                       <span>Export Directory</span>
@@ -588,12 +588,12 @@ const UserManagement: React.FC = () => {
                 )}
               </div>
             ) : (
-              <div className="relative z-10 flex items-center gap-2 shrink-0 self-end md:self-center">
+              <div className="relative z-10 flex items-center gap-1.5 shrink-0 self-end md:self-center">
                 {/* Workforce Overview Toggle Button */}
                 <button
                   type="button"
                   onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border backdrop-blur-xs transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border backdrop-blur-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs ${
                     isSidebarOpen
                       ? "bg-indigo-600 border-indigo-400 text-white shadow-indigo-500/30 ring-2 ring-indigo-400/30"
                       : "bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border-white/20"
@@ -608,7 +608,7 @@ const UserManagement: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsFilterOpen(!isFilterOpen)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border backdrop-blur-xs transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border backdrop-blur-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs ${
                     isFilterOpen || activeFilterCount > 0
                       ? "bg-indigo-600/40 border-indigo-400 text-white shadow-indigo-500/20"
                       : "bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border-white/20"
@@ -617,7 +617,7 @@ const UserManagement: React.FC = () => {
                   <i className="bi bi-funnel text-xs"></i>
                   <span>Filter</span>
                   {activeFilterCount > 0 && (
-                    <span className="w-4 h-4 rounded-full bg-indigo-500 text-white text-[10px] font-bold flex items-center justify-center">
+                    <span className="w-3.5 h-3.5 rounded-full bg-indigo-500 text-white text-[9px] font-bold flex items-center justify-center">
                       {activeFilterCount}
                     </span>
                   )}
@@ -628,7 +628,7 @@ const UserManagement: React.FC = () => {
                   type="button"
                   onClick={handleExportCSV}
                   disabled={users.length === 0}
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border border-white/20 backdrop-blur-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-50"
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border border-white/20 backdrop-blur-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs disabled:opacity-50"
                   title="Export Workforce Directory as CSV"
                 >
                   <i className="bi bi-download text-xs"></i>
@@ -639,9 +639,9 @@ const UserManagement: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleOpenOnboard}
-                  className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/30 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                  className="px-3 py-1 rounded-lg text-[11px] font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/30 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
                 >
-                  <i className="bi bi-plus-lg font-bold text-xs"></i>
+                  <i className="bi bi-plus-lg font-bold text-[10px]"></i>
                   <span>Onboard Member</span>
                 </button>
               </div>
@@ -733,7 +733,7 @@ const UserManagement: React.FC = () => {
           )}
 
           {/* Role Filter Tabs (Clean Floating Pills Matching Image 2) */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar shrink-0">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar shrink-0">
             {roleTabs.map((tab) => {
               const isActive = selectedRole === tab.id;
               return (
@@ -741,7 +741,7 @@ const UserManagement: React.FC = () => {
                   key={tab.id}
                   type="button"
                   onClick={() => setSelectedRole(tab.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                     isActive
                       ? tab.activeStyles
                       : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90 shadow-2xs hover:border-slate-300"
@@ -749,7 +749,7 @@ const UserManagement: React.FC = () => {
                 >
                   <span>{tab.label}</span>
                   <span
-                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold transition-colors ${
+                    className={`px-1.5 py-0.2 rounded-full text-[9.5px] font-bold transition-colors ${
                       isActive ? tab.badgeActive : "bg-slate-100 text-slate-600"
                     }`}
                   >
@@ -761,13 +761,13 @@ const UserManagement: React.FC = () => {
           </div>
 
           {/* Workforce Directory Table */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
+          <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
             <div className="overflow-x-auto min-h-[340px] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
-              <table className="w-full min-w-[780px] text-left border-collapse text-xs">
-                <thead className="bg-slate-50/80 border-b border-slate-200/90 text-xs font-semibold text-slate-600 normal-case tracking-normal">
+              <table className="w-full min-w-[760px] text-left border-collapse text-xs">
+                <thead className="bg-slate-50/80 border-b border-slate-200/90 text-[11px] font-semibold text-slate-600 normal-case tracking-normal">
                   <tr>
                     <th
-                      className="px-4 py-3 cursor-pointer select-none hover:text-slate-900 transition-colors"
+                      className="px-3.5 py-2 cursor-pointer select-none hover:text-slate-900 transition-colors"
                       onClick={() => handleSort("name")}
                       title="Click to sort by Name"
                     >
@@ -785,7 +785,7 @@ const UserManagement: React.FC = () => {
                       </div>
                     </th>
                     <th
-                      className="px-3 py-3 cursor-pointer select-none hover:text-slate-900 transition-colors whitespace-nowrap"
+                      className="px-3 py-2 cursor-pointer select-none hover:text-slate-900 transition-colors whitespace-nowrap"
                       onClick={() => handleSort("role")}
                       title="Click to sort by Role Tier"
                     >
@@ -802,9 +802,9 @@ const UserManagement: React.FC = () => {
                         ></i>
                       </div>
                     </th>
-                    <th className="px-3 py-3 font-semibold text-slate-600 whitespace-nowrap">Department</th>
+                    <th className="px-3 py-2 font-semibold text-slate-600 whitespace-nowrap">Department</th>
                     <th
-                      className="px-3 py-3 cursor-pointer select-none hover:text-slate-900 transition-colors whitespace-nowrap"
+                      className="px-3 py-2 cursor-pointer select-none hover:text-slate-900 transition-colors whitespace-nowrap"
                       onClick={() => handleSort("salary")}
                       title="Click to sort by Annual Salary"
                     >
@@ -821,9 +821,9 @@ const UserManagement: React.FC = () => {
                         ></i>
                       </div>
                     </th>
-                    <th className="px-3 py-3 font-semibold text-slate-600 whitespace-nowrap">Phone</th>
-                    <th className="px-3 py-3 font-semibold text-slate-600 whitespace-nowrap">Status</th>
-                    <th className="px-4 py-3 font-semibold text-slate-600 text-center whitespace-nowrap">Actions</th>
+                    <th className="px-3 py-2 font-semibold text-slate-600 whitespace-nowrap">Phone</th>
+                    <th className="px-3 py-2 font-semibold text-slate-600 whitespace-nowrap">Status</th>
+                    <th className="px-3.5 py-2 font-semibold text-slate-600 text-center whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -863,13 +863,13 @@ const UserManagement: React.FC = () => {
                           }`}
                         >
                           {/* Staff Member Identity */}
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200/90 shadow-2xs shrink-0 overflow-hidden ring-1 ring-slate-200/50">
+                          <td className="px-3.5 py-2">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-7 h-7 rounded-full bg-slate-100 text-slate-700 font-bold text-[11px] flex items-center justify-center border border-slate-200/90 shadow-2xs shrink-0 overflow-hidden ring-1 ring-slate-200/50">
                                 {u.image_url ? (
-                                  <img src={u.image_url} alt={u.name} className="w-full h-full object-cover" />
+                                   <img src={u.image_url} alt={u.name} className="w-full h-full object-cover" />
                                 ) : (
-                                  <span>{u.name ? u.name.charAt(0) : "U"}</span>
+                                   <span>{u.name ? u.name.charAt(0) : "U"}</span>
                                 )}
                               </div>
                               <div className="min-w-0">
@@ -888,18 +888,18 @@ const UserManagement: React.FC = () => {
                                     </span>
                                   ) : null}
                                 </div>
-                                <span className="text-[11px] text-slate-400 block truncate mt-0.5">{u.email}</span>
+                                <span className="text-[10.5px] text-slate-400 block truncate mt-0.5">{u.email}</span>
                               </div>
                             </div>
                           </td>
 
                           {/* Role Tier */}
-                          <td className="px-3 py-3 whitespace-nowrap">
+                          <td className="px-3 py-2 whitespace-nowrap">
                             {getRoleBadge(u)}
                           </td>
 
                           {/* Department */}
-                          <td className="px-3 py-3 whitespace-nowrap">
+                          <td className="px-3 py-2 whitespace-nowrap">
                             <div className="flex items-center gap-2">
                               <i className={`bi ${deptInfo.icon} ${deptInfo.color} text-xs shrink-0`}></i>
                               <span className="font-medium text-slate-700 text-xs">
@@ -909,14 +909,14 @@ const UserManagement: React.FC = () => {
                           </td>
 
                           {/* Compensation */}
-                          <td className="px-3 py-3 whitespace-nowrap">
+                          <td className="px-3 py-2 whitespace-nowrap">
                             <span className="font-semibold text-slate-900 text-xs">
                               ${Number(u.salary || 0).toLocaleString()}
                             </span>
                           </td>
 
                           {/* Contact */}
-                          <td className="px-3 py-3 whitespace-nowrap text-xs text-slate-700">
+                          <td className="px-3 py-2 whitespace-nowrap text-xs text-slate-700">
                             {u.phone ? (
                               <span className="font-medium text-slate-700">{u.phone}</span>
                             ) : (
@@ -925,9 +925,9 @@ const UserManagement: React.FC = () => {
                           </td>
 
                           {/* Status */}
-                          <td className="px-3 py-3 whitespace-nowrap">
+                          <td className="px-3 py-2 whitespace-nowrap">
                             <span
-                              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
+                              className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                                 u.status === "active"
                                   ? "bg-emerald-50 text-emerald-700 border border-emerald-200/70"
                                   : "bg-slate-100 text-slate-600 border border-slate-200/70"
@@ -943,7 +943,7 @@ const UserManagement: React.FC = () => {
                           </td>
 
                           {/* Actions (Centered Matching Option 2) */}
-                          <td className={`px-4 py-3 text-center whitespace-nowrap ${isMenuActive ? "relative z-40" : ""}`}>
+                          <td className={`px-3.5 py-2 text-center whitespace-nowrap ${isMenuActive ? "relative z-40" : ""}`}>
                             <div className="relative inline-flex items-center justify-center action-menu-container">
                               <button
                                 type="button"
@@ -951,7 +951,7 @@ const UserManagement: React.FC = () => {
                                   e.stopPropagation();
                                   setActiveActionMenuId((prev) => (prev === u.id ? null : u.id));
                                 }}
-                                className={`w-8 h-8 rounded-xl border transition-all inline-flex items-center justify-center cursor-pointer ${
+                                className={`w-7 h-7 rounded-lg border transition-all inline-flex items-center justify-center cursor-pointer ${
                                   isMenuActive
                                     ? "bg-slate-100 text-slate-800 border-slate-300 shadow-2xs"
                                     : "border-slate-200/80 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 shadow-2xs"
@@ -965,7 +965,7 @@ const UserManagement: React.FC = () => {
                                 <div
                                   className={`absolute right-0 ${
                                     isNearBottom ? "bottom-full mb-1.5" : "top-full mt-1.5"
-                                  } w-48 rounded-2xl bg-white border border-slate-200/90 shadow-xl p-1.5 z-50 text-left animate-in fade-in zoom-in-95 duration-100`}
+                                  } w-44 rounded-xl bg-white border border-slate-200/90 shadow-xl p-1 z-50 text-left animate-in fade-in zoom-in-95 duration-100`}
                                 >
                                   <button
                                     type="button"
@@ -973,7 +973,7 @@ const UserManagement: React.FC = () => {
                                       setActiveActionMenuId(null);
                                       handleOpenProfile(u.id);
                                     }}
-                                    className="w-full px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-xl flex items-center gap-2 transition-colors cursor-pointer"
+                                    className="w-full px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
                                   >
                                     <i className="bi bi-eye text-slate-400"></i>
                                     <span>View Profile</span>
@@ -984,7 +984,7 @@ const UserManagement: React.FC = () => {
                                       setActiveActionMenuId(null);
                                       handleOpenEdit(u);
                                     }}
-                                    className="w-full px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-xl flex items-center gap-2 transition-colors cursor-pointer"
+                                    className="w-full px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
                                   >
                                     <i className="bi bi-pencil-square text-slate-400"></i>
                                     <span>Edit Details</span>
@@ -997,7 +997,7 @@ const UserManagement: React.FC = () => {
                                       setActiveActionMenuId(null);
                                       handleRequestDelete(u);
                                     }}
-                                    className="w-full px-2.5 py-1.5 text-xs text-rose-600 hover:bg-rose-50 rounded-xl flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
+                                    className="w-full px-2.5 py-1.5 text-[11px] text-rose-600 hover:bg-rose-50 rounded-lg flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
                                   >
                                     <i className="bi bi-person-x text-rose-500"></i>
                                     <span>Offboard Member</span>
@@ -1015,7 +1015,7 @@ const UserManagement: React.FC = () => {
             </div>
 
             {/* Bottom Pagination Bar */}
-            <div className="px-4 sm:px-6 py-3 bg-white border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div className="px-3.5 sm:px-4 py-2 bg-white border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-[11.5px]">
               {/* Left Counter */}
               <div className="text-slate-500 font-medium">
                 Showing <span className="font-semibold text-slate-800">{displayedUsers.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}</span> to{" "}
@@ -1024,26 +1024,26 @@ const UserManagement: React.FC = () => {
               </div>
 
               {/* Right Controls */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 {/* Previous Page Button */}
                 <button
                   type="button"
                   disabled={currentPage <= 1}
                   onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                  className="w-8 h-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center transition-colors cursor-pointer text-xs"
+                  className="w-7 h-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center transition-colors cursor-pointer text-xs"
                   title="Previous Page"
                 >
-                  <i className="bi bi-chevron-left text-[11px]"></i>
+                  <i className="bi bi-chevron-left text-[10px]"></i>
                 </button>
 
                 {/* Page Navigation Pills */}
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <button
                       key={page}
                       type="button"
                       onClick={() => setCurrentPage(page)}
-                      className={`w-8 h-8 rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center ${
+                      className={`w-7 h-7 rounded-lg text-xs transition-all cursor-pointer flex items-center justify-center ${
                         currentPage === page
                           ? "bg-indigo-600 text-white shadow-xs font-bold"
                           : "bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-medium"
@@ -1059,21 +1059,21 @@ const UserManagement: React.FC = () => {
                   type="button"
                   disabled={currentPage >= totalPages}
                   onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                  className="w-8 h-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center transition-colors cursor-pointer text-xs"
+                  className="w-7 h-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center transition-colors cursor-pointer text-xs"
                   title="Next Page"
                 >
-                  <i className="bi bi-chevron-right text-[11px]"></i>
+                  <i className="bi bi-chevron-right text-[10px]"></i>
                 </button>
 
                 {/* Page Size Selector */}
-                <div className="flex items-center gap-1.5 ml-2">
+                <div className="flex items-center gap-1 ml-1.5">
                   <select
                     value={pageSize}
                     onChange={(e) => {
                       setPageSize(Number(e.target.value));
                       setCurrentPage(1);
                     }}
-                    className="px-3 py-1.5 rounded-xl text-xs bg-white border border-slate-200 text-slate-700 font-medium outline-none cursor-pointer hover:border-slate-300"
+                    className="px-2.5 py-1 rounded-lg text-[11px] bg-white border border-slate-200 text-slate-700 font-medium outline-none cursor-pointer hover:border-slate-300"
                   >
                     <option value={5}>5 per page</option>
                     <option value={10}>10 per page</option>
@@ -1088,7 +1088,7 @@ const UserManagement: React.FC = () => {
 
         {/* Right Column: Workforce Analytics Sidebar with Smooth Slide-in */}
         {isSidebarOpen && (
-          <div className="w-full xl:w-1/3 xl:min-w-[340px] xl:max-w-[420px] min-w-0 xl:h-full xl:overflow-y-auto xl:pl-1 space-y-4 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300 animate-in fade-in slide-in-from-right-4 duration-300">
+          <div className="w-full xl:w-[290px] xl:min-w-[280px] xl:max-w-[300px] shrink-0 min-w-0 xl:h-full xl:overflow-y-auto xl:pl-0.5 space-y-3 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300 animate-in fade-in slide-in-from-right-4 duration-300">
             <WorkforceAnalyticsSidebar
               allUsers={allUsers}
               departments={departments}
