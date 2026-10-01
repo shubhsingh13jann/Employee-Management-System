@@ -73,8 +73,4 @@ body {
   animation: microLightningPulse 4s ease-in-out infinite, microWaveShift 7s ease-in-out infinite;
 }
 
-.ambient-bloom {
-  animation: microLightningPulse 6s ease-in-out infinite alternate;
-}
-
 

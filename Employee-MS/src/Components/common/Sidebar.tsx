@@ -162,19 +162,8 @@ const Sidebar = () => {
       className="sidebar-container text-white flex flex-col px-3.5 py-4 h-screen sticky top-0 shadow-xl relative overflow-hidden select-none"
       style={{ width: "240px", minWidth: "240px", zIndex: 1000, fontSize: "0.82rem" }}
     >
-      {/* Ambient Lighting & Micro-Lightning Wave Effect Background */}
+      {/* Micro-Lightning Wave Effect Background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        {/* Ambient Lighting Blooms */}
-        <div className="absolute -top-10 -left-10 w-48 h-48 bg-indigo-600/15 rounded-full blur-3xl ambient-bloom"></div>
-        <div
-          className="absolute top-1/2 -right-12 -translate-y-1/2 w-48 h-80 bg-cyan-500/15 rounded-full blur-3xl ambient-bloom"
-          style={{ animationDelay: "2s" }}
-        ></div>
-        <div
-          className="absolute bottom-16 -right-10 w-44 h-56 bg-indigo-500/20 rounded-full blur-2xl ambient-bloom"
-          style={{ animationDelay: "1s" }}
-        ></div>
-
         {/* Micro Lightning / Harmonic Wave SVG Curves */}
         <svg
           className="absolute right-0 bottom-10 w-full h-[68%] text-cyan-400 micro-lightning-waves opacity-80"

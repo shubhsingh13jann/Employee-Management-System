@@ -406,19 +406,8 @@ const UserManagement: React.FC = () => {
         >
           {/* Executive Gradient Hero Banner & Action Toolbar with Micro-Lightning / Wave Effect */}
           <div className="relative overflow-hidden p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#070d28] via-[#0d164d] to-[#1c1252] border border-indigo-500/30 shadow-2xl text-white flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 select-none">
-            {/* Ambient Lighting & Micro-Lightning Wave Effect Background */}
+            {/* Micro-Lightning Wave Effect Background */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-              {/* Ambient Blooms */}
-              <div className="absolute -top-12 left-12 w-64 h-32 bg-blue-600/20 rounded-full blur-3xl ambient-bloom"></div>
-              <div
-                className="absolute top-0 right-1/4 w-80 h-32 bg-cyan-500/15 rounded-full blur-3xl ambient-bloom"
-                style={{ animationDelay: "2.5s" }}
-              ></div>
-              <div
-                className="absolute -bottom-10 right-10 w-96 h-36 bg-purple-600/20 rounded-full blur-3xl ambient-bloom"
-                style={{ animationDelay: "1.2s" }}
-              ></div>
-
               {/* Harmonic Waves / Micro Lightning SVG */}
               <svg
                 className="absolute right-0 bottom-0 w-[65%] sm:w-[52%] h-full text-cyan-400 micro-lightning-waves opacity-85"
