@@ -286,6 +286,15 @@ const UserManagement: React.FC = () => {
     };
   }, []);
 
+  // Auto-dismiss alert notification after 4 seconds
+  useEffect(() => {
+    if (!msg.text) return;
+    const timer = setTimeout(() => {
+      setMsg({ type: "", text: "" });
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [msg.text]);
+
   // Keyboard shortcut listener (/ or Ctrl+K / Cmd+K to open filter & focus search)
   useEffect(() => {
     const handleGlobalShortcuts = (e: KeyboardEvent) => {
@@ -367,6 +376,10 @@ const UserManagement: React.FC = () => {
   }, [selectedDept, searchQuery]);
 
   const handleRequestDelete = (user: any) => {
+    setIsProfileModalOpen(false);
+    setSelectedUserIdForProfile(null);
+    setIsFormModalOpen(false);
+    setSelectedUserForEdit(null);
     setOffboardTarget({ id: user.id, name: user.name, role: user.role });
   };
 
@@ -391,16 +404,23 @@ const UserManagement: React.FC = () => {
   };
 
   const handleOpenOnboard = () => {
+    setIsProfileModalOpen(false);
+    setSelectedUserIdForProfile(null);
     setSelectedUserForEdit(null);
     setIsFormModalOpen(true);
   };
 
   const handleOpenEdit = (user: any) => {
+    setIsProfileModalOpen(false);
+    setSelectedUserIdForProfile(null);
     setSelectedUserForEdit(user);
     setIsFormModalOpen(true);
   };
 
   const handleOpenProfile = (id: number) => {
+    if (showCheckboxes || isFormModalOpen) return;
+    setIsFormModalOpen(false);
+    setSelectedUserForEdit(null);
     setSelectedUserIdForProfile(id);
     setIsProfileModalOpen(true);
   };
@@ -471,6 +491,8 @@ const UserManagement: React.FC = () => {
 
   const handleToggleUserStatus = async (userToToggle: any) => {
     setActiveActionMenuId(null);
+    setIsProfileModalOpen(false);
+    setSelectedUserIdForProfile(null);
     const isSuspending = userToToggle.status === "active";
     const newStatus = isSuspending ? "inactive" : "active";
     try {
@@ -1645,11 +1667,17 @@ const UserManagement: React.FC = () => {
                       return (
                         <tr
                           key={u.id}
-                          onClick={() => handleOpenProfile(u.id)}
+                          onClick={() => {
+                            if (showCheckboxes) {
+                              handleToggleSelectUser(u.id);
+                            } else {
+                              handleOpenProfile(u.id);
+                            }
+                          }}
                           className={`hover:bg-indigo-50/30 transition-colors cursor-pointer group ${
                             isMenuActive ? "relative z-30 bg-slate-50/60" : "relative z-0"
                           }`}
-                          title="Click row to view profile dossier"
+                          title={showCheckboxes ? "Click to toggle selection" : "Click row to view profile dossier"}
                         >
                           {/* Checkbox Selector */}
                           {showCheckboxes && (
@@ -1658,7 +1686,10 @@ const UserManagement: React.FC = () => {
                                 type="checkbox"
                                 aria-label={`Select ${u.name}`}
                                 checked={selectedUserIds.includes(u.id)}
-                                onChange={() => handleToggleSelectUser(u.id)}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  handleToggleSelectUser(u.id);
+                                }}
                                 className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
                               />
                             </td>
@@ -1839,8 +1870,14 @@ const UserManagement: React.FC = () => {
                           )}
 
                           {/* Actions (Centered Matching Option 2) */}
-                          <td className={`px-4 py-2.5 text-center whitespace-nowrap ${isMenuActive ? "relative z-40" : ""}`}>
-                            <div className="relative inline-flex items-center justify-center action-menu-container">
+                          <td
+                            className={`px-4 py-2.5 text-center whitespace-nowrap ${isMenuActive ? "relative z-40" : ""}`}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <div
+                              className="relative inline-flex items-center justify-center action-menu-container"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <button
                                 type="button"
                                 onClick={(e) => {
@@ -1862,10 +1899,12 @@ const UserManagement: React.FC = () => {
                                   className={`absolute right-0 ${
                                     isNearBottom ? "bottom-full mb-1.5" : "top-full mt-1.5"
                                   } w-44 rounded-xl bg-white border border-slate-200/90 shadow-xl p-1 z-50 text-left animate-in fade-in zoom-in-95 duration-100`}
+                                  onClick={(e) => e.stopPropagation()}
                                 >
                                   <button
                                     type="button"
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                      e.stopPropagation();
                                       setActiveActionMenuId(null);
                                       handleOpenProfile(u.id);
                                     }}
@@ -1876,7 +1915,8 @@ const UserManagement: React.FC = () => {
                                   </button>
                                   <button
                                     type="button"
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                      e.stopPropagation();
                                       setActiveActionMenuId(null);
                                       handleOpenEdit(u);
                                     }}
@@ -1887,7 +1927,8 @@ const UserManagement: React.FC = () => {
                                   </button>
                                   <button
                                     type="button"
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                      e.stopPropagation();
                                       setActiveActionMenuId(null);
                                       setIsSelectMode(true);
                                       if (!selectedUserIds.includes(u.id)) {
@@ -1901,7 +1942,11 @@ const UserManagement: React.FC = () => {
                                   </button>
                                   <button
                                     type="button"
-                                    onClick={() => handleToggleUserStatus(u)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setActiveActionMenuId(null);
+                                      handleToggleUserStatus(u);
+                                    }}
                                     className={`w-full px-2.5 py-1.5 text-[11px] rounded-lg flex items-center gap-2 transition-colors cursor-pointer ${
                                       u.status === "active"
                                         ? "text-amber-700 hover:bg-amber-50"
@@ -1915,7 +1960,8 @@ const UserManagement: React.FC = () => {
                                   <button
                                     type="button"
                                     disabled={deletingId === u.id}
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                      e.stopPropagation();
                                       setActiveActionMenuId(null);
                                       handleRequestDelete(u);
                                     }}
@@ -1980,7 +2026,13 @@ const UserManagement: React.FC = () => {
                     return (
                       <div
                         key={u.id}
-                        onClick={() => handleOpenProfile(u.id)}
+                        onClick={() => {
+                          if (showCheckboxes) {
+                            handleToggleSelectUser(u.id);
+                          } else {
+                            handleOpenProfile(u.id);
+                          }
+                        }}
                         className={`bg-white rounded-2xl border transition-all duration-200 p-4 flex flex-col justify-between group cursor-pointer relative shadow-2xs hover:shadow-md ${
                           isSelected
                             ? "border-indigo-500 ring-2 ring-indigo-100 bg-indigo-50/15"
@@ -1998,7 +2050,10 @@ const UserManagement: React.FC = () => {
                                 type="checkbox"
                                 aria-label={`Select ${u.name}`}
                                 checked={isSelected}
-                                onChange={() => handleToggleSelectUser(u.id)}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  handleToggleSelectUser(u.id);
+                                }}
                                 className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
                               />
                             )}
@@ -2025,17 +2080,24 @@ const UserManagement: React.FC = () => {
                           >
                             <button
                               type="button"
-                              onClick={() => setActiveActionMenuId((prev) => (prev === u.id ? null : u.id))}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveActionMenuId((prev) => (prev === u.id ? null : u.id));
+                              }}
                               className="w-7 h-7 rounded-lg border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 flex items-center justify-center cursor-pointer shadow-2xs"
                               title="Actions"
                             >
                               <i className="bi bi-three-dots text-xs"></i>
                             </button>
                             {activeActionMenuId === u.id && (
-                              <div className="absolute right-0 top-full mt-1 w-44 rounded-xl bg-white border border-slate-200/90 shadow-xl p-1 z-50 text-left animate-in fade-in zoom-in-95 duration-100">
+                              <div
+                                className="absolute right-0 top-full mt-1 w-44 rounded-xl bg-white border border-slate-200/90 shadow-xl p-1 z-50 text-left animate-in fade-in zoom-in-95 duration-100"
+                                onClick={(e) => e.stopPropagation()}
+                              >
                                 <button
                                   type="button"
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     setActiveActionMenuId(null);
                                     handleOpenProfile(u.id);
                                   }}
@@ -2046,7 +2108,8 @@ const UserManagement: React.FC = () => {
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     setActiveActionMenuId(null);
                                     handleOpenEdit(u);
                                   }}
@@ -2057,7 +2120,8 @@ const UserManagement: React.FC = () => {
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     setActiveActionMenuId(null);
                                     setIsSelectMode(true);
                                     if (!selectedUserIds.includes(u.id)) {
@@ -2071,7 +2135,11 @@ const UserManagement: React.FC = () => {
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => handleToggleUserStatus(u)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActiveActionMenuId(null);
+                                    handleToggleUserStatus(u);
+                                  }}
                                   className={`w-full px-2.5 py-1.5 text-[11px] rounded-lg flex items-center gap-2 transition-colors cursor-pointer ${
                                     u.status === "active"
                                       ? "text-amber-700 hover:bg-amber-50"
@@ -2085,7 +2153,8 @@ const UserManagement: React.FC = () => {
                                 <button
                                   type="button"
                                   disabled={deletingId === u.id}
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     setActiveActionMenuId(null);
                                     handleRequestDelete(u);
                                   }}
@@ -2220,7 +2289,10 @@ const UserManagement: React.FC = () => {
                         <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
                           <button
                             type="button"
-                            onClick={() => handleOpenProfile(u.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenProfile(u.id);
+                            }}
                             className="flex-1 h-7.5 rounded-lg text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50/70 hover:bg-indigo-100/70 border border-indigo-200/60 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                           >
                             <i className="bi bi-person-badge text-xs"></i>
@@ -2228,7 +2300,10 @@ const UserManagement: React.FC = () => {
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleOpenEdit(u)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenEdit(u);
+                            }}
                             className="h-7.5 px-3 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-800 bg-white hover:bg-slate-100 border border-slate-200/80 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                             title="Edit Details"
                           >
@@ -2336,7 +2411,7 @@ const UserManagement: React.FC = () => {
 
   {/* User Form Modal (Onboard & Edit) */}
   <UserFormModal
-        isOpen={isFormModalOpen}
+        isOpen={isFormModalOpen && !isProfileModalOpen}
         onClose={() => {
           setIsFormModalOpen(false);
           setSelectedUserForEdit(null);
@@ -2358,13 +2433,15 @@ const UserManagement: React.FC = () => {
 
       {/* User Profile Modal */}
       <UserProfileModal
-        isOpen={isProfileModalOpen}
+        isOpen={isProfileModalOpen && !isFormModalOpen}
         onClose={() => {
           setIsProfileModalOpen(false);
           setSelectedUserIdForProfile(null);
         }}
         userId={selectedUserIdForProfile}
         onEditUser={(user) => {
+          setIsProfileModalOpen(false);
+          setSelectedUserIdForProfile(null);
           setSelectedUserForEdit(user);
           setIsFormModalOpen(true);
         }}
