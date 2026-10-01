@@ -650,10 +650,10 @@ const UserManagement: React.FC = () => {
 
           {/* Expandable Filter Drawer Panel (Matching Reference UI) */}
           {isFilterOpen && (
-            <div className="p-[1px] rounded-[14px] bg-gradient-to-r from-blue-300/60 via-purple-300/60 to-pink-300/60 shadow-lg shadow-indigo-500/10 animate-in fade-in slide-in-from-top-2 duration-200 shrink-0">
-              <div className="relative rounded-[13px] bg-white/90 backdrop-blur-xl p-3.5 sm:p-4 overflow-hidden">
+            <div className="p-[1.5px] rounded-[16px] bg-gradient-to-r from-blue-300/60 via-purple-300/60 to-pink-300/60 shadow-lg shadow-indigo-500/10 animate-in fade-in slide-in-from-top-2 duration-200 shrink-0">
+              <div className="relative rounded-[15px] bg-white/95 backdrop-blur-xl p-4 sm:p-5 overflow-hidden">
                 {/* Holographic Pastel Waves in Background */}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 rounded-[13px]">
+                <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 rounded-[15px]">
                   {/* Organic blurred blobs for holographic feel */}
                   <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[150%] bg-gradient-to-bl from-pink-300/30 via-purple-300/20 to-transparent blur-3xl transform rotate-12"></div>
                   <div className="absolute bottom-[-20%] left-[-10%] w-[40%] h-[150%] bg-gradient-to-tr from-blue-300/30 via-indigo-300/20 to-transparent blur-3xl transform -rotate-12"></div>
@@ -687,69 +687,67 @@ const UserManagement: React.FC = () => {
                 </div>
 
                 {/* Header Row: Title & Action Buttons */}
-                <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 pb-3">
+                <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-transparent">
                   {/* Left: Funnel Badge + Title */}
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#3b82f6] via-[#6366f1] to-[#8b5cf6] border border-blue-400/40 flex items-center justify-center text-white shadow-md shadow-indigo-500/25 shrink-0">
-                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.539.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.378-1.007.917-1.096A48.32 48.32 0 0112 3z" />
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="w-11 h-11 rounded-[12px] bg-gradient-to-br from-[#4f46e5] to-[#7c3aed] flex items-center justify-center text-white shadow-md shadow-indigo-500/25 shrink-0">
+                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                       </svg>
                     </div>
-                    <div>
-                      <h3 className="font-bold text-slate-900 mb-0.5 text-[13px] tracking-tight leading-tight">
+                    <div className="flex flex-col justify-center">
+                      <h3 className="font-bold text-slate-900 text-[19px] tracking-tight leading-none mb-1">
                         Directory Filters
                       </h3>
-                      <p className="text-slate-500 mb-0 text-[11px] font-normal">
+                      <p className="text-slate-500 text-[13px] font-normal leading-none mb-0 mt-[3px]">
                         Search and refine the workforce directory
                       </p>
                     </div>
                   </div>
 
                   {/* Right: Reset Filters + OK */}
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-3 shrink-0">
                     <button
                       type="button"
                       onClick={handleClearFilters}
-                      className="h-8 px-3 rounded-xl text-[11px] font-semibold text-indigo-600 hover:text-indigo-700 bg-white hover:bg-indigo-50/50 border border-indigo-100/90 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                      className="h-[38px] px-4 rounded-xl text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-white hover:bg-indigo-50 border border-indigo-100 shadow-sm transition-all flex items-center gap-2 cursor-pointer"
                     >
-                      <i className="bi bi-arrow-counterclockwise text-xs text-indigo-600"></i>
+                      <i className="bi bi-arrow-counterclockwise text-sm"></i>
                       <span>Reset Filters</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setIsFilterOpen(false)}
-                      className="h-8 px-4 rounded-xl text-[11px] font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-sm shadow-blue-500/25 transition-all flex items-center gap-1.5 cursor-pointer"
+                      className="h-[38px] px-5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-[#4f46e5] to-[#7c3aed] hover:from-indigo-600 hover:to-purple-600 shadow-sm shadow-blue-500/25 transition-all flex items-center gap-2 cursor-pointer"
                     >
-                      <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.6}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                      </svg>
+                      <i className="bi bi-check2 text-sm"></i>
                       <span>OK</span>
                     </button>
                   </div>
                 </div>
 
                 {/* Filter Fields Row */}
-                <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 pt-1">
+                <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-5 pt-3">
                   {/* Field 1: Search Keywords */}
                   <div>
-                    <label className="flex items-center gap-1 text-[11px] font-bold text-slate-800 mb-1.5">
-                      <i className="bi bi-search text-indigo-600 font-bold"></i>
+                    <label className="flex items-center gap-2 text-[13px] font-bold text-slate-900 mb-[7px]">
+                      <i className="bi bi-search text-[#6366f1] font-bold text-sm"></i>
                       <span>Search Keywords</span>
                     </label>
-                    <div className="relative flex items-center h-9 rounded-xl bg-white/70 border border-slate-200 hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 transition-all px-2.5 shadow-2xs">
-                      <i className="bi bi-search text-slate-400 text-xs mr-2 shrink-0"></i>
+                    <div className="relative flex items-center h-10 rounded-xl bg-white/50 border border-slate-200 hover:border-[#6366f1]/50 focus-within:border-[#6366f1] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#6366f1]/10 transition-all px-3 shadow-xs">
+                      <i className="bi bi-search text-slate-400 text-sm mr-2.5 shrink-0"></i>
                       <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Filter by name, email, department..."
-                        className="w-full text-xs text-slate-800 placeholder:text-slate-400 bg-transparent outline-none font-medium"
+                        className="w-full text-[13px] text-slate-700 placeholder:text-slate-400 bg-transparent outline-none font-medium"
                       />
                       {searchQuery && (
                         <button
                           type="button"
                           onClick={() => setSearchQuery("")}
-                          className="text-slate-400 hover:text-slate-600 text-[10px] ml-1 cursor-pointer shrink-0 w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center"
+                          className="text-slate-400 hover:text-slate-600 text-xs ml-1 cursor-pointer shrink-0 w-5 h-5 rounded-full hover:bg-slate-100 flex items-center justify-center"
                         >
                           <i className="bi bi-x-lg"></i>
                         </button>
@@ -759,20 +757,15 @@ const UserManagement: React.FC = () => {
 
                   {/* Field 2: Department */}
                   <div>
-                    <label className="flex items-center gap-1 text-[11px] font-bold text-slate-800 mb-1.5">
-                      <span className="w-3.5 h-3.5 rounded bg-indigo-50 border border-indigo-200/80 flex items-center justify-center text-indigo-600 text-[9px]">
-                        <i className="bi bi-building"></i>
-                      </span>
+                    <label className="flex items-center gap-2 text-[13px] font-bold text-slate-900 mb-[7px]">
+                      <i className="bi bi-building text-[#6366f1] text-sm"></i>
                       <span>Department</span>
                     </label>
-                    <div className="relative flex items-center h-9 rounded-xl bg-white/70 border border-slate-200 hover:border-purple-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-purple-100 transition-all px-2.5 shadow-2xs">
-                      <span className="w-3.5 h-3.5 rounded bg-purple-100/70 border border-purple-200 text-indigo-600 flex items-center justify-center text-[9px] mr-2 shrink-0">
-                        <i className="bi bi-building"></i>
-                      </span>
+                    <div className="relative flex items-center h-10 rounded-xl bg-white/50 border border-slate-200 hover:border-[#6366f1]/50 focus-within:border-[#6366f1] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#6366f1]/10 transition-all px-3 shadow-xs">
                       <select
                         value={selectedDept}
                         onChange={(e) => setSelectedDept(e.target.value)}
-                        className="w-full text-xs font-semibold text-slate-700 bg-transparent outline-none cursor-pointer appearance-none pr-6"
+                        className="w-full text-[13px] font-semibold text-slate-700 bg-transparent outline-none cursor-pointer appearance-none pr-8"
                       >
                         <option value="">All Departments</option>
                         {departments.map((d) => (
@@ -781,28 +774,28 @@ const UserManagement: React.FC = () => {
                           </option>
                         ))}
                       </select>
-                      <i className="bi bi-chevron-down text-indigo-500 text-[10px] font-bold absolute right-3 pointer-events-none"></i>
+                      <i className="bi bi-chevron-down text-slate-400 text-xs absolute right-3 pointer-events-none"></i>
                     </div>
                   </div>
 
                   {/* Field 3: Account Status */}
                   <div>
-                    <label className="flex items-center gap-1 text-[11px] font-bold text-slate-800 mb-1.5">
-                      <i className="bi bi-shield-check text-indigo-600 text-[11px]"></i>
+                    <label className="flex items-center gap-2 text-[13px] font-bold text-slate-900 mb-[7px]">
+                      <i className="bi bi-shield-check text-[#6366f1] text-sm"></i>
                       <span>Account Status</span>
                     </label>
-                    <div className="relative flex items-center h-9 rounded-xl bg-white/70 border border-slate-200 hover:border-emerald-300 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-100 transition-all px-2.5 shadow-2xs">
-                      <span className={`w-2 h-2 rounded-full mr-2 shrink-0 shadow-2xs ${selectedStatus === "inactive" ? "bg-rose-500" : "bg-emerald-500"}`}></span>
+                    <div className="relative flex items-center h-10 rounded-xl bg-white/50 border border-slate-200 hover:border-emerald-300 focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-emerald-50 transition-all px-3 shadow-xs">
+                      <span className={`w-2.5 h-2.5 rounded-full mr-2.5 shrink-0 ${selectedStatus === "inactive" ? "bg-rose-500" : "bg-[#10b981]"}`}></span>
                       <select
                         value={selectedStatus}
                         onChange={(e) => setSelectedStatus(e.target.value)}
-                        className="w-full text-xs font-semibold text-slate-700 bg-transparent outline-none cursor-pointer appearance-none pr-6"
+                        className="w-full text-[13px] font-semibold text-slate-700 bg-transparent outline-none cursor-pointer appearance-none pr-8"
                       >
                         <option value="">All Statuses</option>
                         <option value="active">Active Members</option>
                         <option value="inactive">Inactive / Suspended</option>
                       </select>
-                      <i className="bi bi-chevron-down text-slate-400 text-[10px] font-bold absolute right-3 pointer-events-none"></i>
+                      <i className="bi bi-chevron-down text-slate-400 text-xs absolute right-3 pointer-events-none"></i>
                     </div>
                   </div>
                 </div>
