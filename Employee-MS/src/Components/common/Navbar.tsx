@@ -1,117 +1,133 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-
-interface PageMeta {
-  title: string;
-  subtitle: string;
-  icon: string;
-}
-
-const getPageMeta = (pathname: string, firstName: string): PageMeta => {
-  const path = pathname.toLowerCase();
-
-  if (path.includes("department")) {
-    return {
-      title: "Department Management",
-      subtitle: "Organize departments, structures, and departmental heads.",
-      icon: "bi-building",
-    };
-  }
-  if (path.includes("user")) {
-    return {
-      title: "User Directory",
-      subtitle: "Manage your workforce, roles, departments and reporting structure.",
-      icon: "bi-people-fill",
-    };
-  }
-  if (path.includes("hierarchy")) {
-    return {
-      title: "Team Hierarchy",
-      subtitle: "Visual organizational chart and department reporting lines.",
-      icon: "bi-diagram-3-fill",
-    };
-  }
-  if (path.includes("project")) {
-    return {
-      title: "Projects & Milestones",
-      subtitle: "Track project timelines, deliverables, and assignments.",
-      icon: "bi-kanban-fill",
-    };
-  }
-  if (path.includes("supervisor")) {
-    return {
-      title: "Department Supervisors",
-      subtitle: "Monitor team leaders and supervisor performance metrics.",
-      icon: "bi-person-badge-fill",
-    };
-  }
-  if (path.includes("leave")) {
-    return {
-      title: "Leave Management",
-      subtitle: "Review leave balances, approvals, and employee time off.",
-      icon: "bi-calendar-check-fill",
-    };
-  }
-  if (path.includes("task")) {
-    return {
-      title: "Task Delegation",
-      subtitle: "Assign deliverables, monitor deadlines, and track progress.",
-      icon: "bi-list-check",
-    };
-  }
-  if (path.includes("team")) {
-    return {
-      title: "Assigned Team",
-      subtitle: "Direct reports and member workload breakdown.",
-      icon: "bi-people-fill",
-    };
-  }
-  if (path.includes("profile")) {
-    return {
-      title: "My Profile",
-      subtitle: "Personal details, credentials, and work assignments.",
-      icon: "bi-person-circle",
-    };
-  }
-
-  return {
-    title: `Welcome back, ${firstName}! 👋`,
-    subtitle: "Here's what's happening in your organization today.",
-    icon: "bi-grid-1x2-fill",
-  };
-};
 
 const Navbar = () => {
   const { user } = useAuth();
   const location = useLocation();
+  const headerRef = useRef<HTMLElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
 
   const firstName = user?.name?.split(' ')[0] || "User";
-  const pageMeta = getPageMeta(location.pathname, firstName);
+  const path = location.pathname.toLowerCase();
+  const isDepartmentsPage = path.includes("department");
+  const isUsersPage = path.includes("user");
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    if (!headerRef.current) return;
+    const rect = headerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    headerRef.current.style.setProperty("--mouse-x", `${x}px`);
+  };
 
   return (
-    <header className="w-full h-[68px] min-h-[68px] max-h-[68px] box-border navbar-frosted-glass px-6 lg:px-8 sticky top-0 z-30 transition-colors duration-300 flex items-center">
+    <header 
+      ref={headerRef}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="w-full h-[68px] min-h-[68px] max-h-[68px] box-border navbar-frosted-glass px-6 lg:px-8 sticky top-0 z-30 transition-colors duration-300 flex items-center relative overflow-hidden"
+    >
       {/* 1px "Linear Edge" Laser Border Horizon (Option 1) */}
-      <div className="absolute bottom-0 left-0 right-0 h-[1.5px] overflow-hidden pointer-events-none">
+      <div className="absolute bottom-0 left-0 right-0 h-[1.5px] pointer-events-none z-10">
         <div className="absolute inset-0 bg-slate-200/60" />
         <div className="navbar-laser-beam" />
       </div>
 
-      <div className="w-full h-full flex justify-between items-center relative z-10">
+      {/* Interactive Cursor Spotlight Bottom Border Highlight (Option 2) */}
+      <div className="absolute bottom-0 left-0 right-0 h-[1.5px] pointer-events-none z-15 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent" />
+        <div
+          className="absolute inset-0 transition-opacity duration-200"
+          style={{
+            opacity: isHovered ? 1 : 0,
+            background: `radial-gradient(160px circle at var(--mouse-x, -250px) 50%, rgba(56, 189, 248, 0.95), rgba(99, 102, 241, 0.7), transparent 75%)`,
+            filter: "drop-shadow(0 0 6px rgba(56, 189, 248, 0.85)) drop-shadow(0 0 12px rgba(99, 102, 241, 0.6))",
+          }}
+        />
+      </div>
+
+      {/* Fiber-Optic Wave Pulses (Option 3) */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-40" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="fiberGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#38bdf8" stopOpacity="0" />
+            <stop offset="50%" stopColor="#818cf8" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#c084fc" stopOpacity="0" />
+          </linearGradient>
+          <filter id="pulseNeonGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        {/* Base harmonic waves */}
+        <path d="M 0,68 C 200,48 400,28 600,68 C 800,108 1000,48 1200,68" stroke="url(#fiberGradient)" strokeWidth="1.5" fill="none" />
+        
+        {/* Pulse Track 1: Luminous Photon Head Node */}
+        <g filter="url(#pulseNeonGlow)">
+          <circle r="4" fill="#38bdf8" opacity="0.6">
+            <animateMotion path="M -40,68 C 200,48 400,28 600,68 C 800,108 1000,48 1200,68" dur="6s" repeatCount="indefinite" />
+          </circle>
+          <circle r="1.5" fill="#ffffff">
+            <animateMotion path="M -40,68 C 200,48 400,28 600,68 C 800,108 1000,48 1200,68" dur="6s" repeatCount="indefinite" />
+          </circle>
+        </g>
+        {/* Pulse Track 2 */}
+        <g filter="url(#pulseNeonGlow)">
+          <circle r="4" fill="#a855f7" opacity="0.6">
+            <animateMotion path="M -40,68 C 200,48 400,28 600,68 C 800,108 1000,48 1200,68" dur="7s" begin="2s" repeatCount="indefinite" />
+          </circle>
+          <circle r="1.5" fill="#ffffff">
+            <animateMotion path="M -40,68 C 200,48 400,28 600,68 C 800,108 1000,48 1200,68" dur="7s" begin="2s" repeatCount="indefinite" />
+          </circle>
+        </g>
+      </svg>
+
+      <div className="w-full h-full flex justify-between items-center relative z-20">
         {/* Welcome / Page Title Section */}
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-purple-50/80 border border-purple-100/80 flex items-center justify-center text-purple-600 shadow-2xs shrink-0 backdrop-blur-xs">
-            <i className={`bi ${pageMeta.icon} text-lg`}></i>
+        {isDepartmentsPage ? (
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-purple-50/80 border border-purple-100/80 flex items-center justify-center text-purple-600 shadow-2xs backdrop-blur-xs shrink-0">
+              <i className="bi bi-building text-lg"></i>
+            </div>
+            <div className="min-w-0 flex flex-col justify-center">
+              <h5 className="font-bold text-slate-900 mb-0 text-base tracking-tight leading-tight truncate">
+                Department Management
+              </h5>
+              <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium truncate">
+                <span className="hover:text-slate-600 transition-colors cursor-pointer">Home</span>
+                <i className="bi bi-chevron-right text-[9px] text-slate-300"></i>
+                <span className="text-slate-600">Departments</span>
+              </div>
+            </div>
           </div>
+        ) : isUsersPage ? (
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-purple-50/80 border border-purple-100/80 flex items-center justify-center text-purple-600 shadow-2xs shrink-0 backdrop-blur-xs">
+              <i className="bi bi-people-fill text-lg"></i>
+            </div>
+            <div className="min-w-0 flex flex-col justify-center">
+              <h5 className="font-bold text-slate-900 mb-0 text-base tracking-tight leading-tight truncate">
+                User Directory
+              </h5>
+              <p className="text-slate-500 mb-0 font-normal text-xs leading-normal truncate">
+                Manage your workforce, roles, departments and reporting structure.
+              </p>
+            </div>
+          </div>
+        ) : (
           <div className="min-w-0 flex flex-col justify-center">
-            <h5 className="font-bold text-slate-900 mb-0 text-base tracking-tight leading-tight truncate">
-              {pageMeta.title}
+            <h5 className="font-bold text-slate-900 mb-0 flex items-center gap-2 text-base tracking-tight leading-tight truncate">
+              Welcome back, {firstName}! <span className="text-lg">👋</span>
             </h5>
-            <p className="text-slate-500 mb-0 font-normal text-xs leading-normal truncate">
-              {pageMeta.subtitle}
+            <p className="text-slate-500 mb-0 font-medium text-xs leading-normal truncate">
+              Here's what's happening in your organization today.
             </p>
           </div>
-        </div>
+        )}
 
         {/* Global Search & Actions */}
         <div className="flex items-center gap-6">
