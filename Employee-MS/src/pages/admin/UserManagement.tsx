@@ -405,11 +405,11 @@ const UserManagement: React.FC = () => {
       )}
 
       {/* Main Responsive Layout with Smooth Sidebar Expansion */}
-      <div className="flex flex-col xl:flex-row gap-3.5 items-start xl:flex-1 xl:min-h-0 xl:h-full w-full">
+      <div className="flex flex-col xl:flex-row items-start xl:flex-1 xl:min-h-0 xl:h-full w-full">
         {/* Left Column (Hero, Tabs, Table) */}
         <div
           className={`min-w-0 xl:h-full xl:overflow-y-auto space-y-3 transition-all duration-300 ease-in-out [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300 ${
-            isSidebarOpen ? "xl:flex-1 xl:pr-1" : "w-full"
+            isSidebarOpen ? "xl:w-[calc(100%-365px)] xl:pr-1" : "w-full"
           }`}
         >
           {/* Executive Gradient Hero Banner & Action Toolbar with Micro-Lightning / Wave Effect */}
@@ -593,31 +593,31 @@ const UserManagement: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border backdrop-blur-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs ${
+                  className={`h-8 px-2.5 rounded-lg text-[11px] font-semibold border backdrop-blur-xs transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs box-border ${
                     isSidebarOpen
                       ? "bg-indigo-600 border-indigo-400 text-white shadow-indigo-500/30 ring-2 ring-indigo-400/30"
                       : "bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border-white/20"
                   }`}
                   title="Toggle Workforce Overview Analytics"
                 >
-                  <i className={`bi ${isSidebarOpen ? "bi-pie-chart-fill" : "bi-pie-chart"} text-xs`}></i>
-                  <span>Workforce Overview</span>
+                  <i className={`bi ${isSidebarOpen ? "bi-pie-chart-fill" : "bi-pie-chart"} text-xs leading-none`}></i>
+                  <span className="leading-none">Workforce Overview</span>
                 </button>
 
                 {/* Filter Button */}
                 <button
                   type="button"
                   onClick={() => setIsFilterOpen(!isFilterOpen)}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border backdrop-blur-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs ${
+                  className={`h-8 px-2.5 rounded-lg text-[11px] font-semibold border backdrop-blur-xs transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs box-border ${
                     isFilterOpen || activeFilterCount > 0
                       ? "bg-indigo-600/40 border-indigo-400 text-white shadow-indigo-500/20"
                       : "bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border-white/20"
                   }`}
                 >
-                  <i className="bi bi-funnel text-xs"></i>
-                  <span>Filter</span>
+                  <i className="bi bi-funnel text-xs leading-none"></i>
+                  <span className="leading-none">Filter</span>
                   {activeFilterCount > 0 && (
-                    <span className="w-3.5 h-3.5 rounded-full bg-indigo-500 text-white text-[9px] font-bold flex items-center justify-center">
+                    <span className="w-3.5 h-3.5 rounded-full bg-indigo-500 text-white text-[9px] font-bold flex items-center justify-center leading-none">
                       {activeFilterCount}
                     </span>
                   )}
@@ -628,21 +628,21 @@ const UserManagement: React.FC = () => {
                   type="button"
                   onClick={handleExportCSV}
                   disabled={users.length === 0}
-                  className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border border-white/20 backdrop-blur-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs disabled:opacity-50"
+                  className="h-8 px-2.5 rounded-lg text-[11px] font-semibold bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border border-white/20 backdrop-blur-xs transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs disabled:opacity-50 box-border leading-none"
                   title="Export Workforce Directory as CSV"
                 >
-                  <i className="bi bi-download text-xs"></i>
-                  <span>Export</span>
+                  <i className="bi bi-download text-xs leading-none"></i>
+                  <span className="leading-none">Export</span>
                 </button>
 
                 {/* Onboard Member Button */}
                 <button
                   type="button"
                   onClick={handleOpenOnboard}
-                  className="px-3 py-1 rounded-lg text-[11px] font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/30 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                  className="h-8 px-3 rounded-lg text-[11px] font-semibold text-white bg-indigo-600 hover:bg-indigo-500 border border-indigo-500 shadow-md shadow-indigo-600/30 transition-all inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap box-border leading-none"
                 >
-                  <i className="bi bi-plus-lg font-bold text-[10px]"></i>
-                  <span>Onboard Member</span>
+                  <i className="bi bi-plus-lg font-bold text-[10px] leading-none"></i>
+                  <span className="leading-none">Onboard Member</span>
                 </button>
               </div>
             )}
@@ -1086,16 +1086,22 @@ const UserManagement: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column: Workforce Analytics Sidebar with Smooth Slide-in */}
-        {isSidebarOpen && (
-          <div className="w-full xl:w-[350px] xl:min-w-[340px] xl:max-w-[360px] shrink-0 min-w-0 xl:h-full xl:overflow-y-auto xl:overflow-x-hidden xl:pl-1 space-y-3 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300 animate-in fade-in slide-in-from-right-4 duration-300">
+        {/* Right Column: Workforce Analytics Sidebar with Smooth Slide-in & Slide-out */}
+        <div
+          className={`transition-all duration-300 ease-in-out shrink-0 xl:h-full overflow-hidden ${
+            isSidebarOpen
+              ? "w-full xl:w-[350px] opacity-100 xl:translate-x-0 mt-3.5 xl:mt-0 xl:ml-3.5 pointer-events-auto"
+              : "w-0 xl:w-0 opacity-0 xl:translate-x-8 mt-0 xl:mt-0 xl:ml-0 pointer-events-none"
+          }`}
+        >
+          <div className="w-full xl:w-[350px] xl:min-w-[350px] xl:max-w-[350px] min-w-0 xl:h-full xl:overflow-y-auto xl:overflow-x-hidden space-y-3 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300 pb-2">
             <WorkforceAnalyticsSidebar
               allUsers={allUsers}
               departments={departments}
               onClose={() => setIsSidebarOpen(false)}
             />
           </div>
-        )}
+        </div>
       </div>
 
   {/* User Form Modal (Onboard & Edit) */}
