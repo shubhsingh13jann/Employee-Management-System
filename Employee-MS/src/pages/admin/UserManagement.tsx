@@ -6,6 +6,7 @@ import { UserProfileModal } from "../../Components/admin/users/UserProfileModal"
 import { ConfirmOffboardModal } from "../../Components/admin/users/ConfirmOffboardModal";
 import { WorkforceAnalyticsSidebar } from "../../Components/admin/users/WorkforceAnalyticsSidebar";
 import { CsvImportModal } from "../../Components/admin/users/CsvImportModal";
+import { PasswordResetModal } from "../../Components/admin/users/PasswordResetModal";
 interface FilterDropdownOption {
   value: string;
   label: string;
@@ -176,6 +177,7 @@ const UserManagement: React.FC = () => {
 
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [offboardTarget, setOffboardTarget] = useState<{ id: number; name: string; role?: string } | null>(null);
+  const [passwordResetTarget, setPasswordResetTarget] = useState<{ id: number; name: string; email: string; role?: string } | null>(null);
   const [activeActionMenuId, setActiveActionMenuId] = useState<number | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isHeroMenuOpen, setIsHeroMenuOpen] = useState(false);
@@ -1930,6 +1932,30 @@ const UserManagement: React.FC = () => {
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       setActiveActionMenuId(null);
+                                      setPasswordResetTarget(u);
+                                    }}
+                                    className="w-full px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
+                                  >
+                                    <i className="bi bi-key text-slate-400"></i>
+                                    <span>Reset Password</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setActiveActionMenuId(null);
+                                      setPasswordResetTarget(u);
+                                    }}
+                                    className="w-full px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
+                                  >
+                                    <i className="bi bi-key text-slate-400"></i>
+                                    <span>Reset Password</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setActiveActionMenuId(null);
                                       setIsSelectMode(true);
                                       if (!selectedUserIds.includes(u.id)) {
                                         setSelectedUserIds((prev) => [...prev, u.id]);
@@ -2455,6 +2481,16 @@ const UserManagement: React.FC = () => {
         memberName={offboardTarget?.name || ""}
         memberRole={offboardTarget?.role}
         isDeleting={deletingId !== null}
+      />
+
+      {/* 1-Click Password Reset Modal */}
+      <PasswordResetModal
+        isOpen={Boolean(passwordResetTarget)}
+        onClose={() => setPasswordResetTarget(null)}
+        onSuccess={(text) => {
+          setMsg({ type: "success", text });
+        }}
+        user={passwordResetTarget}
       />
 
       {/* Floating Bulk Action Bar */}

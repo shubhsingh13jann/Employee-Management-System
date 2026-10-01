@@ -154,6 +154,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   const section1Ref = useRef<HTMLDivElement>(null);
   const section2Ref = useRef<HTMLDivElement>(null);
   const section3Ref = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -166,11 +167,31 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
     salary: "",
     phone: "",
     address: "",
-    status: ""
+    status: "",
+    image_url: ""
   });
 
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setErrorMsg("Please select a valid image file (PNG, JPG, WebP).");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setErrorMsg("Image size should be less than 2MB.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setFormData((prev) => ({ ...prev, image_url: reader.result as string }));
+      setErrorMsg("");
+    };
+    reader.readAsDataURL(file);
+  };
 
   // Helper to determine if a field's label should dock into its top border:
   // ONLY when the field is actively focused/opened (typing/selection) OR when user has entered/typed non-empty text.
@@ -198,7 +219,8 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
         salary: editUser.salary !== undefined && editUser.salary !== null ? String(editUser.salary) : "",
         phone: editUser.phone || "",
         address: editUser.address || "",
-        status: editUser.status || ""
+        status: editUser.status || "",
+        image_url: editUser.image_url || ""
       });
     } else {
       setFormData({
@@ -212,7 +234,8 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
         salary: "",
         phone: "",
         address: "",
-        status: ""
+        status: "",
+        image_url: ""
       });
     }
     setErrorMsg("");
@@ -327,7 +350,8 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
         salary: formData.salary ? Number(formData.salary) : 0,
         phone: formData.phone.trim(),
         address: formData.address.trim(),
-        status: formData.status
+        status: formData.status,
+        image_url: formData.image_url || ""
       };
 
       if (isEditMode && editUser) {
@@ -673,6 +697,58 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                       </h5>
                       <p className="text-[10px] text-slate-500 font-normal mb-0">
                         Basic information and login credentials for the employee.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Avatar Upload & Realtime Preview */}
+                  <div className="relative z-10 flex items-center gap-3.5 p-3 rounded-xl bg-white border border-slate-200/90 shadow-2xs mb-3">
+                    <div className="relative w-14 h-14 rounded-2xl bg-indigo-50 border-2 border-indigo-200 flex items-center justify-center text-indigo-600 font-bold text-lg overflow-hidden shrink-0 shadow-inner group">
+                      {formData.image_url ? (
+                        <img src={formData.image_url} alt="Avatar Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <span>{formData.name ? formData.name.charAt(0).toUpperCase() : <i className="bi bi-person text-2xl text-slate-400"></i>}</span>
+                      )}
+                      {formData.image_url && (
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, image_url: "" })}
+                          className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity text-xs cursor-pointer"
+                          title="Remove Photo"
+                        >
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="h-7 px-3 rounded-lg text-xs font-semibold bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 border border-indigo-200/80 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                        >
+                          <i className="bi bi-camera text-xs"></i>
+                          <span>{formData.image_url ? "Change Photo" : "Upload Avatar"}</span>
+                        </button>
+                        {formData.image_url && (
+                          <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, image_url: "" })}
+                            className="h-7 px-2.5 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-rose-200 transition-colors cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        )}
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageFileChange}
+                          className="hidden"
+                        />
+                      </div>
+                      <p className="text-[10px] text-slate-400 mb-0 leading-tight">
+                        PNG, JPG or WebP up to 2MB. Square ratio recommended.
                       </p>
                     </div>
                   </div>
