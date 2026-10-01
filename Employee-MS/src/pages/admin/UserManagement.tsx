@@ -9,6 +9,7 @@ import { CsvImportModal } from "../../Components/admin/users/CsvImportModal";
 import { PasswordResetModal } from "../../Components/admin/users/PasswordResetModal";
 import { BulkBroadcastModal } from "../../Components/admin/users/BulkBroadcastModal";
 import { EmployeeIdCardModal } from "../../Components/admin/users/EmployeeIdCardModal";
+import { RolePermissionMatrixModal } from "../../Components/admin/users/RolePermissionMatrixModal";
 interface FilterDropdownOption {
   value: string;
   label: string;
@@ -212,6 +213,9 @@ const UserManagement: React.FC = () => {
 
   // CSV Import Modal State
   const [isCsvImportOpen, setIsCsvImportOpen] = useState(false);
+
+  // Role-Permission Matrix Modal State
+  const [isPermissionMatrixOpen, setIsPermissionMatrixOpen] = useState(false);
 
   // Column Visibility Customizer State
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(() => {
@@ -1162,6 +1166,17 @@ const UserManagement: React.FC = () => {
                 >
                   <i className="bi bi-download text-xs leading-none"></i>
                   <span className="leading-none">Export</span>
+                </button>
+
+                {/* Permissions Matrix Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsPermissionMatrixOpen(true)}
+                  className="h-8 px-2.5 rounded-lg text-[11px] font-semibold bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border border-white/20 backdrop-blur-xs transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs box-border leading-none"
+                  title="Configure Granular Role-Permission Policy Matrix"
+                >
+                  <i className="bi bi-shield-lock text-xs leading-none text-indigo-300"></i>
+                  <span className="leading-none hidden md:inline">Permissions</span>
                 </button>
 
                 {/* Onboard Member Button */}
@@ -2727,6 +2742,15 @@ const UserManagement: React.FC = () => {
           setMsg({ type: "success", text: "Workforce directory updated successfully from bulk CSV import." });
         }}
         departments={departments}
+      />
+
+      {/* Role-Permission Matrix Customizer Modal */}
+      <RolePermissionMatrixModal
+        isOpen={isPermissionMatrixOpen}
+        onClose={() => setIsPermissionMatrixOpen(false)}
+        onSaved={(text) => {
+          setMsg({ type: "success", text });
+        }}
       />
     </div>
   );
