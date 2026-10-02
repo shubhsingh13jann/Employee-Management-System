@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 import { UserFormModal } from "../../Components/admin/users/UserFormModal";
 import { UserProfileModal } from "../../Components/admin/users/UserProfileModal";
 import { ConfirmOffboardModal } from "../../Components/admin/users/ConfirmOffboardModal";
 import { WorkforceAnalyticsSidebar } from "../../Components/admin/users/WorkforceAnalyticsSidebar";
+import { CsvImportModal } from "../../Components/admin/users/CsvImportModal";
 interface FilterDropdownOption {
   value: string;
   label: string;
@@ -191,6 +192,64 @@ const UserManagement: React.FC = () => {
 
   const showCheckboxes = isSelectMode || selectedUserIds.length > 0;
 
+  // Salary Privacy Mode State
+  const [isSalaryMasked, setIsSalaryMasked] = useState<boolean>(() => {
+    return localStorage.getItem("ems_salary_privacy") === "true";
+  });
+  const toggleSalaryMask = () => {
+    setIsSalaryMasked((prev) => {
+      const next = !prev;
+      localStorage.setItem("ems_salary_privacy", String(next));
+      return next;
+    });
+  };
+
+  // CSV Import Modal State
+  const [isCsvImportOpen, setIsCsvImportOpen] = useState(false);
+
+  // Column Visibility Customizer State
+  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem("ems_user_columns");
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {
+      role: true,
+      department: true,
+      supervisor: true,
+      salary: true,
+      phone: true,
+      status: true
+    };
+  });
+  const [isColumnDropdownOpen, setIsColumnDropdownOpen] = useState(false);
+  const toggleColumn = (key: string) => {
+    setVisibleColumns((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      localStorage.setItem("ems_user_columns", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  // Global search input ref for keyboard shortcut (/ or Ctrl+K)
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Helper to calculate employee tenure from created_at
+  const formatTenure = (dateStr?: string) => {
+    if (!dateStr) return "Recent";
+    const start = new Date(dateStr);
+    if (isNaN(start.getTime())) return "Recent";
+    const now = new Date();
+    let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
+    if (months < 1) return "< 1 mo";
+    if (months < 12) return `${months} mo${months > 1 ? "s" : ""}`;
+    const years = Math.floor(months / 12);
+    const remainingMonths = months % 12;
+    return `${years} yr${years > 1 ? "s" : ""}${remainingMonths > 0 ? ` ${remainingMonths} mo` : ""}`;
+  };
+
+  const activeColSpan = 2 + Object.values(visibleColumns).filter(Boolean).length + (showCheckboxes ? 1 : 0);
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -206,6 +265,9 @@ const UserManagement: React.FC = () => {
       if (!target.closest(".bulk-transfer-container")) {
         setIsBulkTransferOpen(false);
       }
+      if (!target.closest(".column-visibility-container")) {
+        setIsColumnDropdownOpen(false);
+      }
     };
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -213,6 +275,7 @@ const UserManagement: React.FC = () => {
         setIsHeroMenuOpen(false);
         setActiveActionMenuId(null);
         setIsBulkTransferOpen(false);
+        setIsColumnDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -221,6 +284,24 @@ const UserManagement: React.FC = () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
     };
+  }, []);
+
+  // Keyboard shortcut listener (/ or Ctrl+K / Cmd+K to open filter & focus search)
+  useEffect(() => {
+    const handleGlobalShortcuts = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInput = target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
+      if ((e.key === "/" && !isInput) || ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K"))) {
+        e.preventDefault();
+        setIsFilterOpen(true);
+        setTimeout(() => {
+          searchInputRef.current?.focus();
+          searchInputRef.current?.select();
+        }, 60);
+      }
+    };
+    window.addEventListener("keydown", handleGlobalShortcuts);
+    return () => window.removeEventListener("keydown", handleGlobalShortcuts);
   }, []);
 
   const fetchUsers = async () => {
@@ -939,6 +1020,35 @@ const UserManagement: React.FC = () => {
                       type="button"
                       onClick={() => {
                         setIsHeroMenuOpen(false);
+                        toggleSalaryMask();
+                      }}
+                      className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
+                    >
+                      <div className="flex items-center gap-2">
+                        <i className={`bi ${isSalaryMasked ? "bi-eye-slash-fill text-amber-300" : "bi-eye text-indigo-400"} text-xs`}></i>
+                        <span>{isSalaryMasked ? "Reveal Salary Figures" : "Salary Privacy Mode"}</span>
+                      </div>
+                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300">
+                        {isSalaryMasked ? "Masked" : "Visible"}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsHeroMenuOpen(false);
+                        setIsCsvImportOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
+                    >
+                      <i className="bi bi-file-earmark-arrow-up text-indigo-400 text-xs"></i>
+                      <span>Bulk CSV Import</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsHeroMenuOpen(false);
                         handleExportCSV();
                       }}
                       disabled={users.length === 0}
@@ -997,7 +1107,7 @@ const UserManagement: React.FC = () => {
                   <span className="leading-none">Workforce Overview</span>
                 </button>
 
-                {/* Filter Button */}
+                {/* Filter Button with Shortcut Hint */}
                 <button
                   type="button"
                   onClick={() => setIsFilterOpen(!isFilterOpen)}
@@ -1006,6 +1116,7 @@ const UserManagement: React.FC = () => {
                       ? "bg-indigo-600/40 border-indigo-400 text-white shadow-indigo-500/20"
                       : "bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border-white/20"
                   }`}
+                  title="Search & Filters (Shortcut: Ctrl+K or /)"
                 >
                   <i className="bi bi-funnel text-xs leading-none"></i>
                   <span className="leading-none">Filter</span>
@@ -1014,6 +1125,83 @@ const UserManagement: React.FC = () => {
                       {activeFilterCount}
                     </span>
                   )}
+                </button>
+
+                {/* Salary Privacy Mode Toggle (Feature 1) */}
+                <button
+                  type="button"
+                  onClick={toggleSalaryMask}
+                  className={`h-8 px-2.5 rounded-lg text-[11px] font-semibold border backdrop-blur-xs transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs box-border leading-none ${
+                    isSalaryMasked
+                      ? "bg-amber-500/25 border-amber-400 text-amber-200 shadow-amber-500/20 ring-1 ring-amber-400/40"
+                      : "bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border-white/20"
+                  }`}
+                  title={isSalaryMasked ? "Salary Privacy Active ($••••••) — Click to Reveal" : "Enable Salary Privacy Mode (Masks compensation)"}
+                >
+                  <i className={`bi ${isSalaryMasked ? "bi-eye-slash-fill text-amber-300" : "bi-eye text-slate-300"} text-xs`}></i>
+                  <span className="hidden xl:inline">{isSalaryMasked ? "Masked" : "Privacy"}</span>
+                </button>
+
+                {/* Column Visibility Customizer Dropdown (Feature 4) */}
+                {viewMode === "table" && (
+                  <div className="relative column-visibility-container">
+                    <button
+                      type="button"
+                      onClick={() => setIsColumnDropdownOpen(!isColumnDropdownOpen)}
+                      className={`h-8 px-2.5 rounded-lg text-[11px] font-semibold border backdrop-blur-xs transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs box-border leading-none ${
+                        isColumnDropdownOpen
+                          ? "bg-indigo-600/40 border-indigo-400 text-white"
+                          : "bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border-white/20"
+                      }`}
+                      title="Customize Visible Columns in Directory"
+                    >
+                      <i className="bi bi-layout-three-columns text-xs"></i>
+                      <span className="hidden xl:inline">Columns</span>
+                      <i className={`bi bi-chevron-down text-[9px] transition-transform ${isColumnDropdownOpen ? "rotate-180" : ""}`}></i>
+                    </button>
+
+                    {isColumnDropdownOpen && (
+                      <div className="absolute right-0 top-full mt-1.5 w-48 bg-white rounded-xl border border-slate-200/90 shadow-2xl p-2 z-50 text-slate-800 animate-in fade-in zoom-in-95 duration-150">
+                        <div className="text-[10px] font-bold text-slate-400 px-2 py-1 uppercase tracking-wider">
+                          Visible Columns
+                        </div>
+                        <div className="space-y-0.5">
+                          {[
+                            { key: "role", label: "Role Tier" },
+                            { key: "department", label: "Department" },
+                            { key: "supervisor", label: "Reports To" },
+                            { key: "salary", label: "Annual Salary" },
+                            { key: "phone", label: "Phone Number" },
+                            { key: "status", label: "Status" }
+                          ].map((col) => (
+                            <label
+                              key={col.key}
+                              className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700 select-none"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={visibleColumns[col.key] !== false}
+                                onChange={() => toggleColumn(col.key)}
+                                className="w-3.5 h-3.5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 accent-indigo-600 cursor-pointer"
+                              />
+                              <span>{col.label}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Import CSV Button (Feature 5) */}
+                <button
+                  type="button"
+                  onClick={() => setIsCsvImportOpen(true)}
+                  className="h-8 px-2.5 rounded-lg text-[11px] font-semibold bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border border-white/20 backdrop-blur-xs transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs box-border leading-none"
+                  title="Bulk Onboard Personnel via CSV Upload"
+                >
+                  <i className="bi bi-file-earmark-arrow-up text-xs leading-none"></i>
+                  <span className="leading-none hidden sm:inline">Import CSV</span>
                 </button>
 
                 {/* Export Button */}
@@ -1192,21 +1380,27 @@ const UserManagement: React.FC = () => {
                       <div className="relative flex items-center h-9 rounded-xl bg-white/70 border border-slate-200 hover:border-indigo-300 focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-100 transition-all px-2.5 shadow-2xs">
                         <i className="bi bi-search text-slate-400 text-xs mr-2 shrink-0"></i>
                         <input
+                          ref={searchInputRef}
                           type="text"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           placeholder="Filter by name, email, department..."
                           className="w-full text-xs text-slate-800 placeholder:text-slate-400 bg-transparent outline-none font-medium"
                         />
-                        {searchQuery && (
-                          <button
-                            type="button"
-                            onClick={() => setSearchQuery("")}
-                            className="text-slate-400 hover:text-slate-600 text-[10px] ml-1 cursor-pointer shrink-0 w-4 h-4 rounded-full hover:bg-slate-100 flex items-center justify-center"
-                          >
-                            <i className="bi bi-x-lg"></i>
-                          </button>
-                        )}
+                        <div className="flex items-center gap-1 shrink-0 ml-1">
+                          {searchQuery && (
+                            <button
+                              type="button"
+                              onClick={() => setSearchQuery("")}
+                              className="text-slate-400 hover:text-slate-600 text-[10px] cursor-pointer w-4 h-4 rounded-full hover:bg-slate-100 flex items-center justify-center"
+                            >
+                              <i className="bi bi-x-lg"></i>
+                            </button>
+                          )}
+                          <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[9.5px] font-semibold text-slate-400 bg-slate-100 border border-slate-200 rounded select-none">
+                            Ctrl K
+                          </kbd>
+                        </div>
                       </div>
                     </div>
 
@@ -1321,130 +1515,155 @@ const UserManagement: React.FC = () => {
 
           {/* Workforce Directory View (Table or Interactive Card Grid) */}
           <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
-            {viewMode === "table" ? (
-              <div className="overflow-x-auto min-h-[340px] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
-                <table className="w-full min-w-[760px] text-left border-collapse text-xs">
-                <thead className="bg-slate-50/80 border-b border-slate-200/90 text-xs font-semibold text-slate-700 normal-case tracking-normal">
-                  <tr>
-                    {showCheckboxes && (
-                      <th className="w-10 px-3 py-2.5 text-center">
-                        <input
-                          type="checkbox"
-                          aria-label="Select all members on current page"
-                          checked={
-                            paginatedUsers.length > 0 &&
-                            paginatedUsers.every((u) => selectedUserIds.includes(u.id))
-                          }
-                          ref={(el) => {
-                            if (el) {
-                              const someSelected = paginatedUsers.some((u) => selectedUserIds.includes(u.id));
-                              const allSelected = paginatedUsers.length > 0 && paginatedUsers.every((u) => selectedUserIds.includes(u.id));
-                              el.indeterminate = someSelected && !allSelected;
-                            }
-                          }}
-                          onChange={handleToggleSelectAll}
-                          className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
-                        />
-                      </th>
-                    )}
-                    <th
-                      className="px-4 py-2.5 cursor-pointer select-none hover:text-slate-900 transition-colors"
-                      onClick={() => handleSort("name")}
-                      title="Click to sort by Name"
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-semibold text-slate-700">User</span>
-                        <i
-                          className={`bi ${
-                            sortField === "name"
-                              ? sortOrder === "asc"
-                                ? "bi-arrow-up text-indigo-600 font-bold"
-                                : "bi-arrow-down text-indigo-600 font-bold"
-                              : "bi-arrow-down-up text-slate-400 text-[10px]"
-                          }`}
-                        ></i>
-                      </div>
-                    </th>
-                    <th
-                      className="px-3.5 py-2.5 cursor-pointer select-none hover:text-slate-900 transition-colors whitespace-nowrap"
-                      onClick={() => handleSort("role")}
-                      title="Click to sort by Role Tier"
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-semibold text-slate-700">Role Tier</span>
-                        <i
-                          className={`bi ${
-                            sortField === "role"
-                              ? sortOrder === "asc"
-                                ? "bi-arrow-up text-indigo-600 font-bold"
-                                : "bi-arrow-down text-indigo-600 font-bold"
-                              : "bi-arrow-down-up text-slate-400 text-[10px]"
-                          }`}
-                        ></i>
-                      </div>
-                    </th>
-                    <th className="px-3.5 py-2.5 font-semibold text-slate-700 text-xs whitespace-nowrap">Department</th>
-                    <th className="px-3.5 py-2.5 font-semibold text-slate-700 text-xs whitespace-nowrap">Reports To</th>
-                    <th
-                      className="px-3.5 py-2.5 cursor-pointer select-none hover:text-slate-900 transition-colors whitespace-nowrap"
-                      onClick={() => handleSort("salary")}
-                      title="Click to sort by Annual Salary"
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-semibold text-slate-700">Annual Salary</span>
-                        <i
-                          className={`bi ${
-                            sortField === "salary"
-                              ? sortOrder === "asc"
-                                ? "bi-arrow-up text-indigo-600 font-bold"
-                                : "bi-arrow-down text-indigo-600 font-bold"
-                              : "bi-arrow-down-up text-slate-400 text-[10px]"
-                          }`}
-                        ></i>
-                      </div>
-                    </th>
-                    <th className="px-3.5 py-2.5 font-semibold text-slate-700 text-xs whitespace-nowrap">Phone</th>
-                    <th className="px-3.5 py-2.5 font-semibold text-slate-700 text-xs whitespace-nowrap">Status</th>
-                    <th className="px-4 py-2.5 font-semibold text-slate-700 text-xs text-center whitespace-nowrap">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {loading ? (
-                    <tr>
-                      <td colSpan={showCheckboxes ? 9 : 8} className="px-6 py-20 text-center text-slate-400">
-                        <div className="flex flex-col items-center justify-center gap-2.5">
-                          <div className="w-7 h-7 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-                          <span className="text-xs">Loading workforce directory...</span>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : displayedUsers.length === 0 ? (
-                    <tr>
-                      <td colSpan={showCheckboxes ? 9 : 8} className="px-6 py-16 text-center text-slate-400 text-xs">
-                        <div className="flex flex-col items-center justify-center gap-2.5 max-w-sm mx-auto">
-                          <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-500 text-xl shadow-xs">
-                            <i className="bi bi-people"></i>
+                {viewMode === "table" ? (
+                  <div className="overflow-x-auto min-h-[340px] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
+                    <table className="w-full min-w-[760px] text-left border-collapse text-xs">
+                    <thead className="bg-slate-50/80 border-b border-slate-200/90 text-xs font-semibold text-slate-700 normal-case tracking-normal">
+                      <tr>
+                        {showCheckboxes && (
+                          <th className="w-10 px-3 py-2.5 text-center">
+                            <input
+                              type="checkbox"
+                              aria-label="Select all members on current page"
+                              checked={
+                                paginatedUsers.length > 0 &&
+                                paginatedUsers.every((u) => selectedUserIds.includes(u.id))
+                              }
+                              ref={(el) => {
+                                if (el) {
+                                  const someSelected = paginatedUsers.some((u) => selectedUserIds.includes(u.id));
+                                  const allSelected = paginatedUsers.length > 0 && paginatedUsers.every((u) => selectedUserIds.includes(u.id));
+                                  el.indeterminate = someSelected && !allSelected;
+                                }
+                              }}
+                              onChange={handleToggleSelectAll}
+                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
+                            />
+                          </th>
+                        )}
+                        <th
+                          className="px-4 py-2.5 cursor-pointer select-none hover:text-slate-900 transition-colors"
+                          onClick={() => handleSort("name")}
+                          title="Click to sort by Name"
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-semibold text-slate-700">User</span>
+                            <i
+                              className={`bi ${
+                                sortField === "name"
+                                  ? sortOrder === "asc"
+                                    ? "bi-arrow-up text-indigo-600 font-bold"
+                                    : "bi-arrow-down text-indigo-600 font-bold"
+                                  : "bi-arrow-down-up text-slate-400 text-[10px]"
+                              }`}
+                            ></i>
                           </div>
-                          <p className="font-bold text-slate-800 text-sm mb-0">No workforce personnel found</p>
-                          <p className="text-[11px] text-slate-500 leading-normal mb-1">
-                            {activeFilterCount > 0 || selectedRole
-                              ? "No team members matched your active filters or search terms."
-                              : "Your workforce directory is currently empty. Onboard new members to get started."}
-                          </p>
-                          {(activeFilterCount > 0 || selectedRole) && (
-                            <button
-                              type="button"
-                              onClick={handleClearFilters}
-                              className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer mt-1"
-                            >
-                              <i className="bi bi-arrow-counterclockwise text-xs"></i>
-                              <span>Clear All Filters & Search</span>
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
+                        </th>
+                        {visibleColumns.role && (
+                          <th
+                            className="px-3.5 py-2.5 cursor-pointer select-none hover:text-slate-900 transition-colors whitespace-nowrap"
+                            onClick={() => handleSort("role")}
+                            title="Click to sort by Role Tier"
+                          >
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs font-semibold text-slate-700">Role Tier</span>
+                              <i
+                                className={`bi ${
+                                  sortField === "role"
+                                    ? sortOrder === "asc"
+                                      ? "bi-arrow-up text-indigo-600 font-bold"
+                                      : "bi-arrow-down text-indigo-600 font-bold"
+                                    : "bi-arrow-down-up text-slate-400 text-[10px]"
+                                }`}
+                              ></i>
+                            </div>
+                          </th>
+                        )}
+                        {visibleColumns.department && (
+                          <th className="px-3.5 py-2.5 font-semibold text-slate-700 text-xs whitespace-nowrap">Department</th>
+                        )}
+                        {visibleColumns.supervisor && (
+                          <th className="px-3.5 py-2.5 font-semibold text-slate-700 text-xs whitespace-nowrap">Reports To</th>
+                        )}
+                        {visibleColumns.salary && (
+                          <th
+                            className="px-3.5 py-2.5 cursor-pointer select-none hover:text-slate-900 transition-colors whitespace-nowrap"
+                            onClick={() => handleSort("salary")}
+                            title="Click to sort by Annual Salary"
+                          >
+                            <div className="flex items-center justify-between gap-1.5">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-semibold text-slate-700">Annual Salary</span>
+                                <i
+                                  className={`bi ${
+                                    sortField === "salary"
+                                      ? sortOrder === "asc"
+                                        ? "bi-arrow-up text-indigo-600 font-bold"
+                                        : "bi-arrow-down text-indigo-600 font-bold"
+                                      : "bi-arrow-down-up text-slate-400 text-[10px]"
+                                  }`}
+                                ></i>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleSalaryMask();
+                                }}
+                                className="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
+                                title={isSalaryMasked ? "Show Compensation Numbers" : "Hide / Mask Compensation (Privacy Mode)"}
+                              >
+                                <i className={`bi ${isSalaryMasked ? "bi-eye-slash text-indigo-600 font-bold" : "bi-eye text-slate-400"} text-xs`}></i>
+                              </button>
+                            </div>
+                          </th>
+                        )}
+                        {visibleColumns.phone && (
+                          <th className="px-3.5 py-2.5 font-semibold text-slate-700 text-xs whitespace-nowrap">Phone</th>
+                        )}
+                        {visibleColumns.status && (
+                          <th className="px-3.5 py-2.5 font-semibold text-slate-700 text-xs whitespace-nowrap">Status</th>
+                        )}
+                        <th className="px-4 py-2.5 font-semibold text-slate-700 text-xs text-center whitespace-nowrap">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {loading ? (
+                        <tr>
+                          <td colSpan={activeColSpan} className="px-6 py-20 text-center text-slate-400">
+                            <div className="flex flex-col items-center justify-center gap-2.5">
+                              <div className="w-7 h-7 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                              <span className="text-xs">Loading workforce directory...</span>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : displayedUsers.length === 0 ? (
+                        <tr>
+                          <td colSpan={activeColSpan} className="px-6 py-16 text-center text-slate-400 text-xs">
+                            <div className="flex flex-col items-center justify-center gap-2.5 max-w-sm mx-auto">
+                              <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-500 text-xl shadow-xs">
+                                <i className="bi bi-people"></i>
+                              </div>
+                              <p className="font-bold text-slate-800 text-sm mb-0">No workforce personnel found</p>
+                              <p className="text-[11px] text-slate-500 leading-normal mb-1">
+                                {activeFilterCount > 0 || selectedRole
+                                  ? "No team members matched your active filters or search terms."
+                                  : "Your workforce directory is currently empty. Onboard new members to get started."}
+                              </p>
+                              {(activeFilterCount > 0 || selectedRole) && (
+                                <button
+                                  type="button"
+                                  onClick={handleClearFilters}
+                                  className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer mt-1"
+                                >
+                                  <i className="bi bi-arrow-counterclockwise text-xs"></i>
+                                  <span>Clear All Filters & Search</span>
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ) : (
                     paginatedUsers.map((u, index) => {
                       const isCurrentUser = currentUser?.id === u.id || currentUser?.email === u.email;
                       const deptInfo = getDepartmentIcon(u.department_name);
@@ -1507,7 +1726,7 @@ const UserManagement: React.FC = () => {
                                   ) : null}
                                 </div>
                                 <div className="flex items-center gap-1.5 mt-0.5">
-                                  <span className="text-[11px] text-slate-500 truncate max-w-[150px] sm:max-w-[210px]">{u.email}</span>
+                                  <span className="text-[11px] text-slate-500 truncate max-w-[130px] sm:max-w-[170px]">{u.email}</span>
                                   <button
                                     type="button"
                                     onClick={(e) => {
@@ -1524,100 +1743,128 @@ const UserManagement: React.FC = () => {
                                     <i className={`bi ${copiedEmailId === u.id ? "bi-check2 text-emerald-600 font-bold" : "bi-copy"} text-[9.5px]`}></i>
                                     {copiedEmailId === u.id && <span>Copied!</span>}
                                   </button>
+                                  {u.created_at && (
+                                    <span
+                                      className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[9px] font-medium bg-slate-100 text-slate-600 border border-slate-200/70 shrink-0"
+                                      title={`Joined ${new Date(u.created_at).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}`}
+                                    >
+                                      <i className="bi bi-clock-history text-[8.5px] text-slate-400"></i>
+                                      <span>{formatTenure(u.created_at)}</span>
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                             </div>
                           </td>
 
                           {/* Role Tier */}
-                          <td className="px-3.5 py-2.5 whitespace-nowrap">
-                            {getRoleBadge(u)}
-                          </td>
+                          {visibleColumns.role && (
+                            <td className="px-3.5 py-2.5 whitespace-nowrap">
+                              {getRoleBadge(u)}
+                            </td>
+                          )}
 
                           {/* Department */}
-                          <td className="px-3.5 py-2.5 whitespace-nowrap">
-                            <div className="flex items-center gap-2">
-                              <i className={`bi ${deptInfo.icon} ${deptInfo.color} text-xs shrink-0`}></i>
-                              <span className="font-medium text-slate-800 text-xs sm:text-[12.5px]">
-                                {u.department_name || "Unassigned"}
-                              </span>
-                            </div>
-                          </td>
+                          {visibleColumns.department && (
+                            <td className="px-3.5 py-2.5 whitespace-nowrap">
+                              <div className="flex items-center gap-2">
+                                <i className={`bi ${deptInfo.icon} ${deptInfo.color} text-xs shrink-0`}></i>
+                                <span className="font-medium text-slate-800 text-xs sm:text-[12.5px]">
+                                  {u.department_name || "Unassigned"}
+                                </span>
+                              </div>
+                            </td>
+                          )}
 
                           {/* Reports To Supervisor */}
-                          <td className="px-3.5 py-2.5 whitespace-nowrap">
-                            {(() => {
-                              const sup = getSupervisorInfo(u);
-                              if (sup.type === "executive") {
+                          {visibleColumns.supervisor && (
+                            <td className="px-3.5 py-2.5 whitespace-nowrap">
+                              {(() => {
+                                const sup = getSupervisorInfo(u);
+                                if (sup.type === "executive") {
+                                  return (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200/80 shadow-2xs">
+                                      <i className="bi bi-star-fill text-amber-500 text-[9px]"></i>
+                                      <span>{sup.label}</span>
+                                    </span>
+                                  );
+                                }
+                                if (sup.type === "unassigned") {
+                                  return (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-50 text-slate-500 border border-slate-200">
+                                      <i className="bi bi-arrow-up-right text-slate-400 text-[9px]"></i>
+                                      <span>{sup.label}</span>
+                                    </span>
+                                  );
+                                }
                                 return (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200/80 shadow-2xs">
-                                    <i className="bi bi-star-fill text-amber-500 text-[9px]"></i>
-                                    <span>{sup.label}</span>
-                                  </span>
-                                );
-                              }
-                              if (sup.type === "unassigned") {
-                                return (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-50 text-slate-500 border border-slate-200">
-                                    <i className="bi bi-arrow-up-right text-slate-400 text-[9px]"></i>
-                                    <span>{sup.label}</span>
-                                  </span>
-                                );
-                              }
-                              return (
-                                <div className="flex items-center gap-1.5">
-                                  <div className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 font-bold text-[9px] flex items-center justify-center shrink-0 border border-indigo-200 shadow-2xs">
-                                    {sup.label.charAt(0)}
+                                  <div className="flex items-center gap-1.5">
+                                    <div className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 font-bold text-[9px] flex items-center justify-center shrink-0 border border-indigo-200 shadow-2xs">
+                                      {sup.label.charAt(0)}
+                                    </div>
+                                    <span className="font-medium text-slate-800 text-xs sm:text-[12.5px] truncate max-w-[130px]" title={sup.label}>
+                                      {sup.label}
+                                    </span>
                                   </div>
-                                  <span className="font-medium text-slate-800 text-xs sm:text-[12.5px] truncate max-w-[130px]" title={sup.label}>
-                                    {sup.label}
-                                  </span>
-                                </div>
-                              );
-                            })()}
-                          </td>
+                                );
+                              })()}
+                            </td>
+                          )}
 
                           {/* Compensation */}
-                          <td className="px-3.5 py-2.5 whitespace-nowrap">
-                            <span className="font-semibold text-slate-900 text-xs sm:text-[12.5px]">
-                              ${Number(u.salary || 0).toLocaleString()}
-                            </span>
-                          </td>
+                          {visibleColumns.salary && (
+                            <td className="px-3.5 py-2.5 whitespace-nowrap">
+                              <span className="font-semibold text-slate-900 text-xs sm:text-[12.5px]">
+                                {isSalaryMasked ? (
+                                  <span className="inline-flex items-center gap-1 font-mono text-slate-500 font-bold tracking-widest text-[11px] bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60 select-none">
+                                    <i className="bi bi-shield-lock-fill text-[10px] text-slate-400"></i>
+                                    ••••••
+                                  </span>
+                                ) : (
+                                  `$${Number(u.salary || 0).toLocaleString()}`
+                                )}
+                              </span>
+                            </td>
+                          )}
 
                           {/* Contact */}
-                          <td className="px-3.5 py-2.5 whitespace-nowrap text-xs text-slate-700" onClick={(e) => e.stopPropagation()}>
-                            {u.phone ? (
-                              <a
-                                href={`tel:${u.phone}`}
-                                onClick={(e) => e.stopPropagation()}
-                                className="font-medium text-slate-800 hover:text-indigo-600 hover:underline text-xs sm:text-[12.5px] inline-flex items-center gap-1.5 group/phone"
-                                title={`Direct Call ${u.phone}`}
-                              >
-                                <i className="bi bi-telephone text-slate-400 group-hover/phone:text-indigo-600 text-[11px]"></i>
-                                <span>{u.phone}</span>
-                              </a>
-                            ) : (
-                              <span className="text-slate-400">—</span>
-                            )}
-                          </td>
+                          {visibleColumns.phone && (
+                            <td className="px-3.5 py-2.5 whitespace-nowrap text-xs text-slate-700" onClick={(e) => e.stopPropagation()}>
+                              {u.phone ? (
+                                <a
+                                  href={`tel:${u.phone}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="font-medium text-slate-800 hover:text-indigo-600 hover:underline text-xs sm:text-[12.5px] inline-flex items-center gap-1.5 group/phone"
+                                  title={`Direct Call ${u.phone}`}
+                                >
+                                  <i className="bi bi-telephone text-slate-400 group-hover/phone:text-indigo-600 text-[11px]"></i>
+                                  <span>{u.phone}</span>
+                                </a>
+                              ) : (
+                                <span className="text-slate-400">—</span>
+                              )}
+                            </td>
+                          )}
 
                           {/* Status */}
-                          <td className="px-3.5 py-2.5 whitespace-nowrap">
-                            <span
-                              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
-                                u.status === "active"
-                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200/70"
-                                  : "bg-slate-100 text-slate-600 border border-slate-200/70"
-                              }`}
-                            >
+                          {visibleColumns.status && (
+                            <td className="px-3.5 py-2.5 whitespace-nowrap">
                               <span
-                                className={`w-1.5 h-1.5 rounded-full ${
-                                  u.status === "active" ? "bg-emerald-500" : "bg-slate-400"
+                                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
+                                  u.status === "active"
+                                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200/70"
+                                    : "bg-slate-100 text-slate-600 border border-slate-200/70"
                                 }`}
-                              ></span>
-                              <span className="capitalize">{u.status || "active"}</span>
-                            </span>
-                          </td>
+                              >
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full ${
+                                    u.status === "active" ? "bg-emerald-500" : "bg-slate-400"
+                                  }`}
+                                ></span>
+                                <span className="capitalize">{u.status || "active"}</span>
+                              </span>
+                            </td>
+                          )}
 
                           {/* Actions (Centered Matching Option 2) */}
                           <td className={`px-4 py-2.5 text-center whitespace-nowrap ${isMenuActive ? "relative z-40" : ""}`}>
@@ -1939,9 +2186,34 @@ const UserManagement: React.FC = () => {
                               <span>Salary</span>
                             </span>
                             <span className="font-bold text-slate-900 text-xs">
-                              ${Number(u.salary || 0).toLocaleString()}<span className="text-[10px] text-slate-400 font-normal">/yr</span>
+                              {isSalaryMasked ? (
+                                <span className="inline-flex items-center gap-1 font-mono text-slate-500 font-bold tracking-widest text-[11px] bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200/60 select-none">
+                                  <i className="bi bi-shield-lock-fill text-[9.5px] text-slate-400"></i>
+                                  ••••••
+                                </span>
+                              ) : (
+                                <>
+                                  ${Number(u.salary || 0).toLocaleString()}
+                                  <span className="text-[10px] text-slate-400 font-normal">/yr</span>
+                                </>
+                              )}
                             </span>
                           </div>
+                          {u.created_at && (
+                            <div className="flex items-center justify-between text-slate-600">
+                              <span className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                                <i className="bi bi-calendar3 text-indigo-400 text-xs"></i>
+                                <span>Tenure</span>
+                              </span>
+                              <span
+                                className="inline-flex items-center gap-1 text-[10.5px] font-medium text-slate-600"
+                                title={`Joined ${new Date(u.created_at).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}`}
+                              >
+                                <i className="bi bi-clock-history text-[9px] text-slate-400"></i>
+                                {formatTenure(u.created_at)}
+                              </span>
+                            </div>
+                          )}
                         </div>
 
                         {/* Contact Row: 1-click email copy & 1-click phone call */}
@@ -2300,6 +2572,17 @@ const UserManagement: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Bulk CSV Import Modal */}
+      <CsvImportModal
+        isOpen={isCsvImportOpen}
+        onClose={() => setIsCsvImportOpen(false)}
+        onSuccess={() => {
+          fetchUsers();
+          setMsg({ type: "success", text: "Workforce directory updated successfully from bulk CSV import." });
+        }}
+        departments={departments}
+      />
     </div>
   );
 };
