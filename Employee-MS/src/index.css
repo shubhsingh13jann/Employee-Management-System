@@ -283,5 +283,18 @@ body {
   animation: heroCardHoverGently 6s ease-in-out infinite;
 }
 
+/* Floating Bulk Action Bar Animation */
+@keyframes floatingBarSlideUp {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 24px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
 
-
+.floating-action-bar-anim {
+  animation: floatingBarSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

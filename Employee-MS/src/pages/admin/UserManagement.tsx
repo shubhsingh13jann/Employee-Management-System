@@ -180,6 +180,12 @@ const UserManagement: React.FC = () => {
   const [isHeroMenuOpen, setIsHeroMenuOpen] = useState(false);
   const [openFilterDropdown, setOpenFilterDropdown] = useState<string | null>(null);
 
+  // Bulk Selection States
+  const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+  const [isBulkOperating, setIsBulkOperating] = useState(false);
+  const [isBulkTransferOpen, setIsBulkTransferOpen] = useState(false);
+  const [isBulkOffboardConfirmOpen, setIsBulkOffboardConfirmOpen] = useState(false);
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -192,12 +198,16 @@ const UserManagement: React.FC = () => {
       if (!target.closest("[data-filter-dropdown]")) {
         setOpenFilterDropdown(null);
       }
+      if (!target.closest(".bulk-transfer-container")) {
+        setIsBulkTransferOpen(false);
+      }
     };
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setOpenFilterDropdown(null);
         setIsHeroMenuOpen(false);
         setActiveActionMenuId(null);
+        setIsBulkTransferOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -307,6 +317,127 @@ const UserManagement: React.FC = () => {
   const handleOpenProfile = (id: number) => {
     setSelectedUserIdForProfile(id);
     setIsProfileModalOpen(true);
+  };
+
+  // Bulk Selection Handlers
+  const handleToggleSelectUser = (id: number) => {
+    setSelectedUserIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleToggleSelectAll = () => {
+    const pageIds = paginatedUsers.map((u) => u.id);
+    const allSelected = pageIds.length > 0 && pageIds.every((id) => selectedUserIds.includes(id));
+    if (allSelected) {
+      setSelectedUserIds((prev) => prev.filter((id) => !pageIds.includes(id)));
+    } else {
+      setSelectedUserIds((prev) => Array.from(new Set([...prev, ...pageIds])));
+    }
+  };
+
+  const handleBulkActivate = async () => {
+    if (selectedUserIds.length === 0) return;
+    try {
+      setIsBulkOperating(true);
+      await Promise.all(
+        selectedUserIds.map((id) => api.put(`/api/admin/users/${id}`, { status: "active" }))
+      );
+      setMsg({ type: "success", text: `Successfully activated ${selectedUserIds.length} personnel accounts` });
+      fetchUsers();
+      setSelectedUserIds([]);
+    } catch (err: any) {
+      console.error("Bulk activate error:", err);
+      setMsg({ type: "danger", text: err.response?.data?.error || "Failed to bulk activate users" });
+    } finally {
+      setIsBulkOperating(false);
+    }
+  };
+
+  const handleBulkDeactivate = async () => {
+    if (selectedUserIds.length === 0) return;
+    try {
+      setIsBulkOperating(true);
+      await Promise.all(
+        selectedUserIds.map((id) => api.put(`/api/admin/users/${id}`, { status: "inactive" }))
+      );
+      setMsg({ type: "success", text: `Successfully suspended ${selectedUserIds.length} personnel accounts` });
+      fetchUsers();
+      setSelectedUserIds([]);
+    } catch (err: any) {
+      console.error("Bulk deactivate error:", err);
+      setMsg({ type: "danger", text: err.response?.data?.error || "Failed to bulk suspend users" });
+    } finally {
+      setIsBulkOperating(false);
+    }
+  };
+
+  const handleBulkDepartmentTransfer = async (deptId: number) => {
+    if (selectedUserIds.length === 0) return;
+    try {
+      setIsBulkOperating(true);
+      await Promise.all(
+        selectedUserIds.map((id) => api.put(`/api/admin/users/${id}`, { department_id: deptId }))
+      );
+      const targetDept = departments.find((d) => d.id === deptId);
+      setMsg({
+        type: "success",
+        text: `Transferred ${selectedUserIds.length} members to ${targetDept?.name || "department"} successfully`
+      });
+      fetchUsers();
+      setSelectedUserIds([]);
+      setIsBulkTransferOpen(false);
+    } catch (err: any) {
+      console.error("Bulk dept transfer error:", err);
+      setMsg({ type: "danger", text: err.response?.data?.error || "Failed to transfer users" });
+    } finally {
+      setIsBulkOperating(false);
+    }
+  };
+
+  const handleBulkExportCSV = () => {
+    const selectedList = allUsers.filter((u) => selectedUserIds.includes(u.id));
+    if (selectedList.length === 0) return;
+    const headers = ["ID", "Name", "Email", "Role", "Department", "Supervisor", "Salary", "Phone", "Status", "Joined"];
+    const rows = selectedList.map((u) => [
+      u.id,
+      `"${u.name.replace(/"/g, '""')}"`,
+      `"${u.email}"`,
+      u.role,
+      `"${(u.department_name || "Unassigned").replace(/"/g, '""')}"`,
+      `"${(u.supervisor_name || "Direct to HOD").replace(/"/g, '""')}"`,
+      u.salary || 0,
+      `"${(u.phone || "").replace(/"/g, '""')}"`,
+      u.status || "active",
+      u.created_at ? new Date(u.created_at).toISOString().slice(0, 10) : ""
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `workforce_selected_${selectedList.length}_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleBulkOffboardConfirm = async () => {
+    if (selectedUserIds.length === 0) return;
+    try {
+      setIsBulkOperating(true);
+      await Promise.all(selectedUserIds.map((id) => api.delete(`/api/admin/users/${id}`)));
+      setMsg({ type: "success", text: `Successfully offboarded ${selectedUserIds.length} personnel` });
+      fetchUsers();
+      fetchSupervisors();
+      setSelectedUserIds([]);
+      setIsBulkOffboardConfirmOpen(false);
+    } catch (err: any) {
+      console.error("Bulk offboard error:", err);
+      setMsg({ type: "danger", text: err.response?.data?.error || "Failed to offboard selected members" });
+    } finally {
+      setIsBulkOperating(false);
+    }
   };
 
   // CSV Export
@@ -1060,6 +1191,25 @@ const UserManagement: React.FC = () => {
               <table className="w-full min-w-[760px] text-left border-collapse text-xs">
                 <thead className="bg-slate-50/80 border-b border-slate-200/90 text-xs font-semibold text-slate-700 normal-case tracking-normal">
                   <tr>
+                    <th className="w-10 px-3 py-2.5 text-center">
+                      <input
+                        type="checkbox"
+                        aria-label="Select all members on current page"
+                        checked={
+                          paginatedUsers.length > 0 &&
+                          paginatedUsers.every((u) => selectedUserIds.includes(u.id))
+                        }
+                        ref={(el) => {
+                          if (el) {
+                            const someSelected = paginatedUsers.some((u) => selectedUserIds.includes(u.id));
+                            const allSelected = paginatedUsers.length > 0 && paginatedUsers.every((u) => selectedUserIds.includes(u.id));
+                            el.indeterminate = someSelected && !allSelected;
+                          }
+                        }}
+                        onChange={handleToggleSelectAll}
+                        className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
+                      />
+                    </th>
                     <th
                       className="px-4 py-2.5 cursor-pointer select-none hover:text-slate-900 transition-colors"
                       onClick={() => handleSort("name")}
@@ -1123,7 +1273,7 @@ const UserManagement: React.FC = () => {
                 <tbody className="divide-y divide-slate-100">
                   {loading ? (
                     <tr>
-                      <td colSpan={7} className="px-6 py-20 text-center text-slate-400">
+                      <td colSpan={8} className="px-6 py-20 text-center text-slate-400">
                         <div className="flex flex-col items-center justify-center gap-2.5">
                           <div className="w-7 h-7 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
                           <span className="text-xs">Loading workforce directory...</span>
@@ -1132,7 +1282,7 @@ const UserManagement: React.FC = () => {
                     </tr>
                   ) : displayedUsers.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-6 py-16 text-center text-slate-400 text-xs">
+                      <td colSpan={8} className="px-6 py-16 text-center text-slate-400 text-xs">
                         <div className="flex flex-col items-center justify-center gap-2">
                           <i className="bi bi-people text-3xl text-slate-300"></i>
                           <p className="font-medium text-slate-600 mb-0">No workforce personnel found</p>
@@ -1156,6 +1306,17 @@ const UserManagement: React.FC = () => {
                             isMenuActive ? "relative z-30 bg-slate-50/60" : "relative z-0"
                           }`}
                         >
+                          {/* Checkbox Selector */}
+                          <td className="w-10 px-3 py-2.5 text-center" onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              aria-label={`Select ${u.name}`}
+                              checked={selectedUserIds.includes(u.id)}
+                              onChange={() => handleToggleSelectUser(u.id)}
+                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
+                            />
+                          </td>
+
                           {/* Staff Member Identity */}
                           <td className="px-4 py-2.5">
                             <div className="flex items-center gap-2.5">
@@ -1443,6 +1604,165 @@ const UserManagement: React.FC = () => {
         memberRole={offboardTarget?.role}
         isDeleting={deletingId !== null}
       />
+
+      {/* Floating Bulk Action Bar */}
+      {selectedUserIds.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 floating-action-bar-anim max-w-[94vw]">
+          <div className="bg-slate-900/95 backdrop-blur-xl border border-indigo-500/40 text-white rounded-2xl shadow-2xl px-3.5 py-2.5 sm:px-5 sm:py-3 flex items-center gap-2 sm:gap-3.5 ring-1 ring-white/10">
+            {/* Selected Counter Pill */}
+            <div className="flex items-center gap-2 pr-1.5 sm:pr-3 border-r border-slate-700/80 shrink-0">
+              <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+              <span className="text-xs font-bold text-white whitespace-nowrap">
+                {selectedUserIds.length} <span className="hidden sm:inline">Selected</span>
+              </span>
+            </div>
+
+            {/* Bulk Action Buttons */}
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* Activate */}
+              <button
+                type="button"
+                disabled={isBulkOperating}
+                onClick={handleBulkActivate}
+                className="h-8 px-2.5 sm:px-3 rounded-xl text-xs font-semibold bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                title="Activate Selected Accounts"
+              >
+                <i className="bi bi-check-circle text-emerald-400 text-xs"></i>
+                <span className="hidden md:inline">Activate</span>
+              </button>
+
+              {/* Suspend */}
+              <button
+                type="button"
+                disabled={isBulkOperating}
+                onClick={handleBulkDeactivate}
+                className="h-8 px-2.5 sm:px-3 rounded-xl text-xs font-semibold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                title="Suspend Selected Accounts"
+              >
+                <i className="bi bi-slash-circle text-amber-400 text-xs"></i>
+                <span className="hidden md:inline">Suspend</span>
+              </button>
+
+              {/* Transfer Department Dropdown */}
+              <div className="relative bulk-transfer-container">
+                <button
+                  type="button"
+                  disabled={isBulkOperating}
+                  onClick={() => setIsBulkTransferOpen(!isBulkTransferOpen)}
+                  className="h-8 px-2.5 sm:px-3 rounded-xl text-xs font-semibold bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                  title="Move Selected to Department"
+                >
+                  <i className="bi bi-building text-indigo-300 text-xs"></i>
+                  <span className="hidden md:inline">Transfer Dept</span>
+                  <i className={`bi bi-chevron-up text-[10px] transition-transform ${isBulkTransferOpen ? "rotate-180" : ""}`}></i>
+                </button>
+
+                {isBulkTransferOpen && (
+                  <div className="absolute bottom-full left-0 mb-2 w-56 bg-slate-900 border border-indigo-500/40 rounded-xl shadow-2xl p-2 z-50 text-white animate-in fade-in zoom-in-95 duration-150">
+                    <div className="text-[11px] font-bold text-slate-300 px-2 py-1 mb-1">
+                      Select Destination Department:
+                    </div>
+                    <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-1">
+                      {departments.map((d) => (
+                        <button
+                          key={d.id}
+                          type="button"
+                          onClick={() => handleBulkDepartmentTransfer(d.id)}
+                          className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs hover:bg-indigo-600/50 text-slate-200 hover:text-white transition-colors truncate"
+                        >
+                          {d.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Export Selected */}
+              <button
+                type="button"
+                disabled={isBulkOperating}
+                onClick={handleBulkExportCSV}
+                className="h-8 px-2.5 sm:px-3 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-slate-200 border border-white/20 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                title="Export Selected Members as CSV"
+              >
+                <i className="bi bi-download text-indigo-300 text-xs"></i>
+                <span className="hidden md:inline">Export</span>
+              </button>
+
+              {/* Offboard Bulk */}
+              <button
+                type="button"
+                disabled={isBulkOperating}
+                onClick={() => setIsBulkOffboardConfirmOpen(true)}
+                className="h-8 px-2.5 sm:px-3 rounded-xl text-xs font-semibold bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                title="Offboard Selected Members"
+              >
+                <i className="bi bi-trash3 text-rose-400 text-xs"></i>
+                <span className="hidden md:inline">Offboard</span>
+              </button>
+            </div>
+
+            {/* Clear Selection / Close */}
+            <button
+              type="button"
+              onClick={() => setSelectedUserIds([])}
+              className="w-7 h-7 ml-0.5 sm:ml-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer text-xs shrink-0"
+              title="Deselect All"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Offboard Confirmation Modal */}
+      {isBulkOffboardConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-5 text-slate-800 space-y-4">
+            <div className="flex items-center gap-3 text-rose-600">
+              <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-lg shrink-0">
+                <i className="bi bi-exclamation-triangle-fill"></i>
+              </div>
+              <div>
+                <h3 className="font-bold text-base text-slate-900 leading-tight">Confirm Bulk Offboarding</h3>
+                <p className="text-xs text-slate-500 mt-0.5">This action is permanent and cannot be undone.</p>
+              </div>
+            </div>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Are you sure you want to offboard all <span className="font-bold text-rose-700">{selectedUserIds.length}</span> selected personnel? Their active sessions and assignments will be terminated immediately.
+            </p>
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                disabled={isBulkOperating}
+                onClick={() => setIsBulkOffboardConfirmOpen(false)}
+                className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isBulkOperating}
+                onClick={handleBulkOffboardConfirm}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 shadow-md shadow-rose-600/30 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                {isBulkOperating ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Offboarding...</span>
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-trash3"></i>
+                    <span>Confirm Offboard ({selectedUserIds.length})</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
