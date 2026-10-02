@@ -182,11 +182,14 @@ const UserManagement: React.FC = () => {
 
   // Bulk Selection States
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+  const [isSelectMode, setIsSelectMode] = useState(false);
   const [isBulkOperating, setIsBulkOperating] = useState(false);
   const [isBulkTransferOpen, setIsBulkTransferOpen] = useState(false);
   const [isBulkOffboardConfirmOpen, setIsBulkOffboardConfirmOpen] = useState(false);
   const [copiedEmailId, setCopiedEmailId] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
+
+  const showCheckboxes = isSelectMode || selectedUserIds.length > 0;
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -357,6 +360,7 @@ const UserManagement: React.FC = () => {
       setMsg({ type: "success", text: `Successfully activated ${selectedUserIds.length} personnel accounts` });
       fetchUsers();
       setSelectedUserIds([]);
+      setIsSelectMode(false);
     } catch (err: any) {
       console.error("Bulk activate error:", err);
       setMsg({ type: "danger", text: err.response?.data?.error || "Failed to bulk activate users" });
@@ -375,11 +379,34 @@ const UserManagement: React.FC = () => {
       setMsg({ type: "success", text: `Successfully suspended ${selectedUserIds.length} personnel accounts` });
       fetchUsers();
       setSelectedUserIds([]);
+      setIsSelectMode(false);
     } catch (err: any) {
       console.error("Bulk deactivate error:", err);
       setMsg({ type: "danger", text: err.response?.data?.error || "Failed to bulk suspend users" });
     } finally {
       setIsBulkOperating(false);
+    }
+  };
+
+  const handleToggleUserStatus = async (userToToggle: any) => {
+    setActiveActionMenuId(null);
+    const isSuspending = userToToggle.status === "active";
+    const newStatus = isSuspending ? "inactive" : "active";
+    try {
+      const res = await api.put(`/api/admin/users/${userToToggle.id}`, { status: newStatus });
+      if (res.data.status) {
+        setMsg({
+          type: "success",
+          text: `Account for ${userToToggle.name} ${isSuspending ? "suspended" : "reactivated"} successfully.`
+        });
+        fetchUsers();
+      }
+    } catch (err: any) {
+      console.error("Toggle user status error:", err);
+      setMsg({
+        type: "danger",
+        text: err.response?.data?.error || `Failed to ${isSuspending ? "suspend" : "reactivate"} account`
+      });
     }
   };
 
@@ -397,6 +424,7 @@ const UserManagement: React.FC = () => {
       });
       fetchUsers();
       setSelectedUserIds([]);
+      setIsSelectMode(false);
       setIsBulkTransferOpen(false);
     } catch (err: any) {
       console.error("Bulk dept transfer error:", err);
@@ -442,6 +470,7 @@ const UserManagement: React.FC = () => {
       fetchUsers();
       fetchSupervisors();
       setSelectedUserIds([]);
+      setIsSelectMode(false);
       setIsBulkOffboardConfirmOpen(false);
     } catch (err: any) {
       console.error("Bulk offboard error:", err);
@@ -1236,32 +1265,58 @@ const UserManagement: React.FC = () => {
             </div>
           </div>
 
-          {/* Role Filter Tabs (Clean Floating Pills Matching Image 2) */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar shrink-0">
-            {roleTabs.map((tab) => {
-              const isActive = selectedRole === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setSelectedRole(tab.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                    isActive
-                      ? tab.activeStyles
-                      : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90 shadow-2xs hover:border-slate-300"
-                  }`}
-                >
-                  <span>{tab.label}</span>
-                  <span
-                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold transition-colors ${
-                      isActive ? tab.badgeActive : "bg-slate-100 text-slate-600"
+          {/* Role Filter Tabs (Clean Floating Pills) & Multi-Select Action Tab */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar shrink-0">
+              {roleTabs.map((tab) => {
+                const isActive = selectedRole === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setSelectedRole(tab.id)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                      isActive
+                        ? tab.activeStyles
+                        : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90 shadow-2xs hover:border-slate-300"
                     }`}
                   >
-                    {tab.count}
-                  </span>
-                </button>
-              );
-            })}
+                    <span>{tab.label}</span>
+                    <span
+                      className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold transition-colors ${
+                        isActive ? tab.badgeActive : "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {tab.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Select Tab at the right-most corner */}
+            <div className="shrink-0 pl-1">
+              <button
+                type="button"
+                onClick={() => {
+                  if (showCheckboxes) {
+                    setIsSelectMode(false);
+                    setSelectedUserIds([]);
+                  } else {
+                    setIsSelectMode(true);
+                  }
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-2xs ${
+                  showCheckboxes
+                    ? "bg-indigo-600 text-white border-indigo-500 shadow-indigo-500/20 ring-1 ring-indigo-400/40"
+                    : "bg-white hover:bg-indigo-50/60 text-slate-700 hover:text-indigo-600 border-slate-200/90 hover:border-indigo-300"
+                }`}
+                title={showCheckboxes ? "Exit Multi-Select Mode" : "Enable Multi-Select Mode"}
+              >
+                <i className={`bi ${showCheckboxes ? "bi-check2-all text-white font-bold" : "bi-check2-square text-indigo-500"} text-xs`}></i>
+                <span>{showCheckboxes ? `Done (${selectedUserIds.length})` : "Select"}</span>
+              </button>
+            </div>
           </div>
 
           {/* Workforce Directory View (Table or Interactive Card Grid) */}
@@ -1271,25 +1326,27 @@ const UserManagement: React.FC = () => {
                 <table className="w-full min-w-[760px] text-left border-collapse text-xs">
                 <thead className="bg-slate-50/80 border-b border-slate-200/90 text-xs font-semibold text-slate-700 normal-case tracking-normal">
                   <tr>
-                    <th className="w-10 px-3 py-2.5 text-center">
-                      <input
-                        type="checkbox"
-                        aria-label="Select all members on current page"
-                        checked={
-                          paginatedUsers.length > 0 &&
-                          paginatedUsers.every((u) => selectedUserIds.includes(u.id))
-                        }
-                        ref={(el) => {
-                          if (el) {
-                            const someSelected = paginatedUsers.some((u) => selectedUserIds.includes(u.id));
-                            const allSelected = paginatedUsers.length > 0 && paginatedUsers.every((u) => selectedUserIds.includes(u.id));
-                            el.indeterminate = someSelected && !allSelected;
+                    {showCheckboxes && (
+                      <th className="w-10 px-3 py-2.5 text-center">
+                        <input
+                          type="checkbox"
+                          aria-label="Select all members on current page"
+                          checked={
+                            paginatedUsers.length > 0 &&
+                            paginatedUsers.every((u) => selectedUserIds.includes(u.id))
                           }
-                        }}
-                        onChange={handleToggleSelectAll}
-                        className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
-                      />
-                    </th>
+                          ref={(el) => {
+                            if (el) {
+                              const someSelected = paginatedUsers.some((u) => selectedUserIds.includes(u.id));
+                              const allSelected = paginatedUsers.length > 0 && paginatedUsers.every((u) => selectedUserIds.includes(u.id));
+                              el.indeterminate = someSelected && !allSelected;
+                            }
+                          }}
+                          onChange={handleToggleSelectAll}
+                          className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
+                        />
+                      </th>
+                    )}
                     <th
                       className="px-4 py-2.5 cursor-pointer select-none hover:text-slate-900 transition-colors"
                       onClick={() => handleSort("name")}
@@ -1354,7 +1411,7 @@ const UserManagement: React.FC = () => {
                 <tbody className="divide-y divide-slate-100">
                   {loading ? (
                     <tr>
-                      <td colSpan={9} className="px-6 py-20 text-center text-slate-400">
+                      <td colSpan={showCheckboxes ? 9 : 8} className="px-6 py-20 text-center text-slate-400">
                         <div className="flex flex-col items-center justify-center gap-2.5">
                           <div className="w-7 h-7 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
                           <span className="text-xs">Loading workforce directory...</span>
@@ -1363,7 +1420,7 @@ const UserManagement: React.FC = () => {
                     </tr>
                   ) : displayedUsers.length === 0 ? (
                     <tr>
-                      <td colSpan={9} className="px-6 py-16 text-center text-slate-400 text-xs">
+                      <td colSpan={showCheckboxes ? 9 : 8} className="px-6 py-16 text-center text-slate-400 text-xs">
                         <div className="flex flex-col items-center justify-center gap-2.5 max-w-sm mx-auto">
                           <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-500 text-xl shadow-xs">
                             <i className="bi bi-people"></i>
@@ -1404,15 +1461,17 @@ const UserManagement: React.FC = () => {
                           title="Click row to view profile dossier"
                         >
                           {/* Checkbox Selector */}
-                          <td className="w-10 px-3 py-2.5 text-center" onClick={(e) => e.stopPropagation()}>
-                            <input
-                              type="checkbox"
-                              aria-label={`Select ${u.name}`}
-                              checked={selectedUserIds.includes(u.id)}
-                              onChange={() => handleToggleSelectUser(u.id)}
-                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
-                            />
-                          </td>
+                          {showCheckboxes && (
+                            <td className="w-10 px-3 py-2.5 text-center" onClick={(e) => e.stopPropagation()}>
+                              <input
+                                type="checkbox"
+                                aria-label={`Select ${u.name}`}
+                                checked={selectedUserIds.includes(u.id)}
+                                onChange={() => handleToggleSelectUser(u.id)}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
+                              />
+                            </td>
+                          )}
 
                           {/* Staff Member Identity */}
                           <td className="px-4 py-2.5">
@@ -1455,15 +1514,15 @@ const UserManagement: React.FC = () => {
                                       e.stopPropagation();
                                       handleCopyEmail(u.email, u.id);
                                     }}
-                                    className={`h-4 px-1 rounded text-[9.5px] font-medium transition-all inline-flex items-center gap-0.5 cursor-pointer shrink-0 ${
+                                    className={`transition-all inline-flex items-center justify-center cursor-pointer shrink-0 ${
                                       copiedEmailId === u.id
-                                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold"
-                                        : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-200"
+                                        ? "h-4 px-1.5 rounded text-[9px] bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold gap-1 shadow-2xs"
+                                        : "w-4.5 h-4.5 rounded text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 border border-transparent"
                                     }`}
-                                    title="Copy email to clipboard"
+                                    title={copiedEmailId === u.id ? "Email copied!" : "Copy email to clipboard"}
                                   >
-                                    <i className={`bi ${copiedEmailId === u.id ? "bi-check2 text-emerald-600 font-bold" : "bi-copy"} text-[9px]`}></i>
-                                    {copiedEmailId === u.id ? <span>Copied!</span> : <span className="opacity-0 group-hover:opacity-100 transition-opacity">Copy</span>}
+                                    <i className={`bi ${copiedEmailId === u.id ? "bi-check2 text-emerald-600 font-bold" : "bi-copy"} text-[9.5px]`}></i>
+                                    {copiedEmailId === u.id && <span>Copied!</span>}
                                   </button>
                                 </div>
                               </div>
@@ -1607,6 +1666,32 @@ const UserManagement: React.FC = () => {
                                     <i className="bi bi-pencil-square text-slate-400"></i>
                                     <span>Edit Details</span>
                                   </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setActiveActionMenuId(null);
+                                      setIsSelectMode(true);
+                                      if (!selectedUserIds.includes(u.id)) {
+                                        setSelectedUserIds((prev) => [...prev, u.id]);
+                                      }
+                                    }}
+                                    className="w-full px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
+                                  >
+                                    <i className="bi bi-check2-square text-indigo-500"></i>
+                                    <span>Select Member</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleUserStatus(u)}
+                                    className={`w-full px-2.5 py-1.5 text-[11px] rounded-lg flex items-center gap-2 transition-colors cursor-pointer ${
+                                      u.status === "active"
+                                        ? "text-amber-700 hover:bg-amber-50"
+                                        : "text-emerald-700 hover:bg-emerald-50"
+                                    }`}
+                                  >
+                                    <i className={`bi ${u.status === "active" ? "bi-slash-circle text-amber-500" : "bi-check-circle text-emerald-500"}`}></i>
+                                    <span>{u.status === "active" ? "Suspend Account" : "Reactivate Account"}</span>
+                                  </button>
                                   <div className="h-px bg-slate-100 my-1"></div>
                                   <button
                                     type="button"
@@ -1689,13 +1774,15 @@ const UserManagement: React.FC = () => {
                             className="flex items-center gap-2"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <input
-                              type="checkbox"
-                              aria-label={`Select ${u.name}`}
-                              checked={isSelected}
-                              onChange={() => handleToggleSelectUser(u.id)}
-                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
-                            />
+                            {showCheckboxes && (
+                              <input
+                                type="checkbox"
+                                aria-label={`Select ${u.name}`}
+                                checked={isSelected}
+                                onChange={() => handleToggleSelectUser(u.id)}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
+                              />
+                            )}
                             <span
                               className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                                 u.status === "active"
@@ -1748,6 +1835,32 @@ const UserManagement: React.FC = () => {
                                 >
                                   <i className="bi bi-pencil-square text-slate-400"></i>
                                   <span>Edit Details</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setActiveActionMenuId(null);
+                                    setIsSelectMode(true);
+                                    if (!selectedUserIds.includes(u.id)) {
+                                      setSelectedUserIds((prev) => [...prev, u.id]);
+                                    }
+                                  }}
+                                  className="w-full px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  <i className="bi bi-check2-square text-indigo-500"></i>
+                                  <span>Select Member</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleUserStatus(u)}
+                                  className={`w-full px-2.5 py-1.5 text-[11px] rounded-lg flex items-center gap-2 transition-colors cursor-pointer ${
+                                    u.status === "active"
+                                      ? "text-amber-700 hover:bg-amber-50"
+                                      : "text-emerald-700 hover:bg-emerald-50"
+                                  }`}
+                                >
+                                  <i className={`bi ${u.status === "active" ? "bi-slash-circle text-amber-500" : "bi-check-circle text-emerald-500"}`}></i>
+                                  <span>{u.status === "active" ? "Suspend Account" : "Reactivate Account"}</span>
                                 </button>
                                 <div className="h-px bg-slate-100 my-1"></div>
                                 <button
@@ -2025,7 +2138,10 @@ const UserManagement: React.FC = () => {
 
       {/* Floating Bulk Action Bar */}
       {selectedUserIds.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 floating-action-bar-anim max-w-[94vw]">
+        <div
+          className="fixed bottom-6 -translate-x-1/2 z-[1050] floating-action-bar-anim max-w-[calc(100vw-280px)]"
+          style={{ left: "calc(50% + 120px)" }}
+        >
           <div className="bg-slate-900/95 backdrop-blur-xl border border-indigo-500/40 text-white rounded-2xl shadow-2xl px-3.5 py-2.5 sm:px-5 sm:py-3 flex items-center gap-2 sm:gap-3.5 ring-1 ring-white/10">
             {/* Selected Counter Pill */}
             <div className="flex items-center gap-2 pr-1.5 sm:pr-3 border-r border-slate-700/80 shrink-0">
@@ -2086,7 +2202,7 @@ const UserManagement: React.FC = () => {
                           key={d.id}
                           type="button"
                           onClick={() => handleBulkDepartmentTransfer(d.id)}
-                          className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs hover:bg-indigo-600/50 text-slate-200 hover:text-white transition-colors truncate"
+                          className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs hover:bg-indigo-600/50 text-slate-200 hover:text-white transition-colors truncate cursor-pointer"
                         >
                           {d.name}
                         </button>
@@ -2124,9 +2240,12 @@ const UserManagement: React.FC = () => {
             {/* Clear Selection / Close */}
             <button
               type="button"
-              onClick={() => setSelectedUserIds([])}
+              onClick={() => {
+                setSelectedUserIds([]);
+                setIsSelectMode(false);
+              }}
               className="w-7 h-7 ml-0.5 sm:ml-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer text-xs shrink-0"
-              title="Deselect All"
+              title="Deselect All & Exit Multi-Select"
             >
               ✕
             </button>

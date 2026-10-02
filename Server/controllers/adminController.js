@@ -854,6 +854,11 @@ export const updateUser = async (req, res) => {
     const updatedImageUrl = image_url !== undefined ? image_url.trim() : existingUser.image_url;
     const updatedStatus = status || existingUser.status;
 
+    // Prevent suspending the currently logged-in admin's own account
+    if (Number(id) === req.user.id && updatedStatus === "inactive") {
+      return res.status(400).json({ status: false, error: "You cannot suspend your own admin session account" });
+    }
+
     await connection.query(
       `UPDATE users
        SET name = ?, email = ?, password_hash = ?, role = ?, department_id = ?, salary = ?, phone = ?, address = ?, image_url = ?, status = ?
@@ -873,29 +878,31 @@ export const updateUser = async (req, res) => {
       ]
     );
 
-    // Handle reporting line in team_hierarchy
-    if (updatedRole === "employee") {
-      if (supervisor_id) {
-        let managerId = null;
-        if (updatedDeptId) {
-          const [[dept]] = await connection.query("SELECT head_id FROM departments WHERE id = ?", [updatedDeptId]);
-          managerId = dept?.head_id || null;
+    // Handle reporting line in team_hierarchy ONLY if supervisor_id was explicitly supplied in payload
+    if (supervisor_id !== undefined) {
+      if (updatedRole === "employee") {
+        if (supervisor_id) {
+          let managerId = null;
+          if (updatedDeptId) {
+            const [[dept]] = await connection.query("SELECT head_id FROM departments WHERE id = ?", [updatedDeptId]);
+            managerId = dept?.head_id || null;
+          }
+          if (!managerId) {
+            managerId = supervisor_id;
+          }
+          await connection.query(
+            `INSERT INTO team_hierarchy (employee_id, supervisor_id, manager_id)
+             VALUES (?, ?, ?)
+             ON DUPLICATE KEY UPDATE supervisor_id = VALUES(supervisor_id), manager_id = VALUES(manager_id)`,
+            [id, supervisor_id, managerId]
+          );
+        } else {
+          await connection.query("DELETE FROM team_hierarchy WHERE employee_id = ?", [id]);
         }
-        if (!managerId) {
-          managerId = supervisor_id;
-        }
-        await connection.query(
-          `INSERT INTO team_hierarchy (employee_id, supervisor_id, manager_id)
-           VALUES (?, ?, ?)
-           ON DUPLICATE KEY UPDATE supervisor_id = VALUES(supervisor_id), manager_id = VALUES(manager_id)`,
-          [id, supervisor_id, managerId]
-        );
       } else {
+        // If role is supervisor/manager/admin, they are not an employee under another supervisor
         await connection.query("DELETE FROM team_hierarchy WHERE employee_id = ?", [id]);
       }
-    } else {
-      // If role is supervisor/manager/admin, they are not an employee under another supervisor
-      await connection.query("DELETE FROM team_hierarchy WHERE employee_id = ?", [id]);
     }
 
     // Role demotion / status safeguard: if user was supervisor and is demoted or inactivated
