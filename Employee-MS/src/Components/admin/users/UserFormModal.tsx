@@ -47,11 +47,11 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   const selectedOption = options.find((o) => o.value === value && o.value !== "");
 
   return (
-    <div className="relative pt-3.5" data-custom-dropdown={fieldName}>
+    <div className="relative pt-[20px]" data-custom-dropdown={fieldName}>
       <label
         className={`absolute left-2.5 transition-all duration-200 ease-out pointer-events-none select-none z-10 px-2 leading-none ${
           isDocked
-            ? `top-[6px] text-xs font-bold bg-white rounded-xs py-0.5 shadow-2xs ${
+            ? `top-[12px] text-xs font-bold bg-white rounded-xs py-0.5 shadow-2xs ${
                 isOpen ? "text-[#4f46e5]" : "text-slate-700"
               }`
             : "top-0 text-[11.5px] font-bold text-slate-800 bg-transparent"
@@ -587,7 +587,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
 
                   {/* Section Header */}
                   <div className="relative z-10 flex items-center gap-2.5 mb-3">
-                    <div className="w-7 h-7 rounded-lg bg-[#4f46e5] flex items-center justify-center text-white text-xs shrink-0 shadow-2xs">
+                    <div className="w-8 h-8 rounded-lg bg-[#4f46e5] flex items-center justify-center text-white text-sm shrink-0 shadow-2xs">
                       <i className="bi bi-person-badge-fill"></i>
                     </div>
                     <div>
@@ -602,11 +602,11 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
 
                   <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
                     {/* Full Name (Normal Heading by Default, Smoothly Docks to Border when Typing/Filled) */}
-                    <div className="relative pt-3.5">
+                    <div className="relative pt-[20px]">
                       <label
                         className={`absolute left-2.5 transition-all duration-200 ease-out pointer-events-none select-none z-10 px-2 leading-none ${
                           isFieldDocked("name")
-                            ? `top-[6px] text-xs font-bold bg-white rounded-xs py-0.5 shadow-2xs ${focusedField === "name" ? "text-[#4f46e5]" : "text-slate-700"}`
+                            ? `top-[12px] text-xs font-bold bg-white rounded-xs py-0.5 shadow-2xs ${focusedField === "name" ? "text-[#4f46e5]" : "text-slate-700"}`
                             : "top-0 text-[11.5px] font-bold text-slate-800 bg-transparent"
                         }`}
                       >
@@ -641,11 +641,11 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                     </div>
 
                     {/* Work Email (Normal Heading by Default, Smoothly Docks to Border when Typing/Filled) */}
-                    <div className="relative pt-3.5">
+                    <div className="relative pt-[20px]">
                       <label
                         className={`absolute left-2.5 transition-all duration-200 ease-out pointer-events-none select-none z-10 px-2 leading-none ${
                           isFieldDocked("email")
-                            ? `top-[6px] text-xs font-bold bg-white rounded-xs py-0.5 shadow-2xs ${focusedField === "email" ? "text-[#4f46e5]" : "text-slate-700"}`
+                            ? `top-[12px] text-xs font-bold bg-white rounded-xs py-0.5 shadow-2xs ${focusedField === "email" ? "text-[#4f46e5]" : "text-slate-700"}`
                             : "top-0 text-[11.5px] font-bold text-slate-800 bg-transparent"
                         }`}
                       >
@@ -680,11 +680,11 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                     </div>
 
                     {/* Password (Normal Heading by Default, Smoothly Docks to Border when Typing/Filled) */}
-                    <div className="md:col-span-2 relative pt-3.5">
+                    <div className="md:col-span-2 relative pt-[20px]">
                       <label
                         className={`absolute left-2.5 transition-all duration-200 ease-out pointer-events-none select-none z-10 px-2 leading-none ${
                           isFieldDocked("password")
-                            ? `top-[6px] text-xs font-bold bg-white rounded-xs py-0.5 shadow-2xs ${focusedField === "password" ? "text-[#4f46e5]" : "text-slate-700"}`
+                            ? `top-[12px] text-xs font-bold bg-white rounded-xs py-0.5 shadow-2xs ${focusedField === "password" ? "text-[#4f46e5]" : "text-slate-700"}`
                             : "top-0 text-[11.5px] font-bold text-slate-800 bg-transparent"
                         }`}
                       >
@@ -761,7 +761,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
 
                   {/* Section Header */}
                   <div className="relative z-10 flex items-center gap-2.5 mb-3">
-                    <div className="w-7 h-7 rounded-lg bg-[#10b981] flex items-center justify-center text-white text-xs shrink-0 shadow-2xs">
+                    <div className="w-8 h-8 rounded-lg bg-[#10b981] flex items-center justify-center text-white text-sm shrink-0 shadow-2xs">
                       <i className="bi bi-diagram-3-fill"></i>
                     </div>
                     <div>
@@ -912,7 +912,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
 
                   {/* Section Header */}
                   <div className="relative z-10 flex items-center gap-2.5 mb-3">
-                    <div className="w-7 h-7 rounded-lg bg-[#f59e0b] flex items-center justify-center text-white text-xs shrink-0 shadow-2xs">
+                    <div className="w-8 h-8 rounded-lg bg-[#f59e0b] flex items-center justify-center text-white text-sm shrink-0 shadow-2xs">
                       <i className="bi bi-stack"></i>
                     </div>
                     <div>
@@ -927,11 +927,11 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
 
                   <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
                     {/* Annual Salary (Normal Heading by Default, Smoothly Docks to Border when Typing/Filled) */}
-                    <div className="relative pt-3.5">
+                    <div className="relative pt-[20px]">
                       <label
                         className={`absolute left-2.5 transition-all duration-200 ease-out pointer-events-none select-none z-10 px-2 leading-none ${
                           isFieldDocked("salary")
-                            ? `top-[6px] text-xs font-bold bg-white rounded-xs py-0.5 shadow-2xs ${focusedField === "salary" ? "text-[#4f46e5]" : "text-slate-700"}`
+                            ? `top-[12px] text-xs font-bold bg-white rounded-xs py-0.5 shadow-2xs ${focusedField === "salary" ? "text-[#4f46e5]" : "text-slate-700"}`
                             : "top-0 text-[11.5px] font-bold text-slate-800 bg-transparent"
                         }`}
                       >
@@ -969,11 +969,11 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                     </div>
 
                     {/* Contact Phone (Normal Heading by Default, Smoothly Docks to Border when Typing/Filled) */}
-                    <div className="relative pt-3.5">
+                    <div className="relative pt-[20px]">
                       <label
                         className={`absolute left-2.5 transition-all duration-200 ease-out pointer-events-none select-none z-10 px-2 leading-none ${
                           isFieldDocked("phone")
-                            ? `top-[6px] text-xs font-bold bg-white rounded-xs py-0.5 shadow-2xs ${focusedField === "phone" ? "text-[#4f46e5]" : "text-slate-700"}`
+                            ? `top-[12px] text-xs font-bold bg-white rounded-xs py-0.5 shadow-2xs ${focusedField === "phone" ? "text-[#4f46e5]" : "text-slate-700"}`
                             : "top-0 text-[11.5px] font-bold text-slate-800 bg-transparent"
                         }`}
                       >
@@ -1033,11 +1033,11 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                     />
 
                     {/* Office / Work Address (Normal Heading by Default, Smoothly Docks to Border when Typing/Filled) */}
-                    <div className="md:col-span-3 relative pt-3.5">
+                    <div className="md:col-span-3 relative pt-[20px]">
                       <label
                         className={`absolute left-2.5 transition-all duration-200 ease-out pointer-events-none select-none z-10 px-2 leading-none ${
                           isFieldDocked("address")
-                            ? `top-[6px] text-xs font-bold bg-white rounded-xs py-0.5 shadow-2xs ${focusedField === "address" ? "text-[#4f46e5]" : "text-slate-700"}`
+                            ? `top-[12px] text-xs font-bold bg-white rounded-xs py-0.5 shadow-2xs ${focusedField === "address" ? "text-[#4f46e5]" : "text-slate-700"}`
                             : "top-0 text-[11.5px] font-bold text-slate-800 bg-transparent"
                         }`}
                       >
