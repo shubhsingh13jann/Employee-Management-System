@@ -64,7 +64,6 @@ body {
   background: #94a3b8;
 }
 
-
 @keyframes microLightningPulse {
   0%, 100% {
     opacity: 0.75;
@@ -227,6 +226,61 @@ body {
   transform: translateY(-6px);
   margin-bottom: 0;
   pointer-events: none;
+}
+
+/* ========================================================= */
+/* Micro-Interactions: Zero-Gravity Orbit Badges Float Physics */
+/* ========================================================= */
+@keyframes orbitFloat1 {
+  0%, 100% {
+    transform: translateY(0px) rotate(-12deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(-9deg);
+  }
+}
+
+@keyframes orbitFloat2 {
+  0%, 100% {
+    transform: translateY(0px) rotate(12deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(15deg);
+  }
+}
+
+@keyframes orbitFloat3 {
+  0%, 100% {
+    transform: translateY(0px) rotate(-6deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(-3deg);
+  }
+}
+
+@keyframes heroCardHoverGently {
+  0%, 100% {
+    transform: translateY(0px) rotate(-6deg);
+  }
+  50% {
+    transform: translateY(-3px) rotate(-5deg);
+  }
+}
+
+.orbit-badge-1 {
+  animation: orbitFloat1 4.5s ease-in-out infinite;
+}
+
+.orbit-badge-2 {
+  animation: orbitFloat2 5.2s ease-in-out infinite 0.7s;
+}
+
+.orbit-badge-3 {
+  animation: orbitFloat3 4s ease-in-out infinite 1.4s;
+}
+
+.central-hero-card {
+  animation: heroCardHoverGently 6s ease-in-out infinite;
 }
 
 

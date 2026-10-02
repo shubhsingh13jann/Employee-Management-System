@@ -369,6 +369,55 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
     }
   ];
 
+  const stepTips: Record<
+    number,
+    {
+      title: string;
+      badge: string;
+      badgeColor: string;
+      icon: string;
+      tip: React.ReactNode;
+      borderColor: string;
+    }
+  > = {
+    1: {
+      title: "Core Identity Tip",
+      badge: "Identity",
+      badgeColor: "bg-indigo-50 text-indigo-700 border-indigo-200/60",
+      icon: "💡",
+      borderColor: "border-indigo-200/70 shadow-indigo-500/5",
+      tip: (
+        <span>
+          All fields with <span className="text-rose-500 font-bold">*</span> are required. Use corporate email to configure enterprise access.
+        </span>
+      )
+    },
+    2: {
+      title: "Organization Setup Tip",
+      badge: "Hierarchy",
+      badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
+      icon: "💡",
+      borderColor: "border-emerald-200/70 shadow-emerald-500/5",
+      tip: (
+        <span>
+          Assigning a <strong className="font-semibold text-slate-700">Supervisor</strong> configures automatic routing for leave approvals and reviews.
+        </span>
+      )
+    },
+    3: {
+      title: "Compensation & Status Tip",
+      badge: "Profile",
+      badgeColor: "bg-amber-50 text-amber-700 border-amber-200/60",
+      icon: "💡",
+      borderColor: "border-amber-200/70 shadow-amber-500/5",
+      tip: (
+        <span>
+          Set gross annual salary. Choose <strong className="font-semibold text-slate-700">Inactive</strong> if the member starts at a future date.
+        </span>
+      )
+    }
+  };
+
   return createPortal(
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 bg-slate-950/65 backdrop-blur-xs overscroll-contain animate-in fade-in duration-200"
@@ -430,7 +479,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                 <div className="absolute w-20 h-24 bg-gradient-to-tr from-indigo-500/30 to-purple-500/30 blur-lg rounded-2xl transform rotate-12 pointer-events-none" />
 
                 {/* Central 3D Tilted Glass Card */}
-                <div className="relative w-18 h-24 rounded-2xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-600 p-[1px] shadow-lg shadow-indigo-500/25 transform -rotate-6 ">
+                <div className="relative w-18 h-24 rounded-2xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-600 p-[1px] shadow-lg shadow-indigo-500/25 transform -rotate-6 central-hero-card">
                   <div className="w-full h-full rounded-2xl bg-gradient-to-b from-indigo-600/90 to-purple-700/95 backdrop-blur-md flex flex-col items-center justify-center p-2 relative overflow-hidden">
                     <div className="w-8 h-8 rounded-full bg-white/20 border border-white/40 flex items-center justify-center text-white mb-1.5 shadow-inner">
                       <i className="bi bi-person-fill text-base"></i>
@@ -441,17 +490,17 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                 </div>
 
                 {/* Floating Orbit Badge 1 (Left: User Avatar) */}
-                <div className="absolute top-2 left-2 w-7.5 h-7.5 rounded-xl bg-white/95 backdrop-blur-md border border-purple-200/80 shadow-md shadow-purple-500/15 flex items-center justify-center text-purple-600 transform -rotate-12 ">
+                <div className="absolute top-2 left-2 w-7.5 h-7.5 rounded-xl bg-white/95 backdrop-blur-md border border-purple-200/80 shadow-md shadow-purple-500/15 flex items-center justify-center text-purple-600 transform -rotate-12 orbit-badge-1">
                   <i className="bi bi-person-badge-fill text-xs"></i>
                 </div>
 
                 {/* Floating Orbit Badge 2 (Right: Tree Node) */}
-                <div className="absolute top-6 right-3 w-7.5 h-7.5 rounded-xl bg-white/95 backdrop-blur-md border border-emerald-200/80 shadow-md shadow-emerald-500/15 flex items-center justify-center text-emerald-600 transform rotate-12 ">
+                <div className="absolute top-6 right-3 w-7.5 h-7.5 rounded-xl bg-white/95 backdrop-blur-md border border-emerald-200/80 shadow-md shadow-emerald-500/15 flex items-center justify-center text-emerald-600 transform rotate-12 orbit-badge-2">
                   <i className="bi bi-diagram-3-fill text-xs"></i>
                 </div>
 
                 {/* Floating Orbit Badge 3 (Bottom: Analytics Bars) */}
-                <div className="absolute -bottom-1 right-8 w-7 h-7 rounded-xl bg-white/95 backdrop-blur-md border border-amber-200/80 shadow-md shadow-amber-500/15 flex items-center justify-center text-amber-500 transform -rotate-6 ">
+                <div className="absolute -bottom-1 right-8 w-7 h-7 rounded-xl bg-white/95 backdrop-blur-md border border-amber-200/80 shadow-md shadow-amber-500/15 flex items-center justify-center text-amber-500 transform -rotate-6 orbit-badge-3">
                   <i className="bi bi-bar-chart-fill text-[10px]"></i>
                 </div>
               </div>
@@ -470,72 +519,100 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
               {/* Vertical Stepper List */}
               <div className="relative w-full">
                 {/* Stepper Vertical Connector Line with Smooth Dynamic Fill */}
-                <div className="absolute left-[13px] top-3.5 bottom-3.5 w-0.5 bg-slate-200 z-0">
+                <div className="absolute left-[13px] top-[22px] h-[104px] w-0.5 bg-slate-200/80 rounded-full z-0 overflow-hidden">
                   <div
-                    className="w-full bg-[#4f46e5] transition-all duration-400 ease-out"
+                    className="w-full bg-gradient-to-b from-indigo-500 via-indigo-600 to-[#4f46e5] transition-all duration-400 ease-out rounded-full"
                     style={{
                       height: activeStep === 1 ? "0%" : activeStep === 2 ? "50%" : "100%"
                     }}
                   />
                 </div>
 
-                <div className="space-y-2 relative z-10 w-full">
-                  {steps.map((step) => {
-                    const isActive = activeStep === step.id;
+                {/* Smooth Sliding Active Capsule Track */}
+                <div className="relative w-full">
+                  <div
+                    className="absolute left-0 right-0 h-[44px] rounded-xl bg-indigo-100/70 border border-indigo-200/80 shadow-2xs pointer-events-none transition-all duration-300 ease-out z-0"
+                    style={{
+                      top: activeStep === 1 ? "0px" : activeStep === 2 ? "52px" : "104px"
+                    }}
+                  />
 
-                    return (
-                      <div
-                        key={step.id}
-                        onClick={() => scrollToSection(step.id)}
-                        className={`flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition-all cursor-pointer select-none w-full ${
-                          isActive
-                            ? "bg-indigo-100/70 border border-indigo-200/80 shadow-2xs"
-                            : "hover:bg-white/60 text-slate-600"
-                        }`}
-                      >
-                        {/* Step Indicator Node */}
+                  <div className="flex flex-col gap-2 relative z-10 w-full">
+                    {steps.map((step) => {
+                      const isActive = activeStep === step.id;
+                      const isCompleted = activeStep > step.id;
+
+                      return (
                         <div
-                          className={`w-6 h-6 rounded-full flex items-center justify-center text-[10.5px] font-bold shrink-0 transition-all ${
+                          key={step.id}
+                          onClick={() => scrollToSection(step.id)}
+                          className={`h-[44px] flex items-center gap-2.5 px-2.5 rounded-xl transition-all cursor-pointer select-none w-full ${
                             isActive
-                              ? "bg-[#4f46e5] text-white shadow-xs scale-105"
-                              : "bg-white border border-slate-300 text-slate-500"
+                              ? "text-indigo-950 font-bold"
+                              : "hover:bg-white/40 text-slate-600"
                           }`}
                         >
-                          {step.id}
-                        </div>
-
-                        {/* Step Text Info */}
-                        <div className="min-w-0 flex-1">
+                          {/* Step Indicator Node */}
                           <div
-                            className={`text-[11.5px] font-bold leading-tight truncate ${
-                              isActive ? "text-indigo-950 font-extrabold" : "text-slate-800"
+                            className={`w-6 h-6 rounded-full flex items-center justify-center text-[10.5px] font-bold shrink-0 transition-all duration-200 ${
+                              isActive
+                                ? "bg-[#4f46e5] text-white shadow-xs scale-105 ring-2 ring-indigo-200/70"
+                                : isCompleted
+                                ? "bg-indigo-600 text-white"
+                                : "bg-white border border-slate-300 text-slate-500"
                             }`}
                           >
-                            {step.title}
+                            {isCompleted ? (
+                              <i className="bi bi-check2 text-xs font-bold leading-none"></i>
+                            ) : (
+                              step.id
+                            )}
                           </div>
-                          <div className="text-[9.5px] text-slate-400 leading-tight truncate mt-0.5">
-                            {step.subtitle}
+
+                          {/* Step Text Info */}
+                          <div className="min-w-0 flex-1">
+                            <div
+                              className={`text-[11.5px] leading-tight truncate transition-colors ${
+                                isActive ? "text-indigo-950 font-extrabold" : "text-slate-800 font-bold"
+                              }`}
+                            >
+                              {step.title}
+                            </div>
+                            <div className="text-[9.5px] text-slate-400 leading-tight truncate mt-0.5">
+                              {step.subtitle}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom: Quick Tip Callout Box (Full Width) */}
-            <div className="relative z-10 mt-4 pt-3 border-t border-indigo-100/60 w-full">
-              <div className="bg-white/80 border border-slate-200/60 rounded-xl p-2.5 flex items-start gap-2 shadow-2xs w-full">
-                <span className="text-sm leading-none shrink-0 mt-0.5">💡</span>
-                <div>
-                  <div className="text-[10.5px] font-bold text-slate-900 leading-tight">Quick Tip</div>
-                  <div className="text-[9.5px] text-slate-500 font-normal leading-snug mt-0.5">
-                    All fields marked with <span className="text-rose-500 font-bold">*</span> are mandatory. You can update other details later from the profile page.
+                      );
+                    })}
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* Bottom: Dynamic Quick Tip Callout Box (Full Width, Animated Step Sync) */}
+            <div className="relative z-10 mt-4 pt-3 border-t border-indigo-100/60 w-full">
+              {(() => {
+                const currentTip = stepTips[activeStep] || stepTips[1];
+                return (
+                  <div
+                    key={activeStep}
+                    className={`bg-white/90 border rounded-xl p-2.5 flex items-start gap-2 shadow-2xs w-full transition-all duration-300 animate-in fade-in slide-in-from-bottom-1.5 ${currentTip.borderColor}`}
+                  >
+                    <span className="text-sm leading-none shrink-0 mt-0.5 select-none transform transition-transform hover:scale-125 duration-200 cursor-default">
+                      {currentTip.icon}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-1 mb-0.5">
+                        <span className="text-[10.5px] font-bold text-slate-900 leading-tight">
+                          {currentTip.title}
+                        </span>
+                        <span
+                          className={`text-[8.5px] font-bold px-1.5 py-0.2 rounded-full border leading-tight ${currentTip.badgeColor}`}
+                        >
+                          Step {activeStep}
+                        </span>
+                      </div>
                       <div className="text-[9.5px] text-slate-500 font-normal leading-snug">
                         {currentTip.tip}
                       </div>
