@@ -186,6 +186,7 @@ const UserManagement: React.FC = () => {
   const [isBulkTransferOpen, setIsBulkTransferOpen] = useState(false);
   const [isBulkOffboardConfirmOpen, setIsBulkOffboardConfirmOpen] = useState(false);
   const [copiedEmailId, setCopiedEmailId] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<"table" | "grid">("table");
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -892,6 +893,23 @@ const UserManagement: React.FC = () => {
                       type="button"
                       onClick={() => {
                         setIsHeroMenuOpen(false);
+                        setViewMode(viewMode === "table" ? "grid" : "table");
+                      }}
+                      className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
+                    >
+                      <div className="flex items-center gap-2">
+                        <i className={`bi ${viewMode === "table" ? "bi-grid-fill" : "bi-table"} text-indigo-400 text-xs`}></i>
+                        <span>{viewMode === "table" ? "Switch to Grid View" : "Switch to Table View"}</span>
+                      </div>
+                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-indigo-300 uppercase">
+                        {viewMode}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsHeroMenuOpen(false);
                         handleExportCSV();
                       }}
                       disabled={users.length === 0}
@@ -905,6 +923,36 @@ const UserManagement: React.FC = () => {
               </div>
             ) : (
               <div className="relative z-10 flex items-center gap-1.5 shrink-0 self-end md:self-center">
+                {/* View Switcher: Table vs. Grid */}
+                <div className="h-8 p-0.5 rounded-lg bg-white/10 border border-white/20 flex items-center gap-0.5 backdrop-blur-xs box-border">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("table")}
+                    className={`h-7 px-2 sm:px-2.5 rounded-md text-[11px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer leading-none ${
+                      viewMode === "table"
+                        ? "bg-indigo-600 text-white shadow-xs"
+                        : "text-slate-300 hover:text-white"
+                    }`}
+                    title="Dense Table View"
+                  >
+                    <i className="bi bi-table text-xs"></i>
+                    <span className="hidden sm:inline">Table</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("grid")}
+                    className={`h-7 px-2 sm:px-2.5 rounded-md text-[11px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer leading-none ${
+                      viewMode === "grid"
+                        ? "bg-indigo-600 text-white shadow-xs"
+                        : "text-slate-300 hover:text-white"
+                    }`}
+                    title="Interactive Team Card Grid View"
+                  >
+                    <i className="bi bi-grid-fill text-xs"></i>
+                    <span className="hidden sm:inline">Grid</span>
+                  </button>
+                </div>
+
                 {/* Workforce Overview Toggle Button */}
                 <button
                   type="button"
@@ -1216,10 +1264,11 @@ const UserManagement: React.FC = () => {
             })}
           </div>
 
-          {/* Workforce Directory Table */}
+          {/* Workforce Directory View (Table or Interactive Card Grid) */}
           <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
-            <div className="overflow-x-auto min-h-[340px] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
-              <table className="w-full min-w-[760px] text-left border-collapse text-xs">
+            {viewMode === "table" ? (
+              <div className="overflow-x-auto min-h-[340px] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
+                <table className="w-full min-w-[760px] text-left border-collapse text-xs">
                 <thead className="bg-slate-50/80 border-b border-slate-200/90 text-xs font-semibold text-slate-700 normal-case tracking-normal">
                   <tr>
                     <th className="w-10 px-3 py-2.5 text-center">
@@ -1582,6 +1631,261 @@ const UserManagement: React.FC = () => {
                 </tbody>
               </table>
             </div>
+          ) : (
+            <div className="p-3.5 sm:p-4 min-h-[340px] bg-slate-50/50">
+              {loading ? (
+                <div className="py-20 text-center text-slate-400">
+                  <div className="flex flex-col items-center justify-center gap-2.5">
+                    <div className="w-7 h-7 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-xs">Loading workforce directory...</span>
+                  </div>
+                </div>
+              ) : displayedUsers.length === 0 ? (
+                <div className="py-16 text-center text-slate-400 text-xs">
+                  <div className="flex flex-col items-center justify-center gap-2.5 max-w-sm mx-auto">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-500 text-xl shadow-xs">
+                      <i className="bi bi-people"></i>
+                    </div>
+                    <p className="font-bold text-slate-800 text-sm mb-0">No workforce personnel found</p>
+                    <p className="text-[11px] text-slate-500 leading-normal mb-1">
+                      {activeFilterCount > 0 || selectedRole
+                        ? "No team members matched your active filters or search terms."
+                        : "Your workforce directory is currently empty. Onboard new members to get started."}
+                    </p>
+                    {(activeFilterCount > 0 || selectedRole) && (
+                      <button
+                        type="button"
+                        onClick={handleClearFilters}
+                        className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer mt-1"
+                      >
+                        <i className="bi bi-arrow-counterclockwise text-xs"></i>
+                        <span>Clear All Filters & Search</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                  {paginatedUsers.map((u) => {
+                    const isCurrentUser = currentUser?.id === u.id || currentUser?.email === u.email;
+                    const deptInfo = getDepartmentIcon(u.department_name);
+                    const sup = getSupervisorInfo(u);
+                    const isSelected = selectedUserIds.includes(u.id);
+                    const isMenuActive = activeActionMenuId === u.id;
+
+                    return (
+                      <div
+                        key={u.id}
+                        onClick={() => handleOpenProfile(u.id)}
+                        className={`bg-white rounded-2xl border transition-all duration-200 p-4 flex flex-col justify-between group cursor-pointer relative shadow-2xs hover:shadow-md ${
+                          isSelected
+                            ? "border-indigo-500 ring-2 ring-indigo-100 bg-indigo-50/15"
+                            : "border-slate-200/90 hover:border-indigo-300"
+                        } ${isMenuActive ? "z-30" : "z-0"}`}
+                      >
+                        {/* Card Top: Checkbox, Status & Action Menu */}
+                        <div className="flex items-center justify-between gap-2 mb-3">
+                          <div
+                            className="flex items-center gap-2"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <input
+                              type="checkbox"
+                              aria-label={`Select ${u.name}`}
+                              checked={isSelected}
+                              onChange={() => handleToggleSelectUser(u.id)}
+                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
+                            />
+                            <span
+                              className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                                u.status === "active"
+                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200/70"
+                                  : "bg-slate-100 text-slate-600 border border-slate-200/70"
+                              }`}
+                            >
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  u.status === "active" ? "bg-emerald-500" : "bg-slate-400"
+                                }`}
+                              ></span>
+                              <span className="capitalize">{u.status || "active"}</span>
+                            </span>
+                          </div>
+
+                          {/* 3-dots action in card */}
+                          <div
+                            className="relative inline-flex items-center justify-center action-menu-container"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => setActiveActionMenuId((prev) => (prev === u.id ? null : u.id))}
+                              className="w-7 h-7 rounded-lg border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 flex items-center justify-center cursor-pointer shadow-2xs"
+                              title="Actions"
+                            >
+                              <i className="bi bi-three-dots text-xs"></i>
+                            </button>
+                            {activeActionMenuId === u.id && (
+                              <div className="absolute right-0 top-full mt-1 w-44 rounded-xl bg-white border border-slate-200/90 shadow-xl p-1 z-50 text-left animate-in fade-in zoom-in-95 duration-100">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setActiveActionMenuId(null);
+                                    handleOpenProfile(u.id);
+                                  }}
+                                  className="w-full px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  <i className="bi bi-eye text-slate-400"></i>
+                                  <span>View Profile</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setActiveActionMenuId(null);
+                                    handleOpenEdit(u);
+                                  }}
+                                  className="w-full px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  <i className="bi bi-pencil-square text-slate-400"></i>
+                                  <span>Edit Details</span>
+                                </button>
+                                <div className="h-px bg-slate-100 my-1"></div>
+                                <button
+                                  type="button"
+                                  disabled={deletingId === u.id}
+                                  onClick={() => {
+                                    setActiveActionMenuId(null);
+                                    handleRequestDelete(u);
+                                  }}
+                                  className="w-full px-2.5 py-1.5 text-[11px] text-rose-600 hover:bg-rose-50 rounded-lg flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
+                                >
+                                  <i className="bi bi-person-x text-rose-500"></i>
+                                  <span>Offboard Member</span>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Profile Info: Avatar, Name, Role */}
+                        <div className="flex items-start gap-3 mb-3">
+                          <div className="relative shrink-0">
+                            <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-700 font-bold text-base flex items-center justify-center border border-slate-200/90 shadow-2xs overflow-hidden ring-1 ring-slate-200/60 group-hover:ring-indigo-400 transition-all">
+                              {u.image_url ? (
+                                <img src={u.image_url} alt={u.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <span>{u.name ? u.name.charAt(0) : "U"}</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <h4 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors text-sm leading-tight truncate mb-0">
+                                {u.name}
+                              </h4>
+                              {isCurrentUser && (
+                                <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0">
+                                  You
+                                </span>
+                              )}
+                              {Boolean(u.is_hod) && !isCurrentUser && (
+                                <span className="px-1.5 py-0.2 rounded text-[9.5px] font-extrabold uppercase bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                                  👑 HOD
+                                </span>
+                              )}
+                            </div>
+                            <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                              {getRoleBadge(u)}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Meta Rows: Department, Reports To, Salary */}
+                        <div className="space-y-1.5 py-2 border-y border-slate-100 text-xs">
+                          <div className="flex items-center justify-between text-slate-600">
+                            <span className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                              <i className={`bi ${deptInfo.icon} ${deptInfo.color} text-xs`}></i>
+                              <span>Department</span>
+                            </span>
+                            <span className="font-semibold text-slate-800 text-xs truncate max-w-[130px]">
+                              {u.department_name || "Unassigned"}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between text-slate-600">
+                            <span className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                              <i className="bi bi-diagram-2 text-indigo-500 text-xs"></i>
+                              <span>Reports To</span>
+                            </span>
+                            <span className="font-semibold text-slate-800 text-xs truncate max-w-[130px]">
+                              {sup.label}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between text-slate-600">
+                            <span className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                              <i className="bi bi-cash-stack text-emerald-500 text-xs"></i>
+                              <span>Salary</span>
+                            </span>
+                            <span className="font-bold text-slate-900 text-xs">
+                              ${Number(u.salary || 0).toLocaleString()}<span className="text-[10px] text-slate-400 font-normal">/yr</span>
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Contact Row: 1-click email copy & 1-click phone call */}
+                        <div className="mt-2.5 pt-1 flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyEmail(u.email, u.id)}
+                            className={`h-7 px-2.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer truncate flex-1 justify-center ${
+                              copiedEmailId === u.id
+                                ? "bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold"
+                                : "bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 border border-slate-200/80"
+                            }`}
+                            title="Copy Email"
+                          >
+                            <i className={`bi ${copiedEmailId === u.id ? "bi-check2 text-emerald-600 font-bold" : "bi-envelope"} text-xs shrink-0`}></i>
+                            <span className="truncate">{copiedEmailId === u.id ? "Copied!" : u.email}</span>
+                          </button>
+
+                          {u.phone ? (
+                            <a
+                              href={`tel:${u.phone}`}
+                              className="h-7 px-2.5 rounded-lg text-xs font-medium bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 border border-slate-200/80 transition-all flex items-center gap-1.5 shrink-0"
+                              title={`Call ${u.phone}`}
+                            >
+                              <i className="bi bi-telephone text-emerald-600 text-xs"></i>
+                              <span className="hidden sm:inline">Call</span>
+                            </a>
+                          ) : null}
+                        </div>
+
+                        {/* Quick Action Footer */}
+                        <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenProfile(u.id)}
+                            className="flex-1 h-7.5 rounded-lg text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50/70 hover:bg-indigo-100/70 border border-indigo-200/60 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                          >
+                            <i className="bi bi-person-badge text-xs"></i>
+                            <span>View Dossier</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEdit(u)}
+                            className="h-7.5 px-3 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-800 bg-white hover:bg-slate-100 border border-slate-200/80 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                            title="Edit Details"
+                          >
+                            <i className="bi bi-pencil-square text-xs text-slate-500"></i>
+                            <span>Edit</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
             {/* Bottom Pagination Bar */}
             <div className="px-4 py-2.5 bg-white border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
