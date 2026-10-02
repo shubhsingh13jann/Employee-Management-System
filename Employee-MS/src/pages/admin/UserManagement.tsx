@@ -1016,22 +1016,6 @@ const UserManagement: React.FC = () => {
                       </span>
                     </button>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsHeroMenuOpen(false);
-                        toggleSalaryMask();
-                      }}
-                      className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
-                    >
-                      <div className="flex items-center gap-2">
-                        <i className={`bi ${isSalaryMasked ? "bi-eye-slash-fill text-amber-300" : "bi-eye text-indigo-400"} text-xs`}></i>
-                        <span>{isSalaryMasked ? "Reveal Salary Figures" : "Salary Privacy Mode"}</span>
-                      </div>
-                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300">
-                        {isSalaryMasked ? "Masked" : "Visible"}
-                      </span>
-                    </button>
 
                     <button
                       type="button"
@@ -1127,71 +1111,7 @@ const UserManagement: React.FC = () => {
                   )}
                 </button>
 
-                {/* Salary Privacy Mode Toggle (Feature 1) */}
-                <button
-                  type="button"
-                  onClick={toggleSalaryMask}
-                  className={`h-8 px-2.5 rounded-lg text-[11px] font-semibold border backdrop-blur-xs transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs box-border leading-none ${
-                    isSalaryMasked
-                      ? "bg-amber-500/25 border-amber-400 text-amber-200 shadow-amber-500/20 ring-1 ring-amber-400/40"
-                      : "bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border-white/20"
-                  }`}
-                  title={isSalaryMasked ? "Salary Privacy Active ($••••••) — Click to Reveal" : "Enable Salary Privacy Mode (Masks compensation)"}
-                >
-                  <i className={`bi ${isSalaryMasked ? "bi-eye-slash-fill text-amber-300" : "bi-eye text-slate-300"} text-xs`}></i>
-                  <span className="hidden xl:inline">{isSalaryMasked ? "Masked" : "Privacy"}</span>
-                </button>
 
-                {/* Column Visibility Customizer Dropdown (Feature 4) */}
-                {viewMode === "table" && (
-                  <div className="relative column-visibility-container">
-                    <button
-                      type="button"
-                      onClick={() => setIsColumnDropdownOpen(!isColumnDropdownOpen)}
-                      className={`h-8 px-2.5 rounded-lg text-[11px] font-semibold border backdrop-blur-xs transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs box-border leading-none ${
-                        isColumnDropdownOpen
-                          ? "bg-indigo-600/40 border-indigo-400 text-white"
-                          : "bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border-white/20"
-                      }`}
-                      title="Customize Visible Columns in Directory"
-                    >
-                      <i className="bi bi-layout-three-columns text-xs"></i>
-                      <span className="hidden xl:inline">Columns</span>
-                      <i className={`bi bi-chevron-down text-[9px] transition-transform ${isColumnDropdownOpen ? "rotate-180" : ""}`}></i>
-                    </button>
-
-                    {isColumnDropdownOpen && (
-                      <div className="absolute right-0 top-full mt-1.5 w-48 bg-white rounded-xl border border-slate-200/90 shadow-2xl p-2 z-50 text-slate-800 animate-in fade-in zoom-in-95 duration-150">
-                        <div className="text-[10px] font-bold text-slate-400 px-2 py-1 uppercase tracking-wider">
-                          Visible Columns
-                        </div>
-                        <div className="space-y-0.5">
-                          {[
-                            { key: "role", label: "Role Tier" },
-                            { key: "department", label: "Department" },
-                            { key: "supervisor", label: "Reports To" },
-                            { key: "salary", label: "Annual Salary" },
-                            { key: "phone", label: "Phone Number" },
-                            { key: "status", label: "Status" }
-                          ].map((col) => (
-                            <label
-                              key={col.key}
-                              className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700 select-none"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={visibleColumns[col.key] !== false}
-                                onChange={() => toggleColumn(col.key)}
-                                className="w-3.5 h-3.5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 accent-indigo-600 cursor-pointer"
-                              />
-                              <span>{col.label}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
 
                 {/* Import CSV Button (Feature 5) */}
                 <button
@@ -1488,8 +1408,60 @@ const UserManagement: React.FC = () => {
               })}
             </div>
 
-            {/* Select Tab at the right-most corner */}
-            <div className="shrink-0 pl-1">
+            {/* Right Controls: Column Visibility Customizer & Multi-Select Tab */}
+            <div className="flex items-center gap-2 shrink-0 pl-1">
+              {/* Column Visibility Customizer Dropdown (Feature 4 - Just left to the select button) */}
+              {viewMode === "table" && (
+                <div className="relative column-visibility-container">
+                  <button
+                    type="button"
+                    onClick={() => setIsColumnDropdownOpen(!isColumnDropdownOpen)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-2xs ${
+                      isColumnDropdownOpen
+                        ? "bg-indigo-50 text-indigo-700 border-indigo-300 ring-2 ring-indigo-100"
+                        : "bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200/90 hover:border-slate-300"
+                    }`}
+                    title="Customize Visible Columns in Directory"
+                  >
+                    <i className="bi bi-layout-three-columns text-indigo-500 text-xs"></i>
+                    <span>Columns</span>
+                    <i className={`bi bi-chevron-down text-[9.5px] text-slate-400 transition-transform ${isColumnDropdownOpen ? "rotate-180" : ""}`}></i>
+                  </button>
+
+                  {isColumnDropdownOpen && (
+                    <div className="absolute right-0 top-full mt-1.5 w-48 bg-white rounded-xl border border-slate-200/90 shadow-2xl p-2 z-50 text-slate-800 animate-in fade-in zoom-in-95 duration-150">
+                      <div className="text-[10px] font-bold text-slate-400 px-2 py-1 uppercase tracking-wider">
+                        Visible Columns
+                      </div>
+                      <div className="space-y-0.5">
+                        {[
+                          { key: "role", label: "Role Tier" },
+                          { key: "department", label: "Department" },
+                          { key: "supervisor", label: "Reports To" },
+                          { key: "salary", label: "Annual Salary" },
+                          { key: "phone", label: "Phone Number" },
+                          { key: "status", label: "Status" }
+                        ].map((col) => (
+                          <label
+                            key={col.key}
+                            className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700 select-none"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={visibleColumns[col.key] !== false}
+                              onChange={() => toggleColumn(col.key)}
+                              className="w-3.5 h-3.5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 accent-indigo-600 cursor-pointer"
+                            />
+                            <span>{col.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Select Tab at the right-most corner */}
               <button
                 type="button"
                 onClick={() => {
@@ -2411,10 +2383,10 @@ const UserManagement: React.FC = () => {
       {/* Floating Bulk Action Bar */}
       {selectedUserIds.length > 0 && (
         <div
-          className="fixed bottom-6 -translate-x-1/2 z-[1050] floating-action-bar-anim max-w-[calc(100vw-280px)]"
-          style={{ left: "calc(50% + 120px)" }}
+          className="fixed bottom-6 flex justify-center items-center z-[1050] pointer-events-none px-4"
+          style={{ left: "240px", right: "0px" }}
         >
-          <div className="bg-slate-900/95 backdrop-blur-xl border border-indigo-500/40 text-white rounded-2xl shadow-2xl px-3.5 py-2.5 sm:px-5 sm:py-3 flex items-center gap-2 sm:gap-3.5 ring-1 ring-white/10">
+          <div className="floating-action-bar-anim bg-slate-900/95 backdrop-blur-xl border border-indigo-500/40 text-white rounded-2xl shadow-2xl px-3.5 py-2.5 sm:px-5 sm:py-3 flex items-center gap-2 sm:gap-3.5 ring-1 ring-white/10 pointer-events-auto max-w-full overflow-x-auto [scrollbar-width:none]">
             {/* Selected Counter Pill */}
             <div className="flex items-center gap-2 pr-1.5 sm:pr-3 border-r border-slate-700/80 shrink-0">
               <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
