@@ -185,6 +185,7 @@ const UserManagement: React.FC = () => {
   const [isBulkOperating, setIsBulkOperating] = useState(false);
   const [isBulkTransferOpen, setIsBulkTransferOpen] = useState(false);
   const [isBulkOffboardConfirmOpen, setIsBulkOffboardConfirmOpen] = useState(false);
+  const [copiedEmailId, setCopiedEmailId] = useState<number | null>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -317,6 +318,15 @@ const UserManagement: React.FC = () => {
   const handleOpenProfile = (id: number) => {
     setSelectedUserIdForProfile(id);
     setIsProfileModalOpen(true);
+  };
+
+  const handleCopyEmail = (email: string, id: number) => {
+    if (!email) return;
+    navigator.clipboard.writeText(email);
+    setCopiedEmailId(id);
+    setTimeout(() => {
+      setCopiedEmailId(null);
+    }, 1800);
   };
 
   // Bulk Selection Handlers
@@ -1302,9 +1312,11 @@ const UserManagement: React.FC = () => {
                       return (
                         <tr
                           key={u.id}
-                          className={`hover:bg-slate-50/70 transition-colors ${
+                          onClick={() => handleOpenProfile(u.id)}
+                          className={`hover:bg-indigo-50/30 transition-colors cursor-pointer group ${
                             isMenuActive ? "relative z-30 bg-slate-50/60" : "relative z-0"
                           }`}
+                          title="Click row to view profile dossier"
                         >
                           {/* Checkbox Selector */}
                           <td className="w-10 px-3 py-2.5 text-center" onClick={(e) => e.stopPropagation()}>
@@ -1320,7 +1332,14 @@ const UserManagement: React.FC = () => {
                           {/* Staff Member Identity */}
                           <td className="px-4 py-2.5">
                             <div className="flex items-center gap-2.5">
-                              <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200/90 shadow-2xs shrink-0 overflow-hidden ring-1 ring-slate-200/50">
+                              <div
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenProfile(u.id);
+                                }}
+                                className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200/90 shadow-2xs shrink-0 overflow-hidden ring-1 ring-slate-200/50 hover:ring-indigo-400 hover:scale-105 transition-all cursor-pointer"
+                                title="Click to view full profile"
+                              >
                                 {u.image_url ? (
                                    <img src={u.image_url} alt={u.name} className="w-full h-full object-cover" />
                                 ) : (
@@ -1329,7 +1348,7 @@ const UserManagement: React.FC = () => {
                               </div>
                               <div className="min-w-0">
                                 <div className="flex items-center gap-1.5 flex-nowrap">
-                                  <span className="font-semibold text-slate-900 text-xs sm:text-[13px] leading-tight truncate">
+                                  <span className="font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors text-xs sm:text-[13px] leading-tight truncate">
                                     {u.name}
                                   </span>
                                   {isCurrentUser && (
@@ -1343,7 +1362,25 @@ const UserManagement: React.FC = () => {
                                     </span>
                                   ) : null}
                                 </div>
-                                <span className="text-[11px] text-slate-500 block truncate mt-0.5">{u.email}</span>
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                  <span className="text-[11px] text-slate-500 truncate max-w-[150px] sm:max-w-[210px]">{u.email}</span>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleCopyEmail(u.email, u.id);
+                                    }}
+                                    className={`h-4 px-1 rounded text-[9.5px] font-medium transition-all inline-flex items-center gap-0.5 cursor-pointer shrink-0 ${
+                                      copiedEmailId === u.id
+                                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold"
+                                        : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-200"
+                                    }`}
+                                    title="Copy email to clipboard"
+                                  >
+                                    <i className={`bi ${copiedEmailId === u.id ? "bi-check2 text-emerald-600 font-bold" : "bi-copy"} text-[9px]`}></i>
+                                    {copiedEmailId === u.id ? <span>Copied!</span> : <span className="opacity-0 group-hover:opacity-100 transition-opacity">Copy</span>}
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           </td>
@@ -1371,9 +1408,17 @@ const UserManagement: React.FC = () => {
                           </td>
 
                           {/* Contact */}
-                          <td className="px-3.5 py-2.5 whitespace-nowrap text-xs text-slate-700">
+                          <td className="px-3.5 py-2.5 whitespace-nowrap text-xs text-slate-700" onClick={(e) => e.stopPropagation()}>
                             {u.phone ? (
-                              <span className="font-medium text-slate-800 text-xs sm:text-[12.5px]">{u.phone}</span>
+                              <a
+                                href={`tel:${u.phone}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="font-medium text-slate-800 hover:text-indigo-600 hover:underline text-xs sm:text-[12.5px] inline-flex items-center gap-1.5 group/phone"
+                                title={`Direct Call ${u.phone}`}
+                              >
+                                <i className="bi bi-telephone text-slate-400 group-hover/phone:text-indigo-600 text-[11px]"></i>
+                                <span>{u.phone}</span>
+                              </a>
                             ) : (
                               <span className="text-slate-400">—</span>
                             )}
