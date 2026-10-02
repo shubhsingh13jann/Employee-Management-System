@@ -635,6 +635,27 @@ const UserManagement: React.FC = () => {
     return { icon: "bi-building", color: "text-indigo-500" };
   };
 
+  const getSupervisorInfo = (u: any) => {
+    if (Boolean(u.is_hod) || u.role === "admin") {
+      return {
+        type: "executive",
+        label: u.role === "admin" ? "Board / Exec" : "Dept Head (HOD)",
+      };
+    }
+    const sup = supervisors.find((s) => s.id === u.supervisor_id);
+    const name = u.supervisor_name || sup?.name;
+    if (!name) {
+      return {
+        type: "unassigned",
+        label: "Direct to HOD",
+      };
+    }
+    return {
+      type: "assigned",
+      label: name,
+    };
+  };
+
   const getRoleBadge = (u: any) => {
     switch (u.role) {
       case "admin":
@@ -1257,6 +1278,7 @@ const UserManagement: React.FC = () => {
                       </div>
                     </th>
                     <th className="px-3.5 py-2.5 font-semibold text-slate-700 text-xs whitespace-nowrap">Department</th>
+                    <th className="px-3.5 py-2.5 font-semibold text-slate-700 text-xs whitespace-nowrap">Reports To</th>
                     <th
                       className="px-3.5 py-2.5 cursor-pointer select-none hover:text-slate-900 transition-colors whitespace-nowrap"
                       onClick={() => handleSort("salary")}
@@ -1283,7 +1305,7 @@ const UserManagement: React.FC = () => {
                 <tbody className="divide-y divide-slate-100">
                   {loading ? (
                     <tr>
-                      <td colSpan={8} className="px-6 py-20 text-center text-slate-400">
+                      <td colSpan={9} className="px-6 py-20 text-center text-slate-400">
                         <div className="flex flex-col items-center justify-center gap-2.5">
                           <div className="w-7 h-7 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
                           <span className="text-xs">Loading workforce directory...</span>
@@ -1292,13 +1314,27 @@ const UserManagement: React.FC = () => {
                     </tr>
                   ) : displayedUsers.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="px-6 py-16 text-center text-slate-400 text-xs">
-                        <div className="flex flex-col items-center justify-center gap-2">
-                          <i className="bi bi-people text-3xl text-slate-300"></i>
-                          <p className="font-medium text-slate-600 mb-0">No workforce personnel found</p>
-                          <p className="text-[11px] text-slate-400 mb-0">
-                            Try adjusting your filters, search terms, or onboard a new team member.
+                      <td colSpan={9} className="px-6 py-16 text-center text-slate-400 text-xs">
+                        <div className="flex flex-col items-center justify-center gap-2.5 max-w-sm mx-auto">
+                          <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-500 text-xl shadow-xs">
+                            <i className="bi bi-people"></i>
+                          </div>
+                          <p className="font-bold text-slate-800 text-sm mb-0">No workforce personnel found</p>
+                          <p className="text-[11px] text-slate-500 leading-normal mb-1">
+                            {activeFilterCount > 0 || selectedRole
+                              ? "No team members matched your active filters or search terms."
+                              : "Your workforce directory is currently empty. Onboard new members to get started."}
                           </p>
+                          {(activeFilterCount > 0 || selectedRole) && (
+                            <button
+                              type="button"
+                              onClick={handleClearFilters}
+                              className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer mt-1"
+                            >
+                              <i className="bi bi-arrow-counterclockwise text-xs"></i>
+                              <span>Clear All Filters & Search</span>
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -1398,6 +1434,39 @@ const UserManagement: React.FC = () => {
                                 {u.department_name || "Unassigned"}
                               </span>
                             </div>
+                          </td>
+
+                          {/* Reports To Supervisor */}
+                          <td className="px-3.5 py-2.5 whitespace-nowrap">
+                            {(() => {
+                              const sup = getSupervisorInfo(u);
+                              if (sup.type === "executive") {
+                                return (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200/80 shadow-2xs">
+                                    <i className="bi bi-star-fill text-amber-500 text-[9px]"></i>
+                                    <span>{sup.label}</span>
+                                  </span>
+                                );
+                              }
+                              if (sup.type === "unassigned") {
+                                return (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-50 text-slate-500 border border-slate-200">
+                                    <i className="bi bi-arrow-up-right text-slate-400 text-[9px]"></i>
+                                    <span>{sup.label}</span>
+                                  </span>
+                                );
+                              }
+                              return (
+                                <div className="flex items-center gap-1.5">
+                                  <div className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 font-bold text-[9px] flex items-center justify-center shrink-0 border border-indigo-200 shadow-2xs">
+                                    {sup.label.charAt(0)}
+                                  </div>
+                                  <span className="font-medium text-slate-800 text-xs sm:text-[12.5px] truncate max-w-[130px]" title={sup.label}>
+                                    {sup.label}
+                                  </span>
+                                </div>
+                              );
+                            })()}
                           </td>
 
                           {/* Compensation */}
