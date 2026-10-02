@@ -5,6 +5,144 @@ import { UserFormModal } from "../../Components/admin/users/UserFormModal";
 import { UserProfileModal } from "../../Components/admin/users/UserProfileModal";
 import { ConfirmOffboardModal } from "../../Components/admin/users/ConfirmOffboardModal";
 import { WorkforceAnalyticsSidebar } from "../../Components/admin/users/WorkforceAnalyticsSidebar";
+interface FilterDropdownOption {
+  value: string;
+  label: string;
+  sublabel?: string;
+  dot?: string;
+}
+
+interface FilterDropdownProps {
+  label: string;
+  icon: string;
+  value: string;
+  options: FilterDropdownOption[];
+  placeholder?: string;
+  fieldName: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  onSelect: (value: string) => void;
+  themeColor?: "purple" | "emerald" | "indigo";
+}
+
+const FilterDropdown: React.FC<FilterDropdownProps> = ({
+  label,
+  icon,
+  value,
+  options,
+  placeholder = "Select...",
+  fieldName,
+  isOpen,
+  onToggle,
+  onSelect,
+  themeColor = "purple"
+}) => {
+  const selectedOption = options.find((opt) => opt.value === value);
+
+  const themeClasses = {
+    purple: {
+      btn: isOpen
+        ? "border-indigo-500 bg-white ring-2 ring-purple-100"
+        : "border-purple-200/90 hover:border-purple-300 bg-purple-50/40",
+      icon: "text-indigo-600",
+      activeItem: "bg-indigo-50 text-[#4f46e5]",
+      hoverItem: "text-slate-700 hover:bg-slate-50 hover:text-indigo-600",
+      check: "text-[#4f46e5]"
+    },
+    emerald: {
+      btn: isOpen
+        ? "border-emerald-500 bg-white ring-2 ring-emerald-100"
+        : "border-emerald-200/90 hover:border-emerald-300 bg-emerald-50/30",
+      icon: "text-emerald-600",
+      activeItem: "bg-emerald-50 text-emerald-700",
+      hoverItem: "text-slate-700 hover:bg-slate-50 hover:text-emerald-700",
+      check: "text-emerald-600"
+    },
+    indigo: {
+      btn: isOpen
+        ? "border-indigo-500 bg-white ring-2 ring-indigo-100"
+        : "border-slate-200 hover:border-indigo-300 bg-white/70",
+      icon: "text-indigo-600",
+      activeItem: "bg-indigo-50 text-[#4f46e5]",
+      hoverItem: "text-slate-700 hover:bg-slate-50 hover:text-indigo-600",
+      check: "text-[#4f46e5]"
+    }
+  }[themeColor];
+
+  return (
+    <div>
+      <label className="flex items-center text-xs font-bold text-slate-800 mb-1">
+        <span className={`inline-flex items-center justify-center mr-2 ${themeClasses.icon}`}>
+          <i className={`${icon} text-xs`}></i>
+        </span>
+        <span>{label}</span>
+      </label>
+      <div className="relative" data-filter-dropdown={fieldName}>
+        <button
+          type="button"
+          onClick={onToggle}
+          className={`w-full relative flex items-center h-9 rounded-xl border transition-all px-2.5 shadow-2xs text-left cursor-pointer outline-none ${themeClasses.btn}`}
+        >
+          {selectedOption?.dot ? (
+            <span className={`w-2.5 h-2.5 rounded-full mr-2 shrink-0 shadow-2xs ${selectedOption.dot}`}></span>
+          ) : (
+            <i className={`${icon} ${themeClasses.icon} text-xs mr-2 shrink-0`}></i>
+          )}
+
+          <span className="w-full text-xs font-semibold text-slate-700 truncate pr-2">
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
+
+          <i
+            className={`bi bi-chevron-down text-slate-500 text-[10px] font-bold shrink-0 transition-transform duration-200 ${
+              isOpen ? "rotate-180 text-indigo-600" : ""
+            }`}
+          ></i>
+        </button>
+
+        {/* Floating Menu Popover (Matching UserFormModal structure) */}
+        {isOpen && (
+          <div className="absolute top-full left-0 mt-1.5 w-full min-w-[210px] bg-white rounded-xl border border-slate-200/90 shadow-2xl z-50 py-1.5 overflow-hidden ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-150">
+            <div className="max-h-60 overflow-y-auto custom-scrollbar p-1 space-y-0.5">
+              {options.map((opt) => {
+                const isSelected = value === opt.value;
+                return (
+                  <button
+                    key={opt.value || "__all__"}
+                    type="button"
+                    onClick={() => onSelect(opt.value)}
+                    className={`w-full px-3 py-2 rounded-lg text-xs sm:text-[13px] flex items-center justify-between text-left cursor-pointer transition-all duration-150 ${
+                      isSelected
+                        ? `${themeClasses.activeItem} font-semibold`
+                        : `${themeClasses.hoverItem} font-medium`
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0 pr-2">
+                      {opt.dot && (
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${opt.dot}`}></span>
+                      )}
+                      <div className="flex flex-col min-w-0">
+                        <span className="truncate">{opt.label}</span>
+                        {opt.sublabel && (
+                          <span className="text-[10px] text-slate-400 truncate">
+                            {opt.sublabel}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    {isSelected && (
+                      <i className={`bi bi-check2 text-base ${themeClasses.check} shrink-0 font-bold ml-1`}></i>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const UserManagement: React.FC = () => {
   const { user: currentUser } = useAuth();
@@ -40,6 +178,7 @@ const UserManagement: React.FC = () => {
   const [activeActionMenuId, setActiveActionMenuId] = useState<number | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isHeroMenuOpen, setIsHeroMenuOpen] = useState(false);
+  const [openFilterDropdown, setOpenFilterDropdown] = useState<string | null>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -50,9 +189,23 @@ const UserManagement: React.FC = () => {
       if (!target.closest(".hero-menu-container")) {
         setIsHeroMenuOpen(false);
       }
+      if (!target.closest("[data-filter-dropdown]")) {
+        setOpenFilterDropdown(null);
+      }
     };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpenFilterDropdown(null);
+        setIsHeroMenuOpen(false);
+        setActiveActionMenuId(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   const fetchUsers = async () => {
@@ -278,6 +431,7 @@ const UserManagement: React.FC = () => {
     setSelectedDept("");
     setSelectedStatus("");
     setSearchQuery("");
+    setOpenFilterDropdown(null);
   };
 
   const roleTabs = [
@@ -653,19 +807,19 @@ const UserManagement: React.FC = () => {
           <div
             className={`water-drawer-wrapper ${
               isFilterOpen ? "water-drawer-open" : "water-drawer-closed"
-            }`}
+            } ${openFilterDropdown ? "z-30 relative" : "z-10 relative"}`}
           >
-            <div className="overflow-hidden min-h-0 py-0.5">
+            <div className={`${isFilterOpen ? "overflow-visible" : "overflow-hidden"} min-h-0 py-0.5`}>
               <div className="water-drop-card p-[1px] rounded-[16px] bg-gradient-to-r from-sky-300/40 via-purple-300/40 to-pink-300/50 shadow-md shadow-indigo-500/5 shrink-0">
-                <div className="relative rounded-[15px] bg-white/85 backdrop-blur-2xl px-4 py-2.5 sm:px-5 sm:py-3 overflow-hidden">
-                  {/* Concentric Water Droplet Ripple Wave */}
-                  <div className="absolute -top-10 left-1/3 w-80 h-40 rounded-full border border-sky-300/40 bg-gradient-to-b from-sky-400/15 via-indigo-300/10 to-transparent pointer-events-none water-ripple-ring" />
-
-                  {/* Liquid Caustic Water Sheen Sweep */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none water-caustic-gleam" />
-
-                  {/* Luminous Ethereal Silk Waves in Background */}
+                <div className="relative rounded-[15px] bg-white/85 backdrop-blur-2xl px-4 py-2.5 sm:px-5 sm:py-3">
+                  {/* Luminous Ethereal Silk Waves & Water Effects in Background */}
                   <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 rounded-[15px]">
+                    {/* Concentric Water Droplet Ripple Wave */}
+                    <div className="absolute -top-10 left-1/3 w-80 h-40 rounded-full border border-sky-300/40 bg-gradient-to-b from-sky-400/15 via-indigo-300/10 to-transparent water-ripple-ring" />
+
+                    {/* Liquid Caustic Water Sheen Sweep */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent water-caustic-gleam" />
+
                     {/* Atmospheric Glow Blobs */}
                     <div className="absolute -top-12 -right-10 w-72 h-40 bg-gradient-to-bl from-pink-300/35 via-rose-200/25 to-transparent blur-2xl"></div>
                     <div className="absolute -top-16 left-1/4 w-96 h-40 bg-gradient-to-b from-sky-200/35 via-indigo-100/20 to-transparent blur-2xl"></div>
@@ -817,54 +971,55 @@ const UserManagement: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Field 2: Department */}
-                    <div>
-                      <label className="flex items-center text-xs font-bold text-slate-800 mb-1">
-                        <span className="inline-flex items-center justify-center mr-2 text-indigo-600">
-                          <i className="bi bi-building text-xs"></i>
-                        </span>
-                        <span>Department</span>
-                      </label>
-                      <div className="relative flex items-center h-9 rounded-xl bg-purple-50/40 border border-purple-200/90 hover:border-purple-300 focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-purple-100 transition-all px-2.5 shadow-2xs">
-                        <i className="bi bi-building text-indigo-600 text-xs mr-2 shrink-0"></i>
-                        <select
-                          value={selectedDept}
-                          onChange={(e) => setSelectedDept(e.target.value)}
-                          className="w-full text-xs font-semibold text-slate-700 bg-transparent outline-none cursor-pointer appearance-none pr-6"
-                        >
-                          <option value="">All Departments</option>
-                          {departments.map((d) => (
-                            <option key={d.id} value={d.id}>
-                              {d.name} {d.code ? `(${d.code})` : ""}
-                            </option>
-                          ))}
-                        </select>
-                        <i className="bi bi-chevron-down text-indigo-500 text-[10px] font-bold absolute right-2.5 pointer-events-none"></i>
-                      </div>
-                    </div>
+                    {/* Field 2: Department (Modern Custom Dropdown) */}
+                    <FilterDropdown
+                      label="Department"
+                      icon="bi bi-building"
+                      value={selectedDept}
+                      options={[
+                        { value: "", label: "All Departments" },
+                        ...departments.map((d) => ({
+                          value: String(d.id),
+                          label: `${d.name} ${d.code ? `(${d.code})` : ""}`
+                        }))
+                      ]}
+                      fieldName="department"
+                      isOpen={openFilterDropdown === "department"}
+                      onToggle={() =>
+                        setOpenFilterDropdown(
+                          openFilterDropdown === "department" ? null : "department"
+                        )
+                      }
+                      onSelect={(val) => {
+                        setSelectedDept(val);
+                        setOpenFilterDropdown(null);
+                      }}
+                      themeColor="purple"
+                    />
 
-                    {/* Field 3: Account Status */}
-                    <div>
-                      <label className="flex items-center text-xs font-bold text-slate-800 mb-1">
-                        <span className="inline-flex items-center justify-center mr-2 text-indigo-600">
-                          <i className="bi bi-shield-check text-xs"></i>
-                        </span>
-                        <span>Account Status</span>
-                      </label>
-                      <div className="relative flex items-center h-9 rounded-xl bg-emerald-50/30 border border-emerald-200/90 hover:border-emerald-300 focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-100 transition-all px-2.5 shadow-2xs">
-                        <span className={`w-2.5 h-2.5 rounded-full mr-2 shrink-0 shadow-2xs ${selectedStatus === "inactive" ? "bg-rose-500" : "bg-emerald-500"}`}></span>
-                        <select
-                          value={selectedStatus}
-                          onChange={(e) => setSelectedStatus(e.target.value)}
-                          className="w-full text-xs font-semibold text-slate-700 bg-transparent outline-none cursor-pointer appearance-none pr-6"
-                        >
-                          <option value="">All Statuses</option>
-                          <option value="active">Active Members</option>
-                          <option value="inactive">Inactive / Suspended</option>
-                        </select>
-                        <i className="bi bi-chevron-down text-slate-500 text-[10px] font-bold absolute right-2.5 pointer-events-none"></i>
-                      </div>
-                    </div>
+                    {/* Field 3: Account Status (Modern Custom Dropdown) */}
+                    <FilterDropdown
+                      label="Account Status"
+                      icon="bi bi-shield-check"
+                      value={selectedStatus}
+                      options={[
+                        { value: "", label: "All Statuses", dot: "bg-slate-400" },
+                        { value: "active", label: "Active Members", dot: "bg-emerald-500" },
+                        { value: "inactive", label: "Inactive / Suspended", dot: "bg-rose-500" }
+                      ]}
+                      fieldName="status"
+                      isOpen={openFilterDropdown === "status"}
+                      onToggle={() =>
+                        setOpenFilterDropdown(
+                          openFilterDropdown === "status" ? null : "status"
+                        )
+                      }
+                      onSelect={(val) => {
+                        setSelectedStatus(val);
+                        setOpenFilterDropdown(null);
+                      }}
+                      themeColor="emerald"
+                    />
                   </div>
                 </div>
               </div>

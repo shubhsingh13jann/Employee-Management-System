@@ -49,6 +49,22 @@ body {
   border-radius: 4px;
 }
 
+/* Sleek custom scrollbar for dropdown menus */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+
 @keyframes microLightningPulse {
   0%, 100% {
     opacity: 0.75;
@@ -190,6 +206,7 @@ body {
   opacity: 1;
   margin-bottom: 0.875rem;
   pointer-events: auto;
+  overflow: visible;
 }
 
 .water-drawer-open .water-drop-card {
