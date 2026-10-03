@@ -514,36 +514,136 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               {/* TAB 1: OVERVIEW */}
               {activeTab === "overview" && (
                 <div className="space-y-5 animate-in fade-in duration-150">
-                  {/* Profile Details Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                    <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 shadow-2xs">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Annual Salary</span>
-                      <span className="font-extrabold text-slate-900 text-base">
+                  {/* Hero Profile Banner Card */}
+                  <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full border-2 border-slate-200 overflow-hidden shrink-0 bg-indigo-50 flex items-center justify-center text-indigo-700 text-2xl font-extrabold shadow-xs">
+                        {user.image_url ? (
+                          <img src={user.image_url} alt={user.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span>{user.name ? user.name.charAt(0) : "U"}</span>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h2 className="text-xl font-extrabold text-slate-900 tracking-tight mb-0 truncate">
+                            {user.name}
+                          </h2>
+                          {getRoleBadge(user.role)}
+                          {user.is_hod ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-700 border border-amber-400/40">
+                              👑 HOD
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="text-xs font-semibold text-slate-500 mt-0.5 mb-2 truncate">
+                          {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : "Employee"} | {user.department_name ? `${user.department_name} Department` : "Unassigned Department"}
+                        </p>
+                        <div className="flex items-center gap-3.5 text-xs text-slate-500 flex-wrap">
+                          <span className="inline-flex items-center gap-1.5 text-slate-600">
+                            <i className="bi bi-envelope text-slate-400"></i>
+                            <span className="truncate max-w-[200px]">{user.email}</span>
+                          </span>
+                          <span className="text-slate-300">•</span>
+                          <span className="inline-flex items-center gap-1.5 text-slate-600">
+                            <i className="bi bi-telephone text-slate-400"></i>
+                            <span>{user.phone || "Not recorded"}</span>
+                          </span>
+                          <span className="text-slate-300">•</span>
+                          <span className="inline-flex items-center gap-1.5 text-slate-600">
+                            <i className="bi bi-geo-alt text-slate-400"></i>
+                            <span>{user.address ? user.address.split(",")[0] : "Corporate Headquarters"}</span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex md:flex-col items-end justify-between gap-3 shrink-0 self-stretch md:self-auto border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
+                      <div className="flex items-center md:flex-col md:items-end gap-1.5">
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+                            user.status === "active"
+                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                              : "bg-slate-100 text-slate-600 border border-slate-200"
+                          }`}
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full ${user.status === "active" ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`}></span>
+                          <span>{user.status === "active" ? "Active" : "Inactive"}</span>
+                        </span>
+                        <span className="text-[11px] text-slate-400 font-medium">
+                          Since {user.created_at ? new Date(user.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "N/A"}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {onEditUser && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              onClose();
+                              onEditUser(user);
+                            }}
+                            className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-xs shadow-indigo-600/30 flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <i className="bi bi-pencil-square"></i>
+                            <span>Edit Profile</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 5-Column Personnel Key Metrics Row */}
+                  <div className="grid grid-cols-2 sm:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-slate-200/80 bg-white rounded-2xl border border-slate-200/90 p-4 shadow-2xs">
+                    <div className="p-2 sm:px-3.5 sm:py-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                        Employee ID
+                      </span>
+                      <span className="font-extrabold text-slate-900 text-sm block">
+                        EMP-{String(user.id).padStart(4, "0")}
+                      </span>
+                      <span className="text-[10.5px] text-slate-400 block mt-0.5">Directory Index</span>
+                    </div>
+
+                    <div className="p-2 sm:px-3.5 sm:py-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                        Employment Type
+                      </span>
+                      <span className="font-extrabold text-slate-900 text-sm block">
+                        Full-time
+                      </span>
+                      <span className="text-[10.5px] text-slate-400 block mt-0.5">Permanent</span>
+                    </div>
+
+                    <div className="p-2 sm:px-3.5 sm:py-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                        Annual Salary
+                      </span>
+                      <span className="font-extrabold text-slate-900 text-sm block">
                         ${Number(user.salary || 0).toLocaleString()}
                       </span>
-                      <span className="text-[11px] text-slate-400 block mt-0.5">Approved Base Compensation</span>
+                      <span className="text-[10.5px] text-slate-400 block mt-0.5">Approved Base Compensation</span>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 shadow-2xs">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Contact Phone</span>
-                      <span className="font-semibold text-slate-800 text-xs block truncate">
-                        {user.phone || "Not recorded"}
+                    <div className="p-2 sm:px-3.5 sm:py-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                        Joined On
                       </span>
-                      <span className="text-[11px] text-slate-400 block mt-0.5">Mobile / Direct Extension</span>
-                    </div>
-
-                    <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 shadow-2xs">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Onboarded Since</span>
-                      <span className="font-semibold text-slate-800 text-xs block">
-                        {user.created_at ? new Date(user.created_at).toLocaleDateString() : "N/A"}
+                      <span className="font-extrabold text-slate-900 text-sm block">
+                        {user.created_at ? new Date(user.created_at).toLocaleDateString("en-US") : "N/A"}
                       </span>
-                      <span className="text-[11px] text-slate-400 block mt-0.5">Tenure Initiation Date</span>
+                      <span className="text-[10.5px] text-slate-400 block mt-0.5">Tenure Initiation Date</span>
                     </div>
 
-                    <div className="sm:col-span-2 lg:col-span-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 shadow-2xs">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Office / Work Location</span>
-                      <span className="font-semibold text-slate-800 text-xs block">
-                        {user.address || "Corporate Headquarters (Unspecified Suite)"}
+                    <div className="p-2 sm:px-3.5 sm:py-1 col-span-2 sm:col-span-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                        Work Location
+                      </span>
+                      <span className="font-extrabold text-slate-900 text-sm block truncate">
+                        {user.address ? user.address.split(",")[0] : "Corporate Headquarters"}
+                      </span>
+                      <span className="text-[10.5px] text-slate-400 block mt-0.5 truncate">
+                        {user.address && user.address.includes(",") ? user.address : "(Unspecified Suite)"}
                       </span>
                     </div>
                   </div>
