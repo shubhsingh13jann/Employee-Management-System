@@ -177,14 +177,23 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setErrorMsg("Please select a valid image file (PNG, JPG, WebP).");
+
+    // Check mime type and file extension for robust format validation (.jpeg, .jpg, .png, .webp, .jfif)
+    const validExtensions = [".jpg", ".jpeg", ".png", ".webp", ".jfif"];
+    const ext = "." + (file.name.split(".").pop() || "").toLowerCase();
+    const isImageMime = file.type.startsWith("image/") || ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/pjpeg"].includes(file.type.toLowerCase());
+    const isValidFormat = isImageMime || validExtensions.includes(ext);
+
+    if (!isValidFormat) {
+      setErrorMsg("Please select a valid image file (.jpg, .jpeg, .png, .webp).");
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
-      setErrorMsg("Image size should be less than 2MB.");
+
+    if (file.size > 10 * 1024 * 1024) {
+      setErrorMsg("Image size should be less than 10MB.");
       return;
     }
+
     const reader = new FileReader();
     reader.onload = () => {
       setFormData((prev) => ({ ...prev, image_url: reader.result as string }));
@@ -742,13 +751,13 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                         <input
                           ref={fileInputRef}
                           type="file"
-                          accept="image/*"
+                          accept="image/*,.jpg,.jpeg,.png,.webp"
                           onChange={handleImageFileChange}
                           className="hidden"
                         />
                       </div>
                       <p className="text-[10px] text-slate-400 mb-0 leading-tight">
-                        PNG, JPG or WebP up to 2MB. Square ratio recommended.
+                        PNG, JPG, JPEG or WebP up to 10MB. Square ratio recommended.
                       </p>
                     </div>
                   </div>
