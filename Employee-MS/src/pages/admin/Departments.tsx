@@ -22,6 +22,17 @@ const Departments = () => {
   const [decommissionDeptId, setDecommissionDeptId] = useState<number | null>(null);
   const [formModal, setFormModal] = useState<{ isOpen: boolean; dept: any | null }>({ isOpen: false, dept: null });
   const [msg, setMsg] = useState({ type: "", text: "" });
+  const [sortField, setSortField] = useState<string>("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  };
 
   const filteredDepartments = departments.filter((dept) => {
     if (!searchQuery.trim()) return true;
@@ -34,6 +45,25 @@ const Departments = () => {
       dept.parent_name?.toLowerCase().includes(query)
     );
   });
+
+  const sortedDepartments = useMemo(() => {
+    const list = [...filteredDepartments];
+    list.sort((a, b) => {
+      let valA: any = a[sortField] ?? "";
+      let valB: any = b[sortField] ?? "";
+      if (sortField === "employee_count") {
+        valA = Number(valA) || 0;
+        valB = Number(valB) || 0;
+        return sortOrder === "asc" ? valA - valB : valB - valA;
+      }
+      if (typeof valA === "string") valA = valA.toLowerCase();
+      if (typeof valB === "string") valB = valB.toLowerCase();
+      if (valA < valB) return sortOrder === "asc" ? -1 : 1;
+      if (valA > valB) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+    return list;
+  }, [filteredDepartments, sortField, sortOrder]);
 
   const fetchDepartments = async () => {
     try {
@@ -220,12 +250,48 @@ const Departments = () => {
             {/* Table Area */}
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse table-fixed">
-                <thead className="bg-slate-50/70 border-b border-slate-100 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                <thead className="bg-slate-50/70 border-b border-slate-100 text-[11px] font-semibold text-slate-400 uppercase tracking-wider select-none">
                   <tr>
-                    <th className="w-[28%] px-6 py-3.5">Department</th>
-                    <th className="w-[36%] px-4 py-3.5">Description</th>
-                    <th className="w-[18%] px-4 py-3.5">Head of Dept</th>
-                    <th className="w-[11%] px-3 py-3.5 text-center">Members</th>
+                    <th
+                      className="w-[28%] px-6 py-3.5 cursor-pointer hover:text-slate-700 transition-colors"
+                      onClick={() => handleSort("name")}
+                      title="Click to sort by Department Name"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>Department</span>
+                        <i className={`bi ${sortField === "name" ? (sortOrder === "asc" ? "bi-arrow-up text-indigo-600 font-bold" : "bi-arrow-down text-indigo-600 font-bold") : "bi-arrow-down-up text-slate-300 text-[10px]"}`}></i>
+                      </div>
+                    </th>
+                    <th
+                      className="w-[36%] px-4 py-3.5 cursor-pointer hover:text-slate-700 transition-colors"
+                      onClick={() => handleSort("description")}
+                      title="Click to sort by Description"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>Description</span>
+                        <i className={`bi ${sortField === "description" ? (sortOrder === "asc" ? "bi-arrow-up text-indigo-600 font-bold" : "bi-arrow-down text-indigo-600 font-bold") : "bi-arrow-down-up text-slate-300 text-[10px]"}`}></i>
+                      </div>
+                    </th>
+                    <th
+                      className="w-[18%] px-4 py-3.5 cursor-pointer hover:text-slate-700 transition-colors"
+                      onClick={() => handleSort("head_name")}
+                      title="Click to sort by Head of Department"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>Head of Dept</span>
+                        <i className={`bi ${sortField === "head_name" ? (sortOrder === "asc" ? "bi-arrow-up text-indigo-600 font-bold" : "bi-arrow-down text-indigo-600 font-bold") : "bi-arrow-down-up text-slate-300 text-[10px]"}`}></i>
+                      </div>
+                    </th>
+                    <th
+                      className="w-[11%] px-3 py-3.5 text-center cursor-pointer hover:text-slate-700 transition-colors"
+                      onClick={() => handleSort("employee_count")}
+                      title="Click to sort by Members Count"
+                    >
+                      <div className="flex items-center justify-center gap-1.5">
+                        <span>Members</span>
+                        <i className={`bi ${sortField === "employee_count" ? (sortOrder === "asc" ? "bi-arrow-up text-indigo-600 font-bold" : "bi-arrow-down text-indigo-600 font-bold") : "bi-arrow-down-up text-slate-300 text-[10px]"}`}></i>
+                      </div>
+                    </th>
                     <th className="w-[7%] px-3 py-3.5 text-center">Actions</th>
                   </tr>
                 </thead>
@@ -236,7 +302,7 @@ const Departments = () => {
                         <div className="inline-block w-6 h-6 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
                       </td>
                     </tr>
-                  ) : filteredDepartments.length === 0 ? (
+                  ) : sortedDepartments.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="text-center py-12 text-slate-400 text-xs font-medium">
                         <div className="flex flex-col items-center justify-center gap-2.5">
@@ -266,7 +332,7 @@ const Departments = () => {
                       </td>
                     </tr>
                   ) : (
-                    filteredDepartments.map((dept, index) => {
+                    sortedDepartments.map((dept, index) => {
                       const icons = ["bi-code-slash", "bi-graph-up", "bi-people", "bi-megaphone", "bi-cart", "bi-shield-check"];
                       const colors = [
                         "bg-blue-50 text-blue-600 border-blue-100",

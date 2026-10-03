@@ -234,7 +234,7 @@ const Sidebar = () => {
       <div className="relative z-10 pb-3.5 mb-3.5 border-b border-white/10">
         <BrandLogo
           theme="dark"
-          size="sm"
+          size="normal"
           to={getDefaultRouteForRole ? getDefaultRouteForRole(user?.role) : "/"}
         />
       </div>

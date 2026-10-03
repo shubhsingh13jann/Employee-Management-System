@@ -38,8 +38,8 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
         transition={{ type: "spring", stiffness: 420, damping: 22 }}
         className={`logo-cube ${isSm ? "logo-cube-sm" : ""} flex items-center justify-center`}
         style={{
-          width: isSm ? "30px" : "38px",
-          height: isSm ? "30px" : "38px",
+          width: isSm ? "32px" : "38px",
+          height: isSm ? "32px" : "38px",
           borderRadius: isSm ? "8px" : "10px",
           background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
           boxShadow: "0 8px 16px -4px rgba(79, 70, 229, 0.45)",
@@ -47,14 +47,14 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
           transformStyle: "preserve-3d"
         }}
       >
-        <i className={`bi bi-box-fill text-white ${isSm ? "text-xs" : "text-lg"}`}></i>
+        <i className={`bi bi-box-fill text-white ${isSm ? "text-sm" : "text-lg"}`}></i>
       </motion.div>
 
       {/* Brand Typography (Centered alignment so Workforce Excellence is centered with respect to Enterprise EMS) */}
       <div className="flex flex-col items-center text-center whitespace-nowrap">
         <span
           className={`font-bold tracking-tight leading-tight whitespace-nowrap ${
-            isSm ? "text-xs" : "text-lg"
+            isSm ? "text-sm" : "text-lg"
           } ${theme === "dark" ? "text-white" : "text-gray-900"}`}
           style={{ letterSpacing: "-0.02em" }}
         >
@@ -64,7 +64,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
           <small
             className={`whitespace-nowrap ${theme === "dark" ? "text-white/60" : "text-gray-500"}`}
             style={{
-              fontSize: isSm ? "10px" : "11px",
+              fontSize: isSm ? "10.5px" : "11px",
               letterSpacing: "0.5px",
               lineHeight: 1.2,
               marginTop: "2px",
