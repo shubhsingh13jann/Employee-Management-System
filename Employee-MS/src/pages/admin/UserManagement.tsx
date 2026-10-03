@@ -954,46 +954,77 @@ const UserManagement: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Side: Action Buttons or 3-Lines Dropdown Menu */}
-            {isSidebarOpen ? (
-              <div className="relative z-10 hero-menu-container shrink-0 self-end md:self-center">
+            {/* Right Side: Table/Grid View Switcher + Triple Line Actions Menu */}
+            <div className="relative z-10 flex items-center gap-2 shrink-0 self-end md:self-center hero-menu-container">
+              {/* Enlarged View Switcher: Table vs. Grid */}
+              <div className="h-9 p-0.5 rounded-xl bg-white/10 border border-white/20 flex items-center gap-1 backdrop-blur-xs box-border shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("table")}
+                  className={`h-8 px-2.5 sm:px-3 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer leading-none ${
+                    viewMode === "table"
+                      ? "bg-indigo-600 text-white shadow-xs"
+                      : "text-slate-300 hover:text-white"
+                  }`}
+                  title="Dense Table View"
+                >
+                  <i className="bi bi-table text-sm"></i>
+                  <span className="hidden sm:inline">Table</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("grid")}
+                  className={`h-8 px-2.5 sm:px-3 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer leading-none ${
+                    viewMode === "grid"
+                      ? "bg-indigo-600 text-white shadow-xs"
+                      : "text-slate-300 hover:text-white"
+                  }`}
+                  title="Interactive Team Card Grid View"
+                >
+                  <i className="bi bi-grid-fill text-sm"></i>
+                  <span className="hidden sm:inline">Grid</span>
+                </button>
+              </div>
+
+              {/* Enlarged Triple Line Button & Consolidated Dropdown Menu */}
+              <div className="relative">
                 <button
                   type="button"
                   onClick={() => setIsHeroMenuOpen(!isHeroMenuOpen)}
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer shadow-xs ${
+                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer shadow-xs ${
                     isHeroMenuOpen
                       ? "bg-indigo-600 text-white border border-indigo-400/50 shadow-indigo-500/30 ring-2 ring-indigo-400/30"
                       : "bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-xs"
                   }`}
-                  title="Menu Options"
+                  title="Directory Management & Actions Menu"
                   aria-label="Toggle Actions Menu"
                 >
-                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
                   </svg>
                   {activeFilterCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-indigo-500 border-2 border-slate-900 text-[8px] font-bold flex items-center justify-center text-white">
+                    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-indigo-500 border-2 border-slate-900 text-[9px] font-bold flex items-center justify-center text-white">
                       {activeFilterCount}
                     </span>
                   )}
                 </button>
 
-                {/* Dropdown Menu */}
+                {/* Dropdown Menu - Always available and contains all actions including Role Permissions */}
                 {isHeroMenuOpen && (
-                  <div className="absolute right-0 top-full mt-1.5 w-48 rounded-xl bg-slate-900/95 backdrop-blur-xl border border-indigo-500/30 shadow-2xl p-1 z-50 animate-in fade-in zoom-in-95 duration-150 text-white">
+                  <div className="absolute right-0 top-full mt-2 w-52 rounded-xl bg-slate-900/95 backdrop-blur-xl border border-indigo-500/30 shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 text-white">
                     <button
                       type="button"
                       onClick={() => {
                         setIsHeroMenuOpen(false);
                         handleOpenOnboard();
                       }}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer shadow-xs text-left"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer shadow-sm text-left"
                     >
-                      <i className="bi bi-plus-lg text-[10px] font-bold"></i>
+                      <i className="bi bi-plus-lg font-bold text-xs"></i>
                       <span>Onboard Member</span>
                     </button>
 
-                    <div className="h-px bg-white/10 my-1"></div>
+                    <div className="h-px bg-white/10 my-1.5"></div>
 
                     <button
                       type="button"
@@ -1001,13 +1032,13 @@ const UserManagement: React.FC = () => {
                         setIsHeroMenuOpen(false);
                         setIsSidebarOpen(!isSidebarOpen);
                       }}
-                      className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
                     >
-                      <div className="flex items-center gap-2">
-                        <i className={`bi ${isSidebarOpen ? "bi-pie-chart-fill" : "bi-pie-chart"} text-indigo-400 text-xs`}></i>
+                      <div className="flex items-center gap-2.5">
+                        <i className={`bi ${isSidebarOpen ? "bi-pie-chart-fill" : "bi-pie-chart"} text-indigo-400 text-sm`}></i>
                         <span>Workforce Overview</span>
                       </div>
-                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-indigo-300">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/30 text-indigo-300">
                         {isSidebarOpen ? "Open" : "Closed"}
                       </span>
                     </button>
@@ -1018,14 +1049,14 @@ const UserManagement: React.FC = () => {
                         setIsHeroMenuOpen(false);
                         setIsFilterOpen(!isFilterOpen);
                       }}
-                      className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
                     >
-                      <div className="flex items-center gap-2">
-                        <i className="bi bi-funnel text-indigo-400 text-xs"></i>
+                      <div className="flex items-center gap-2.5">
+                        <i className="bi bi-funnel text-indigo-400 text-sm"></i>
                         <span>Filter Directory</span>
                       </div>
                       {activeFilterCount > 0 && (
-                        <span className="w-3.5 h-3.5 rounded-full bg-indigo-500 text-white text-[9px] font-bold flex items-center justify-center">
+                        <span className="w-4 h-4 rounded-full bg-indigo-500 text-white text-[10px] font-bold flex items-center justify-center">
                           {activeFilterCount}
                         </span>
                       )}
@@ -1035,19 +1066,15 @@ const UserManagement: React.FC = () => {
                       type="button"
                       onClick={() => {
                         setIsHeroMenuOpen(false);
-                        setViewMode(viewMode === "table" ? "grid" : "table");
+                        setIsPermissionMatrixOpen(true);
                       }}
-                      className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
                     >
-                      <div className="flex items-center gap-2">
-                        <i className={`bi ${viewMode === "table" ? "bi-grid-fill" : "bi-table"} text-indigo-400 text-xs`}></i>
-                        <span>{viewMode === "table" ? "Switch to Grid View" : "Switch to Table View"}</span>
-                      </div>
-                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-indigo-500/30 text-indigo-300 uppercase">
-                        {viewMode}
-                      </span>
+                      <i className="bi bi-shield-lock text-indigo-400 text-sm"></i>
+                      <span>Role Permissions</span>
                     </button>
 
+                    <div className="h-px bg-white/10 my-1.5"></div>
 
                     <button
                       type="button"
@@ -1055,9 +1082,9 @@ const UserManagement: React.FC = () => {
                         setIsHeroMenuOpen(false);
                         setIsCsvImportOpen(true);
                       }}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
                     >
-                      <i className="bi bi-file-earmark-arrow-up text-indigo-400 text-xs"></i>
+                      <i className="bi bi-file-earmark-arrow-up text-indigo-400 text-sm"></i>
                       <span>Bulk CSV Import</span>
                     </button>
 
@@ -1068,128 +1095,15 @@ const UserManagement: React.FC = () => {
                         handleExportCSV();
                       }}
                       disabled={users.length === 0}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer disabled:opacity-50 text-left"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer disabled:opacity-50 text-left"
                     >
-                      <i className="bi bi-download text-indigo-400 text-xs"></i>
+                      <i className="bi bi-download text-indigo-400 text-sm"></i>
                       <span>Export Directory</span>
                     </button>
                   </div>
                 )}
               </div>
-            ) : (
-              <div className="relative z-10 flex items-center gap-1.5 shrink-0 self-end md:self-center">
-                {/* View Switcher: Table vs. Grid */}
-                <div className="h-8 p-0.5 rounded-lg bg-white/10 border border-white/20 flex items-center gap-0.5 backdrop-blur-xs box-border">
-                  <button
-                    type="button"
-                    onClick={() => setViewMode("table")}
-                    className={`h-7 px-2 sm:px-2.5 rounded-md text-[11px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer leading-none ${
-                      viewMode === "table"
-                        ? "bg-indigo-600 text-white shadow-xs"
-                        : "text-slate-300 hover:text-white"
-                    }`}
-                    title="Dense Table View"
-                  >
-                    <i className="bi bi-table text-xs"></i>
-                    <span className="hidden sm:inline">Table</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setViewMode("grid")}
-                    className={`h-7 px-2 sm:px-2.5 rounded-md text-[11px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer leading-none ${
-                      viewMode === "grid"
-                        ? "bg-indigo-600 text-white shadow-xs"
-                        : "text-slate-300 hover:text-white"
-                    }`}
-                    title="Interactive Team Card Grid View"
-                  >
-                    <i className="bi bi-grid-fill text-xs"></i>
-                    <span className="hidden sm:inline">Grid</span>
-                  </button>
-                </div>
-
-                {/* Workforce Overview Toggle Button */}
-                <button
-                  type="button"
-                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                  className={`h-8 px-2.5 rounded-lg text-[11px] font-semibold border backdrop-blur-xs transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs box-border ${
-                    isSidebarOpen
-                      ? "bg-indigo-600 border-indigo-400 text-white shadow-indigo-500/30 ring-2 ring-indigo-400/30"
-                      : "bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border-white/20"
-                  }`}
-                  title="Toggle Workforce Overview Analytics"
-                >
-                  <i className={`bi ${isSidebarOpen ? "bi-pie-chart-fill" : "bi-pie-chart"} text-xs leading-none`}></i>
-                  <span className="leading-none">Workforce Overview</span>
-                </button>
-
-                {/* Filter Button with Shortcut Hint */}
-                <button
-                  type="button"
-                  onClick={() => setIsFilterOpen(!isFilterOpen)}
-                  className={`h-8 px-2.5 rounded-lg text-[11px] font-semibold border backdrop-blur-xs transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs box-border ${
-                    isFilterOpen || activeFilterCount > 0
-                      ? "bg-indigo-600/40 border-indigo-400 text-white shadow-indigo-500/20"
-                      : "bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border-white/20"
-                  }`}
-                  title="Search & Filters (Shortcut: Ctrl+K or /)"
-                >
-                  <i className="bi bi-funnel text-xs leading-none"></i>
-                  <span className="leading-none">Filter</span>
-                  {activeFilterCount > 0 && (
-                    <span className="w-3.5 h-3.5 rounded-full bg-indigo-500 text-white text-[9px] font-bold flex items-center justify-center leading-none">
-                      {activeFilterCount}
-                    </span>
-                  )}
-                </button>
-
-
-
-                {/* Import CSV Button (Feature 5) */}
-                <button
-                  type="button"
-                  onClick={() => setIsCsvImportOpen(true)}
-                  className="h-8 px-2.5 rounded-lg text-[11px] font-semibold bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border border-white/20 backdrop-blur-xs transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs box-border leading-none"
-                  title="Bulk Onboard Personnel via CSV Upload"
-                >
-                  <i className="bi bi-file-earmark-arrow-up text-xs leading-none"></i>
-                  <span className="leading-none hidden sm:inline">Import CSV</span>
-                </button>
-
-                {/* Export Button */}
-                <button
-                  type="button"
-                  onClick={handleExportCSV}
-                  disabled={users.length === 0}
-                  className="h-8 px-2.5 rounded-lg text-[11px] font-semibold bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border border-white/20 backdrop-blur-xs transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs disabled:opacity-50 box-border leading-none"
-                  title="Export Workforce Directory as CSV"
-                >
-                  <i className="bi bi-download text-xs leading-none"></i>
-                  <span className="leading-none">Export</span>
-                </button>
-
-                {/* Permissions Matrix Button */}
-                <button
-                  type="button"
-                  onClick={() => setIsPermissionMatrixOpen(true)}
-                  className="h-8 px-2.5 rounded-lg text-[11px] font-semibold bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border border-white/20 backdrop-blur-xs transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs box-border leading-none"
-                  title="Configure Granular Role-Permission Policy Matrix"
-                >
-                  <i className="bi bi-shield-lock text-xs leading-none text-indigo-300"></i>
-                  <span className="leading-none hidden md:inline">Permissions</span>
-                </button>
-
-                {/* Onboard Member Button */}
-                <button
-                  type="button"
-                  onClick={handleOpenOnboard}
-                  className="h-8 px-3 rounded-lg text-[11px] font-semibold text-white bg-indigo-600 hover:bg-indigo-500 border border-indigo-500 shadow-md shadow-indigo-600/30 transition-all inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap box-border leading-none"
-                >
-                  <i className="bi bi-plus-lg font-bold text-[10px] leading-none"></i>
-                  <span className="leading-none">Onboard Member</span>
-                </button>
-              </div>
-            )}
+            </div>
           </div>
 
           {/* Expandable Filter Drawer Panel (Matching Reference UI) */}
@@ -1595,7 +1509,24 @@ const UserManagement: React.FC = () => {
                           </th>
                         )}
                         {visibleColumns.department && (
-                          <th className="px-3.5 py-2.5 font-semibold text-slate-700 text-xs whitespace-nowrap">Department</th>
+                          <th
+                            className="px-3.5 py-2.5 cursor-pointer select-none hover:text-slate-900 transition-colors whitespace-nowrap"
+                            onClick={() => handleSort("department_name")}
+                            title="Click to sort by Department"
+                          >
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs font-semibold text-slate-700">Department</span>
+                              <i
+                                className={`bi ${
+                                  sortField === "department_name"
+                                    ? sortOrder === "asc"
+                                      ? "bi-arrow-up text-indigo-600 font-bold"
+                                      : "bi-arrow-down text-indigo-600 font-bold"
+                                    : "bi-arrow-down-up text-slate-400 text-[10px]"
+                                }`}
+                              ></i>
+                            </div>
+                          </th>
                         )}
                         {visibleColumns.supervisor && (
                           <th className="px-3.5 py-2.5 font-semibold text-slate-700 text-xs whitespace-nowrap">Reports To</th>
@@ -2562,7 +2493,7 @@ const UserManagement: React.FC = () => {
           className="fixed bottom-6 flex justify-center items-center z-[1050] pointer-events-none px-4"
           style={{ left: "240px", right: "0px" }}
         >
-          <div className="floating-action-bar-anim bg-slate-900/95 backdrop-blur-xl border border-indigo-500/40 text-white rounded-2xl shadow-2xl px-3.5 py-2.5 sm:px-5 sm:py-3 flex items-center gap-2 sm:gap-3.5 ring-1 ring-white/10 pointer-events-auto max-w-full overflow-x-auto [scrollbar-width:none]">
+          <div className="floating-action-bar-anim bg-slate-900/95 backdrop-blur-xl border border-indigo-500/40 text-white rounded-2xl shadow-2xl px-3.5 py-2.5 sm:px-5 sm:py-3 flex items-center gap-2 sm:gap-3.5 ring-1 ring-white/10 pointer-events-auto max-w-full overflow-visible">
             {/* Selected Counter Pill */}
             <div className="flex items-center gap-2 pr-1.5 sm:pr-3 border-r border-slate-700/80 shrink-0">
               <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
@@ -2612,8 +2543,8 @@ const UserManagement: React.FC = () => {
                 </button>
 
                 {isBulkTransferOpen && (
-                  <div className="absolute bottom-full left-0 mb-2 w-56 bg-slate-900 border border-indigo-500/40 rounded-xl shadow-2xl p-2 z-50 text-white animate-in fade-in zoom-in-95 duration-150">
-                    <div className="text-[11px] font-bold text-slate-300 px-2 py-1 mb-1">
+                  <div className="absolute bottom-[calc(100%+10px)] left-0 w-60 bg-slate-900/98 backdrop-blur-2xl border border-indigo-500/50 rounded-xl shadow-2xl p-2 z-[9999] text-white animate-in fade-in zoom-in-95 duration-150 ring-1 ring-white/10">
+                    <div className="text-[11px] font-bold text-slate-300 px-2 py-1 mb-1 border-b border-slate-800">
                       Select Destination Department:
                     </div>
                     <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-1">
