@@ -1,5 +1,6 @@
 import pool from "../config/db.js";
 import bcrypt from "bcrypt";
+import { sendBroadcastEmail, sendCredentialResetEmail } from "../utils/broadcastEmailService.js";
 
 export const getStats = async (req, res) => {
   try {
@@ -601,7 +602,7 @@ export const getUsers = async (req, res) => {
   try {
     const { role, department_id, search } = req.query;
     let query = `
-      SELECT u.id, u.name, u.email, u.role, u.department_id, u.salary, u.phone, u.address, u.image_url, u.status, u.created_at,
+      SELECT u.id, u.name, u.email, u.role, u.department_id, u.salary, u.phone, u.address, u.image_url, u.status, u.created_at, u.must_change_password,
              d.name AS department_name, d.code AS department_code,
              sup.id AS supervisor_id, sup.name AS supervisor_name,
              (SELECT COUNT(*) FROM team_hierarchy WHERE supervisor_id = u.id) AS direct_reports_count,
@@ -679,7 +680,7 @@ export const getUserDetails = async (req, res) => {
   try {
     const { id } = req.params;
     const [[user]] = await pool.query(`
-      SELECT u.id, u.name, u.email, u.role, u.department_id, u.salary, u.phone, u.address, u.image_url, u.status, u.created_at,
+      SELECT u.id, u.name, u.email, u.role, u.department_id, u.salary, u.phone, u.address, u.image_url, u.status, u.created_at, u.must_change_password,
              d.name AS department_name, d.code AS department_code, d.head_id AS dept_head_id,
              sup.id AS supervisor_id, sup.name AS supervisor_name, sup.email AS supervisor_email,
              mgr.id AS manager_id, mgr.name AS manager_name,
@@ -723,12 +724,21 @@ export const getUserDetails = async (req, res) => {
       LIMIT 5
     `, [id]);
 
+    // Fetch comprehensive audit trail history
+    const [audit_logs] = await pool.query(`
+      SELECT * FROM user_audit_logs
+      WHERE user_id = ?
+      ORDER BY created_at DESC
+      LIMIT 30
+    `, [id]);
+
     return res.json({
       status: true,
       user: {
         ...user,
         direct_reports,
-        transfers
+        transfers,
+        audit_logs
       }
     });
   } catch (err) {
@@ -754,7 +764,9 @@ export const addUser = async (req, res) => {
       phone = "",
       address = "",
       image_url = "",
-      status = "active"
+      status = "active",
+      must_change_password,
+      require_password_change
     } = req.body;
 
     if (!name || !email || !password) {
@@ -768,11 +780,14 @@ export const addUser = async (req, res) => {
 
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
+    const mustChangePasswordVal = must_change_password !== undefined
+      ? (must_change_password ? 1 : 0)
+      : (require_password_change !== undefined ? (require_password_change ? 1 : 0) : 1);
 
     const [result] = await connection.query(
-      `INSERT INTO users (name, email, password_hash, role, department_id, salary, phone, address, image_url, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name.trim(), email.trim().toLowerCase(), password_hash, role, department_id || null, Number(salary) || 0, phone ? phone.trim() : "", address ? address.trim() : "", image_url ? image_url.trim() : "", status || "active"]
+      `INSERT INTO users (name, email, password_hash, must_change_password, role, department_id, salary, phone, address, image_url, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name.trim(), email.trim().toLowerCase(), password_hash, mustChangePasswordVal, role, department_id || null, Number(salary) || 0, phone ? phone.trim() : "", address ? address.trim() : "", image_url ? image_url.trim() : "", status || "active"]
     );
     const newUserId = result.insertId;
 
@@ -831,7 +846,11 @@ export const updateUser = async (req, res) => {
       phone,
       address,
       image_url,
-      status
+      status,
+      must_change_password,
+      require_password_change,
+      sendEmailNotification,
+      notifyEmail
     } = req.body;
 
     const [[existingUser]] = await connection.query("SELECT * FROM users WHERE id = ?", [id]);
@@ -841,9 +860,23 @@ export const updateUser = async (req, res) => {
     }
 
     let password_hash = existingUser.password_hash;
+    let isPasswordReset = false;
+    let newRawPassword = null;
+    let mustChangePasswordVal = existingUser.must_change_password || 0;
+
     if (password && password.trim().length > 0) {
       const salt = await bcrypt.genSalt(10);
-      password_hash = await bcrypt.hash(password.trim(), salt);
+      newRawPassword = password.trim();
+      password_hash = await bcrypt.hash(newRawPassword, salt);
+      isPasswordReset = true;
+
+      if (must_change_password !== undefined) {
+        mustChangePasswordVal = must_change_password ? 1 : 0;
+      } else if (require_password_change !== undefined) {
+        mustChangePasswordVal = require_password_change ? 1 : 0;
+      } else {
+        mustChangePasswordVal = 1; // Default to 1 on admin reset
+      }
     }
 
     const updatedRole = role || existingUser.role;
@@ -861,12 +894,13 @@ export const updateUser = async (req, res) => {
 
     await connection.query(
       `UPDATE users
-       SET name = ?, email = ?, password_hash = ?, role = ?, department_id = ?, salary = ?, phone = ?, address = ?, image_url = ?, status = ?
+       SET name = ?, email = ?, password_hash = ?, must_change_password = ?, role = ?, department_id = ?, salary = ?, phone = ?, address = ?, image_url = ?, status = ?
        WHERE id = ?`,
       [
         name ? name.trim() : existingUser.name,
         email ? email.trim().toLowerCase() : existingUser.email,
         password_hash,
+        mustChangePasswordVal,
         updatedRole,
         updatedDeptId,
         updatedSalary,
@@ -877,6 +911,33 @@ export const updateUser = async (req, res) => {
         id
       ]
     );
+
+    // Sync corresponding legacy role table if password changed
+    if (isPasswordReset && newRawPassword) {
+      try {
+        const targetEmail = email ? email.trim().toLowerCase() : existingUser.email;
+        if (updatedRole === "admin") {
+          await connection.query("UPDATE admin SET password = ?, password_hash = ? WHERE email = ?", [newRawPassword, password_hash, targetEmail]);
+        } else if (updatedRole === "manager") {
+          await connection.query("UPDATE manager SET password = ?, password_hash = ? WHERE email = ?", [newRawPassword, password_hash, targetEmail]);
+        } else if (updatedRole === "supervisor") {
+          await connection.query("UPDATE supervisor SET password = ?, password_hash = ? WHERE email = ?", [newRawPassword, password_hash, targetEmail]);
+        } else if (updatedRole === "employee") {
+          await connection.query("UPDATE employee SET password = ?, password_hash = ? WHERE email = ?", [newRawPassword, password_hash, targetEmail]);
+        }
+      } catch (syncErr) {
+        console.warn("Legacy role table sync warning:", syncErr.message);
+      }
+
+      // Dispatch temporary credentials email notification to employee
+      if (sendEmailNotification !== false && notifyEmail !== false) {
+        sendCredentialResetEmail(
+          email ? email.trim().toLowerCase() : existingUser.email,
+          name ? name.trim() : existingUser.name,
+          newRawPassword
+        ).catch(mailErr => console.error("[Admin Reset Credential Email Error]:", mailErr.message));
+      }
+    }
 
     // Handle reporting line in team_hierarchy ONLY if supervisor_id was explicitly supplied in payload
     if (supervisor_id !== undefined) {
@@ -925,6 +986,160 @@ export const updateUser = async (req, res) => {
         // If explicitly unset, remove as HOD if they were HOD
         await connection.query("UPDATE departments SET head_id = NULL WHERE head_id = ?", [id]);
       }
+    }
+
+    // Record Audit Trail entries
+    try {
+      const adminName = req.user?.name ? `${req.user.name}` : "HR Admin";
+
+      // 1. Salary / Compensation Change
+      if (salary !== undefined && Number(salary) !== Number(existingUser.salary)) {
+        await connection.query(
+          `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+           VALUES (?, 'Compensation', 'salary', ?, ?, ?, ?)`,
+          [
+            id,
+            String(existingUser.salary || 0),
+            String(salary),
+            `Base salary adjusted from $${Number(existingUser.salary || 0).toLocaleString()} to $${Number(salary).toLocaleString()} per annum.`,
+            adminName
+          ]
+        );
+      }
+
+      // 2. Contact Phone Number Change
+      if (phone !== undefined && phone.trim() !== (existingUser.phone || "").trim()) {
+        const oldPhone = existingUser.phone && existingUser.phone.trim() ? existingUser.phone.trim() : "None";
+        const newPhone = phone.trim() ? phone.trim() : "None";
+        await connection.query(
+          `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+           VALUES (?, 'Contact', 'phone', ?, ?, ?, ?)`,
+          [
+            id,
+            oldPhone,
+            newPhone,
+            `Contact phone number updated from "${oldPhone}" to "${newPhone}".`,
+            adminName
+          ]
+        );
+      }
+
+      // 3. Office Work Location Change
+      if (address !== undefined && address.trim() !== (existingUser.address || "").trim()) {
+        const oldAddr = existingUser.address && existingUser.address.trim() ? existingUser.address.trim() : "None";
+        const newAddr = address.trim() ? address.trim() : "None";
+        await connection.query(
+          `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+           VALUES (?, 'Location', 'address', ?, ?, ?, ?)`,
+          [
+            id,
+            oldAddr,
+            newAddr,
+            `Office work location updated from "${oldAddr}" to "${newAddr}".`,
+            adminName
+          ]
+        );
+      }
+
+      // 4. Role Tier Change
+      if (role && role !== existingUser.role) {
+        await connection.query(
+          `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+           VALUES (?, 'Role', 'role', ?, ?, ?, ?)`,
+          [
+            id,
+            existingUser.role,
+            role,
+            `Governance role reallocated from ${existingUser.role.toUpperCase()} to ${role.toUpperCase()}.`,
+            adminName
+          ]
+        );
+      }
+
+      // 5. Status Lifecycle Change
+      if (status && status !== existingUser.status) {
+        await connection.query(
+          `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+           VALUES (?, 'Status', 'status', ?, ?, ?, ?)`,
+          [
+            id,
+            existingUser.status,
+            status,
+            `Account lifecycle status transitioned from ${existingUser.status} to ${status}.`,
+            adminName
+          ]
+        );
+      }
+
+      // 6. Workforce Identity / Legal Name Change
+      if (name && name.trim() !== (existingUser.name || "").trim()) {
+        await connection.query(
+          `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+           VALUES (?, 'Identity', 'name', ?, ?, ?, ?)`,
+          [
+            id,
+            existingUser.name,
+            name.trim(),
+            `Legal workforce member name updated from "${existingUser.name}" to "${name.trim()}".`,
+            adminName
+          ]
+        );
+      }
+
+      // 7. Official Communication Email Change
+      if (email && email.trim().toLowerCase() !== (existingUser.email || "").trim().toLowerCase()) {
+        await connection.query(
+          `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+           VALUES (?, 'Contact', 'email', ?, ?, ?, ?)`,
+          [
+            id,
+            existingUser.email,
+            email.trim().toLowerCase(),
+            `Official communication email updated from "${existingUser.email}" to "${email.trim().toLowerCase()}".`,
+            adminName
+          ]
+        );
+      }
+
+      // 8. Department Reallocation
+      if (department_id !== undefined && Number(department_id) !== Number(existingUser.department_id)) {
+        let oldDeptName = "Unassigned";
+        let newDeptName = "Unassigned";
+        if (existingUser.department_id) {
+          const [[oldDept]] = await connection.query("SELECT name FROM departments WHERE id = ?", [existingUser.department_id]);
+          if (oldDept) oldDeptName = oldDept.name;
+        }
+        if (department_id) {
+          const [[newDept]] = await connection.query("SELECT name FROM departments WHERE id = ?", [department_id]);
+          if (newDept) newDeptName = newDept.name;
+        }
+        await connection.query(
+          `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+           VALUES (?, 'Department', 'department', ?, ?, ?, ?)`,
+          [
+            id,
+            oldDeptName,
+            newDeptName,
+            `Department mobility reallocated from ${oldDeptName} to ${newDeptName}.`,
+            adminName
+          ]
+        );
+      }
+
+      // 9. Password Reset
+      if (isPasswordReset) {
+        await connection.query(
+          `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+           VALUES (?, 'Security', 'password', NULL, NULL, ?, ?)`,
+          [
+            id,
+            `1-Click password reset executed. Temporary credentials issued.`,
+            adminName
+          ]
+        );
+      }
+    } catch (auditErr) {
+      console.warn("Audit logging non-fatal error:", auditErr.message);
     }
 
     await connection.commit();
@@ -1032,5 +1247,88 @@ export const assignHierarchy = async (req, res) => {
   } catch (err) {
     console.error("Assign hierarchy error:", err);
     return res.status(500).json({ status: false, error: "Failed to update team assignment" });
+  }
+};
+
+export const broadcastAnnouncement = async (req, res) => {
+  try {
+    const { userIds, subject, message, priority = "standard", channels } = req.body;
+
+    if (!subject || !subject.trim() || !message || !message.trim()) {
+      return res.status(400).json({ status: false, error: "Subject and announcement message are required." });
+    }
+
+    if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+      return res.status(400).json({ status: false, error: "At least one recipient must be selected." });
+    }
+
+    // Fetch active recipient users
+    const [recipients] = await pool.query(
+      `SELECT id, name, email, role FROM users WHERE id IN (?) AND status = 'active'`,
+      [userIds]
+    );
+
+    if (recipients.length === 0) {
+      return res.status(400).json({ status: false, error: "No active users found among selected recipients." });
+    }
+
+    const adminName = req.user?.name || "Enterprise Administrator";
+    let emailSentCount = 0;
+    let emailFailedCount = 0;
+
+    // 1. Dispatch Email Channel
+    if (channels?.email !== false) {
+      const emailPromises = recipients.map(async (recipient) => {
+        try {
+          const result = await sendBroadcastEmail(recipient.email, recipient.name, {
+            subject: subject.trim(),
+            message: message.trim(),
+            priority,
+            senderName: adminName
+          });
+          if (result && result.success) {
+            emailSentCount++;
+          } else {
+            emailFailedCount++;
+          }
+        } catch (err) {
+          console.error(`Failed to send broadcast email to ${recipient.email}:`, err.message);
+          emailFailedCount++;
+        }
+      });
+
+      await Promise.allSettled(emailPromises);
+    }
+
+    // 2. Dispatch In-App Channel (Insert into notifications table)
+    if (channels?.inApp !== false) {
+      try {
+        const notifValues = recipients.map((r) => [
+          r.id,
+          subject.trim(),
+          message.trim(),
+          priority || "standard"
+        ]);
+        if (notifValues.length > 0) {
+          await pool.query(
+            `INSERT INTO notifications (user_id, title, message, priority) VALUES ?`,
+            [notifValues]
+          );
+        }
+      } catch (notifErr) {
+        console.warn("In-app notification insert notice:", notifErr.message);
+      }
+    }
+
+    return res.json({
+      status: true,
+      message: `Broadcast announcement dispatched successfully to ${recipients.length} workforce personnel.`,
+      recipientsCount: recipients.length,
+      emailSentCount,
+      emailFailedCount
+    });
+  } catch (err) {
+    console.error("broadcastAnnouncement error:", err);
+    return res.status(500).json({ status: false, error: "Failed to dispatch broadcast announcement." });
   }
 };

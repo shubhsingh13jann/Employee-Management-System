@@ -128,6 +128,28 @@ export async function seedDatabase() {
     console.warn('Migration note (department_transfers):', err.message);
   }
 
+  // Migration check for user_audit_logs table
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS user_audit_logs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        action_type VARCHAR(50) NOT NULL,
+        field_name VARCHAR(50) NULL,
+        old_value TEXT NULL,
+        new_value TEXT NULL,
+        details TEXT NOT NULL,
+        performed_by VARCHAR(100) DEFAULT 'Admin',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_audit_user (user_id),
+        INDEX idx_audit_action (action_type)
+      )
+    `);
+    console.log('✓ Verified user_audit_logs schema.');
+  } catch (err) {
+    console.warn('Migration note (user_audit_logs):', err.message);
+  }
+
   // Check if database is already seeded
   const [existing] = await pool.query("SELECT id FROM users LIMIT 1");
   if (existing.length > 0) {

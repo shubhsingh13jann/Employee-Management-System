@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import api from "../../../api/axios";
+import { useAuth } from "../../../context/AuthContext";
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -27,10 +28,14 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   onEditUser,
   onGenerateIdCard
 }) => {
+  const { user: currentUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [activeTab, setActiveTab] = useState<"overview" | "audit" | "documents">("overview");
+
+  // Determine whether this dossier belongs to the currently logged in session user
+  const isOwnProfile = Boolean(currentUser && user && Number(currentUser.id) === Number(user.id));
 
   // Document Vault State (persisted per user in localStorage)
   const [documents, setDocuments] = useState<EmployeeDocument[]>([]);
@@ -186,6 +191,65 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   // Compile Comprehensive Audit Trail (Item 40)
   const auditEvents = user
     ? [
+        ...(user.audit_logs || []).map((log: any) => ({
+          id: `audit-db-${log.id}`,
+          type: log.action_type || "Activity",
+          title:
+            log.field_name === "salary"
+              ? "Compensation Adjustment"
+              : log.field_name === "phone"
+              ? "Contact Phone Number Updated"
+              : log.field_name === "email"
+              ? "Communication Email Address Updated"
+              : log.field_name === "address"
+              ? "Office Work Location Updated"
+              : log.field_name === "name"
+              ? "Legal Identity / Name Updated"
+              : log.field_name === "department"
+              ? "Department Reallocation"
+              : log.field_name === "role"
+              ? "Governance Authority Realignment"
+              : log.field_name === "status"
+              ? "Account Lifecycle Status Change"
+              : log.field_name === "password"
+              ? "Security Credentials Reset"
+              : log.action_type || "Activity Log",
+          description: log.details || `Updated ${log.field_name || "profile"} record.`,
+          timestamp: log.created_at,
+          icon:
+            log.action_type === "Compensation"
+              ? "bi-cash-stack"
+              : log.action_type === "Role"
+              ? "bi-shield-check"
+              : log.action_type === "Security"
+              ? "bi-key-fill"
+              : log.action_type === "Status"
+              ? "bi-check-circle"
+              : log.field_name === "phone" || log.action_type === "Contact"
+              ? "bi-telephone-fill"
+              : log.field_name === "address" || log.action_type === "Location"
+              ? "bi-geo-alt-fill"
+              : log.field_name === "department" || log.action_type === "Department"
+              ? "bi-diagram-3-fill"
+              : log.field_name === "name" || log.action_type === "Identity"
+              ? "bi-person-badge-fill"
+              : "bi-activity",
+          badgeColor:
+            log.action_type === "Compensation"
+              ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+              : log.action_type === "Role"
+              ? "bg-purple-100 text-purple-700 border-purple-200"
+              : log.action_type === "Security"
+              ? "bg-amber-100 text-amber-800 border-amber-200"
+              : log.field_name === "phone" || log.action_type === "Contact"
+              ? "bg-teal-100 text-teal-800 border-teal-200"
+              : log.field_name === "address" || log.action_type === "Location"
+              ? "bg-amber-100 text-amber-800 border-amber-200"
+              : log.field_name === "department" || log.action_type === "Department"
+              ? "bg-indigo-100 text-indigo-700 border-indigo-200"
+              : "bg-blue-100 text-blue-700 border-blue-200",
+          author: log.performed_by || "HR Admin"
+        })),
         ...(user.transfers || []).map((t: any) => ({
           id: `transfer-${t.id}`,
           type: "Transfer",
@@ -219,10 +283,10 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
           author: "System Executive"
         },
         {
-          id: "audit-comp",
+          id: "audit-comp-initial",
           type: "Compensation",
-          title: `Base Compensation Ledger Verified`,
-          description: `Base salary verified at $${Number(user.salary || 0).toLocaleString()} per annum.`,
+          title: `Initial Base Compensation Baseline`,
+          description: `Starting baseline salary established at $${Number(user.salary || 0).toLocaleString()} per annum.`,
           timestamp: user.created_at,
           icon: "bi-cash-stack",
           badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
@@ -600,27 +664,48 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               {/* TAB 3: DOCUMENTS VAULT (Item 42) */}
               {activeTab === "documents" && (
                 <div className="space-y-4 animate-in fade-in duration-150">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-3">
                     <div>
                       <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 mb-0">
                         Employee Credentials & Document Vault
                       </h4>
                       <p className="text-[11px] text-slate-400 mb-0">
-                        Verified contracts, identification proofs, and compliance records.
+                        {isOwnProfile
+                          ? "Manage your personal verification files, identity credentials, and tax records."
+                          : "Audit employee credentials to verify statutory files and compliance records."}
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setIsUploadingDoc(!isUploadingDoc)}
-                      className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
-                    >
-                      <i className={`bi ${isUploadingDoc ? "bi-x" : "bi-plus-lg"}`}></i>
-                      <span>{isUploadingDoc ? "Cancel" : "Attach Document"}</span>
-                    </button>
+                    {isOwnProfile ? (
+                      <button
+                        type="button"
+                        onClick={() => setIsUploadingDoc(!isUploadingDoc)}
+                        className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                      >
+                        <i className={`bi ${isUploadingDoc ? "bi-x" : "bi-plus-lg"}`}></i>
+                        <span>{isUploadingDoc ? "Cancel" : "Attach Document"}</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs shrink-0">
+                        <i className="bi bi-shield-check text-emerald-600"></i>
+                        <span>HR Compliance Mode</span>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Inline Document Upload Form */}
-                  {isUploadingDoc && (
+                  {/* Informational Banner for HR reviewing employee records */}
+                  {!isOwnProfile && (
+                    <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/90 text-slate-600 text-xs flex items-start gap-3 shadow-2xs">
+                      <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 mt-0.5">
+                        <i className="bi bi-clipboard-check-fill text-sm"></i>
+                      </div>
+                      <div className="text-[11.5px] leading-relaxed">
+                        <strong className="text-slate-800">Compliance & Verification Audit:</strong> Reviewing documentation submitted by <span className="font-semibold text-slate-900">{user.name}</span> to ensure all regulatory contracts and identity certificates are on file with the company. File modifications and deletions are restricted to the employee's personal portal.
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Inline Document Upload Form (Only for own profile) */}
+                  {isOwnProfile && isUploadingDoc && (
                     <form
                       onSubmit={handleAddDocument}
                       className="p-4 rounded-xl bg-indigo-50/50 border border-indigo-200 space-y-3 animate-in fade-in zoom-in-95"
@@ -711,14 +796,16 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                           >
                             <i className="bi bi-eye text-xs"></i>
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteDocument(doc.id)}
-                            className="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-white flex items-center justify-center transition-colors cursor-pointer"
-                            title="Remove Document"
-                          >
-                            <i className="bi bi-trash text-xs"></i>
-                          </button>
+                          {isOwnProfile && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteDocument(doc.id)}
+                              className="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-white flex items-center justify-center transition-colors cursor-pointer"
+                              title="Remove Document"
+                            >
+                              <i className="bi bi-trash text-xs"></i>
+                            </button>
+                          )}
                         </div>
                       </div>
                     ))}

@@ -19,6 +19,7 @@ import {
   addUser,
   updateUser,
   deleteUser,
+  broadcastAnnouncement,
   getHierarchy,
   assignHierarchy
 } from "../controllers/adminController.js";
@@ -52,6 +53,7 @@ router.get("/users/:id", getUserDetails);
 router.post("/users", addUser);
 router.put("/users/:id", updateUser);
 router.delete("/users/:id", deleteUser);
+router.post("/broadcast", broadcastAnnouncement);
 
 router.get("/hierarchy", getHierarchy);
 router.post("/hierarchy", assignHierarchy);
