@@ -65,13 +65,15 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
       setLoading(true);
       setErrorMsg("");
       const res = await api.put(`/api/admin/users/${user.id}`, {
-        password: newPassword
+        password: newPassword,
+        require_password_change: true,
+        sendEmailNotification: sendEmailNotification
       });
 
       if (res.data.status) {
         onSuccess(
           `Password for ${user.name} reset successfully.${
-            sendEmailNotification ? " Notification sent to " + user.email + "." : ""
+            sendEmailNotification ? " Temporary credentials dispatched to " + user.email + "." : ""
           }`
         );
         onClose();

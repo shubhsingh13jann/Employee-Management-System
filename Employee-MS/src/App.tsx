@@ -15,6 +15,8 @@ import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ResetPassword from "./pages/ResetPassword";
+import { useAuth } from "./context/AuthContext";
+import { MandatoryPasswordChangeModal } from "./Components/auth/MandatoryPasswordChangeModal";
 
 // 💤 Lazy-Loaded Admin Pages
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -42,6 +44,8 @@ const EmployeeProfile = lazy(() => import("./pages/employee/EmployeeProfile"));
 
 const AnimatedAppContent = () => {
   const location = useLocation();
+  const { user, refreshUser } = useAuth();
+  const mustChangePassword = Boolean(user?.must_change_password);
 
   const isAuthRoute =
     location.pathname === "/" ||
@@ -58,6 +62,12 @@ const AnimatedAppContent = () => {
   return (
     <>
       <TopLaserBar />
+      {mustChangePassword && (
+        <MandatoryPasswordChangeModal
+          isOpen={mustChangePassword}
+          onSuccess={refreshUser}
+        />
+      )}
       <AnimatePresence mode="wait">
         <PageTransition key={transitionKey} transitionKey={transitionKey}>
           <Routes location={location}>

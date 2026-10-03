@@ -319,3 +319,6 @@ export const sendPasswordResetEmail = async (toEmail, userName, resetUrl) => {
   });
 };
 
+export { sendBroadcastEmail, sendCredentialResetEmail } from "./broadcastEmailService.js";
+
+

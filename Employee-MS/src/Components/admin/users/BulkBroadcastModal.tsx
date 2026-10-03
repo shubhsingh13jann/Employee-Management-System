@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
+import api from "../../../api/axios";
 
 interface BulkBroadcastModalProps {
   isOpen: boolean;
@@ -42,17 +43,32 @@ export const BulkBroadcastModal: React.FC<BulkBroadcastModalProps> = ({
     try {
       setSending(true);
       setErrorMsg("");
-      // Simulate enterprise broadcast dispatch latency
-      await new Promise((res) => setTimeout(res, 600));
+      const userIds = selectedUsers.map((u) => u.id);
+      const res = await api.post("/api/admin/broadcast", {
+        userIds,
+        subject: subject.trim(),
+        message: message.trim(),
+        priority,
+        channels
+      });
 
-      onSuccess(
-        `Broadcast announcement "${subject.trim()}" dispatched successfully to ${selectedUsers.length} personnel.`
+      if (res.data.status) {
+        onSuccess(
+          res.data.message ||
+            `Broadcast announcement "${subject.trim()}" dispatched successfully to ${selectedUsers.length} personnel.`
+        );
+        setSubject("");
+        setMessage("");
+        onClose();
+      } else {
+        setErrorMsg(res.data.error || "Failed to dispatch broadcast announcement.");
+      }
+    } catch (err: any) {
+      console.error("Broadcast dispatch error:", err);
+      setErrorMsg(
+        err.response?.data?.error ||
+          "Failed to dispatch broadcast. Please verify network connection and try again."
       );
-      setSubject("");
-      setMessage("");
-      onClose();
-    } catch {
-      setErrorMsg("Failed to dispatch broadcast. Please try again.");
     } finally {
       setSending(false);
     }

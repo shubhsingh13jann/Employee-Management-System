@@ -250,7 +250,8 @@ export const verify2FA = async (req, res) => {
         role: user.role,
         department_id: user.department_id,
         department_name: user.department_name,
-        image_url: user.image_url
+        image_url: user.image_url,
+        must_change_password: Boolean(user.must_change_password)
       }
     });
   } catch (err) {
@@ -471,7 +472,7 @@ export const logout = (req, res) => {
 export const getCurrentUser = async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT u.id, u.name, u.email, u.role, u.department_id, u.salary, u.phone, u.address, u.image_url, u.status, u.created_at,
+      `SELECT u.id, u.name, u.email, u.role, u.department_id, u.salary, u.phone, u.address, u.image_url, u.status, u.created_at, u.must_change_password,
               d.name AS department_name
        FROM users u
        LEFT JOIN departments d ON u.department_id = d.id
@@ -483,10 +484,66 @@ export const getCurrentUser = async (req, res) => {
       return res.status(404).json({ status: false, error: "User record not found" });
     }
 
-    return res.json({ status: true, user: rows[0] });
+    const userData = {
+      ...rows[0],
+      must_change_password: Boolean(rows[0].must_change_password)
+    };
+
+    return res.json({ status: true, user: userData });
   } catch (err) {
     console.error("Get current user error:", err);
     return res.status(500).json({ status: false, error: "Failed to retrieve user profile" });
+  }
+};
+
+export const changeTempPassword = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { newPassword, confirmPassword } = req.body;
+
+    if (!newPassword || newPassword.trim().length < 6) {
+      return res.status(400).json({ status: false, error: "New password must be at least 6 characters long." });
+    }
+
+    if (confirmPassword && newPassword.trim() !== confirmPassword.trim()) {
+      return res.status(400).json({ status: false, error: "Passwords do not match." });
+    }
+
+    const [[user]] = await pool.query("SELECT * FROM users WHERE id = ?", [userId]);
+    if (!user) {
+      return res.status(404).json({ status: false, error: "User not found." });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const password_hash = await bcrypt.hash(newPassword.trim(), salt);
+
+    await pool.query(
+      "UPDATE users SET password_hash = ?, must_change_password = 0 WHERE id = ?",
+      [password_hash, userId]
+    );
+
+    // Sync legacy role table if applicable
+    try {
+      if (user.role === "admin") {
+        await pool.query("UPDATE admin SET password = ?, password_hash = ? WHERE email = ?", [newPassword.trim(), password_hash, user.email]);
+      } else if (user.role === "manager") {
+        await pool.query("UPDATE manager SET password = ?, password_hash = ? WHERE email = ?", [newPassword.trim(), password_hash, user.email]);
+      } else if (user.role === "supervisor") {
+        await pool.query("UPDATE supervisor SET password = ?, password_hash = ? WHERE email = ?", [newPassword.trim(), password_hash, user.email]);
+      } else if (user.role === "employee") {
+        await pool.query("UPDATE employee SET password = ?, password_hash = ? WHERE email = ?", [newPassword.trim(), password_hash, user.email]);
+      }
+    } catch (syncErr) {
+      console.warn("Legacy role sync warning on changeTempPassword:", syncErr.message);
+    }
+
+    return res.json({
+      status: true,
+      message: "Your permanent password has been successfully set!"
+    });
+  } catch (err) {
+    console.error("changeTempPassword error:", err);
+    return res.status(500).json({ status: false, error: "Failed to update temporary password." });
   }
 };
 

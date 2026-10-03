@@ -8,6 +8,7 @@ import {
   resetPassword,
   logout,
   getCurrentUser,
+  changeTempPassword,
   register,
   getPublicDepartments
 } from "../controllers/authController.js";
@@ -24,6 +25,7 @@ router.post("/resend-2fa", resend2FA);
 router.post("/forgot-password", forgotPassword);
 router.get("/verify-reset-token/:token", verifyResetToken);
 router.post("/reset-password", resetPassword);
+router.post("/change-temp-password", verifyToken, changeTempPassword);
 router.post("/logout", logout);
 router.get("/me", verifyToken, getCurrentUser);
 
