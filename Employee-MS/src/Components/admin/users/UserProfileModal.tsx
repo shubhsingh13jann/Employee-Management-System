@@ -44,6 +44,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [newDocCategory, setNewDocCategory] = useState<EmployeeDocument["category"]>("Identity");
   const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState("");
+  const [auditCategoryFilter, setAuditCategoryFilter] = useState<string>("all");
 
   useEffect(() => {
     if (!isOpen || !userId) return;
@@ -305,6 +306,21 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
           author: "HR Operations"
         }
       ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    : [];
+
+  const displayedAuditEvents = user && auditEvents
+    ? (auditCategoryFilter === "all"
+        ? auditEvents
+        : auditEvents.filter((e) => {
+            if (auditCategoryFilter === "Transfer") return e.type === "Transfer";
+            if (auditCategoryFilter === "Compensation") return e.type === "Compensation";
+            if (auditCategoryFilter === "Contact") return e.type === "Contact" || e.title.includes("Phone") || e.title.includes("Email") || e.title.includes("Location") || e.type === "Location";
+            if (auditCategoryFilter === "Role") return e.type === "Role";
+            if (auditCategoryFilter === "Status") return e.type === "Status";
+            if (auditCategoryFilter === "Security") return e.type === "Security";
+            if (auditCategoryFilter === "Onboarding") return e.type === "Onboarding";
+            return e.type.toLowerCase() === auditCategoryFilter.toLowerCase();
+          }))
     : [];
 
   return createPortal(
@@ -990,62 +1006,104 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               {/* TAB 2: AUDIT TRAIL (Item 40) */}
               {activeTab === "audit" && (
                 <div className="space-y-4 animate-in fade-in duration-150">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100">
                     <div>
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 mb-0">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 mb-0.5">
                         Personnel Audit Trail & Change Ledger
                       </h4>
                       <p className="text-[11px] text-slate-400 mb-0">
-                        Chronological record of lifecycle events, governance roles, and mobility.
+                        Chronological record of lifecycle events, governance roles, compensation changes, and mobility.
                       </p>
                     </div>
-                    <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
-                      {auditEvents.length} Recorded Events
-                    </span>
-                  </div>
 
-                  <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
-                    {auditEvents.map((event) => (
-                      <div key={event.id} className="relative group">
-                        {/* Timeline Node Icon */}
-                        <div className="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-white border-2 border-indigo-600 flex items-center justify-center text-indigo-600 text-[9px] shadow-2xs">
-                          <i className={`bi ${event.icon}`}></i>
-                        </div>
-
-                        {/* Event Card */}
-                        <div className="bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-xl p-3.5 transition-all shadow-2xs">
-                          <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
-                            <div className="flex items-center gap-2">
-                              <span className={`px-2 py-0.2 rounded-full text-[10px] font-bold uppercase border ${event.badgeColor}`}>
-                                {event.type}
-                              </span>
-                              <h5 className="text-xs font-bold text-slate-900 mb-0">
-                                {event.title}
-                              </h5>
-                            </div>
-                            <span className="text-[10.5px] font-medium text-slate-400">
-                              {new Date(event.timestamp).toLocaleString(undefined, {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit"
-                              })}
-                            </span>
-                          </div>
-
-                          <p className="text-xs text-slate-600 mb-1.5 leading-relaxed">
-                            {event.description}
-                          </p>
-
-                          <div className="flex items-center gap-2 text-[10px] text-slate-400">
-                            <i className="bi bi-person-badge"></i>
-                            <span>Logged by: <strong className="text-slate-600">{event.author}</strong></span>
-                          </div>
-                        </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="relative">
+                        <select
+                          value={auditCategoryFilter}
+                          onChange={(e) => setAuditCategoryFilter(e.target.value)}
+                          className="text-xs font-semibold bg-white border border-slate-200 text-slate-700 rounded-xl px-3 py-1.5 pr-7 appearance-none focus:outline-none focus:border-indigo-500 shadow-2xs cursor-pointer hover:border-slate-300 transition-colors"
+                        >
+                          <option value="all">All Events ({auditEvents.length})</option>
+                          <option value="Compensation">Compensation</option>
+                          <option value="Transfer">Mobility / Transfer</option>
+                          <option value="Contact">Contact & Location</option>
+                          <option value="Role">Role & Authority</option>
+                          <option value="Status">Account Status</option>
+                          <option value="Security">Security & Access</option>
+                          <option value="Onboarding">Onboarding</option>
+                        </select>
+                        <i className="bi bi-chevron-down absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[9px]"></i>
                       </div>
-                    ))}
+                      <span className="text-[11px] font-semibold text-slate-600 bg-slate-100 px-2.5 py-1.5 rounded-xl border border-slate-200">
+                        {displayedAuditEvents.length} Records
+                      </span>
+                    </div>
                   </div>
+
+                  {displayedAuditEvents.length > 0 ? (
+                    <div className="relative pl-7 space-y-4 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+                      {displayedAuditEvents.map((event) => (
+                        <div key={event.id} className="relative group">
+                          {/* Timeline Node Icon */}
+                          <div className="absolute -left-7 top-1.5 w-6 h-6 rounded-full bg-white border-2 border-indigo-600 flex items-center justify-center text-indigo-600 text-[10px] shadow-2xs group-hover:scale-110 transition-transform">
+                            <i className={`bi ${event.icon}`}></i>
+                          </div>
+
+                          {/* Event Card */}
+                          <div className="bg-slate-50/70 hover:bg-slate-50/90 border border-slate-200/90 rounded-2xl p-4 transition-all shadow-2xs hover:shadow-xs">
+                            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${event.badgeColor}`}>
+                                  {event.type}
+                                </span>
+                                <h5 className="text-xs font-bold text-slate-900 mb-0">
+                                  {event.title}
+                                </h5>
+                              </div>
+                              <span className="text-[10.5px] font-medium text-slate-400 bg-white px-2 py-0.5 rounded-md border border-slate-100 shadow-2xs">
+                                {new Date(event.timestamp).toLocaleString(undefined, {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit"
+                                })}
+                              </span>
+                            </div>
+
+                            <p className="text-xs text-slate-600 mb-2.5 leading-relaxed">
+                              {event.description}
+                            </p>
+
+                            <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-[10.5px] text-slate-400">
+                              <div className="flex items-center gap-1.5">
+                                <i className="bi bi-person-check text-slate-400"></i>
+                                <span>Logged by: <strong className="text-slate-700 font-semibold">{event.author}</strong></span>
+                              </div>
+                              <span className="text-[10px] text-slate-400 font-mono">
+                                {event.id}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center bg-slate-50/60 border border-dashed border-slate-200 rounded-2xl">
+                      <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center text-base mb-2">
+                        <i className="bi bi-funnel"></i>
+                      </div>
+                      <p className="text-xs font-bold text-slate-700 mb-0.5">No records match "{auditCategoryFilter}"</p>
+                      <p className="text-[11px] text-slate-400 mb-3">Try selecting a different filter category or reset to view all events.</p>
+                      <button
+                        type="button"
+                        onClick={() => setAuditCategoryFilter("all")}
+                        className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                      >
+                        Reset Filter
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
