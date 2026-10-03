@@ -42,6 +42,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [isUploadingDoc, setIsUploadingDoc] = useState(false);
   const [newDocName, setNewDocName] = useState("");
   const [newDocCategory, setNewDocCategory] = useState<EmployeeDocument["category"]>("Identity");
+  const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
+  const [copyFeedback, setCopyFeedback] = useState("");
 
   useEffect(() => {
     if (!isOpen || !userId) return;
@@ -315,13 +317,13 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       }}
     >
       <div
-        className="w-full max-w-3xl max-h-[92vh] bg-white rounded-2xl border border-slate-200/80 shadow-2xl flex flex-col my-auto overflow-hidden animate-in zoom-in-95 duration-150"
+        className="w-full max-w-6xl max-h-[92vh] bg-white rounded-2xl border border-slate-200/80 shadow-2xl flex flex-col my-auto overflow-hidden animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Pinned Executive Header Banner */}
-        <div className="shrink-0 px-5 sm:px-6 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between gap-4 border-b border-indigo-900/40">
+        <div className="shrink-0 px-5 sm:px-6 py-3.5 bg-[#0B132B] text-white flex items-center justify-between gap-4 border-b border-slate-800">
           <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-200 text-lg font-bold shadow-inner shrink-0 overflow-hidden">
+            <div className="w-11 h-11 rounded-xl bg-indigo-600/30 border border-indigo-400/30 flex items-center justify-center text-indigo-200 text-lg font-bold shadow-inner shrink-0 overflow-hidden">
               {user?.image_url ? (
                 <img src={user.image_url} alt={user.name} className="w-full h-full object-cover" />
               ) : (
@@ -340,31 +342,92 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   </span>
                 ) : null}
                 <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
-                    user?.status === "active" ? "bg-emerald-500/20 text-emerald-200" : "bg-slate-500/20 text-slate-300"
+                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+                    user?.status === "active"
+                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                      : "bg-slate-500/20 text-slate-300 border border-slate-500/30"
                   }`}
                 >
-                  {user?.status === "active" ? "Active" : "Inactive"}
+                  <span className={`w-1.5 h-1.5 rounded-full ${user?.status === "active" ? "bg-emerald-400 animate-pulse" : "bg-slate-400"}`}></span>
+                  <span>{user?.status === "active" ? "Active" : "Inactive"}</span>
                 </span>
               </div>
-              <p className="text-xs text-indigo-200/70 mt-0.5 mb-0 font-normal truncate">
-                {user?.email} • {user?.department_name ? `${user.department_name} Department` : "Unassigned Department"}
+              <p className="text-xs text-slate-400 mt-1 mb-0 font-normal truncate flex items-center gap-2 flex-wrap">
+                <span>EMP-{String(user?.id || 1).padStart(4, "0")}</span>
+                <span className="text-slate-600">|</span>
+                <span>{user?.email}</span>
+                <span className="text-slate-600">|</span>
+                <span>{user?.department_name ? `${user.department_name} Department` : "Unassigned Department"}</span>
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 relative">
+            {copyFeedback && (
+              <span className="text-[11px] font-bold text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-lg border border-emerald-700/50 animate-in fade-in">
+                {copyFeedback}
+              </span>
+            )}
             {onGenerateIdCard && user && (
               <button
                 type="button"
                 onClick={() => onGenerateIdCard(user)}
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-400/30 text-indigo-200 text-xs font-semibold transition-all cursor-pointer"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-400/30 text-indigo-200 text-xs font-semibold transition-all cursor-pointer shadow-2xs"
                 title="Generate Employee ID Card"
               >
                 <i className="bi bi-badge-ad"></i>
                 <span>ID Badge</span>
               </button>
             )}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsHeaderMenuOpen(!isHeaderMenuOpen)}
+                className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer text-sm"
+                title="More Actions"
+              >
+                <i className="bi bi-three-dots"></i>
+              </button>
+              {isHeaderMenuOpen && (
+                <div
+                  className="absolute right-0 mt-1.5 w-48 bg-slate-900 border border-slate-700/80 rounded-xl shadow-2xl z-50 py-1 text-xs text-slate-200 animate-in fade-in zoom-in-95"
+                  onClick={() => setIsHeaderMenuOpen(false)}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(user?.email || "");
+                      setCopyFeedback("Email copied!");
+                      setTimeout(() => setCopyFeedback(""), 2000);
+                    }}
+                    className="w-full text-left px-3 py-2 hover:bg-white/10 flex items-center gap-2 cursor-pointer"
+                  >
+                    <i className="bi bi-clipboard text-indigo-400"></i>
+                    <span>Copy Work Email</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`EMP-${String(user?.id || 1).padStart(4, "0")}`);
+                      setCopyFeedback("Employee ID copied!");
+                      setTimeout(() => setCopyFeedback(""), 2000);
+                    }}
+                    className="w-full text-left px-3 py-2 hover:bg-white/10 flex items-center gap-2 cursor-pointer"
+                  >
+                    <i className="bi bi-person-badge text-indigo-400"></i>
+                    <span>Copy Employee ID</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="w-full text-left px-3 py-2 hover:bg-white/10 flex items-center gap-2 cursor-pointer border-t border-slate-800"
+                  >
+                    <i className="bi bi-printer text-indigo-400"></i>
+                    <span>Print Dossier</span>
+                  </button>
+                </div>
+              )}
+            </div>
             <button
               type="button"
               onClick={onClose}
@@ -376,68 +439,78 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
           </div>
         </div>
 
-        {/* Tab Navigation Ribbon */}
-        <div className="shrink-0 px-5 sm:px-6 bg-slate-50 border-b border-slate-200 flex items-center gap-2 overflow-x-auto [scrollbar-width:none]">
-          <button
-            type="button"
-            onClick={() => setActiveTab("overview")}
-            className={`px-3.5 py-2.5 text-xs font-bold transition-all border-b-2 flex items-center gap-2 cursor-pointer whitespace-nowrap ${
-              activeTab === "overview"
-                ? "border-indigo-600 text-indigo-600 bg-white"
-                : "border-transparent text-slate-500 hover:text-slate-800"
-            }`}
-          >
-            <i className="bi bi-person-badge"></i>
-            <span>Profile Overview</span>
-          </button>
+        {/* Modal Main Body (Dual Column: Left Navigation Drawer + Right Content Canvas) */}
+        <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
+          {/* Left Vertical Sidebar Navigation */}
+          <aside className="w-full md:w-56 shrink-0 bg-slate-50/80 border-b md:border-b-0 md:border-r border-slate-200/90 p-3 space-y-1.5 flex md:flex-col justify-between overflow-x-auto md:overflow-x-visible">
+            <div className="flex md:flex-col gap-1.5 w-full">
+              <button
+                type="button"
+                onClick={() => setActiveTab("overview")}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer ${
+                  activeTab === "overview"
+                    ? "bg-indigo-50 text-indigo-700 font-bold border border-indigo-200/80 shadow-2xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium border border-transparent"
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <i className="bi bi-person-badge text-sm"></i>
+                  <span>Profile Overview</span>
+                </div>
+              </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab("audit")}
-            className={`px-3.5 py-2.5 text-xs font-bold transition-all border-b-2 flex items-center gap-2 cursor-pointer whitespace-nowrap ${
-              activeTab === "audit"
-                ? "border-indigo-600 text-indigo-600 bg-white"
-                : "border-transparent text-slate-500 hover:text-slate-800"
-            }`}
-          >
-            <i className="bi bi-clock-history"></i>
-            <span>Audit Trail & Activity</span>
-            <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-indigo-100 text-indigo-700 font-extrabold">
-              {auditEvents.length}
-            </span>
-          </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("audit")}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer ${
+                  activeTab === "audit"
+                    ? "bg-indigo-50 text-indigo-700 font-bold border border-indigo-200/80 shadow-2xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium border border-transparent"
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <i className="bi bi-clock-history text-sm"></i>
+                  <span>Audit Trail & Activity</span>
+                </div>
+                <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-indigo-100 text-indigo-700 font-extrabold">
+                  {auditEvents.length}
+                </span>
+              </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab("documents")}
-            className={`px-3.5 py-2.5 text-xs font-bold transition-all border-b-2 flex items-center gap-2 cursor-pointer whitespace-nowrap ${
-              activeTab === "documents"
-                ? "border-indigo-600 text-indigo-600 bg-white"
-                : "border-transparent text-slate-500 hover:text-slate-800"
-            }`}
-          >
-            <i className="bi bi-folder2-open"></i>
-            <span>Documents Vault</span>
-            <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-slate-200 text-slate-700 font-extrabold">
-              {documents.length}
-            </span>
-          </button>
-        </div>
-
-        {/* Modal Scrollable Body */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 [scrollbar-width:thin]">
-          {loading ? (
-            <div className="py-20 flex flex-col items-center justify-center gap-3 text-slate-400 text-xs">
-              <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-              <span>Loading complete member profile...</span>
+              <button
+                type="button"
+                onClick={() => setActiveTab("documents")}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer ${
+                  activeTab === "documents"
+                    ? "bg-indigo-50 text-indigo-700 font-bold border border-indigo-200/80 shadow-2xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium border border-transparent"
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <i className="bi bi-folder2-open text-sm"></i>
+                  <span>Documents Vault</span>
+                </div>
+                <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-slate-200 text-slate-700 font-extrabold">
+                  {documents.length}
+                </span>
+              </button>
             </div>
-          ) : errorMsg ? (
-            <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
-              <i className="bi bi-exclamation-triangle-fill"></i>
-              <span>{errorMsg}</span>
-            </div>
-          ) : user ? (
-            <>
+          </aside>
+
+          {/* Right Main Content Canvas */}
+          <main className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 bg-slate-50/30 [scrollbar-width:thin]">
+            {loading ? (
+              <div className="py-20 flex flex-col items-center justify-center gap-3 text-slate-400 text-xs">
+                <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                <span>Loading complete member profile...</span>
+              </div>
+            ) : errorMsg ? (
+              <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                <i className="bi bi-exclamation-triangle-fill"></i>
+                <span>{errorMsg}</span>
+              </div>
+            ) : user ? (
+              <>
               {/* TAB 1: OVERVIEW */}
               {activeTab === "overview" && (
                 <div className="space-y-5 animate-in fade-in duration-150">
@@ -814,7 +887,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               )}
             </>
           ) : null}
-        </div>
+        </main>
+      </div>
 
         {/* Modal Footer Controls */}
         <div className="shrink-0 px-5 sm:px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
