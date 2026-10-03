@@ -14,6 +14,7 @@ interface UserProfileModalProps {
 interface EmployeeDocument {
   id: string;
   name: string;
+  description?: string;
   category: "Identity" | "Contract" | "Tax" | "Certification" | "Other";
   fileType: "pdf" | "image" | "doc";
   fileSize: string;
@@ -78,6 +79,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
           {
             id: "doc-1",
             name: "Government ID / Passport Scan",
+            description: "Statutory proof of identity and citizenship verification",
             category: "Identity",
             fileType: "pdf",
             fileSize: "2.4 MB",
@@ -87,6 +89,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
           {
             id: "doc-2",
             name: "Employment Contract & Offer Letter",
+            description: "Signed formal executive contract and terms",
             category: "Contract",
             fileType: "pdf",
             fileSize: "1.8 MB",
@@ -96,6 +99,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
           {
             id: "doc-3",
             name: "Non-Disclosure Agreement (NDA)",
+            description: "Confidentiality and proprietary rights covenants",
             category: "Contract",
             fileType: "pdf",
             fileSize: "840 KB",
@@ -105,11 +109,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
           {
             id: "doc-4",
             name: "Tax Withholding & Direct Deposit Form",
+            description: "W-4 withholding declaration and verified bank coordinates",
             category: "Tax",
             fileType: "pdf",
             fileSize: "620 KB",
             uploadDate: new Date().toISOString().slice(0, 10),
-            status: "pending"
+            status: "verified"
           }
         ];
         setDocuments(defaultDocs);
@@ -140,6 +145,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     const newDoc: EmployeeDocument = {
       id: `doc-${Date.now()}`,
       name: newDocName.trim(),
+      description: "User submitted compliance document",
       category: newDocCategory,
       fileType: "pdf",
       fileSize: "1.2 MB",
@@ -1202,60 +1208,101 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     </form>
                   )}
 
-                  {/* Documents Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {documents.map((doc) => (
-                      <div
-                        key={doc.id}
-                        className="p-3.5 rounded-xl bg-slate-50 hover:bg-slate-100/70 border border-slate-200 transition-all flex items-start justify-between gap-3 shadow-2xs"
-                      >
-                        <div className="flex items-start gap-3 min-w-0">
-                          <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-rose-500 text-base shadow-2xs shrink-0">
-                            <i className="bi bi-file-earmark-pdf-fill"></i>
-                          </div>
-                          <div className="min-w-0">
-                            <h5 className="text-xs font-bold text-slate-900 truncate mb-0.5">
-                              {doc.name}
-                            </h5>
-                            <div className="flex items-center gap-1.5 flex-wrap text-[10px] text-slate-400">
-                              <span className="px-1.5 py-0.2 rounded font-semibold bg-slate-200/70 text-slate-600">
-                                {doc.category}
-                              </span>
-                              <span>•</span>
-                              <span>{doc.fileSize}</span>
-                              <span>•</span>
-                              <span>{doc.uploadDate}</span>
-                            </div>
-                            <div className="mt-1 flex items-center gap-1 text-[10px] text-emerald-600 font-semibold">
-                              <i className="bi bi-check-circle-fill"></i>
-                              <span>Verified Compliance</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-1 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => alert(`Simulated document viewer for: "${doc.name}"`)}
-                            className="w-7 h-7 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-white flex items-center justify-center transition-colors cursor-pointer"
-                            title="View Document"
-                          >
-                            <i className="bi bi-eye text-xs"></i>
-                          </button>
-                          {isOwnProfile && (
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteDocument(doc.id)}
-                              className="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-white flex items-center justify-center transition-colors cursor-pointer"
-                              title="Remove Document"
-                            >
-                              <i className="bi bi-trash text-xs"></i>
-                            </button>
-                          )}
-                        </div>
+                  {/* Enterprise Document Vault Table Layout */}
+                  {documents.length > 0 ? (
+                    <div className="rounded-2xl border border-slate-200/90 overflow-hidden bg-white shadow-2xs">
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left text-xs">
+                          <thead className="bg-slate-50/90 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                            <tr>
+                              <th className="py-3 px-4">Document Name</th>
+                              <th className="py-3 px-4">Type</th>
+                              <th className="py-3 px-4">Size</th>
+                              <th className="py-3 px-4">Uploaded On</th>
+                              <th className="py-3 px-4">Status</th>
+                              <th className="py-3 px-4 text-right">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {documents.map((doc) => (
+                              <tr key={doc.id} className="hover:bg-slate-50/70 transition-colors">
+                                <td className="py-3 px-4">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-500 text-base shrink-0 shadow-2xs">
+                                      <i className="bi bi-file-earmark-pdf-fill"></i>
+                                    </div>
+                                    <div className="min-w-0 max-w-xs sm:max-w-md">
+                                      <span className="font-bold text-slate-900 block truncate text-xs">
+                                        {doc.name}
+                                      </span>
+                                      <span className="text-[11px] text-slate-400 block truncate">
+                                        {doc.description || "Statutory compliance record"}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="py-3 px-4 whitespace-nowrap">
+                                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
+                                    {doc.category}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-4 text-slate-500 whitespace-nowrap font-medium text-[11px]">
+                                  {doc.fileSize}
+                                </td>
+                                <td className="py-3 px-4 text-slate-500 whitespace-nowrap text-[11px]">
+                                  {doc.uploadDate}
+                                </td>
+                                <td className="py-3 px-4 whitespace-nowrap">
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    <span>Verified</span>
+                                  </span>
+                                </td>
+                                <td className="py-3 px-4 text-right whitespace-nowrap">
+                                  <div className="inline-flex items-center justify-end gap-1">
+                                    <button
+                                      type="button"
+                                      onClick={() => alert(`Previewing statutory record: "${doc.name}"`)}
+                                      className="w-7 h-7 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer"
+                                      title="Preview Document"
+                                    >
+                                      <i className="bi bi-eye text-xs"></i>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => alert(`Downloading verified record: "${doc.name}"`)}
+                                      className="w-7 h-7 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer"
+                                      title="Download Document"
+                                    >
+                                      <i className="bi bi-download text-xs"></i>
+                                    </button>
+                                    {isOwnProfile && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteDocument(doc.id)}
+                                        className="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition-colors cursor-pointer"
+                                        title="Delete Document"
+                                      >
+                                        <i className="bi bi-trash text-xs"></i>
+                                      </button>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center bg-slate-50/60 border border-dashed border-slate-200 rounded-2xl">
+                      <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center text-base mb-2">
+                        <i className="bi bi-file-earmark-x"></i>
+                      </div>
+                      <p className="text-xs font-bold text-slate-700 mb-0.5">No Documents Recorded</p>
+                      <p className="text-[11px] text-slate-400 mb-0">No statutory files or credentials have been uploaded yet.</p>
+                    </div>
+                  )}
                 </div>
               )}
             </>
