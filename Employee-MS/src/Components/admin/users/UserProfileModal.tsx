@@ -648,45 +648,260 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Reporting Line / Hierarchy Section */}
-                  <div className="p-4 rounded-xl bg-indigo-50/40 border border-indigo-100 space-y-3">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-900 flex items-center gap-1.5 mb-0">
-                      <i className="bi bi-diagram-3-fill text-indigo-600"></i>
-                      <span>Institutional Reporting Chain</span>
-                    </h4>
+                  {/* Detailed Cards Section (Matching Image 1 Grid) */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    {/* CARD 1: Employment Details */}
+                    <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-3.5">
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-800">
+                          <div className="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
+                            <i className="bi bi-briefcase-fill"></i>
+                          </div>
+                          <span>Employment Details</span>
+                        </div>
+                        {onEditUser && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              onClose();
+                              onEditUser(user);
+                            }}
+                            className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                      <div className="p-3 rounded-lg bg-white border border-indigo-100 shadow-2xs">
-                        <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
-                          Assigned Department
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-slate-900 text-sm">
-                            {user.department_name || "Unassigned"}
+                      <div className="space-y-2.5 text-xs">
+                        <div className="flex items-center justify-between py-1 border-b border-slate-50">
+                          <span className="text-slate-400 font-medium">Department</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-slate-800">{user.department_name || "Unassigned"}</span>
+                            {user.department_code && (
+                              <span className="px-1.5 py-0.2 rounded text-[10px] font-bold uppercase bg-slate-100 text-slate-700">
+                                {user.department_code}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between py-1 border-b border-slate-50">
+                          <span className="text-slate-400 font-medium">Role</span>
+                          <span className="font-bold text-slate-800 capitalize">
+                            {user.role === "admin" ? "HR Admin" : user.role || "Employee"}
                           </span>
-                          {user.department_code && (
-                            <span className="px-1.5 py-0.2 rounded text-[10px] font-bold uppercase bg-slate-100 text-slate-700">
-                              {user.department_code}
+                        </div>
+
+                        <div className="flex items-center justify-between py-1 border-b border-slate-50">
+                          <span className="text-slate-400 font-medium">Employment Type</span>
+                          <span className="font-bold text-slate-800">Full-time</span>
+                        </div>
+
+                        <div className="flex items-center justify-between py-1 border-b border-slate-50">
+                          <span className="text-slate-400 font-medium">Annual Salary</span>
+                          <div className="text-right">
+                            <span className="font-extrabold text-slate-900 block">
+                              ${Number(user.salary || 0).toLocaleString()}
                             </span>
+                            <span className="text-[10px] text-slate-400">Approved Base Compensation</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between py-1 border-b border-slate-50">
+                          <span className="text-slate-400 font-medium">Account Status</span>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span>{user.status === "active" ? "Active" : "Inactive"}</span>
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between py-1">
+                          <span className="text-slate-400 font-medium">Onboarded Since</span>
+                          <div className="text-right">
+                            <span className="font-bold text-slate-800 block">
+                              {user.created_at ? new Date(user.created_at).toLocaleDateString("en-US") : "N/A"}
+                            </span>
+                            <span className="text-[10px] text-slate-400">Tenure Initiation Date</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* COLUMN 2: Stack of Contact Info & Office Location */}
+                    <div className="space-y-4">
+                      {/* CARD 2: Contact Information */}
+                      <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-3.5">
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-800">
+                            <div className="w-6 h-6 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-xs">
+                              <i className="bi bi-telephone-fill"></i>
+                            </div>
+                            <span>Contact Information</span>
+                          </div>
+                          {onEditUser && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onClose();
+                                onEditUser(user);
+                              }}
+                              className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                            >
+                              Edit
+                            </button>
                           )}
+                        </div>
+
+                        <div className="space-y-2.5 text-xs">
+                          <div className="flex items-center justify-between py-1 border-b border-slate-50">
+                            <span className="text-slate-400 font-medium flex items-center gap-1.5">
+                              <i className="bi bi-envelope text-slate-400"></i>
+                              <span>Work Email</span>
+                            </span>
+                            <span className="font-semibold text-slate-800 truncate max-w-[170px]" title={user.email}>
+                              {user.email}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-between py-1 border-b border-slate-50">
+                            <span className="text-slate-400 font-medium flex items-center gap-1.5">
+                              <i className="bi bi-telephone text-slate-400"></i>
+                              <span>Contact Phone</span>
+                            </span>
+                            <span className={`font-semibold ${user.phone ? "text-slate-800" : "text-slate-400 italic"}`}>
+                              {user.phone || "Not recorded"}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-between py-1">
+                            <span className="text-slate-400 font-medium flex items-center gap-1.5">
+                              <i className="bi bi-phone text-slate-400"></i>
+                              <span>Mobile / Direct</span>
+                            </span>
+                            <span className={`font-semibold ${user.phone ? "text-slate-800" : "text-slate-400 italic"}`}>
+                              {user.phone || "Not recorded"}
+                            </span>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="p-3 rounded-lg bg-white border border-indigo-100 shadow-2xs">
-                        <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
-                          Direct Supervisor
-                        </span>
-                        {user.supervisor_name ? (
-                          <div>
-                            <span className="font-bold text-slate-900 text-sm block">{user.supervisor_name}</span>
-                            <span className="text-[11px] text-slate-400">{user.supervisor_email}</span>
+                      {/* CARD 3: Office / Work Location */}
+                      <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-3.5">
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-800">
+                            <div className="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs">
+                              <i className="bi bi-geo-alt-fill"></i>
+                            </div>
+                            <span>Office / Work Location</span>
                           </div>
-                        ) : (
-                          <span className="font-medium text-slate-500 italic text-xs">
-                            Direct to Department Head / Apex Authority
-                          </span>
-                        )}
+                          {onEditUser && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onClose();
+                                onEditUser(user);
+                              }}
+                              className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                            >
+                              Edit
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="space-y-2.5 text-xs">
+                          <div className="flex items-center justify-between py-1 border-b border-slate-50">
+                            <span className="text-slate-400 font-medium">Location</span>
+                            <span className="font-semibold text-slate-800">
+                              {user.address ? user.address.split(",")[0] : "Corporate Headquarters"}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-between py-1 border-b border-slate-50">
+                            <span className="text-slate-400 font-medium">Address</span>
+                            <span className={`font-semibold text-right ${user.address ? "text-slate-800" : "text-slate-400 italic"}`}>
+                              {user.address || "Not specified"}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-between py-1">
+                            <span className="text-slate-400 font-medium">Suite / Floor</span>
+                            <span className="font-semibold text-slate-400 italic">Not specified</span>
+                          </div>
+                        </div>
                       </div>
+                    </div>
+
+                    {/* CARD 4: Institutional Reporting Chain (Visual Node Tree Graph) */}
+                    <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-3.5 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-800">
+                            <div className="w-6 h-6 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xs">
+                              <i className="bi bi-diagram-3-fill"></i>
+                            </div>
+                            <span>Institutional Reporting Chain</span>
+                          </div>
+                          {onEditUser && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onClose();
+                                onEditUser(user);
+                              }}
+                              className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                            >
+                              Edit
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Interactive Node Graph */}
+                        <div className="pt-4 pb-2 flex flex-col items-center">
+                          {/* Node 1: Top Department Head / Supervisor */}
+                          <div className="w-full p-3 rounded-xl bg-slate-50/90 border border-slate-200/90 flex items-center gap-3 shadow-2xs">
+                            <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500 shadow-2xs shrink-0">
+                              <i className="bi bi-people text-sm"></i>
+                            </div>
+                            <div className="min-w-0">
+                              <span className="text-[10px] uppercase font-bold text-slate-400 block leading-none mb-1">
+                                Department Head (HOD)
+                              </span>
+                              <span className="font-bold text-slate-800 text-xs block truncate">
+                                {user.head_of_department_name || user.supervisor_name || "— Unassigned / Vacant —"}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Connecting Dotted Line */}
+                          <div className="w-0.5 h-6 border-l-2 border-dashed border-slate-300 my-1"></div>
+
+                          {/* Node 2: Current Member (Target User) */}
+                          <div className="w-full p-3 rounded-xl bg-indigo-50/80 border border-indigo-200 flex items-center gap-3 shadow-2xs">
+                            <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white font-extrabold text-sm flex items-center justify-center shadow-xs shrink-0 overflow-hidden">
+                              {user.image_url ? (
+                                <img src={user.image_url} alt={user.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <span>{user.name ? user.name.charAt(0) : "U"}</span>
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <span className="font-extrabold text-slate-900 text-xs block truncate">
+                                {user.name}
+                              </span>
+                              <span className="text-[11px] text-indigo-700 font-semibold block truncate">
+                                {user.role === "admin" ? "HR Admin" : user.role || "Employee"} {isOwnProfile ? "(You)" : ""} • {user.department_name || "Accounts"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <p className="text-[11px] text-slate-400 text-center italic mb-0 pt-2 border-t border-slate-100">
+                        {user.supervisor_name
+                          ? `Direct supervisory routing to ${user.supervisor_name}`
+                          : "Direct to Department Head / Apex Authority"}
+                      </p>
                     </div>
                   </div>
 
