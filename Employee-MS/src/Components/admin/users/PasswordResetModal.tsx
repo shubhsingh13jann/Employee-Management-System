@@ -426,10 +426,10 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
               )}
 
               {/* Employee Details Section */}
-              <div>
+              <div data-section="employee-details">
                 <div
                   style={{ fontSize: "11.5px", marginBottom: "12px" }}
-                  className="font-bold text-slate-800 tracking-tight"
+                  className="password-reset-heading font-bold text-slate-800 tracking-tight"
                 >
                   Employee Details
                 </div>
@@ -589,10 +589,13 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
             <div className="hidden lg:block w-px bg-slate-200/80 self-stretch my-0.5 shrink-0"></div>
 
             {/* ── RIGHT COLUMN — Security Guidelines (30% of Content Split) ── */}
-            <div className="w-full lg:w-[31%] lg:flex-[3] shrink-0 min-w-0 space-y-3.5 pb-2">
+            <div
+              data-section="security-guidelines"
+              className="w-full lg:w-[31%] lg:flex-[3] shrink-0 min-w-0 space-y-3.5 pb-2"
+            >
               <div
                 style={{ fontSize: "11.5px", marginBottom: "12px" }}
-                className="font-bold text-slate-800 whitespace-nowrap tracking-tight"
+                className="password-reset-heading font-bold text-slate-800 whitespace-nowrap tracking-tight"
               >
                 Security Guidelines
               </div>
