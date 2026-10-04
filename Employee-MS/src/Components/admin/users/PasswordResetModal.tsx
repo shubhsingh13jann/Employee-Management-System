@@ -212,6 +212,7 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             className="w-full h-full"
+            preserveAspectRatio="none"
           >
             <path
               d="M 110 0 C 170 35, 230 65, 320 85 L 320 185 C 295 130, 260 70, 210 0 Z"
@@ -281,71 +282,72 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
           </svg>
         </div>
 
-        {/* ── High-Visibility Flowing Ribbon Wave (Bottom-Left - Fully visible below warning box) ── */}
-        <div className="absolute bottom-0 left-0 w-[440px] sm:w-[480px] h-20 sm:h-24 pointer-events-none overflow-hidden select-none z-0 rounded-bl-3xl">
+        {/* ── High-Visibility Flowing Ribbon Wave (Bottom-Left - Fully flush to corner boundaries) ── */}
+        <div className="absolute -bottom-1 -left-2 w-[460px] sm:w-[500px] h-20 sm:h-24 pointer-events-none select-none z-0">
           <svg
-            viewBox="0 0 500 100"
+            viewBox="-30 0 530 100"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             className="w-full h-full"
+            preserveAspectRatio="none"
           >
             {/* Soft translucent purple ribbon wave sweeping across */}
             <path
-              d="M 0 15 C 80 25, 160 55, 250 70 C 330 80, 410 90, 490 100 L 0 100 Z"
+              d="M -30 15 C 80 25, 160 55, 250 70 C 330 80, 410 90, 490 100 L -30 100 Z"
               fill="url(#botRibbonGrad)"
               opacity="0.10"
             />
             {/* Mid-blue ribbon fold with dynamic satin curve */}
             <path
-              d="M 0 35 C 60 42, 120 65, 180 82 C 220 95, 260 100, 310 100 L 190 100 C 140 90, 90 70, 0 55 Z"
+              d="M -30 35 C 60 42, 120 65, 180 82 C 220 95, 260 100, 310 100 L 190 100 C 140 90, 90 70, -30 55 Z"
               fill="url(#botBlueFoldGrad)"
               opacity="0.16"
             />
             {/* Flowing harmonic bezier line array */}
             <path
-              d="M 0 15 C 85 25, 170 55, 260 70 C 340 80, 420 90, 500 100"
+              d="M -30 15 C 85 25, 170 55, 260 70 C 340 80, 420 90, 500 100"
               stroke="url(#botWaveStroke1)"
               strokeWidth="1.6"
               strokeLinecap="round"
               opacity="0.75"
             />
             <path
-              d="M 0 24 C 75 32, 150 58, 230 74 C 310 86, 390 94, 460 100"
+              d="M -30 24 C 75 32, 150 58, 230 74 C 310 86, 390 94, 460 100"
               stroke="url(#botWaveStroke2)"
               strokeWidth="1.5"
               strokeLinecap="round"
               opacity="0.65"
             />
             <path
-              d="M 0 34 C 68 40, 135 63, 205 79 C 275 91, 350 96, 420 100"
+              d="M -30 34 C 68 40, 135 63, 205 79 C 275 91, 350 96, 420 100"
               stroke="url(#botWaveStroke1)"
               strokeWidth="1.4"
               strokeLinecap="round"
               opacity="0.6"
             />
             <path
-              d="M 0 45 C 60 50, 120 68, 180 84 C 245 95, 315 98, 380 100"
+              d="M -30 45 C 60 50, 120 68, 180 84 C 245 95, 315 98, 380 100"
               stroke="url(#botWaveStroke2)"
               strokeWidth="1.3"
               strokeLinecap="round"
               opacity="0.5"
             />
             <path
-              d="M 0 57 C 52 61, 105 74, 158 88 C 215 97, 275 100, 340 100"
+              d="M -30 57 C 52 61, 105 74, 158 88 C 215 97, 275 100, 340 100"
               stroke="url(#botWaveStroke1)"
               strokeWidth="1.1"
               strokeLinecap="round"
               opacity="0.4"
             />
             <path
-              d="M 0 70 C 45 73, 90 81, 136 91 C 185 98, 235 100, 290 100"
+              d="M -30 70 C 45 73, 90 81, 136 91 C 185 98, 235 100, 290 100"
               stroke="url(#botWaveStroke2)"
               strokeWidth="1.0"
               strokeLinecap="round"
               opacity="0.35"
             />
             <path
-              d="M 0 84 C 38 85, 75 90, 115 95 C 155 99, 195 100, 240 100"
+              d="M -30 84 C 38 85, 75 90, 115 95 C 155 99, 195 100, 240 100"
               stroke="url(#botWaveStroke1)"
               strokeWidth="0.9"
               strokeLinecap="round"
@@ -547,17 +549,19 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
 
               {/* Email Notification Checkbox (Space after checkbox, flush left-aligned text block) */}
               <div className="flex items-start gap-3 select-none">
-                <input
-                  type="checkbox"
-                  id="notify-email-checkbox"
-                  checked={sendEmailNotification}
-                  onChange={(e) => setSendEmailNotification(e.target.checked)}
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600 shrink-0 mt-0.5"
-                />
+                <div className="flex items-center h-5 shrink-0">
+                  <input
+                    type="checkbox"
+                    id="notify-email-checkbox"
+                    checked={sendEmailNotification}
+                    onChange={(e) => setSendEmailNotification(e.target.checked)}
+                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600 m-0"
+                  />
+                </div>
                 <div className="space-y-0.5 min-w-0">
                   <label
                     htmlFor="notify-email-checkbox"
-                    className="text-xs sm:text-[13px] font-semibold text-slate-800 cursor-pointer block leading-snug whitespace-nowrap"
+                    className="text-xs sm:text-[13px] font-semibold text-slate-800 cursor-pointer block leading-5 whitespace-nowrap"
                   >
                     Notify employee with credentials via registered email
                   </label>
