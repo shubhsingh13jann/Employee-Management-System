@@ -713,8 +713,8 @@ button.\!rounded-md,
 }
 
 /* ==========================================================================
-   PASSWORD RESET MODAL - SECTION HEADINGS (Employee Details & Security Guidelines)
-   Overrides Bootstrap 5 global `h3` (24.5px) rule which clobbers Tailwind classes.
+   PASSWORD RESET MODAL - SECTION HEADINGS & GUIDELINES TYPOGRAPHY
+   Overrides Bootstrap 5 global `h3` (24.5px) rule to establish clean visual hierarchy.
    ========================================================================== */
 .password-reset-heading,
 div.password-reset-heading,
@@ -725,7 +725,7 @@ div[data-section="employee-details"] > .password-reset-heading,
 div[data-section="employee-details"] > h3,
 div[data-section="security-guidelines"] > .password-reset-heading,
 div[data-section="security-guidelines"] > h3 {
-  font-size: 11px !important;
+  font-size: 15.5px !important;
   line-height: 1.3 !important;
   margin-top: 0 !important;
   margin-bottom: 14px !important;
@@ -734,5 +734,11 @@ div[data-section="security-guidelines"] > h3 {
   letter-spacing: -0.01em !important;
 }
 
+.security-guideline-title {
+  font-size: 14.5px !important;
+  line-height: 1.25 !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+}
 
 

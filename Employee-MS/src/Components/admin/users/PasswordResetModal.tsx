@@ -428,7 +428,7 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
               {/* Employee Details Section */}
               <div data-section="employee-details">
                 <div
-                  style={{ fontSize: "11px", marginBottom: "14px" }}
+                  style={{ fontSize: "15.5px", marginBottom: "14px" }}
                   className="password-reset-heading font-bold text-slate-800 tracking-tight"
                 >
                   Employee Details
@@ -594,14 +594,14 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
               className="w-full lg:w-[31%] lg:flex-[3] shrink-0 min-w-0 space-y-3.5 pb-2"
             >
               <div
-                style={{ fontSize: "11px", marginBottom: "14px" }}
+                style={{ fontSize: "15.5px", marginBottom: "14px" }}
                 className="password-reset-heading font-bold text-slate-800 whitespace-nowrap tracking-tight"
               >
                 Security Guidelines
               </div>
 
               <div className="space-y-3.5">
-                {SECURITY_GUIDELINES.map((g) =>(
+                {SECURITY_GUIDELINES.map((g) => (
                   <div key={g.icon} className="flex items-start gap-2.5">
                     {/* Icon circle */}
                     <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-200/90 flex items-center justify-center text-slate-600 text-xs shrink-0 shadow-2xs mt-0.5">
@@ -609,7 +609,10 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
                     </div>
                     {/* Text: Title and description tightly connected with increased legibility */}
                     <div className="min-w-0 flex-1">
-                      <p className="text-[13px] font-bold text-slate-900 mb-0 leading-tight">
+                      <p
+                        style={{ fontSize: "14.5px" }}
+                        className="security-guideline-title font-bold text-slate-900 mb-0 leading-tight"
+                      >
                         {g.title}
                       </p>
                       <p className="text-xs text-slate-500 leading-snug mb-0 mt-0.5">
