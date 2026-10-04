@@ -427,7 +427,10 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
 
               {/* Employee Details Section */}
               <div>
-                <h3 className="text-xs font-bold text-slate-800 mb-2">
+                <h3
+                  style={{ fontSize: "11px" }}
+                  className="!text-[11px] font-bold text-slate-800 mb-2"
+                >
                   Employee Details
                 </h3>
 
@@ -587,7 +590,10 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
 
             {/* ── RIGHT COLUMN — Security Guidelines (30% of Content Split) ── */}
             <div className="w-full lg:w-[31%] lg:flex-[3] shrink-0 min-w-0 space-y-3.5 pb-2">
-              <h3 className="text-xs font-bold text-slate-800 mb-2 whitespace-nowrap">
+              <h3
+                style={{ fontSize: "11px" }}
+                className="!text-[11px] font-bold text-slate-800 mb-2 whitespace-nowrap"
+              >
                 Security Guidelines
               </h3>
 
