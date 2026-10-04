@@ -427,12 +427,12 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
 
               {/* Employee Details Section */}
               <div>
-                <h3
-                  style={{ fontSize: "11px" }}
-                  className="!text-[11px] font-bold text-slate-800 mb-2"
+                <div
+                  style={{ fontSize: "11.5px", marginBottom: "12px" }}
+                  className="font-bold text-slate-800 tracking-tight"
                 >
                   Employee Details
-                </h3>
+                </div>
 
                 {/* Employee Card */}
                 <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white flex items-center justify-between gap-3 shadow-2xs">
@@ -590,12 +590,12 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
 
             {/* ── RIGHT COLUMN — Security Guidelines (30% of Content Split) ── */}
             <div className="w-full lg:w-[31%] lg:flex-[3] shrink-0 min-w-0 space-y-3.5 pb-2">
-              <h3
-                style={{ fontSize: "11px" }}
-                className="!text-[11px] font-bold text-slate-800 mb-2 whitespace-nowrap"
+              <div
+                style={{ fontSize: "11.5px", marginBottom: "12px" }}
+                className="font-bold text-slate-800 whitespace-nowrap tracking-tight"
               >
                 Security Guidelines
-              </h3>
+              </div>
 
               <div className="space-y-3.5">
                 {SECURITY_GUIDELINES.map((g) => (
