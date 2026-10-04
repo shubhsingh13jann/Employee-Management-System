@@ -258,6 +258,18 @@ const UserManagement: React.FC = () => {
     return `${years} yr${years > 1 ? "s" : ""}${remainingMonths > 0 ? ` ${remainingMonths} mo` : ""}`;
   };
 
+  const formatJoinedDateSafe = (dateStr?: string) => {
+    if (!dateStr) return "N/A";
+    try {
+      const d = new Date(dateStr);
+      return isNaN(d.getTime())
+        ? "N/A"
+        : d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+    } catch {
+      return "N/A";
+    }
+  };
+
   const activeColSpan = 2 + Object.values(visibleColumns).filter(Boolean).length + (showCheckboxes ? 1 : 0);
 
   useEffect(() => {
@@ -1701,7 +1713,7 @@ const UserManagement: React.FC = () => {
                                   {u.created_at && (
                                     <span
                                       className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[9px] font-medium bg-slate-100 text-slate-600 border border-slate-200/70 shrink-0"
-                                      title={`Joined ${new Date(u.created_at).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}`}
+                                      title={`Joined ${formatJoinedDateSafe(u.created_at)}`}
                                     >
                                       <i className="bi bi-clock-history text-[8.5px] text-slate-400"></i>
                                       <span>{formatTenure(u.created_at)}</span>
@@ -2248,7 +2260,7 @@ const UserManagement: React.FC = () => {
                               </span>
                               <span
                                 className="inline-flex items-center gap-1 text-[10.5px] font-medium text-slate-600"
-                                title={`Joined ${new Date(u.created_at).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}`}
+                                title={`Joined ${formatJoinedDateSafe(u.created_at)}`}
                               >
                                 <i className="bi bi-clock-history text-[9px] text-slate-400"></i>
                                 {formatTenure(u.created_at)}

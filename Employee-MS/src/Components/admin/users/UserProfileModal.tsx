@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import api from "../../../api/axios";
 import { useAuth } from "../../../context/AuthContext";
+import ErrorBoundary from "../../common/ErrorBoundary";
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -21,6 +22,73 @@ interface EmployeeDocument {
   uploadDate: string;
   status: "verified" | "pending";
 }
+
+const formatDateSafe = (
+  dateVal: any,
+  options?: Intl.DateTimeFormatOptions,
+  locale = "en-US",
+  fallback = "N/A"
+): string => {
+  if (!dateVal) return fallback;
+  try {
+    const d = new Date(dateVal);
+    if (isNaN(d.getTime())) return fallback;
+    return d.toLocaleDateString(locale, options);
+  } catch {
+    return fallback;
+  }
+};
+
+const formatDateTimeSafe = (
+  dateVal: any,
+  options?: Intl.DateTimeFormatOptions,
+  locale = "en-US",
+  fallback = "N/A"
+): string => {
+  if (!dateVal) return fallback;
+  try {
+    const d = new Date(dateVal);
+    if (isNaN(d.getTime())) return fallback;
+    return d.toLocaleString(locale, options);
+  } catch {
+    return fallback;
+  }
+};
+
+const getTimestampSafe = (dateVal: any): number => {
+  if (!dateVal) return 0;
+  try {
+    const t = new Date(dateVal).getTime();
+    return isNaN(t) ? 0 : t;
+  } catch {
+    return 0;
+  }
+};
+
+const getAddressCity = (addr: any, fallback = "Corporate Headquarters"): string => {
+  if (typeof addr !== "string" || !addr.trim()) return fallback;
+  const parts = addr.split(",");
+  return parts[0]?.trim() || fallback;
+};
+
+const getAddressFull = (addr: any, fallback = "Not specified"): string => {
+  if (typeof addr !== "string" || !addr.trim()) return fallback;
+  return addr.trim() || fallback;
+};
+
+const formatRoleTitle = (role?: any): string => {
+  if (typeof role !== "string" || !role.trim()) return "Employee";
+  const r = role.toLowerCase().trim();
+  if (r === "admin") return "HR Admin";
+  if (r === "manager") return "Manager";
+  if (r === "supervisor") return "Supervisor";
+  return r.charAt(0).toUpperCase() + r.slice(1);
+};
+
+const formatSalarySafe = (val: any): string => {
+  const num = Number(val);
+  return isNaN(num) ? "0" : num.toLocaleString();
+};
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   isOpen,
@@ -167,30 +235,60 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     localStorage.setItem(`ems_user_docs_${userId}`, JSON.stringify(updated));
   };
 
-  const getRoleBadge = (role: string) => {
+  const getRoleBadge = (role: string, isDark: boolean = false) => {
+    if (isDark) {
+      switch (role) {
+        case "admin":
+          return (
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-200 border border-rose-400/30">
+              👑 HR Admin
+            </span>
+          );
+        case "manager":
+          return (
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-200 border border-indigo-400/30">
+              👔 Manager
+            </span>
+          );
+        case "supervisor":
+          return (
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
+              👷 Supervisor
+            </span>
+          );
+        case "employee":
+        default:
+          return (
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-500/20 text-sky-200 border border-sky-400/30">
+              💼 Employee
+            </span>
+          );
+      }
+    }
+
     switch (role) {
       case "admin":
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-200 border border-rose-400/30">
+          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 shadow-2xs">
             👑 HR Admin
           </span>
         );
       case "manager":
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-200 border border-indigo-400/30">
+          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs">
             👔 Manager
           </span>
         );
       case "supervisor":
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
+          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
             👷 Supervisor
           </span>
         );
       case "employee":
       default:
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-sky-500/20 text-sky-200 border border-sky-400/30">
+          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-800 border border-sky-300 shadow-2xs">
             💼 Employee
           </span>
         );
@@ -200,73 +298,73 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   // Compile Comprehensive Audit Trail (Item 40)
   const auditEvents = user
     ? [
-        ...(user.audit_logs || []).map((log: any) => ({
-          id: `audit-db-${log.id}`,
-          type: log.action_type || "Activity",
+        ...(Array.isArray(user.audit_logs) ? user.audit_logs : []).map((log: any) => ({
+          id: `audit-db-${log?.id || Math.random()}`,
+          type: log?.action_type || "Activity",
           title:
-            log.field_name === "salary"
+            log?.field_name === "salary"
               ? "Compensation Adjustment"
-              : log.field_name === "phone"
+              : log?.field_name === "phone"
               ? "Contact Phone Number Updated"
-              : log.field_name === "email"
+              : log?.field_name === "email"
               ? "Communication Email Address Updated"
-              : log.field_name === "address"
+              : log?.field_name === "address"
               ? "Office Work Location Updated"
-              : log.field_name === "name"
+              : log?.field_name === "name"
               ? "Legal Identity / Name Updated"
-              : log.field_name === "department"
+              : log?.field_name === "department"
               ? "Department Reallocation"
-              : log.field_name === "role"
+              : log?.field_name === "role"
               ? "Governance Authority Realignment"
-              : log.field_name === "status"
+              : log?.field_name === "status"
               ? "Account Lifecycle Status Change"
-              : log.field_name === "password"
+              : log?.field_name === "password"
               ? "Security Credentials Reset"
-              : log.action_type || "Activity Log",
-          description: log.details || `Updated ${log.field_name || "profile"} record.`,
-          timestamp: log.created_at,
+              : log?.action_type || "Activity Log",
+          description: log?.details || `Updated ${log?.field_name || "profile"} record.`,
+          timestamp: log?.created_at,
           icon:
-            log.action_type === "Compensation"
+            log?.action_type === "Compensation"
               ? "bi-cash-stack"
-              : log.action_type === "Role"
+              : log?.action_type === "Role"
               ? "bi-shield-check"
-              : log.action_type === "Security"
+              : log?.action_type === "Security"
               ? "bi-key-fill"
-              : log.action_type === "Status"
+              : log?.action_type === "Status"
               ? "bi-check-circle"
-              : log.field_name === "phone" || log.action_type === "Contact"
+              : log?.field_name === "phone" || log?.action_type === "Contact"
               ? "bi-telephone-fill"
-              : log.field_name === "address" || log.action_type === "Location"
+              : log?.field_name === "address" || log?.action_type === "Location"
               ? "bi-geo-alt-fill"
-              : log.field_name === "department" || log.action_type === "Department"
+              : log?.field_name === "department" || log?.action_type === "Department"
               ? "bi-diagram-3-fill"
-              : log.field_name === "name" || log.action_type === "Identity"
+              : log?.field_name === "name" || log?.action_type === "Identity"
               ? "bi-person-badge-fill"
               : "bi-activity",
           badgeColor:
-            log.action_type === "Compensation"
+            log?.action_type === "Compensation"
               ? "bg-emerald-100 text-emerald-800 border-emerald-200"
-              : log.action_type === "Role"
+              : log?.action_type === "Role"
               ? "bg-purple-100 text-purple-700 border-purple-200"
-              : log.action_type === "Security"
+              : log?.action_type === "Security"
               ? "bg-amber-100 text-amber-800 border-amber-200"
-              : log.field_name === "phone" || log.action_type === "Contact"
+              : log?.field_name === "phone" || log?.action_type === "Contact"
               ? "bg-teal-100 text-teal-800 border-teal-200"
-              : log.field_name === "address" || log.action_type === "Location"
+              : log?.field_name === "address" || log?.action_type === "Location"
               ? "bg-amber-100 text-amber-800 border-amber-200"
-              : log.field_name === "department" || log.action_type === "Department"
+              : log?.field_name === "department" || log?.action_type === "Department"
               ? "bg-indigo-100 text-indigo-700 border-indigo-200"
               : "bg-blue-100 text-blue-700 border-blue-200",
-          author: log.performed_by || "HR Admin"
+          author: log?.performed_by || "HR Admin"
         })),
-        ...(user.transfers || []).map((t: any) => ({
-          id: `transfer-${t.id}`,
+        ...(Array.isArray(user.transfers) ? user.transfers : []).map((t: any) => ({
+          id: `transfer-${t?.id || Math.random()}`,
           type: "Transfer",
           title: `Department Mobility Reorganization`,
-          description: `Transferred from ${t.source_dept_name || "Unassigned"} to ${t.target_dept_name}. Reason: ${
-            t.reason ? `"${t.reason}"` : "Organizational squad alignment."
+          description: `Transferred from ${t?.source_dept_name || "Unassigned"} to ${t?.target_dept_name || "New Department"}. Reason: ${
+            t?.reason ? `"${t.reason}"` : "Organizational squad alignment."
           }`,
-          timestamp: t.transferred_at,
+          timestamp: t?.transferred_at,
           icon: "bi-arrow-left-right",
           badgeColor: "bg-indigo-100 text-indigo-700 border-indigo-200",
           author: "System / Admin"
@@ -284,7 +382,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         {
           id: "audit-role",
           type: "Role",
-          title: `Governance Authority Allocated: ${user.role?.toUpperCase()}`,
+          title: `Governance Authority Allocated: ${formatRoleTitle(user.role)}`,
           description: `Assigned tier privileges within system hierarchy. Department Head: ${user.is_hod ? "Yes (👑 Crowned HOD)" : "No"}.`,
           timestamp: user.created_at,
           icon: "bi-shield-check",
@@ -295,7 +393,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
           id: "audit-comp-initial",
           type: "Compensation",
           title: `Initial Base Compensation Baseline`,
-          description: `Starting baseline salary established at $${Number(user.salary || 0).toLocaleString()} per annum.`,
+          description: `Starting baseline salary established at $${formatSalarySafe(user.salary)} per annum.`,
           timestamp: user.created_at,
           icon: "bi-cash-stack",
           badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
@@ -311,7 +409,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
           badgeColor: "bg-blue-100 text-blue-700 border-blue-200",
           author: "HR Operations"
         }
-      ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      ].sort((a, b) => getTimestampSafe(b.timestamp) - getTimestampSafe(a.timestamp))
     : [];
 
   const displayedAuditEvents = user && auditEvents
@@ -331,21 +429,34 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-xs overscroll-contain animate-in fade-in duration-200"
+      className="fixed inset-0 z-[9999] pointer-events-none overscroll-contain animate-in fade-in duration-200"
       onWheel={(e) => {
         if (e.target === e.currentTarget) {
           e.preventDefault();
         }
       }}
     >
+      {/* Invisible backdrop over uncovered left navbar area so clicking outside closes dossier */}
       <div
-        className="w-full max-w-6xl max-h-[92vh] bg-white rounded-2xl border border-slate-200/80 shadow-2xl flex flex-col my-auto overflow-hidden animate-in zoom-in-95 duration-150"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-y-0 left-0 w-0 md:w-[240px] pointer-events-auto cursor-pointer"
+        onClick={onClose}
+        title="Click to close dossier"
+      />
+
+      {/* Main modal container covering only the right portion area (leaving background navbar view clear) */}
+      <div
+        className="fixed inset-y-0 right-0 left-0 md:left-[240px] flex items-center justify-center p-2 sm:p-3 md:p-4 bg-slate-950/60 backdrop-blur-xs pointer-events-auto"
+        onClick={onClose}
       >
-        {/* Pinned Executive Header Banner */}
-        <div className="shrink-0 px-5 sm:px-6 py-3.5 bg-[#0B132B] text-white flex items-center justify-between gap-4 border-b border-slate-800">
-          <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-indigo-600/30 border border-indigo-400/30 flex items-center justify-center text-indigo-200 text-lg font-bold shadow-inner shrink-0 overflow-hidden">
+        <div
+          className="w-full max-h-[94vh] bg-white rounded-2xl border border-slate-200/80 shadow-2xl flex flex-col my-auto overflow-hidden animate-in zoom-in-95 duration-150"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <ErrorBoundary fallbackTitle="Personnel Dossier Error" onReset={onClose}>
+            {/* Pinned Executive Header Banner */}
+        <div className="shrink-0 px-4 sm:px-6 py-2.5 sm:py-3 bg-[#0B132B] text-white flex items-center justify-between gap-4 border-b border-slate-800">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-400/30 flex items-center justify-center text-indigo-200 text-base font-bold shadow-inner shrink-0 overflow-hidden">
               {user?.image_url ? (
                 <img src={user.image_url} alt={user.name} className="w-full h-full object-cover" />
               ) : (
@@ -357,14 +468,14 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 <h3 className="font-bold text-base sm:text-lg text-white tracking-tight mb-0 truncate">
                   {user?.name || "Member Profile"}
                 </h3>
-                {user && getRoleBadge(user.role)}
+                {user && getRoleBadge(user.role, true)}
                 {user?.is_hod ? (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-200 border border-amber-400/30">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-200 border border-amber-400/30">
                     👑 HOD
                   </span>
                 ) : null}
                 <span
-                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+                  className={`px-2.5 py-0.5 rounded-full text-xs font-semibold flex items-center gap-1.5 ${
                     user?.status === "active"
                       ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
                       : "bg-slate-500/20 text-slate-300 border border-slate-500/30"
@@ -374,11 +485,11 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   <span>{user?.status === "active" ? "Active" : "Inactive"}</span>
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-1 mb-0 font-normal truncate flex items-center gap-2 flex-wrap">
+              <p className="text-xs text-slate-300 mt-0.5 mb-0 font-normal truncate flex items-center gap-2 flex-wrap">
                 <span>EMP-{String(user?.id || 1).padStart(4, "0")}</span>
-                <span className="text-slate-600">|</span>
+                <span className="text-slate-500">|</span>
                 <span>{user?.email}</span>
-                <span className="text-slate-600">|</span>
+                <span className="text-slate-500">|</span>
                 <span>{user?.department_name ? `${user.department_name} Department` : "Unassigned Department"}</span>
               </p>
             </div>
@@ -464,37 +575,37 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         {/* Modal Main Body (Dual Column: Left Navigation Drawer + Right Content Canvas) */}
         <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
           {/* Left Vertical Sidebar Navigation */}
-          <aside className="w-full md:w-56 shrink-0 bg-slate-50/80 border-b md:border-b-0 md:border-r border-slate-200/90 p-3 space-y-1.5 flex md:flex-col justify-between overflow-x-auto md:overflow-x-visible">
-            <div className="flex md:flex-col gap-1.5 w-full">
+          <aside className="w-full md:w-64 lg:w-72 shrink-0 bg-slate-50/70 border-b md:border-b-0 md:border-r border-slate-200/80 p-3 space-y-1 flex md:flex-col justify-between overflow-x-auto md:overflow-x-visible">
+            <div className="flex md:flex-col gap-1 w-full">
               <button
                 type="button"
                 onClick={() => setActiveTab("overview")}
-                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer ${
+                className={`w-full px-3.5 py-2.5 rounded-r-xl rounded-l-none text-xs sm:text-sm transition-all flex items-center justify-between gap-3 cursor-pointer ${
                   activeTab === "overview"
-                    ? "bg-indigo-50 text-indigo-700 font-bold border border-indigo-200/80 shadow-2xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium border border-transparent"
+                    ? "border-l-[3px] border-indigo-600 bg-indigo-50/70 text-indigo-600 font-semibold shadow-2xs"
+                    : "border-l-[3px] border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium"
                 }`}
               >
-                <div className="flex items-center gap-2.5">
-                  <i className="bi bi-person-badge text-sm"></i>
-                  <span>Profile Overview</span>
+                <div className="flex items-center gap-3 min-w-0">
+                  <i className="bi bi-person text-lg text-indigo-600 shrink-0"></i>
+                  <span className="whitespace-nowrap">Profile Overview</span>
                 </div>
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab("audit")}
-                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer ${
+                className={`w-full px-3.5 py-2.5 rounded-r-xl rounded-l-none text-xs sm:text-sm transition-all flex items-center justify-between gap-3 cursor-pointer ${
                   activeTab === "audit"
-                    ? "bg-indigo-50 text-indigo-700 font-bold border border-indigo-200/80 shadow-2xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium border border-transparent"
+                    ? "border-l-[3px] border-indigo-600 bg-indigo-50/70 text-indigo-600 font-semibold shadow-2xs"
+                    : "border-l-[3px] border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium"
                 }`}
               >
-                <div className="flex items-center gap-2.5">
-                  <i className="bi bi-clock-history text-sm"></i>
-                  <span>Audit Trail & Activity</span>
+                <div className="flex items-center gap-3 min-w-0">
+                  <i className="bi bi-clock text-lg text-indigo-600 shrink-0"></i>
+                  <span className="whitespace-nowrap">Audit Trail & Activity</span>
                 </div>
-                <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-indigo-100 text-indigo-700 font-extrabold">
+                <span className="ml-auto ml-3 px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 shrink-0">
                   {auditEvents.length}
                 </span>
               </button>
@@ -502,17 +613,17 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveTab("documents")}
-                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer ${
+                className={`w-full px-3.5 py-2.5 rounded-r-xl rounded-l-none text-xs sm:text-sm transition-all flex items-center justify-between gap-3 cursor-pointer ${
                   activeTab === "documents"
-                    ? "bg-indigo-50 text-indigo-700 font-bold border border-indigo-200/80 shadow-2xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium border border-transparent"
+                    ? "border-l-[3px] border-indigo-600 bg-indigo-50/70 text-indigo-600 font-semibold shadow-2xs"
+                    : "border-l-[3px] border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 font-medium"
                 }`}
               >
-                <div className="flex items-center gap-2.5">
-                  <i className="bi bi-folder2-open text-sm"></i>
-                  <span>Documents Vault</span>
+                <div className="flex items-center gap-3 min-w-0">
+                  <i className="bi bi-file-earmark-text text-lg text-indigo-600 shrink-0"></i>
+                  <span className="whitespace-nowrap">Documents Vault</span>
                 </div>
-                <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-slate-200 text-slate-700 font-extrabold">
+                <span className="ml-auto ml-3 px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 shrink-0">
                   {documents.length}
                 </span>
               </button>
@@ -520,7 +631,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
           </aside>
 
           {/* Right Main Content Canvas */}
-          <main className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 bg-slate-50/30 [scrollbar-width:thin]">
+          <main className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 bg-slate-50/30 [scrollbar-width:thin]">
             {loading ? (
               <div className="py-20 flex flex-col items-center justify-center gap-3 text-slate-400 text-xs">
                 <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
@@ -535,150 +646,160 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               <>
               {/* TAB 1: OVERVIEW */}
               {activeTab === "overview" && (
-                <div className="space-y-5 animate-in fade-in duration-150">
-                  {/* Hero Profile Banner Card */}
-                  <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                    <div className="flex items-center gap-4 min-w-0">
-                      <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full border-2 border-slate-200 overflow-hidden shrink-0 bg-indigo-50 flex items-center justify-center text-indigo-700 text-2xl font-extrabold shadow-xs">
-                        {user.image_url ? (
-                          <img src={user.image_url} alt={user.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <span>{user.name ? user.name.charAt(0) : "U"}</span>
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h2 className="text-xl font-extrabold text-slate-900 tracking-tight mb-0 truncate">
-                            {user.name}
-                          </h2>
-                          {getRoleBadge(user.role)}
-                          {user.is_hod ? (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-700 border border-amber-400/40">
-                              👑 HOD
-                            </span>
-                          ) : null}
+                <div className="space-y-3 sm:space-y-3.5 animate-in fade-in duration-150">
+                  {/* Unified Hero & 5-Column Metrics Container (Outer border removed as requested in Image 2) */}
+                  <div className="rounded-2xl bg-white shadow-2xs overflow-hidden">
+                    {/* Upper Profile Hero Area (Compact padding to remove unnecessary blank space) */}
+                    <div className="px-4 sm:px-5 py-3 sm:py-3.5 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4">
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        {/* Avatar photo cleanly scaled to match the 3 lines of text beside it */}
+                        <div className="w-16 h-16 sm:w-[68px] sm:h-[68px] rounded-full border-2 border-slate-200 overflow-hidden shrink-0 bg-indigo-50 flex items-center justify-center text-indigo-700 text-xl sm:text-2xl font-extrabold shadow-2xs">
+                          {user.image_url ? (
+                            <img src={user.image_url} alt={user.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span>{user.name ? user.name.charAt(0) : "U"}</span>
+                          )}
                         </div>
-                        <p className="text-xs font-semibold text-slate-500 mt-0.5 mb-2 truncate">
-                          {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : "Employee"} | {user.department_name ? `${user.department_name} Department` : "Unassigned Department"}
-                        </p>
-                        <div className="flex items-center gap-3.5 text-xs text-slate-500 flex-wrap">
-                          <span className="inline-flex items-center gap-1.5 text-slate-600">
-                            <i className="bi bi-envelope text-slate-400"></i>
-                            <span className="truncate max-w-[200px]">{user.email}</span>
-                          </span>
-                          <span className="text-slate-300">•</span>
-                          <span className="inline-flex items-center gap-1.5 text-slate-600">
-                            <i className="bi bi-telephone text-slate-400"></i>
-                            <span>{user.phone || "Not recorded"}</span>
-                          </span>
-                          <span className="text-slate-300">•</span>
-                          <span className="inline-flex items-center gap-1.5 text-slate-600">
-                            <i className="bi bi-geo-alt text-slate-400"></i>
-                            <span>{user.address ? user.address.split(",")[0] : "Corporate Headquarters"}</span>
-                          </span>
-                        </div>
-                      </div>
-                    </div>
 
-                    <div className="flex md:flex-col items-end justify-between gap-3 shrink-0 self-stretch md:self-auto border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
-                      <div className="flex items-center md:flex-col md:items-end gap-1.5">
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
-                            user.status === "active"
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                              : "bg-slate-100 text-slate-600 border border-slate-200"
-                          }`}
-                        >
-                          <span className={`w-1.5 h-1.5 rounded-full ${user.status === "active" ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`}></span>
-                          <span>{user.status === "active" ? "Active" : "Inactive"}</span>
-                        </span>
-                        <span className="text-[11px] text-slate-400 font-medium">
-                          Since {user.created_at ? new Date(user.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "N/A"}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        {onEditUser && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              onClose();
-                              onEditUser(user);
-                            }}
-                            className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-xs shadow-indigo-600/30 flex items-center gap-1.5 cursor-pointer"
-                          >
-                            <i className="bi bi-pencil-square"></i>
-                            <span>Edit Profile</span>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 5-Column Personnel Key Metrics Row */}
-                  <div className="grid grid-cols-2 sm:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-slate-200/80 bg-white rounded-2xl border border-slate-200/90 p-4 shadow-2xs">
-                    <div className="p-2 sm:px-3.5 sm:py-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                        Employee ID
-                      </span>
-                      <span className="font-extrabold text-slate-900 text-sm block">
-                        EMP-{String(user.id).padStart(4, "0")}
-                      </span>
-                      <span className="text-[10.5px] text-slate-400 block mt-0.5">Directory Index</span>
-                    </div>
-
-                    <div className="p-2 sm:px-3.5 sm:py-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                        Employment Type
-                      </span>
-                      <span className="font-extrabold text-slate-900 text-sm block">
-                        Full-time
-                      </span>
-                      <span className="text-[10.5px] text-slate-400 block mt-0.5">Permanent</span>
-                    </div>
-
-                    <div className="p-2 sm:px-3.5 sm:py-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                        Annual Salary
-                      </span>
-                      <span className="font-extrabold text-slate-900 text-sm block">
-                        ${Number(user.salary || 0).toLocaleString()}
-                      </span>
-                      <span className="text-[10.5px] text-slate-400 block mt-0.5">Approved Base Compensation</span>
-                    </div>
-
-                    <div className="p-2 sm:px-3.5 sm:py-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                        Joined On
-                      </span>
-                      <span className="font-extrabold text-slate-900 text-sm block">
-                        {user.created_at ? new Date(user.created_at).toLocaleDateString("en-US") : "N/A"}
-                      </span>
-                      <span className="text-[10.5px] text-slate-400 block mt-0.5">Tenure Initiation Date</span>
-                    </div>
-
-                    <div className="p-2 sm:px-3.5 sm:py-1 col-span-2 sm:col-span-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                        Work Location
-                      </span>
-                      <span className="font-extrabold text-slate-900 text-sm block truncate">
-                        {user.address ? user.address.split(",")[0] : "Corporate Headquarters"}
-                      </span>
-                      <span className="text-[10.5px] text-slate-400 block mt-0.5 truncate">
-                        {user.address && user.address.includes(",") ? user.address : "(Unspecified Suite)"}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Detailed Cards Section (Matching Image 1 Grid) */}
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    {/* CARD 1: Employment Details */}
-                    <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-3.5">
-                      <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-800">
-                          <div className="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
-                            <i className="bi bi-briefcase-fill"></i>
+                        {/* Text Container with exactly equal vertical spacing between all 3 lines */}
+                        <div className="flex flex-col justify-center gap-1 sm:gap-1.5 min-w-0">
+                          {/* Line 1: Name + Role Badge */}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight leading-none mb-0 truncate">
+                              {user.name}
+                            </h2>
+                            {getRoleBadge(user.role, false)}
+                            {user.is_hod ? (
+                              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-800 border border-amber-300 shadow-2xs">
+                                👑 HOD
+                              </span>
+                            ) : null}
                           </div>
+
+                          {/* Line 2: Role | Department */}
+                          <p className="text-xs sm:text-sm font-semibold text-slate-500 leading-none truncate m-0">
+                            {formatRoleTitle(user.role)} | {user.department_name ? `${user.department_name} Department` : "Accounts Department"}
+                          </p>
+
+                          {/* Line 3: Email, Phone, Address */}
+                          <div className="flex items-center gap-3.5 text-xs sm:text-[13px] text-slate-600 flex-wrap leading-none">
+                            <span className="inline-flex items-center gap-1.5 text-slate-600">
+                              <i className="bi bi-envelope text-indigo-600"></i>
+                              <span className="truncate max-w-[220px]">{user.email}</span>
+                            </span>
+                            <span className="inline-flex items-center gap-1.5 text-slate-600">
+                              <i className="bi bi-telephone text-indigo-600"></i>
+                              <span>{user.phone || "Not recorded"}</span>
+                            </span>
+                            <span className="inline-flex items-center gap-1.5 text-slate-600">
+                              <i className="bi bi-geo-alt text-indigo-600"></i>
+                              <span>{getAddressCity(user.address)}</span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Action / Status Area */}
+                      <div className="flex items-center md:items-end justify-between md:justify-center gap-3 shrink-0 self-stretch md:self-auto border-t md:border-t-0 pt-2.5 md:pt-0 border-slate-100">
+                        <div className="flex flex-col items-start md:items-end gap-1.5">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`px-2.5 py-0.5 rounded-full text-xs font-semibold flex items-center gap-1.5 ${
+                                user.status === "active"
+                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                  : "bg-slate-100 text-slate-600 border border-slate-200"
+                              }`}
+                            >
+                              <span className={`w-1.5 h-1.5 rounded-full ${user.status === "active" ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`}></span>
+                              <span>{user.status === "active" ? "Active" : "Inactive"}</span>
+                            </span>
+                            {onEditUser && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  onClose();
+                                  onEditUser(user);
+                                }}
+                                className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold transition-all shadow-xs shadow-indigo-600/30 flex items-center gap-1.5 cursor-pointer"
+                              >
+                                <i className="bi bi-pencil-square"></i>
+                                <span>Edit Profile</span>
+                              </button>
+                            )}
+                          </div>
+                          <span className="text-xs text-slate-400 font-medium">
+                            Since {formatDateSafe(user.created_at, { day: "numeric", month: "short", year: "numeric" }, "en-GB")}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Thin Divider Line Separating Upper Hero and 5-Column Metrics Section */}
+                    <div className="border-t border-slate-200/80"></div>
+
+                    {/* 5-Column Personnel Key Metrics Row with Thin Divider Lines */}
+                    <div className="grid grid-cols-2 sm:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-slate-200/80 px-4 sm:px-5 py-2.5 sm:py-3 bg-white">
+                      <div className="py-1 px-2 sm:px-3">
+                        <span className="text-xs font-semibold text-slate-500 block mb-0.5">
+                          Employee ID
+                        </span>
+                        <span className="font-bold text-slate-900 text-sm sm:text-base block">
+                          EMP-{String(user.id).padStart(4, "0")}
+                        </span>
+                        <span className="text-[11px] text-slate-400 block">Directory Index</span>
+                      </div>
+
+                      <div className="py-1 px-2 sm:px-3">
+                        <span className="text-xs font-semibold text-slate-500 block mb-0.5">
+                          Employment Type
+                        </span>
+                        <span className="font-bold text-slate-900 text-sm sm:text-base block">
+                          Full-time
+                        </span>
+                        <span className="text-[11px] text-slate-400 block">Permanent</span>
+                      </div>
+
+                      <div className="py-1 px-2 sm:px-3">
+                        <span className="text-xs font-semibold text-slate-500 block mb-0.5">
+                          Annual Salary
+                        </span>
+                        <span className="font-bold text-slate-900 text-sm sm:text-base block">
+                          ${formatSalarySafe(user.salary)}
+                        </span>
+                        <span className="text-[11px] text-slate-400 block">Approved Base Compensation</span>
+                      </div>
+
+                      <div className="py-1 px-2 sm:px-3">
+                        <span className="text-xs font-semibold text-slate-500 block mb-0.5">
+                          Joined On
+                        </span>
+                        <span className="font-bold text-slate-900 text-sm sm:text-base block">
+                          {formatDateSafe(user.created_at)}
+                        </span>
+                        <span className="text-[11px] text-slate-400 block">Tenure Initiation Date</span>
+                      </div>
+
+                      <div className="py-1 px-2 sm:px-3 col-span-2 sm:col-span-1">
+                        <span className="text-xs font-semibold text-slate-500 block mb-0.5">
+                          Work Location
+                        </span>
+                        <span className="font-bold text-slate-900 text-sm sm:text-base block truncate">
+                          {getAddressCity(user.address)}
+                        </span>
+                        <span className="text-[11px] text-slate-400 block truncate">
+                          {typeof user.address === "string" && user.address.includes(",") ? user.address : "(Unspecified Suite)"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Detailed Cards Section (Matching Image 2 and Image 3 Grid) */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-3.5 items-stretch">
+                    {/* CARD 1: Employment Details */}
+                    <div className="col-span-12 lg:col-span-4 p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+                      <div className="flex items-center justify-between pb-2 border-b border-slate-100 mb-0.5 shrink-0">
+                        <div className="flex items-center gap-2 text-sm sm:text-[15px] font-bold text-slate-900">
+                          <i className="bi bi-briefcase text-indigo-600 text-lg"></i>
                           <span>Employment Details</span>
                         </div>
                         {onEditUser && (
@@ -688,77 +809,73 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                               onClose();
                               onEditUser(user);
                             }}
-                            className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                            className="text-xs sm:text-[13px] font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
                           >
                             Edit
                           </button>
                         )}
                       </div>
 
-                      <div className="space-y-2.5 text-xs">
-                        <div className="flex items-center justify-between py-1 border-b border-slate-50">
-                          <span className="text-slate-400 font-medium">Department</span>
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-slate-800">{user.department_name || "Unassigned"}</span>
-                            {user.department_code && (
-                              <span className="px-1.5 py-0.2 rounded text-[10px] font-bold uppercase bg-slate-100 text-slate-700">
-                                {user.department_code}
-                              </span>
-                            )}
+                      <div className="text-xs sm:text-[13px] divide-y divide-slate-100/80 flex-1 flex flex-col justify-between">
+                        <div className="grid grid-cols-[105px_1fr] sm:grid-cols-[115px_1fr] items-center gap-2.5 py-1.5 sm:py-2">
+                          <span className="text-slate-500 font-medium whitespace-nowrap">Department</span>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-bold text-slate-900">{user.department_name || "Accounts"}</span>
+                            <span className="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-700">
+                              {user.department_code || "ACC"}
+                            </span>
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between py-1 border-b border-slate-50">
-                          <span className="text-slate-400 font-medium">Role</span>
-                          <span className="font-bold text-slate-800 capitalize">
-                            {user.role === "admin" ? "HR Admin" : user.role || "Employee"}
+                        <div className="grid grid-cols-[105px_1fr] sm:grid-cols-[115px_1fr] items-center gap-2.5 py-1.5 sm:py-2">
+                          <span className="text-slate-500 font-medium whitespace-nowrap">Role</span>
+                          <span className="font-bold text-slate-900 capitalize">
+                            {formatRoleTitle(user.role)}
                           </span>
                         </div>
 
-                        <div className="flex items-center justify-between py-1 border-b border-slate-50">
-                          <span className="text-slate-400 font-medium">Employment Type</span>
-                          <span className="font-bold text-slate-800">Full-time</span>
+                        <div className="grid grid-cols-[105px_1fr] sm:grid-cols-[115px_1fr] items-center gap-2.5 py-1.5 sm:py-2">
+                          <span className="text-slate-500 font-medium whitespace-nowrap">Employment Type</span>
+                          <span className="font-bold text-slate-900">Full-time</span>
                         </div>
 
-                        <div className="flex items-center justify-between py-1 border-b border-slate-50">
-                          <span className="text-slate-400 font-medium">Annual Salary</span>
-                          <div className="text-right">
-                            <span className="font-extrabold text-slate-900 block">
-                              ${Number(user.salary || 0).toLocaleString()}
+                        <div className="grid grid-cols-[105px_1fr] sm:grid-cols-[115px_1fr] items-start gap-2.5 py-1.5 sm:py-2">
+                          <span className="text-slate-500 font-medium whitespace-nowrap pt-0.5">Annual Salary</span>
+                          <div>
+                            <span className="font-bold text-slate-900 block">
+                              ${formatSalarySafe(user.salary)}
                             </span>
-                            <span className="text-[10px] text-slate-400">Approved Base Compensation</span>
+                            <span className="text-[11px] text-slate-400 block mt-0.5 font-normal">Approved Base Compensation</span>
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between py-1 border-b border-slate-50">
-                          <span className="text-slate-400 font-medium">Account Status</span>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                        <div className="grid grid-cols-[105px_1fr] sm:grid-cols-[115px_1fr] items-center gap-2.5 py-1.5 sm:py-2">
+                          <span className="text-slate-500 font-medium whitespace-nowrap">Account Status</span>
+                          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 inline-flex items-center gap-1.5 w-fit">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                             <span>{user.status === "active" ? "Active" : "Inactive"}</span>
                           </span>
                         </div>
 
-                        <div className="flex items-center justify-between py-1">
-                          <span className="text-slate-400 font-medium">Onboarded Since</span>
-                          <div className="text-right">
-                            <span className="font-bold text-slate-800 block">
-                              {user.created_at ? new Date(user.created_at).toLocaleDateString("en-US") : "N/A"}
+                        <div className="grid grid-cols-[105px_1fr] sm:grid-cols-[115px_1fr] items-start gap-2.5 py-1.5 sm:py-2">
+                          <span className="text-slate-500 font-medium whitespace-nowrap pt-0.5">Onboarded Since</span>
+                          <div>
+                            <span className="font-bold text-slate-900 block">
+                              {formatDateSafe(user.created_at)}
                             </span>
-                            <span className="text-[10px] text-slate-400">Tenure Initiation Date</span>
+                            <span className="text-[11px] text-slate-400 block mt-0.5 font-normal">Tenure Initiation Date</span>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     {/* COLUMN 2: Stack of Contact Info & Office Location */}
-                    <div className="space-y-4">
+                    <div className="col-span-12 lg:col-span-4 flex flex-col justify-between gap-3">
                       {/* CARD 2: Contact Information */}
-                      <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-3.5">
-                        <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-800">
-                            <div className="w-6 h-6 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-xs">
-                              <i className="bi bi-telephone-fill"></i>
-                            </div>
+                      <div className="flex-1 p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+                        <div className="flex items-center justify-between pb-2 border-b border-slate-100 mb-0.5 shrink-0">
+                          <div className="flex items-center gap-2 text-sm sm:text-[15px] font-bold text-slate-900">
+                            <i className="bi bi-telephone text-indigo-600 text-lg"></i>
                             <span>Contact Information</span>
                           </div>
                           {onEditUser && (
@@ -768,40 +885,40 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                                 onClose();
                                 onEditUser(user);
                               }}
-                              className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                              className="text-xs sm:text-[13px] font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
                             >
                               Edit
                             </button>
                           )}
                         </div>
 
-                        <div className="space-y-2.5 text-xs">
-                          <div className="flex items-center justify-between py-1 border-b border-slate-50">
-                            <span className="text-slate-400 font-medium flex items-center gap-1.5">
-                              <i className="bi bi-envelope text-slate-400"></i>
+                        <div className="text-xs sm:text-[13px] divide-y divide-slate-100/80 flex-1 flex flex-col justify-between">
+                          <div className="grid grid-cols-[105px_1fr] sm:grid-cols-[115px_1fr] items-center gap-2.5 py-1.5 sm:py-2">
+                            <span className="text-slate-500 font-medium flex items-center gap-2 whitespace-nowrap">
+                              <i className="bi bi-envelope text-indigo-600"></i>
                               <span>Work Email</span>
                             </span>
-                            <span className="font-semibold text-slate-800 truncate max-w-[170px]" title={user.email}>
+                            <span className="font-semibold text-slate-900 truncate" title={user.email}>
                               {user.email}
                             </span>
                           </div>
 
-                          <div className="flex items-center justify-between py-1 border-b border-slate-50">
-                            <span className="text-slate-400 font-medium flex items-center gap-1.5">
-                              <i className="bi bi-telephone text-slate-400"></i>
+                          <div className="grid grid-cols-[105px_1fr] sm:grid-cols-[115px_1fr] items-center gap-2.5 py-1.5 sm:py-2">
+                            <span className="text-slate-500 font-medium flex items-center gap-2 whitespace-nowrap">
+                              <i className="bi bi-telephone text-indigo-600"></i>
                               <span>Contact Phone</span>
                             </span>
-                            <span className={`font-semibold ${user.phone ? "text-slate-800" : "text-slate-400 italic"}`}>
+                            <span className={`font-semibold truncate ${user.phone ? "text-slate-900" : "text-slate-400 italic"}`}>
                               {user.phone || "Not recorded"}
                             </span>
                           </div>
 
-                          <div className="flex items-center justify-between py-1">
-                            <span className="text-slate-400 font-medium flex items-center gap-1.5">
-                              <i className="bi bi-phone text-slate-400"></i>
+                          <div className="grid grid-cols-[105px_1fr] sm:grid-cols-[115px_1fr] items-center gap-2.5 py-1.5 sm:py-2">
+                            <span className="text-slate-500 font-medium flex items-center gap-2 whitespace-nowrap">
+                              <i className="bi bi-phone text-indigo-600"></i>
                               <span>Mobile / Direct</span>
                             </span>
-                            <span className={`font-semibold ${user.phone ? "text-slate-800" : "text-slate-400 italic"}`}>
+                            <span className={`font-semibold truncate ${user.phone ? "text-slate-900" : "text-slate-400 italic"}`}>
                               {user.phone || "Not recorded"}
                             </span>
                           </div>
@@ -809,12 +926,10 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                       </div>
 
                       {/* CARD 3: Office / Work Location */}
-                      <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-3.5">
-                        <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-800">
-                            <div className="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs">
-                              <i className="bi bi-geo-alt-fill"></i>
-                            </div>
+                      <div className="flex-1 p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+                        <div className="flex items-center justify-between pb-2 border-b border-slate-100 mb-0.5 shrink-0">
+                          <div className="flex items-center gap-2 text-sm sm:text-[15px] font-bold text-slate-900">
+                            <i className="bi bi-geo-alt text-indigo-600 text-lg"></i>
                             <span>Office / Work Location</span>
                           </div>
                           {onEditUser && (
@@ -824,30 +939,30 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                                 onClose();
                                 onEditUser(user);
                               }}
-                              className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                              className="text-xs sm:text-[13px] font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
                             >
                               Edit
                             </button>
                           )}
                         </div>
 
-                        <div className="space-y-2.5 text-xs">
-                          <div className="flex items-center justify-between py-1 border-b border-slate-50">
-                            <span className="text-slate-400 font-medium">Location</span>
-                            <span className="font-semibold text-slate-800">
-                              {user.address ? user.address.split(",")[0] : "Corporate Headquarters"}
+                        <div className="text-xs sm:text-[13px] divide-y divide-slate-100/80 flex-1 flex flex-col justify-between">
+                          <div className="grid grid-cols-[105px_1fr] sm:grid-cols-[115px_1fr] items-center gap-2.5 py-1.5 sm:py-2">
+                            <span className="text-slate-500 font-medium whitespace-nowrap">Location</span>
+                            <span className="font-semibold text-slate-900 truncate">
+                              {getAddressCity(user.address)}
                             </span>
                           </div>
 
-                          <div className="flex items-center justify-between py-1 border-b border-slate-50">
-                            <span className="text-slate-400 font-medium">Address</span>
-                            <span className={`font-semibold text-right ${user.address ? "text-slate-800" : "text-slate-400 italic"}`}>
-                              {user.address || "Not specified"}
+                          <div className="grid grid-cols-[105px_1fr] sm:grid-cols-[115px_1fr] items-center gap-2.5 py-1.5 sm:py-2">
+                            <span className="text-slate-500 font-medium whitespace-nowrap">Address</span>
+                            <span className={`font-semibold truncate ${typeof user.address === "string" && user.address.trim() ? "text-slate-900" : "text-slate-400 italic"}`}>
+                              {getAddressFull(user.address)}
                             </span>
                           </div>
 
-                          <div className="flex items-center justify-between py-1">
-                            <span className="text-slate-400 font-medium">Suite / Floor</span>
+                          <div className="grid grid-cols-[105px_1fr] sm:grid-cols-[115px_1fr] items-center gap-2.5 py-1.5 sm:py-2">
+                            <span className="text-slate-500 font-medium whitespace-nowrap">Suite / Floor</span>
                             <span className="font-semibold text-slate-400 italic">Not specified</span>
                           </div>
                         </div>
@@ -855,71 +970,67 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     </div>
 
                     {/* CARD 4: Institutional Reporting Chain (Visual Node Tree Graph) */}
-                    <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-3.5 flex flex-col justify-between">
-                      <div>
-                        <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-800">
-                            <div className="w-6 h-6 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xs">
-                              <i className="bi bi-diagram-3-fill"></i>
-                            </div>
-                            <span>Institutional Reporting Chain</span>
+                    <div className="col-span-12 lg:col-span-4 p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+                      <div className="flex items-center justify-between pb-2 border-b border-slate-100 mb-0.5 shrink-0">
+                        <div className="flex items-center gap-2 text-sm sm:text-[15px] font-bold text-slate-900">
+                          <i className="bi bi-diagram-3 text-indigo-600 text-lg"></i>
+                          <span>Institutional Reporting Chain</span>
+                        </div>
+                        {onEditUser && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              onClose();
+                              onEditUser(user);
+                            }}
+                            className="text-xs sm:text-[13px] font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Interactive Node Graph */}
+                      <div className="py-2.5 sm:py-3.5 flex-1 flex flex-col items-center justify-center">
+                        {/* Node 1: Top Department Head / Supervisor */}
+                        <div className="w-full p-2.5 rounded-xl bg-slate-50/90 border border-slate-200/90 flex items-center gap-2.5 shadow-2xs">
+                          <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200/80 flex items-center justify-center text-indigo-600 shadow-2xs shrink-0">
+                            <i className="bi bi-people-fill text-sm"></i>
                           </div>
-                          {onEditUser && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                onClose();
-                                onEditUser(user);
-                              }}
-                              className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
-                            >
-                              Edit
-                            </button>
-                          )}
+                          <div className="min-w-0">
+                            <span className="text-xs font-semibold text-slate-500 block leading-none mb-1">
+                              Department Head (HOD)
+                            </span>
+                            <span className="font-bold text-slate-900 text-xs sm:text-[13px] block truncate">
+                              {user.head_of_department_name || user.supervisor_name || "— Unassigned / Vacant —"}
+                            </span>
+                          </div>
                         </div>
 
-                        {/* Interactive Node Graph */}
-                        <div className="pt-4 pb-2 flex flex-col items-center">
-                          {/* Node 1: Top Department Head / Supervisor */}
-                          <div className="w-full p-3 rounded-xl bg-slate-50/90 border border-slate-200/90 flex items-center gap-3 shadow-2xs">
-                            <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500 shadow-2xs shrink-0">
-                              <i className="bi bi-people text-sm"></i>
-                            </div>
-                            <div className="min-w-0">
-                              <span className="text-[10px] uppercase font-bold text-slate-400 block leading-none mb-1">
-                                Department Head (HOD)
-                              </span>
-                              <span className="font-bold text-slate-800 text-xs block truncate">
-                                {user.head_of_department_name || user.supervisor_name || "— Unassigned / Vacant —"}
-                              </span>
-                            </div>
+                        {/* Connecting Dotted Line */}
+                        <div className="w-0.5 h-4 sm:h-5 border-l-2 border-dashed border-slate-300 my-1"></div>
+
+                        {/* Node 2: Current Member (Target User) */}
+                        <div className="w-full p-2.5 rounded-xl bg-indigo-50/80 border border-indigo-200 flex items-center gap-2.5 shadow-2xs">
+                          <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white font-extrabold text-xs flex items-center justify-center shadow-xs shrink-0 overflow-hidden">
+                            {user.image_url ? (
+                              <img src={user.image_url} alt={user.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <span>{user.name ? user.name.charAt(0) : "U"}</span>
+                            )}
                           </div>
-
-                          {/* Connecting Dotted Line */}
-                          <div className="w-0.5 h-6 border-l-2 border-dashed border-slate-300 my-1"></div>
-
-                          {/* Node 2: Current Member (Target User) */}
-                          <div className="w-full p-3 rounded-xl bg-indigo-50/80 border border-indigo-200 flex items-center gap-3 shadow-2xs">
-                            <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white font-extrabold text-sm flex items-center justify-center shadow-xs shrink-0 overflow-hidden">
-                              {user.image_url ? (
-                                <img src={user.image_url} alt={user.name} className="w-full h-full object-cover" />
-                              ) : (
-                                <span>{user.name ? user.name.charAt(0) : "U"}</span>
-                              )}
-                            </div>
-                            <div className="min-w-0">
-                              <span className="font-extrabold text-slate-900 text-xs block truncate">
-                                {user.name}
-                              </span>
-                              <span className="text-[11px] text-indigo-700 font-semibold block truncate">
-                                {user.role === "admin" ? "HR Admin" : user.role || "Employee"} {isOwnProfile ? "(You)" : ""} • {user.department_name || "Accounts"}
-                              </span>
-                            </div>
+                          <div className="min-w-0">
+                            <span className="font-extrabold text-slate-900 text-xs sm:text-[13px] block truncate">
+                              {user.name}
+                            </span>
+                            <span className="text-xs text-indigo-700 font-semibold block truncate">
+                              {formatRoleTitle(user.role)} {isOwnProfile ? "(You)" : ""} • {user.department_name || "Accounts"}
+                            </span>
                           </div>
                         </div>
                       </div>
 
-                      <p className="text-[11px] text-slate-400 text-center italic mb-0 pt-2 border-t border-slate-100">
+                      <p className="text-xs text-slate-400 text-center italic mb-0 pt-2 border-t border-slate-100 shrink-0">
                         {user.supervisor_name
                           ? `Direct supervisory routing to ${user.supervisor_name}`
                           : "Direct to Department Head / Apex Authority"}
@@ -931,8 +1042,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   {(user.role === "supervisor" || user.role === "manager") && (
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5 mb-0">
-                          <i className="bi bi-people-fill text-indigo-600"></i>
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-2 mb-0">
+                          <i className="bi bi-people-fill text-indigo-600 text-base"></i>
                           <span>Assigned Squad Roster ({user.direct_reports?.length || 0} Direct Reports)</span>
                         </h4>
                       </div>
@@ -958,7 +1069,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                               </div>
 
                               <div className="flex items-center gap-2">
-                                <span className="px-2 py-0.5 rounded text-[10px] font-semibold uppercase bg-slate-100 text-slate-600">
+                                <span className="px-2.5 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-600">
                                   {report.role}
                                 </span>
                                 <span
@@ -982,24 +1093,24 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   {/* Mobility History (If transfers exist) */}
                   {user.transfers && user.transfers.length > 0 && (
                     <div className="space-y-3">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5 mb-0">
-                        <i className="bi bi-clock-history text-indigo-600"></i>
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-2 mb-0">
+                        <i className="bi bi-clock-history text-indigo-600 text-base"></i>
                         <span>Department Mobility History</span>
                       </h4>
 
                       <div className="rounded-xl border border-slate-200 overflow-hidden divide-y divide-slate-100 bg-white shadow-2xs">
                         {user.transfers.map((t: any) => (
-                          <div key={t.id} className="p-3 text-xs flex items-center justify-between gap-3">
+                          <div key={t.id} className="p-3 text-xs sm:text-[13px] flex items-center justify-between gap-3">
                             <div className="space-y-0.5">
-                              <div className="flex items-center gap-1.5 font-semibold text-slate-800 text-xs">
+                              <div className="flex items-center gap-1.5 font-semibold text-slate-800 text-xs sm:text-[13px]">
                                 <span>{t.source_dept_name || "Unassigned"}</span>
                                 <i className="bi bi-arrow-right text-slate-400 text-[10px]"></i>
                                 <span className="text-indigo-700">{t.target_dept_name}</span>
                               </div>
-                              {t.reason && <p className="text-[11px] text-slate-400 italic mb-0">"{t.reason}"</p>}
+                              {t.reason && <p className="text-xs text-slate-400 italic mb-0">"{t.reason}"</p>}
                             </div>
-                            <span className="text-[11px] text-slate-400 shrink-0">
-                              {new Date(t.transferred_at).toLocaleDateString()}
+                            <span className="text-xs text-slate-400 shrink-0">
+                              {formatDateSafe(t.transferred_at)}
                             </span>
                           </div>
                         ))}
@@ -1012,14 +1123,17 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               {/* TAB 2: AUDIT TRAIL (Item 40) */}
               {activeTab === "audit" && (
                 <div className="space-y-4 animate-in fade-in duration-150">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100">
-                    <div>
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 mb-0.5">
-                        Personnel Audit Trail & Change Ledger
-                      </h4>
-                      <p className="text-[11px] text-slate-400 mb-0">
-                        Chronological record of lifecycle events, governance roles, compensation changes, and mobility.
-                      </p>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2.5 border-b border-slate-100">
+                    <div className="flex items-center gap-3">
+                      <i className="bi bi-clock-history text-indigo-600 text-xl sm:text-2xl shrink-0"></i>
+                      <div>
+                        <h4 className="text-sm sm:text-base font-bold text-slate-900 mb-0.5">
+                          Personnel Audit Trail & Change Ledger
+                        </h4>
+                        <p className="text-xs text-slate-500 mb-0">
+                          Chronological record of lifecycle events, governance roles, compensation changes, and mobility.
+                        </p>
+                      </div>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
@@ -1027,7 +1141,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                         <select
                           value={auditCategoryFilter}
                           onChange={(e) => setAuditCategoryFilter(e.target.value)}
-                          className="text-xs font-semibold bg-white border border-slate-200 text-slate-700 rounded-xl px-3 py-1.5 pr-7 appearance-none focus:outline-none focus:border-indigo-500 shadow-2xs cursor-pointer hover:border-slate-300 transition-colors"
+                          className="text-xs sm:text-[13px] font-semibold bg-white border border-slate-200 text-slate-700 rounded-xl px-3 py-1.5 pr-7 appearance-none focus:outline-none focus:border-indigo-500 shadow-2xs cursor-pointer hover:border-slate-300 transition-colors"
                         >
                           <option value="all">All Events ({auditEvents.length})</option>
                           <option value="Compensation">Compensation</option>
@@ -1040,7 +1154,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                         </select>
                         <i className="bi bi-chevron-down absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[9px]"></i>
                       </div>
-                      <span className="text-[11px] font-semibold text-slate-600 bg-slate-100 px-2.5 py-1.5 rounded-xl border border-slate-200">
+                      <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1.5 rounded-xl border border-slate-200">
                         {displayedAuditEvents.length} Records
                       </span>
                     </div>
@@ -1059,15 +1173,15 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                           <div className="bg-slate-50/70 hover:bg-slate-50/90 border border-slate-200/90 rounded-2xl p-4 transition-all shadow-2xs hover:shadow-xs">
                             <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${event.badgeColor}`}>
+                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${event.badgeColor}`}>
                                   {event.type}
                                 </span>
-                                <h5 className="text-xs font-bold text-slate-900 mb-0">
+                                <h5 className="text-xs sm:text-sm font-bold text-slate-900 mb-0">
                                   {event.title}
                                 </h5>
                               </div>
-                              <span className="text-[10.5px] font-medium text-slate-400 bg-white px-2 py-0.5 rounded-md border border-slate-100 shadow-2xs">
-                                {new Date(event.timestamp).toLocaleString(undefined, {
+                              <span className="text-xs font-medium text-slate-400 bg-white px-2 py-0.5 rounded-md border border-slate-100 shadow-2xs">
+                                {formatDateTimeSafe(event.timestamp, {
                                   year: "numeric",
                                   month: "short",
                                   day: "numeric",
@@ -1077,16 +1191,16 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                               </span>
                             </div>
 
-                            <p className="text-xs text-slate-600 mb-2.5 leading-relaxed">
+                            <p className="text-xs sm:text-[13px] text-slate-600 mb-2.5 leading-relaxed">
                               {event.description}
                             </p>
 
-                            <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-[10.5px] text-slate-400">
+                            <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-xs text-slate-400">
                               <div className="flex items-center gap-1.5">
                                 <i className="bi bi-person-check text-slate-400"></i>
                                 <span>Logged by: <strong className="text-slate-700 font-semibold">{event.author}</strong></span>
                               </div>
-                              <span className="text-[10px] text-slate-400 font-mono">
+                              <span className="text-xs text-slate-400 font-mono">
                                 {event.id}
                               </span>
                             </div>
@@ -1116,25 +1230,28 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               {/* TAB 3: DOCUMENTS VAULT (Item 42) */}
               {activeTab === "documents" && (
                 <div className="space-y-4 animate-in fade-in duration-150">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 mb-0">
-                        Employee Credentials & Document Vault
-                      </h4>
-                      <p className="text-[11px] text-slate-400 mb-0">
-                        {isOwnProfile
-                          ? "Manage your personal verification files, identity credentials, and tax records."
-                          : "Audit employee credentials to verify statutory files and compliance records."}
-                      </p>
+                  <div className="flex items-center justify-between gap-3 pb-2.5 border-b border-slate-100">
+                    <div className="flex items-center gap-3">
+                      <i className="bi bi-folder2-open text-indigo-600 text-xl sm:text-2xl shrink-0"></i>
+                      <div>
+                        <h4 className="text-sm sm:text-base font-bold text-slate-900 mb-0">
+                          Employee Credentials & Document Vault
+                        </h4>
+                        <p className="text-xs text-slate-500 mb-0">
+                          {isOwnProfile
+                            ? "Manage your personal verification files, identity credentials, and tax records."
+                            : "Audit employee credentials to verify statutory files and compliance records."}
+                        </p>
+                      </div>
                     </div>
                     {isOwnProfile ? (
                       <button
                         type="button"
                         onClick={() => setIsUploadingDoc(!isUploadingDoc)}
-                        className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                        className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-sm shadow-indigo-600/30"
                       >
                         <i className={`bi ${isUploadingDoc ? "bi-x" : "bi-plus-lg"}`}></i>
-                        <span>{isUploadingDoc ? "Cancel" : "Attach Document"}</span>
+                        <span>{isUploadingDoc ? "Cancel" : "+ Attach Document"}</span>
                       </button>
                     ) : (
                       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs shrink-0">
@@ -1150,7 +1267,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                       <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 mt-0.5">
                         <i className="bi bi-clipboard-check-fill text-sm"></i>
                       </div>
-                      <div className="text-[11.5px] leading-relaxed">
+                      <div className="text-xs leading-relaxed">
                         <strong className="text-slate-800">Compliance & Verification Audit:</strong> Reviewing documentation submitted by <span className="font-semibold text-slate-900">{user.name}</span> to ensure all regulatory contracts and identity certificates are on file with the company. File modifications and deletions are restricted to the employee's personal portal.
                       </div>
                     </div>
@@ -1212,48 +1329,48 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   {documents.length > 0 ? (
                     <div className="rounded-2xl border border-slate-200/90 overflow-hidden bg-white shadow-2xs">
                       <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs">
-                          <thead className="bg-slate-50/90 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                        <table className="w-full text-left text-xs sm:text-[13px]">
+                          <thead className="bg-slate-50/90 border-b border-slate-200 text-xs font-semibold text-slate-600">
                             <tr>
-                              <th className="py-3 px-4">Document Name</th>
-                              <th className="py-3 px-4">Type</th>
-                              <th className="py-3 px-4">Size</th>
-                              <th className="py-3 px-4">Uploaded On</th>
-                              <th className="py-3 px-4">Status</th>
-                              <th className="py-3 px-4 text-right">Actions</th>
+                              <th className="py-3.5 px-4">Document Name</th>
+                              <th className="py-3.5 px-4">Type</th>
+                              <th className="py-3.5 px-4">Size</th>
+                              <th className="py-3.5 px-4">Uploaded On</th>
+                              <th className="py-3.5 px-4">Status</th>
+                              <th className="py-3.5 px-4 text-right">Actions</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100">
                             {documents.map((doc) => (
                               <tr key={doc.id} className="hover:bg-slate-50/70 transition-colors">
-                                <td className="py-3 px-4">
+                                <td className="py-3.5 px-4">
                                   <div className="flex items-center gap-3">
                                     <div className="w-9 h-9 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-500 text-base shrink-0 shadow-2xs">
                                       <i className="bi bi-file-earmark-pdf-fill"></i>
                                     </div>
                                     <div className="min-w-0 max-w-xs sm:max-w-md">
-                                      <span className="font-bold text-slate-900 block truncate text-xs">
+                                      <span className="font-bold text-slate-900 block truncate text-xs sm:text-sm">
                                         {doc.name}
                                       </span>
-                                      <span className="text-[11px] text-slate-400 block truncate">
+                                      <span className="text-xs text-slate-400 block truncate">
                                         {doc.description || "Statutory compliance record"}
                                       </span>
                                     </div>
                                   </div>
                                 </td>
-                                <td className="py-3 px-4 whitespace-nowrap">
-                                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
+                                <td className="py-3.5 px-4 whitespace-nowrap">
+                                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
                                     {doc.category}
                                   </span>
                                 </td>
-                                <td className="py-3 px-4 text-slate-500 whitespace-nowrap font-medium text-[11px]">
+                                <td className="py-3.5 px-4 text-slate-600 whitespace-nowrap font-medium text-xs sm:text-[13px]">
                                   {doc.fileSize}
                                 </td>
-                                <td className="py-3 px-4 text-slate-500 whitespace-nowrap text-[11px]">
+                                <td className="py-3.5 px-4 text-slate-600 whitespace-nowrap text-xs sm:text-[13px]">
                                   {doc.uploadDate}
                                 </td>
-                                <td className="py-3 px-4 whitespace-nowrap">
-                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200">
+                                <td className="py-3.5 px-4 whitespace-nowrap">
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                     <span>Verified</span>
                                   </span>
@@ -1311,19 +1428,20 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       </div>
 
         {/* Modal Footer Controls */}
-        <div className="shrink-0 px-5 sm:px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
+        <div className="shrink-0 px-4 sm:px-6 py-2.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
             >
-              Close Dossier
+              <i className="bi bi-x text-sm"></i>
+              <span>Close Dossier</span>
             </button>
             <button
               type="button"
               onClick={() => window.print()}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer shadow-2xs"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer shadow-2xs"
               title="Print Dossier Document"
             >
               <i className="bi bi-printer"></i>
@@ -1338,15 +1456,17 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 onClose();
                 onEditUser(user);
               }}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-all flex items-center gap-1.5 shadow-sm shadow-indigo-600/30 cursor-pointer"
+              className="px-4 py-1.5 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-all flex items-center gap-1.5 shadow-sm shadow-indigo-600/30 cursor-pointer"
             >
               <i className="bi bi-pencil-square"></i>
               <span>Edit Member Profile</span>
             </button>
           )}
         </div>
-      </div>
-    </div>,
-    document.body
-  );
+      </ErrorBoundary>
+    </div>
+  </div>
+</div>,
+document.body
+);
 };
