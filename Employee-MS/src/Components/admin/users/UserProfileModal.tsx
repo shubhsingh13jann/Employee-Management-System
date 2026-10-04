@@ -114,6 +114,27 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState("");
   const [auditCategoryFilter, setAuditCategoryFilter] = useState<string>("all");
+  const [activeDocMenuId, setActiveDocMenuId] = useState<string | null>(null);
+
+  // Close document action menu on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest(".doc-action-menu-container")) {
+        setActiveDocMenuId(null);
+      }
+    };
+    if (activeDocMenuId) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [activeDocMenuId]);
+
+  useEffect(() => {
+    setActiveDocMenuId(null);
+  }, [activeTab, isOpen]);
 
   useEffect(() => {
     if (!isOpen || !userId) return;
@@ -1327,23 +1348,28 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
                   {/* Enterprise Document Vault Table Layout */}
                   {documents.length > 0 ? (
-                    <div className="rounded-2xl border border-slate-200/90 overflow-hidden bg-white shadow-2xs">
+                    <div className="rounded-2xl border border-slate-200/90 bg-white shadow-2xs">
                       <div className="overflow-x-auto">
                         <table className="w-full text-left text-xs sm:text-[13px]">
                           <thead className="bg-slate-50/90 border-b border-slate-200 text-xs font-semibold text-slate-600">
                             <tr>
-                              <th className="py-3.5 px-4">Document Name</th>
-                              <th className="py-3.5 px-4">Type</th>
-                              <th className="py-3.5 px-4">Size</th>
-                              <th className="py-3.5 px-4">Uploaded On</th>
-                              <th className="py-3.5 px-4">Status</th>
-                              <th className="py-3.5 px-4 text-right">Actions</th>
+                              <th className="py-3.5 px-4 text-left min-w-[220px]">Document Name</th>
+                              <th className="py-3.5 px-4 text-center w-28">Type</th>
+                              <th className="py-3.5 px-4 text-center w-24">Size</th>
+                              <th className="py-3.5 px-4 text-center w-32">Uploaded On</th>
+                              <th className="py-3.5 px-4 text-center w-28">Status</th>
+                              <th className="py-3.5 px-4 text-center w-20">Actions</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100">
-                            {documents.map((doc) => (
-                              <tr key={doc.id} className="hover:bg-slate-50/70 transition-colors">
-                                <td className="py-3.5 px-4">
+                            {documents.map((doc, idx) => (
+                              <tr
+                                key={doc.id}
+                                className={`hover:bg-slate-50/70 transition-colors ${
+                                  activeDocMenuId === doc.id ? "relative z-30" : ""
+                                }`}
+                              >
+                                <td className="py-3.5 px-4 text-left">
                                   <div className="flex items-center gap-3">
                                     <div className="w-9 h-9 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-500 text-base shrink-0 shadow-2xs">
                                       <i className="bi bi-file-earmark-pdf-fill"></i>
@@ -1358,50 +1384,109 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                                     </div>
                                   </div>
                                 </td>
-                                <td className="py-3.5 px-4 whitespace-nowrap">
-                                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                                <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                                  <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
                                     {doc.category}
                                   </span>
                                 </td>
-                                <td className="py-3.5 px-4 text-slate-600 whitespace-nowrap font-medium text-xs sm:text-[13px]">
+                                <td className="py-3.5 px-4 text-center text-slate-600 whitespace-nowrap font-medium text-xs sm:text-[13px]">
                                   {doc.fileSize}
                                 </td>
-                                <td className="py-3.5 px-4 text-slate-600 whitespace-nowrap text-xs sm:text-[13px]">
+                                <td className="py-3.5 px-4 text-center text-slate-600 whitespace-nowrap text-xs sm:text-[13px]">
                                   {doc.uploadDate}
                                 </td>
-                                <td className="py-3.5 px-4 whitespace-nowrap">
-                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200">
+                                <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                                  <span className="inline-flex items-center justify-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                     <span>Verified</span>
                                   </span>
                                 </td>
-                                <td className="py-3 px-4 text-right whitespace-nowrap">
-                                  <div className="inline-flex items-center justify-end gap-1">
+                                <td className={`py-3.5 px-4 text-center whitespace-nowrap ${activeDocMenuId === doc.id ? "relative z-40" : ""}`}>
+                                  <div
+                                    className="relative inline-flex items-center justify-center doc-action-menu-container"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
                                     <button
                                       type="button"
-                                      onClick={() => alert(`Previewing statutory record: "${doc.name}"`)}
-                                      className="w-7 h-7 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer"
-                                      title="Preview Document"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setActiveDocMenuId((prev) => (prev === doc.id ? null : doc.id));
+                                      }}
+                                      className={`w-7.5 h-7.5 rounded-lg border transition-all inline-flex items-center justify-center cursor-pointer ${
+                                        activeDocMenuId === doc.id
+                                          ? "bg-slate-100 text-slate-800 border-slate-300 shadow-2xs"
+                                          : "border-slate-200/80 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 shadow-2xs"
+                                      }`}
+                                      title="Document Actions"
                                     >
-                                      <i className="bi bi-eye text-xs"></i>
+                                      <i className="bi bi-three-dots text-xs"></i>
                                     </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => alert(`Downloading verified record: "${doc.name}"`)}
-                                      className="w-7 h-7 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer"
-                                      title="Download Document"
-                                    >
-                                      <i className="bi bi-download text-xs"></i>
-                                    </button>
-                                    {isOwnProfile && (
-                                      <button
-                                        type="button"
-                                        onClick={() => handleDeleteDocument(doc.id)}
-                                        className="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition-colors cursor-pointer"
-                                        title="Delete Document"
+
+                                    {activeDocMenuId === doc.id && (
+                                      <div
+                                        className={`absolute right-0 ${
+                                          idx >= documents.length - 2 && documents.length > 2
+                                            ? "bottom-full mb-1.5"
+                                            : "top-full mt-1.5"
+                                        } w-44 rounded-xl bg-white border border-slate-200/90 shadow-xl p-1 z-50 text-left animate-in fade-in zoom-in-95 duration-100`}
+                                        onClick={(e) => e.stopPropagation()}
                                       >
-                                        <i className="bi bi-trash text-xs"></i>
-                                      </button>
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setActiveDocMenuId(null);
+                                            alert(`Previewing statutory record: "${doc.name}"`);
+                                          }}
+                                          className="w-full px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
+                                        >
+                                          <i className="bi bi-eye text-slate-400"></i>
+                                          <span>Preview Document</span>
+                                        </button>
+
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setActiveDocMenuId(null);
+                                            alert(`Downloading verified record: "${doc.name}"`);
+                                          }}
+                                          className="w-full px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
+                                        >
+                                          <i className="bi bi-download text-slate-400"></i>
+                                          <span>Download File</span>
+                                        </button>
+
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setActiveDocMenuId(null);
+                                            navigator.clipboard.writeText(doc.name);
+                                            setCopyFeedback("Document name copied!");
+                                            setTimeout(() => setCopyFeedback(""), 2000);
+                                          }}
+                                          className="w-full px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
+                                        >
+                                          <i className="bi bi-clipboard text-slate-400"></i>
+                                          <span>Copy File Name</span>
+                                        </button>
+
+                                        {isOwnProfile && (
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setActiveDocMenuId(null);
+                                              handleDeleteDocument(doc.id);
+                                            }}
+                                            className="w-full px-2.5 py-1.5 text-[11px] text-rose-600 hover:bg-rose-50 rounded-lg flex items-center gap-2 transition-colors cursor-pointer border-t border-slate-100"
+                                          >
+                                            <i className="bi bi-trash text-rose-500"></i>
+                                            <span>Delete Document</span>
+                                          </button>
+                                        )}
+                                      </div>
                                     )}
                                   </div>
                                 </td>
