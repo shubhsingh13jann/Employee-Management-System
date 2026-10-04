@@ -47,24 +47,24 @@ const getRoleBadgeCfg = (
 ): { label: string; icon: string; cls: string } => {
   const map: Record<string, { label: string; icon: string; cls: string }> = {
     admin: {
-      label: "Admin",
+      label: "ADMIN",
       icon: "bi-person-badge",
-      cls: "bg-rose-50 text-rose-700 border-rose-200",
+      cls: "bg-indigo-50 text-indigo-700 border-indigo-200/70",
     },
     manager: {
-      label: "Manager",
+      label: "MANAGER",
       icon: "bi-briefcase",
-      cls: "bg-indigo-50 text-indigo-700 border-indigo-200",
+      cls: "bg-indigo-50 text-indigo-700 border-indigo-200/70",
     },
     supervisor: {
-      label: "Supervisor",
+      label: "SUPERVISOR",
       icon: "bi-diagram-3",
-      cls: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      cls: "bg-indigo-50 text-indigo-700 border-indigo-200/70",
     },
     employee: {
-      label: "Employee",
+      label: "EMPLOYEE",
       icon: "bi-person",
-      cls: "bg-slate-100 text-slate-700 border-slate-200",
+      cls: "bg-indigo-50 text-indigo-700 border-indigo-200/70",
     },
   };
   return map[(role || "").toLowerCase()] ?? map.employee;
@@ -198,88 +198,85 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-xs overscroll-contain animate-in fade-in duration-150"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 bg-slate-950/60 backdrop-blur-xs overscroll-contain animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-[780px] bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150 border border-slate-100"
+        className="relative w-full max-w-[880px] bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150 border border-slate-100"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ── Flowing Wave Art Background (Top-Right) ── */}
-        <div className="absolute -top-12 -right-12 w-96 h-80 pointer-events-none overflow-hidden select-none z-0">
+        {/* ── Delicate Flowing Ribbon Wave (Top-Right) — No Solid Blob ── */}
+        <div className="absolute top-0 right-0 w-80 h-56 pointer-events-none overflow-hidden select-none z-0 rounded-tr-3xl">
           <svg
-            viewBox="0 0 400 320"
+            viewBox="0 0 320 220"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             className="w-full h-full"
           >
-            {/* Soft background glow fills */}
+            {/* Very faint, transparent ribbon fill strictly following the curve */}
             <path
-              d="M160 0 C240 40 320 90 380 170 C410 210 400 270 340 290 C290 300 230 260 210 200 C190 140 130 90 160 0 Z"
-              fill="url(#topWaveGradA)"
-              opacity="0.14"
-            />
-            <path
-              d="M220 0 C280 60 360 110 390 190 C405 235 375 285 320 280 C265 275 225 220 210 160 C195 100 170 40 220 0 Z"
-              fill="url(#topWaveGradB)"
-              opacity="0.12"
+              d="M 110 0 C 170 35, 230 65, 320 85 L 320 185 C 295 130, 260 70, 210 0 Z"
+              fill="url(#topRibbonGrad)"
+              opacity="0.08"
             />
 
-            {/* Fine flowing harmonic ribbon lines */}
+            {/* Fine flowing harmonic ribbon strands */}
             <path
-              d="M120 0 C170 50 250 110 330 140 C380 160 410 200 400 250"
-              stroke="url(#topLineGrad1)"
+              d="M 110 0 C 170 35, 230 65, 320 85"
+              stroke="url(#topWaveStroke1)"
               strokeWidth="1.5"
               strokeLinecap="round"
-              opacity="0.45"
+              opacity="0.6"
             />
             <path
-              d="M150 0 C195 55 270 115 345 150 C395 175 415 215 410 270"
-              stroke="url(#topLineGrad2)"
-              strokeWidth="1.5"
+              d="M 130 0 C 185 40, 245 72, 320 102"
+              stroke="url(#topWaveStroke2)"
+              strokeWidth="1.4"
               strokeLinecap="round"
               opacity="0.55"
             />
             <path
-              d="M180 0 C220 60 290 120 360 160 C410 190 425 230 420 290"
-              stroke="url(#topLineGrad1)"
+              d="M 150 0 C 200 46, 260 80, 320 120"
+              stroke="url(#topWaveStroke1)"
+              strokeWidth="1.3"
+              strokeLinecap="round"
+              opacity="0.5"
+            />
+            <path
+              d="M 170 0 C 215 52, 275 88, 320 138"
+              stroke="url(#topWaveStroke2)"
               strokeWidth="1.2"
+              strokeLinecap="round"
+              opacity="0.45"
+            />
+            <path
+              d="M 190 0 C 230 58, 290 96, 320 156"
+              stroke="url(#topWaveStroke1)"
+              strokeWidth="1.0"
               strokeLinecap="round"
               opacity="0.4"
             />
             <path
-              d="M210 0 C245 65 310 125 375 170 C420 200 435 245 425 305"
-              stroke="url(#topLineGrad2)"
-              strokeWidth="1"
+              d="M 210 0 C 245 64, 305 104, 320 174"
+              stroke="url(#topWaveStroke2)"
+              strokeWidth="0.8"
               strokeLinecap="round"
               opacity="0.35"
             />
-            <path
-              d="M240 0 C270 70 330 130 390 180 C430 210 445 260 430 320"
-              stroke="url(#topLineGrad1)"
-              strokeWidth="0.8"
-              strokeLinecap="round"
-              opacity="0.25"
-            />
 
             <defs>
-              <linearGradient id="topWaveGradA" x1="160" y1="0" x2="380" y2="290" gradientUnits="userSpaceOnUse">
+              <linearGradient id="topRibbonGrad" x1="110" y1="0" x2="320" y2="185" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stopColor="#818cf8" />
-                <stop offset="50%" stopColor="#c084fc" />
+                <stop offset="60%" stopColor="#c084fc" />
+                <stop offset="100%" stopColor="#60a5fa" />
+              </linearGradient>
+              <linearGradient id="topWaveStroke1" x1="110" y1="0" x2="320" y2="174" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#6366f1" />
+                <stop offset="45%" stopColor="#8b5cf6" />
+                <stop offset="85%" stopColor="#a855f7" />
                 <stop offset="100%" stopColor="#38bdf8" />
               </linearGradient>
-              <linearGradient id="topWaveGradB" x1="220" y1="0" x2="320" y2="280" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#6366f1" />
-                <stop offset="60%" stopColor="#a855f7" />
-                <stop offset="100%" stopColor="#e0e7ff" />
-              </linearGradient>
-              <linearGradient id="topLineGrad1" x1="120" y1="0" x2="400" y2="250" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#6366f1" />
-                <stop offset="40%" stopColor="#8b5cf6" />
-                <stop offset="80%" stopColor="#c084fc" />
-                <stop offset="100%" stopColor="#38bdf8" />
-              </linearGradient>
-              <linearGradient id="topLineGrad2" x1="150" y1="0" x2="410" y2="270" gradientUnits="userSpaceOnUse">
+              <linearGradient id="topWaveStroke2" x1="130" y1="0" x2="320" y2="174" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stopColor="#a855f7" />
                 <stop offset="50%" stopColor="#6366f1" />
                 <stop offset="100%" stopColor="#60a5fa" />
@@ -288,81 +285,71 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
           </svg>
         </div>
 
-        {/* ── Flowing Wave Art Background (Bottom-Left) ── */}
-        <div className="absolute -bottom-10 -left-10 w-96 h-72 pointer-events-none overflow-hidden select-none z-0">
+        {/* ── Delicate Flowing Ribbon Wave (Bottom-Left) — No Solid Blob ── */}
+        <div className="absolute bottom-0 left-0 w-80 h-56 pointer-events-none overflow-hidden select-none z-0 rounded-bl-3xl">
           <svg
-            viewBox="0 0 380 290"
+            viewBox="0 0 320 220"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             className="w-full h-full"
           >
-            {/* Soft background glow fills */}
+            {/* Very faint, transparent ribbon fill strictly following the curve */}
             <path
-              d="M0 200 C60 170 120 190 180 230 C230 260 250 300 230 330 C190 350 110 320 60 300 C20 280 0 250 0 200 Z"
-              fill="url(#botWaveGradA)"
-              opacity="0.16"
-            />
-            <path
-              d="M0 160 C50 140 110 165 170 210 C220 245 240 290 210 320 C160 330 90 300 40 270 C10 240 0 200 0 160 Z"
-              fill="url(#botWaveGradB)"
-              opacity="0.12"
+              d="M 0 105 C 70 125, 130 160, 210 220 L 110 220 C 65 170, 30 135, 0 195 Z"
+              fill="url(#botRibbonGrad)"
+              opacity="0.08"
             />
 
-            {/* Fine flowing harmonic ribbon lines */}
+            {/* Fine flowing harmonic ribbon strands */}
             <path
-              d="M0 240 C60 190 140 180 220 220 C270 250 310 290 320 330"
-              stroke="url(#botLineGrad1)"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              opacity="0.5"
-            />
-            <path
-              d="M0 210 C70 170 155 170 235 210 C285 240 325 280 340 320"
-              stroke="url(#botLineGrad2)"
+              d="M 0 105 C 70 125, 130 160, 210 220"
+              stroke="url(#botWaveStroke1)"
               strokeWidth="1.5"
               strokeLinecap="round"
               opacity="0.6"
             />
             <path
-              d="M0 180 C80 150 170 160 250 200 C300 230 340 270 355 310"
-              stroke="url(#botLineGrad1)"
+              d="M 0 125 C 65 140, 120 172, 190 220"
+              stroke="url(#botWaveStroke2)"
+              strokeWidth="1.4"
+              strokeLinecap="round"
+              opacity="0.55"
+            />
+            <path
+              d="M 0 145 C 60 155, 110 184, 170 220"
+              stroke="url(#botWaveStroke1)"
+              strokeWidth="1.3"
+              strokeLinecap="round"
+              opacity="0.5"
+            />
+            <path
+              d="M 0 165 C 55 170, 100 196, 150 220"
+              stroke="url(#botWaveStroke2)"
               strokeWidth="1.2"
               strokeLinecap="round"
               opacity="0.45"
             />
             <path
-              d="M0 150 C90 130 185 150 265 190 C315 220 355 260 370 300"
-              stroke="url(#botLineGrad2)"
-              strokeWidth="1"
+              d="M 0 185 C 50 185, 90 208, 130 220"
+              stroke="url(#botWaveStroke1)"
+              strokeWidth="1.0"
               strokeLinecap="round"
-              opacity="0.35"
-            />
-            <path
-              d="M0 120 C100 110 200 140 280 180 C330 210 370 250 380 290"
-              stroke="url(#botLineGrad1)"
-              strokeWidth="0.8"
-              strokeLinecap="round"
-              opacity="0.25"
+              opacity="0.4"
             />
 
             <defs>
-              <linearGradient id="botWaveGradA" x1="0" y1="200" x2="250" y2="330" gradientUnits="userSpaceOnUse">
+              <linearGradient id="botRibbonGrad" x1="0" y1="105" x2="210" y2="220" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stopColor="#38bdf8" />
                 <stop offset="50%" stopColor="#818cf8" />
                 <stop offset="100%" stopColor="#c084fc" />
               </linearGradient>
-              <linearGradient id="botWaveGradB" x1="0" y1="160" x2="240" y2="320" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#818cf8" />
-                <stop offset="60%" stopColor="#a855f7" />
-                <stop offset="100%" stopColor="#e0e7ff" />
-              </linearGradient>
-              <linearGradient id="botLineGrad1" x1="0" y1="240" x2="320" y2="330" gradientUnits="userSpaceOnUse">
+              <linearGradient id="botWaveStroke1" x1="0" y1="105" x2="210" y2="220" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stopColor="#38bdf8" />
                 <stop offset="40%" stopColor="#6366f1" />
                 <stop offset="80%" stopColor="#8b5cf6" />
                 <stop offset="100%" stopColor="#a855f7" />
               </linearGradient>
-              <linearGradient id="botLineGrad2" x1="0" y1="210" x2="340" y2="320" gradientUnits="userSpaceOnUse">
+              <linearGradient id="botWaveStroke2" x1="0" y1="125" x2="190" y2="220" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stopColor="#60a5fa" />
                 <stop offset="50%" stopColor="#818cf8" />
                 <stop offset="100%" stopColor="#c084fc" />
@@ -372,7 +359,7 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
         </div>
 
         {/* ── Modal Header (Icon + Title Side-by-Side in SAME Row) ── */}
-        <div className="relative px-5 sm:px-6 pt-5 sm:pt-6 pb-3 flex items-start justify-between gap-3 z-10">
+        <div className="relative px-6 sm:px-8 pt-6 sm:pt-7 pb-6 flex items-start justify-between gap-3 z-10">
           <div className="flex items-center gap-3.5 min-w-0">
             {/* Padlock Icon Box */}
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-600 flex items-center justify-center text-white text-2xl shadow-md shadow-indigo-600/30 shrink-0">
@@ -400,12 +387,12 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
           </button>
         </div>
 
-        {/* ── Main Body (Two Columns: Left Form + Right Security Guidelines) ── */}
+        {/* ── Main Body (Left Form + Vertical Divider + Right Security Guidelines) ── */}
         <form onSubmit={handleSubmit}>
-          <div className="relative px-5 sm:px-6 pb-2 z-10 flex flex-col lg:flex-row gap-5 sm:gap-6">
+          <div className="relative px-6 sm:px-8 pb-3 z-10 flex flex-col lg:flex-row items-stretch gap-6 sm:gap-7">
 
             {/* ── LEFT COLUMN ── */}
-            <div className="flex-1 min-w-0 space-y-3.5">
+            <div className="flex-1 min-w-0 space-y-4">
 
               {/* API Error */}
               {errorMsg && (
@@ -417,15 +404,15 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
 
               {/* Employee Details Section */}
               <div>
-                <h3 className="text-xs font-bold text-slate-900 mb-2">
+                <h3 className="text-sm font-bold text-slate-900 mb-2.5">
                   Employee Details
                 </h3>
 
                 {/* Employee Card */}
-                <div className="p-3 sm:p-3.5 rounded-xl border border-slate-200/90 bg-white flex items-center justify-between gap-3 shadow-2xs">
-                  <div className="flex items-center gap-3 min-w-0">
+                <div className="p-3.5 sm:p-4 rounded-xl border border-slate-200/90 bg-white flex items-center justify-between gap-3 shadow-2xs">
+                  <div className="flex items-center gap-3.5 min-w-0">
                     {/* Avatar */}
-                    <div className="w-11 h-11 rounded-full bg-indigo-100 text-indigo-700 font-extrabold text-sm flex items-center justify-center shrink-0 border border-indigo-200/60">
+                    <div className="w-12 h-12 rounded-full bg-indigo-100/80 text-indigo-700 font-extrabold text-sm flex items-center justify-center shrink-0 border border-indigo-200/60">
                       {initials}
                     </div>
 
@@ -555,7 +542,7 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
               </div>
 
               {/* Warning Notice */}
-              <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200/80 flex items-start gap-2.5">
+              <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200/80 flex items-start gap-2.5">
                 <div className="w-5 h-5 rounded-full border-2 border-amber-400 flex items-center justify-center shrink-0 mt-0.5">
                   <i className="bi bi-exclamation text-amber-600 text-[11px] font-black"></i>
                 </div>
@@ -570,25 +557,28 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
               </div>
             </div>
 
-            {/* ── RIGHT COLUMN — Security Guidelines ── */}
-            <div className="w-full lg:w-60 xl:w-64 shrink-0 space-y-3 pb-2 lg:border-l lg:border-slate-100 lg:pl-5">
-              <h3 className="text-xs font-bold text-slate-900 mb-2">
+            {/* ── Continuous Vertical Thin Divider Line Between Sections ── */}
+            <div className="hidden lg:block w-px bg-slate-200/80 self-stretch my-0.5"></div>
+
+            {/* ── RIGHT COLUMN — Security Guidelines (Heading on 1 Single Line) ── */}
+            <div className="w-full lg:w-[310px] xl:w-[325px] shrink-0 space-y-3.5 pb-2">
+              <h3 className="text-sm font-bold text-slate-900 mb-3 whitespace-nowrap">
                 Security Guidelines
               </h3>
 
-              <div className="space-y-3">
+              <div className="space-y-3.5">
                 {SECURITY_GUIDELINES.map((g) => (
-                  <div key={g.icon} className="flex items-start gap-2.5">
-                    {/* Icon circle */}
-                    <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-200/80 flex items-center justify-center text-slate-500 text-xs shrink-0 shadow-2xs">
+                  <div key={g.icon} className="flex items-center gap-3">
+                    {/* Larger Icon circle */}
+                    <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-200/90 flex items-center justify-center text-slate-600 text-sm shrink-0 shadow-2xs">
                       <i className={`bi ${g.icon}`}></i>
                     </div>
-                    {/* Text */}
-                    <div className="min-w-0 pt-0.5">
-                      <p className="text-xs font-bold text-slate-900 mb-0.5 leading-tight">
+                    {/* Text: Title and description tightly connected with no excess space */}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-slate-900 mb-0 leading-tight">
                         {g.title}
                       </p>
-                      <p className="text-[11px] text-slate-500 leading-normal mb-0">
+                      <p className="text-[11px] text-slate-500 leading-snug mb-0 mt-0.5">
                         {g.desc}
                       </p>
                     </div>
@@ -599,7 +589,7 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
           </div>
 
           {/* ── Footer ── */}
-          <div className="relative px-5 sm:px-6 py-3.5 border-t border-slate-100 flex items-center justify-end gap-2.5 mt-4 bg-white/80 z-10">
+          <div className="relative px-6 sm:px-8 py-4 border-t border-slate-100 flex items-center justify-end gap-3 mt-4 bg-white/80 z-10">
             <button
               type="button"
               onClick={onClose}
