@@ -47,17 +47,17 @@ const getRoleBadgeCfg = (
 ): { label: string; icon: string; cls: string } => {
   const map: Record<string, { label: string; icon: string; cls: string }> = {
     admin: {
-      label: "ADMIN",
+      label: "EMPLOYEE",
       icon: "bi-person-badge",
       cls: "bg-indigo-50 text-indigo-700 border-indigo-200/70",
     },
     manager: {
-      label: "MANAGER",
+      label: "EMPLOYEE",
       icon: "bi-briefcase",
       cls: "bg-indigo-50 text-indigo-700 border-indigo-200/70",
     },
     supervisor: {
-      label: "SUPERVISOR",
+      label: "EMPLOYEE",
       icon: "bi-diagram-3",
       cls: "bg-indigo-50 text-indigo-700 border-indigo-200/70",
     },
@@ -198,14 +198,14 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 bg-slate-950/60 backdrop-blur-xs overscroll-contain animate-in fade-in duration-150"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-xs overscroll-contain animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-[880px] bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150 border border-slate-100"
+        className="relative w-full max-w-[760px] bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150 border border-slate-100"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ── Delicate Flowing Ribbon Wave (Top-Right) — No Solid Blob ── */}
+        {/* ── Delicate Flowing Ribbon Wave (Top-Right) ── */}
         <div className="absolute top-0 right-0 w-80 h-56 pointer-events-none overflow-hidden select-none z-0 rounded-tr-3xl">
           <svg
             viewBox="0 0 320 220"
@@ -213,14 +213,11 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
             xmlns="http://www.w3.org/2000/svg"
             className="w-full h-full"
           >
-            {/* Very faint, transparent ribbon fill strictly following the curve */}
             <path
               d="M 110 0 C 170 35, 230 65, 320 85 L 320 185 C 295 130, 260 70, 210 0 Z"
               fill="url(#topRibbonGrad)"
               opacity="0.08"
             />
-
-            {/* Fine flowing harmonic ribbon strands */}
             <path
               d="M 110 0 C 170 35, 230 65, 320 85"
               stroke="url(#topWaveStroke1)"
@@ -263,7 +260,6 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
               strokeLinecap="round"
               opacity="0.35"
             />
-
             <defs>
               <linearGradient id="topRibbonGrad" x1="110" y1="0" x2="320" y2="185" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stopColor="#818cf8" />
@@ -285,92 +281,119 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
           </svg>
         </div>
 
-        {/* ── Delicate Flowing Ribbon Wave (Bottom-Left) — No Solid Blob ── */}
-        <div className="absolute bottom-0 left-0 w-80 h-56 pointer-events-none overflow-hidden select-none z-0 rounded-bl-3xl">
+        {/* ── High-Visibility Flowing Ribbon Wave (Bottom-Left - Fully visible below warning box) ── */}
+        <div className="absolute bottom-0 left-0 w-[440px] sm:w-[480px] h-20 sm:h-24 pointer-events-none overflow-hidden select-none z-0 rounded-bl-3xl">
           <svg
-            viewBox="0 0 320 220"
+            viewBox="0 0 500 100"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             className="w-full h-full"
           >
-            {/* Very faint, transparent ribbon fill strictly following the curve */}
+            {/* Soft translucent purple ribbon wave sweeping across */}
             <path
-              d="M 0 105 C 70 125, 130 160, 210 220 L 110 220 C 65 170, 30 135, 0 195 Z"
+              d="M 0 15 C 80 25, 160 55, 250 70 C 330 80, 410 90, 490 100 L 0 100 Z"
               fill="url(#botRibbonGrad)"
-              opacity="0.08"
+              opacity="0.10"
             />
-
-            {/* Fine flowing harmonic ribbon strands */}
+            {/* Mid-blue ribbon fold with dynamic satin curve */}
             <path
-              d="M 0 105 C 70 125, 130 160, 210 220"
+              d="M 0 35 C 60 42, 120 65, 180 82 C 220 95, 260 100, 310 100 L 190 100 C 140 90, 90 70, 0 55 Z"
+              fill="url(#botBlueFoldGrad)"
+              opacity="0.16"
+            />
+            {/* Flowing harmonic bezier line array */}
+            <path
+              d="M 0 15 C 85 25, 170 55, 260 70 C 340 80, 420 90, 500 100"
               stroke="url(#botWaveStroke1)"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              opacity="0.75"
+            />
+            <path
+              d="M 0 24 C 75 32, 150 58, 230 74 C 310 86, 390 94, 460 100"
+              stroke="url(#botWaveStroke2)"
               strokeWidth="1.5"
+              strokeLinecap="round"
+              opacity="0.65"
+            />
+            <path
+              d="M 0 34 C 68 40, 135 63, 205 79 C 275 91, 350 96, 420 100"
+              stroke="url(#botWaveStroke1)"
+              strokeWidth="1.4"
               strokeLinecap="round"
               opacity="0.6"
             />
             <path
-              d="M 0 125 C 65 140, 120 172, 190 220"
+              d="M 0 45 C 60 50, 120 68, 180 84 C 245 95, 315 98, 380 100"
               stroke="url(#botWaveStroke2)"
-              strokeWidth="1.4"
-              strokeLinecap="round"
-              opacity="0.55"
-            />
-            <path
-              d="M 0 145 C 60 155, 110 184, 170 220"
-              stroke="url(#botWaveStroke1)"
               strokeWidth="1.3"
               strokeLinecap="round"
               opacity="0.5"
             />
             <path
-              d="M 0 165 C 55 170, 100 196, 150 220"
-              stroke="url(#botWaveStroke2)"
-              strokeWidth="1.2"
-              strokeLinecap="round"
-              opacity="0.45"
-            />
-            <path
-              d="M 0 185 C 50 185, 90 208, 130 220"
+              d="M 0 57 C 52 61, 105 74, 158 88 C 215 97, 275 100, 340 100"
               stroke="url(#botWaveStroke1)"
-              strokeWidth="1.0"
+              strokeWidth="1.1"
               strokeLinecap="round"
               opacity="0.4"
             />
-
+            <path
+              d="M 0 70 C 45 73, 90 81, 136 91 C 185 98, 235 100, 290 100"
+              stroke="url(#botWaveStroke2)"
+              strokeWidth="1.0"
+              strokeLinecap="round"
+              opacity="0.35"
+            />
+            <path
+              d="M 0 84 C 38 85, 75 90, 115 95 C 155 99, 195 100, 240 100"
+              stroke="url(#botWaveStroke1)"
+              strokeWidth="0.9"
+              strokeLinecap="round"
+              opacity="0.3"
+            />
+            {/* Delicate subtle glow particle accents */}
+            <circle cx="200" cy="65" r="3.5" fill="#818cf8" opacity="0.3" />
+            <circle cx="258" cy="80" r="3" fill="#60a5fa" opacity="0.35" />
+            <circle cx="150" cy="55" r="2" fill="#c084fc" opacity="0.25" />
             <defs>
-              <linearGradient id="botRibbonGrad" x1="0" y1="105" x2="210" y2="220" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#38bdf8" />
+              <linearGradient id="botRibbonGrad" x1="0" y1="15" x2="490" y2="100" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#c084fc" />
                 <stop offset="50%" stopColor="#818cf8" />
-                <stop offset="100%" stopColor="#c084fc" />
+                <stop offset="100%" stopColor="#60a5fa" />
               </linearGradient>
-              <linearGradient id="botWaveStroke1" x1="0" y1="105" x2="210" y2="220" gradientUnits="userSpaceOnUse">
+              <linearGradient id="botBlueFoldGrad" x1="0" y1="35" x2="310" y2="100" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#60a5fa" />
+                <stop offset="40%" stopColor="#3b82f6" />
+                <stop offset="100%" stopColor="#6366f1" />
+              </linearGradient>
+              <linearGradient id="botWaveStroke1" x1="0" y1="15" x2="500" y2="100" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stopColor="#38bdf8" />
-                <stop offset="40%" stopColor="#6366f1" />
-                <stop offset="80%" stopColor="#8b5cf6" />
+                <stop offset="35%" stopColor="#6366f1" />
+                <stop offset="70%" stopColor="#8b5cf6" />
                 <stop offset="100%" stopColor="#a855f7" />
               </linearGradient>
-              <linearGradient id="botWaveStroke2" x1="0" y1="125" x2="190" y2="220" gradientUnits="userSpaceOnUse">
+              <linearGradient id="botWaveStroke2" x1="0" y1="24" x2="460" y2="100" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stopColor="#60a5fa" />
-                <stop offset="50%" stopColor="#818cf8" />
+                <stop offset="45%" stopColor="#818cf8" />
                 <stop offset="100%" stopColor="#c084fc" />
               </linearGradient>
             </defs>
           </svg>
         </div>
 
-        {/* ── Modal Header (Icon + Title Side-by-Side in SAME Row) ── */}
-        <div className="relative px-6 sm:px-8 pt-6 sm:pt-7 pb-6 flex items-start justify-between gap-3 z-10">
+        {/* ── Modal Header (Icon + Title + Subtitle Side-by-Side in SAME Row) ── */}
+        <div className="relative px-5 sm:px-6 pt-5 sm:pt-6 pb-2 flex items-start justify-between gap-4 z-10">
           <div className="flex items-center gap-3.5 min-w-0">
             {/* Padlock Icon Box */}
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-600 flex items-center justify-center text-white text-2xl shadow-md shadow-indigo-600/30 shrink-0">
+            <div className="w-13 h-13 rounded-2xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-600 flex items-center justify-center text-white text-2xl shadow-md shadow-indigo-600/30 shrink-0">
               <i className="bi bi-lock-fill"></i>
             </div>
-            {/* Title & Subtitle */}
+            {/* Title & Subtitle with increased font sizes */}
             <div className="min-w-0">
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight leading-snug mb-0.5">
+              <h2 className="text-2xl sm:text-[26px] font-bold text-slate-900 tracking-tight leading-snug mb-0.5">
                 1-Click Password Reset
               </h2>
-              <p className="text-xs sm:text-[13px] text-slate-500 mb-0 truncate">
+              <p className="text-sm text-slate-500 mb-0 font-normal">
                 Generate or assign a secure temporary password for the selected employee.
               </p>
             </div>
@@ -380,19 +403,19 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center transition-colors cursor-pointer text-xs font-bold shrink-0 mt-0.5 shadow-2xs"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center transition-colors cursor-pointer text-xs font-bold shrink-0 mt-0.5 shadow-2xs"
             title="Close"
           >
             ✕
           </button>
         </div>
 
-        {/* ── Main Body (Left Form + Vertical Divider + Right Security Guidelines) ── */}
+        {/* ── Main Body (Exact 70% Left : 30% Right Ratio with Compact Gap) ── */}
         <form onSubmit={handleSubmit}>
-          <div className="relative px-6 sm:px-8 pb-3 z-10 flex flex-col lg:flex-row items-stretch gap-6 sm:gap-7">
+          <div className="relative px-5 sm:px-6 pt-4 pb-2 z-10 flex flex-col lg:flex-row items-stretch gap-3.5 sm:gap-4">
 
-            {/* ── LEFT COLUMN ── */}
-            <div className="flex-1 min-w-0 space-y-4">
+            {/* ── LEFT COLUMN (70% of Content Split) ── */}
+            <div className="w-full lg:w-[68%] lg:flex-[7] min-w-0 space-y-3.5">
 
               {/* API Error */}
               {errorMsg && (
@@ -404,28 +427,28 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
 
               {/* Employee Details Section */}
               <div>
-                <h3 className="text-sm font-bold text-slate-900 mb-2.5">
+                <h3 className="text-xs font-bold text-slate-800 mb-2">
                   Employee Details
                 </h3>
 
                 {/* Employee Card */}
-                <div className="p-3.5 sm:p-4 rounded-xl border border-slate-200/90 bg-white flex items-center justify-between gap-3 shadow-2xs">
+                <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white flex items-center justify-between gap-3 shadow-2xs">
                   <div className="flex items-center gap-3.5 min-w-0">
-                    {/* Avatar */}
-                    <div className="w-12 h-12 rounded-full bg-indigo-100/80 text-indigo-700 font-extrabold text-sm flex items-center justify-center shrink-0 border border-indigo-200/60">
+                    {/* Large Avatar covering the 3 lines cleanly */}
+                    <div className="w-14 h-14 rounded-full bg-indigo-100/90 text-indigo-700 font-extrabold text-lg flex items-center justify-center shrink-0 border border-indigo-200/80 shadow-2xs">
                       {initials}
                     </div>
 
-                    {/* Info */}
-                    <div className="min-w-0">
-                      <p className="font-bold text-slate-900 text-sm truncate mb-0 leading-tight">
+                    {/* 3 Lines: Identical equal gap between 1st & 2nd and 2nd & 3rd lines */}
+                    <div className="flex flex-col justify-center min-w-0 py-0.5 space-y-1">
+                      <p className="font-bold text-slate-900 text-sm leading-tight mb-0">
                         {user.name}
                       </p>
-                      <p className="text-xs text-slate-500 truncate mb-0.5">
+                      <p className="text-xs text-slate-500 leading-tight mb-0">
                         {user.email}
                       </p>
-                      <p className="text-[11px] text-slate-400 font-medium mb-0">
-                        ID: {empId}
+                      <p className="text-xs text-slate-400 font-medium leading-tight mb-0 flex items-center">
+                        <span>ID: {empId}</span>
                         <span className="mx-1.5 text-slate-300">|</span>
                         <span className="capitalize">
                           {user.role
@@ -436,11 +459,11 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Role Badge */}
+                  {/* Role Badge Capsule */}
                   <span
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0 border ${roleCfg.cls}`}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider shrink-0 border ${roleCfg.cls}`}
                   >
-                    <i className={`bi ${roleCfg.icon} text-[10px]`}></i>
+                    <i className={`bi ${roleCfg.icon} text-xs`}></i>
                     {roleCfg.label}
                   </span>
                 </div>
@@ -449,7 +472,7 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
               {/* Password Field Block */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-800">
+                  <label className="text-xs sm:text-[13px] font-bold text-slate-800">
                     New Temporary Password{" "}
                     <span className="text-rose-500">*</span>
                   </label>
@@ -471,7 +494,7 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Enter or generate password..."
-                    className="w-full h-10 px-3.5 bg-transparent outline-none font-mono text-xs sm:text-sm text-slate-900 tracking-wide"
+                    className="w-full h-10 px-3 bg-transparent outline-none font-mono text-sm text-slate-900 tracking-wide"
                   />
                   <div className="flex items-center gap-1 pr-2 shrink-0">
                     <button
@@ -500,57 +523,59 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
                   </div>
                 </div>
 
-                {/* Strength Bar */}
+                {/* Strength Bar (Compact width segments) */}
                 {newPassword && (
-                  <div className="flex items-center gap-1 pt-0.5">
+                  <div className="flex items-center gap-1.5 pt-0.5">
                     {[1, 2, 3, 4].map((seg) => (
                       <div
                         key={seg}
-                        className={`h-1.5 rounded-full flex-1 transition-all duration-300 ${getSegmentColor(
+                        className={`h-1 w-8 sm:w-9 rounded-full transition-all duration-300 ${getSegmentColor(
                           seg,
                           strength.score
                         )}`}
                       />
                     ))}
-                    <span className={`text-[11px] font-semibold ml-1.5 whitespace-nowrap ${strength.textColor}`}>
+                    <span className={`text-xs font-semibold ml-2 whitespace-nowrap ${strength.textColor}`}>
                       {strength.label}
                     </span>
                   </div>
                 )}
               </div>
 
-              {/* Email Notification Checkbox */}
-              <div>
-                <label className="flex items-start gap-2.5 cursor-pointer select-none group">
-                  <input
-                    type="checkbox"
-                    checked={sendEmailNotification}
-                    onChange={(e) => setSendEmailNotification(e.target.checked)}
-                    className="w-4 h-4 mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600 shrink-0"
-                  />
-                  <div>
-                    <span className="text-xs font-semibold text-slate-800 block leading-tight">
-                      Notify employee with credentials via registered email
-                    </span>
-                    <span className="text-[11px] text-slate-500 block mt-0.5">
-                      An email will be sent to{" "}
-                      <span className="font-medium text-slate-700">{user.email}</span>{" "}
-                      with the temporary password and instructions.
-                    </span>
-                  </div>
-                </label>
+              {/* Email Notification Checkbox (Space after checkbox, flush left-aligned text block) */}
+              <div className="flex items-start gap-3 select-none">
+                <input
+                  type="checkbox"
+                  id="notify-email-checkbox"
+                  checked={sendEmailNotification}
+                  onChange={(e) => setSendEmailNotification(e.target.checked)}
+                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600 shrink-0 mt-0.5"
+                />
+                <div className="space-y-0.5 min-w-0">
+                  <label
+                    htmlFor="notify-email-checkbox"
+                    className="text-xs sm:text-[13px] font-semibold text-slate-800 cursor-pointer block leading-snug whitespace-nowrap"
+                  >
+                    Notify employee with credentials via registered email
+                  </label>
+                  <p className="text-xs text-slate-500 mb-0 leading-normal">
+                    An email will be sent to{" "}
+                    <span className="font-semibold text-slate-700">{user.email}</span>{" "}
+                    with the temporary password and instructions.
+                  </p>
+                </div>
               </div>
 
-              {/* Warning Notice */}
-              <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200/80 flex items-start gap-2.5">
+              {/* Warning Notice (Heading in one line, tight spacing between the two lines) */}
+              <div className="p-3 sm:p-3.5 rounded-xl bg-amber-50/80 border border-amber-200/80 flex items-start gap-2.5">
                 <div className="w-5 h-5 rounded-full border-2 border-amber-400 flex items-center justify-center shrink-0 mt-0.5">
-                  <i className="bi bi-exclamation text-amber-600 text-[11px] font-black"></i>
+                  <i className="bi bi-exclamation text-amber-600 text-xs font-black"></i>
                 </div>
-                <div>
-                  <p className="text-xs font-bold text-amber-900 mb-0.5 leading-tight">
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-[13px] font-bold text-amber-900 leading-tight mb-0 whitespace-nowrap">
                     The user will be required to update their temporary password
                   </p>
-                  <p className="text-[11px] text-amber-800 mb-0">
+                  <p className="text-xs text-amber-800 leading-tight mb-0 mt-0.5">
                     upon their next session sign-in.
                   </p>
                 </div>
@@ -558,27 +583,27 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
             </div>
 
             {/* ── Continuous Vertical Thin Divider Line Between Sections ── */}
-            <div className="hidden lg:block w-px bg-slate-200/80 self-stretch my-0.5"></div>
+            <div className="hidden lg:block w-px bg-slate-200/80 self-stretch my-0.5 shrink-0"></div>
 
-            {/* ── RIGHT COLUMN — Security Guidelines (Heading on 1 Single Line) ── */}
-            <div className="w-full lg:w-[310px] xl:w-[325px] shrink-0 space-y-3.5 pb-2">
-              <h3 className="text-sm font-bold text-slate-900 mb-3 whitespace-nowrap">
+            {/* ── RIGHT COLUMN — Security Guidelines (30% of Content Split) ── */}
+            <div className="w-full lg:w-[31%] lg:flex-[3] shrink-0 min-w-0 space-y-3.5 pb-2">
+              <h3 className="text-xs font-bold text-slate-800 mb-2 whitespace-nowrap">
                 Security Guidelines
               </h3>
 
               <div className="space-y-3.5">
                 {SECURITY_GUIDELINES.map((g) => (
-                  <div key={g.icon} className="flex items-center gap-3">
-                    {/* Larger Icon circle */}
-                    <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-200/90 flex items-center justify-center text-slate-600 text-sm shrink-0 shadow-2xs">
+                  <div key={g.icon} className="flex items-start gap-2.5">
+                    {/* Icon circle */}
+                    <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-200/90 flex items-center justify-center text-slate-600 text-xs shrink-0 shadow-2xs mt-0.5">
                       <i className={`bi ${g.icon}`}></i>
                     </div>
-                    {/* Text: Title and description tightly connected with no excess space */}
+                    {/* Text: Title and description tightly connected with increased legibility */}
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-slate-900 mb-0 leading-tight">
+                      <p className="text-[13px] font-bold text-slate-900 mb-0 leading-tight">
                         {g.title}
                       </p>
-                      <p className="text-[11px] text-slate-500 leading-snug mb-0 mt-0.5">
+                      <p className="text-xs text-slate-500 leading-snug mb-0 mt-0.5">
                         {g.desc}
                       </p>
                     </div>
@@ -589,30 +614,30 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
           </div>
 
           {/* ── Footer ── */}
-          <div className="relative px-6 sm:px-8 py-4 border-t border-slate-100 flex items-center justify-end gap-3 mt-4 bg-white/80 z-10">
+          <div className="relative px-5 sm:px-6 py-3.5 border-t border-slate-100/70 flex items-center justify-end gap-3 mt-3 bg-transparent z-10">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
+              className="h-11 px-5 rounded-xl text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 flex items-center gap-2 shadow-md shadow-indigo-600/30 transition-all cursor-pointer disabled:opacity-60"
+              className="h-11 px-6 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 flex items-center gap-2 shadow-md shadow-indigo-600/30 transition-all cursor-pointer disabled:opacity-60"
             >
               {loading ? (
                 <>
-                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   <span>Resetting...</span>
                 </>
               ) : (
                 <>
-                  <i className="bi bi-arrow-clockwise text-sm"></i>
+                  <i className="bi bi-arrow-clockwise text-base"></i>
                   <span>Confirm Password Reset</span>
-                  <i className="bi bi-arrow-right text-xs"></i>
+                  <i className="bi bi-arrow-right text-sm"></i>
                 </>
               )}
             </button>
