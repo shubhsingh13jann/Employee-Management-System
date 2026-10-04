@@ -549,7 +549,7 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
 
               {/* Email Notification Checkbox (Space after checkbox, flush left-aligned text block) */}
               <div className="flex items-start gap-3 select-none">
-                <div className="flex items-center h-5 shrink-0">
+                <div className="flex items-center h-5 shrink-0 mt-[3.5px]">
                   <input
                     type="checkbox"
                     id="notify-email-checkbox"
