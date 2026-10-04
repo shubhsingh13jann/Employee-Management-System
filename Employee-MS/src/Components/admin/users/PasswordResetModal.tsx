@@ -547,30 +547,28 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
                 )}
               </div>
 
-              {/* Email Notification Checkbox (Space after checkbox, flush left-aligned text block) */}
-              <div className="flex items-start gap-3 select-none">
-                <div className="flex items-center h-5 shrink-0 mt-[3.5px]">
+              {/* Email Notification Checkbox */}
+              <div className="space-y-1 select-none">
+                <div className="flex items-center gap-2.5">
                   <input
                     type="checkbox"
                     id="notify-email-checkbox"
                     checked={sendEmailNotification}
                     onChange={(e) => setSendEmailNotification(e.target.checked)}
-                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600 m-0"
+                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600 shrink-0 m-0"
                   />
-                </div>
-                <div className="space-y-0.5 min-w-0">
                   <label
                     htmlFor="notify-email-checkbox"
-                    className="text-xs sm:text-[13px] font-semibold text-slate-800 cursor-pointer block leading-5 whitespace-nowrap"
+                    className="text-xs sm:text-[13px] font-semibold text-slate-800 cursor-pointer mb-0 select-none whitespace-nowrap leading-none"
                   >
                     Notify employee with credentials via registered email
                   </label>
-                  <p className="text-xs text-slate-500 mb-0 leading-normal">
-                    An email will be sent to{" "}
-                    <span className="font-semibold text-slate-700">{user.email}</span>{" "}
-                    with the temporary password and instructions.
-                  </p>
                 </div>
+                <p className="text-xs text-slate-500 mb-0 leading-normal pl-[26px]">
+                  An email will be sent to{" "}
+                  <span className="font-semibold text-slate-700">{user.email}</span>{" "}
+                  with the temporary password and instructions.
+                </p>
               </div>
 
               {/* Warning Notice (Heading in one line, tight spacing between the two lines) */}

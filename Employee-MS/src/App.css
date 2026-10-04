@@ -734,10 +734,4 @@ div[data-section="security-guidelines"] > h3 {
   letter-spacing: -0.01em !important;
 }
 
-/* Ensure checkbox is vertically centered with label text line */
-.flex:has(> #notify-email-checkbox) > #notify-email-checkbox {
-  margin-top: 3.5px !important;
-}
-
-
 
