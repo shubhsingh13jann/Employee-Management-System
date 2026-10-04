@@ -258,6 +258,46 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
           </svg>
         </div>
 
+        {/* ── Decorative SVG Wave Background (bottom-left) ── */}
+        <div className="absolute bottom-0 left-0 w-80 h-72 pointer-events-none overflow-hidden rounded-bl-3xl">
+          <svg
+            viewBox="0 0 320 288"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-full"
+          >
+            <path
+              d="M-30 290 Q50 200 165 225 Q225 265 198 335 Q170 405 105 380 Q35 360 -30 290Z"
+              fill="url(#pwResetWaveBL1)"
+              opacity="0.22"
+            />
+            <path
+              d="M10 240 Q90 165 215 188 Q275 212 252 282 Q230 350 145 328 Q60 305 10 240Z"
+              fill="url(#pwResetWaveBL2)"
+              opacity="0.16"
+            />
+            <path
+              d="M-35 320 Q35 225 170 200 Q235 242 212 315 Q190 388 105 362 Q20 338 -35 320Z"
+              fill="url(#pwResetWaveBL3)"
+              opacity="0.12"
+            />
+            <defs>
+              <linearGradient id="pwResetWaveBL1" x1="0" y1="1" x2="1" y2="0">
+                <stop offset="0%" stopColor="#818cf8" />
+                <stop offset="100%" stopColor="#c4b5fd" />
+              </linearGradient>
+              <linearGradient id="pwResetWaveBL2" x1="0" y1="1" x2="1" y2="0">
+                <stop offset="0%" stopColor="#6366f1" />
+                <stop offset="100%" stopColor="#a5b4fc" />
+              </linearGradient>
+              <linearGradient id="pwResetWaveBL3" x1="0" y1="1" x2="1" y2="0">
+                <stop offset="0%" stopColor="#93c5fd" />
+                <stop offset="100%" stopColor="#e0e7ff" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
         {/* ── Header ── */}
         <div className="relative px-7 sm:px-8 pt-7 sm:pt-8 pb-5 z-10">
           {/* Close button */}
