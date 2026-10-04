@@ -2,6 +2,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
+import ErrorBoundary from "./ErrorBoundary";
 
 const Layout = () => {
   return (
@@ -18,7 +19,9 @@ const Layout = () => {
         
         {/* Main Workspace - Scrollable */}
         <main className="p-6 lg:p-8 flex-1 min-h-0 overflow-y-auto">
-          <Outlet />
+          <ErrorBoundary fallbackTitle="Workspace Module Error">
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
     </div>

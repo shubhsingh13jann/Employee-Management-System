@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import api from "../../api/axios";
 import { DepartmentRosterModal } from "../../Components/admin/departments/DepartmentRosterModal";
 import { TransferMemberModal } from "../../Components/admin/departments/TransferMemberModal";
