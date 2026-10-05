@@ -1,0 +1,152 @@
+/* ==========================================================================
+   ENTERPRISE DIGITAL ID BADGE - 3D PERSPECTIVE, HOLOGRAPHIC & PRINT STYLES
+   ========================================================================== */
+
+/* 3D Card Perspective Viewport */
+.badge-perspective-viewport {
+  perspective: 1400px;
+  transform-style: preserve-3d;
+}
+
+.badge-3d-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.75s cubic-bezier(0.34, 1.25, 0.64, 1);
+  transform-origin: center center;
+}
+
+.badge-3d-wrapper.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.badge-card-face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  transform-style: preserve-3d;
+}
+
+.badge-card-face-back {
+  transform: rotateY(180deg);
+}
+
+/* Dynamic Holographic Overlays */
+.holo-prism {
+  background: linear-gradient(
+    125deg,
+    transparent 15%,
+    rgba(255, 255, 255, 0.22) 28%,
+    rgba(6, 182, 212, 0.35) 40%,
+    rgba(217, 70, 239, 0.35) 55%,
+    rgba(245, 158, 11, 0.25) 70%,
+    transparent 85%
+  );
+  background-size: 200% 200%;
+  mix-blend-mode: color-dodge;
+  pointer-events: none;
+  transition: opacity 0.3s ease, background-position 0.15s ease-out;
+}
+
+.holo-grid {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.22) 1px, transparent 0);
+  background-size: 12px 12px;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.holo-cyber {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(6, 182, 212, 0.12),
+    rgba(6, 182, 212, 0.12) 10px,
+    transparent 10px,
+    transparent 20px
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.holo-waves {
+  background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.3), transparent 70%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* Linear Barcode Rendering */
+.barcode-lines-pattern {
+  background: repeating-linear-gradient(
+    90deg,
+    #ffffff,
+    #ffffff 2px,
+    transparent 2px,
+    transparent 4px,
+    #ffffff 4px,
+    #ffffff 7px,
+    transparent 7px,
+    transparent 9px,
+    #ffffff 9px,
+    #ffffff 13px,
+    transparent 13px,
+    transparent 15px,
+    #ffffff 15px,
+    #ffffff 17px,
+    transparent 17px,
+    transparent 19px,
+    #ffffff 19px,
+    #ffffff 22px
+  );
+}
+
+/* Glass panel */
+.badge-glass-panel {
+  background: rgba(13, 19, 35, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Custom Scrollbar for Drawer */
+.badge-custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.badge-custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+}
+.badge-custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.4);
+  border-radius: 4px;
+}
+.badge-custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.7);
+}
+
+/* Print Optimization */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #printable-badge-area,
+  #printable-badge-area * {
+    visibility: visible !important;
+  }
+  #printable-badge-area {
+    position: fixed !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) scale(1.15) !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    page-break-inside: avoid !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    border: 1px solid #1e293b !important;
+  }
+}
