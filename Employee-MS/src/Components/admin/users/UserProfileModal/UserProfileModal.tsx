@@ -5,7 +5,7 @@ import { useAuth } from "../../../../context/AuthContext";
 import ErrorBoundary from "../../../common/ErrorBoundary";
 import "./UserProfileModal.css";
 
-interface UserProfileModalProps {
+export interface UserProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   userId: number | null;
@@ -1556,3 +1556,5 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 document.body
 );
 };
+
+export default UserProfileModal;

@@ -103,7 +103,7 @@ const SECURITY_GUIDELINES = [
    Props Interface
    ───────────────────────────────────────────────────────────── */
 
-interface PasswordResetModalProps {
+export interface PasswordResetModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (message: string) => void;
@@ -660,3 +660,5 @@ export const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
     document.body
   );
 };
+
+export default PasswordResetModal;

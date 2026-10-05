@@ -16,7 +16,7 @@ export interface ModulePermission {
 
 export type RolePermissionsMap = Record<RoleType, Record<string, Record<ActionType, boolean>>>;
 
-interface RolePermissionMatrixModalProps {
+export interface RolePermissionMatrixModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSaved?: (message: string) => void;
@@ -531,3 +531,5 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
     document.body
   );
 };
+
+export default RolePermissionMatrixModal;

@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import api from "../../../../api/axios";
 import "./UserFormModal.css";
 
-interface UserFormModalProps {
+export interface UserFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
@@ -1274,3 +1274,5 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
     document.body
   );
 };
+
+export default UserFormModal;

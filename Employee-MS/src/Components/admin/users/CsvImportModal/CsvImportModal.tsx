@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import api from "../../../../api/axios";
 import "./CsvImportModal.css";
 
-interface CsvImportModalProps {
+export interface CsvImportModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
@@ -530,3 +530,5 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
     </div>
   );
 };
+
+export default CsvImportModal;

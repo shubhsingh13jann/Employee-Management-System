@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import api from "../../../../api/axios";
 import "./BulkBroadcastModal.css";
 
-interface BulkBroadcastModalProps {
+export interface BulkBroadcastModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (message: string) => void;
@@ -244,3 +244,5 @@ export const BulkBroadcastModal: React.FC<BulkBroadcastModalProps> = ({
     document.body
   );
 };
+
+export default BulkBroadcastModal;

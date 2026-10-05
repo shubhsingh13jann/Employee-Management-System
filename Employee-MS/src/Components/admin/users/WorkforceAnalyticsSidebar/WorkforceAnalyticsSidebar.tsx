@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import "./WorkforceAnalyticsSidebar.css";
 
-interface WorkforceAnalyticsSidebarProps {
+export interface WorkforceAnalyticsSidebarProps {
   allUsers: any[];
   departments: any[];
   onClose?: () => void;
@@ -434,3 +434,5 @@ export const WorkforceAnalyticsSidebar: React.FC<WorkforceAnalyticsSidebarProps>
     </div>
   );
 };
+
+export default WorkforceAnalyticsSidebar;

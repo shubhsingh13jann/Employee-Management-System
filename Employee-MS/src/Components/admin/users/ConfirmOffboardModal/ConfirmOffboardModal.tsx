@@ -2,7 +2,7 @@ import React from "react";
 import { createPortal } from "react-dom";
 import "./ConfirmOffboardModal.css";
 
-interface ConfirmOffboardModalProps {
+export interface ConfirmOffboardModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;

@@ -6,3 +6,4 @@ import {
 export type EmployeeIdCardModalProps = EnterpriseIdBadgeModalProps;
 export const EmployeeIdCardModal = EnterpriseIdBadgeModal;
 export default EnterpriseIdBadgeModal;
+
