@@ -8,7 +8,7 @@ import { WorkforceAnalyticsSidebar } from "../../../Components/admin/users/Workf
 import { CsvImportModal } from "../../../Components/admin/users/CsvImportModal";
 import { PasswordResetModal } from "../../../Components/admin/users/PasswordResetModal";
 import { BulkBroadcastModal } from "../../../Components/admin/users/BulkBroadcastModal";
-import { EnterpriseIdBadgeModal } from "../../../Components/admin/users/EnterpriseIdBadgeModal";
+import { EmployeeIdCardModal } from "../../../Components/admin/users/EmployeeIdCardModal";
 import { RolePermissionMatrixModal } from "../../../Components/admin/users/RolePermissionMatrixModal";
 import "./UserManagement.css";
 interface FilterDropdownOption {
@@ -2494,7 +2494,7 @@ const UserManagement: React.FC = () => {
       />
 
       {/* Digital Employee ID Card Badge Modal */}
-      <EnterpriseIdBadgeModal
+      <EmployeeIdCardModal
         isOpen={Boolean(idCardTarget)}
         onClose={() => setIdCardTarget(null)}
         user={idCardTarget}

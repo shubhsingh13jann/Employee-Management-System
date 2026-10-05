@@ -9,7 +9,7 @@ export interface CsvImportModalProps {
   departments: Array<{ id: number; name: string }>;
 }
 
-interface ParsedEmployeeRow {
+export interface ParsedEmployeeRow {
   id: number;
   name: string;
   email: string;
