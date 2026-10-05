@@ -244,5 +244,5 @@ export const BulkBroadcastModal: React.FC<BulkBroadcastModalProps> = ({
     document.body
   );
 };
- 
+
 export default BulkBroadcastModal;
