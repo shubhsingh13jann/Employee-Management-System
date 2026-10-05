@@ -326,15 +326,17 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
       scrollToSection(1);
       return;
     }
-    if (!isEditMode && !formData.password.trim()) {
-      setErrorMsg("Temporary password is required for onboarding.");
-      scrollToSection(1);
-      return;
-    }
-    if (formData.password.trim() && formData.password.trim().length < 6) {
-      setErrorMsg("Password must be at least 6 characters.");
-      scrollToSection(1);
-      return;
+    if (!isEditMode) {
+      if (!formData.password.trim()) {
+        setErrorMsg("Temporary password is required for onboarding.");
+        scrollToSection(1);
+        return;
+      }
+      if (formData.password.trim().length < 6) {
+        setErrorMsg("Password must be at least 6 characters.");
+        scrollToSection(1);
+        return;
+      }
     }
     if (!formData.role) {
       setErrorMsg("Please select a governance role tier.");
@@ -352,7 +354,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
       const payload = {
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
-        password: formData.password.trim() || undefined,
+        password: isEditMode ? undefined : (formData.password.trim() || undefined),
         role: formData.role,
         department_id: formData.department_id ? Number(formData.department_id) : null,
         supervisor_id: formData.role === "employee" && formData.supervisor_id ? Number(formData.supervisor_id) : null,
@@ -842,57 +844,65 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                       </div>
                     </div>
 
-                    {/* Password (Normal Heading by Default, Smoothly Docks to Border when Typing/Filled) */}
-                    <div className="md:col-span-2 relative pt-[20px]">
-                      <label
-                        className={`absolute left-2.5 transition-all duration-200 ease-out pointer-events-none select-none z-10 px-2 leading-none ${
-                          isFieldDocked("password")
-                            ? `top-[12px] text-xs font-bold bg-white rounded-xs py-0.5 shadow-2xs ${focusedField === "password" ? "text-[#4f46e5]" : "text-slate-700"}`
-                            : "top-0 text-[11.5px] font-bold text-slate-800 bg-transparent"
-                        }`}
-                      >
-                        {isEditMode ? "Update Password (Optional)" : "Initial Login Password"}{" "}
-                        {!isEditMode && <span className="text-rose-500">*</span>}
-                      </label>
-                      <div
-                        className={`relative flex items-center rounded-lg bg-white border border-slate-200 hover:border-indigo-400 focus-within:border-[#4f46e5] focus-within:ring-2 focus-within:ring-indigo-100 transition-all duration-200 ease-out px-2.5 shadow-2xs ${
-                          isFieldDocked("password") ? "h-11" : "h-9"
-                        }`}
-                      >
-                        <i
-                          className={`bi bi-lock mr-2 shrink-0 transition-all duration-200 ${
-                            isFieldDocked("password") ? "text-sm text-indigo-500" : "text-xs text-slate-400"
+                    {/* Password (Onboarding Only: Removed during profile editing to prevent direct password overwrites; dedicated Reset Password modal handles credential resets) */}
+                    {!isEditMode ? (
+                      <div className="md:col-span-2 relative pt-[20px]">
+                        <label
+                          className={`absolute left-2.5 transition-all duration-200 ease-out pointer-events-none select-none z-10 px-2 leading-none ${
+                            isFieldDocked("password")
+                              ? `top-[12px] text-xs font-bold bg-white rounded-xs py-0.5 shadow-2xs ${focusedField === "password" ? "text-[#4f46e5]" : "text-slate-700"}`
+                              : "top-0 text-[11.5px] font-bold text-slate-800 bg-transparent"
                           }`}
-                        ></i>
-                        <input
-                          type={showPassword ? "text" : "password"}
-                          required={!isEditMode}
-                          value={formData.password}
-                          onFocus={() => {
-                            setFocusedField("password");
-                            setActiveStep(1);
-                          }}
-                          onBlur={() => setFocusedField(null)}
-                          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                          placeholder={isFieldDocked("password") ? "" : "Leave blank to preserve current password"}
-                          className={`w-full bg-transparent outline-none font-medium pt-0.5 transition-all duration-200 ${
-                            isFieldDocked("password") ? "text-[13.5px] text-slate-900 placeholder:text-slate-400" : "text-xs text-slate-800 placeholder:text-slate-400"
-                          }`}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="text-slate-400 hover:text-slate-600 text-sm ml-2 cursor-pointer shrink-0"
-                          title={showPassword ? "Hide password" : "Show password"}
                         >
-                          <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
-                        </button>
+                          Initial Login Password <span className="text-rose-500">*</span>
+                        </label>
+                        <div
+                          className={`relative flex items-center rounded-lg bg-white border border-slate-200 hover:border-indigo-400 focus-within:border-[#4f46e5] focus-within:ring-2 focus-within:ring-indigo-100 transition-all duration-200 ease-out px-2.5 shadow-2xs ${
+                            isFieldDocked("password") ? "h-11" : "h-9"
+                          }`}
+                        >
+                          <i
+                            className={`bi bi-lock mr-2 shrink-0 transition-all duration-200 ${
+                              isFieldDocked("password") ? "text-sm text-indigo-500" : "text-xs text-slate-400"
+                            }`}
+                          ></i>
+                          <input
+                            type={showPassword ? "text" : "password"}
+                            required
+                            value={formData.password}
+                            onFocus={() => {
+                              setFocusedField("password");
+                              setActiveStep(1);
+                            }}
+                            onBlur={() => setFocusedField(null)}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            placeholder={isFieldDocked("password") ? "" : "Enter temporary password (min 6 chars)"}
+                            className={`w-full bg-transparent outline-none font-medium pt-0.5 transition-all duration-200 ${
+                              isFieldDocked("password") ? "text-[13.5px] text-slate-900 placeholder:text-slate-400" : "text-xs text-slate-800 placeholder:text-slate-400"
+                            }`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="text-slate-400 hover:text-slate-600 text-sm ml-2 cursor-pointer shrink-0"
+                            title={showPassword ? "Hide password" : "Show password"}
+                          >
+                            <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
+                          </button>
+                        </div>
+                        <p className="text-[10px] text-slate-400 font-normal mt-1 mb-0 flex items-center gap-1">
+                          <i className="bi bi-info-circle text-[9px] text-[#4f46e5]"></i>
+                          <span>Temporary credentials provided to the new hire to facilitate first sign-in.</span>
+                        </p>
                       </div>
-                      <p className="text-[10px] text-slate-400 font-normal mt-1 mb-0 flex items-center gap-1">
-                        <i className="bi bi-info-circle text-[9px] text-[#4f46e5]"></i>
-                        <span>Leave empty unless you wish to reset or change this member's password.</span>
-                      </p>
-                    </div>
+                    ) : (
+                      <div className="md:col-span-2 flex items-center gap-2.5 p-2.5 bg-slate-50/80 rounded-lg border border-slate-200/60 text-slate-500 text-[11px] leading-relaxed">
+                        <i className="bi bi-shield-lock text-[#4f46e5] text-base shrink-0"></i>
+                        <span>
+                          <strong className="text-slate-700">Security Safeguard:</strong> Passwords cannot be directly modified through profile editing. To reset employee credentials safely with full audit tracking, use the dedicated <strong className="text-slate-700">Reset Password</strong> button on the user roster.
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
