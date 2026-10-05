@@ -13,24 +13,9 @@ export default defineConfig({
     react()
   ],
   resolve: {
-    alias: [
-      {
-        find: /^\.\.\/\.\.\/api\/axios$/,
-        replacement: path.resolve(__dirname, 'src/api/axios')
-      },
-      {
-        find: /^\.\.\/\.\.\/context\/AuthContext$/,
-        replacement: path.resolve(__dirname, 'src/context/AuthContext')
-      },
-      {
-        find: /^\.\.\/\.\.\/Components\/admin\/users\/(.*)$/,
-        replacement: path.resolve(__dirname, 'src/Components/admin/users/$1')
-      },
-      {
-        find: '@',
-        replacement: path.resolve(__dirname, 'src')
-      }
-    ]
+    alias: {
+      '@': path.resolve(__dirname, 'src')
+    }
   },
   server: {
     port: 5173

@@ -844,8 +844,8 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                       </div>
                     </div>
 
-                    {/* Password (Onboarding Only: Removed during profile editing to prevent direct password overwrites; dedicated Reset Password modal handles credential resets) */}
-                    {!isEditMode ? (
+                    {/* Password (Onboarding Only: Completely omitted during profile editing) */}
+                    {!isEditMode && (
                       <div className="md:col-span-2 relative pt-[20px]">
                         <label
                           className={`absolute left-2.5 transition-all duration-200 ease-out pointer-events-none select-none z-10 px-2 leading-none ${
@@ -894,13 +894,6 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                           <i className="bi bi-info-circle text-[9px] text-[#4f46e5]"></i>
                           <span>Temporary credentials provided to the new hire to facilitate first sign-in.</span>
                         </p>
-                      </div>
-                    ) : (
-                      <div className="md:col-span-2 flex items-center gap-2.5 p-2.5 bg-slate-50/80 rounded-lg border border-slate-200/60 text-slate-500 text-[11px] leading-relaxed">
-                        <i className="bi bi-shield-lock text-[#4f46e5] text-base shrink-0"></i>
-                        <span>
-                          <strong className="text-slate-700">Security Safeguard:</strong> Passwords cannot be directly modified through profile editing. To reset employee credentials safely with full audit tracking, use the dedicated <strong className="text-slate-700">Reset Password</strong> button on the user roster.
-                        </span>
                       </div>
                     )}
                   </div>
