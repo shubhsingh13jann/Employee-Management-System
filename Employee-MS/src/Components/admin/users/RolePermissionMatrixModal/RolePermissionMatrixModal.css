@@ -1,0 +1,19 @@
+/* ==========================================================================
+   ROLE PERMISSION MATRIX MODAL - COMPONENT STYLES
+   ========================================================================== */
+
+/* Custom Permission Grid Scrollbar */
+.permission-matrix-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.permission-matrix-scrollbar::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.6);
+}
+.permission-matrix-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.5);
+  border-radius: 4px;
+}
+.permission-matrix-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.7);
+}

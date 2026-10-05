@@ -1,0 +1,18 @@
+/* ==========================================================================
+   WORKFORCE ANALYTICS SIDEBAR - COMPONENT STYLES
+   ========================================================================== */
+
+/* Custom Smooth Sidebar Scrollbar */
+.workforce-sidebar-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.workforce-sidebar-scrollbar::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.6);
+}
+.workforce-sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.5);
+  border-radius: 4px;
+}
+.workforce-sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.7);
+}

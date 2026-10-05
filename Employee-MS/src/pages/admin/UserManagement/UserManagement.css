@@ -1,0 +1,35 @@
+/* ==========================================================================
+   USER MANAGEMENT PAGE - DEDICATED PAGE STYLES
+   ========================================================================== */
+
+/* Floating Bulk Action Bar Animation */
+@keyframes floatingBarSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.floating-action-bar-anim {
+  animation: floatingBarSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Custom User Table Scrollbar */
+.user-table-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.user-table-scrollbar::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.5);
+}
+.user-table-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 4px;
+}
+.user-table-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.6);
+}

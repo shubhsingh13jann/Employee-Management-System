@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import "./EmployeeIdCardModal.css";
+import "./EnterpriseIdBadgeModal.css";
 
-export interface EmployeeIdCardModalProps {
+export interface EnterpriseIdBadgeModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: {
@@ -102,7 +102,7 @@ const THEMES: Record<ThemeKey, ThemeConfig> = {
   },
 };
 
-export const EmployeeIdCardModal: React.FC<EmployeeIdCardModalProps> = ({
+export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
   isOpen,
   onClose,
   user,
@@ -934,3 +934,5 @@ export const EmployeeIdCardModal: React.FC<EmployeeIdCardModalProps> = ({
     document.body
   );
 };
+
+export default EnterpriseIdBadgeModal;

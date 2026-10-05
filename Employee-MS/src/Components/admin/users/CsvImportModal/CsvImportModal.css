@@ -1,0 +1,25 @@
+/* ==========================================================================
+   CSV IMPORT MODAL - COMPONENT STYLES
+   ========================================================================== */
+
+/* Dropzone pulse and drag highlight */
+.csv-dropzone-dragover {
+  border-color: #6366f1 !important;
+  background-color: rgba(99, 102, 241, 0.08) !important;
+}
+
+/* Custom Preview Table Scrollbar */
+.csv-preview-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.csv-preview-scrollbar::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.6);
+}
+.csv-preview-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.5);
+  border-radius: 4px;
+}
+.csv-preview-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.7);
+}
