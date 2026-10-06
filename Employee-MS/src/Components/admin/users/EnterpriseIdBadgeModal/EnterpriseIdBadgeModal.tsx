@@ -394,9 +394,9 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
               <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse shrink-0"></span>
               ENTERPRISE PASS
             </span>
-            <h1 className="text-[11px] sm:text-xs font-semibold tracking-tight text-slate-100 flex items-center gap-1.5 sm:gap-2 mb-0 whitespace-nowrap">
+            <h1 className="text-[10px] sm:text-[11px] font-semibold tracking-tight text-slate-200 flex items-center gap-1.5 mb-0 whitespace-nowrap">
               <i className="bi bi-shield-check text-indigo-400 text-xs shrink-0"></i>
-              <span>Security Credential & Identity Portal</span>
+              <span>Security ID Portal</span>
             </h1>
           </div>
 
@@ -427,15 +427,15 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
           {/* LEFT CUSTOMIZATION DRAWER PANEL */}
           {isEditorOpen && (
             <div className="w-full lg:w-96 h-fit self-start badge-glass-panel rounded-2xl p-4 sm:p-5 border border-slate-800/90 space-y-4 text-xs max-h-[580px] overflow-y-auto badge-custom-scrollbar transition-all duration-300">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3 gap-2">
-                <h3 className="font-bold text-xs sm:text-[13px] text-slate-100 flex items-center gap-1.5 mb-0 whitespace-nowrap shrink-0">
-                  <i className="bi bi-magic text-indigo-400 shrink-0"></i>
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2.5 gap-2">
+                <h3 className="font-bold text-[11px] sm:text-xs text-slate-200 flex items-center gap-1.5 mb-0 whitespace-nowrap shrink-0">
+                  <i className="bi bi-magic text-indigo-400 text-[11px] shrink-0"></i>
                   <span>Badge Customizer</span>
                 </h3>
                 <button
                   type="button"
                   onClick={resetBadgeData}
-                  className="text-[11px] sm:text-xs text-indigo-400 hover:text-indigo-300 font-medium hover:underline cursor-pointer whitespace-nowrap shrink-0"
+                  className="text-[10px] sm:text-[10.5px] text-indigo-400 hover:text-indigo-300 font-medium hover:underline cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Reset Defaults
                 </button>
@@ -662,29 +662,31 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                     }`}
                   ></div>
 
-                  {/* HEADER: LOGO & STATUS */}
-                  <div className="relative z-10 flex items-center justify-between pt-1">
-                    <div className="flex items-center space-x-2.5">
-                      <div className={`w-9 h-9 rounded-xl ${currentTheme.logoBg} flex items-center justify-center font-black text-lg shadow-lg`}>
-                        E
+                  {/* HEADER: LOGO, STATUS & ACCENT LINE */}
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between pt-0.5">
+                      <div className="flex items-center space-x-2.5">
+                        <div className={`w-9 h-9 rounded-xl ${currentTheme.logoBg} flex items-center justify-center font-black text-lg shadow-lg`}>
+                          E
+                        </div>
+                        <div>
+                          <div className="text-[11px] font-extrabold tracking-wider text-slate-100 uppercase leading-none">
+                            ENTERPRISE EMS
+                          </div>
+                          <div className="text-[8.5px] font-semibold tracking-widest text-slate-400 uppercase mt-0.5">
+                            SECURITY CREDENTIAL
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="text-[11px] font-extrabold tracking-wider text-slate-100 uppercase leading-none">
-                          ENTERPRISE EMS
-                        </div>
-                        <div className="text-[8.5px] font-semibold tracking-widest text-slate-400 uppercase mt-0.5">
-                          SECURITY CREDENTIAL
-                        </div>
+
+                      <div className={`px-2.5 py-1 rounded-full border font-mono text-[9px] font-bold tracking-wider flex items-center gap-1.5 shadow-2xs ${statusStyle.pill}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot} animate-pulse`}></span>
+                        <span>{status}</span>
                       </div>
                     </div>
 
-                    <div className={`px-2.5 py-1 rounded-full border font-mono text-[9px] font-bold tracking-wider flex items-center gap-1.5 shadow-2xs ${statusStyle.pill}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot} animate-pulse`}></span>
-                      <span>{status}</span>
-                    </div>
+                    <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-700/60 to-transparent mt-2 relative z-10"></div>
                   </div>
-
-                  <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-700/60 to-transparent my-1.5 relative z-10"></div>
 
                   {/* AVATAR SECTION */}
                   <div className="relative z-10 flex flex-col items-center my-1">
@@ -710,12 +712,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                         </div>
                       </div>
 
-                      {/* Security Shield Badge Pin */}
-                      <div className="absolute -bottom-2 -right-2 w-7 h-7 bg-slate-900 border border-slate-700 rounded-lg flex items-center justify-center text-cyan-400 shadow-md">
-                        <i className="bi bi-shield-shaded text-xs"></i>
-                      </div>
-
-                      {user.is_hod && (
+                      {Boolean(user.is_hod) && (
                         <div className="absolute -top-2 -left-2 px-1.5 py-0.5 rounded-md text-[8.5px] font-black bg-amber-400 text-slate-950 shadow-md flex items-center gap-1">
                           <span>👑</span> HOD
                         </div>
