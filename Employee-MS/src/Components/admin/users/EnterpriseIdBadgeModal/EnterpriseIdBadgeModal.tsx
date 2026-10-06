@@ -20,7 +20,8 @@ export interface EnterpriseIdBadgeModalProps {
   } | null;
 }
 
-type ThemeKey = "cyber" | "gold" | "frost" | "emerald" | "violet";
+type PresetThemeKey = "cyber" | "gold" | "frost" | "emerald" | "violet";
+type ThemeKey = PresetThemeKey | "custom";
 type HoloKey = "holo-prism" | "holo-grid" | "holo-cyber" | "holo-waves" | "none";
 type AvatarPreset = "photo" | "initials" | "user" | "shield";
 type BarcodeType = "linear" | "qr";
@@ -39,7 +40,7 @@ interface ThemeConfig {
   previewGradient: string;
 }
 
-const THEMES: Record<ThemeKey, ThemeConfig> = {
+const THEMES: Record<PresetThemeKey, ThemeConfig> = {
   cyber: {
     name: "Cyber Neon",
     badgeBg: "bg-slate-950",
@@ -123,6 +124,8 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
   const [barcodeType, setBarcodeType] = useState<BarcodeType>("linear");
   const [holoEffect, setHoloEffect] = useState<HoloKey>("holo-prism");
   const [theme, setTheme] = useState<ThemeKey>("cyber");
+  const [customColor1, setCustomColor1] = useState<string>("#6366f1");
+  const [customColor2, setCustomColor2] = useState<string>("#06b6d4");
   const [avatarType, setAvatarType] = useState<AvatarPreset>("photo");
   const [customAvatar, setCustomAvatar] = useState<string | null>(null);
 
@@ -193,7 +196,21 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
 
   if (!isOpen || !user) return null;
 
-  const currentTheme = THEMES[theme];
+  const currentTheme: ThemeConfig =
+    theme === "custom"
+      ? {
+          name: "Custom Palette",
+          badgeBg: "bg-slate-950",
+          logoBg: "text-white shadow-lg",
+          avatarRing: "shadow-xl",
+          topBar: "",
+          glow1: "",
+          glow2: "",
+          accentText: "text-indigo-400",
+          roleBadge: "border font-mono font-bold tracking-widest uppercase",
+          previewGradient: "",
+        }
+      : THEMES[theme];
 
   // 3D Gyroscope Mouse Movement
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -341,6 +358,8 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
     setBarcodeType("linear");
     setHoloEffect("holo-prism");
     setTheme("cyber");
+    setCustomColor1("#6366f1");
+    setCustomColor2("#06b6d4");
     setIsFlipped(false);
 
     if (user.image_url) {
@@ -421,7 +440,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
           </div>
 
           {/* Right: Actions */}
-          <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0 justify-end">
+          <div className="flex items-center gap-3.5 sm:gap-4 shrink-0 justify-end">
             {/* Toggle Customizer Drawer */}
             <button
               type="button"
@@ -434,7 +453,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1 sm:p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer shrink-0"
+              className="p-1 sm:p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer shrink-0 ml-0.5"
               title="Close modal"
             >
               <i className="bi bi-x-lg text-sm sm:text-base"></i>
@@ -466,11 +485,18 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                   </button>
                 </div>
 
-                {/* Theme Presets */}
+                {/* Theme Presets & Custom Gradient Studio */}
                 <div>
-                  <label className="text-slate-300 font-bold block mb-1.5">Color Theme Preset</label>
-                  <div className="grid grid-cols-5 gap-2">
-                    {(Object.keys(THEMES) as ThemeKey[]).map((tKey) => (
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-0">
+                      Color Theme & Palette
+                    </label>
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      {theme === "custom" ? "Custom Blend" : THEMES[theme].name}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-6 gap-1.5">
+                    {(Object.keys(THEMES) as PresetThemeKey[]).map((tKey) => (
                       <button
                         key={tKey}
                         type="button"
@@ -479,12 +505,108 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                           showToast(`Theme changed to ${THEMES[tKey].name}`, "success");
                         }}
                         title={THEMES[tKey].name}
-                        className={`h-8 rounded-lg bg-gradient-to-r ${THEMES[tKey].previewGradient} border ${
-                          theme === tKey ? "ring-2 ring-white border-white scale-105" : "border-white/20"
-                        } hover:scale-105 transition cursor-pointer`}
+                        className={`badge-theme-preset ${
+                          theme === tKey ? "is-active" : "is-inactive"
+                        } bg-gradient-to-r ${THEMES[tKey].previewGradient}`}
                       />
                     ))}
+                    {/* 6th: Custom Palette Button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTheme("custom");
+                        showToast("Custom Gradient Studio active", "info");
+                      }}
+                      title="Custom Gradient Palette"
+                      style={{
+                        background: `linear-gradient(135deg, ${customColor1}, ${customColor2})`,
+                      }}
+                      className={`badge-theme-preset ${
+                        theme === "custom" ? "is-active" : "is-inactive"
+                      } flex items-center justify-center text-white shadow-xs`}
+                    >
+                      <i className="bi bi-palette-fill text-[11px] drop-shadow-xs"></i>
+                    </button>
                   </div>
+
+                  {/* Custom Color Palette & Gradient Studio */}
+                  {theme === "custom" && (
+                    <div className="mt-2.5 p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2 animate-in fade-in duration-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
+                          <i className="bi bi-palette-fill text-indigo-400 text-xs"></i>
+                          HR Custom Gradient Combination
+                        </span>
+                        <span className="text-[10px] font-mono text-indigo-400 uppercase font-semibold">
+                          {customColor1} → {customColor2}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        {/* Start Color Picker */}
+                        <label className="flex items-center gap-2 p-1.5 bg-slate-950/70 rounded-lg border border-slate-800 hover:border-slate-700 transition cursor-pointer">
+                          <input
+                            type="color"
+                            value={customColor1}
+                            onChange={(e) => setCustomColor1(e.target.value)}
+                            className="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent shrink-0"
+                          />
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-[9.5px] text-slate-400 uppercase font-medium leading-none mb-0.5">Start Color</span>
+                            <span className="text-[10.5px] font-mono font-bold text-slate-200 uppercase truncate">
+                              {customColor1}
+                            </span>
+                          </div>
+                        </label>
+
+                        {/* End Color Picker */}
+                        <label className="flex items-center gap-2 p-1.5 bg-slate-950/70 rounded-lg border border-slate-800 hover:border-slate-700 transition cursor-pointer">
+                          <input
+                            type="color"
+                            value={customColor2}
+                            onChange={(e) => setCustomColor2(e.target.value)}
+                            className="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent shrink-0"
+                          />
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-[9.5px] text-slate-400 uppercase font-medium leading-none mb-0.5">End Color</span>
+                            <span className="text-[10.5px] font-mono font-bold text-slate-200 uppercase truncate">
+                              {customColor2}
+                            </span>
+                          </div>
+                        </label>
+                      </div>
+
+                      {/* Quick Harmonious Palettes */}
+                      <div>
+                        <div className="text-[9.5px] text-slate-400 font-medium mb-1">Quick Gradient Combinations:</div>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {[
+                            { c1: "#6366f1", c2: "#06b6d4", name: "Cyber Cyan" },
+                            { c1: "#f43f5e", c2: "#fb923c", name: "Sunset Coral" },
+                            { c1: "#059669", c2: "#10b981", name: "Emerald Mint" },
+                            { c1: "#2563eb", c2: "#9333ea", name: "Royal Purple" },
+                            { c1: "#d946ef", c2: "#f59e0b", name: "Amber Fusion" },
+                            { c1: "#3b82f6", c2: "#ec4899", name: "Neon Rose" },
+                          ].map((combo) => (
+                            <button
+                              key={combo.name}
+                              type="button"
+                              onClick={() => {
+                                setCustomColor1(combo.c1);
+                                setCustomColor2(combo.c2);
+                                showToast(`Applied ${combo.name} gradient`, "success");
+                              }}
+                              title={combo.name}
+                              className="h-4.5 w-7 rounded-md border border-white/10 hover:border-white/50 transition cursor-pointer"
+                              style={{
+                                background: `linear-gradient(90deg, ${combo.c1}, ${combo.c2})`,
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Avatar Photo & Presets */}
@@ -560,7 +682,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
 
               {/* Holographic Overlay Effect */}
               <div>
-                <label className="text-slate-300 font-bold block mb-1.5">Holographic Effect Overlay</label>
+                <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Holographic Effect Overlay</label>
                 <select
                   value={holoEffect}
                   onChange={(e) => {
@@ -568,7 +690,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                     setHoloEffect(val);
                     showToast(`Hologram effect: ${val}`, "info");
                   }}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-200 focus:outline-hidden focus:border-indigo-500 cursor-pointer"
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 text-[12px] sm:text-[12.5px] focus:outline-hidden focus:border-indigo-500 cursor-pointer"
                 >
                   <option value="holo-prism">Prism Light Reflex (Default)</option>
                   <option value="holo-grid">Security Micro Grid</option>
@@ -579,66 +701,66 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
               </div>
 
               {/* Personal Info Input Fields */}
-              <div className="space-y-2 pt-1 border-t border-slate-800">
+              <div className="space-y-3 pt-2 border-t border-slate-800/80">
                 <div>
-                  <label className="text-slate-400 font-medium block mb-1">Full Name</label>
+                  <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Full Name</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-100 font-semibold focus:outline-hidden focus:border-indigo-500"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 font-semibold text-[12.5px] sm:text-[13px] focus:outline-hidden focus:border-indigo-500"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-slate-400 font-medium block mb-1">Role Title</label>
+                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Role Title</label>
                     <input
                       type="text"
                       value={role}
                       onChange={(e) => setRole(e.target.value.toUpperCase())}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-100 uppercase focus:outline-hidden focus:border-indigo-500 font-mono text-xs"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 uppercase focus:outline-hidden focus:border-indigo-500 font-mono text-[12px]"
                     />
                   </div>
                   <div>
-                    <label className="text-slate-400 font-medium block mb-1">Personnel ID</label>
+                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Personnel ID</label>
                     <input
                       type="text"
                       value={personnelId}
                       onChange={(e) => setPersonnelId(e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-100 font-mono focus:outline-hidden focus:border-indigo-500 text-xs"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 font-mono focus:outline-hidden focus:border-indigo-500 text-[12px]"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-slate-400 font-medium block mb-1">Department</label>
+                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Department</label>
                     <input
                       type="text"
                       value={department}
                       onChange={(e) => setDepartment(e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-100 focus:outline-hidden focus:border-indigo-500"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 font-medium text-[12.5px] sm:text-[13px] focus:outline-hidden focus:border-indigo-500"
                     />
                   </div>
                   <div>
-                    <label className="text-slate-400 font-medium block mb-1">Validity</label>
+                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Validity</label>
                     <input
                       type="text"
                       value={validity}
                       onChange={(e) => setValidity(e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-100 font-mono focus:outline-hidden focus:border-indigo-500 text-xs"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 font-mono focus:outline-hidden focus:border-indigo-500 text-[12px]"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-slate-400 font-medium block mb-1">Status Badge</label>
+                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Status Badge</label>
                     <select
                       value={status}
                       onChange={(e) => setStatus(e.target.value as StatusType)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-hidden focus:border-indigo-500 cursor-pointer text-xs"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:outline-hidden focus:border-indigo-500 cursor-pointer text-[12px]"
                     >
                       <option value="ACTIVE">ACTIVE</option>
                       <option value="ON-SITE">ON-SITE</option>
@@ -647,11 +769,11 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                     </select>
                   </div>
                   <div>
-                    <label className="text-slate-400 font-medium block mb-1">Barcode Type</label>
+                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Barcode Type</label>
                     <select
                       value={barcodeType}
                       onChange={(e) => setBarcodeType(e.target.value as BarcodeType)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-hidden focus:border-indigo-500 cursor-pointer text-xs"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:outline-hidden focus:border-indigo-500 cursor-pointer text-[12px]"
                     >
                       <option value="linear">Linear Barcode</option>
                       <option value="qr">Scannable QR</option>
@@ -696,11 +818,20 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                   className={`badge-card-face ${currentTheme.badgeBg} border border-slate-800 flex flex-col justify-between p-4 sm:p-4.5 shadow-2xl relative cursor-pointer`}
                 >
                   {/* Ambient Glow Overlay */}
-                  <div className={`absolute -top-24 -left-24 w-52 h-52 ${currentTheme.glow1} rounded-full blur-3xl pointer-events-none`}></div>
-                  <div className={`absolute -bottom-24 -right-24 w-52 h-52 ${currentTheme.glow2} rounded-full blur-3xl pointer-events-none`}></div>
+                  <div
+                    style={theme === "custom" ? { backgroundColor: customColor1, opacity: 0.24 } : undefined}
+                    className={`absolute -top-24 -left-24 w-52 h-52 ${theme === "custom" ? "" : currentTheme.glow1} rounded-full blur-3xl pointer-events-none`}
+                  ></div>
+                  <div
+                    style={theme === "custom" ? { backgroundColor: customColor2, opacity: 0.2 } : undefined}
+                    className={`absolute -bottom-24 -right-24 w-52 h-52 ${theme === "custom" ? "" : currentTheme.glow2} rounded-full blur-3xl pointer-events-none`}
+                  ></div>
 
                   {/* Top Gradient Line Accent */}
-                  <div className={`absolute top-0 left-0 right-0 h-1.5 ${currentTheme.topBar}`}></div>
+                  <div
+                    style={theme === "custom" ? { background: `linear-gradient(90deg, ${customColor1}, ${customColor2})` } : undefined}
+                    className={`absolute top-0 left-0 right-0 h-1.5 ${theme === "custom" ? "" : currentTheme.topBar}`}
+                  ></div>
 
                   {/* Holographic Reflective Effect Layer */}
                   <div
@@ -714,7 +845,10 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                   <div className="relative z-10">
                     <div className="flex items-center justify-between pt-0.5">
                       <div className="flex items-center space-x-2">
-                        <div className={`w-8 h-8 rounded-xl ${currentTheme.logoBg} flex items-center justify-center font-black text-base shadow-lg shrink-0`}>
+                        <div
+                          style={theme === "custom" ? { background: `linear-gradient(135deg, ${customColor1}, ${customColor2})` } : undefined}
+                          className={`w-8 h-8 rounded-xl ${theme === "custom" ? "text-white shadow-lg" : currentTheme.logoBg} flex items-center justify-center font-black text-base shadow-lg shrink-0`}
+                        >
                           E
                         </div>
                         <div>
@@ -740,7 +874,10 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                   <div className="relative z-10 flex flex-col items-center my-0.5">
                     <div className="relative">
                       {/* Dynamic Avatar Outer Ring */}
-                      <div className={`w-20 h-20 rounded-2xl p-[2px] ${currentTheme.avatarRing} shadow-xl`}>
+                      <div
+                        style={theme === "custom" ? { background: `linear-gradient(135deg, ${customColor1}, ${customColor2})` } : undefined}
+                        className={`w-20 h-20 rounded-2xl p-[2px] ${theme === "custom" ? "shadow-xl" : currentTheme.avatarRing} shadow-xl`}
+                      >
                         <div className="w-full h-full bg-slate-950/90 rounded-[14px] flex items-center justify-center backdrop-blur-sm overflow-hidden relative">
                           {avatarType === "photo" && customAvatar ? (
                             <img
@@ -773,7 +910,14 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                         {name}
                       </h2>
                       <div className="mt-1">
-                        <span className={`px-2.5 py-0.5 rounded-md border text-[9.5px] font-mono font-bold tracking-widest uppercase ${currentTheme.roleBadge}`}>
+                        <span
+                          style={theme === "custom" ? {
+                            backgroundColor: `${customColor1}20`,
+                            borderColor: `${customColor1}50`,
+                            color: customColor2,
+                          } : undefined}
+                          className={`px-2.5 py-0.5 rounded-md border text-[9.5px] font-mono font-bold tracking-widest uppercase ${theme === "custom" ? "" : currentTheme.roleBadge}`}
+                        >
                           {role}
                         </span>
                       </div>
