@@ -388,32 +388,32 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* MODAL HEADER */}
-        <div className="px-5 sm:px-6 py-3.5 border-b border-slate-800/80 flex items-center justify-between bg-slate-900/90">
-          <div className="flex items-center space-x-3">
-            <span className="px-2.5 py-1 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+        <div className="px-4 sm:px-6 py-3.5 border-b border-slate-800/80 flex items-center justify-between bg-slate-900/90 gap-3">
+          <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
+            <span className="px-2.5 py-1 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-2xs whitespace-nowrap shrink-0">
+              <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse shrink-0"></span>
               ENTERPRISE PASS
             </span>
-            <h1 className="text-sm sm:text-base font-semibold tracking-tight text-slate-100 flex items-center gap-2 mb-0">
-              <i className="bi bi-shield-check text-indigo-400"></i>
-              Security Credential & Identity Portal
+            <h1 className="text-xs sm:text-sm font-semibold tracking-tight text-slate-100 flex items-center gap-1.5 sm:gap-2 mb-0 whitespace-nowrap truncate">
+              <i className="bi bi-shield-check text-indigo-400 shrink-0"></i>
+              <span>Security Credential & Identity Portal</span>
             </h1>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 shrink-0">
             {/* Toggle Customizer Drawer */}
             <button
               type="button"
               onClick={() => setIsEditorOpen(!isEditorOpen)}
-              className="px-3 py-1.5 text-xs font-semibold text-slate-200 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 rounded-xl transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+              className="px-3 py-1.5 text-xs font-semibold text-slate-200 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 rounded-xl transition flex items-center gap-1.5 shadow-2xs cursor-pointer whitespace-nowrap shrink-0"
             >
-              <i className="bi bi-sliders text-indigo-400"></i>
-              <span>{isEditorOpen ? "Hide Customizer" : "Customize Badge"}</span>
+              <i className="bi bi-sliders text-indigo-400 shrink-0"></i>
+              <span className="whitespace-nowrap">{isEditorOpen ? "Hide Customizer" : "Customize Badge"}</span>
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer"
+              className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer shrink-0"
               title="Close modal"
             >
               <i className="bi bi-x-lg text-base"></i>
@@ -427,15 +427,15 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
           {/* LEFT CUSTOMIZATION DRAWER PANEL */}
           {isEditorOpen && (
             <div className="w-full lg:w-96 badge-glass-panel rounded-2xl p-4 sm:p-5 border border-slate-800/90 space-y-4 text-xs max-h-[580px] overflow-y-auto badge-custom-scrollbar transition-all duration-300">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h3 className="font-bold text-sm text-slate-100 flex items-center gap-2 mb-0">
-                  <i className="bi bi-magic text-indigo-400"></i>
-                  Badge Customizer
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3 gap-2">
+                <h3 className="font-bold text-xs sm:text-[13px] text-slate-100 flex items-center gap-1.5 mb-0 whitespace-nowrap shrink-0">
+                  <i className="bi bi-magic text-indigo-400 shrink-0"></i>
+                  <span>Badge Customizer</span>
                 </h3>
                 <button
                   type="button"
                   onClick={resetBadgeData}
-                  className="text-xs text-indigo-400 hover:text-indigo-300 font-medium hover:underline cursor-pointer"
+                  className="text-[11px] sm:text-xs text-indigo-400 hover:text-indigo-300 font-medium hover:underline cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Reset Defaults
                 </button>
