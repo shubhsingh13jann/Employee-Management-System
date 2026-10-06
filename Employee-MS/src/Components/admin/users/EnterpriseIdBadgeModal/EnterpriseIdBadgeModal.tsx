@@ -384,64 +384,66 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
     >
       {/* MAIN CONTAINER MODAL */}
       <div
-        className="w-full max-w-5xl badge-glass-panel rounded-3xl shadow-2xl border border-slate-700/60 flex flex-col my-auto transition-all duration-300 overflow-hidden text-slate-100"
+        className={`w-full ${
+          isEditorOpen ? "max-w-[760px]" : "max-w-[360px]"
+        } badge-glass-panel rounded-3xl shadow-2xl border border-slate-700/60 flex flex-col my-auto transition-all duration-300 overflow-hidden text-slate-100`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* MODAL HEADER */}
-        <div className="px-4 sm:px-6 py-2.5 sm:py-3 border-b border-slate-800/80 grid grid-cols-[1fr_auto_1fr] items-center bg-slate-900/90 gap-2">
+        <div className="px-3.5 sm:px-5 py-2.5 sm:py-3 border-b border-slate-800/80 flex items-center justify-between bg-slate-900/90 gap-2">
           {/* Left: Enterprise Pass Badge */}
-          <div className="flex items-center justify-start">
-            <span className="px-2.5 py-0.5 sm:py-1 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 font-mono text-[9.5px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-2xs whitespace-nowrap shrink-0">
-              <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse shrink-0"></span>
+          <div className="flex items-center justify-start shrink-0">
+            <span className={`${isEditorOpen ? "inline-flex" : "hidden sm:inline-flex"} px-2 py-0.5 sm:py-1 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 font-mono text-[9px] sm:text-[9.5px] font-bold uppercase tracking-wider items-center gap-1 shadow-2xs whitespace-nowrap`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shrink-0"></span>
               ENTERPRISE PASS
             </span>
           </div>
 
           {/* Center: Security ID Portal Heading (Centered) */}
-          <div className="flex items-center justify-center text-center">
+          <div className="flex-1 flex items-center justify-center text-center">
             <div
-              style={{ fontSize: "11.5px", lineHeight: "1.25" }}
-              className="security-id-portal-heading font-bold tracking-tight text-slate-200 flex items-center justify-center gap-1.5 mb-0 whitespace-nowrap"
+              style={{ fontSize: "14.5px", lineHeight: "1.25" }}
+              className="security-id-portal-heading font-extrabold tracking-normal text-slate-100 flex items-center justify-center gap-1.5 mb-0 whitespace-nowrap"
             >
-              <i className="bi bi-shield-check text-indigo-400 text-xs shrink-0"></i>
+              <i className="bi bi-shield-check text-indigo-400 text-sm shrink-0"></i>
               <span>Security ID Portal</span>
             </div>
           </div>
 
           {/* Right: Actions */}
-          <div className="flex items-center space-x-2 shrink-0 justify-end">
+          <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0 justify-end">
             {/* Toggle Customizer Drawer */}
             <button
               type="button"
               onClick={() => setIsEditorOpen(!isEditorOpen)}
-              className="px-3 py-1.5 text-xs font-semibold text-slate-200 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 rounded-xl transition flex items-center gap-1.5 shadow-2xs cursor-pointer whitespace-nowrap shrink-0"
+              className="px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs font-semibold text-slate-200 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 rounded-xl transition flex items-center gap-1 shadow-2xs cursor-pointer whitespace-nowrap shrink-0"
             >
-              <i className="bi bi-sliders text-indigo-400 shrink-0"></i>
-              <span className="whitespace-nowrap">{isEditorOpen ? "Hide Customizer" : "Customize Badge"}</span>
+              <i className="bi bi-sliders text-indigo-400 shrink-0 text-xs"></i>
+              <span className="whitespace-nowrap">{isEditorOpen ? "Hide Customizer" : "Customize"}</span>
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer shrink-0"
+              className="p-1 sm:p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer shrink-0"
               title="Close modal"
             >
-              <i className="bi bi-x-lg text-base"></i>
+              <i className="bi bi-x-lg text-sm sm:text-base"></i>
             </button>
           </div>
         </div>
 
         {/* MAIN CONTENT SPLIT LAYOUT */}
-        <div className="p-4 sm:p-7 flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 sm:gap-8 relative bg-slate-950/70 overflow-hidden">
+        <div className="p-3.5 sm:p-5 flex flex-col lg:flex-row items-center lg:items-start justify-center gap-4 sm:gap-5 relative bg-slate-950/70 overflow-hidden">
           
           {/* LEFT CUSTOMIZATION DRAWER PANEL */}
           {isEditorOpen && (
-            <div className="w-full lg:w-96 h-fit self-start badge-glass-panel rounded-2xl p-4 sm:p-5 border border-slate-800/90 space-y-4 text-xs max-h-[580px] overflow-y-auto badge-custom-scrollbar transition-all duration-300">
+            <div className="w-full lg:w-[340px] h-fit self-start badge-glass-panel rounded-2xl p-3.5 sm:p-4 border border-slate-800/90 space-y-3.5 text-xs max-h-[580px] overflow-y-auto badge-custom-scrollbar transition-all duration-300">
               <div className="flex items-center justify-between border-b border-slate-800 pb-2.5 gap-2">
                 <div
-                  style={{ fontSize: "11.5px", lineHeight: "1.25" }}
-                  className="badge-customizer-heading font-bold text-slate-200 flex items-center gap-1.5 mb-0 whitespace-nowrap shrink-0"
+                  style={{ fontSize: "14.5px", lineHeight: "1.25" }}
+                  className="badge-customizer-heading font-extrabold tracking-normal text-slate-100 flex items-center gap-1.5 mb-0 whitespace-nowrap shrink-0"
                 >
-                  <i className="bi bi-magic text-indigo-400 text-[11px] shrink-0"></i>
+                  <i className="bi bi-magic text-indigo-400 text-sm shrink-0"></i>
                   <span>Badge Customizer</span>
                 </div>
                 <button
@@ -639,14 +641,14 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
           )}
 
           {/* CENTER DISPLAY: 3D DIGITAL ID BADGE CARD */}
-          <div className="flex-1 flex flex-col items-center justify-center relative min-h-[530px]">
+          <div className="flex-initial flex flex-col items-center justify-center relative">
             
             {/* CARD PERSPECTIVE CONTAINER */}
             <div
               ref={badgeContainerRef}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
-              className="badge-perspective-viewport w-[310px] sm:w-[340px] h-[510px] relative select-none"
+              className="badge-perspective-viewport w-[265px] sm:w-[280px] h-[470px] relative select-none"
             >
               {/* 3D FLIPPABLE WRAPPER */}
               <div
@@ -657,7 +659,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                 {/* ================= CARD FRONT ================= */}
                 <div
                   id="printable-badge-area"
-                  className={`badge-card-face ${currentTheme.badgeBg} border border-slate-800 flex flex-col justify-between p-6 shadow-2xl relative cursor-pointer`}
+                  className={`badge-card-face ${currentTheme.badgeBg} border border-slate-800 flex flex-col justify-between p-4 sm:p-4.5 shadow-2xl relative cursor-pointer`}
                 >
                   {/* Ambient Glow Overlay */}
                   <div className={`absolute -top-24 -left-24 w-52 h-52 ${currentTheme.glow1} rounded-full blur-3xl pointer-events-none`}></div>
@@ -677,21 +679,21 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                   {/* HEADER: LOGO, STATUS & ACCENT LINE */}
                   <div className="relative z-10">
                     <div className="flex items-center justify-between pt-0.5">
-                      <div className="flex items-center space-x-2.5">
-                        <div className={`w-9 h-9 rounded-xl ${currentTheme.logoBg} flex items-center justify-center font-black text-lg shadow-lg`}>
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-8 h-8 rounded-xl ${currentTheme.logoBg} flex items-center justify-center font-black text-base shadow-lg shrink-0`}>
                           E
                         </div>
                         <div>
-                          <div className="text-[11px] font-extrabold tracking-wider text-slate-100 uppercase leading-none">
+                          <div className="text-[10.5px] font-extrabold tracking-wider text-slate-100 uppercase leading-none">
                             ENTERPRISE EMS
                           </div>
-                          <div className="text-[8.5px] font-semibold tracking-widest text-slate-400 uppercase mt-0.5">
+                          <div className="text-[8px] font-semibold tracking-widest text-slate-400 uppercase mt-0.5">
                             SECURITY CREDENTIAL
                           </div>
                         </div>
                       </div>
 
-                      <div className={`px-2.5 py-1 rounded-full border font-mono text-[9px] font-bold tracking-wider flex items-center gap-1.5 shadow-2xs ${statusStyle.pill}`}>
+                      <div className={`px-2 py-0.5 rounded-full border font-mono text-[8.5px] font-bold tracking-wider flex items-center gap-1 shadow-2xs shrink-0 ${statusStyle.pill}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot} animate-pulse`}></span>
                         <span>{status}</span>
                       </div>
@@ -701,10 +703,10 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                   </div>
 
                   {/* AVATAR SECTION */}
-                  <div className="relative z-10 flex flex-col items-center my-1">
+                  <div className="relative z-10 flex flex-col items-center my-0.5">
                     <div className="relative">
                       {/* Dynamic Avatar Outer Ring */}
-                      <div className={`w-24 h-24 rounded-2xl p-[2px] ${currentTheme.avatarRing} shadow-xl`}>
+                      <div className={`w-20 h-20 rounded-2xl p-[2px] ${currentTheme.avatarRing} shadow-xl`}>
                         <div className="w-full h-full bg-slate-950/90 rounded-[14px] flex items-center justify-center backdrop-blur-sm overflow-hidden relative">
                           {avatarType === "photo" && customAvatar ? (
                             <img
@@ -713,11 +715,11 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                               className="w-full h-full object-cover rounded-[14px]"
                             />
                           ) : avatarType === "user" ? (
-                            <i className="bi bi-person-fill text-3xl text-indigo-300"></i>
+                            <i className="bi bi-person-fill text-2xl text-indigo-300"></i>
                           ) : avatarType === "shield" ? (
-                            <i className="bi bi-shield-fill-check text-3xl text-cyan-300"></i>
+                            <i className="bi bi-shield-fill-check text-2xl text-cyan-300"></i>
                           ) : (
-                            <span className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-tr from-cyan-300 via-slate-100 to-fuchsia-300">
+                            <span className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-tr from-cyan-300 via-slate-100 to-fuchsia-300">
                               {name ? name.charAt(0).toUpperCase() : "A"}
                             </span>
                           )}
@@ -725,19 +727,19 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                       </div>
 
                       {Boolean(user.is_hod) && (
-                        <div className="absolute -top-2 -left-2 px-1.5 py-0.5 rounded-md text-[8.5px] font-black bg-amber-400 text-slate-950 shadow-md flex items-center gap-1">
+                        <div className="absolute -top-1.5 -left-1.5 px-1.5 py-0.5 rounded-md text-[8px] font-black bg-amber-400 text-slate-950 shadow-md flex items-center gap-0.5">
                           <span>👑</span> HOD
                         </div>
                       )}
                     </div>
 
                     {/* Employee Name & Role */}
-                    <div className="text-center mt-3">
-                      <h2 className="text-xl font-extrabold text-slate-100 tracking-tight leading-snug mb-0">
+                    <div className="text-center mt-2.5">
+                      <h2 className="text-lg font-extrabold text-slate-100 tracking-tight leading-snug mb-0 max-w-[240px] truncate">
                         {name}
                       </h2>
                       <div className="mt-1">
-                        <span className={`px-3 py-0.5 rounded-md border text-[10px] font-mono font-bold tracking-widest uppercase ${currentTheme.roleBadge}`}>
+                        <span className={`px-2.5 py-0.5 rounded-md border text-[9.5px] font-mono font-bold tracking-widest uppercase ${currentTheme.roleBadge}`}>
                           {role}
                         </span>
                       </div>
@@ -745,42 +747,42 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                   </div>
 
                   {/* DETAILS TABLE */}
-                  <div className="relative z-10 bg-slate-900/85 rounded-xl border border-slate-800/90 p-3 space-y-1.5 text-xs backdrop-blur-md">
+                  <div className="relative z-10 bg-slate-900/85 rounded-xl border border-slate-800/90 p-2.5 space-y-1.5 text-xs backdrop-blur-md">
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-400 text-[11px] font-medium">Personnel ID:</span>
-                      <span className="font-mono font-bold text-slate-100 text-[11px] tracking-wide">
+                      <span className="text-slate-400 text-[10.5px] font-medium">Personnel ID:</span>
+                      <span className="font-mono font-bold text-slate-100 text-[10.5px] tracking-wide">
                         {personnelId}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-400 text-[11px] font-medium">Department:</span>
-                      <span className="font-bold text-slate-200 text-[11px] truncate max-w-[150px]">
+                      <span className="text-slate-400 text-[10.5px] font-medium">Department:</span>
+                      <span className="font-bold text-slate-200 text-[10.5px] truncate max-w-[140px]">
                         {department}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-400 text-[11px] font-medium">Validity:</span>
-                      <span className="font-mono text-slate-300 text-[11px]">{validity}</span>
+                      <span className="text-slate-400 text-[10.5px] font-medium">Validity:</span>
+                      <span className="font-mono text-slate-300 text-[10.5px]">{validity}</span>
                     </div>
                   </div>
 
                   {/* SCANNABLE BARCODE / QR FOOTER */}
-                  <div className="relative z-10 flex flex-col items-center pt-2">
+                  <div className="relative z-10 flex flex-col items-center pt-1.5">
                     {barcodeType === "linear" ? (
                       <div className="w-full flex flex-col items-center">
-                        <div className="w-full h-8 barcode-lines-pattern rounded opacity-85"></div>
-                        <div className="text-[9px] font-mono text-slate-400 tracking-widest mt-1">
+                        <div className="w-full h-7 barcode-lines-pattern rounded opacity-85"></div>
+                        <div className="text-[8.5px] font-mono text-slate-400 tracking-widest mt-0.5">
                           *{personnelId}*
                         </div>
                       </div>
                     ) : (
                       <div className="w-full flex flex-col items-center">
                         <div className="p-1 bg-white rounded-lg shadow-sm">
-                          <svg className="w-9 h-9 text-slate-900" viewBox="0 0 100 100" fill="currentColor">
+                          <svg className="w-8 h-8 text-slate-900" viewBox="0 0 100 100" fill="currentColor">
                             <path d="M0,0 h30 v30 h-30 z M10,10 h10 v10 h-10 z M70,0 h30 v30 h-30 z M80,10 h10 v10 h-10 z M0,70 h30 v30 h-30 z M10,80 h10 v10 h-10 z M40,10 h10 v10 h-10 z M40,40 h20 v20 h-20 z M70,40 h10 v10 h-10 z M10,40 h10 v20 h-10 z M40,70 h20 v10 h-20 z M70,70 h20 v20 h-20 z M80,80 h10 v10 h-10 z"/>
                           </svg>
                         </div>
-                        <div className="text-[8.5px] font-mono text-slate-400 tracking-widest mt-1">
+                        <div className="text-[8px] font-mono text-slate-400 tracking-widest mt-0.5">
                           *{personnelId}*
                         </div>
                       </div>
@@ -788,32 +790,32 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                   </div>
 
                   {/* FLIP TIP HINT */}
-                  <div className="absolute bottom-1 left-0 right-0 text-center pointer-events-none z-10">
-                    <span className="text-[8px] text-slate-500 uppercase tracking-widest flex items-center justify-center gap-1">
-                      <i className="bi bi-arrow-repeat text-[8px]"></i> Click card to flip
+                  <div className="text-center pointer-events-none z-10 pb-0.5">
+                    <span className="text-[7.5px] text-slate-500 uppercase tracking-widest flex items-center justify-center gap-1">
+                      <i className="bi bi-arrow-repeat text-[7.5px]"></i> Click card to flip
                     </span>
                   </div>
                 </div>
 
                 {/* ================= CARD BACK ================= */}
                 <div
-                  className="badge-card-face badge-card-face-back bg-slate-950 border border-slate-800 flex flex-col justify-between p-6 shadow-2xl relative cursor-pointer"
+                  className="badge-card-face badge-card-face-back bg-slate-950 border border-slate-800 flex flex-col justify-between p-4 sm:p-4.5 shadow-2xl relative cursor-pointer"
                   onClick={toggleFlip}
                 >
                   {/* Magnetic Stripe Simulation */}
-                  <div className="absolute top-5 left-0 right-0 h-10 bg-slate-900 border-y border-slate-800 flex items-center px-4">
-                    <div className="h-2 w-full bg-gradient-to-r from-amber-700/40 via-amber-500/20 to-amber-700/40 rounded-xs"></div>
+                  <div className="absolute top-4 left-0 right-0 h-8 bg-slate-900 border-y border-slate-800 flex items-center px-4">
+                    <div className="h-1.5 w-full bg-gradient-to-r from-amber-700/40 via-amber-500/20 to-amber-700/40 rounded-xs"></div>
                   </div>
 
                   {/* Back Content */}
-                  <div className="pt-14 space-y-4 relative z-10">
+                  <div className="pt-11 space-y-2.5 relative z-10">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                        <h4 className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider mb-1">
                           Encrypted Security QR
                         </h4>
-                        <div className="p-2.5 bg-white rounded-xl inline-block shadow-lg">
-                          <svg className="w-18 h-18 text-slate-900" viewBox="0 0 100 100" fill="currentColor">
+                        <div className="p-2 bg-white rounded-xl inline-block shadow-lg">
+                          <svg className="w-14 h-14 text-slate-950" viewBox="0 0 100 100" fill="currentColor">
                             <path d="M0,0 h30 v30 h-30 z M10,10 h10 v10 h-10 z M70,0 h30 v30 h-30 z M80,10 h10 v10 h-10 z M0,70 h30 v30 h-30 z M10,80 h10 v10 h-10 z M40,10 h10 v10 h-10 z M40,40 h20 v20 h-20 z M70,40 h10 v10 h-10 z M10,40 h10 v20 h-10 z M40,70 h20 v10 h-20 z M70,70 h20 v20 h-20 z M80,80 h10 v10 h-10 z"/>
                           </svg>
                         </div>
@@ -822,56 +824,56 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                       {/* Interactive RFID / NFC Tap Chip */}
                       <div
                         onClick={handleNfcTap}
-                        className="flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:border-indigo-500/50 transition cursor-pointer group"
+                        className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-indigo-500/50 transition cursor-pointer group"
                       >
                         <div
-                          className={`w-10 h-10 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition ${
+                          className={`w-9 h-9 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition ${
                             nfcActive ? "animate-ping" : ""
                           }`}
                         >
                           <i className="bi bi-wifi text-sm rotate-90"></i>
                         </div>
-                        <span className="text-[8px] font-mono text-slate-400 mt-1 uppercase tracking-wider">
+                        <span className="text-[7.5px] font-mono text-slate-400 mt-1 uppercase tracking-wider">
                           Tap NFC Scan
                         </span>
                       </div>
                     </div>
 
-                    <div className="text-[10px] text-slate-400 space-y-1.5 leading-relaxed border-t border-slate-800 pt-3">
+                    <div className="text-[9.5px] text-slate-400 space-y-1 leading-snug border-t border-slate-800 pt-2.5">
                       <p className="font-semibold text-slate-300 mb-0">
                         Property of Enterprise EMS Security
                       </p>
-                      <p className="mb-0">
+                      <p className="mb-0 text-[8.5px]">
                         If found, please return to any EMS Security Desk or mail to Headquarters.
                       </p>
-                      <p className="font-mono text-slate-500 text-[9px] mb-0">
-                        24/7 Security Hotline: +1 (800) 555-0199
+                      <p className="font-mono text-slate-500 text-[8px] mb-0">
+                        24/7 Hotline: +1 (800) 555-0199
                       </p>
                     </div>
                   </div>
 
                   {/* Digital Signature Line */}
-                  <div className="relative z-10 border-t border-slate-800 pt-2 flex items-center justify-between">
+                  <div className="relative z-10 border-t border-slate-800 pt-1.5 flex items-center justify-between">
                     <div>
-                      <div className="font-mono text-[9px] italic text-indigo-300 tracking-wider">
+                      <div className="font-mono text-[8.5px] italic text-indigo-300 tracking-wider">
                         {name} (Signed)
                       </div>
-                      <div className="text-[7.5px] text-slate-500 uppercase tracking-widest">
+                      <div className="text-[7px] text-slate-500 uppercase tracking-widest">
                         Authorized Signature
                       </div>
                     </div>
-                    <i className="bi bi-patch-check-fill text-indigo-400 text-sm"></i>
+                    <i className="bi bi-patch-check-fill text-indigo-400 text-xs"></i>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* CARD CONTROL BUTTONS */}
-            <div className="flex items-center gap-3 mt-4 z-20">
+            <div className="flex items-center gap-2.5 mt-3 z-20">
               <button
                 type="button"
                 onClick={toggleFlip}
-                className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold border border-slate-700/80 flex items-center gap-1.5 transition shadow-2xs cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold border border-slate-700/80 flex items-center gap-1.5 transition shadow-2xs cursor-pointer"
               >
                 <i className="bi bi-arrow-repeat text-indigo-400"></i>
                 <span>Flip Badge</span>
@@ -879,7 +881,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
               <button
                 type="button"
                 onClick={handleCopyId}
-                className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold border border-slate-700/80 flex items-center gap-1.5 transition shadow-2xs cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold border border-slate-700/80 flex items-center gap-1.5 transition shadow-2xs cursor-pointer"
               >
                 <i className="bi bi-clipboard text-indigo-400"></i>
                 <span>Copy ID</span>
@@ -891,8 +893,8 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
         </div>
 
         {/* MODAL FOOTER BAR */}
-        <div className="px-6 py-4 border-t border-slate-800/80 bg-slate-900/90 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center space-x-2 text-xs text-slate-400">
+        <div className="px-4 sm:px-6 py-2.5 sm:py-3 border-t border-slate-800/80 bg-slate-900/90 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="hidden sm:flex items-center space-x-2 text-xs text-slate-400">
             <i className="bi bi-check-circle-fill text-emerald-400"></i>
             <span>Ready for printer output (PDF / Physical Badge)</span>
           </div>
