@@ -40,6 +40,74 @@ export type AvatarPreset = "photo" | "initials" | "user" | "shield";
 export type BarcodeType = "linear" | "qr";
 export type StatusType = "ACTIVE" | "ON-SITE" | "RESTRICTED" | "VIP ACCESS";
 
+export type CardBackgroundType =
+  | "obsidian"
+  | "ceramic"
+  | "frosted"
+  | "guilloche"
+  | "aurora"
+  | "titanium";
+
+export interface CardBackgroundPreset {
+  id: CardBackgroundType;
+  name: string;
+  subtitle: string;
+  description: string;
+  isLight: boolean;
+  previewClass: string;
+}
+
+export const CARD_BACKGROUNDS: CardBackgroundPreset[] = [
+  {
+    id: "obsidian",
+    name: "Obsidian",
+    subtitle: "Stealth Dark",
+    description: "Executive Matte Carbon Obsidian",
+    isLight: false,
+    previewClass: "badge-bg-obsidian border-slate-700",
+  },
+  {
+    id: "ceramic",
+    name: "Ceramic",
+    subtitle: "Alpine White",
+    description: "Clean Minimalist Porcelain White",
+    isLight: true,
+    previewClass: "badge-bg-ceramic border-slate-300",
+  },
+  {
+    id: "frosted",
+    name: "Frosted",
+    subtitle: "Glassmorphic",
+    description: "Translucent Polycarbonate Glass",
+    isLight: false,
+    previewClass: "badge-bg-frosted border-cyan-400/40",
+  },
+  {
+    id: "guilloche",
+    name: "Guilloché",
+    subtitle: "Security Wave",
+    description: "Geometric Anti-Counterfeit Matrix",
+    isLight: false,
+    previewClass: "badge-preview-guilloche border-indigo-700",
+  },
+  {
+    id: "aurora",
+    name: "Aurora",
+    subtitle: "Mesh Flow",
+    description: "Vibrant Dynamic Prismatic Mesh",
+    isLight: false,
+    previewClass: "badge-preview-aurora border-slate-600",
+  },
+  {
+    id: "titanium",
+    name: "Titanium",
+    subtitle: "Brushed Metal",
+    description: "Executive Brushed Platinum Metallic",
+    isLight: false,
+    previewClass: "badge-preview-titanium border-slate-500",
+  },
+];
+
 export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
   isOpen,
   onClose,
@@ -60,6 +128,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
   const [status, setStatus] = useState<StatusType>("ACTIVE");
   const [barcodeType, setBarcodeType] = useState<BarcodeType>("linear");
   const [holoEffect, setHoloEffect] = useState<HoloKey>("holo-prism");
+  const [cardBg, setCardBg] = useState<CardBackgroundType>("obsidian");
   const [palettes, setPalettes] = useState<PaletteSlot[]>(() => {
     try {
       const saved = localStorage.getItem("ems_id_badge_palettes");
@@ -138,6 +207,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
         setStatus(savedConfig.status || "ACTIVE");
         setBarcodeType(savedConfig.barcodeType || "linear");
         setHoloEffect(savedConfig.holoEffect || "holo-prism");
+        setCardBg(savedConfig.cardBg || "obsidian");
         setTheme(savedConfig.theme || "p1");
         if (savedConfig.customColor1) setCustomColor1(savedConfig.customColor1);
         if (savedConfig.customColor2) setCustomColor2(savedConfig.customColor2);
@@ -156,6 +226,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
         );
         setBarcodeType("linear");
         setHoloEffect("holo-prism");
+        setCardBg("obsidian");
         setTheme("p1");
         setCustomColor1(palettes[0].c1);
         setCustomColor2(palettes[0].c2);
@@ -200,18 +271,27 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
 
   if (!isOpen || !user) return null;
 
+  const isLightBg = cardBg === "ceramic";
+
   const currentTheme = {
     name: activeColors.name,
-    badgeBg: "bg-slate-950",
+    badgeBg: `badge-bg-${cardBg}`,
     logoBg: "text-white shadow-lg",
     avatarRing: "shadow-xl",
     topBar: "",
     glow1: "",
     glow2: "",
-    accentText: "text-indigo-400",
+    accentText: isLightBg ? "text-indigo-600" : "text-indigo-400",
     roleBadge: "border font-mono font-bold tracking-widest uppercase",
     previewGradient: "",
   };
+
+  const cardDynamicStyle: React.CSSProperties =
+    cardBg === "aurora"
+      ? {
+          background: `radial-gradient(ellipse at 15% 15%, ${activeColors.c1}85 0%, transparent 60%), radial-gradient(ellipse at 85% 85%, ${activeColors.c2}85 0%, transparent 60%), radial-gradient(circle at 50% 50%, #1e1b4b 0%, #030712 100%)`,
+        }
+      : {};
 
   // 3D Gyroscope Mouse Movement
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -369,6 +449,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
         status,
         barcodeType,
         holoEffect,
+        cardBg,
         avatarType,
         customAvatar,
         theme,
@@ -401,6 +482,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
     setStatus("ACTIVE");
     setBarcodeType("linear");
     setHoloEffect("holo-prism");
+    setCardBg("obsidian");
     setTheme("p1");
     setPalettes(DEFAULT_PALETTES);
     try {
@@ -427,6 +509,31 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
 
   // Status Styling Badge
   const getStatusBadgeClasses = () => {
+    if (isLightBg) {
+      switch (status) {
+        case "ACTIVE":
+        case "ON-SITE":
+          return {
+            pill: "bg-emerald-50 border-emerald-300 text-emerald-800 font-bold",
+            dot: "bg-emerald-600",
+          };
+        case "RESTRICTED":
+          return {
+            pill: "bg-amber-50 border-amber-300 text-amber-800 font-bold",
+            dot: "bg-amber-600",
+          };
+        case "VIP ACCESS":
+          return {
+            pill: "bg-fuchsia-50 border-fuchsia-300 text-fuchsia-800 font-bold",
+            dot: "bg-fuchsia-600",
+          };
+        default:
+          return {
+            pill: "bg-emerald-50 border-emerald-300 text-emerald-800 font-bold",
+            dot: "bg-emerald-600",
+          };
+      }
+    }
     switch (status) {
       case "ACTIVE":
       case "ON-SITE":
@@ -783,6 +890,49 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                     )}
                   </div>
 
+                  {/* Card Base Material / Surface Theme */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-0">
+                        Card Base Material
+                      </label>
+                      <span className="text-[10px] text-indigo-600 font-medium">
+                        {CARD_BACKGROUNDS.find((b) => b.id === cardBg)?.name || "Obsidian"}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {CARD_BACKGROUNDS.map((bg) => (
+                        <button
+                          key={bg.id}
+                          type="button"
+                          onClick={() => {
+                            setCardBg(bg.id);
+                            showToast(`Applied ${bg.name} card material`, "info");
+                          }}
+                          className={`p-1.5 rounded-xl border flex flex-col items-center justify-center text-center transition cursor-pointer ${
+                            cardBg === bg.id
+                              ? "border-indigo-600 bg-indigo-50/70 ring-2 ring-indigo-500/20 shadow-xs"
+                              : "border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300"
+                          }`}
+                          title={bg.description}
+                        >
+                          <div className={`w-full h-5 rounded-md mb-1 border shadow-2xs ${bg.previewClass}`}></div>
+                          <span
+                            className={`text-[10.5px] font-bold leading-tight truncate w-full ${
+                              cardBg === bg.id ? "text-indigo-700" : "text-slate-800"
+                            }`}
+                          >
+                            {bg.name}
+                          </span>
+                          <span className="text-[8.5px] text-slate-400 leading-none mt-0.5 truncate w-full">
+                            {bg.subtitle}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                 {/* Avatar Photo & Presets */}
                 <div>
                   <label className="text-slate-700 font-semibold block mb-1.5">Profile Avatar / Photo</label>
@@ -989,15 +1139,56 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                 {/* ================= CARD FRONT ================= */}
                 <div
                   id="printable-badge-area"
-                  className={`badge-card-face ${currentTheme.badgeBg} border border-slate-800 flex flex-col justify-between p-4 sm:p-4.5 shadow-2xl relative cursor-pointer`}
+                  style={cardDynamicStyle}
+                  className={`badge-card-face ${currentTheme.badgeBg} flex flex-col justify-between p-4 sm:p-4.5 shadow-2xl relative cursor-pointer border ${
+                    isLightBg ? "border-slate-300" : "border-slate-800"
+                  }`}
                 >
+                  {/* Guilloché Geometric Spirograph Security Layer */}
+                  {cardBg === "guilloche" && (
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none z-1">
+                      <svg className="w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 480">
+                        <defs>
+                          <pattern id="guilloche-grid-front" width="60" height="60" patternUnits="userSpaceOnUse">
+                            <path d="M 0,30 Q 15,0 30,30 T 60,30" fill="none" stroke="currentColor" strokeWidth="0.75" />
+                            <path d="M 0,15 Q 15,45 30,15 T 60,15" fill="none" stroke="currentColor" strokeWidth="0.75" />
+                            <circle cx="30" cy="30" r="22" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2,2" />
+                          </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#guilloche-grid-front)" className="text-cyan-300" />
+                        <g transform="translate(150, 240)" className="text-indigo-400" stroke="currentColor" fill="none" strokeWidth="0.6">
+                          {[0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165].map((angle) => (
+                            <ellipse key={angle} cx="0" cy="0" rx="95" ry="32" transform={`rotate(${angle})`} opacity="0.4" />
+                          ))}
+                        </g>
+                      </svg>
+                      <div className="absolute top-10 left-0 right-0 overflow-hidden opacity-25">
+                        <div className="text-[6.5px] font-mono uppercase tracking-[0.22em] text-cyan-300 whitespace-nowrap">
+                          AUTHENTICATED ENTERPRISE CREDENTIAL • 256-BIT CRYPTOGRAPHIC TAMPER SEAL • SECURE ACCESS VERIFIED •
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Frosted Polycarbonate Embedded RFID Antenna Trace */}
+                  {cardBg === "frosted" && (
+                    <div className="absolute inset-1.5 rounded-[22px] border border-amber-400/25 pointer-events-none z-1 flex flex-col justify-between p-2">
+                      <div className="flex justify-between items-start">
+                        <span className="text-[6.5px] font-mono text-amber-300/40 tracking-wider">RFID-13.56MHz</span>
+                        <div className="w-3.5 h-3.5 rounded-full border border-amber-400/30 flex items-center justify-center">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400/50"></span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Ambient Glow Overlay */}
                   <div
-                    style={{ backgroundColor: activeColors.c1, opacity: 0.24 }}
+                    style={{ backgroundColor: activeColors.c1, opacity: isLightBg ? 0.08 : 0.24 }}
                     className="absolute -top-24 -left-24 w-52 h-52 rounded-full blur-3xl pointer-events-none"
                   ></div>
                   <div
-                    style={{ backgroundColor: activeColors.c2, opacity: 0.2 }}
+                    style={{ backgroundColor: activeColors.c2, opacity: isLightBg ? 0.06 : 0.2 }}
                     className="absolute -bottom-24 -right-24 w-52 h-52 rounded-full blur-3xl pointer-events-none"
                   ></div>
 
@@ -1021,15 +1212,23 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                       <div className="flex items-center space-x-2">
                         <div
                           style={{ background: `linear-gradient(135deg, ${activeColors.c1}, ${activeColors.c2})` }}
-                          className="w-8 h-8 rounded-xl text-white shadow-lg flex items-center justify-center font-black text-base shadow-lg shrink-0"
+                          className="w-8 h-8 rounded-xl text-white shadow-lg flex items-center justify-center font-black text-base shrink-0"
                         >
                           E
                         </div>
                         <div>
-                          <div className="text-[10.5px] font-extrabold tracking-wider text-slate-100 uppercase leading-none">
+                          <div
+                            className={`text-[10.5px] font-extrabold tracking-wider uppercase leading-none ${
+                              isLightBg ? "text-slate-900" : "text-slate-100"
+                            }`}
+                          >
                             ENTERPRISE EMS
                           </div>
-                          <div className="text-[8px] font-semibold tracking-widest text-slate-400 uppercase mt-0.5">
+                          <div
+                            className={`text-[8px] font-semibold tracking-widest uppercase mt-0.5 ${
+                              isLightBg ? "text-slate-500" : "text-slate-400"
+                            }`}
+                          >
                             SECURITY CREDENTIAL
                           </div>
                         </div>
@@ -1041,7 +1240,11 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                       </div>
                     </div>
 
-                    <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-700/60 to-transparent mt-2 relative z-10"></div>
+                    <div
+                      className={`w-full h-px bg-gradient-to-r from-transparent ${
+                        isLightBg ? "via-slate-300" : "via-slate-700/60"
+                      } to-transparent mt-2 relative z-10`}
+                    ></div>
                   </div>
 
                   {/* AVATAR SECTION */}
@@ -1052,7 +1255,11 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                         style={{ background: `linear-gradient(135deg, ${activeColors.c1}, ${activeColors.c2})` }}
                         className="w-20 h-20 rounded-2xl p-[2px] shadow-xl"
                       >
-                        <div className="w-full h-full bg-slate-950/90 rounded-[14px] flex items-center justify-center backdrop-blur-sm overflow-hidden relative">
+                        <div
+                          className={`w-full h-full ${
+                            isLightBg ? "bg-white" : "bg-slate-950/90"
+                          } rounded-[14px] flex items-center justify-center backdrop-blur-sm overflow-hidden relative`}
+                        >
                           {avatarType === "photo" && customAvatar ? (
                             <img
                               src={customAvatar}
@@ -1060,11 +1267,17 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                               className="w-full h-full object-cover rounded-[14px]"
                             />
                           ) : avatarType === "user" ? (
-                            <i className="bi bi-person-fill text-2xl text-indigo-300"></i>
+                            <i className={`bi bi-person-fill text-2xl ${isLightBg ? "text-indigo-600" : "text-indigo-300"}`}></i>
                           ) : avatarType === "shield" ? (
-                            <i className="bi bi-shield-fill-check text-2xl text-cyan-300"></i>
+                            <i className={`bi bi-shield-fill-check text-2xl ${isLightBg ? "text-teal-600" : "text-cyan-300"}`}></i>
                           ) : (
-                            <span className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-tr from-cyan-300 via-slate-100 to-fuchsia-300">
+                            <span
+                              className={`text-2xl font-extrabold ${
+                                isLightBg
+                                  ? "text-indigo-600"
+                                  : "text-transparent bg-clip-text bg-gradient-to-tr from-cyan-300 via-slate-100 to-fuchsia-300"
+                              }`}
+                            >
                               {name ? name.charAt(0).toUpperCase() : "A"}
                             </span>
                           )}
@@ -1080,15 +1293,19 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
 
                     {/* Employee Name & Role */}
                     <div className="text-center mt-2.5">
-                      <h2 className="text-lg font-extrabold text-slate-100 tracking-tight leading-snug mb-0 max-w-[240px] truncate">
+                      <h2
+                        className={`text-lg font-extrabold tracking-tight leading-snug mb-0 max-w-[240px] truncate ${
+                          isLightBg ? "text-slate-900 font-black" : "text-slate-100"
+                        }`}
+                      >
                         {name}
                       </h2>
                       <div className="mt-1">
                         <span
                           style={{
-                            backgroundColor: `${activeColors.c1}20`,
-                            borderColor: `${activeColors.c1}50`,
-                            color: activeColors.c2,
+                            backgroundColor: isLightBg ? `${activeColors.c1}15` : `${activeColors.c1}20`,
+                            borderColor: isLightBg ? `${activeColors.c1}40` : `${activeColors.c1}50`,
+                            color: isLightBg ? activeColors.c1 : activeColors.c2,
                           }}
                           className="px-2.5 py-0.5 rounded-md border text-[9.5px] font-mono font-bold tracking-widest uppercase"
                         >
@@ -1099,22 +1316,26 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                   </div>
 
                   {/* DETAILS TABLE */}
-                  <div className="relative z-10 bg-slate-900/85 rounded-xl border border-slate-800/90 p-2.5 space-y-1.5 text-xs backdrop-blur-md">
+                  <div
+                    className={`relative z-10 ${
+                      isLightBg ? "bg-white/85 border-slate-200/90 shadow-2xs" : "bg-slate-900/85 border-slate-800/90"
+                    } rounded-xl border p-2.5 space-y-1.5 text-xs backdrop-blur-md`}
+                  >
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-400 text-[10.5px] font-medium">Personnel ID:</span>
-                      <span className="font-mono font-bold text-slate-100 text-[10.5px] tracking-wide">
+                      <span className={`${isLightBg ? "text-slate-500" : "text-slate-400"} text-[10.5px] font-medium`}>Personnel ID:</span>
+                      <span className={`font-mono font-bold ${isLightBg ? "text-slate-900" : "text-slate-100"} text-[10.5px] tracking-wide`}>
                         {personnelId}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-400 text-[10.5px] font-medium">Department:</span>
-                      <span className="font-bold text-slate-200 text-[10.5px] truncate max-w-[140px]">
+                      <span className={`${isLightBg ? "text-slate-500" : "text-slate-400"} text-[10.5px] font-medium`}>Department:</span>
+                      <span className={`font-bold ${isLightBg ? "text-slate-900" : "text-slate-200"} text-[10.5px] truncate max-w-[140px]`}>
                         {department}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-400 text-[10.5px] font-medium">Validity:</span>
-                      <span className="font-mono text-slate-300 text-[10.5px]">{validity}</span>
+                      <span className={`${isLightBg ? "text-slate-500" : "text-slate-400"} text-[10.5px] font-medium`}>Validity:</span>
+                      <span className={`font-mono ${isLightBg ? "text-slate-700 font-semibold" : "text-slate-300"} text-[10.5px]`}>{validity}</span>
                     </div>
                   </div>
 
@@ -1122,19 +1343,31 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                   <div className="relative z-10 flex flex-col items-center pt-1.5">
                     {barcodeType === "linear" ? (
                       <div className="w-full flex flex-col items-center">
-                        <div className="w-full h-7 barcode-lines-pattern rounded opacity-85"></div>
-                        <div className="text-[8.5px] font-mono text-slate-400 tracking-widest mt-0.5">
+                        <div
+                          className={`w-full h-7 ${
+                            isLightBg ? "barcode-lines-pattern-dark opacity-90" : "barcode-lines-pattern opacity-85"
+                          } rounded`}
+                        ></div>
+                        <div
+                          className={`text-[8.5px] font-mono ${
+                            isLightBg ? "text-slate-600 font-semibold" : "text-slate-400"
+                          } tracking-widest mt-0.5`}
+                        >
                           *{personnelId}*
                         </div>
                       </div>
                     ) : (
                       <div className="w-full flex flex-col items-center">
-                        <div className="p-1 bg-white rounded-lg shadow-sm">
+                        <div className="p-1 bg-white rounded-lg shadow-sm border border-slate-200">
                           <svg className="w-8 h-8 text-slate-900" viewBox="0 0 100 100" fill="currentColor">
                             <path d="M0,0 h30 v30 h-30 z M10,10 h10 v10 h-10 z M70,0 h30 v30 h-30 z M80,10 h10 v10 h-10 z M0,70 h30 v30 h-30 z M10,80 h10 v10 h-10 z M40,10 h10 v10 h-10 z M40,40 h20 v20 h-20 z M70,40 h10 v10 h-10 z M10,40 h10 v20 h-10 z M40,70 h20 v10 h-20 z M70,70 h20 v20 h-20 z M80,80 h10 v10 h-10 z"/>
                           </svg>
                         </div>
-                        <div className="text-[8px] font-mono text-slate-400 tracking-widest mt-0.5">
+                        <div
+                          className={`text-[8px] font-mono ${
+                            isLightBg ? "text-slate-600 font-semibold" : "text-slate-400"
+                          } tracking-widest mt-0.5`}
+                        >
                           *{personnelId}*
                         </div>
                       </div>
@@ -1151,9 +1384,32 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
 
                 {/* ================= CARD BACK ================= */}
                 <div
-                  className="badge-card-face badge-card-face-back bg-slate-950 border border-slate-800 flex flex-col justify-between p-4 sm:p-4.5 shadow-2xl relative cursor-pointer"
+                  style={cardDynamicStyle}
+                  className={`badge-card-face badge-card-face-back ${currentTheme.badgeBg} flex flex-col justify-between p-4 sm:p-4.5 shadow-2xl relative cursor-pointer border ${
+                    isLightBg ? "border-slate-300" : "border-slate-800"
+                  }`}
                   onClick={toggleFlip}
                 >
+                  {/* Guilloché pattern for back if active */}
+                  {cardBg === "guilloche" && (
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none z-1">
+                      <svg className="w-full h-full opacity-15" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 480">
+                        <defs>
+                          <pattern id="guilloche-grid-back" width="60" height="60" patternUnits="userSpaceOnUse">
+                            <path d="M 0,30 Q 15,0 30,30 T 60,30" fill="none" stroke="currentColor" strokeWidth="0.75" />
+                            <path d="M 0,15 Q 15,45 30,15 T 60,15" fill="none" stroke="currentColor" strokeWidth="0.75" />
+                          </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#guilloche-grid-back)" className="text-cyan-300" />
+                      </svg>
+                    </div>
+                  )}
+
+                  {/* Frosted trace for back if active */}
+                  {cardBg === "frosted" && (
+                    <div className="absolute inset-1.5 rounded-[22px] border border-amber-400/20 pointer-events-none z-1"></div>
+                  )}
+
                   {/* Magnetic Stripe Simulation */}
                   <div className="absolute top-4 left-0 right-0 h-8 bg-slate-900 border-y border-slate-800 flex items-center px-4">
                     <div className="h-1.5 w-full bg-gradient-to-r from-amber-700/40 via-amber-500/20 to-amber-700/40 rounded-xs"></div>
@@ -1163,10 +1419,14 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                   <div className="pt-11 space-y-2.5 relative z-10">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                        <h4
+                          className={`text-[9.5px] font-bold uppercase tracking-wider mb-1 ${
+                            isLightBg ? "text-slate-700" : "text-slate-400"
+                          }`}
+                        >
                           Encrypted Security QR
                         </h4>
-                        <div className="p-2 bg-white rounded-xl inline-block shadow-lg">
+                        <div className="p-2 bg-white rounded-xl inline-block shadow-lg border border-slate-200">
                           <svg className="w-14 h-14 text-slate-950" viewBox="0 0 100 100" fill="currentColor">
                             <path d="M0,0 h30 v30 h-30 z M10,10 h10 v10 h-10 z M70,0 h30 v30 h-30 z M80,10 h10 v10 h-10 z M0,70 h30 v30 h-30 z M10,80 h10 v10 h-10 z M40,10 h10 v10 h-10 z M40,40 h20 v20 h-20 z M70,40 h10 v10 h-10 z M10,40 h10 v20 h-10 z M40,70 h20 v10 h-20 z M70,70 h20 v20 h-20 z M80,80 h10 v10 h-10 z"/>
                           </svg>
@@ -1176,7 +1436,11 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                       {/* Interactive RFID / NFC Tap Chip */}
                       <div
                         onClick={handleNfcTap}
-                        className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-indigo-500/50 transition cursor-pointer group"
+                        className={`flex flex-col items-center justify-center p-2.5 rounded-2xl ${
+                          isLightBg
+                            ? "bg-slate-100 border-slate-200 hover:border-indigo-400"
+                            : "bg-slate-900 border-slate-800 hover:border-indigo-500/50"
+                        } border transition cursor-pointer group shadow-2xs`}
                       >
                         <div
                           style={{
@@ -1190,14 +1454,22 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                         >
                           <i className="bi bi-wifi text-sm rotate-90"></i>
                         </div>
-                        <span className="text-[7.5px] font-mono text-slate-400 mt-1 uppercase tracking-wider">
+                        <span
+                          className={`text-[7.5px] font-mono mt-1 uppercase tracking-wider ${
+                            isLightBg ? "text-slate-600 font-semibold" : "text-slate-400"
+                          }`}
+                        >
                           Tap NFC Scan
                         </span>
                       </div>
                     </div>
 
-                    <div className="text-[9.5px] text-slate-400 space-y-1 leading-snug border-t border-slate-800 pt-2.5">
-                      <p className="font-semibold text-slate-300 mb-0">
+                    <div
+                      className={`text-[9.5px] space-y-1 leading-snug border-t pt-2.5 ${
+                        isLightBg ? "text-slate-600 border-slate-200" : "text-slate-400 border-slate-800"
+                      }`}
+                    >
+                      <p className={`font-semibold mb-0 ${isLightBg ? "text-slate-800" : "text-slate-300"}`}>
                         Property of Enterprise EMS Security
                       </p>
                       <p className="mb-0 text-[8.5px]">
@@ -1210,11 +1482,15 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                   </div>
 
                   {/* Digital Signature Line */}
-                  <div className="relative z-10 border-t border-slate-800 pt-1.5 flex items-center justify-between">
+                  <div
+                    className={`relative z-10 border-t pt-1.5 flex items-center justify-between ${
+                      isLightBg ? "border-slate-200" : "border-slate-800"
+                    }`}
+                  >
                     <div>
                       <div
-                        style={{ color: activeColors.c2 }}
-                        className="font-mono text-[8.5px] italic tracking-wider"
+                        style={{ color: isLightBg ? activeColors.c1 : activeColors.c2 }}
+                        className="font-mono text-[8.5px] italic tracking-wider font-bold"
                       >
                         {name} (Signed)
                       </div>
@@ -1222,7 +1498,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                         Authorized Signature
                       </div>
                     </div>
-                    <i className="bi bi-patch-check-fill text-indigo-400 text-xs"></i>
+                    <i className="bi bi-patch-check-fill text-indigo-500 text-xs"></i>
                   </div>
                 </div>
               </div>
