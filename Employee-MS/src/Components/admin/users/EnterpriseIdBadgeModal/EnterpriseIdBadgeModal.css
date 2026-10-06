@@ -2,6 +2,58 @@
    ENTERPRISE DIGITAL ID BADGE - 3D PERSPECTIVE, HOLOGRAPHIC & PRINT STYLES
    ========================================================================== */
 
+/* Ambient Background Micro-Animations & Security Matrix Grid */
+.badge-grid-matrix-bg {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(99, 102, 241, 0.12) 1.2px, transparent 1.2px);
+  background-size: 20px 20px;
+  mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, #000 50%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, #000 50%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.badge-ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  opacity: 0.18;
+  will-change: transform;
+  z-index: 0;
+}
+
+.badge-orb-1 {
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.8) 0%, rgba(124, 58, 237, 0.2) 70%, transparent 90%);
+  top: 5%;
+  left: 20%;
+  animation: floatBadgeOrb1 16s ease-in-out infinite alternate;
+}
+
+.badge-orb-2 {
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.75) 0%, rgba(99, 102, 241, 0.15) 70%, transparent 90%);
+  bottom: 5%;
+  right: 15%;
+  animation: floatBadgeOrb2 20s ease-in-out infinite alternate;
+}
+
+@keyframes floatBadgeOrb1 {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(35px, 25px) scale(1.08); }
+  100% { transform: translate(15px, 45px) scale(0.95); }
+}
+
+@keyframes floatBadgeOrb2 {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(-30px, -20px) scale(1.06); }
+  100% { transform: translate(-10px, -35px) scale(0.94); }
+}
+
 /* 3D Card Perspective Viewport */
 .badge-perspective-viewport {
   perspective: 1400px;
@@ -113,19 +165,23 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-/* Custom Scrollbar for Drawer */
+/* Custom Scrollbar for Drawer & Modal */
+.badge-custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.35) rgba(241, 245, 249, 0.8);
+}
 .badge-custom-scrollbar::-webkit-scrollbar {
   width: 5px;
 }
 .badge-custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(241, 245, 249, 0.8);
 }
 .badge-custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.35);
   border-radius: 4px;
 }
 .badge-custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.7);
+  background: rgba(99, 102, 241, 0.65);
 }
 
 /* Print Optimization */
@@ -177,18 +233,18 @@
 }
 
 .badge-theme-preset.is-active {
-  border: 1px solid rgba(255, 255, 255, 0.9) !important;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35), 0 2px 6px rgba(0, 0, 0, 0.4);
+  border: 1.5px solid #4f46e5 !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25), 0 2px 6px rgba(0, 0, 0, 0.12);
   transform: scale(1.02);
 }
 
 .badge-theme-preset.is-inactive {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  opacity: 0.85;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  opacity: 0.9;
 }
 
 .badge-theme-preset.is-inactive:hover {
-  border-color: rgba(255, 255, 255, 0.35);
+  border-color: rgba(99, 102, 241, 0.5);
   opacity: 1;
   transform: translateY(-1px);
 }
