@@ -388,14 +388,14 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* MODAL HEADER */}
-        <div className="px-4 sm:px-6 py-3.5 border-b border-slate-800/80 flex items-center justify-between bg-slate-900/90 gap-3">
+        <div className="px-4 sm:px-6 py-3 border-b border-slate-800/80 flex items-center justify-between bg-slate-900/90 gap-3">
           <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
-            <span className="px-2.5 py-1 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-2xs whitespace-nowrap shrink-0">
+            <span className="px-2.5 py-0.5 sm:py-1 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 font-mono text-[9.5px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-2xs whitespace-nowrap shrink-0">
               <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse shrink-0"></span>
               ENTERPRISE PASS
             </span>
-            <h1 className="text-xs sm:text-sm font-semibold tracking-tight text-slate-100 flex items-center gap-1.5 sm:gap-2 mb-0 whitespace-nowrap truncate">
-              <i className="bi bi-shield-check text-indigo-400 shrink-0"></i>
+            <h1 className="text-[11px] sm:text-xs font-semibold tracking-tight text-slate-100 flex items-center gap-1.5 sm:gap-2 mb-0 whitespace-nowrap">
+              <i className="bi bi-shield-check text-indigo-400 text-xs shrink-0"></i>
               <span>Security Credential & Identity Portal</span>
             </h1>
           </div>
@@ -422,11 +422,11 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
         </div>
 
         {/* MAIN CONTENT SPLIT LAYOUT */}
-        <div className="p-4 sm:p-7 flex flex-col lg:flex-row items-stretch justify-center gap-6 sm:gap-8 relative bg-slate-950/70 overflow-hidden">
+        <div className="p-4 sm:p-7 flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 sm:gap-8 relative bg-slate-950/70 overflow-hidden">
           
           {/* LEFT CUSTOMIZATION DRAWER PANEL */}
           {isEditorOpen && (
-            <div className="w-full lg:w-96 badge-glass-panel rounded-2xl p-4 sm:p-5 border border-slate-800/90 space-y-4 text-xs max-h-[580px] overflow-y-auto badge-custom-scrollbar transition-all duration-300">
+            <div className="w-full lg:w-96 h-fit self-start badge-glass-panel rounded-2xl p-4 sm:p-5 border border-slate-800/90 space-y-4 text-xs max-h-[580px] overflow-y-auto badge-custom-scrollbar transition-all duration-300">
               <div className="flex items-center justify-between border-b border-slate-800 pb-3 gap-2">
                 <h3 className="font-bold text-xs sm:text-[13px] text-slate-100 flex items-center gap-1.5 mb-0 whitespace-nowrap shrink-0">
                   <i className="bi bi-magic text-indigo-400 shrink-0"></i>
