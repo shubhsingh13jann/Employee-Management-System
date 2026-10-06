@@ -118,6 +118,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
   const cardInnerRef = useRef<HTMLDivElement>(null);
   const holoLayerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Form & Badge State
   const [name, setName] = useState<string>("");
@@ -260,6 +261,219 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
       document.body.style.overflow = "auto";
     };
   }, [isOpen, onClose]);
+
+  // Interactive Cosmic Constellation Background Animation
+  useEffect(() => {
+    if (!isOpen) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animId: number;
+    let width = 0;
+    let height = 0;
+
+    const mouse = {
+      x: null as number | null,
+      y: null as number | null,
+      radius: 175,
+    };
+
+    const particleCount = 75;
+    const maxDistance = 145;
+
+    // Color palette for nodes and connecting lines
+    const colors = [
+      "rgba(99, 102, 241, ", // Indigo
+      "rgba(6, 182, 212, ",  // Cyan
+      "rgba(168, 85, 247, ", // Purple
+      "rgba(236, 72, 153, ", // Pink
+    ];
+
+    class Particle {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      radius: number;
+      baseColor: string;
+      pulseSpeed: number;
+      pulseAngle: number;
+
+      constructor(w: number, h: number) {
+        this.x = Math.random() * (w || 400);
+        this.y = Math.random() * (h || 600);
+        this.vx = (Math.random() - 0.5) * 0.75;
+        this.vy = (Math.random() - 0.5) * 0.75;
+        this.radius = Math.random() * 2 + 1.3;
+        this.baseColor = colors[Math.floor(Math.random() * colors.length)];
+        this.pulseSpeed = Math.random() * 0.03 + 0.01;
+        this.pulseAngle = Math.random() * Math.PI * 2;
+      }
+
+      update(w: number, h: number) {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Bounce off canvas edges
+        if (this.x < 0 || this.x > w) this.vx *= -1;
+        if (this.y < 0 || this.y > h) this.vy *= -1;
+
+        // Keep inside bounds if container shrinks
+        if (this.x > w) this.x = Math.random() * w;
+        if (this.y > h) this.y = Math.random() * h;
+        if (this.x < 0) this.x = 0;
+        if (this.y < 0) this.y = 0;
+
+        // Gentle pulse size oscillation
+        this.pulseAngle += this.pulseSpeed;
+
+        // Mouse reaction (smooth push away)
+        if (mouse.x !== null && mouse.y !== null) {
+          const dx = mouse.x - this.x;
+          const dy = mouse.y - this.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < mouse.radius && dist > 0) {
+            const angle = Math.atan2(dy, dx);
+            const force = (mouse.radius - dist) / mouse.radius;
+            this.x -= Math.cos(angle) * force * 2.2;
+            this.y -= Math.sin(angle) * force * 2.2;
+          }
+        }
+      }
+
+      draw(c: CanvasRenderingContext2D) {
+        const currentRadius = Math.max(0.6, this.radius + Math.sin(this.pulseAngle) * 0.75);
+
+        c.save();
+        // Glow effect around particle
+        c.beginPath();
+        c.arc(this.x, this.y, currentRadius * 2.6, 0, Math.PI * 2);
+        c.fillStyle = this.baseColor + "0.15)";
+        c.fill();
+
+        // Core particle dot
+        c.beginPath();
+        c.arc(this.x, this.y, currentRadius, 0, Math.PI * 2);
+        c.fillStyle = this.baseColor + "0.95)";
+        c.shadowColor = this.baseColor + "1)";
+        c.shadowBlur = 10;
+        c.fill();
+        c.restore();
+      }
+    }
+
+    let particles: Particle[] = [];
+
+    const resize = () => {
+      const container = canvas.parentElement;
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      width = canvas.width = rect.width;
+      height = canvas.height = rect.height;
+
+      // Fill background
+      ctx.fillStyle = "#030712";
+      ctx.fillRect(0, 0, width, height);
+
+      if (particles.length === 0) {
+        for (let i = 0; i < particleCount; i++) {
+          particles.push(new Particle(width, height));
+        }
+      }
+    };
+
+    resize();
+
+    const resizeObserver = new ResizeObserver(() => {
+      resize();
+    });
+    if (canvas.parentElement) {
+      resizeObserver.observe(canvas.parentElement);
+    }
+
+    const drawConnections = () => {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const p1 = particles[i];
+          const p2 = particles[j];
+          const dx = p1.x - p2.x;
+          const dy = p1.y - p2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < maxDistance) {
+            const alpha = (1 - dist / maxDistance) * 0.35;
+
+            // Gradient line between connected nodes
+            const grad = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
+            grad.addColorStop(0, p1.baseColor + alpha + ")");
+            grad.addColorStop(1, p2.baseColor + alpha + ")");
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+      }
+    };
+
+    const animate = () => {
+      // Clear with soft trails
+      ctx.fillStyle = "rgba(3, 7, 18, 0.25)";
+      ctx.fillRect(0, 0, width, height);
+
+      // Draw lines between nodes
+      drawConnections();
+
+      // Update and draw nodes
+      particles.forEach((p) => {
+        p.update(width, height);
+        p.draw(ctx);
+      });
+
+      animId = requestAnimationFrame(animate);
+    };
+
+    animId = requestAnimationFrame(animate);
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      if (
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom
+      ) {
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+      } else {
+        mouse.x = null;
+        mouse.y = null;
+      }
+    };
+
+    const handleMouseLeave = () => {
+      mouse.x = null;
+      mouse.y = null;
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      resizeObserver.disconnect();
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, [isOpen]);
 
   // Auto-dismiss toast helper
   const showToast = (message: string, type: "info" | "success" | "error" = "info") => {
@@ -571,11 +785,11 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
         <div
           className={`w-full ${
             isEditorOpen ? "max-w-[760px]" : "max-w-[340px] sm:max-w-[350px]"
-          } bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col my-auto transition-all duration-300 text-slate-800 relative overflow-hidden animate-in zoom-in-95 duration-150`}
+          } bg-[#030712] rounded-2xl sm:rounded-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_40px_rgba(99,102,241,0.2)] border border-slate-800/90 flex flex-col my-auto transition-all duration-300 text-slate-100 relative overflow-hidden animate-in zoom-in-95 duration-150`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* MODAL HEADER */}
-          <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 border-b border-slate-800/80 flex items-center justify-between bg-[#0B132B] text-white gap-2.5">
+          <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 border-b border-slate-800/80 flex items-center justify-between bg-[#060D1E]/95 backdrop-blur-md text-white gap-2.5 relative z-20">
             {/* Left: Enterprise Pass Badge */}
             <div className="flex items-center justify-start shrink-0">
               <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 font-mono text-[8.5px] sm:text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-2xs whitespace-nowrap">
@@ -611,7 +825,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
 
               {/* Triple Dots Dropdown Menu */}
               {isMenuOpen && (
-                <div className="absolute right-8 top-full mt-1.5 w-52 bg-white rounded-2xl border border-slate-200 shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 text-xs text-slate-700">
+                <div className="absolute right-8 top-full mt-1.5 w-52 bg-slate-900/95 backdrop-blur-xl rounded-2xl border border-slate-800 shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 text-xs text-slate-200">
                   {/* Customize Badge Toggle */}
                   <button
                     type="button"
@@ -619,9 +833,9 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                       setIsEditorOpen(!isEditorOpen);
                       setIsMenuOpen(false);
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/80 transition cursor-pointer text-left font-semibold"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-200 hover:text-white hover:bg-slate-800/80 transition cursor-pointer text-left font-semibold"
                   >
-                    <i className="bi bi-sliders text-indigo-600 text-sm"></i>
+                    <i className="bi bi-sliders text-indigo-400 text-sm"></i>
                     <span>{isEditorOpen ? "Hide Customizer" : "Customize Badge"}</span>
                   </button>
 
@@ -632,9 +846,9 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                       handleSaveBadge();
                       setIsMenuOpen(false);
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/80 transition cursor-pointer text-left font-semibold"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-200 hover:text-white hover:bg-slate-800/80 transition cursor-pointer text-left font-semibold"
                   >
-                    <i className="bi bi-floppy-fill text-indigo-600 text-sm"></i>
+                    <i className="bi bi-floppy-fill text-indigo-400 text-sm"></i>
                     <span>Save Badge</span>
                   </button>
 
@@ -645,9 +859,9 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                       handlePrint();
                       setIsMenuOpen(false);
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/80 transition cursor-pointer text-left font-semibold"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-200 hover:text-white hover:bg-slate-800/80 transition cursor-pointer text-left font-semibold"
                   >
-                    <i className="bi bi-printer-fill text-indigo-600 text-sm"></i>
+                    <i className="bi bi-printer-fill text-indigo-400 text-sm"></i>
                     <span>Print Badge</span>
                   </button>
 
@@ -658,13 +872,13 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                       handleDownloadWalletPass();
                       setIsMenuOpen(false);
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/80 transition cursor-pointer text-left font-semibold"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-200 hover:text-white hover:bg-slate-800/80 transition cursor-pointer text-left font-semibold"
                   >
-                    <i className="bi bi-wallet2 text-indigo-600 text-sm"></i>
+                    <i className="bi bi-wallet2 text-indigo-400 text-sm"></i>
                     <span>Add to Mobile Wallet</span>
                   </button>
 
-                  <div className="my-1 border-t border-slate-100"></div>
+                  <div className="my-1 border-t border-slate-800"></div>
 
                   {/* Reset Defaults */}
                   <button
@@ -673,9 +887,9 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                       resetBadgeData();
                       setIsMenuOpen(false);
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition cursor-pointer text-left font-semibold"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition cursor-pointer text-left font-semibold"
                   >
-                    <i className="bi bi-arrow-counterclockwise text-rose-500 text-sm"></i>
+                    <i className="bi bi-arrow-counterclockwise text-rose-400 text-sm"></i>
                     <span>Reset Defaults</span>
                   </button>
                 </div>
@@ -696,28 +910,32 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
           {/* MAIN CONTENT SPLIT LAYOUT */}
           <div className={`${
             isEditorOpen ? "p-4 sm:p-5" : "px-3.5 pt-3.5 pb-4.5 sm:px-4 sm:pt-4 sm:pb-5"
-          } flex flex-col lg:flex-row items-stretch justify-center gap-5 sm:gap-6 relative bg-gradient-to-br from-slate-50 via-indigo-50/30 to-slate-100/70 overflow-hidden`}>
-            {/* Ambient Security Matrix Grid & Floating Light Nodes */}
-            <div className="badge-grid-matrix-bg"></div>
-            <div className="badge-ambient-orb badge-orb-1"></div>
-            <div className="badge-ambient-orb badge-orb-2"></div>
+          } flex flex-col lg:flex-row items-stretch justify-center gap-5 sm:gap-6 relative bg-[#030712] overflow-hidden`}>
+            {/* Cosmic Constellation Canvas Background */}
+            <canvas
+              ref={canvasRef}
+              className="absolute inset-0 w-full h-full pointer-events-none z-0"
+            />
+            {/* Ambient Nebula Glow Behind Cosmic Canvas */}
+            <div className="badge-ambient-orb badge-orb-1 opacity-20"></div>
+            <div className="badge-ambient-orb badge-orb-2 opacity-20"></div>
 
             {/* LEFT CUSTOMIZATION DRAWER PANEL */}
             {isEditorOpen && (
-              <div className="w-full lg:w-[380px] flex flex-col justify-between bg-white/95 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-slate-200/90 text-xs transition-all duration-300 shadow-sm space-y-3.5 max-h-[78vh] overflow-y-auto badge-custom-scrollbar relative z-10">
+              <div className="w-full lg:w-[380px] flex flex-col justify-between bg-[#0A101F]/90 backdrop-blur-xl rounded-2xl p-4 sm:p-5 border border-slate-800/90 text-xs transition-all duration-300 shadow-2xl space-y-3.5 max-h-[78vh] overflow-y-auto badge-custom-scrollbar relative z-10 text-slate-200">
                 <div className="space-y-3.5 flex-1">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 gap-2">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-2.5 gap-2">
                     <div
                       style={{ fontSize: "14.5px", lineHeight: "1.25" }}
-                      className="badge-customizer-heading font-extrabold tracking-normal text-slate-900 flex items-center gap-1.5 mb-0 whitespace-nowrap shrink-0"
+                      className="badge-customizer-heading font-extrabold tracking-normal text-white flex items-center gap-1.5 mb-0 whitespace-nowrap shrink-0"
                     >
-                      <i className="bi bi-magic text-indigo-600 text-sm shrink-0"></i>
+                      <i className="bi bi-magic text-indigo-400 text-sm shrink-0"></i>
                       <span>Badge Customizer</span>
                     </div>
                     <button
                       type="button"
                       onClick={resetBadgeData}
-                      className="text-[10px] sm:text-[10.5px] text-indigo-600 hover:text-indigo-700 font-semibold hover:underline cursor-pointer whitespace-nowrap shrink-0"
+                      className="text-[10px] sm:text-[10.5px] text-indigo-400 hover:text-indigo-300 font-semibold hover:underline cursor-pointer whitespace-nowrap shrink-0"
                     >
                       Reset Defaults
                     </button>
@@ -726,10 +944,10 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                   {/* Theme Presets & Custom Gradient Studio */}
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-0">
+                      <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-0">
                         Color Theme & Palette
                       </label>
-                      <span className="text-[10px] text-indigo-600 font-medium">
+                      <span className="text-[10px] text-indigo-400 font-medium">
                         {theme === "custom" ? "Custom Blend" : activeColors.name}
                       </span>
                     </div>
@@ -777,20 +995,20 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
 
                     {/* Custom Color Palette & Gradient Studio */}
                     {theme === "custom" && (
-                      <div className="mt-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-200/90 space-y-2 animate-in fade-in duration-200">
+                      <div className="mt-2.5 p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2 animate-in fade-in duration-200">
                         <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
-                            <i className="bi bi-palette-fill text-indigo-600 text-xs"></i>
+                          <span className="text-[11px] font-semibold text-slate-200 flex items-center gap-1.5">
+                            <i className="bi bi-palette-fill text-indigo-400 text-xs"></i>
                             HR Custom Gradient Studio
                           </span>
-                          <span className="text-[10px] font-mono text-indigo-600 uppercase font-semibold">
+                          <span className="text-[10px] font-mono text-indigo-400 uppercase font-semibold">
                             {customColor1} → {customColor2}
                           </span>
                         </div>
 
                         <div className="grid grid-cols-2 gap-2">
                           {/* Start Color Picker */}
-                          <label className="flex items-center gap-2 p-1.5 bg-white rounded-lg border border-slate-200 hover:border-slate-300 transition cursor-pointer shadow-2xs">
+                          <label className="flex items-center gap-2 p-1.5 bg-slate-950/80 rounded-lg border border-slate-700/80 hover:border-slate-600 transition cursor-pointer shadow-2xs">
                             <input
                               type="color"
                               value={customColor1}
@@ -798,15 +1016,15 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                               className="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent shrink-0"
                             />
                             <div className="flex flex-col min-w-0">
-                              <span className="text-[9.5px] text-slate-500 uppercase font-medium leading-none mb-0.5">Start Color</span>
-                              <span className="text-[10.5px] font-mono font-bold text-slate-800 uppercase truncate">
+                              <span className="text-[9.5px] text-slate-400 uppercase font-medium leading-none mb-0.5">Start Color</span>
+                              <span className="text-[10.5px] font-mono font-bold text-slate-100 uppercase truncate">
                                 {customColor1}
                               </span>
                             </div>
                           </label>
 
                           {/* End Color Picker */}
-                          <label className="flex items-center gap-2 p-1.5 bg-white rounded-lg border border-slate-200 hover:border-slate-300 transition cursor-pointer shadow-2xs">
+                          <label className="flex items-center gap-2 p-1.5 bg-slate-950/80 rounded-lg border border-slate-700/80 hover:border-slate-600 transition cursor-pointer shadow-2xs">
                             <input
                               type="color"
                               value={customColor2}
@@ -814,8 +1032,8 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                               className="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent shrink-0"
                             />
                             <div className="flex flex-col min-w-0">
-                              <span className="text-[9.5px] text-slate-500 uppercase font-medium leading-none mb-0.5">End Color</span>
-                              <span className="text-[10.5px] font-mono font-bold text-slate-800 uppercase truncate">
+                              <span className="text-[9.5px] text-slate-400 uppercase font-medium leading-none mb-0.5">End Color</span>
+                              <span className="text-[10.5px] font-mono font-bold text-slate-100 uppercase truncate">
                                 {customColor2}
                               </span>
                             </div>
@@ -824,7 +1042,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
 
                         {/* Quick Harmonious Palettes */}
                         <div>
-                          <div className="text-[9.5px] text-slate-500 font-medium mb-1">Quick Gradient Combinations:</div>
+                          <div className="text-[9.5px] text-slate-400 font-medium mb-1">Quick Gradient Combinations:</div>
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {[
                               { c1: "#6366f1", c2: "#06b6d4", name: "Cyber Cyan" },
@@ -843,7 +1061,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                                   showToast(`Applied ${combo.name} gradient`, "success");
                                 }}
                                 title={combo.name}
-                                className="h-4.5 w-7 rounded-md border border-slate-200 hover:border-indigo-500 shadow-2xs transition cursor-pointer"
+                                className="h-4.5 w-7 rounded-md border border-slate-700 hover:border-indigo-400 shadow-2xs transition cursor-pointer"
                                 style={{
                                   background: `linear-gradient(90deg, ${combo.c1}, ${combo.c2})`,
                                 }}
@@ -853,13 +1071,13 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                         </div>
 
                         {/* Save Current Combination into any of the 4 Palettes */}
-                        <div className="pt-2 border-t border-slate-200/80">
+                        <div className="pt-2 border-t border-slate-800">
                           <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-[10.5px] font-bold text-slate-700 flex items-center gap-1.5">
-                              <i className="bi bi-bookmark-check-fill text-indigo-600 text-xs"></i>
+                            <span className="text-[10.5px] font-bold text-slate-200 flex items-center gap-1.5">
+                              <i className="bi bi-bookmark-check-fill text-indigo-400 text-xs"></i>
                               Save Combination to Palette:
                             </span>
-                            <span className="text-[9px] text-slate-500">Click a slot to save</span>
+                            <span className="text-[9px] text-slate-400">Click a slot to save</span>
                           </div>
 
                           <div className="grid grid-cols-4 gap-1.5">
@@ -868,17 +1086,17 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                                 key={p.id}
                                 type="button"
                                 onClick={() => handleSaveToPalette(p.id)}
-                                className="px-1.5 py-1.5 rounded-lg bg-white hover:bg-indigo-50/50 border border-slate-200 hover:border-indigo-400 transition flex flex-col items-center gap-1 group cursor-pointer text-center shadow-2xs"
+                                className="px-1.5 py-1.5 rounded-lg bg-slate-950/80 hover:bg-slate-900 border border-slate-700/80 hover:border-indigo-400 transition flex flex-col items-center gap-1 group cursor-pointer text-center shadow-2xs"
                                 title={`Save current gradient into Palette Slot ${idx + 1}`}
                               >
-                                <span className="text-[9.5px] font-bold text-slate-700 group-hover:text-indigo-600">
+                                <span className="text-[9.5px] font-bold text-slate-300 group-hover:text-indigo-400">
                                   Slot {idx + 1}
                                 </span>
                                 <span
-                                  className="w-3.5 h-3.5 rounded-md border border-slate-200 shadow-2xs group-hover:scale-110 transition"
+                                  className="w-3.5 h-3.5 rounded-md border border-slate-700 shadow-2xs group-hover:scale-110 transition"
                                   style={{ background: `linear-gradient(135deg, ${p.c1}, ${p.c2})` }}
                                 />
-                                <span className="text-[9px] font-semibold text-indigo-600 flex items-center gap-0.5">
+                                <span className="text-[9px] font-semibold text-indigo-400 flex items-center gap-0.5">
                                   <i className="bi bi-download text-[8.5px]"></i> Save
                                 </span>
                               </button>
@@ -893,10 +1111,10 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                   {/* Card Base Material / Surface Theme */}
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-0">
+                      <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-0">
                         Card Base Material
                       </label>
-                      <span className="text-[10px] text-indigo-600 font-medium">
+                      <span className="text-[10px] text-indigo-400 font-medium">
                         {CARD_BACKGROUNDS.find((b) => b.id === cardBg)?.name || "Obsidian"}
                       </span>
                     </div>
@@ -912,15 +1130,15 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                           }}
                           className={`p-1.5 rounded-xl border flex flex-col items-center justify-center text-center transition cursor-pointer ${
                             cardBg === bg.id
-                              ? "border-indigo-600 bg-indigo-50/70 ring-2 ring-indigo-500/20 shadow-xs"
-                              : "border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300"
+                              ? "border-indigo-500 bg-indigo-950/60 ring-2 ring-indigo-500/30 shadow-xs"
+                              : "border-slate-800 bg-slate-950/60 hover:bg-slate-900 hover:border-slate-700"
                           }`}
                           title={bg.description}
                         >
                           <div className={`w-full h-5 rounded-md mb-1 border shadow-2xs ${bg.previewClass}`}></div>
                           <span
                             className={`text-[10.5px] font-bold leading-tight truncate w-full ${
-                              cardBg === bg.id ? "text-indigo-700" : "text-slate-800"
+                              cardBg === bg.id ? "text-indigo-300" : "text-slate-200"
                             }`}
                           >
                             {bg.name}
@@ -935,7 +1153,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
 
                 {/* Avatar Photo & Presets */}
                 <div>
-                  <label className="text-slate-700 font-semibold block mb-1.5">Profile Avatar / Photo</label>
+                  <label className="text-slate-300 font-semibold block mb-1.5">Profile Avatar / Photo</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="file"
@@ -947,9 +1165,9 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-200 flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition shrink-0"
+                      className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-lg border border-slate-700/80 flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition shrink-0"
                     >
-                      <i className="bi bi-upload text-indigo-600"></i>
+                      <i className="bi bi-upload text-indigo-400"></i>
                       <span>{customAvatar ? "Change Photo" : "Upload Photo"}</span>
                     </button>
                     {customAvatar && (
@@ -957,7 +1175,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                         type="button"
                         onClick={handleRemoveAvatar}
                         title="Remove uploaded photo"
-                        className="px-2 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg border border-rose-200 flex items-center gap-1 text-xs font-semibold cursor-pointer transition shrink-0"
+                        className="px-2 py-1.5 bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 rounded-lg border border-rose-800/80 flex items-center gap-1 text-xs font-semibold cursor-pointer transition shrink-0"
                       >
                         <i className="bi bi-trash3 text-xs"></i>
                         <span>Remove</span>
@@ -970,8 +1188,8 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                         title="Initial Letter"
                         className={`w-7 h-7 rounded-lg text-xs font-bold flex items-center justify-center border cursor-pointer transition ${
                           avatarType === "initials"
-                            ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
-                            : "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200"
+                            ? "bg-indigo-600 text-white border-indigo-500 shadow-xs"
+                            : "bg-slate-900 text-slate-300 border-slate-700/80 hover:bg-slate-800"
                         }`}
                       >
                         {name ? name.charAt(0).toUpperCase() : "A"}
@@ -982,8 +1200,8 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                         title="User Icon"
                         className={`w-7 h-7 rounded-lg text-xs flex items-center justify-center border cursor-pointer transition ${
                           avatarType === "user"
-                            ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
-                            : "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200"
+                            ? "bg-indigo-600 text-white border-indigo-500 shadow-xs"
+                            : "bg-slate-900 text-slate-300 border-slate-700/80 hover:bg-slate-800"
                         }`}
                       >
                         <i className="bi bi-person-fill"></i>
@@ -994,8 +1212,8 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                         title="Security Shield"
                         className={`w-7 h-7 rounded-lg text-xs flex items-center justify-center border cursor-pointer transition ${
                           avatarType === "shield"
-                            ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
-                            : "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200"
+                            ? "bg-indigo-600 text-white border-indigo-500 shadow-xs"
+                            : "bg-slate-900 text-slate-300 border-slate-700/80 hover:bg-slate-800"
                         }`}
                       >
                         <i className="bi bi-shield-lock-fill"></i>
@@ -1006,7 +1224,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
 
               {/* Holographic Overlay Effect */}
               <div>
-                <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-1.5">Holographic Effect Overlay</label>
+                <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Holographic Effect Overlay</label>
                 <select
                   value={holoEffect}
                   onChange={(e) => {
@@ -1014,93 +1232,93 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                     setHoloEffect(val);
                     showToast(`Hologram effect: ${val}`, "info");
                   }}
-                  className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 text-[12px] sm:text-[12.5px] focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 cursor-pointer shadow-2xs"
+                  className="w-full bg-slate-900 border border-slate-700/90 rounded-lg px-3 py-2 text-white text-[12px] sm:text-[12.5px] focus:outline-hidden focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 cursor-pointer shadow-2xs"
                 >
-                  <option value="holo-prism">Prism Light Reflex (Default)</option>
-                  <option value="holo-grid">Security Micro Grid</option>
-                  <option value="holo-cyber">Cyber Scan Stripe</option>
-                  <option value="holo-waves">Quantum Waves</option>
-                  <option value="none">None (Clean Glass)</option>
+                  <option value="holo-prism" className="bg-slate-900 text-white">Prism Light Reflex (Default)</option>
+                  <option value="holo-grid" className="bg-slate-900 text-white">Security Micro Grid</option>
+                  <option value="holo-cyber" className="bg-slate-900 text-white">Cyber Scan Stripe</option>
+                  <option value="holo-waves" className="bg-slate-900 text-white">Quantum Waves</option>
+                  <option value="none" className="bg-slate-900 text-white">None (Clean Glass)</option>
                 </select>
               </div>
 
               {/* Personal Info Input Fields */}
-              <div className="space-y-3 pt-2 border-t border-slate-100">
+              <div className="space-y-3 pt-2 border-t border-slate-800">
                 <div>
-                  <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-1.5">Full Name</label>
+                  <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Full Name</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 font-semibold text-[12.5px] sm:text-[13px] focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 shadow-2xs"
+                    className="w-full bg-slate-900/90 border border-slate-700/90 rounded-lg px-3 py-2 text-white font-semibold text-[12.5px] sm:text-[13px] focus:outline-hidden focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 shadow-2xs"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-1.5">Role Title</label>
+                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Role Title</label>
                     <input
                       type="text"
                       value={role}
                       onChange={(e) => setRole(e.target.value.toUpperCase())}
-                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 uppercase focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 font-mono text-[12px] shadow-2xs"
+                      className="w-full bg-slate-900/90 border border-slate-700/90 rounded-lg px-3 py-2 text-white uppercase focus:outline-hidden focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 font-mono text-[12px] shadow-2xs"
                     />
                   </div>
                   <div>
-                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-1.5">Personnel ID</label>
+                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Personnel ID</label>
                     <input
                       type="text"
                       value={personnelId}
                       onChange={(e) => setPersonnelId(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 font-mono focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-[12px] shadow-2xs"
+                      className="w-full bg-slate-900/90 border border-slate-700/90 rounded-lg px-3 py-2 text-white font-mono focus:outline-hidden focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 text-[12px] shadow-2xs"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-1.5">Department</label>
+                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Department</label>
                     <input
                       type="text"
                       value={department}
                       onChange={(e) => setDepartment(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 font-medium text-[12.5px] sm:text-[13px] focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 shadow-2xs"
+                      className="w-full bg-slate-900/90 border border-slate-700/90 rounded-lg px-3 py-2 text-white font-medium text-[12.5px] sm:text-[13px] focus:outline-hidden focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 shadow-2xs"
                     />
                   </div>
                   <div>
-                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-1.5">Validity</label>
+                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Validity</label>
                     <input
                       type="text"
                       value={validity}
                       onChange={(e) => setValidity(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 font-mono focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-[12px] shadow-2xs"
+                      className="w-full bg-slate-900/90 border border-slate-700/90 rounded-lg px-3 py-2 text-white font-mono focus:outline-hidden focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 text-[12px] shadow-2xs"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-1.5">Status Badge</label>
+                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Status Badge</label>
                     <select
                       value={status}
                       onChange={(e) => setStatus(e.target.value as StatusType)}
-                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 cursor-pointer text-[12px] shadow-2xs"
+                      className="w-full bg-slate-900 border border-slate-700/90 rounded-lg px-3 py-2 text-white focus:outline-hidden focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 cursor-pointer text-[12px] shadow-2xs"
                     >
-                      <option value="ACTIVE">ACTIVE</option>
-                      <option value="ON-SITE">ON-SITE</option>
-                      <option value="RESTRICTED">RESTRICTED</option>
-                      <option value="VIP ACCESS">VIP ACCESS</option>
+                      <option value="ACTIVE" className="bg-slate-900 text-white">ACTIVE</option>
+                      <option value="ON-SITE" className="bg-slate-900 text-white">ON-SITE</option>
+                      <option value="RESTRICTED" className="bg-slate-900 text-white">RESTRICTED</option>
+                      <option value="VIP ACCESS" className="bg-slate-900 text-white">VIP ACCESS</option>
                     </select>
                   </div>
                   <div>
-                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-1.5">Barcode Type</label>
+                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Barcode Type</label>
                     <select
                       value={barcodeType}
                       onChange={(e) => setBarcodeType(e.target.value as BarcodeType)}
-                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 cursor-pointer text-[12px] shadow-2xs"
+                      className="w-full bg-slate-900 border border-slate-700/90 rounded-lg px-3 py-2 text-white focus:outline-hidden focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 cursor-pointer text-[12px] shadow-2xs"
                     >
-                      <option value="linear">Linear Barcode</option>
-                      <option value="qr">Scannable QR</option>
+                      <option value="linear" className="bg-slate-900 text-white">Linear Barcode</option>
+                      <option value="qr" className="bg-slate-900 text-white">Scannable QR</option>
                     </select>
                   </div>
                 </div>
@@ -1108,12 +1326,12 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
             </div>
 
             {/* Drawer Bottom Sync Indicator */}
-              <div className="pt-2.5 mt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+              <div className="pt-2.5 mt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                   <span>Real-time Live Sync</span>
                 </span>
-                <span className="font-mono text-indigo-600 text-[10px] uppercase font-bold tracking-wider">
+                <span className="font-mono text-indigo-400 text-[10px] uppercase font-bold tracking-wider">
                   256-BIT ENCRYPTED
                 </span>
               </div>
@@ -1492,17 +1710,17 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
               <button
                 type="button"
                 onClick={toggleFlip}
-                className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-indigo-600 text-xs font-semibold border border-slate-200 shadow-2xs flex items-center gap-1.5 transition cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 hover:text-white text-xs font-semibold border border-slate-700/80 shadow-md flex items-center gap-1.5 transition cursor-pointer backdrop-blur-md"
               >
-                <i className="bi bi-arrow-repeat text-indigo-600"></i>
+                <i className="bi bi-arrow-repeat text-indigo-400"></i>
                 <span>Flip Badge</span>
               </button>
               <button
                 type="button"
                 onClick={handleCopyId}
-                className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-indigo-600 text-xs font-semibold border border-slate-200 shadow-2xs flex items-center gap-1.5 transition cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 hover:text-white text-xs font-semibold border border-slate-700/80 shadow-md flex items-center gap-1.5 transition cursor-pointer backdrop-blur-md"
               >
-                <i className="bi bi-clipboard text-indigo-600"></i>
+                <i className="bi bi-clipboard text-indigo-400"></i>
                 <span>Copy ID</span>
               </button>
             </div>
