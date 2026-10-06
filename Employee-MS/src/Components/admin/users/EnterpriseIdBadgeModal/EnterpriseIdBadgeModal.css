@@ -277,14 +277,20 @@
   position: relative;
 }
 
-/* 3. Frosted Polycarbonate (Translucent Glassmorphism) */
+/* 3. Frosted Polycarbonate (Seamless Frosted Slate) */
 .badge-bg-frosted {
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.88) 0%, rgba(15, 23, 42, 0.94) 100%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-color: rgba(255, 255, 255, 0.22) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 20px 35px -5px rgba(0, 0, 0, 0.45);
+  background: linear-gradient(145deg, #111a2e 0%, #080d1a 100%);
+  border-color: #334155 !important;
+  box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.5);
   position: relative;
+}
+.badge-bg-frosted::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+  border-radius: 1.5rem;
 }
 
 /* 4. Security Guilloché (Mathematical Anti-Counterfeit Net) */
@@ -357,5 +363,19 @@
 }
 .badge-preview-titanium {
   background: linear-gradient(135deg, #1e293b, #475569, #0f172a);
+}
+
+/* High-Contrast Employee Name & Text Overrides (Overrides Bootstrap Heading Defaults) */
+.badge-employee-name,
+.badge-card-face h2 {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+.badge-card-face.badge-bg-ceramic .badge-employee-name,
+.badge-card-face.badge-bg-ceramic h2 {
+  color: #0f172a !important;
+  text-shadow: none;
 }
 

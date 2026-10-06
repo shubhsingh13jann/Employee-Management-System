@@ -1147,7 +1147,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                   {/* Guilloché Geometric Spirograph Security Layer */}
                   {cardBg === "guilloche" && (
                     <div className="absolute inset-0 overflow-hidden pointer-events-none z-1">
-                      <svg className="w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 480">
+                      <svg className="w-full h-full opacity-15" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 480">
                         <defs>
                           <pattern id="guilloche-grid-front" width="60" height="60" patternUnits="userSpaceOnUse">
                             <path d="M 0,30 Q 15,0 30,30 T 60,30" fill="none" stroke="currentColor" strokeWidth="0.75" />
@@ -1158,25 +1158,14 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                         <rect width="100%" height="100%" fill="url(#guilloche-grid-front)" className="text-cyan-300" />
                         <g transform="translate(150, 240)" className="text-indigo-400" stroke="currentColor" fill="none" strokeWidth="0.6">
                           {[0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165].map((angle) => (
-                            <ellipse key={angle} cx="0" cy="0" rx="95" ry="32" transform={`rotate(${angle})`} opacity="0.4" />
+                            <ellipse key={angle} cx="0" cy="0" rx="95" ry="32" transform={`rotate(${angle})`} opacity="0.35" />
                           ))}
                         </g>
                       </svg>
-                      <div className="absolute top-10 left-0 right-0 overflow-hidden opacity-25">
-                        <div className="text-[6.5px] font-mono uppercase tracking-[0.22em] text-cyan-300 whitespace-nowrap">
+                      {/* Positioned safely near bottom so it NEVER overlaps header */}
+                      <div className="absolute bottom-12 left-0 right-0 overflow-hidden opacity-25">
+                        <div className="text-[6px] font-mono uppercase tracking-[0.25em] text-cyan-300 whitespace-nowrap">
                           AUTHENTICATED ENTERPRISE CREDENTIAL • 256-BIT CRYPTOGRAPHIC TAMPER SEAL • SECURE ACCESS VERIFIED •
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Frosted Polycarbonate Embedded RFID Antenna Trace */}
-                  {cardBg === "frosted" && (
-                    <div className="absolute inset-1.5 rounded-[22px] border border-amber-400/25 pointer-events-none z-1 flex flex-col justify-between p-2">
-                      <div className="flex justify-between items-start">
-                        <span className="text-[6.5px] font-mono text-amber-300/40 tracking-wider">RFID-13.56MHz</span>
-                        <div className="w-3.5 h-3.5 rounded-full border border-amber-400/30 flex items-center justify-center">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400/50"></span>
                         </div>
                       </div>
                     </div>
@@ -1218,15 +1207,17 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                         </div>
                         <div>
                           <div
+                            style={{ color: isLightBg ? "#0f172a" : "#ffffff" }}
                             className={`text-[10.5px] font-extrabold tracking-wider uppercase leading-none ${
-                              isLightBg ? "text-slate-900" : "text-slate-100"
+                              isLightBg ? "text-slate-900" : "text-white"
                             }`}
                           >
                             ENTERPRISE EMS
                           </div>
                           <div
+                            style={{ color: isLightBg ? "#64748b" : "#94a3b8" }}
                             className={`text-[8px] font-semibold tracking-widest uppercase mt-0.5 ${
-                              isLightBg ? "text-slate-500" : "text-slate-400"
+                              isLightBg ? "text-slate-500" : "text-slate-300"
                             }`}
                           >
                             SECURITY CREDENTIAL
@@ -1275,7 +1266,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                               className={`text-2xl font-extrabold ${
                                 isLightBg
                                   ? "text-indigo-600"
-                                  : "text-transparent bg-clip-text bg-gradient-to-tr from-cyan-300 via-slate-100 to-fuchsia-300"
+                                  : "text-white"
                               }`}
                             >
                               {name ? name.charAt(0).toUpperCase() : "A"}
@@ -1294,8 +1285,9 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                     {/* Employee Name & Role */}
                     <div className="text-center mt-2.5">
                       <h2
-                        className={`text-lg font-extrabold tracking-tight leading-snug mb-0 max-w-[240px] truncate ${
-                          isLightBg ? "text-slate-900 font-black" : "text-slate-100"
+                        style={{ color: isLightBg ? "#0f172a" : "#ffffff" }}
+                        className={`badge-employee-name text-lg font-extrabold tracking-tight leading-snug mb-0 max-w-[240px] truncate ${
+                          isLightBg ? "text-slate-900 font-black" : "text-white"
                         }`}
                       >
                         {name}
@@ -1303,11 +1295,11 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                       <div className="mt-1">
                         <span
                           style={{
-                            backgroundColor: isLightBg ? `${activeColors.c1}15` : `${activeColors.c1}20`,
-                            borderColor: isLightBg ? `${activeColors.c1}40` : `${activeColors.c1}50`,
-                            color: isLightBg ? activeColors.c1 : activeColors.c2,
+                            backgroundColor: isLightBg ? `${activeColors.c1}15` : `${activeColors.c1}25`,
+                            borderColor: isLightBg ? `${activeColors.c1}50` : `${activeColors.c1}70`,
+                            color: isLightBg ? activeColors.c1 : "#ffffff",
                           }}
-                          className="px-2.5 py-0.5 rounded-md border text-[9.5px] font-mono font-bold tracking-widest uppercase"
+                          className="px-2.5 py-0.5 rounded-md border text-[9.5px] font-mono font-bold tracking-widest uppercase shadow-2xs"
                         >
                           {role}
                         </span>
@@ -1318,24 +1310,24 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                   {/* DETAILS TABLE */}
                   <div
                     className={`relative z-10 ${
-                      isLightBg ? "bg-white/85 border-slate-200/90 shadow-2xs" : "bg-slate-900/85 border-slate-800/90"
+                      isLightBg ? "bg-white/85 border-slate-200/90 shadow-2xs" : "bg-slate-900/90 border-slate-700/60 shadow-md"
                     } rounded-xl border p-2.5 space-y-1.5 text-xs backdrop-blur-md`}
                   >
                     <div className="flex justify-between items-center">
-                      <span className={`${isLightBg ? "text-slate-500" : "text-slate-400"} text-[10.5px] font-medium`}>Personnel ID:</span>
-                      <span className={`font-mono font-bold ${isLightBg ? "text-slate-900" : "text-slate-100"} text-[10.5px] tracking-wide`}>
+                      <span style={{ color: isLightBg ? "#64748b" : "#cbd5e1" }} className="text-[10.5px] font-medium">Personnel ID:</span>
+                      <span style={{ color: isLightBg ? "#0f172a" : "#ffffff" }} className="font-mono font-bold text-[10.5px] tracking-wide">
                         {personnelId}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className={`${isLightBg ? "text-slate-500" : "text-slate-400"} text-[10.5px] font-medium`}>Department:</span>
-                      <span className={`font-bold ${isLightBg ? "text-slate-900" : "text-slate-200"} text-[10.5px] truncate max-w-[140px]`}>
+                      <span style={{ color: isLightBg ? "#64748b" : "#cbd5e1" }} className="text-[10.5px] font-medium">Department:</span>
+                      <span style={{ color: isLightBg ? "#0f172a" : "#ffffff" }} className="font-bold text-[10.5px] truncate max-w-[140px]">
                         {department}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className={`${isLightBg ? "text-slate-500" : "text-slate-400"} text-[10.5px] font-medium`}>Validity:</span>
-                      <span className={`font-mono ${isLightBg ? "text-slate-700 font-semibold" : "text-slate-300"} text-[10.5px]`}>{validity}</span>
+                      <span style={{ color: isLightBg ? "#64748b" : "#cbd5e1" }} className="text-[10.5px] font-medium">Validity:</span>
+                      <span style={{ color: isLightBg ? "#0f172a" : "#ffffff" }} className="font-mono text-[10.5px] font-semibold">{validity}</span>
                     </div>
                   </div>
 
@@ -1345,13 +1337,12 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                       <div className="w-full flex flex-col items-center">
                         <div
                           className={`w-full h-7 ${
-                            isLightBg ? "barcode-lines-pattern-dark opacity-90" : "barcode-lines-pattern opacity-85"
+                            isLightBg ? "barcode-lines-pattern-dark opacity-95" : "barcode-lines-pattern opacity-90"
                           } rounded`}
                         ></div>
                         <div
-                          className={`text-[8.5px] font-mono ${
-                            isLightBg ? "text-slate-600 font-semibold" : "text-slate-400"
-                          } tracking-widest mt-0.5`}
+                          style={{ color: isLightBg ? "#475569" : "#cbd5e1" }}
+                          className="text-[8.5px] font-mono tracking-widest mt-0.5 font-semibold"
                         >
                           *{personnelId}*
                         </div>
@@ -1364,9 +1355,8 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                           </svg>
                         </div>
                         <div
-                          className={`text-[8px] font-mono ${
-                            isLightBg ? "text-slate-600 font-semibold" : "text-slate-400"
-                          } tracking-widest mt-0.5`}
+                          style={{ color: isLightBg ? "#475569" : "#cbd5e1" }}
+                          className="text-[8px] font-mono tracking-widest mt-0.5 font-semibold"
                         >
                           *{personnelId}*
                         </div>
@@ -1376,7 +1366,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
 
                   {/* FLIP TIP HINT */}
                   <div className="text-center pointer-events-none z-10 pb-0.5">
-                    <span className="text-[7.5px] text-slate-500 uppercase tracking-widest flex items-center justify-center gap-1">
+                    <span style={{ color: isLightBg ? "#64748b" : "#94a3b8" }} className="text-[7.5px] uppercase tracking-widest flex items-center justify-center gap-1 font-medium">
                       <i className="bi bi-arrow-repeat text-[7.5px]"></i> Click card to flip
                     </span>
                   </div>
@@ -1405,11 +1395,6 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                     </div>
                   )}
 
-                  {/* Frosted trace for back if active */}
-                  {cardBg === "frosted" && (
-                    <div className="absolute inset-1.5 rounded-[22px] border border-amber-400/20 pointer-events-none z-1"></div>
-                  )}
-
                   {/* Magnetic Stripe Simulation */}
                   <div className="absolute top-4 left-0 right-0 h-8 bg-slate-900 border-y border-slate-800 flex items-center px-4">
                     <div className="h-1.5 w-full bg-gradient-to-r from-amber-700/40 via-amber-500/20 to-amber-700/40 rounded-xs"></div>
@@ -1419,13 +1404,12 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                   <div className="pt-11 space-y-2.5 relative z-10">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4
-                          className={`text-[9.5px] font-bold uppercase tracking-wider mb-1 ${
-                            isLightBg ? "text-slate-700" : "text-slate-400"
-                          }`}
+                        <div
+                          style={{ color: isLightBg ? "#1e293b" : "#f1f5f9" }}
+                          className="text-[9.5px] font-bold uppercase tracking-wider mb-1"
                         >
                           Encrypted Security QR
-                        </h4>
+                        </div>
                         <div className="p-2 bg-white rounded-xl inline-block shadow-lg border border-slate-200">
                           <svg className="w-14 h-14 text-slate-950" viewBox="0 0 100 100" fill="currentColor">
                             <path d="M0,0 h30 v30 h-30 z M10,10 h10 v10 h-10 z M70,0 h30 v30 h-30 z M80,10 h10 v10 h-10 z M0,70 h30 v30 h-30 z M10,80 h10 v10 h-10 z M40,10 h10 v10 h-10 z M40,40 h20 v20 h-20 z M70,40 h10 v10 h-10 z M10,40 h10 v20 h-10 z M40,70 h20 v10 h-20 z M70,70 h20 v20 h-20 z M80,80 h10 v10 h-10 z"/>
@@ -1455,9 +1439,8 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                           <i className="bi bi-wifi text-sm rotate-90"></i>
                         </div>
                         <span
-                          className={`text-[7.5px] font-mono mt-1 uppercase tracking-wider ${
-                            isLightBg ? "text-slate-600 font-semibold" : "text-slate-400"
-                          }`}
+                          style={{ color: isLightBg ? "#475569" : "#cbd5e1" }}
+                          className="text-[7.5px] font-mono mt-1 uppercase tracking-wider font-semibold"
                         >
                           Tap NFC Scan
                         </span>
@@ -1469,13 +1452,13 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                         isLightBg ? "text-slate-600 border-slate-200" : "text-slate-400 border-slate-800"
                       }`}
                     >
-                      <p className={`font-semibold mb-0 ${isLightBg ? "text-slate-800" : "text-slate-300"}`}>
+                      <p style={{ color: isLightBg ? "#0f172a" : "#ffffff" }} className="font-bold mb-0 text-[9.5px]">
                         Property of Enterprise EMS Security
                       </p>
-                      <p className="mb-0 text-[8.5px]">
+                      <p style={{ color: isLightBg ? "#475569" : "#cbd5e1" }} className="mb-0 text-[8.5px]">
                         If found, please return to any EMS Security Desk or mail to Headquarters.
                       </p>
-                      <p className="font-mono text-slate-500 text-[8px] mb-0">
+                      <p style={{ color: isLightBg ? "#64748b" : "#94a3b8" }} className="font-mono text-[8px] mb-0">
                         24/7 Hotline: +1 (800) 555-0199
                       </p>
                     </div>
@@ -1494,7 +1477,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                       >
                         {name} (Signed)
                       </div>
-                      <div className="text-[7px] text-slate-500 uppercase tracking-widest">
+                      <div style={{ color: isLightBg ? "#64748b" : "#94a3b8" }} className="text-[7px] uppercase tracking-widest font-medium">
                         Authorized Signature
                       </div>
                     </div>
