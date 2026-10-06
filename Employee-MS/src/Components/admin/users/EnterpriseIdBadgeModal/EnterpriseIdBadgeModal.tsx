@@ -20,88 +20,25 @@ export interface EnterpriseIdBadgeModalProps {
   } | null;
 }
 
-type PresetThemeKey = "cyber" | "gold" | "frost" | "emerald" | "violet";
-type ThemeKey = PresetThemeKey | "custom";
-type HoloKey = "holo-prism" | "holo-grid" | "holo-cyber" | "holo-waves" | "none";
-type AvatarPreset = "photo" | "initials" | "user" | "shield";
-type BarcodeType = "linear" | "qr";
-type StatusType = "ACTIVE" | "ON-SITE" | "RESTRICTED" | "VIP ACCESS";
-
-interface ThemeConfig {
+export interface PaletteSlot {
+  id: string;
   name: string;
-  badgeBg: string;
-  logoBg: string;
-  avatarRing: string;
-  topBar: string;
-  glow1: string;
-  glow2: string;
-  accentText: string;
-  roleBadge: string;
-  previewGradient: string;
+  c1: string;
+  c2: string;
 }
 
-const THEMES: Record<PresetThemeKey, ThemeConfig> = {
-  cyber: {
-    name: "Cyber Neon",
-    badgeBg: "bg-slate-950",
-    logoBg: "bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-500 text-white shadow-indigo-500/30",
-    avatarRing: "bg-gradient-to-br from-cyan-400 via-indigo-500 to-fuchsia-500 shadow-indigo-500/25",
-    topBar: "bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500",
-    glow1: "bg-indigo-500/25",
-    glow2: "bg-fuchsia-500/20",
-    accentText: "text-indigo-400",
-    roleBadge: "bg-indigo-500/15 border-indigo-500/30 text-indigo-300",
-    previewGradient: "from-cyan-500 via-indigo-500 to-fuchsia-500",
-  },
-  gold: {
-    name: "Executive Gold",
-    badgeBg: "bg-slate-950",
-    logoBg: "bg-gradient-to-tr from-amber-600 via-yellow-500 to-amber-400 text-slate-950 shadow-amber-500/30",
-    avatarRing: "bg-gradient-to-br from-amber-300 via-yellow-500 to-amber-700 shadow-amber-500/20",
-    topBar: "bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-600",
-    glow1: "bg-amber-500/20",
-    glow2: "bg-yellow-600/15",
-    accentText: "text-amber-400",
-    roleBadge: "bg-amber-500/15 border-amber-500/30 text-amber-300",
-    previewGradient: "from-amber-400 via-yellow-500 to-amber-700",
-  },
-  frost: {
-    name: "Pearl Light",
-    badgeBg: "bg-[#0b1021]",
-    logoBg: "bg-gradient-to-tr from-slate-200 via-sky-300 to-indigo-400 text-slate-900 shadow-indigo-200/30",
-    avatarRing: "bg-gradient-to-br from-slate-100 via-indigo-300 to-sky-400 shadow-indigo-300/20",
-    topBar: "bg-gradient-to-r from-slate-100 via-indigo-300 to-sky-300",
-    glow1: "bg-slate-300/20",
-    glow2: "bg-indigo-400/20",
-    accentText: "text-sky-300",
-    roleBadge: "bg-sky-500/15 border-sky-500/30 text-sky-200",
-    previewGradient: "from-slate-200 via-sky-300 to-indigo-400",
-  },
-  emerald: {
-    name: "Security Emerald",
-    badgeBg: "bg-slate-950",
-    logoBg: "bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-400 text-white shadow-emerald-500/30",
-    avatarRing: "bg-gradient-to-br from-emerald-300 via-teal-500 to-emerald-700 shadow-emerald-500/20",
-    topBar: "bg-gradient-to-r from-emerald-300 via-teal-400 to-emerald-600",
-    glow1: "bg-emerald-500/20",
-    glow2: "bg-teal-600/20",
-    accentText: "text-emerald-400",
-    roleBadge: "bg-emerald-500/15 border-emerald-500/30 text-emerald-300",
-    previewGradient: "from-emerald-400 via-teal-500 to-emerald-700",
-  },
-  violet: {
-    name: "Deep Ultraviolet",
-    badgeBg: "bg-slate-950",
-    logoBg: "bg-gradient-to-tr from-purple-700 via-violet-600 to-indigo-500 text-white shadow-purple-500/30",
-    avatarRing: "bg-gradient-to-br from-purple-400 via-indigo-500 to-purple-800 shadow-purple-500/20",
-    topBar: "bg-gradient-to-r from-purple-400 via-indigo-500 to-purple-700",
-    glow1: "bg-purple-600/25",
-    glow2: "bg-indigo-600/20",
-    accentText: "text-purple-400",
-    roleBadge: "bg-purple-500/15 border-purple-500/30 text-purple-300",
-    previewGradient: "from-purple-500 via-violet-600 to-indigo-700",
-  },
-};
+export const DEFAULT_PALETTES: PaletteSlot[] = [
+  { id: "p1", name: "Cyber Neon", c1: "#6366f1", c2: "#06b6d4" },
+  { id: "p2", name: "Executive Gold", c1: "#f59e0b", c2: "#d97706" },
+  { id: "p3", name: "Emerald Mint", c1: "#059669", c2: "#10b981" },
+  { id: "p4", name: "Royal Purple", c1: "#8b5cf6", c2: "#ec4899" },
+];
+
+export type ThemeKey = "p1" | "p2" | "p3" | "p4" | "custom";
+export type HoloKey = "holo-prism" | "holo-grid" | "holo-cyber" | "holo-waves" | "none";
+export type AvatarPreset = "photo" | "initials" | "user" | "shield";
+export type BarcodeType = "linear" | "qr";
+export type StatusType = "ACTIVE" | "ON-SITE" | "RESTRICTED" | "VIP ACCESS";
 
 export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
   isOpen,
@@ -123,7 +60,17 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
   const [status, setStatus] = useState<StatusType>("ACTIVE");
   const [barcodeType, setBarcodeType] = useState<BarcodeType>("linear");
   const [holoEffect, setHoloEffect] = useState<HoloKey>("holo-prism");
-  const [theme, setTheme] = useState<ThemeKey>("cyber");
+  const [palettes, setPalettes] = useState<PaletteSlot[]>(() => {
+    try {
+      const saved = localStorage.getItem("ems_id_badge_palettes");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length === 4) return parsed;
+      }
+    } catch {}
+    return DEFAULT_PALETTES;
+  });
+  const [theme, setTheme] = useState<ThemeKey>("p1");
   const [customColor1, setCustomColor1] = useState<string>("#6366f1");
   const [customColor2, setCustomColor2] = useState<string>("#06b6d4");
   const [avatarType, setAvatarType] = useState<AvatarPreset>("photo");
@@ -133,7 +80,38 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
   const [isFlipped, setIsFlipped] = useState<boolean>(false);
   const [isEditorOpen, setIsEditorOpen] = useState<boolean>(true);
   const [nfcActive, setNfcActive] = useState<boolean>(false);
-  const [toast, setToast] = useState<{ message: string; type: "info" | "success" } | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const menuDropdownRef = useRef<HTMLDivElement>(null);
+  const [toast, setToast] = useState<{ message: string; type: "info" | "success" | "error" } | null>(null);
+
+  // Active gradient colors
+  const activeColors = React.useMemo(() => {
+    if (theme === "custom") {
+      return { c1: customColor1, c2: customColor2, name: "Custom Blend" };
+    }
+    const found = palettes.find((p) => p.id === theme);
+    return found
+      ? { c1: found.c1, c2: found.c2, name: found.name }
+      : { c1: palettes[0].c1, c2: palettes[0].c2, name: palettes[0].name };
+  }, [theme, customColor1, customColor2, palettes]);
+
+  // Click outside to close triple-dots menu
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (
+        menuDropdownRef.current &&
+        !menuDropdownRef.current.contains(e.target as Node)
+      ) {
+        setIsMenuOpen(false);
+      }
+    };
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [isMenuOpen]);
 
   // Reset or initialize state whenever modal opens or user prop changes
   useEffect(() => {
@@ -144,28 +122,54 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
         : new Date().getFullYear();
       const validPeriod = `${joinYear} - ${joinYear + 3}`;
 
-      setName(user.name || "Employee Name");
-      setRole(user.role ? user.role.toUpperCase() : "EMPLOYEE");
-      setPersonnelId(formattedId);
-      setDepartment(user.department_name || "Operations");
-      setValidity(validPeriod);
-      setStatus(
-        user.status?.toUpperCase() === "SUSPENDED" || user.status?.toUpperCase() === "RESTRICTED"
-          ? "RESTRICTED"
-          : "ACTIVE"
-      );
-      setBarcodeType("linear");
-      setHoloEffect("holo-prism");
-      setTheme("cyber");
-      setIsFlipped(false);
+      // Check if user has previously saved badge config
+      let savedConfig: any = null;
+      try {
+        const raw = localStorage.getItem(`ems_badge_saved_${user.id}`);
+        if (raw) savedConfig = JSON.parse(raw);
+      } catch {}
 
-      if (user.image_url) {
-        setCustomAvatar(user.image_url);
-        setAvatarType("photo");
+      if (savedConfig) {
+        setName(savedConfig.name || user.name || "Employee Name");
+        setRole(savedConfig.role || (user.role ? user.role.toUpperCase() : "EMPLOYEE"));
+        setPersonnelId(savedConfig.personnelId || formattedId);
+        setDepartment(savedConfig.department || user.department_name || "Operations");
+        setValidity(savedConfig.validity || validPeriod);
+        setStatus(savedConfig.status || "ACTIVE");
+        setBarcodeType(savedConfig.barcodeType || "linear");
+        setHoloEffect(savedConfig.holoEffect || "holo-prism");
+        setTheme(savedConfig.theme || "p1");
+        if (savedConfig.customColor1) setCustomColor1(savedConfig.customColor1);
+        if (savedConfig.customColor2) setCustomColor2(savedConfig.customColor2);
+        setAvatarType(savedConfig.avatarType || (user.image_url ? "photo" : "initials"));
+        setCustomAvatar(savedConfig.customAvatar || user.image_url || null);
       } else {
-        setCustomAvatar(null);
-        setAvatarType("initials");
+        setName(user.name || "Employee Name");
+        setRole(user.role ? user.role.toUpperCase() : "EMPLOYEE");
+        setPersonnelId(formattedId);
+        setDepartment(user.department_name || "Operations");
+        setValidity(validPeriod);
+        setStatus(
+          user.status?.toUpperCase() === "SUSPENDED" || user.status?.toUpperCase() === "RESTRICTED"
+            ? "RESTRICTED"
+            : "ACTIVE"
+        );
+        setBarcodeType("linear");
+        setHoloEffect("holo-prism");
+        setTheme("p1");
+        setCustomColor1(palettes[0].c1);
+        setCustomColor2(palettes[0].c2);
+
+        if (user.image_url) {
+          setCustomAvatar(user.image_url);
+          setAvatarType("photo");
+        } else {
+          setCustomAvatar(null);
+          setAvatarType("initials");
+        }
       }
+      setIsFlipped(false);
+      setIsMenuOpen(false);
     }
   }, [user, isOpen]);
 
@@ -187,7 +191,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
   }, [isOpen, onClose]);
 
   // Auto-dismiss toast helper
-  const showToast = (message: string, type: "info" | "success" = "info") => {
+  const showToast = (message: string, type: "info" | "success" | "error" = "info") => {
     setToast({ message, type });
     setTimeout(() => {
       setToast(null);
@@ -196,21 +200,18 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
 
   if (!isOpen || !user) return null;
 
-  const currentTheme: ThemeConfig =
-    theme === "custom"
-      ? {
-          name: "Custom Palette",
-          badgeBg: "bg-slate-950",
-          logoBg: "text-white shadow-lg",
-          avatarRing: "shadow-xl",
-          topBar: "",
-          glow1: "",
-          glow2: "",
-          accentText: "text-indigo-400",
-          roleBadge: "border font-mono font-bold tracking-widest uppercase",
-          previewGradient: "",
-        }
-      : THEMES[theme];
+  const currentTheme = {
+    name: activeColors.name,
+    badgeBg: "bg-slate-950",
+    logoBg: "text-white shadow-lg",
+    avatarRing: "shadow-xl",
+    topBar: "",
+    glow1: "",
+    glow2: "",
+    accentText: "text-indigo-400",
+    roleBadge: "border font-mono font-bold tracking-widest uppercase",
+    previewGradient: "",
+  };
 
   // 3D Gyroscope Mouse Movement
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -342,6 +343,49 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
     showToast("Mobile Pass metadata (.pkpass) exported successfully", "success");
   };
 
+  // Save current gradient into one of the 4 palette slots
+  const handleSaveToPalette = (paletteId: string) => {
+    const updated = palettes.map((p) =>
+      p.id === paletteId ? { ...p, c1: customColor1, c2: customColor2 } : p
+    );
+    setPalettes(updated);
+    try {
+      localStorage.setItem("ems_id_badge_palettes", JSON.stringify(updated));
+    } catch {}
+    setTheme(paletteId as ThemeKey);
+    const slotIdx = updated.findIndex((p) => p.id === paletteId) + 1;
+    showToast(`Saved gradient combination to Palette Slot ${slotIdx}!`, "success");
+  };
+
+  // Save current badge configuration
+  const handleSaveBadge = () => {
+    try {
+      const config = {
+        name,
+        role,
+        personnelId,
+        department,
+        validity,
+        status,
+        barcodeType,
+        holoEffect,
+        avatarType,
+        customAvatar,
+        theme,
+        customColor1,
+        customColor2,
+        savedAt: new Date().toISOString(),
+      };
+      localStorage.setItem(
+        `ems_badge_saved_${user?.id || personnelId || "default"}`,
+        JSON.stringify(config)
+      );
+      showToast("Badge configuration saved successfully!", "success");
+    } catch {
+      showToast("Failed to save badge configuration", "error");
+    }
+  };
+
   // Reset to Defaults
   const resetBadgeData = () => {
     const formattedId = `EMS-${String(user.id).padStart(4, "0")}`;
@@ -357,9 +401,13 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
     setStatus("ACTIVE");
     setBarcodeType("linear");
     setHoloEffect("holo-prism");
-    setTheme("cyber");
-    setCustomColor1("#6366f1");
-    setCustomColor2("#06b6d4");
+    setTheme("p1");
+    setPalettes(DEFAULT_PALETTES);
+    try {
+      localStorage.removeItem("ems_id_badge_palettes");
+    } catch {}
+    setCustomColor1(DEFAULT_PALETTES[0].c1);
+    setCustomColor2(DEFAULT_PALETTES[0].c2);
     setIsFlipped(false);
 
     if (user.image_url) {
@@ -374,7 +422,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
       cardInnerRef.current.style.transform = "rotateX(0deg) rotateY(0deg)";
     }
 
-    showToast("Reset to default credential details", "info");
+    showToast("Reset to default credential details & palettes", "info");
   };
 
   // Status Styling Badge
@@ -408,210 +456,336 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md overscroll-contain transition-all"
+      className="fixed inset-0 z-[9999] overflow-y-auto bg-slate-950/65 backdrop-blur-xs p-3 sm:p-5 overscroll-y-contain animate-in fade-in duration-150"
       onClick={onClose}
     >
-      {/* MAIN CONTAINER MODAL */}
-      <div
-        className={`w-full ${
-          isEditorOpen ? "max-w-[820px]" : "max-w-[480px]"
-        } badge-glass-panel rounded-3xl shadow-2xl border border-slate-700/60 flex flex-col my-auto transition-all duration-300 overflow-hidden text-slate-100`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* MODAL HEADER */}
-        <div className="px-4 sm:px-6 py-3 border-b border-slate-800/80 flex items-center justify-between bg-slate-900/95 gap-3">
-          {/* Left: Enterprise Pass Badge */}
-          <div className="flex items-center justify-start shrink-0">
-            <span className="px-2.5 py-1 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 font-mono text-[9px] sm:text-[9.5px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-2xs whitespace-nowrap">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shrink-0"></span>
-              ENTERPRISE PASS
-            </span>
-          </div>
+      <div className="min-h-full flex items-center justify-center py-4 sm:py-6">
+        {/* MAIN CONTAINER MODAL */}
+        <div
+          className={`w-full ${
+            isEditorOpen ? "max-w-[760px]" : "max-w-[340px] sm:max-w-[350px]"
+          } bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col my-auto transition-all duration-300 text-slate-800 relative overflow-hidden animate-in zoom-in-95 duration-150`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* MODAL HEADER */}
+          <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 border-b border-slate-800/80 flex items-center justify-between bg-[#0B132B] text-white gap-2.5">
+            {/* Left: Enterprise Pass Badge */}
+            <div className="flex items-center justify-start shrink-0">
+              <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 font-mono text-[8.5px] sm:text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-2xs whitespace-nowrap">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shrink-0"></span>
+                ENTERPRISE PASS
+              </span>
+            </div>
 
-          {/* Center: Security ID Portal Heading (Centered) */}
-          <div className="flex-1 flex items-center justify-center text-center">
-            <div
-              style={{ fontSize: "14.5px", lineHeight: "1.25" }}
-              className="security-id-portal-heading font-extrabold tracking-normal text-slate-100 flex items-center justify-center gap-1.5 mb-0 whitespace-nowrap"
-            >
-              <i className="bi bi-shield-check text-indigo-400 text-sm shrink-0"></i>
-              <span>Security ID Portal</span>
+            {/* Center: Security ID Portal Heading (Centered) */}
+            <div className="flex-1 flex items-center justify-center text-center">
+              <div
+                style={{ fontSize: "14px", lineHeight: "1.25" }}
+                className="security-id-portal-heading font-extrabold tracking-normal text-white flex items-center justify-center gap-1.5 mb-0 whitespace-nowrap"
+              >
+                <i className="bi bi-shield-check text-indigo-400 text-sm shrink-0"></i>
+                <span>Security ID Portal</span>
+              </div>
+            </div>
+
+            {/* Right: Actions with Triple Dots Menu on Left of Cross Button */}
+            <div className="relative flex items-center gap-1.5 shrink-0 justify-end" ref={menuDropdownRef}>
+              {/* Triple Dots Options Button */}
+              <button
+                type="button"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className={`p-1 text-slate-300 hover:text-white rounded-xl hover:bg-white/10 transition cursor-pointer shrink-0 ${
+                  isMenuOpen ? "bg-white/10 text-indigo-300" : ""
+                }`}
+                title="More Options"
+              >
+                <i className="bi bi-three-dots-vertical text-base"></i>
+              </button>
+
+              {/* Triple Dots Dropdown Menu */}
+              {isMenuOpen && (
+                <div className="absolute right-8 top-full mt-1.5 w-52 bg-white rounded-2xl border border-slate-200 shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 text-xs text-slate-700">
+                  {/* Customize Badge Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsEditorOpen(!isEditorOpen);
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/80 transition cursor-pointer text-left font-semibold"
+                  >
+                    <i className="bi bi-sliders text-indigo-600 text-sm"></i>
+                    <span>{isEditorOpen ? "Hide Customizer" : "Customize Badge"}</span>
+                  </button>
+
+                  {/* Save Badge */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleSaveBadge();
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/80 transition cursor-pointer text-left font-semibold"
+                  >
+                    <i className="bi bi-floppy-fill text-indigo-600 text-sm"></i>
+                    <span>Save Badge</span>
+                  </button>
+
+                  {/* Print Badge */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handlePrint();
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/80 transition cursor-pointer text-left font-semibold"
+                  >
+                    <i className="bi bi-printer-fill text-indigo-600 text-sm"></i>
+                    <span>Print Badge</span>
+                  </button>
+
+                  {/* Add to Mobile Wallet */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleDownloadWalletPass();
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/80 transition cursor-pointer text-left font-semibold"
+                  >
+                    <i className="bi bi-wallet2 text-indigo-600 text-sm"></i>
+                    <span>Add to Mobile Wallet</span>
+                  </button>
+
+                  <div className="my-1 border-t border-slate-100"></div>
+
+                  {/* Reset Defaults */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      resetBadgeData();
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition cursor-pointer text-left font-semibold"
+                  >
+                    <i className="bi bi-arrow-counterclockwise text-rose-500 text-sm"></i>
+                    <span>Reset Defaults</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Close Cross Button */}
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-1 text-slate-400 hover:text-white rounded-xl hover:bg-white/10 transition cursor-pointer shrink-0"
+                title="Close modal"
+              >
+                <i className="bi bi-x-lg text-sm"></i>
+              </button>
             </div>
           </div>
 
-          {/* Right: Actions */}
-          <div className="flex items-center gap-3.5 sm:gap-4 shrink-0 justify-end">
-            {/* Toggle Customizer Drawer */}
-            <button
-              type="button"
-              onClick={() => setIsEditorOpen(!isEditorOpen)}
-              className="px-2.5 py-1.5 sm:px-3 sm:py-1.5 text-xs font-semibold text-slate-200 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 rounded-xl transition flex items-center gap-1.5 shadow-2xs cursor-pointer whitespace-nowrap shrink-0"
-            >
-              <i className="bi bi-sliders text-indigo-400 shrink-0 text-xs"></i>
-              <span className="whitespace-nowrap">{isEditorOpen ? "Hide Customizer" : "Customize Badge"}</span>
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1 sm:p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer shrink-0 ml-0.5"
-              title="Close modal"
-            >
-              <i className="bi bi-x-lg text-sm sm:text-base"></i>
-            </button>
-          </div>
-        </div>
+          {/* MAIN CONTENT SPLIT LAYOUT */}
+          <div className={`${
+            isEditorOpen ? "p-4 sm:p-5" : "px-3.5 pt-3.5 pb-4.5 sm:px-4 sm:pt-4 sm:pb-5"
+          } flex flex-col lg:flex-row items-stretch justify-center gap-5 sm:gap-6 relative bg-gradient-to-br from-slate-50 via-indigo-50/30 to-slate-100/70 overflow-hidden`}>
+            {/* Ambient Security Matrix Grid & Floating Light Nodes */}
+            <div className="badge-grid-matrix-bg"></div>
+            <div className="badge-ambient-orb badge-orb-1"></div>
+            <div className="badge-ambient-orb badge-orb-2"></div>
 
-        {/* MAIN CONTENT SPLIT LAYOUT */}
-        <div className="p-4 sm:p-6 flex flex-col lg:flex-row items-stretch justify-center gap-6 relative bg-slate-950/70 overflow-hidden">
-          
-          {/* LEFT CUSTOMIZATION DRAWER PANEL */}
-          {isEditorOpen && (
-            <div className="w-full lg:w-[380px] flex flex-col justify-between badge-glass-panel rounded-2xl p-4 sm:p-5 border border-slate-800/90 text-xs transition-all duration-300 shadow-xl space-y-3.5">
-              <div className="space-y-3.5 flex-1">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-2.5 gap-2">
-                  <div
-                    style={{ fontSize: "14.5px", lineHeight: "1.25" }}
-                    className="badge-customizer-heading font-extrabold tracking-normal text-slate-100 flex items-center gap-1.5 mb-0 whitespace-nowrap shrink-0"
-                  >
-                    <i className="bi bi-magic text-indigo-400 text-sm shrink-0"></i>
-                    <span>Badge Customizer</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={resetBadgeData}
-                    className="text-[10px] sm:text-[10.5px] text-indigo-400 hover:text-indigo-300 font-medium hover:underline cursor-pointer whitespace-nowrap shrink-0"
-                  >
-                    Reset Defaults
-                  </button>
-                </div>
-
-                {/* Theme Presets & Custom Gradient Studio */}
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-0">
-                      Color Theme & Palette
-                    </label>
-                    <span className="text-[10px] text-slate-400 font-medium">
-                      {theme === "custom" ? "Custom Blend" : THEMES[theme].name}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-6 gap-1.5">
-                    {(Object.keys(THEMES) as PresetThemeKey[]).map((tKey) => (
-                      <button
-                        key={tKey}
-                        type="button"
-                        onClick={() => {
-                          setTheme(tKey);
-                          showToast(`Theme changed to ${THEMES[tKey].name}`, "success");
-                        }}
-                        title={THEMES[tKey].name}
-                        className={`badge-theme-preset ${
-                          theme === tKey ? "is-active" : "is-inactive"
-                        } bg-gradient-to-r ${THEMES[tKey].previewGradient}`}
-                      />
-                    ))}
-                    {/* 6th: Custom Palette Button */}
+            {/* LEFT CUSTOMIZATION DRAWER PANEL */}
+            {isEditorOpen && (
+              <div className="w-full lg:w-[380px] flex flex-col justify-between bg-white/95 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-slate-200/90 text-xs transition-all duration-300 shadow-sm space-y-3.5 max-h-[78vh] overflow-y-auto badge-custom-scrollbar relative z-10">
+                <div className="space-y-3.5 flex-1">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 gap-2">
+                    <div
+                      style={{ fontSize: "14.5px", lineHeight: "1.25" }}
+                      className="badge-customizer-heading font-extrabold tracking-normal text-slate-900 flex items-center gap-1.5 mb-0 whitespace-nowrap shrink-0"
+                    >
+                      <i className="bi bi-magic text-indigo-600 text-sm shrink-0"></i>
+                      <span>Badge Customizer</span>
+                    </div>
                     <button
                       type="button"
-                      onClick={() => {
-                        setTheme("custom");
-                        showToast("Custom Gradient Studio active", "info");
-                      }}
-                      title="Custom Gradient Palette"
-                      style={{
-                        background: `linear-gradient(135deg, ${customColor1}, ${customColor2})`,
-                      }}
-                      className={`badge-theme-preset ${
-                        theme === "custom" ? "is-active" : "is-inactive"
-                      } flex items-center justify-center text-white shadow-xs`}
+                      onClick={resetBadgeData}
+                      className="text-[10px] sm:text-[10.5px] text-indigo-600 hover:text-indigo-700 font-semibold hover:underline cursor-pointer whitespace-nowrap shrink-0"
                     >
-                      <i className="bi bi-palette-fill text-[11px] drop-shadow-xs"></i>
+                      Reset Defaults
                     </button>
                   </div>
 
-                  {/* Custom Color Palette & Gradient Studio */}
-                  {theme === "custom" && (
-                    <div className="mt-2.5 p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2 animate-in fade-in duration-200">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
-                          <i className="bi bi-palette-fill text-indigo-400 text-xs"></i>
-                          HR Custom Gradient Combination
-                        </span>
-                        <span className="text-[10px] font-mono text-indigo-400 uppercase font-semibold">
-                          {customColor1} → {customColor2}
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2">
-                        {/* Start Color Picker */}
-                        <label className="flex items-center gap-2 p-1.5 bg-slate-950/70 rounded-lg border border-slate-800 hover:border-slate-700 transition cursor-pointer">
-                          <input
-                            type="color"
-                            value={customColor1}
-                            onChange={(e) => setCustomColor1(e.target.value)}
-                            className="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent shrink-0"
-                          />
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-[9.5px] text-slate-400 uppercase font-medium leading-none mb-0.5">Start Color</span>
-                            <span className="text-[10.5px] font-mono font-bold text-slate-200 uppercase truncate">
-                              {customColor1}
-                            </span>
-                          </div>
-                        </label>
-
-                        {/* End Color Picker */}
-                        <label className="flex items-center gap-2 p-1.5 bg-slate-950/70 rounded-lg border border-slate-800 hover:border-slate-700 transition cursor-pointer">
-                          <input
-                            type="color"
-                            value={customColor2}
-                            onChange={(e) => setCustomColor2(e.target.value)}
-                            className="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent shrink-0"
-                          />
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-[9.5px] text-slate-400 uppercase font-medium leading-none mb-0.5">End Color</span>
-                            <span className="text-[10.5px] font-mono font-bold text-slate-200 uppercase truncate">
-                              {customColor2}
-                            </span>
-                          </div>
-                        </label>
-                      </div>
-
-                      {/* Quick Harmonious Palettes */}
-                      <div>
-                        <div className="text-[9.5px] text-slate-400 font-medium mb-1">Quick Gradient Combinations:</div>
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          {[
-                            { c1: "#6366f1", c2: "#06b6d4", name: "Cyber Cyan" },
-                            { c1: "#f43f5e", c2: "#fb923c", name: "Sunset Coral" },
-                            { c1: "#059669", c2: "#10b981", name: "Emerald Mint" },
-                            { c1: "#2563eb", c2: "#9333ea", name: "Royal Purple" },
-                            { c1: "#d946ef", c2: "#f59e0b", name: "Amber Fusion" },
-                            { c1: "#3b82f6", c2: "#ec4899", name: "Neon Rose" },
-                          ].map((combo) => (
-                            <button
-                              key={combo.name}
-                              type="button"
-                              onClick={() => {
-                                setCustomColor1(combo.c1);
-                                setCustomColor2(combo.c2);
-                                showToast(`Applied ${combo.name} gradient`, "success");
-                              }}
-                              title={combo.name}
-                              className="h-4.5 w-7 rounded-md border border-white/10 hover:border-white/50 transition cursor-pointer"
-                              style={{
-                                background: `linear-gradient(90deg, ${combo.c1}, ${combo.c2})`,
-                              }}
-                            />
-                          ))}
-                        </div>
-                      </div>
+                  {/* Theme Presets & Custom Gradient Studio */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-0">
+                        Color Theme & Palette
+                      </label>
+                      <span className="text-[10px] text-indigo-600 font-medium">
+                        {theme === "custom" ? "Custom Blend" : activeColors.name}
+                      </span>
                     </div>
-                  )}
-                </div>
+
+                    {/* Exactly 4 Palettes + 1 Customizer Palette Button (5 Total) */}
+                    <div className="grid grid-cols-5 gap-1.5">
+                      {palettes.map((p, idx) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => {
+                            setTheme(p.id as ThemeKey);
+                            setCustomColor1(p.c1);
+                            setCustomColor2(p.c2);
+                            showToast(`Selected Palette ${idx + 1} (${p.name})`, "info");
+                          }}
+                          title={`Palette ${idx + 1}: ${p.name}`}
+                          style={{
+                            background: `linear-gradient(135deg, ${p.c1}, ${p.c2})`,
+                          }}
+                          className={`badge-theme-preset ${
+                            theme === p.id ? "is-active" : "is-inactive"
+                          }`}
+                        />
+                      ))}
+
+                      {/* 5th: Custom Palette Button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTheme("custom");
+                          showToast("Custom Gradient Studio active", "info");
+                        }}
+                        title="Custom Gradient Studio"
+                        style={{
+                          background: `linear-gradient(135deg, ${customColor1}, ${customColor2})`,
+                        }}
+                        className={`badge-theme-preset ${
+                          theme === "custom" ? "is-active" : "is-inactive"
+                        } flex items-center justify-center text-white shadow-xs`}
+                      >
+                        <i className="bi bi-palette-fill text-[11px] drop-shadow-xs"></i>
+                      </button>
+                    </div>
+
+                    {/* Custom Color Palette & Gradient Studio */}
+                    {theme === "custom" && (
+                      <div className="mt-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-200/90 space-y-2 animate-in fade-in duration-200">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
+                            <i className="bi bi-palette-fill text-indigo-600 text-xs"></i>
+                            HR Custom Gradient Studio
+                          </span>
+                          <span className="text-[10px] font-mono text-indigo-600 uppercase font-semibold">
+                            {customColor1} → {customColor2}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          {/* Start Color Picker */}
+                          <label className="flex items-center gap-2 p-1.5 bg-white rounded-lg border border-slate-200 hover:border-slate-300 transition cursor-pointer shadow-2xs">
+                            <input
+                              type="color"
+                              value={customColor1}
+                              onChange={(e) => setCustomColor1(e.target.value)}
+                              className="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent shrink-0"
+                            />
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-[9.5px] text-slate-500 uppercase font-medium leading-none mb-0.5">Start Color</span>
+                              <span className="text-[10.5px] font-mono font-bold text-slate-800 uppercase truncate">
+                                {customColor1}
+                              </span>
+                            </div>
+                          </label>
+
+                          {/* End Color Picker */}
+                          <label className="flex items-center gap-2 p-1.5 bg-white rounded-lg border border-slate-200 hover:border-slate-300 transition cursor-pointer shadow-2xs">
+                            <input
+                              type="color"
+                              value={customColor2}
+                              onChange={(e) => setCustomColor2(e.target.value)}
+                              className="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent shrink-0"
+                            />
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-[9.5px] text-slate-500 uppercase font-medium leading-none mb-0.5">End Color</span>
+                              <span className="text-[10.5px] font-mono font-bold text-slate-800 uppercase truncate">
+                                {customColor2}
+                              </span>
+                            </div>
+                          </label>
+                        </div>
+
+                        {/* Quick Harmonious Palettes */}
+                        <div>
+                          <div className="text-[9.5px] text-slate-500 font-medium mb-1">Quick Gradient Combinations:</div>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {[
+                              { c1: "#6366f1", c2: "#06b6d4", name: "Cyber Cyan" },
+                              { c1: "#f43f5e", c2: "#fb923c", name: "Sunset Coral" },
+                              { c1: "#059669", c2: "#10b981", name: "Emerald Mint" },
+                              { c1: "#2563eb", c2: "#9333ea", name: "Royal Purple" },
+                              { c1: "#d946ef", c2: "#f59e0b", name: "Amber Fusion" },
+                              { c1: "#3b82f6", c2: "#ec4899", name: "Neon Rose" },
+                            ].map((combo) => (
+                              <button
+                                key={combo.name}
+                                type="button"
+                                onClick={() => {
+                                  setCustomColor1(combo.c1);
+                                  setCustomColor2(combo.c2);
+                                  showToast(`Applied ${combo.name} gradient`, "success");
+                                }}
+                                title={combo.name}
+                                className="h-4.5 w-7 rounded-md border border-slate-200 hover:border-indigo-500 shadow-2xs transition cursor-pointer"
+                                style={{
+                                  background: `linear-gradient(90deg, ${combo.c1}, ${combo.c2})`,
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Save Current Combination into any of the 4 Palettes */}
+                        <div className="pt-2 border-t border-slate-200/80">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-[10.5px] font-bold text-slate-700 flex items-center gap-1.5">
+                              <i className="bi bi-bookmark-check-fill text-indigo-600 text-xs"></i>
+                              Save Combination to Palette:
+                            </span>
+                            <span className="text-[9px] text-slate-500">Click a slot to save</span>
+                          </div>
+
+                          <div className="grid grid-cols-4 gap-1.5">
+                            {palettes.map((p, idx) => (
+                              <button
+                                key={p.id}
+                                type="button"
+                                onClick={() => handleSaveToPalette(p.id)}
+                                className="px-1.5 py-1.5 rounded-lg bg-white hover:bg-indigo-50/50 border border-slate-200 hover:border-indigo-400 transition flex flex-col items-center gap-1 group cursor-pointer text-center shadow-2xs"
+                                title={`Save current gradient into Palette Slot ${idx + 1}`}
+                              >
+                                <span className="text-[9.5px] font-bold text-slate-700 group-hover:text-indigo-600">
+                                  Slot {idx + 1}
+                                </span>
+                                <span
+                                  className="w-3.5 h-3.5 rounded-md border border-slate-200 shadow-2xs group-hover:scale-110 transition"
+                                  style={{ background: `linear-gradient(135deg, ${p.c1}, ${p.c2})` }}
+                                />
+                                <span className="text-[9px] font-semibold text-indigo-600 flex items-center gap-0.5">
+                                  <i className="bi bi-download text-[8.5px]"></i> Save
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                      </div>
+                    )}
+                  </div>
 
                 {/* Avatar Photo & Presets */}
                 <div>
-                  <label className="text-slate-300 font-bold block mb-1.5">Profile Avatar / Photo</label>
+                  <label className="text-slate-700 font-semibold block mb-1.5">Profile Avatar / Photo</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="file"
@@ -623,9 +797,9 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition shrink-0"
+                      className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-200 flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition shrink-0"
                     >
-                      <i className="bi bi-upload text-indigo-400"></i>
+                      <i className="bi bi-upload text-indigo-600"></i>
                       <span>{customAvatar ? "Change Photo" : "Upload Photo"}</span>
                     </button>
                     {customAvatar && (
@@ -633,7 +807,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                         type="button"
                         onClick={handleRemoveAvatar}
                         title="Remove uploaded photo"
-                        className="px-2 py-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 hover:text-rose-200 rounded-lg border border-rose-500/30 flex items-center gap-1 text-xs font-semibold cursor-pointer transition shrink-0"
+                        className="px-2 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg border border-rose-200 flex items-center gap-1 text-xs font-semibold cursor-pointer transition shrink-0"
                       >
                         <i className="bi bi-trash3 text-xs"></i>
                         <span>Remove</span>
@@ -646,8 +820,8 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                         title="Initial Letter"
                         className={`w-7 h-7 rounded-lg text-xs font-bold flex items-center justify-center border cursor-pointer transition ${
                           avatarType === "initials"
-                            ? "bg-indigo-600 text-white border-indigo-400 shadow-xs"
-                            : "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700"
+                            ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+                            : "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200"
                         }`}
                       >
                         {name ? name.charAt(0).toUpperCase() : "A"}
@@ -658,8 +832,8 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                         title="User Icon"
                         className={`w-7 h-7 rounded-lg text-xs flex items-center justify-center border cursor-pointer transition ${
                           avatarType === "user"
-                            ? "bg-indigo-600 text-white border-indigo-400 shadow-xs"
-                            : "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700"
+                            ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+                            : "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200"
                         }`}
                       >
                         <i className="bi bi-person-fill"></i>
@@ -670,8 +844,8 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                         title="Security Shield"
                         className={`w-7 h-7 rounded-lg text-xs flex items-center justify-center border cursor-pointer transition ${
                           avatarType === "shield"
-                            ? "bg-indigo-600 text-white border-indigo-400 shadow-xs"
-                            : "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700"
+                            ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+                            : "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200"
                         }`}
                       >
                         <i className="bi bi-shield-lock-fill"></i>
@@ -682,7 +856,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
 
               {/* Holographic Overlay Effect */}
               <div>
-                <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Holographic Effect Overlay</label>
+                <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-1.5">Holographic Effect Overlay</label>
                 <select
                   value={holoEffect}
                   onChange={(e) => {
@@ -690,7 +864,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                     setHoloEffect(val);
                     showToast(`Hologram effect: ${val}`, "info");
                   }}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 text-[12px] sm:text-[12.5px] focus:outline-hidden focus:border-indigo-500 cursor-pointer"
+                  className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 text-[12px] sm:text-[12.5px] focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 cursor-pointer shadow-2xs"
                 >
                   <option value="holo-prism">Prism Light Reflex (Default)</option>
                   <option value="holo-grid">Security Micro Grid</option>
@@ -701,66 +875,66 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
               </div>
 
               {/* Personal Info Input Fields */}
-              <div className="space-y-3 pt-2 border-t border-slate-800/80">
+              <div className="space-y-3 pt-2 border-t border-slate-100">
                 <div>
-                  <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Full Name</label>
+                  <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-1.5">Full Name</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 font-semibold text-[12.5px] sm:text-[13px] focus:outline-hidden focus:border-indigo-500"
+                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 font-semibold text-[12.5px] sm:text-[13px] focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 shadow-2xs"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Role Title</label>
+                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-1.5">Role Title</label>
                     <input
                       type="text"
                       value={role}
                       onChange={(e) => setRole(e.target.value.toUpperCase())}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 uppercase focus:outline-hidden focus:border-indigo-500 font-mono text-[12px]"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 uppercase focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 font-mono text-[12px] shadow-2xs"
                     />
                   </div>
                   <div>
-                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Personnel ID</label>
+                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-1.5">Personnel ID</label>
                     <input
                       type="text"
                       value={personnelId}
                       onChange={(e) => setPersonnelId(e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 font-mono focus:outline-hidden focus:border-indigo-500 text-[12px]"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 font-mono focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-[12px] shadow-2xs"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Department</label>
+                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-1.5">Department</label>
                     <input
                       type="text"
                       value={department}
                       onChange={(e) => setDepartment(e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 font-medium text-[12.5px] sm:text-[13px] focus:outline-hidden focus:border-indigo-500"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 font-medium text-[12.5px] sm:text-[13px] focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 shadow-2xs"
                     />
                   </div>
                   <div>
-                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Validity</label>
+                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-1.5">Validity</label>
                     <input
                       type="text"
                       value={validity}
                       onChange={(e) => setValidity(e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 font-mono focus:outline-hidden focus:border-indigo-500 text-[12px]"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 font-mono focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-[12px] shadow-2xs"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Status Badge</label>
+                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-1.5">Status Badge</label>
                     <select
                       value={status}
                       onChange={(e) => setStatus(e.target.value as StatusType)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:outline-hidden focus:border-indigo-500 cursor-pointer text-[12px]"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 cursor-pointer text-[12px] shadow-2xs"
                     >
                       <option value="ACTIVE">ACTIVE</option>
                       <option value="ON-SITE">ON-SITE</option>
@@ -769,11 +943,11 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                     </select>
                   </div>
                   <div>
-                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-300 block mb-1.5">Barcode Type</label>
+                    <label className="text-[12px] sm:text-[12.5px] font-semibold text-slate-700 block mb-1.5">Barcode Type</label>
                     <select
                       value={barcodeType}
                       onChange={(e) => setBarcodeType(e.target.value as BarcodeType)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:outline-hidden focus:border-indigo-500 cursor-pointer text-[12px]"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 cursor-pointer text-[12px] shadow-2xs"
                     >
                       <option value="linear">Linear Barcode</option>
                       <option value="qr">Scannable QR</option>
@@ -784,12 +958,12 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
             </div>
 
             {/* Drawer Bottom Sync Indicator */}
-              <div className="pt-2.5 mt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+              <div className="pt-2.5 mt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                   <span>Real-time Live Sync</span>
                 </span>
-                <span className="font-mono text-indigo-400 text-[10px] uppercase font-bold tracking-wider">
+                <span className="font-mono text-indigo-600 text-[10px] uppercase font-bold tracking-wider">
                   256-BIT ENCRYPTED
                 </span>
               </div>
@@ -797,7 +971,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
           )}
 
           {/* CENTER DISPLAY: 3D DIGITAL ID BADGE CARD */}
-          <div className="flex flex-col items-center justify-between relative">
+          <div className="flex flex-col items-center justify-between relative z-10">
             
             {/* CARD PERSPECTIVE CONTAINER */}
             <div
@@ -819,18 +993,18 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                 >
                   {/* Ambient Glow Overlay */}
                   <div
-                    style={theme === "custom" ? { backgroundColor: customColor1, opacity: 0.24 } : undefined}
-                    className={`absolute -top-24 -left-24 w-52 h-52 ${theme === "custom" ? "" : currentTheme.glow1} rounded-full blur-3xl pointer-events-none`}
+                    style={{ backgroundColor: activeColors.c1, opacity: 0.24 }}
+                    className="absolute -top-24 -left-24 w-52 h-52 rounded-full blur-3xl pointer-events-none"
                   ></div>
                   <div
-                    style={theme === "custom" ? { backgroundColor: customColor2, opacity: 0.2 } : undefined}
-                    className={`absolute -bottom-24 -right-24 w-52 h-52 ${theme === "custom" ? "" : currentTheme.glow2} rounded-full blur-3xl pointer-events-none`}
+                    style={{ backgroundColor: activeColors.c2, opacity: 0.2 }}
+                    className="absolute -bottom-24 -right-24 w-52 h-52 rounded-full blur-3xl pointer-events-none"
                   ></div>
 
                   {/* Top Gradient Line Accent */}
                   <div
-                    style={theme === "custom" ? { background: `linear-gradient(90deg, ${customColor1}, ${customColor2})` } : undefined}
-                    className={`absolute top-0 left-0 right-0 h-1.5 ${theme === "custom" ? "" : currentTheme.topBar}`}
+                    style={{ background: `linear-gradient(90deg, ${activeColors.c1}, ${activeColors.c2})` }}
+                    className="absolute top-0 left-0 right-0 h-1.5"
                   ></div>
 
                   {/* Holographic Reflective Effect Layer */}
@@ -846,8 +1020,8 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                     <div className="flex items-center justify-between pt-0.5">
                       <div className="flex items-center space-x-2">
                         <div
-                          style={theme === "custom" ? { background: `linear-gradient(135deg, ${customColor1}, ${customColor2})` } : undefined}
-                          className={`w-8 h-8 rounded-xl ${theme === "custom" ? "text-white shadow-lg" : currentTheme.logoBg} flex items-center justify-center font-black text-base shadow-lg shrink-0`}
+                          style={{ background: `linear-gradient(135deg, ${activeColors.c1}, ${activeColors.c2})` }}
+                          className="w-8 h-8 rounded-xl text-white shadow-lg flex items-center justify-center font-black text-base shadow-lg shrink-0"
                         >
                           E
                         </div>
@@ -875,8 +1049,8 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                     <div className="relative">
                       {/* Dynamic Avatar Outer Ring */}
                       <div
-                        style={theme === "custom" ? { background: `linear-gradient(135deg, ${customColor1}, ${customColor2})` } : undefined}
-                        className={`w-20 h-20 rounded-2xl p-[2px] ${theme === "custom" ? "shadow-xl" : currentTheme.avatarRing} shadow-xl`}
+                        style={{ background: `linear-gradient(135deg, ${activeColors.c1}, ${activeColors.c2})` }}
+                        className="w-20 h-20 rounded-2xl p-[2px] shadow-xl"
                       >
                         <div className="w-full h-full bg-slate-950/90 rounded-[14px] flex items-center justify-center backdrop-blur-sm overflow-hidden relative">
                           {avatarType === "photo" && customAvatar ? (
@@ -911,12 +1085,12 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                       </h2>
                       <div className="mt-1">
                         <span
-                          style={theme === "custom" ? {
-                            backgroundColor: `${customColor1}20`,
-                            borderColor: `${customColor1}50`,
-                            color: customColor2,
-                          } : undefined}
-                          className={`px-2.5 py-0.5 rounded-md border text-[9.5px] font-mono font-bold tracking-widest uppercase ${theme === "custom" ? "" : currentTheme.roleBadge}`}
+                          style={{
+                            backgroundColor: `${activeColors.c1}20`,
+                            borderColor: `${activeColors.c1}50`,
+                            color: activeColors.c2,
+                          }}
+                          className="px-2.5 py-0.5 rounded-md border text-[9.5px] font-mono font-bold tracking-widest uppercase"
                         >
                           {role}
                         </span>
@@ -1005,7 +1179,12 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                         className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-indigo-500/50 transition cursor-pointer group"
                       >
                         <div
-                          className={`w-9 h-9 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition ${
+                          style={{
+                            borderColor: `${activeColors.c1}50`,
+                            backgroundColor: `${activeColors.c1}15`,
+                            color: activeColors.c2,
+                          }}
+                          className={`w-9 h-9 rounded-full border flex items-center justify-center group-hover:scale-110 transition ${
                             nfcActive ? "animate-ping" : ""
                           }`}
                         >
@@ -1033,7 +1212,10 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                   {/* Digital Signature Line */}
                   <div className="relative z-10 border-t border-slate-800 pt-1.5 flex items-center justify-between">
                     <div>
-                      <div className="font-mono text-[8.5px] italic text-indigo-300 tracking-wider">
+                      <div
+                        style={{ color: activeColors.c2 }}
+                        className="font-mono text-[8.5px] italic tracking-wider"
+                      >
                         {name} (Signed)
                       </div>
                       <div className="text-[7px] text-slate-500 uppercase tracking-widest">
@@ -1051,17 +1233,17 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
               <button
                 type="button"
                 onClick={toggleFlip}
-                className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold border border-slate-700/80 flex items-center gap-1.5 transition shadow-2xs cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-indigo-600 text-xs font-semibold border border-slate-200 shadow-2xs flex items-center gap-1.5 transition cursor-pointer"
               >
-                <i className="bi bi-arrow-repeat text-indigo-400"></i>
+                <i className="bi bi-arrow-repeat text-indigo-600"></i>
                 <span>Flip Badge</span>
               </button>
               <button
                 type="button"
                 onClick={handleCopyId}
-                className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold border border-slate-700/80 flex items-center gap-1.5 transition shadow-2xs cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-indigo-600 text-xs font-semibold border border-slate-200 shadow-2xs flex items-center gap-1.5 transition cursor-pointer"
               >
-                <i className="bi bi-clipboard text-indigo-400"></i>
+                <i className="bi bi-clipboard text-indigo-600"></i>
                 <span>Copy ID</span>
               </button>
             </div>
@@ -1070,52 +1252,19 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
 
         </div>
 
-        {/* MODAL FOOTER BAR */}
-        <div className="px-4 sm:px-6 py-3 border-t border-slate-800/80 bg-slate-900/95 flex items-center justify-between gap-3">
-          <div className="flex items-center space-x-2 text-xs text-slate-400 shrink-0">
-            <i className="bi bi-check-circle-fill text-emerald-400 text-xs"></i>
-            <span className="hidden sm:inline">Ready for printer output</span>
-            <span className="sm:hidden text-[11px]">Ready</span>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition border border-slate-700/60 shadow-2xs cursor-pointer whitespace-nowrap"
-            >
-              Close
-            </button>
-
-            <button
-              type="button"
-              onClick={handleDownloadWalletPass}
-              className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 text-slate-100 text-xs font-bold transition border border-slate-600/50 flex items-center gap-1.5 shadow-2xs cursor-pointer whitespace-nowrap"
-            >
-              <i className="bi bi-wallet2 text-indigo-400 text-xs"></i>
-              <span className="hidden sm:inline">Add to Mobile Wallet</span>
-              <span className="sm:hidden">Wallet</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handlePrint}
-              className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-fuchsia-600 hover:from-indigo-500 hover:to-fuchsia-500 text-white text-xs font-bold transition shadow-lg shadow-indigo-500/25 flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
-            >
-              <i className="bi bi-printer-fill text-xs"></i>
-              <span>Print Badge</span>
-            </button>
-          </div>
-        </div>
-
       </div>
+    </div>
 
       {/* TOAST NOTIFICATION */}
       {toast && (
-        <div className="fixed bottom-6 right-6 badge-glass-panel px-4 py-3 rounded-xl border border-indigo-500/30 text-xs font-semibold text-slate-100 flex items-center gap-2.5 shadow-2xl z-[10000] pointer-events-none animate-in fade-in slide-in-from-bottom-4 duration-200">
+        <div className="fixed bottom-6 right-6 bg-slate-900 text-white px-4 py-2.5 rounded-xl border border-slate-800 text-xs font-semibold flex items-center gap-2.5 shadow-2xl z-[10000] pointer-events-none animate-in fade-in slide-in-from-bottom-4 duration-200">
           <i
             className={`bi ${
-              toast.type === "success" ? "bi-check-circle-fill text-emerald-400" : "bi-info-circle-fill text-indigo-400"
+              toast.type === "success"
+                ? "bi-check-circle-fill text-emerald-400"
+                : toast.type === "error"
+                ? "bi-exclamation-circle-fill text-rose-400"
+                : "bi-info-circle-fill text-indigo-400"
             } text-sm`}
           ></i>
           <span>{toast.message}</span>
