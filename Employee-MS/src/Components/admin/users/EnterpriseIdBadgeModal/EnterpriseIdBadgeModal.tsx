@@ -253,6 +253,16 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
     }
   };
 
+  // Remove Custom Avatar
+  const handleRemoveAvatar = () => {
+    setCustomAvatar(null);
+    setAvatarType("initials");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    showToast("Uploaded photo removed", "info");
+  };
+
   // NFC Tap Simulation
   const handleNfcTap = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -385,15 +395,15 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
       {/* MAIN CONTAINER MODAL */}
       <div
         className={`w-full ${
-          isEditorOpen ? "max-w-[760px]" : "max-w-[360px]"
+          isEditorOpen ? "max-w-[820px]" : "max-w-[480px]"
         } badge-glass-panel rounded-3xl shadow-2xl border border-slate-700/60 flex flex-col my-auto transition-all duration-300 overflow-hidden text-slate-100`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* MODAL HEADER */}
-        <div className="px-3.5 sm:px-5 py-2.5 sm:py-3 border-b border-slate-800/80 flex items-center justify-between bg-slate-900/90 gap-2">
+        <div className="px-4 sm:px-6 py-3 border-b border-slate-800/80 flex items-center justify-between bg-slate-900/95 gap-3">
           {/* Left: Enterprise Pass Badge */}
           <div className="flex items-center justify-start shrink-0">
-            <span className={`${isEditorOpen ? "inline-flex" : "hidden sm:inline-flex"} px-2 py-0.5 sm:py-1 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 font-mono text-[9px] sm:text-[9.5px] font-bold uppercase tracking-wider items-center gap-1 shadow-2xs whitespace-nowrap`}>
+            <span className="px-2.5 py-1 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 font-mono text-[9px] sm:text-[9.5px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-2xs whitespace-nowrap">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shrink-0"></span>
               ENTERPRISE PASS
             </span>
@@ -416,10 +426,10 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
             <button
               type="button"
               onClick={() => setIsEditorOpen(!isEditorOpen)}
-              className="px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs font-semibold text-slate-200 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 rounded-xl transition flex items-center gap-1 shadow-2xs cursor-pointer whitespace-nowrap shrink-0"
+              className="px-2.5 py-1.5 sm:px-3 sm:py-1.5 text-xs font-semibold text-slate-200 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 rounded-xl transition flex items-center gap-1.5 shadow-2xs cursor-pointer whitespace-nowrap shrink-0"
             >
               <i className="bi bi-sliders text-indigo-400 shrink-0 text-xs"></i>
-              <span className="whitespace-nowrap">{isEditorOpen ? "Hide Customizer" : "Customize"}</span>
+              <span className="whitespace-nowrap">{isEditorOpen ? "Hide Customizer" : "Customize Badge"}</span>
             </button>
             <button
               type="button"
@@ -433,108 +443,120 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
         </div>
 
         {/* MAIN CONTENT SPLIT LAYOUT */}
-        <div className="p-3.5 sm:p-5 flex flex-col lg:flex-row items-center lg:items-start justify-center gap-4 sm:gap-5 relative bg-slate-950/70 overflow-hidden">
+        <div className="p-4 sm:p-6 flex flex-col lg:flex-row items-stretch justify-center gap-6 relative bg-slate-950/70 overflow-hidden">
           
           {/* LEFT CUSTOMIZATION DRAWER PANEL */}
           {isEditorOpen && (
-            <div className="w-full lg:w-[340px] h-fit self-start badge-glass-panel rounded-2xl p-3.5 sm:p-4 border border-slate-800/90 space-y-3.5 text-xs max-h-[580px] overflow-y-auto badge-custom-scrollbar transition-all duration-300">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-2.5 gap-2">
-                <div
-                  style={{ fontSize: "14.5px", lineHeight: "1.25" }}
-                  className="badge-customizer-heading font-extrabold tracking-normal text-slate-100 flex items-center gap-1.5 mb-0 whitespace-nowrap shrink-0"
-                >
-                  <i className="bi bi-magic text-indigo-400 text-sm shrink-0"></i>
-                  <span>Badge Customizer</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={resetBadgeData}
-                  className="text-[10px] sm:text-[10.5px] text-indigo-400 hover:text-indigo-300 font-medium hover:underline cursor-pointer whitespace-nowrap shrink-0"
-                >
-                  Reset Defaults
-                </button>
-              </div>
-
-              {/* Theme Presets */}
-              <div>
-                <label className="text-slate-300 font-bold block mb-1.5">Color Theme Preset</label>
-                <div className="grid grid-cols-5 gap-2">
-                  {(Object.keys(THEMES) as ThemeKey[]).map((tKey) => (
-                    <button
-                      key={tKey}
-                      type="button"
-                      onClick={() => {
-                        setTheme(tKey);
-                        showToast(`Theme changed to ${THEMES[tKey].name}`, "success");
-                      }}
-                      title={THEMES[tKey].name}
-                      className={`h-8 rounded-lg bg-gradient-to-r ${THEMES[tKey].previewGradient} border ${
-                        theme === tKey ? "ring-2 ring-white border-white scale-105" : "border-white/20"
-                      } hover:scale-105 transition cursor-pointer`}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Avatar Photo & Presets */}
-              <div>
-                <label className="text-slate-300 font-bold block mb-1.5">Profile Avatar / Photo</label>
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    accept="image/*"
-                    onChange={handleAvatarUpload}
-                    className="hidden"
-                  />
+            <div className="w-full lg:w-[380px] flex flex-col justify-between badge-glass-panel rounded-2xl p-4 sm:p-5 border border-slate-800/90 text-xs transition-all duration-300 shadow-xl space-y-3.5">
+              <div className="space-y-3.5 flex-1">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-2.5 gap-2">
+                  <div
+                    style={{ fontSize: "14.5px", lineHeight: "1.25" }}
+                    className="badge-customizer-heading font-extrabold tracking-normal text-slate-100 flex items-center gap-1.5 mb-0 whitespace-nowrap shrink-0"
+                  >
+                    <i className="bi bi-magic text-indigo-400 text-sm shrink-0"></i>
+                    <span>Badge Customizer</span>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
+                    onClick={resetBadgeData}
+                    className="text-[10px] sm:text-[10.5px] text-indigo-400 hover:text-indigo-300 font-medium hover:underline cursor-pointer whitespace-nowrap shrink-0"
                   >
-                    <i className="bi bi-upload text-indigo-400"></i>
-                    Upload Photo
+                    Reset Defaults
                   </button>
-                  <div className="flex gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => setAvatarType("initials")}
-                      title="Initial Letter"
-                      className={`w-7 h-7 rounded-lg text-xs font-bold flex items-center justify-center border cursor-pointer ${
-                        avatarType === "initials"
-                          ? "bg-indigo-600 text-white border-indigo-400"
-                          : "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700"
-                      }`}
-                    >
-                      {name ? name.charAt(0).toUpperCase() : "A"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAvatarType("user")}
-                      title="User Icon"
-                      className={`w-7 h-7 rounded-lg text-xs flex items-center justify-center border cursor-pointer ${
-                        avatarType === "user"
-                          ? "bg-indigo-600 text-white border-indigo-400"
-                          : "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700"
-                      }`}
-                    >
-                      <i className="bi bi-person-fill"></i>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAvatarType("shield")}
-                      title="Security Shield"
-                      className={`w-7 h-7 rounded-lg text-xs flex items-center justify-center border cursor-pointer ${
-                        avatarType === "shield"
-                          ? "bg-indigo-600 text-white border-indigo-400"
-                          : "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700"
-                      }`}
-                    >
-                      <i className="bi bi-shield-lock-fill"></i>
-                    </button>
+                </div>
+
+                {/* Theme Presets */}
+                <div>
+                  <label className="text-slate-300 font-bold block mb-1.5">Color Theme Preset</label>
+                  <div className="grid grid-cols-5 gap-2">
+                    {(Object.keys(THEMES) as ThemeKey[]).map((tKey) => (
+                      <button
+                        key={tKey}
+                        type="button"
+                        onClick={() => {
+                          setTheme(tKey);
+                          showToast(`Theme changed to ${THEMES[tKey].name}`, "success");
+                        }}
+                        title={THEMES[tKey].name}
+                        className={`h-8 rounded-lg bg-gradient-to-r ${THEMES[tKey].previewGradient} border ${
+                          theme === tKey ? "ring-2 ring-white border-white scale-105" : "border-white/20"
+                        } hover:scale-105 transition cursor-pointer`}
+                      />
+                    ))}
                   </div>
                 </div>
-              </div>
+
+                {/* Avatar Photo & Presets */}
+                <div>
+                  <label className="text-slate-300 font-bold block mb-1.5">Profile Avatar / Photo</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition shrink-0"
+                    >
+                      <i className="bi bi-upload text-indigo-400"></i>
+                      <span>{customAvatar ? "Change Photo" : "Upload Photo"}</span>
+                    </button>
+                    {customAvatar && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveAvatar}
+                        title="Remove uploaded photo"
+                        className="px-2 py-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 hover:text-rose-200 rounded-lg border border-rose-500/30 flex items-center gap-1 text-xs font-semibold cursor-pointer transition shrink-0"
+                      >
+                        <i className="bi bi-trash3 text-xs"></i>
+                        <span>Remove</span>
+                      </button>
+                    )}
+                    <div className="flex gap-1.5 ml-auto">
+                      <button
+                        type="button"
+                        onClick={() => setAvatarType("initials")}
+                        title="Initial Letter"
+                        className={`w-7 h-7 rounded-lg text-xs font-bold flex items-center justify-center border cursor-pointer transition ${
+                          avatarType === "initials"
+                            ? "bg-indigo-600 text-white border-indigo-400 shadow-xs"
+                            : "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700"
+                        }`}
+                      >
+                        {name ? name.charAt(0).toUpperCase() : "A"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAvatarType("user")}
+                        title="User Icon"
+                        className={`w-7 h-7 rounded-lg text-xs flex items-center justify-center border cursor-pointer transition ${
+                          avatarType === "user"
+                            ? "bg-indigo-600 text-white border-indigo-400 shadow-xs"
+                            : "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700"
+                        }`}
+                      >
+                        <i className="bi bi-person-fill"></i>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAvatarType("shield")}
+                        title="Security Shield"
+                        className={`w-7 h-7 rounded-lg text-xs flex items-center justify-center border cursor-pointer transition ${
+                          avatarType === "shield"
+                            ? "bg-indigo-600 text-white border-indigo-400 shadow-xs"
+                            : "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700"
+                        }`}
+                      >
+                        <i className="bi bi-shield-lock-fill"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
 
               {/* Holographic Overlay Effect */}
               <div>
@@ -638,17 +660,29 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                 </div>
               </div>
             </div>
+
+            {/* Drawer Bottom Sync Indicator */}
+              <div className="pt-2.5 mt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>Real-time Live Sync</span>
+                </span>
+                <span className="font-mono text-indigo-400 text-[10px] uppercase font-bold tracking-wider">
+                  256-BIT ENCRYPTED
+                </span>
+              </div>
+            </div>
           )}
 
           {/* CENTER DISPLAY: 3D DIGITAL ID BADGE CARD */}
-          <div className="flex-initial flex flex-col items-center justify-center relative">
+          <div className="flex flex-col items-center justify-between relative">
             
             {/* CARD PERSPECTIVE CONTAINER */}
             <div
               ref={badgeContainerRef}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
-              className="badge-perspective-viewport w-[265px] sm:w-[280px] h-[470px] relative select-none"
+              className="badge-perspective-viewport w-[275px] sm:w-[285px] h-[480px] relative select-none"
             >
               {/* 3D FLIPPABLE WRAPPER */}
               <div
@@ -893,17 +927,18 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
         </div>
 
         {/* MODAL FOOTER BAR */}
-        <div className="px-4 sm:px-6 py-2.5 sm:py-3 border-t border-slate-800/80 bg-slate-900/90 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="hidden sm:flex items-center space-x-2 text-xs text-slate-400">
-            <i className="bi bi-check-circle-fill text-emerald-400"></i>
-            <span>Ready for printer output (PDF / Physical Badge)</span>
+        <div className="px-4 sm:px-6 py-3 border-t border-slate-800/80 bg-slate-900/95 flex items-center justify-between gap-3">
+          <div className="flex items-center space-x-2 text-xs text-slate-400 shrink-0">
+            <i className="bi bi-check-circle-fill text-emerald-400 text-xs"></i>
+            <span className="hidden sm:inline">Ready for printer output</span>
+            <span className="sm:hidden text-[11px]">Ready</span>
           </div>
 
-          <div className="flex flex-wrap items-center justify-end gap-3 w-full sm:w-auto">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition border border-slate-700/60 shadow-2xs cursor-pointer"
+              className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition border border-slate-700/60 shadow-2xs cursor-pointer whitespace-nowrap"
             >
               Close
             </button>
@@ -911,18 +946,19 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
             <button
               type="button"
               onClick={handleDownloadWalletPass}
-              className="px-4 py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 text-slate-100 text-xs font-bold transition border border-slate-600/50 flex items-center gap-2 shadow-2xs cursor-pointer"
+              className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 text-slate-100 text-xs font-bold transition border border-slate-600/50 flex items-center gap-1.5 shadow-2xs cursor-pointer whitespace-nowrap"
             >
-              <i className="bi bi-wallet2 text-indigo-400 text-sm"></i>
-              <span>Add to Mobile Wallet</span>
+              <i className="bi bi-wallet2 text-indigo-400 text-xs"></i>
+              <span className="hidden sm:inline">Add to Mobile Wallet</span>
+              <span className="sm:hidden">Wallet</span>
             </button>
 
             <button
               type="button"
               onClick={handlePrint}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-fuchsia-600 hover:from-indigo-500 hover:to-fuchsia-500 text-white text-xs font-bold transition shadow-lg shadow-indigo-500/25 flex items-center gap-2 cursor-pointer"
+              className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-fuchsia-600 hover:from-indigo-500 hover:to-fuchsia-500 text-white text-xs font-bold transition shadow-lg shadow-indigo-500/25 flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
-              <i className="bi bi-printer-fill text-sm"></i>
+              <i className="bi bi-printer-fill text-xs"></i>
               <span>Print Badge</span>
             </button>
           </div>
