@@ -148,6 +148,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
 
   // Interaction State
   const [isFlipped, setIsFlipped] = useState<boolean>(false);
+  const isFlippedRef = useRef<boolean>(false);
   const [isEditorOpen, setIsEditorOpen] = useState<boolean>(true);
   const [nfcActive, setNfcActive] = useState<boolean>(false);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
@@ -241,6 +242,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
         }
       }
       setIsFlipped(false);
+      isFlippedRef.current = false;
       setIsMenuOpen(false);
     }
   }, [user, isOpen]);
@@ -519,7 +521,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
     const rotateX = ((y - centerY) / centerY) * -9;
     const rotateY = ((x - centerX) / centerX) * 9;
 
-    if (isFlipped) {
+    if (isFlippedRef.current) {
       cardInnerRef.current.style.transform = `rotateY(180deg) rotateX(${rotateX}deg) rotateY(${-rotateY}deg)`;
     } else {
       cardInnerRef.current.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
@@ -535,15 +537,19 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
 
   const handleMouseLeave = () => {
     if (!cardInnerRef.current) return;
-    cardInnerRef.current.style.transform = isFlipped ? "rotateY(180deg)" : "rotateX(0deg) rotateY(0deg)";
+    cardInnerRef.current.style.transform = isFlippedRef.current ? "rotateY(180deg)" : "rotateX(0deg) rotateY(0deg)";
     if (holoLayerRef.current) {
       holoLayerRef.current.style.opacity = "0.45";
     }
   };
 
   // Flip Card Action
-  const toggleFlip = () => {
-    const nextFlipped = !isFlipped;
+  const toggleFlip = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    const nextFlipped = !isFlippedRef.current;
+    isFlippedRef.current = nextFlipped;
     setIsFlipped(nextFlipped);
     if (cardInnerRef.current) {
       cardInnerRef.current.style.transform = nextFlipped ? "rotateY(180deg)" : "rotateX(0deg) rotateY(0deg)";
@@ -705,6 +711,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
     setCustomColor1(DEFAULT_PALETTES[0].c1);
     setCustomColor2(DEFAULT_PALETTES[0].c2);
     setIsFlipped(false);
+    isFlippedRef.current = false;
 
     if (user.image_url) {
       setCustomAvatar(user.image_url);
@@ -1339,7 +1346,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
           )}
 
           {/* CENTER DISPLAY: 3D DIGITAL ID BADGE CARD */}
-          <div className="flex flex-col items-center justify-between relative z-10">
+          <div className="flex flex-col items-center justify-center relative z-10">
             
             {/* CARD PERSPECTIVE CONTAINER */}
             <div
@@ -1358,7 +1365,7 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                 <div
                   id="printable-badge-area"
                   style={cardDynamicStyle}
-                  className={`badge-card-face ${currentTheme.badgeBg} flex flex-col justify-between p-4 sm:p-4.5 shadow-2xl relative cursor-pointer border ${
+                  className={`badge-card-face absolute inset-0 ${currentTheme.badgeBg} flex flex-col justify-between p-4 sm:p-4.5 shadow-2xl cursor-pointer border ${
                     isLightBg ? "border-slate-300" : "border-slate-800"
                   }`}
                 >
@@ -1593,10 +1600,9 @@ export const EnterpriseIdBadgeModal: React.FC<EnterpriseIdBadgeModalProps> = ({
                 {/* ================= CARD BACK ================= */}
                 <div
                   style={cardDynamicStyle}
-                  className={`badge-card-face badge-card-face-back ${currentTheme.badgeBg} flex flex-col justify-between p-4 sm:p-4.5 shadow-2xl relative cursor-pointer border ${
+                  className={`badge-card-face badge-card-face-back absolute inset-0 ${currentTheme.badgeBg} flex flex-col justify-between p-4 sm:p-4.5 shadow-2xl cursor-pointer border ${
                     isLightBg ? "border-slate-300" : "border-slate-800"
                   }`}
-                  onClick={toggleFlip}
                 >
                   {/* Guilloché pattern for back if active */}
                   {cardBg === "guilloche" && (

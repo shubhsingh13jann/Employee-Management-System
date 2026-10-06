@@ -74,20 +74,23 @@
 }
 
 .badge-card-face {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  -webkit-backface-visibility: hidden !important;
+  backface-visibility: hidden !important;
   border-radius: 1.5rem;
   overflow: hidden;
-  transform-style: preserve-3d;
+  transform: rotateY(0deg) translateZ(1px);
 }
 
 .badge-card-face-back {
-  transform: rotateY(180deg);
+  transform: rotateY(180deg) translateZ(1px) !important;
+  transform-origin: center center;
+  -webkit-backface-visibility: hidden !important;
+  backface-visibility: hidden !important;
 }
 
 /* Dynamic Holographic Overlays */
@@ -257,7 +260,6 @@
 .badge-bg-obsidian {
   background: linear-gradient(180deg, #090d16 0%, #030712 100%);
   border-color: #1e293b !important;
-  position: relative;
 }
 .badge-bg-obsidian::before {
   content: "";
@@ -274,7 +276,6 @@
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 55%, #f1f5f9 100%);
   border-color: #cbd5e1 !important;
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 1), 0 20px 30px -10px rgba(0, 0, 0, 0.08);
-  position: relative;
 }
 
 /* 3. Frosted Polycarbonate (Seamless Frosted Slate) */
@@ -282,7 +283,6 @@
   background: linear-gradient(145deg, #111a2e 0%, #080d1a 100%);
   border-color: #334155 !important;
   box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.5);
-  position: relative;
 }
 .badge-bg-frosted::before {
   content: "";
@@ -297,21 +297,18 @@
 .badge-bg-guilloche {
   background: linear-gradient(180deg, #060d21 0%, #020617 100%);
   border-color: #1e293b !important;
-  position: relative;
 }
 
 /* 5. Aurora Mesh (Dynamic Prismatic Flow) */
 .badge-bg-aurora {
   background-color: #030712;
   border-color: #334155 !important;
-  position: relative;
 }
 
 /* 6. Brushed Titanium (Executive Platinum Metallic) */
 .badge-bg-titanium {
   background: linear-gradient(135deg, #0f172a 0%, #334155 30%, #1e293b 60%, #0f172a 100%);
   border-color: #64748b !important;
-  position: relative;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 20px 30px -10px rgba(0, 0, 0, 0.35);
 }
 .badge-bg-titanium::before {
