@@ -249,3 +249,113 @@
   transform: translateY(-1px);
 }
 
+/* ==========================================================================
+   CARD BASE MATERIAL / BACKGROUND PRESET STYLES
+   ========================================================================== */
+
+/* 1. Executive Obsidian (Stealth Matte Carbon) */
+.badge-bg-obsidian {
+  background: linear-gradient(180deg, #090d16 0%, #030712 100%);
+  border-color: #1e293b !important;
+  position: relative;
+}
+.badge-bg-obsidian::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 10px 10px;
+  pointer-events: none;
+  border-radius: 1.5rem;
+}
+
+/* 2. Ceramic Alpine White (Porcelain Minimalist) */
+.badge-bg-ceramic {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 55%, #f1f5f9 100%);
+  border-color: #cbd5e1 !important;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 1), 0 20px 30px -10px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+/* 3. Frosted Polycarbonate (Translucent Glassmorphism) */
+.badge-bg-frosted {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.88) 0%, rgba(15, 23, 42, 0.94) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 20px 35px -5px rgba(0, 0, 0, 0.45);
+  position: relative;
+}
+
+/* 4. Security Guilloché (Mathematical Anti-Counterfeit Net) */
+.badge-bg-guilloche {
+  background: linear-gradient(180deg, #060d21 0%, #020617 100%);
+  border-color: #1e293b !important;
+  position: relative;
+}
+
+/* 5. Aurora Mesh (Dynamic Prismatic Flow) */
+.badge-bg-aurora {
+  background-color: #030712;
+  border-color: #334155 !important;
+  position: relative;
+}
+
+/* 6. Brushed Titanium (Executive Platinum Metallic) */
+.badge-bg-titanium {
+  background: linear-gradient(135deg, #0f172a 0%, #334155 30%, #1e293b 60%, #0f172a 100%);
+  border-color: #64748b !important;
+  position: relative;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 20px 30px -10px rgba(0, 0, 0, 0.35);
+}
+.badge-bg-titanium::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.02) 0px,
+    rgba(255, 255, 255, 0.02) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  border-radius: 1.5rem;
+}
+
+/* Linear Barcode Rendering (Dark lines for Ceramic background) */
+.barcode-lines-pattern-dark {
+  background: repeating-linear-gradient(
+    90deg,
+    #0f172a,
+    #0f172a 2px,
+    transparent 2px,
+    transparent 4px,
+    #0f172a 4px,
+    #0f172a 7px,
+    transparent 7px,
+    transparent 9px,
+    #0f172a 9px,
+    #0f172a 13px,
+    transparent 13px,
+    transparent 15px,
+    #0f172a 15px,
+    #0f172a 17px,
+    transparent 17px,
+    transparent 19px,
+    #0f172a 19px,
+    #0f172a 22px
+  );
+}
+
+/* Background Preset Thumbnail Previews */
+.badge-preview-guilloche {
+  background: radial-gradient(circle, #1e1b4b 0%, #060d21 100%);
+}
+.badge-preview-aurora {
+  background: linear-gradient(135deg, #6366f1, #06b6d4, #ec4899);
+}
+.badge-preview-titanium {
+  background: linear-gradient(135deg, #1e293b, #475569, #0f172a);
+}
+
