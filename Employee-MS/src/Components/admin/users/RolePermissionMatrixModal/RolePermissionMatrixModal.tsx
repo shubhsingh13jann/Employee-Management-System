@@ -156,35 +156,56 @@ export const DEFAULT_PERMISSIONS: RolePermissionsMap = {
 
 export const ROLE_METADATA: Record<
   RoleType,
-  { label: string; badge: string; desc: string; icon: string; accentColor: string }
+  {
+    label: string;
+    badge: string;
+    desc: string;
+    icon: string;
+    accentColor: string;
+    iconBg: string;
+    iconColor: string;
+    tierBadgeColor: string;
+  }
 > = {
   admin: {
     label: "Admin",
     badge: "FULL PRIVILEGE",
     desc: "Unrestricted operational authority, role management, and organizational governance.",
     icon: "bi-shield-shaded",
-    accentColor: "from-amber-400 to-orange-400"
+    accentColor: "from-amber-400 to-orange-400",
+    iconBg: "bg-amber-50",
+    iconColor: "text-amber-600",
+    tierBadgeColor: "bg-amber-100 text-amber-800 border-amber-200"
   },
   manager: {
     label: "Manager",
     badge: "DEPARTMENT LEAD",
     desc: "Oversees business units, approves requisitions, and manages team deliverables.",
     icon: "bi-briefcase-fill",
-    accentColor: "from-indigo-500 to-blue-600"
+    accentColor: "from-indigo-500 to-blue-600",
+    iconBg: "bg-indigo-50",
+    iconColor: "text-indigo-600",
+    tierBadgeColor: "bg-indigo-100 text-indigo-800 border-indigo-200"
   },
   supervisor: {
     label: "Supervisor",
     badge: "TEAM LEAD",
     desc: "Day-to-day workflow orchestration, task reviews, and direct reporting lines.",
     icon: "bi-people-fill",
-    accentColor: "from-blue-400 to-indigo-500"
+    accentColor: "from-blue-400 to-indigo-500",
+    iconBg: "bg-blue-50",
+    iconColor: "text-blue-600",
+    tierBadgeColor: "bg-blue-100 text-blue-800 border-blue-200"
   },
   employee: {
     label: "Employee",
     badge: "STANDARD ACCESS",
     desc: "Core individual contributor access for assigned work, attendance, and self-service.",
     icon: "bi-person-badge-fill",
-    accentColor: "from-emerald-400 to-teal-500"
+    accentColor: "from-emerald-400 to-teal-500",
+    iconBg: "bg-emerald-50",
+    iconColor: "text-emerald-600",
+    tierBadgeColor: "bg-emerald-100 text-emerald-800 border-emerald-200"
   }
 };
 
@@ -573,8 +594,8 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
                   <div
                     className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${
                       isSelected
-                        ? "bg-gradient-to-br from-amber-400 to-indigo-600 text-white"
-                        : "bg-slate-100 text-slate-600"
+                        ? `bg-gradient-to-br ${meta.accentColor} text-white`
+                        : `${meta.iconBg} ${meta.iconColor}`
                     }`}
                   >
                     <i className={`bi ${meta.icon} text-base`}></i>
@@ -663,9 +684,9 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
           <div className="p-3 px-3.5 bg-gradient-to-r from-blue-50/80 via-indigo-50/60 to-purple-50/80 border border-indigo-100/90 rounded-2xl flex flex-wrap md:flex-nowrap items-center justify-between gap-3 shadow-2xs relative overflow-hidden">
             {/* Left Role Details */}
             <div className="flex items-center gap-3 relative z-10 min-w-0">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-400 to-orange-400 p-0.5 shadow-md shadow-amber-500/20 shrink-0">
-                <div className="w-full h-full bg-amber-50 rounded-full flex items-center justify-center">
-                  <i className={`bi ${currentRoleMeta.icon} text-amber-600 text-base`}></i>
+              <div className={`w-10 h-10 rounded-full bg-gradient-to-tr ${currentRoleMeta.accentColor} p-0.5 shadow-md shrink-0`}>
+                <div className={`w-full h-full ${currentRoleMeta.iconBg} rounded-full flex items-center justify-center`}>
+                  <i className={`bi ${currentRoleMeta.icon} ${currentRoleMeta.iconColor} text-base`}></i>
                 </div>
               </div>
               <div className="min-w-0">
@@ -673,6 +694,9 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
                   <h3 className="text-sm sm:text-base font-extrabold text-slate-800 mb-0 truncate">
                     {currentRoleMeta.label}
                   </h3>
+                  <span className={`text-[9.5px] font-bold px-2 py-0.5 rounded-md border ${currentRoleMeta.tierBadgeColor}`}>
+                    {currentRoleMeta.badge}
+                  </span>
                   <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)] shrink-0"></span>
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium mt-0.5 max-w-xl leading-snug truncate mb-0">
