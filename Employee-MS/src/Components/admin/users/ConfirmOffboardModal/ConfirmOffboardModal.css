@@ -1,8 +1,59 @@
 /* ==========================================================================
-   CONFIRM OFFBOARD MODAL - COMPONENT STYLES
+   CONFIRM PERSONNEL OFFBOARDING MODAL - COMPONENT STYLES
    ========================================================================== */
 
-.offboard-modal-panel {
-  box-shadow: 0 25px 50px -12px rgba(225, 29, 72, 0.15);
+.modal-card-shadow {
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
+.text-crimson {
+  color: #dc0032;
+}
+
+.bg-crimson {
+  background-color: #e60039;
+}
+
+.bg-crimson:hover {
+  background-color: #cd0033;
+}
+
+.btn-crimson-glow {
+  box-shadow: 0 6px 20px -2px rgba(230, 0, 57, 0.45);
+}
+
+.alert-box-border {
+  border: 1px solid #fecdd3;
+}
+
+/* Decorative Fluid Corner Waves */
+.top-right-wave {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 220px;
+  height: 180px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.85;
+}
+
+.bottom-left-wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 200px;
+  height: 160px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.85;
+}
+
+/* Modal Animation Transitions */
+.modal-backdrop-animate {
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-card-animate {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}

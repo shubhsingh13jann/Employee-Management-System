@@ -180,7 +180,13 @@ const UserManagement: React.FC = () => {
   const [selectedUserIdForProfile, setSelectedUserIdForProfile] = useState<number | null>(null);
 
   const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [offboardTarget, setOffboardTarget] = useState<{ id: number; name: string; role?: string } | null>(null);
+  const [offboardTarget, setOffboardTarget] = useState<{
+    id: number;
+    name: string;
+    role?: string;
+    department_name?: string;
+    image_url?: string;
+  } | null>(null);
   const [passwordResetTarget, setPasswordResetTarget] = useState<{ id: number; name: string; email: string; role?: string } | null>(null);
   const [idCardTarget, setIdCardTarget] = useState<any | null>(null);
   const [activeActionMenuId, setActiveActionMenuId] = useState<number | null>(null);
@@ -403,7 +409,13 @@ const UserManagement: React.FC = () => {
     setSelectedUserIdForProfile(null);
     setIsFormModalOpen(false);
     setSelectedUserForEdit(null);
-    setOffboardTarget({ id: user.id, name: user.name, role: user.role });
+    setOffboardTarget({
+      id: user.id,
+      name: user.name,
+      role: user.role,
+      department_name: user.department_name,
+      image_url: user.image_url,
+    });
   };
 
   const handleConfirmOffboard = async () => {
@@ -2470,6 +2482,9 @@ const UserManagement: React.FC = () => {
         onConfirm={handleConfirmOffboard}
         memberName={offboardTarget?.name || ""}
         memberRole={offboardTarget?.role}
+        memberId={offboardTarget?.id}
+        memberDepartment={offboardTarget?.department_name}
+        memberImage={offboardTarget?.image_url}
         isDeleting={deletingId !== null}
       />
 
