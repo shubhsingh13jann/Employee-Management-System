@@ -6,7 +6,7 @@ export type RoleType = "admin" | "manager" | "supervisor" | "employee";
 
 export type ActionType = "view" | "create" | "edit" | "delete" | "export";
 
-export type ModuleCategory = "CORE" | "OPERATIONS" | "FINANCE" | "SECURITY";
+export type ModuleCategory = "CORE" | "OPERATIONS" | "HR" | "FINANCE" | "SECURITY" | "INTEGRATIONS";
 
 export interface ModuleDefinition {
   id: string;
@@ -62,12 +62,30 @@ export const MODULE_DEFINITIONS: ModuleDefinition[] = [
     icon: "bi-list-check"
   },
   {
-    id: "leaves",
-    name: "Leave Requests & Approvals",
+    id: "projects",
+    name: "Project Milestones & Deliverables",
     category: "OPERATIONS",
     categoryLabel: "Operations",
+    description: "Track sprint deliverables, project milestones, and resource allocation",
+    icon: "bi-kanban-fill"
+  },
+
+  // HR & Organization
+  {
+    id: "leaves",
+    name: "Leave Requests & Approvals",
+    category: "HR",
+    categoryLabel: "HR & Organization",
     description: "Review, approve, reject, and adjust employee time-off and sick leaves",
     icon: "bi-calendar-event"
+  },
+  {
+    id: "onboarding",
+    name: "Employee Lifecycle & Mobility",
+    category: "HR",
+    categoryLabel: "HR & Organization",
+    description: "Coordinate new hire onboarding workflows, badge provisioning, and transfers",
+    icon: "bi-person-badge"
   },
 
   // Finance & Reporting
@@ -104,6 +122,16 @@ export const MODULE_DEFINITIONS: ModuleDefinition[] = [
     categoryLabel: "Security & Compliance",
     description: "Configure multi-factor authentication, IP whitelists, and session timeouts",
     icon: "bi-shield-check"
+  },
+
+  // Integrations & Extensibility
+  {
+    id: "integrations",
+    name: "Enterprise API & Webhooks",
+    category: "INTEGRATIONS",
+    categoryLabel: "Integrations",
+    description: "Manage REST webhooks, third-party connectors, and automated notification endpoints",
+    icon: "bi-link-45deg"
   }
 ];
 
@@ -113,44 +141,56 @@ export const DEFAULT_PERMISSIONS: RolePermissionsMap = {
     departments: { view: true, create: true, edit: true, delete: true, export: true },
     hierarchy: { view: true, create: true, edit: true, delete: true, export: true },
     tasks: { view: true, create: true, edit: true, delete: true, export: true },
+    projects: { view: true, create: true, edit: true, delete: true, export: true },
     leaves: { view: true, create: true, edit: true, delete: true, export: true },
+    onboarding: { view: true, create: true, edit: true, delete: true, export: true },
     payroll: { view: true, create: true, edit: true, delete: true, export: true },
     analytics: { view: true, create: true, edit: true, delete: true, export: true },
     audit: { view: true, create: true, edit: true, delete: true, export: true },
-    security: { view: true, create: true, edit: true, delete: true, export: true }
+    security: { view: true, create: true, edit: true, delete: true, export: true },
+    integrations: { view: true, create: true, edit: true, delete: true, export: true }
   },
   manager: {
     users: { view: true, create: true, edit: true, delete: false, export: true },
     departments: { view: true, create: false, edit: true, delete: false, export: true },
     hierarchy: { view: true, create: false, edit: true, delete: false, export: true },
     tasks: { view: true, create: true, edit: true, delete: true, export: true },
+    projects: { view: true, create: true, edit: true, delete: true, export: true },
     leaves: { view: true, create: true, edit: true, delete: false, export: true },
+    onboarding: { view: true, create: true, edit: true, delete: false, export: true },
     payroll: { view: true, create: false, edit: false, delete: false, export: false },
     analytics: { view: true, create: false, edit: false, delete: false, export: true },
     audit: { view: true, create: false, edit: false, delete: false, export: true },
-    security: { view: false, create: false, edit: false, delete: false, export: false }
+    security: { view: false, create: false, edit: false, delete: false, export: false },
+    integrations: { view: false, create: false, edit: false, delete: false, export: false }
   },
   supervisor: {
     users: { view: true, create: false, edit: false, delete: false, export: false },
     departments: { view: true, create: false, edit: false, delete: false, export: false },
     hierarchy: { view: true, create: false, edit: false, delete: false, export: false },
     tasks: { view: true, create: true, edit: true, delete: false, export: true },
+    projects: { view: true, create: true, edit: true, delete: false, export: true },
     leaves: { view: true, create: true, edit: true, delete: false, export: false },
+    onboarding: { view: true, create: false, edit: false, delete: false, export: false },
     payroll: { view: false, create: false, edit: false, delete: false, export: false },
     analytics: { view: true, create: false, edit: false, delete: false, export: false },
     audit: { view: false, create: false, edit: false, delete: false, export: false },
-    security: { view: false, create: false, edit: false, delete: false, export: false }
+    security: { view: false, create: false, edit: false, delete: false, export: false },
+    integrations: { view: false, create: false, edit: false, delete: false, export: false }
   },
   employee: {
     users: { view: true, create: false, edit: false, delete: false, export: false },
     departments: { view: true, create: false, edit: false, delete: false, export: false },
     hierarchy: { view: true, create: false, edit: false, delete: false, export: false },
     tasks: { view: true, create: false, edit: true, delete: false, export: false },
+    projects: { view: true, create: false, edit: false, delete: false, export: false },
     leaves: { view: true, create: true, edit: false, delete: false, export: false },
+    onboarding: { view: true, create: false, edit: false, delete: false, export: false },
     payroll: { view: false, create: false, edit: false, delete: false, export: false },
     analytics: { view: false, create: false, edit: false, delete: false, export: false },
     audit: { view: false, create: false, edit: false, delete: false, export: false },
-    security: { view: false, create: false, edit: false, delete: false, export: false }
+    security: { view: false, create: false, edit: false, delete: false, export: false },
+    integrations: { view: false, create: false, edit: false, delete: false, export: false }
   }
 };
 
@@ -234,8 +274,10 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
   const [collapsedSections, setCollapsedSections] = useState<Record<ModuleCategory, boolean>>({
     CORE: false,
     OPERATIONS: false,
+    HR: false,
     FINANCE: false,
-    SECURITY: false
+    SECURITY: false,
+    INTEGRATIONS: false
   });
 
   useEffect(() => {
@@ -412,7 +454,7 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
       grantedCount,
       totalPossible,
       modulesCount: MODULE_DEFINITIONS.length,
-      categoriesCount: 4
+      categoriesCount: 6
     };
   }, [permissions, selectedRole]);
 
@@ -425,8 +467,10 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
     { key: "ALL", label: "All Modules", icon: "bi-grid-fill" },
     { key: "CORE", label: "Core System", icon: "bi-folder-fill" },
     { key: "OPERATIONS", label: "Operations", icon: "bi-gear-fill" },
+    { key: "HR", label: "HR & Organization", icon: "bi-people" },
     { key: "FINANCE", label: "Finance & Reporting", icon: "bi-bar-chart-fill" },
-    { key: "SECURITY", label: "Security & Compliance", icon: "bi-shield-shaded" }
+    { key: "SECURITY", label: "Security & Compliance", icon: "bi-shield-shaded" },
+    { key: "INTEGRATIONS", label: "Integrations & API", icon: "bi-link-45deg" }
   ];
 
   return createPortal(
@@ -671,8 +715,10 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
                   <option value="ALL">All Categories</option>
                   <option value="CORE">Core System</option>
                   <option value="OPERATIONS">Operations</option>
+                  <option value="HR">HR & Organization</option>
                   <option value="FINANCE">Finance & Reporting</option>
                   <option value="SECURITY">Security & Compliance</option>
+                  <option value="INTEGRATIONS">Integrations & API</option>
                 </select>
                 <i className="bi bi-funnel absolute left-2.5 top-1/2 -translate-y-1/2 text-indigo-500 text-xs pointer-events-none"></i>
                 <i className="bi bi-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
@@ -859,18 +905,26 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
                           ? "Core System Modules"
                           : catKey === "OPERATIONS"
                           ? "Operational Modules"
+                          : catKey === "HR"
+                          ? "HR & Organization Modules"
                           : catKey === "FINANCE"
                           ? "Finance & Reporting"
-                          : "Security & Compliance";
+                          : catKey === "SECURITY"
+                          ? "Security & Compliance"
+                          : "Integrations & Enterprise API";
 
                       const catBadgeColor =
                         catKey === "CORE"
                           ? "bg-indigo-100 text-indigo-700"
                           : catKey === "OPERATIONS"
                           ? "bg-blue-100 text-blue-700"
+                          : catKey === "HR"
+                          ? "bg-purple-100 text-purple-700"
                           : catKey === "FINANCE"
                           ? "bg-emerald-100 text-emerald-700"
-                          : "bg-amber-100 text-amber-800";
+                          : catKey === "SECURITY"
+                          ? "bg-amber-100 text-amber-800"
+                          : "bg-cyan-100 text-cyan-800";
 
                       return (
                         <React.Fragment key={catKey}>
