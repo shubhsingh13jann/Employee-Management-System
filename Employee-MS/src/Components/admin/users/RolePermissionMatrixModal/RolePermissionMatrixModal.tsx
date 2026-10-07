@@ -293,7 +293,15 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
       setPermissions(DEFAULT_PERMISSIONS);
     }
     setHasChanges(false);
-  }, [isOpen]);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);

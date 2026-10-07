@@ -105,3 +105,14 @@
 .matrix-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* Interactive Checkbox Micro-interactions */
+.matrix-custom-checkbox:hover:not(:disabled) {
+  border-color: #2563eb;
+  transform: scale(1.05);
+}
+
+.matrix-custom-checkbox:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
