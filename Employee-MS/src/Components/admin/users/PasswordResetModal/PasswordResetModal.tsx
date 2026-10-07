@@ -48,24 +48,24 @@ const getRoleBadgeCfg = (
 ): { label: string; icon: string; cls: string } => {
   const map: Record<string, { label: string; icon: string; cls: string }> = {
     admin: {
-      label: "EMPLOYEE",
-      icon: "bi-person-badge",
-      cls: "bg-indigo-50 text-indigo-700 border-indigo-200/70",
+      label: "ADMIN",
+      icon: "bi-shield-shaded",
+      cls: "bg-purple-50 text-purple-700 border-purple-200/70",
     },
     manager: {
-      label: "EMPLOYEE",
+      label: "MANAGER",
       icon: "bi-briefcase",
       cls: "bg-indigo-50 text-indigo-700 border-indigo-200/70",
     },
     supervisor: {
-      label: "EMPLOYEE",
+      label: "SUPERVISOR",
       icon: "bi-diagram-3",
-      cls: "bg-indigo-50 text-indigo-700 border-indigo-200/70",
+      cls: "bg-amber-50 text-amber-700 border-amber-200/70",
     },
     employee: {
       label: "EMPLOYEE",
       icon: "bi-person",
-      cls: "bg-indigo-50 text-indigo-700 border-indigo-200/70",
+      cls: "bg-sky-50 text-sky-700 border-sky-200/70",
     },
   };
   return map[(role || "").toLowerCase()] ?? map.employee;
