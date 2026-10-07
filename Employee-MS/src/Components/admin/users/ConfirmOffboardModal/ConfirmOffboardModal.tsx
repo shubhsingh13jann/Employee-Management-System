@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 import "./ConfirmOffboardModal.css";
 
@@ -25,8 +25,6 @@ export const ConfirmOffboardModal: React.FC<ConfirmOffboardModalProps> = ({
   memberImage,
   isDeleting,
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
   // Keyboard navigation (Escape to close)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -41,151 +39,6 @@ export const ConfirmOffboardModal: React.FC<ConfirmOffboardModalProps> = ({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, isDeleting, onClose]);
-
-  // Cosmic Constellation Interactive Background Canvas Engine
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animId: number;
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
-
-    const mouse = {
-      x: width / 2,
-      y: height / 2,
-      radius: 170,
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-    };
-
-    const handleResize = () => {
-      if (!canvas) return;
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-      initNodes();
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("resize", handleResize);
-
-    const colors = [
-      "rgba(99, 102, 241, ", // Indigo
-      "rgba(14, 165, 233, ", // Cyan
-      "rgba(236, 72, 153, ", // Pink
-      "rgba(168, 85, 247, ", // Purple
-    ];
-
-    class Node {
-      x!: number;
-      y!: number;
-      vx!: number;
-      vy!: number;
-      radius!: number;
-      colorBase!: string;
-      alpha!: number;
-
-      constructor() {
-        this.reset();
-      }
-
-      reset() {
-        this.x = Math.random() * width;
-        this.y = Math.random() * height;
-        this.vx = (Math.random() - 0.5) * 0.75;
-        this.vy = (Math.random() - 0.5) * 0.75;
-        this.radius = Math.random() * 2 + 1.2;
-        this.colorBase = colors[Math.floor(Math.random() * colors.length)];
-        this.alpha = Math.random() * 0.6 + 0.3;
-      }
-
-      update() {
-        this.x += this.vx;
-        this.y += this.vy;
-
-        if (this.x < 0 || this.x > width) this.vx *= -1;
-        if (this.y < 0 || this.y > height) this.vy *= -1;
-
-        const dx = mouse.x - this.x;
-        const dy = mouse.y - this.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < mouse.radius) {
-          const force = (mouse.radius - dist) / mouse.radius;
-          this.x -= (dx / dist) * force * 2;
-          this.y -= (dy / dist) * force * 2;
-        }
-      }
-
-      draw(c: CanvasRenderingContext2D) {
-        c.beginPath();
-        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        c.fillStyle = this.colorBase + this.alpha + ")";
-        c.shadowBlur = 10;
-        c.shadowColor = this.colorBase + "0.8)";
-        c.fill();
-        c.shadowBlur = 0;
-      }
-    }
-
-    let nodes: Node[] = [];
-    const initNodes = () => {
-      nodes = [];
-      const nodeCount = Math.min(85, Math.max(35, Math.floor((width * height) / 11000)));
-      for (let i = 0; i < nodeCount; i++) {
-        nodes.push(new Node());
-      }
-    };
-
-    initNodes();
-
-    const animateCosmic = () => {
-      ctx.fillStyle = "#090d16";
-      ctx.fillRect(0, 0, width, height);
-
-      // Render connecting laser constellation lines
-      const maxDist = 140;
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const dx = nodes[i].x - nodes[j].x;
-          const dy = nodes[i].y - nodes[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          if (dist < maxDist) {
-            const lineAlpha = (1 - dist / maxDist) * 0.28;
-            ctx.beginPath();
-            ctx.moveTo(nodes[i].x, nodes[i].y);
-            ctx.lineTo(nodes[j].x, nodes[j].y);
-            ctx.strokeStyle = `rgba(147, 51, 234, ${lineAlpha})`;
-            ctx.lineWidth = 0.8;
-            ctx.stroke();
-          }
-        }
-      }
-
-      nodes.forEach((node) => {
-        node.update();
-        node.draw(ctx);
-      });
-
-      animId = requestAnimationFrame(animateCosmic);
-    };
-
-    animId = requestAnimationFrame(animateCosmic);
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -215,18 +68,13 @@ export const ConfirmOffboardModal: React.FC<ConfirmOffboardModalProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-950/60 backdrop-blur-[4px] overscroll-contain animate-in fade-in duration-200"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs overscroll-contain animate-in fade-in duration-200"
       onClick={!isDeleting ? onClose : undefined}
     >
-      {/* 6th Background Effect: Cosmic Constellation Canvas */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full pointer-events-none z-0"
-      />
-
-      {/* MAIN MODAL DIALOG CARD */}
+      {/* MAIN MODAL DIALOG CARD - RESTORED TO ORIGINAL MAX-W-MD SIZE */}
       <div
-        className="relative w-full max-w-[540px] bg-white rounded-[28px] p-6 sm:p-8 modal-card-shadow overflow-hidden z-10 animate-in zoom-in-95 duration-150 transform scale-100 opacity-100"
+        className="offboard-modal-card relative w-full max-w-md bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 overflow-hidden z-10 animate-in zoom-in-95 duration-150 border border-slate-200/80"
+        style={{ maxWidth: "448px" }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Right Corner Wave SVG */}
@@ -259,35 +107,35 @@ export const ConfirmOffboardModal: React.FC<ConfirmOffboardModalProps> = ({
           type="button"
           onClick={onClose}
           disabled={isDeleting}
-          className="absolute top-5 right-5 z-20 w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 flex items-center justify-center transition-all cursor-pointer disabled:opacity-50"
+          className="absolute top-4 right-4 z-20 w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 flex items-center justify-center transition-all cursor-pointer disabled:opacity-50"
           aria-label="Close modal"
         >
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 6L6 18M6 6l12 12" />
           </svg>
         </button>
 
         {/* Modal Header Section */}
-        <div className="relative z-10 flex items-start gap-4 sm:gap-5 mb-5">
+        <div className="relative z-10 flex items-start gap-3.5 sm:gap-4 mb-4">
           {/* Soft Pink Circular Avatar Badge */}
-          <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-red-50/90 border border-red-100/80 flex items-center justify-center shrink-0 relative mt-0.5 shadow-sm">
-            <svg className="w-9 h-9 text-crimson" viewBox="0 0 24 24" fill="currentColor">
+          <div className="offboard-header-badge mt-0.5">
+            <svg className="w-7 h-7 text-crimson" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 11a4 4 0 100-8 4 4 0 000 8zm0 2c-4.42 0-8 2.24-8 5v2h16v-2c0-2.76-3.58-5-8-5z" />
             </svg>
-            <div className="absolute top-[21px] right-[13px] text-crimson font-extrabold text-xs">
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+            <div className="absolute top-[16px] right-[10px] text-crimson font-extrabold text-xs">
+              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 6L6 18M6 6l12 12" />
               </svg>
             </div>
           </div>
 
           {/* Title and Subtitle Text */}
-          <div className="pt-0.5">
-            <h2 className="text-2xl sm:text-[27px] font-bold text-slate-900 leading-[1.15] tracking-tight mb-0">
+          <div className="pt-0.5 min-w-0 pr-6">
+            <h2 className="text-xl sm:text-[22px] font-bold text-slate-900 leading-[1.2] tracking-tight mb-0">
               Confirm Personnel<br />
               <span className="text-crimson">Offboarding</span>
             </h2>
-            <p className="text-[13px] sm:text-[14px] text-slate-500 mt-2.5 leading-snug mb-0">
+            <p className="text-[12px] sm:text-[12.5px] text-slate-500 mt-1.5 leading-snug mb-0">
               Are you sure you want to offboard and remove{" "}
               <span className="font-bold text-slate-800">{memberName || "this employee"}</span>{" "}
               ({memberRole ? memberRole.toLowerCase() : "employee"}) from the active directory?
@@ -296,15 +144,11 @@ export const ConfirmOffboardModal: React.FC<ConfirmOffboardModalProps> = ({
         </div>
 
         {/* Warning Box Alert */}
-        <div className="relative z-10 mb-4 p-4 sm:p-4.5 rounded-2xl bg-[#fff7f7] alert-box-border flex items-start gap-3.5 shadow-sm">
+        <div className="relative z-10 mb-3.5 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-[#fff7f7] alert-box-border flex items-start gap-3 shadow-2xs">
           {/* Warning Triangle Icon Badge */}
-          <div className="w-10 h-10 rounded-full bg-orange-100/90 border border-orange-200/50 flex items-center justify-center shrink-0 mt-0.5">
-            <div className="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center text-white">
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                <line x1="12" y1="9" x2="12" y2="13" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-              </svg>
+          <div className="offboard-warning-badge mt-0.5">
+            <div className="offboard-warning-icon-inner">
+              <i className="bi bi-exclamation-triangle-fill"></i>
             </div>
           </div>
 
@@ -312,8 +156,8 @@ export const ConfirmOffboardModal: React.FC<ConfirmOffboardModalProps> = ({
           <div className="w-[1px] bg-red-200/80 self-stretch my-0.5 shrink-0"></div>
 
           {/* Warning Text Content */}
-          <div className="text-[12.5px] sm:text-[13px] leading-snug">
-            <h4 className="font-bold text-crimson mb-1 text-[13.5px]">This action cannot be undone</h4>
+          <div className="text-[11.5px] sm:text-[12px] leading-snug">
+            <h4 className="font-bold text-crimson mb-0.5 text-[12.5px]">This action cannot be undone</h4>
             <p className="text-slate-600 font-normal leading-relaxed mb-0">
               This action immediately revokes authentication tokens, clears reporting hierarchy bindings, and archives their personnel history.
             </p>
@@ -321,43 +165,43 @@ export const ConfirmOffboardModal: React.FC<ConfirmOffboardModalProps> = ({
         </div>
 
         {/* Employee Profile Summary Card */}
-        <div className="relative z-10 mb-6 p-3.5 sm:p-4 rounded-2xl bg-[#f5f7fc] border border-slate-200/70 flex items-center gap-3.5 shadow-sm">
+        <div className="relative z-10 mb-5 p-3 rounded-xl sm:rounded-2xl bg-[#f5f7fc] border border-slate-200/70 flex items-center gap-3 shadow-2xs">
           {/* Avatar Badge */}
           {memberImage ? (
             <img
               src={memberImage}
               alt={memberName}
-              className="w-11 h-11 rounded-full object-cover shrink-0 shadow-sm border border-slate-200"
+              className="w-10 h-10 rounded-full object-cover shrink-0 shadow-2xs border border-slate-200"
             />
           ) : (
-            <div className="w-11 h-11 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-sm tracking-wide shrink-0 shadow-sm">
+            <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-xs tracking-wide shrink-0 shadow-2xs">
               {initials}
             </div>
           )}
 
           {/* Employee Info Metadata */}
-          <div>
-            <div className="text-[14px] sm:text-[15px] font-bold text-slate-900 leading-tight">
+          <div className="min-w-0">
+            <div className="text-[13px] sm:text-[13.5px] font-bold text-slate-900 leading-tight truncate">
               {memberName || "Alex Mercer"}
             </div>
-            <div className="text-[12px] sm:text-[12.5px] text-slate-400 font-medium mt-0.5 flex items-center gap-2">
+            <div className="text-[11px] sm:text-[11.5px] text-slate-400 font-medium mt-0.5 flex items-center gap-1.5 truncate">
               <span>{formattedId}</span>
               <span className="text-slate-300">|</span>
-              <span>{displayDepartment}</span>
+              <span className="truncate">{displayDepartment}</span>
               <span className="text-slate-300">|</span>
-              <span>{displayRole}</span>
+              <span className="capitalize">{displayRole}</span>
             </div>
           </div>
         </div>
 
         {/* Action Buttons Footer */}
-        <div className="relative z-10 flex items-center justify-end gap-3 pt-1">
+        <div className="relative z-10 flex items-center justify-end gap-2.5 pt-0.5">
           {/* Cancel Button */}
           <button
             type="button"
             onClick={onClose}
             disabled={isDeleting}
-            className="px-6 py-2.5 sm:py-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm transition-all shadow-xs cursor-pointer active:scale-98 disabled:opacity-50"
+            className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs sm:text-[13px] transition-all shadow-2xs cursor-pointer active:scale-98 disabled:opacity-50"
           >
             Cancel
           </button>
@@ -367,21 +211,16 @@ export const ConfirmOffboardModal: React.FC<ConfirmOffboardModalProps> = ({
             type="button"
             onClick={onConfirm}
             disabled={isDeleting}
-            className="px-6 py-2.5 sm:py-3 rounded-2xl bg-crimson hover:bg-rose-700 text-white font-bold text-sm flex items-center gap-2 btn-crimson-glow transition-all transform active:scale-98 cursor-pointer disabled:opacity-50"
+            className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl sm:rounded-2xl bg-crimson hover:bg-rose-700 text-white font-bold text-xs sm:text-[13px] flex items-center gap-1.5 btn-crimson-glow transition-all transform active:scale-98 cursor-pointer disabled:opacity-50"
           >
             {isDeleting ? (
               <>
-                <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <span className="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                 <span>Offboarding...</span>
               </>
             ) : (
               <>
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="3 6 5 6 21 6" />
-                  <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-                  <line x1="10" y1="11" x2="10" y2="17" />
-                  <line x1="14" y1="11" x2="14" y2="17" />
-                </svg>
+                <i className="bi bi-trash3-fill text-xs"></i>
                 <span>Confirm Offboarding</span>
               </>
             )}

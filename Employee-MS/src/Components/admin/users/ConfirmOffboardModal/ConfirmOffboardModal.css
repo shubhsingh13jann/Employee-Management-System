@@ -2,28 +2,68 @@
    CONFIRM PERSONNEL OFFBOARDING MODAL - COMPONENT STYLES
    ========================================================================== */
 
-.modal-card-shadow {
-  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+.offboard-modal-card {
+  max-width: 28rem !important; /* 448px (max-w-md) matching original card size */
+  width: 100% !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
 }
 
 .text-crimson {
-  color: #dc0032;
+  color: #dc0032 !important;
 }
 
 .bg-crimson {
-  background-color: #e60039;
+  background-color: #e60039 !important;
 }
 
 .bg-crimson:hover {
-  background-color: #cd0033;
+  background-color: #cd0033 !important;
 }
 
 .btn-crimson-glow {
-  box-shadow: 0 6px 20px -2px rgba(230, 0, 57, 0.45);
+  box-shadow: 0 4px 14px -1px rgba(230, 0, 57, 0.4);
 }
 
 .alert-box-border {
-  border: 1px solid #fecdd3;
+  border: 1px solid #fecdd3 !important;
+}
+
+.offboard-header-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 9999px;
+  background-color: #fef2f2;
+  border: 1px solid #fee2e2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.offboard-warning-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 9999px;
+  background-color: #ffedd5;
+  border: 1px solid #fed7aa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.offboard-warning-icon-inner {
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  background-color: #f97316;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
 }
 
 /* Decorative Fluid Corner Waves */
@@ -31,8 +71,8 @@
   position: absolute;
   top: 0;
   right: 0;
-  width: 220px;
-  height: 180px;
+  width: 140px;
+  height: 120px;
   pointer-events: none;
   z-index: 1;
   opacity: 0.85;
@@ -42,18 +82,9 @@
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 200px;
-  height: 160px;
+  width: 130px;
+  height: 110px;
   pointer-events: none;
   z-index: 1;
   opacity: 0.85;
-}
-
-/* Modal Animation Transitions */
-.modal-backdrop-animate {
-  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.modal-card-animate {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
