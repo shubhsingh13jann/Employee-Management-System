@@ -892,50 +892,50 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
                 <table className="w-full text-left border-collapse min-w-[680px] bg-white">
                   {/* Table Header */}
                   <thead>
-                    <tr className="bg-[#0b0e22] text-white text-[10.5px] select-none border-b border-slate-800">
+                    <tr className="matrix-gloss-table-header text-white text-[10.5px] select-none">
                       <th className="p-3 pl-4 font-extrabold tracking-wider w-5/12">System Module & Scope</th>
 
                       <th className="p-2.5 text-center w-20">
                         <div className="flex flex-col items-center">
-                          <i className="bi bi-eye text-slate-400 mb-0.5 text-xs"></i>
+                          <i className="bi bi-eye text-indigo-300 mb-0.5 text-xs drop-shadow-xs"></i>
                           <span className="font-bold">View</span>
-                          <span className="text-[8.5px] text-slate-400 uppercase font-normal">Read</span>
+                          <span className="text-[8.5px] text-indigo-200/90 uppercase font-bold tracking-wider">Read</span>
                         </div>
                       </th>
 
                       <th className="p-2.5 text-center w-20">
                         <div className="flex flex-col items-center">
-                          <i className="bi bi-plus-circle text-slate-400 mb-0.5 text-xs"></i>
+                          <i className="bi bi-plus-circle text-indigo-300 mb-0.5 text-xs drop-shadow-xs"></i>
                           <span className="font-bold">Create</span>
-                          <span className="text-[8.5px] text-slate-400 uppercase font-normal">Add</span>
+                          <span className="text-[8.5px] text-indigo-200/90 uppercase font-bold tracking-wider">Add</span>
                         </div>
                       </th>
 
                       <th className="p-2.5 text-center w-20">
                         <div className="flex flex-col items-center">
-                          <i className="bi bi-pencil-square text-slate-400 mb-0.5 text-xs"></i>
+                          <i className="bi bi-pencil-square text-indigo-300 mb-0.5 text-xs drop-shadow-xs"></i>
                           <span className="font-bold">Edit</span>
-                          <span className="text-[8.5px] text-slate-400 uppercase font-normal">Update</span>
+                          <span className="text-[8.5px] text-indigo-200/90 uppercase font-bold tracking-wider">Update</span>
                         </div>
                       </th>
 
                       <th className="p-2.5 text-center w-20">
                         <div className="flex flex-col items-center">
-                          <i className="bi bi-trash3 text-slate-400 mb-0.5 text-xs"></i>
+                          <i className="bi bi-trash3 text-indigo-300 mb-0.5 text-xs drop-shadow-xs"></i>
                           <span className="font-bold">Delete</span>
-                          <span className="text-[8.5px] text-slate-400 uppercase font-normal">Remove</span>
+                          <span className="text-[8.5px] text-indigo-200/90 uppercase font-bold tracking-wider">Remove</span>
                         </div>
                       </th>
 
                       <th className="p-2.5 text-center w-24">
                         <div className="flex flex-col items-center">
-                          <i className="bi bi-download text-slate-400 mb-0.5 text-xs"></i>
+                          <i className="bi bi-download text-indigo-300 mb-0.5 text-xs drop-shadow-xs"></i>
                           <span className="font-bold">Export</span>
-                          <span className="text-[8.5px] text-slate-400 uppercase font-normal">CSV/PDF</span>
+                          <span className="text-[8.5px] text-indigo-200/90 uppercase font-bold tracking-wider">CSV/PDF</span>
                         </div>
                       </th>
 
-                      <th className="p-2.5 pr-4 text-center font-bold w-28">Quick Action</th>
+                      <th className="p-2.5 pr-4 text-center font-extrabold w-28 tracking-wider">Quick Action</th>
                     </tr>
                   </thead>
 
