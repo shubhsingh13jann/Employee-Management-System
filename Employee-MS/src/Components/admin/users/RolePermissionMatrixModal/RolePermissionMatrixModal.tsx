@@ -483,102 +483,102 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 overscroll-contain overflow-y-auto cosmic-matrix-backdrop animate-in fade-in duration-200"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 overscroll-contain overflow-y-auto bg-slate-950/65 backdrop-blur-xs animate-in fade-in duration-200"
       onClick={onClose}
     >
-      {/* ==================== BACKGROUND ARTWORK & WAVE STREAKS ==================== */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        {/* Top Glowing Shield Halo Center Light */}
-        <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-indigo-500/30 via-purple-600/20 to-transparent rounded-full blur-[100px] animate-wave-glow"></div>
-        <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-cyan-400/20 rounded-full blur-[70px]"></div>
-
-        {/* Vector Electric Light Wave Curved Streaks */}
-        <svg
-          className="absolute inset-0 w-full h-full opacity-80"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="none"
-          viewBox="0 0 1440 900"
-        >
-          <defs>
-            <linearGradient id="waveGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.8" />
-              <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#ec4899" stopOpacity="0.2" />
-            </linearGradient>
-
-            <linearGradient id="waveGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.7" />
-              <stop offset="60%" stopColor="#6366f1" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#a855f7" stopOpacity="0.1" />
-            </linearGradient>
-
-            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="12" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-            <filter id="glow-heavy" x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur stdDeviation="25" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
-
-          <path
-            d="M-100 250 C 300 50, 700 450, 1540 100 L 1540 -100 L -100 -100 Z"
-            fill="url(#waveGrad1)"
-            opacity="0.15"
-            filter="url(#glow-heavy)"
-          />
-          <path
-            d="M-50 180 C 350 -20, 800 320, 1500 40"
-            fill="none"
-            stroke="url(#waveGrad1)"
-            strokeWidth="4"
-            filter="url(#glow)"
-          />
-          <path
-            d="M-50 210 C 380 20, 830 350, 1500 70"
-            fill="none"
-            stroke="url(#waveGrad2)"
-            strokeWidth="2.5"
-            opacity="0.85"
-            filter="url(#glow)"
-          />
-          <path
-            d="M-50 140 C 320 -50, 770 290, 1500 10"
-            fill="none"
-            stroke="#60a5fa"
-            strokeWidth="1.5"
-            opacity="0.6"
-          />
-          <path
-            d="M-100 700 C 400 950, 900 550, 1540 820"
-            fill="none"
-            stroke="url(#waveGrad2)"
-            strokeWidth="5"
-            filter="url(#glow)"
-          />
-          <path
-            d="M-100 740 C 430 990, 930 590, 1540 860"
-            fill="none"
-            stroke="url(#waveGrad1)"
-            strokeWidth="3"
-            opacity="0.7"
-            filter="url(#glow)"
-          />
-        </svg>
-
-        {/* Ambient Orb Glows */}
-        <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-purple-600/25 rounded-full blur-[100px]"></div>
-        <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-blue-600/20 rounded-full blur-[100px]"></div>
-      </div>
-
       {/* ==================== MAIN GLASS DASHBOARD CONTAINER ==================== */}
       <div
         className="relative z-10 w-full max-w-[1140px] max-h-[92vh] glass-modal rounded-3xl border border-white/20 overflow-hidden flex flex-col my-auto transition-all shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* ==================== CARD BACKGROUND ARTWORK & WAVE STREAKS ==================== */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+          {/* Top Glowing Shield Halo Center Light */}
+          <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-indigo-500/30 via-purple-600/20 to-transparent rounded-full blur-[100px] animate-wave-glow"></div>
+          <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-cyan-400/20 rounded-full blur-[70px]"></div>
+
+          {/* Vector Electric Light Wave Curved Streaks */}
+          <svg
+            className="absolute inset-0 w-full h-full opacity-80"
+            xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="none"
+            viewBox="0 0 1440 900"
+          >
+            <defs>
+              <linearGradient id="waveGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.8" />
+                <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="#ec4899" stopOpacity="0.2" />
+              </linearGradient>
+
+              <linearGradient id="waveGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.7" />
+                <stop offset="60%" stopColor="#6366f1" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="#a855f7" stopOpacity="0.1" />
+              </linearGradient>
+
+              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="12" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+              <filter id="glow-heavy" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="25" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+
+            <path
+              d="M-100 250 C 300 50, 700 450, 1540 100 L 1540 -100 L -100 -100 Z"
+              fill="url(#waveGrad1)"
+              opacity="0.15"
+              filter="url(#glow-heavy)"
+            />
+            <path
+              d="M-50 180 C 350 -20, 800 320, 1500 40"
+              fill="none"
+              stroke="url(#waveGrad1)"
+              strokeWidth="4"
+              filter="url(#glow)"
+            />
+            <path
+              d="M-50 210 C 380 20, 830 350, 1500 70"
+              fill="none"
+              stroke="url(#waveGrad2)"
+              strokeWidth="2.5"
+              opacity="0.85"
+              filter="url(#glow)"
+            />
+            <path
+              d="M-50 140 C 320 -50, 770 290, 1500 10"
+              fill="none"
+              stroke="#60a5fa"
+              strokeWidth="1.5"
+              opacity="0.6"
+            />
+            <path
+              d="M-100 700 C 400 950, 900 550, 1540 820"
+              fill="none"
+              stroke="url(#waveGrad2)"
+              strokeWidth="5"
+              filter="url(#glow)"
+            />
+            <path
+              d="M-100 740 C 430 990, 930 590, 1540 860"
+              fill="none"
+              stroke="url(#waveGrad1)"
+              strokeWidth="3"
+              opacity="0.7"
+              filter="url(#glow)"
+            />
+          </svg>
+
+          {/* Ambient Orb Glows */}
+          <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-purple-600/25 rounded-full blur-[100px]"></div>
+          <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-blue-600/20 rounded-full blur-[100px]"></div>
+        </div>
+
         {/* TOP DARK HEADER WITH COSMIC SHIELD ICON & LIGHT RAYS */}
-        <header className="glass-header text-white p-3.5 sm:p-4 px-5 sm:px-6 flex justify-between items-center relative overflow-hidden border-b border-indigo-500/20 shrink-0">
+        <header className="glass-header text-white p-3.5 sm:p-4 px-5 sm:px-6 flex justify-between items-center relative overflow-hidden border-b border-indigo-500/20 shrink-0 z-10">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-500/20 to-transparent opacity-70 pointer-events-none"></div>
           <div className="absolute -top-20 right-1/4 w-96 h-48 bg-cyan-400/15 blur-2xl skew-x-12 pointer-events-none"></div>
 
@@ -1052,7 +1052,7 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
         </div>
 
         {/* FOOTER ACTIONS & STATUS */}
-        <footer className="px-5 sm:px-6 py-3 bg-slate-50/90 border-t border-slate-200/90 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <footer className="relative z-10 px-5 sm:px-6 py-3 bg-slate-50/90 border-t border-slate-200/90 flex flex-wrap items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-2 text-slate-500 text-xs font-medium">
             <div className="w-4.5 h-4.5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 text-[10px]">
               <i className="bi bi-info-lg"></i>
