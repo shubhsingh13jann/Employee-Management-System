@@ -222,12 +222,12 @@ export const ROLE_METADATA: Record<
     iconBg: "bg-purple-100",
     iconColor: "text-purple-600",
     tierBadgeColor: "bg-purple-100 text-purple-800 border-purple-200",
-    activeBorder: "border-purple-500",
-    activeBg: "bg-purple-50",
-    activeText: "text-purple-950",
-    activeBadge: "text-purple-700",
+    activeBorder: "border-purple-300",
+    activeBg: "bg-white",
+    activeText: "text-slate-900",
+    activeBadge: "text-purple-600",
     activeCheckmark: "text-purple-600",
-    activeInnerShadow: "shadow-[inset_0_2px_8px_rgba(126,34,206,0.45),inset_0_-2px_8px_rgba(126,34,206,0.25),inset_0_0_14px_rgba(147,51,234,0.35)]"
+    activeInnerShadow: "shadow-[inset_0_2px_6px_rgba(147,51,234,0.18),inset_0_0_10px_rgba(147,51,234,0.12)]"
   },
   manager: {
     label: "Manager",
@@ -238,12 +238,12 @@ export const ROLE_METADATA: Record<
     iconBg: "bg-indigo-100",
     iconColor: "text-indigo-600",
     tierBadgeColor: "bg-indigo-100 text-indigo-800 border-indigo-200",
-    activeBorder: "border-indigo-500",
-    activeBg: "bg-indigo-50",
-    activeText: "text-indigo-950",
-    activeBadge: "text-indigo-700",
+    activeBorder: "border-indigo-300",
+    activeBg: "bg-white",
+    activeText: "text-slate-900",
+    activeBadge: "text-indigo-600",
     activeCheckmark: "text-indigo-600",
-    activeInnerShadow: "shadow-[inset_0_2px_8px_rgba(67,56,202,0.45),inset_0_-2px_8px_rgba(67,56,202,0.25),inset_0_0_14px_rgba(99,102,241,0.35)]"
+    activeInnerShadow: "shadow-[inset_0_2px_6px_rgba(99,102,241,0.18),inset_0_0_10px_rgba(99,102,241,0.12)]"
   },
   supervisor: {
     label: "Supervisor",
@@ -254,12 +254,12 @@ export const ROLE_METADATA: Record<
     iconBg: "bg-amber-100",
     iconColor: "text-amber-600",
     tierBadgeColor: "bg-amber-100 text-amber-800 border-amber-200",
-    activeBorder: "border-amber-500",
-    activeBg: "bg-amber-50",
-    activeText: "text-amber-950",
-    activeBadge: "text-amber-700",
+    activeBorder: "border-amber-300",
+    activeBg: "bg-white",
+    activeText: "text-slate-900",
+    activeBadge: "text-amber-600",
     activeCheckmark: "text-amber-600",
-    activeInnerShadow: "shadow-[inset_0_2px_8px_rgba(217,119,6,0.45),inset_0_-2px_8px_rgba(217,119,6,0.25),inset_0_0_14px_rgba(245,158,11,0.35)]"
+    activeInnerShadow: "shadow-[inset_0_2px_6px_rgba(217,119,6,0.18),inset_0_0_10px_rgba(217,119,6,0.12)]"
   },
   employee: {
     label: "Employee",
@@ -270,12 +270,12 @@ export const ROLE_METADATA: Record<
     iconBg: "bg-emerald-100",
     iconColor: "text-emerald-600",
     tierBadgeColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
-    activeBorder: "border-emerald-500",
-    activeBg: "bg-emerald-50",
-    activeText: "text-emerald-950",
-    activeBadge: "text-emerald-700",
+    activeBorder: "border-emerald-300",
+    activeBg: "bg-white",
+    activeText: "text-slate-900",
+    activeBadge: "text-emerald-600",
     activeCheckmark: "text-emerald-600",
-    activeInnerShadow: "shadow-[inset_0_2px_8px_rgba(4,120,87,0.45),inset_0_-2px_8px_rgba(4,120,87,0.25),inset_0_0_14px_rgba(16,185,129,0.35)]"
+    activeInnerShadow: "shadow-[inset_0_2px_6px_rgba(16,185,129,0.18),inset_0_0_10px_rgba(16,185,129,0.12)]"
   }
 };
 
@@ -892,50 +892,64 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
                 <table className="w-full text-left border-collapse min-w-[680px] bg-white">
                   {/* Table Header */}
                   <thead>
-                    <tr className="matrix-gloss-table-header text-white text-[10.5px] select-none">
-                      <th className="p-3 pl-4 font-extrabold tracking-wider w-5/12">System Module & Scope</th>
+                    <tr className="matrix-gloss-table-header text-slate-800 text-[10.5px] select-none">
+                      <th className="p-3 pl-4 font-extrabold tracking-wider w-5/12 text-slate-800">
+                        System Module & Scope
+                      </th>
 
                       <th className="p-2.5 text-center w-20">
                         <div className="flex flex-col items-center">
-                          <i className="bi bi-eye text-indigo-300 mb-0.5 text-xs drop-shadow-xs"></i>
-                          <span className="font-bold">View</span>
-                          <span className="text-[8.5px] text-indigo-200/90 uppercase font-bold tracking-wider">Read</span>
+                          <i className="bi bi-eye text-indigo-600 mb-0.5 text-xs"></i>
+                          <span className="font-bold text-slate-800">View</span>
+                          <span className="text-[8.5px] text-slate-400 uppercase font-semibold tracking-wider">
+                            Read
+                          </span>
                         </div>
                       </th>
 
                       <th className="p-2.5 text-center w-20">
                         <div className="flex flex-col items-center">
-                          <i className="bi bi-plus-circle text-indigo-300 mb-0.5 text-xs drop-shadow-xs"></i>
-                          <span className="font-bold">Create</span>
-                          <span className="text-[8.5px] text-indigo-200/90 uppercase font-bold tracking-wider">Add</span>
+                          <i className="bi bi-plus-circle text-indigo-600 mb-0.5 text-xs"></i>
+                          <span className="font-bold text-slate-800">Create</span>
+                          <span className="text-[8.5px] text-slate-400 uppercase font-semibold tracking-wider">
+                            Add
+                          </span>
                         </div>
                       </th>
 
                       <th className="p-2.5 text-center w-20">
                         <div className="flex flex-col items-center">
-                          <i className="bi bi-pencil-square text-indigo-300 mb-0.5 text-xs drop-shadow-xs"></i>
-                          <span className="font-bold">Edit</span>
-                          <span className="text-[8.5px] text-indigo-200/90 uppercase font-bold tracking-wider">Update</span>
+                          <i className="bi bi-pencil-square text-indigo-600 mb-0.5 text-xs"></i>
+                          <span className="font-bold text-slate-800">Edit</span>
+                          <span className="text-[8.5px] text-slate-400 uppercase font-semibold tracking-wider">
+                            Update
+                          </span>
                         </div>
                       </th>
 
                       <th className="p-2.5 text-center w-20">
                         <div className="flex flex-col items-center">
-                          <i className="bi bi-trash3 text-indigo-300 mb-0.5 text-xs drop-shadow-xs"></i>
-                          <span className="font-bold">Delete</span>
-                          <span className="text-[8.5px] text-indigo-200/90 uppercase font-bold tracking-wider">Remove</span>
+                          <i className="bi bi-trash3 text-indigo-600 mb-0.5 text-xs"></i>
+                          <span className="font-bold text-slate-800">Delete</span>
+                          <span className="text-[8.5px] text-slate-400 uppercase font-semibold tracking-wider">
+                            Remove
+                          </span>
                         </div>
                       </th>
 
                       <th className="p-2.5 text-center w-24">
                         <div className="flex flex-col items-center">
-                          <i className="bi bi-download text-indigo-300 mb-0.5 text-xs drop-shadow-xs"></i>
-                          <span className="font-bold">Export</span>
-                          <span className="text-[8.5px] text-indigo-200/90 uppercase font-bold tracking-wider">CSV/PDF</span>
+                          <i className="bi bi-download text-indigo-600 mb-0.5 text-xs"></i>
+                          <span className="font-bold text-slate-800">Export</span>
+                          <span className="text-[8.5px] text-slate-400 uppercase font-semibold tracking-wider">
+                            CSV/PDF
+                          </span>
                         </div>
                       </th>
 
-                      <th className="p-2.5 pr-4 text-center font-extrabold w-28 tracking-wider">Quick Action</th>
+                      <th className="p-2.5 pr-4 text-center font-extrabold w-28 tracking-wider text-slate-800">
+                        Quick Action
+                      </th>
                     </tr>
                   </thead>
 
