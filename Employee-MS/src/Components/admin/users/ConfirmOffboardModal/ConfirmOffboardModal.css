@@ -3,7 +3,7 @@
    ========================================================================== */
 
 .offboard-modal-card {
-  max-width: 28rem !important; /* 448px (max-w-md) matching original card size */
+  max-width: 42rem !important; /* 672px - 20% increased width */
   width: 100% !important;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
 }
@@ -29,8 +29,8 @@
 }
 
 .offboard-header-badge {
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   border-radius: 9999px;
   background-color: #fef2f2;
   border: 1px solid #fee2e2;
@@ -43,8 +43,8 @@
 }
 
 .offboard-warning-badge {
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   border-radius: 9999px;
   background-color: #ffedd5;
   border: 1px solid #fed7aa;
@@ -55,15 +55,15 @@
 }
 
 .offboard-warning-icon-inner {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 9999px;
   background-color: #f97316;
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 9.5px;
 }
 
 /* Decorative Fluid Corner Waves */
@@ -71,8 +71,8 @@
   position: absolute;
   top: 0;
   right: 0;
-  width: 140px;
-  height: 120px;
+  width: 160px;
+  height: 105px;
   pointer-events: none;
   z-index: 1;
   opacity: 0.85;
@@ -82,8 +82,8 @@
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 130px;
-  height: 110px;
+  width: 150px;
+  height: 95px;
   pointer-events: none;
   z-index: 1;
   opacity: 0.85;
