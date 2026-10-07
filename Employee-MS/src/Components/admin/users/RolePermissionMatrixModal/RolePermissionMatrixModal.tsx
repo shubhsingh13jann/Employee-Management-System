@@ -639,14 +639,14 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
                   onClick={() => setSelectedRole(roleKey)}
                   className={`flex items-center gap-2.5 p-2 px-3 rounded-2xl transition-all duration-200 border text-left cursor-pointer ${
                     isSelected
-                      ? "bg-[#0a0d24] text-white border-indigo-500/50 shadow-lg shadow-indigo-950/40 ring-2 ring-indigo-500/30"
+                      ? "bg-white text-slate-900 border-indigo-500 ring-2 ring-indigo-500/25 shadow-[0_0_20px_rgba(99,102,241,0.32),0_4px_12px_rgba(0,0,0,0.08)]"
                       : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-xs"
                   }`}
                 >
                   <div
                     className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${
                       isSelected
-                        ? `bg-gradient-to-br ${meta.accentColor} text-white`
+                        ? `bg-gradient-to-br ${meta.accentColor} text-white shadow-md shadow-indigo-500/20`
                         : `${meta.iconBg} ${meta.iconColor}`
                     }`}
                   >
@@ -654,14 +654,20 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-xs sm:text-[13px] truncate">{meta.label}</span>
+                      <span
+                        className={`font-bold text-xs sm:text-[13px] truncate ${
+                          isSelected ? "text-slate-900" : "text-slate-700"
+                        }`}
+                      >
+                        {meta.label}
+                      </span>
                       {isSelected && (
-                        <i className="bi bi-check2 text-xs text-indigo-400"></i>
+                        <i className="bi bi-check2 text-xs text-indigo-600 font-bold"></i>
                       )}
                     </div>
                     <p
                       className={`text-[8.5px] font-extrabold tracking-wider uppercase mt-0.5 truncate mb-0 ${
-                        isSelected ? "text-indigo-300" : "text-slate-400"
+                        isSelected ? "text-indigo-600" : "text-slate-400"
                       }`}
                     >
                       {meta.badge}
