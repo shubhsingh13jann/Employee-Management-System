@@ -205,6 +205,12 @@ export const ROLE_METADATA: Record<
     iconBg: string;
     iconColor: string;
     tierBadgeColor: string;
+    activeBorder: string;
+    activeBg: string;
+    activeText: string;
+    activeBadge: string;
+    activeCheckmark: string;
+    activeInnerShadow: string;
   }
 > = {
   admin: {
@@ -212,10 +218,16 @@ export const ROLE_METADATA: Record<
     badge: "FULL PRIVILEGE",
     desc: "Unrestricted operational authority, role management, and organizational governance.",
     icon: "bi-shield-shaded",
-    accentColor: "from-amber-400 to-orange-400",
-    iconBg: "bg-amber-50",
-    iconColor: "text-amber-600",
-    tierBadgeColor: "bg-amber-100 text-amber-800 border-amber-200"
+    accentColor: "from-purple-500 to-indigo-600",
+    iconBg: "bg-purple-100",
+    iconColor: "text-purple-600",
+    tierBadgeColor: "bg-purple-100 text-purple-800 border-purple-200",
+    activeBorder: "border-purple-500",
+    activeBg: "bg-purple-50",
+    activeText: "text-purple-950",
+    activeBadge: "text-purple-700",
+    activeCheckmark: "text-purple-600",
+    activeInnerShadow: "shadow-[inset_0_2px_8px_rgba(126,34,206,0.45),inset_0_-2px_8px_rgba(126,34,206,0.25),inset_0_0_14px_rgba(147,51,234,0.35)]"
   },
   manager: {
     label: "Manager",
@@ -223,29 +235,47 @@ export const ROLE_METADATA: Record<
     desc: "Oversees business units, approves requisitions, and manages team deliverables.",
     icon: "bi-briefcase-fill",
     accentColor: "from-indigo-500 to-blue-600",
-    iconBg: "bg-indigo-50",
+    iconBg: "bg-indigo-100",
     iconColor: "text-indigo-600",
-    tierBadgeColor: "bg-indigo-100 text-indigo-800 border-indigo-200"
+    tierBadgeColor: "bg-indigo-100 text-indigo-800 border-indigo-200",
+    activeBorder: "border-indigo-500",
+    activeBg: "bg-indigo-50",
+    activeText: "text-indigo-950",
+    activeBadge: "text-indigo-700",
+    activeCheckmark: "text-indigo-600",
+    activeInnerShadow: "shadow-[inset_0_2px_8px_rgba(67,56,202,0.45),inset_0_-2px_8px_rgba(67,56,202,0.25),inset_0_0_14px_rgba(99,102,241,0.35)]"
   },
   supervisor: {
     label: "Supervisor",
     badge: "TEAM LEAD",
     desc: "Day-to-day workflow orchestration, task reviews, and direct reporting lines.",
     icon: "bi-people-fill",
-    accentColor: "from-blue-400 to-indigo-500",
-    iconBg: "bg-blue-50",
+    accentColor: "from-blue-500 to-indigo-500",
+    iconBg: "bg-blue-100",
     iconColor: "text-blue-600",
-    tierBadgeColor: "bg-blue-100 text-blue-800 border-blue-200"
+    tierBadgeColor: "bg-blue-100 text-blue-800 border-blue-200",
+    activeBorder: "border-blue-500",
+    activeBg: "bg-blue-50",
+    activeText: "text-blue-950",
+    activeBadge: "text-blue-700",
+    activeCheckmark: "text-blue-600",
+    activeInnerShadow: "shadow-[inset_0_2px_8px_rgba(29,78,216,0.45),inset_0_-2px_8px_rgba(29,78,216,0.25),inset_0_0_14px_rgba(59,130,246,0.35)]"
   },
   employee: {
     label: "Employee",
     badge: "STANDARD ACCESS",
     desc: "Core individual contributor access for assigned work, attendance, and self-service.",
     icon: "bi-person-badge-fill",
-    accentColor: "from-emerald-400 to-teal-500",
-    iconBg: "bg-emerald-50",
+    accentColor: "from-emerald-500 to-teal-500",
+    iconBg: "bg-emerald-100",
     iconColor: "text-emerald-600",
-    tierBadgeColor: "bg-emerald-100 text-emerald-800 border-emerald-200"
+    tierBadgeColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    activeBorder: "border-emerald-500",
+    activeBg: "bg-emerald-50",
+    activeText: "text-emerald-950",
+    activeBadge: "text-emerald-700",
+    activeCheckmark: "text-emerald-600",
+    activeInnerShadow: "shadow-[inset_0_2px_8px_rgba(4,120,87,0.45),inset_0_-2px_8px_rgba(4,120,87,0.25),inset_0_0_14px_rgba(16,185,129,0.35)]"
   }
 };
 
@@ -639,14 +669,14 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
                   onClick={() => setSelectedRole(roleKey)}
                   className={`flex items-center gap-2.5 p-2 px-3 rounded-2xl transition-all duration-200 border text-left cursor-pointer ${
                     isSelected
-                      ? "bg-white text-slate-900 border-indigo-500 ring-2 ring-indigo-500/25 shadow-[0_0_20px_rgba(99,102,241,0.32),0_4px_12px_rgba(0,0,0,0.08)]"
+                      ? `${meta.activeBg} ${meta.activeBorder} ${meta.activeInnerShadow}`
                       : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-xs"
                   }`}
                 >
                   <div
                     className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${
                       isSelected
-                        ? `bg-gradient-to-br ${meta.accentColor} text-white shadow-md shadow-indigo-500/20`
+                        ? `bg-gradient-to-br ${meta.accentColor} text-white shadow-md`
                         : `${meta.iconBg} ${meta.iconColor}`
                     }`}
                   >
@@ -656,18 +686,18 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
                     <div className="flex items-center justify-between">
                       <span
                         className={`font-bold text-xs sm:text-[13px] truncate ${
-                          isSelected ? "text-slate-900" : "text-slate-700"
+                          isSelected ? meta.activeText : "text-slate-700"
                         }`}
                       >
                         {meta.label}
                       </span>
                       {isSelected && (
-                        <i className="bi bi-check2 text-xs text-indigo-600 font-bold"></i>
+                        <i className={`bi bi-check2 text-xs font-bold ${meta.activeCheckmark}`}></i>
                       )}
                     </div>
                     <p
                       className={`text-[8.5px] font-extrabold tracking-wider uppercase mt-0.5 truncate mb-0 ${
-                        isSelected ? "text-indigo-600" : "text-slate-400"
+                        isSelected ? meta.activeBadge : "text-slate-400"
                       }`}
                     >
                       {meta.badge}
