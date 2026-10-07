@@ -626,7 +626,7 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
         </header>
 
         {/* INNER CONTENT BODY (Compact with no wasted space) */}
-        <div className="p-3.5 sm:p-4 md:p-4.5 space-y-3 overflow-y-auto flex-1 matrix-scrollbar">
+        <div className="relative z-10 p-3.5 sm:p-4 md:p-4.5 space-y-3 overflow-y-auto flex-1 matrix-scrollbar">
           {/* ROLE SELECTION TABS ROW (4 Workforce Tiers) */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             {(Object.keys(ROLE_METADATA) as RoleType[]).map((roleKey) => {
@@ -640,7 +640,7 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
                   className={`flex items-center gap-2.5 p-2 px-3 rounded-2xl transition-all duration-200 border text-left cursor-pointer ${
                     isSelected
                       ? "bg-[#0a0d24] text-white border-indigo-500/50 shadow-lg shadow-indigo-950/40 ring-2 ring-indigo-500/30"
-                      : "bg-white border-slate-200/80 text-slate-700 hover:bg-slate-50"
+                      : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-xs"
                   }`}
                 >
                   <div
@@ -695,7 +695,7 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
               <button
                 type="button"
                 onClick={handleResetDefaults}
-                className="px-3.5 py-1.5 text-xs font-bold text-slate-600 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                className="px-3.5 py-1.5 text-xs font-bold text-slate-600 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs"
               >
                 <i className="bi bi-arrow-counterclockwise text-xs"></i> Reset Defaults
               </button>
@@ -710,7 +710,7 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search modules, scopes..."
-                  className="w-full text-xs pl-8 pr-3 py-1.5 bg-white/90 border border-slate-200/90 rounded-xl outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all placeholder:text-slate-400"
+                  className="w-full text-xs pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all placeholder:text-slate-400 shadow-xs"
                 />
               </div>
 
@@ -718,7 +718,7 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="appearance-none text-xs font-semibold py-1.5 pl-7 pr-7 bg-white/90 border border-slate-200/90 rounded-xl outline-none text-slate-700 hover:bg-slate-50 transition-all cursor-pointer"
+                  className="appearance-none text-xs font-semibold py-1.5 pl-7 pr-7 bg-white border border-slate-200 rounded-xl outline-none text-slate-700 hover:bg-slate-50 transition-all cursor-pointer shadow-xs"
                 >
                   <option value="ALL">All Categories</option>
                   <option value="CORE">Core System</option>
@@ -735,7 +735,7 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
           </div>
 
           {/* ACTIVE ROLE SUMMARY & METRICS STAT CARDS */}
-          <div className="p-3 px-3.5 bg-gradient-to-r from-blue-50/80 via-indigo-50/60 to-purple-50/80 border border-indigo-100/90 rounded-2xl flex flex-wrap md:flex-nowrap items-center justify-between gap-3 shadow-2xs relative overflow-hidden">
+          <div className="p-3 px-3.5 bg-gradient-to-r from-[#eff6ff] via-[#eef2ff] to-[#faf5ff] border border-indigo-100 rounded-2xl flex flex-wrap md:flex-nowrap items-center justify-between gap-3 shadow-sm relative overflow-hidden">
             {/* Left Role Details */}
             <div className="flex items-center gap-3 relative z-10 min-w-0">
               <div className={`w-10 h-10 rounded-full bg-gradient-to-tr ${currentRoleMeta.accentColor} p-0.5 shadow-md shrink-0`}>
@@ -762,7 +762,7 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
             {/* Right Metrics Stat Cards & Wireframe Globe */}
             <div className="flex items-center gap-2 relative z-10 w-full md:w-auto justify-end">
               {/* Stat 1: Modules */}
-              <div className="bg-white/90 border border-slate-200/90 rounded-xl p-2 px-3 flex items-center gap-2.5 shadow-2xs">
+              <div className="bg-white border border-slate-200 rounded-xl p-2 px-3 flex items-center gap-2.5 shadow-xs">
                 <div className="w-7 h-7 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-600 text-xs">
                   <i className="bi bi-box"></i>
                 </div>
@@ -775,7 +775,7 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
               </div>
 
               {/* Stat 2: Granted Permissions */}
-              <div className="bg-white/90 border border-slate-200/90 rounded-xl p-2 px-3 flex items-center gap-2.5 shadow-2xs">
+              <div className="bg-white border border-slate-200 rounded-xl p-2 px-3 flex items-center gap-2.5 shadow-xs">
                 <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 text-xs">
                   <i className="bi bi-key"></i>
                 </div>
@@ -788,7 +788,7 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
               </div>
 
               {/* Stat 3: Categories */}
-              <div className="bg-white/90 border border-slate-200/90 rounded-xl p-2 px-3 flex items-center gap-2.5 shadow-2xs">
+              <div className="bg-white border border-slate-200 rounded-xl p-2 px-3 flex items-center gap-2.5 shadow-xs">
                 <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600 text-xs">
                   <i className="bi bi-folder"></i>
                 </div>
@@ -815,7 +815,7 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
           {/* MAIN SPLIT VIEW (Sidebar Categories + Accordion Matrix Table) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-start">
             {/* Left Sidebar Navigation (Fully wired and working!) */}
-            <div className="lg:col-span-3 bg-white/90 border border-slate-200/90 rounded-2xl p-2 space-y-1 shadow-2xs">
+            <div className="lg:col-span-3 bg-white border border-slate-200 rounded-2xl p-2 space-y-1 shadow-sm">
               {categoriesList.map((catItem) => {
                 const isActive = categoryFilter === catItem.key;
                 const count =
@@ -831,7 +831,7 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
                     className={`w-full flex items-center justify-between p-2 px-2.5 rounded-xl transition-all text-xs font-bold text-left cursor-pointer ${
                       isActive
                         ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-indigo-500/20"
-                        : "text-slate-700 hover:bg-slate-100/70"
+                        : "text-slate-700 hover:bg-slate-100"
                     }`}
                   >
                     <div className="flex items-center gap-2 min-w-0">
@@ -851,9 +851,9 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
             </div>
 
             {/* Right Main Permissions Accordion Table */}
-            <div className="lg:col-span-9 bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden flex flex-col">
+            <div className="lg:col-span-9 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
               <div className="overflow-x-auto matrix-scrollbar">
-                <table className="w-full text-left border-collapse min-w-[680px]">
+                <table className="w-full text-left border-collapse min-w-[680px] bg-white">
                   {/* Table Header */}
                   <thead>
                     <tr className="bg-[#0b0e22] text-white text-[10.5px] select-none border-b border-slate-800">
@@ -904,7 +904,7 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
                   </thead>
 
                   {/* Table Body with Accordion Groups */}
-                  <tbody className="divide-y divide-slate-100 text-xs">
+                  <tbody className="divide-y divide-slate-100 text-xs bg-white">
                     {(Object.keys(groupedModules) as ModuleCategory[]).map((catKey) => {
                       const modulesInCat = groupedModules[catKey] || [];
                       const isCollapsed = collapsedSections[catKey];
@@ -937,7 +937,7 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
                       return (
                         <React.Fragment key={catKey}>
                           {/* Section Header Accordion Bar */}
-                          <tr className="bg-slate-50/90 border-y border-slate-200/80">
+                          <tr className="bg-[#f8fafc] border-y border-slate-200">
                             <td colSpan={7} className="p-2.5 px-3.5">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2.5">
@@ -982,7 +982,7 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
                                 modPerms.export;
 
                               return (
-                                <tr key={mod.id} className="hover:bg-slate-50/80 transition-colors">
+                                <tr key={mod.id} className="bg-white hover:bg-slate-50 transition-colors">
                                   <td className="p-2.5 pl-4">
                                     <div className="flex items-start gap-2.5">
                                       <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600 shrink-0 mt-0.5">
@@ -1052,7 +1052,7 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
         </div>
 
         {/* FOOTER ACTIONS & STATUS */}
-        <footer className="relative z-10 px-5 sm:px-6 py-3 bg-slate-50/90 border-t border-slate-200/90 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <footer className="relative z-10 px-5 sm:px-6 py-3 bg-[#f8fafc] border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-2 text-slate-500 text-xs font-medium">
             <div className="w-4.5 h-4.5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 text-[10px]">
               <i className="bi bi-info-lg"></i>
