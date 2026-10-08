@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/axios";
-import { HierarchyHeader } from "../../Components/admin/hierarchy";
+import {
+  HierarchyHeader,
+  HierarchyKPIStats,
+  OrphanedStaffBanner,
+} from "../../Components/admin/hierarchy";
 
 const HierarchyMapping = () => {
   const [hierarchy, setHierarchy] = useState([]);
@@ -10,13 +14,21 @@ const HierarchyMapping = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [msg, setMsg] = useState({ type: "", text: "" });
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const [form, setForm] = useState({
     employee_id: "",
     supervisor_id: "",
-    manager_id: ""
+    manager_id: "",
   });
   const [saving, setSaving] = useState(false);
+
+  const unassignedEmployees = employees.filter(
+    (e) => !hierarchy.some((h) => String(h.employee_id) === String(e.id))
+  );
+  const unassignedCount = unassignedEmployees.length;
+  const uniqueSupervisorsCount = new Set(hierarchy.map((h) => h.supervisor_id)).size;
+  const uniqueManagersCount = new Set(hierarchy.map((h) => h.manager_id)).size;
 
   const fetchData = async () => {
     try {
@@ -98,6 +110,28 @@ const HierarchyMapping = () => {
         onOpenAssignModal={() => setShowModal(true)}
         onRefresh={fetchData}
         isRefreshing={loading}
+      />
+
+      {/* KPI Stats Grid */}
+      <HierarchyKPIStats
+        totalMapped={hierarchy.length}
+        totalSupervisors={uniqueSupervisorsCount}
+        totalManagers={uniqueManagersCount}
+        unassignedCount={unassignedCount}
+        onFilterUnassigned={() =>
+          setStatusFilter((prev) => (prev === "unassigned" ? "all" : "unassigned"))
+        }
+        isUnassignedFilterActive={statusFilter === "unassigned"}
+      />
+
+      {/* Orphaned Staff Alert Banner */}
+      <OrphanedStaffBanner
+        unassignedCount={unassignedCount}
+        onQuickAssign={() => setShowModal(true)}
+        onFilterUnassigned={() =>
+          setStatusFilter((prev) => (prev === "unassigned" ? "all" : "unassigned"))
+        }
+        isFilterActive={statusFilter === "unassigned"}
       />
 
       {/* Mapping Hierarchy Table Card */}
