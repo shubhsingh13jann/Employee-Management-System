@@ -5,6 +5,7 @@ import {
   HierarchyKPIStats,
   OrphanedStaffBanner,
   HierarchyFilters,
+  HierarchyTableView,
 } from "../../Components/admin/hierarchy";
 
 const HierarchyMapping = () => {
@@ -177,74 +178,24 @@ const HierarchyMapping = () => {
         }}
       />
 
-      {/* Mapping Hierarchy Table Card */}
-      <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg bg-white overflow-hidden">
-        <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0">
-            <thead className="table-light">
-              <tr>
-                <th className="px-6">💼 Employee (Subordinate)</th>
-                <th>👷 Direct Supervisor (Team Lead)</th>
-                <th>👔 Department Manager</th>
-                <th>Department</th>
-                <th className="text-right px-6">Assigned Since</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={5} className="text-center py-12">
-                    <div className="spinner-border spinner-border-sm text-blue-600"></div>
-                    <span className="ml-2 text-gray-500">Loading hierarchy mappings...</span>
-                  </td>
-                </tr>
-              ) : hierarchy.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="text-center py-12 text-gray-500">
-                    No active team hierarchy mappings found. Click 'Assign / Reassign Team' to create mappings.
-                  </td>
-                </tr>
-              ) : (
-                hierarchy.map((h) => (
-                  <tr key={h.id}>
-                    <td className="px-6">
-                      <div className="flex items-center gap-2">
-                        <div className="bg-info bg-opacity-10 text-info rounded-full font-bold flex items-center justify-center" style={{ width: "34px", height: "34px" }}>
-                          {h.employee_name.charAt(0)}
-                        </div>
-                        <div>
-                          <p className="mb-0 font-semibold text-gray-900">{h.employee_name}</p>
-                          <small className="text-gray-500">{h.employee_email}</small>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="badge bg-green-600 bg-opacity-10 text-green-600 border border-gray-200 border-gray-200 px-2.5 py-1.5 text-base font-semibold">
-                        <i className="bi bi-person-badge mr-1"></i>
-                        {h.supervisor_name}
-                      </span>
-                    </td>
-                    <td>
-                      <span className="badge bg-blue-600 bg-opacity-10 text-blue-600 border border-gray-200 border-gray-200 px-2.5 py-1.5 text-base font-semibold">
-                        <i className="bi bi-person-gear mr-1"></i>
-                        {h.manager_name}
-                      </span>
-                    </td>
-                    <td>
-                      <span className="badge bg-gray-50 text-gray-900 border border-gray-200 border-gray-200">
-                        {h.department_name || "General"}
-                      </span>
-                    </td>
-                    <td className="text-right px-6 text-gray-500 text-sm">
-                      {new Date(h.assigned_at).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Modern Hierarchy Table View */}
+      <HierarchyTableView
+        loading={loading}
+        mappings={filteredHierarchy}
+        unassignedStaff={unassignedEmployees}
+        showUnassignedOnly={statusFilter === "unassigned"}
+        onOpenAssignModal={(empId) => {
+          if (empId) {
+            setForm((prev) => ({ ...prev, employee_id: String(empId) }));
+          }
+          setShowModal(true);
+        }}
+        onResetFilters={() => {
+          setSearchTerm("");
+          setSelectedDepartment("all");
+          setStatusFilter("all");
+        }}
+      />
 
       {/* Assignment Modal */}
       {showModal && (
