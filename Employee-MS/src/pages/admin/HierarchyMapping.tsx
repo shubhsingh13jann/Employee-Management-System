@@ -6,6 +6,7 @@ import {
   OrphanedStaffBanner,
   HierarchyFilters,
   HierarchyTableView,
+  AssignHierarchyModal,
 } from "../../Components/admin/hierarchy";
 
 const HierarchyMapping = () => {
@@ -197,77 +198,21 @@ const HierarchyMapping = () => {
         }}
       />
 
-      {/* Assignment Modal */}
-      {showModal && (
-        <div className="modal show block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content border-0 shadow-lg rounded-xl">
-              <div className="modal-header bg-gray-900 text-white">
-                <h5 className="modal-title font-bold">Map Employee to Team</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
-              </div>
-              <form onSubmit={handleAssign}>
-                <div className="modal-body p-6">
-                  {/* Select Employee */}
-                  <div className="mb-6">
-                    <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">1. Select Employee (Subordinate)</label>
-                    <select
-                      className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      value={form.employee_id}
-                      onChange={(e) => setForm({ ...form, employee_id: e.target.value })}
-                      required
-                    >
-                      <option value="">Choose Employee...</option>
-                      {employees.map((e) => (
-                        <option key={e.id} value={e.id}>{e.name} ({e.email})</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Select Supervisor */}
-                  <div className="mb-6">
-                    <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">2. Select Direct Supervisor (Team Lead)</label>
-                    <select
-                      className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      value={form.supervisor_id}
-                      onChange={(e) => setForm({ ...form, supervisor_id: e.target.value })}
-                      required
-                    >
-                      <option value="">Choose Supervisor...</option>
-                      {supervisors.map((s) => (
-                        <option key={s.id} value={s.id}>{s.name} ({s.department_name || "Supervisor"})</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Select Manager */}
-                  <div className="mb-6">
-                    <label className="block mb-2 font-medium text-gray-700 font-semibold text-sm">3. Select Department Manager</label>
-                    <select
-                      className="w-full px-4 py-2 border border-gray-200 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      value={form.manager_id}
-                      onChange={(e) => setForm({ ...form, manager_id: e.target.value })}
-                      required
-                    >
-                      <option value="">Choose Manager...</option>
-                      {managers.map((m) => (
-                        <option key={m.id} value={m.id}>{m.name} ({m.department_name || "Manager"})</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="modal-footer bg-gray-50">
-                  <button type="button" className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center border border-gray-200 border-gray-500 text-gray-500 hover:bg-gray-50" onClick={() => setShowModal(false)}>Cancel</button>
-                  <button type="submit" disabled={saving} className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center bg-blue-600 text-white hover:bg-blue-700 px-6">
-                    {saving ? <span className="spinner-border spinner-border-sm"></span> : "Save Assignment"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modern Assignment Modal */}
+      <AssignHierarchyModal
+        isOpen={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setForm({ employee_id: "", supervisor_id: "", manager_id: "" });
+        }}
+        form={form}
+        onFormChange={setForm}
+        onSubmit={handleAssign}
+        employees={employees}
+        supervisors={supervisors}
+        managers={managers}
+        saving={saving}
+      />
     </div>
   );
 };
