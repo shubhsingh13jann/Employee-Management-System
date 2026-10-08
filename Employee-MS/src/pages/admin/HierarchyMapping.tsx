@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/axios";
+import { HierarchyHeader } from "../../Components/admin/hierarchy";
 
 const HierarchyMapping = () => {
   const [hierarchy, setHierarchy] = useState([]);
@@ -67,19 +68,37 @@ const HierarchyMapping = () => {
   };
 
   return (
-    <div className="w-full px-6 p-0">
-      {msg.text && <div className={`alert alert-${msg.type} alert-dismissible fade show`}>{msg.text}</div>}
-
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h5 className="font-bold text-gray-900 mb-1">Workforce Team Mapping</h5>
-          <p className="text-gray-500 text-sm mb-0">Define which staff member reports to which Supervisor and Department Manager.</p>
+    <div className="w-full min-h-screen p-4 sm:p-6 lg:p-8 bg-slate-50/50">
+      {/* Alert Notification */}
+      {msg.text && (
+        <div
+          className={`mb-6 p-4 rounded-xl border flex items-center justify-between gap-3 text-xs sm:text-sm animate-in fade-in ${
+            msg.type === "success"
+              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+              : "bg-rose-50 text-rose-800 border-rose-200"
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            <i className={`bi ${msg.type === "success" ? "bi-check-circle-fill text-emerald-500" : "bi-exclamation-triangle-fill text-rose-500"} text-base`}></i>
+            <span className="font-medium">{msg.text}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setMsg({ type: "", text: "" })}
+            className="text-slate-400 hover:text-slate-700 cursor-pointer text-xs"
+          >
+            <i className="bi bi-x-lg"></i>
+          </button>
         </div>
-        <button onClick={() => setShowModal(true)} className="px-6 py-2 rounded font-medium transition-colors cursor-pointer inline-block text-center bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2 shadow-sm">
-          <i className="bi bi-diagram-3-fill"></i>
-          <span>Assign / Reassign Team</span>
-        </button>
-      </div>
+      )}
+
+      {/* Modern Executive Header */}
+      <HierarchyHeader
+        totalCount={hierarchy.length}
+        onOpenAssignModal={() => setShowModal(true)}
+        onRefresh={fetchData}
+        isRefreshing={loading}
+      />
 
       {/* Mapping Hierarchy Table Card */}
       <div className="bg-white rounded-lg border border-gray-200 border-gray-200 shadow-sm flex flex-col shadow-sm border-0 rounded-lg bg-white overflow-hidden">
