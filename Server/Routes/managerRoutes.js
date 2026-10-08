@@ -3,6 +3,8 @@ import {
   getManagerDashboard,
   getProjects,
   createProject,
+  updateProject,
+  deleteProject,
   getSupervisors,
   getEscalatedLeaves,
   reviewEscalatedLeave
@@ -16,6 +18,8 @@ router.use(verifyToken, authorizeRoles("manager", "admin"));
 router.get("/dashboard", getManagerDashboard);
 router.get("/projects", getProjects);
 router.post("/projects", createProject);
+router.put("/projects/:id", updateProject);
+router.delete("/projects/:id", deleteProject);
 router.get("/supervisors", getSupervisors);
 router.get("/leaves", getEscalatedLeaves);
 router.put("/leaves/:id/review", reviewEscalatedLeave);

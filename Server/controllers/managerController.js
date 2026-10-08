@@ -94,12 +94,75 @@ export const createProject = async (req, res) => {
   }
 };
 
+export const updateProject = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description = "", lead_supervisor_id, target_date, status = "active" } = req.body;
+    const managerId = req.user.id;
+
+    if (!title || !lead_supervisor_id || !target_date) {
+      return res.status(400).json({ status: false, error: "Title, Lead Supervisor, and Target Date are required" });
+    }
+
+    const [result] = await pool.query(
+      `UPDATE projects
+       SET title = ?, description = ?, lead_supervisor_id = ?, target_date = ?, status = ?
+       WHERE id = ? AND (created_by = ? OR ? = 'admin')`,
+      [title.trim(), description.trim(), lead_supervisor_id, target_date, status, id, managerId, req.user.role]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ status: false, error: "Project not found or unauthorized to update" });
+    }
+
+    return res.json({ status: true, message: "Project milestone updated successfully" });
+  } catch (err) {
+    console.error("Update project error:", err);
+    return res.status(500).json({ status: false, error: "Failed to update project" });
+  }
+};
+
+export const deleteProject = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const managerId = req.user.id;
+
+    // Safely unlink tasks belonging to this project before deletion
+    await pool.query("UPDATE tasks SET project_id = NULL WHERE project_id = ?", [id]);
+
+    const [result] = await pool.query(
+      `DELETE FROM projects WHERE id = ? AND (created_by = ? OR ? = 'admin')`,
+      [id, managerId, req.user.role]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ status: false, error: "Project not found or unauthorized to delete" });
+    }
+
+    return res.json({ status: true, message: "Project initiative deleted successfully" });
+  } catch (err) {
+    console.error("Delete project error:", err);
+    return res.status(500).json({ status: false, error: "Failed to delete project" });
+  }
+};
+
 export const getSupervisors = async (req, res) => {
   try {
     const deptId = req.user.department_id;
-    const query = deptId
-      ? "SELECT id, name, email, phone, salary, status FROM users WHERE role = 'supervisor' AND (department_id = ? OR department_id IS NULL)"
-      : "SELECT id, name, email, phone, salary, status FROM users WHERE role = 'supervisor'";
+    const query = `
+      SELECT u.id, u.name, u.email, u.phone, u.status, u.image_url,
+             COUNT(DISTINCT p.id) AS active_projects_count,
+             COUNT(DISTINCT th.employee_id) AS team_size,
+             COUNT(DISTINCT t.id) AS total_tasks_count,
+             SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) AS completed_tasks_count
+      FROM users u
+      LEFT JOIN projects p ON u.id = p.lead_supervisor_id AND p.status != 'completed'
+      LEFT JOIN team_hierarchy th ON u.id = th.supervisor_id
+      LEFT JOIN tasks t ON u.id = t.assigned_by
+      WHERE u.role = 'supervisor' ${deptId ? "AND (u.department_id = ? OR u.department_id IS NULL)" : ""}
+      GROUP BY u.id
+      ORDER BY u.name ASC
+    `;
     const params = deptId ? [deptId] : [];
 
     const [supervisors] = await pool.query(query, params);
