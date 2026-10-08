@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 
 export interface EmployeeDocument {
@@ -30,6 +30,17 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
   onToggleStatus,
   onDownload,
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen || !doc) return null;
 
   const isImage = doc.fileData && (doc.fileData.startsWith("data:image/") || doc.fileType === "image");
@@ -82,7 +93,10 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
   const theme = getCategoryTheme(doc.category);
 
   return createPortal(
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-5 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-150">
+    <div
+      className="fixed inset-0 z-[100000] flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-150"
+      onClick={onClose}
+    >
       <div
         className="w-full max-w-3xl max-h-[92vh] bg-white rounded-2xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}

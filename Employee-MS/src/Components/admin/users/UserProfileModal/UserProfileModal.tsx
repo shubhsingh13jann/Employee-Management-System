@@ -1769,132 +1769,131 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                                       </button>
                                     </td>
 
-                                    {/* Actions */}
-                                    <td className={`py-3.5 px-4 text-center whitespace-nowrap ${isMenuOpen ? "relative z-40" : ""}`}>
-                                      <div className="flex items-center justify-center gap-1">
-                                        {/* Direct Preview Button */}
-                                        <button
-                                          type="button"
-                                          onClick={() => setPreviewingDoc(doc)}
-                                          className="w-7 h-7 rounded-lg border border-slate-200 bg-white hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
-                                          title="Preview Document"
-                                        >
-                                          <i className="bi bi-eye text-xs"></i>
-                                        </button>
+                                     {/* Actions: Consolidated inside triple-dot menu */}
+                                     <td className={`py-3.5 px-4 text-center whitespace-nowrap ${isMenuOpen ? "relative z-40" : ""}`}>
+                                       <div className="flex items-center justify-center">
+                                         <div
+                                           className="relative inline-flex items-center justify-center doc-action-menu-container"
+                                           onClick={(e) => e.stopPropagation()}
+                                         >
+                                           <button
+                                             type="button"
+                                             onClick={(e) => {
+                                               e.stopPropagation();
+                                               setActiveDocMenuId((prev) => (prev === String(doc.id) ? null : String(doc.id)));
+                                             }}
+                                             className={`w-8 h-8 rounded-xl border transition-all inline-flex items-center justify-center cursor-pointer ${
+                                               isMenuOpen
+                                                 ? "bg-slate-100 text-slate-800 border-slate-300 shadow-sm"
+                                                 : "border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 shadow-2xs hover:border-slate-300"
+                                             }`}
+                                             title="Document Options"
+                                           >
+                                             <i className="bi bi-three-dots text-sm"></i>
+                                           </button>
 
-                                        {/* Direct Download Button */}
-                                        <button
-                                          type="button"
-                                          onClick={() => handleDownloadDoc(doc)}
-                                          className="w-7 h-7 rounded-lg border border-slate-200 bg-white hover:bg-emerald-50 text-slate-500 hover:text-emerald-600 flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
-                                          title="Download File"
-                                        >
-                                          <i className="bi bi-download text-xs"></i>
-                                        </button>
+                                           {isMenuOpen && (
+                                             <div
+                                               className={`absolute right-0 ${
+                                                 idx >= arr.length - 2 && arr.length > 2
+                                                   ? "bottom-full mb-1.5"
+                                                   : "top-full mt-1.5"
+                                               } w-48 rounded-xl bg-white border border-slate-200 shadow-xl p-1 z-50 text-left animate-in fade-in zoom-in-95 duration-100`}
+                                               onClick={(e) => e.stopPropagation()}
+                                             >
+                                               {/* Preview */}
+                                               <button
+                                                 type="button"
+                                                 onClick={(e) => {
+                                                   e.stopPropagation();
+                                                   setActiveDocMenuId(null);
+                                                   setPreviewingDoc(doc);
+                                                 }}
+                                                 className="w-full px-2.5 py-1.5 text-xs text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer font-medium"
+                                               >
+                                                 <i className="bi bi-eye text-indigo-500 text-xs"></i>
+                                                 <span>Preview Document</span>
+                                               </button>
 
-                                        {/* 3-dots Menu */}
-                                        <div
-                                          className="relative inline-flex items-center justify-center doc-action-menu-container"
-                                          onClick={(e) => e.stopPropagation()}
-                                        >
-                                          <button
-                                            type="button"
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              setActiveDocMenuId((prev) => (prev === String(doc.id) ? null : String(doc.id)));
-                                            }}
-                                            className={`w-7 h-7 rounded-lg border transition-all inline-flex items-center justify-center cursor-pointer ${
-                                              isMenuOpen
-                                                ? "bg-slate-100 text-slate-800 border-slate-300 shadow-2xs"
-                                                : "border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 shadow-2xs"
-                                            }`}
-                                            title="More Options"
-                                          >
-                                            <i className="bi bi-three-dots text-xs"></i>
-                                          </button>
+                                               {/* Download */}
+                                               <button
+                                                 type="button"
+                                                 onClick={(e) => {
+                                                   e.stopPropagation();
+                                                   setActiveDocMenuId(null);
+                                                   handleDownloadDoc(doc);
+                                                 }}
+                                                 className="w-full px-2.5 py-1.5 text-xs text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer font-medium"
+                                               >
+                                                 <i className="bi bi-download text-emerald-500 text-xs"></i>
+                                                 <span>Download File</span>
+                                               </button>
 
-                                          {isMenuOpen && (
-                                            <div
-                                              className={`absolute right-0 ${
-                                                idx >= arr.length - 2 && arr.length > 2
-                                                  ? "bottom-full mb-1.5"
-                                                  : "top-full mt-1.5"
-                                              } w-44 rounded-xl bg-white border border-slate-200/90 shadow-xl p-1 z-50 text-left animate-in fade-in zoom-in-95 duration-100`}
-                                              onClick={(e) => e.stopPropagation()}
-                                            >
-                                              <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  setActiveDocMenuId(null);
-                                                  setPreviewingDoc(doc);
-                                                }}
-                                                className="w-full px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
-                                              >
-                                                <i className="bi bi-eye text-slate-400"></i>
-                                                <span>Preview Record</span>
-                                              </button>
+                                               {/* Print */}
+                                               <button
+                                                 type="button"
+                                                 onClick={(e) => {
+                                                   e.stopPropagation();
+                                                   setActiveDocMenuId(null);
+                                                   setPreviewingDoc(doc);
+                                                   setTimeout(() => window.print(), 350);
+                                                 }}
+                                                 className="w-full px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900 rounded-lg flex items-center gap-2 transition-colors cursor-pointer font-medium"
+                                               >
+                                                 <i className="bi bi-printer text-slate-400 text-xs"></i>
+                                                 <span>Print Document</span>
+                                               </button>
 
-                                              <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  setActiveDocMenuId(null);
-                                                  handleDownloadDoc(doc);
-                                                }}
-                                                className="w-full px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
-                                              >
-                                                <i className="bi bi-download text-slate-400"></i>
-                                                <span>Download File</span>
-                                              </button>
+                                               {/* Toggle Status */}
+                                               <button
+                                                 type="button"
+                                                 onClick={(e) => {
+                                                   e.stopPropagation();
+                                                   setActiveDocMenuId(null);
+                                                   handleToggleDocStatus(doc, isVerified ? 'pending' : 'verified');
+                                                 }}
+                                                 className="w-full px-2.5 py-1.5 text-xs text-slate-700 hover:bg-amber-50 hover:text-amber-700 rounded-lg flex items-center gap-2 transition-colors cursor-pointer font-medium"
+                                               >
+                                                 <i className={`bi ${isVerified ? "bi-clock-history text-amber-500" : "bi-check2-circle text-emerald-500"} text-xs`}></i>
+                                                 <span>{isVerified ? 'Set as Pending' : 'Mark as Verified'}</span>
+                                               </button>
 
-                                              <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  setActiveDocMenuId(null);
-                                                  handleToggleDocStatus(doc, isVerified ? "pending" : "verified");
-                                                }}
-                                                className="w-full px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
-                                              >
-                                                <i className={`bi ${isVerified ? "bi-clock-history" : "bi-check2-circle"} text-slate-400`}></i>
-                                                <span>{isVerified ? "Set Pending" : "Mark Verified"}</span>
-                                              </button>
+                                               {/* Copy Title */}
+                                               <button
+                                                 type="button"
+                                                 onClick={(e) => {
+                                                   e.stopPropagation();
+                                                   setActiveDocMenuId(null);
+                                                   navigator.clipboard.writeText(doc.name);
+                                                   setCopyFeedback("Title copied!");
+                                                   setTimeout(() => setCopyFeedback(""), 2000);
+                                                 }}
+                                                 className="w-full px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900 rounded-lg flex items-center gap-2 transition-colors cursor-pointer font-medium"
+                                               >
+                                                 <i className="bi bi-clipboard text-slate-400 text-xs"></i>
+                                                 <span>Copy Title</span>
+                                               </button>
 
-                                              <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  setActiveDocMenuId(null);
-                                                  navigator.clipboard.writeText(doc.name);
-                                                  setCopyFeedback("Document name copied!");
-                                                  setTimeout(() => setCopyFeedback(""), 2000);
-                                                }}
-                                                className="w-full px-2.5 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
-                                              >
-                                                <i className="bi bi-clipboard text-slate-400"></i>
-                                                <span>Copy Title</span>
-                                              </button>
+                                               <div className="h-px bg-slate-100 my-1"></div>
 
-                                              <div className="h-px bg-slate-100 my-1"></div>
-
-                                              <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  setActiveDocMenuId(null);
-                                                  handleDeleteDocument(doc.id);
-                                                }}
-                                                className="w-full px-2.5 py-1.5 text-[11px] text-rose-600 hover:bg-rose-50 rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
-                                              >
-                                                <i className="bi bi-trash3 text-rose-500"></i>
-                                                <span>Delete Record</span>
-                                              </button>
-                                            </div>
-                                          )}
-                                        </div>
-                                      </div>
-                                    </td>
+                                               {/* Delete */}
+                                               <button
+                                                 type="button"
+                                                 onClick={(e) => {
+                                                   e.stopPropagation();
+                                                   setActiveDocMenuId(null);
+                                                   handleDeleteDocument(doc.id);
+                                                 }}
+                                                 className="w-full px-2.5 py-1.5 text-xs text-rose-600 hover:bg-rose-50 rounded-lg flex items-center gap-2 transition-colors cursor-pointer font-medium"
+                                               >
+                                                 <i className="bi bi-trash3 text-rose-500 text-xs"></i>
+                                                 <span>Delete Record</span>
+                                               </button>
+                                             </div>
+                                           )}
+                                         </div>
+                                       </div>
+                                     </td>
                                   </tr>
                                 );
                               })}
