@@ -81,10 +81,12 @@ export const createProject = async (req, res) => {
       deptId = userRows[0]?.department_id || 1;
     }
 
+    const cleanDate = target_date ? new Date(target_date).toISOString().slice(0, 10) : target_date;
+
     const [result] = await pool.query(
       `INSERT INTO projects (title, description, department_id, created_by, lead_supervisor_id, target_date, start_date)
        VALUES (?, ?, ?, ?, ?, ?, CURDATE())`,
-      [title.trim(), description.trim(), deptId, managerId, lead_supervisor_id, target_date]
+      [title.trim(), description.trim(), deptId, managerId, lead_supervisor_id, cleanDate]
     );
 
     return res.json({ status: true, message: "Project milestone created successfully", projectId: result.insertId });
@@ -99,16 +101,19 @@ export const updateProject = async (req, res) => {
     const { id } = req.params;
     const { title, description = "", lead_supervisor_id, target_date, status = "active" } = req.body;
     const managerId = req.user.id;
+    const deptId = req.user.department_id;
 
     if (!title || !lead_supervisor_id || !target_date) {
       return res.status(400).json({ status: false, error: "Title, Lead Supervisor, and Target Date are required" });
     }
 
+    const cleanDate = target_date ? new Date(target_date).toISOString().slice(0, 10) : target_date;
+
     const [result] = await pool.query(
       `UPDATE projects
        SET title = ?, description = ?, lead_supervisor_id = ?, target_date = ?, status = ?
-       WHERE id = ? AND (created_by = ? OR ? = 'admin')`,
-      [title.trim(), description.trim(), lead_supervisor_id, target_date, status, id, managerId, req.user.role]
+       WHERE id = ? AND (created_by = ? OR department_id = ? OR ? = 'admin')`,
+      [title.trim(), description.trim(), lead_supervisor_id, cleanDate, status, id, managerId, deptId, req.user.role]
     );
 
     if (result.affectedRows === 0) {
@@ -126,13 +131,14 @@ export const deleteProject = async (req, res) => {
   try {
     const { id } = req.params;
     const managerId = req.user.id;
+    const deptId = req.user.department_id;
 
     // Safely unlink tasks belonging to this project before deletion
     await pool.query("UPDATE tasks SET project_id = NULL WHERE project_id = ?", [id]);
 
     const [result] = await pool.query(
-      `DELETE FROM projects WHERE id = ? AND (created_by = ? OR ? = 'admin')`,
-      [id, managerId, req.user.role]
+      `DELETE FROM projects WHERE id = ? AND (created_by = ? OR department_id = ? OR ? = 'admin')`,
+      [id, managerId, deptId, req.user.role]
     );
 
     if (result.affectedRows === 0) {
@@ -148,6 +154,7 @@ export const deleteProject = async (req, res) => {
 
 export const getSupervisors = async (req, res) => {
   try {
+    const managerId = req.user.id;
     const deptId = req.user.department_id;
     const query = `
       SELECT u.id, u.name, u.email, u.phone, u.status, u.image_url,
@@ -159,11 +166,17 @@ export const getSupervisors = async (req, res) => {
       LEFT JOIN projects p ON u.id = p.lead_supervisor_id AND p.status != 'completed'
       LEFT JOIN team_hierarchy th ON u.id = th.supervisor_id
       LEFT JOIN tasks t ON u.id = t.assigned_by
-      WHERE u.role = 'supervisor' ${deptId ? "AND (u.department_id = ? OR u.department_id IS NULL)" : ""}
+      WHERE u.role = 'supervisor'
+        AND (
+          ? IS NULL
+          OR u.department_id = ?
+          OR u.department_id IS NULL
+          OR u.id IN (SELECT lead_supervisor_id FROM projects WHERE (department_id = ? OR created_by = ?) AND lead_supervisor_id IS NOT NULL)
+        )
       GROUP BY u.id
       ORDER BY u.name ASC
     `;
-    const params = deptId ? [deptId] : [];
+    const params = [deptId, deptId, deptId, managerId];
 
     const [supervisors] = await pool.query(query, params);
     return res.json({ status: true, supervisors });

@@ -138,11 +138,14 @@ const ProjectsManager: React.FC = () => {
   const handleQuickStatusChange = async (project: Project, newStatus: "planning" | "active" | "completed") => {
     setActiveActionMenuId(null);
     try {
+      const cleanTargetDate = project.target_date
+        ? new Date(project.target_date).toISOString().slice(0, 10)
+        : "";
       const res = await api.put(`/api/manager/projects/${project.id}`, {
         title: project.title,
         description: project.description || "",
         lead_supervisor_id: project.lead_supervisor_id,
-        target_date: project.target_date,
+        target_date: cleanTargetDate,
         status: newStatus,
       });
       if (res.data.status) {
