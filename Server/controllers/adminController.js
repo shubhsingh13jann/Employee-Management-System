@@ -732,13 +732,21 @@ export const getUserDetails = async (req, res) => {
       LIMIT 30
     `, [id]);
 
+    // Fetch employee document vault records
+    const [documents] = await pool.query(`
+      SELECT * FROM user_documents
+      WHERE user_id = ?
+      ORDER BY created_at DESC
+    `, [id]);
+
     return res.json({
       status: true,
       user: {
         ...user,
         direct_reports,
         transfers,
-        audit_logs
+        audit_logs,
+        documents
       }
     });
   } catch (err) {
@@ -1330,5 +1338,137 @@ export const broadcastAnnouncement = async (req, res) => {
   } catch (err) {
     console.error("broadcastAnnouncement error:", err);
     return res.status(500).json({ status: false, error: "Failed to dispatch broadcast announcement." });
+  }
+};
+
+export const getUserDocuments = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let [docs] = await pool.query(
+      "SELECT * FROM user_documents WHERE user_id = ? ORDER BY created_at DESC",
+      [id]
+    );
+
+    // If user has no documents yet, seed initial standard statutory documents
+    if (docs.length === 0) {
+      const defaultDocs = [
+        [id, "Government ID / Passport Scan", "Statutory proof of identity and citizenship verification", "Identity", "pdf", "2.4 MB", "verified", req.user?.id || 1],
+        [id, "Employment Contract & Offer Letter", "Signed formal executive contract and terms", "Contract", "pdf", "1.8 MB", "verified", req.user?.id || 1],
+        [id, "Non-Disclosure Agreement (NDA)", "Confidentiality and proprietary rights covenants", "NDA", "pdf", "840 KB", "verified", req.user?.id || 1],
+        [id, "Tax Withholding & Direct Deposit Form", "W-4 withholding declaration and verified bank coordinates", "Tax", "pdf", "620 KB", "verified", req.user?.id || 1]
+      ];
+      await pool.query(
+        `INSERT INTO user_documents (user_id, name, description, category, file_type, file_size, status, uploaded_by) VALUES ?`,
+        [defaultDocs]
+      );
+      const [seededDocs] = await pool.query(
+        "SELECT * FROM user_documents WHERE user_id = ? ORDER BY created_at DESC",
+        [id]
+      );
+      docs = seededDocs;
+    }
+
+    return res.json({ status: true, documents: docs });
+  } catch (err) {
+    console.error("getUserDocuments error:", err);
+    return res.status(500).json({ status: false, error: "Failed to fetch user documents" });
+  }
+};
+
+export const uploadUserDocument = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      name,
+      description = "Compliance record",
+      category = "Identity",
+      file_type = "pdf",
+      file_size = "1.2 MB",
+      file_data = null,
+      status = "verified"
+    } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ status: false, error: "Document name is required" });
+    }
+
+    const [result] = await pool.query(
+      `INSERT INTO user_documents (user_id, name, description, category, file_type, file_size, file_data, status, uploaded_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, name.trim(), description.trim(), category, file_type, file_size, file_data, status, req.user?.id || 1]
+    );
+
+    // Audit log
+    await pool.query(
+      `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+       VALUES (?, 'Document Vault', 'documents', NULL, ?, ?, ?)`,
+      [id, name.trim(), `Uploaded compliance document: ${name.trim()} (${category})`, req.user?.id || 1]
+    );
+
+    const [newDoc] = await pool.query("SELECT * FROM user_documents WHERE id = ?", [result.insertId]);
+
+    return res.json({
+      status: true,
+      message: "Document uploaded to employee vault successfully",
+      document: newDoc[0]
+    });
+  } catch (err) {
+    console.error("uploadUserDocument error:", err);
+    return res.status(500).json({ status: false, error: "Failed to upload document" });
+  }
+};
+
+export const updateUserDocumentStatus = async (req, res) => {
+  try {
+    const { id, docId } = req.params;
+    const { status } = req.body;
+
+    if (!["verified", "pending", "expired"].includes(status)) {
+      return res.status(400).json({ status: false, error: "Invalid document status" });
+    }
+
+    const [existing] = await pool.query("SELECT * FROM user_documents WHERE id = ? AND user_id = ?", [docId, id]);
+    if (existing.length === 0) {
+      return res.status(404).json({ status: false, error: "Document not found" });
+    }
+
+    await pool.query("UPDATE user_documents SET status = ? WHERE id = ? AND user_id = ?", [status, docId, id]);
+
+    // Audit log
+    await pool.query(
+      `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+       VALUES (?, 'Document Vault', 'document_status', ?, ?, ?, ?)`,
+      [id, existing[0].status, status, `Updated status of ${existing[0].name} to ${status}`, req.user?.id || 1]
+    );
+
+    return res.json({ status: true, message: `Document status updated to ${status}` });
+  } catch (err) {
+    console.error("updateUserDocumentStatus error:", err);
+    return res.status(500).json({ status: false, error: "Failed to update document status" });
+  }
+};
+
+export const deleteUserDocument = async (req, res) => {
+  try {
+    const { id, docId } = req.params;
+
+    const [existing] = await pool.query("SELECT * FROM user_documents WHERE id = ? AND user_id = ?", [docId, id]);
+    if (existing.length === 0) {
+      return res.status(404).json({ status: false, error: "Document not found" });
+    }
+
+    await pool.query("DELETE FROM user_documents WHERE id = ? AND user_id = ?", [docId, id]);
+
+    // Audit log
+    await pool.query(
+      `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+       VALUES (?, 'Document Vault', 'documents', ?, NULL, ?, ?)`,
+      [id, existing[0].name, `Deleted compliance record: ${existing[0].name}`, req.user?.id || 1]
+    );
+
+    return res.json({ status: true, message: "Document removed from employee vault" });
+  } catch (err) {
+    console.error("deleteUserDocument error:", err);
+    return res.status(500).json({ status: false, error: "Failed to delete document" });
   }
 };

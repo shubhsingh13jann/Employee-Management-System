@@ -20,6 +20,10 @@ import {
   updateUser,
   deleteUser,
   broadcastAnnouncement,
+  getUserDocuments,
+  uploadUserDocument,
+  updateUserDocumentStatus,
+  deleteUserDocument,
   getHierarchy,
   assignHierarchy
 } from "../controllers/adminController.js";
@@ -54,6 +58,12 @@ router.post("/users", addUser);
 router.put("/users/:id", updateUser);
 router.delete("/users/:id", deleteUser);
 router.post("/broadcast", broadcastAnnouncement);
+
+// Employee Document & Contract Vault Routes
+router.get("/users/:id/documents", getUserDocuments);
+router.post("/users/:id/documents", uploadUserDocument);
+router.put("/users/:id/documents/:docId/status", updateUserDocumentStatus);
+router.delete("/users/:id/documents/:docId", deleteUserDocument);
 
 router.get("/hierarchy", getHierarchy);
 router.post("/hierarchy", assignHierarchy);
