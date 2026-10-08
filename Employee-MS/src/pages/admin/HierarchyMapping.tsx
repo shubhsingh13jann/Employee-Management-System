@@ -4,6 +4,7 @@ import {
   HierarchyHeader,
   HierarchyKPIStats,
   OrphanedStaffBanner,
+  HierarchyFilters,
 } from "../../Components/admin/hierarchy";
 
 const HierarchyMapping = () => {
@@ -14,6 +15,8 @@ const HierarchyMapping = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [msg, setMsg] = useState({ type: "", text: "" });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
   const [form, setForm] = useState({
@@ -29,6 +32,27 @@ const HierarchyMapping = () => {
   const unassignedCount = unassignedEmployees.length;
   const uniqueSupervisorsCount = new Set(hierarchy.map((h) => h.supervisor_id)).size;
   const uniqueManagersCount = new Set(hierarchy.map((h) => h.manager_id)).size;
+
+  const departments = Array.from(
+    new Set(hierarchy.map((h) => h.department_name).filter(Boolean))
+  ) as string[];
+
+  const filteredHierarchy = hierarchy.filter((h) => {
+    if (selectedDepartment !== "all" && h.department_name !== selectedDepartment) {
+      return false;
+    }
+    if (searchTerm.trim()) {
+      const q = searchTerm.toLowerCase();
+      const matchEmp =
+        h.employee_name?.toLowerCase().includes(q) ||
+        h.employee_email?.toLowerCase().includes(q);
+      const matchSup = h.supervisor_name?.toLowerCase().includes(q);
+      const matchMgr = h.manager_name?.toLowerCase().includes(q);
+      const matchDept = h.department_name?.toLowerCase().includes(q);
+      if (!matchEmp && !matchSup && !matchMgr && !matchDept) return false;
+    }
+    return true;
+  });
 
   const fetchData = async () => {
     try {
@@ -132,6 +156,25 @@ const HierarchyMapping = () => {
           setStatusFilter((prev) => (prev === "unassigned" ? "all" : "unassigned"))
         }
         isFilterActive={statusFilter === "unassigned"}
+      />
+
+      {/* Filter and Search Bar */}
+      <HierarchyFilters
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        selectedDepartment={selectedDepartment}
+        onDepartmentChange={setSelectedDepartment}
+        departments={departments}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+        unassignedCount={unassignedCount}
+        totalFiltered={filteredHierarchy.length}
+        totalCount={hierarchy.length}
+        onResetFilters={() => {
+          setSearchTerm("");
+          setSelectedDepartment("all");
+          setStatusFilter("all");
+        }}
       />
 
       {/* Mapping Hierarchy Table Card */}
