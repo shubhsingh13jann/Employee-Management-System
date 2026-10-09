@@ -1,12 +1,19 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { HierarchyMappingItem } from "./HierarchyTableView";
 
+export interface ReassignDropPayload {
+  employee: HierarchyMappingItem;
+  targetSupervisor?: { id: string | number; name: string; department?: string };
+  targetManager?: { id: string | number; name: string; department?: string };
+}
+
 interface HierarchyOrgChartViewProps {
   mappings: HierarchyMappingItem[];
   searchTerm: string;
   onOpenAssignModal: (employeeId?: string | number) => void;
   onInitiateReassign?: (employee: HierarchyMappingItem) => void;
   onInitiateUnlink?: (employee: HierarchyMappingItem) => void;
+  onReassignDrop?: (payload: ReassignDropPayload) => void;
 }
 
 interface TreeNodeManager {
@@ -33,9 +40,14 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
   onOpenAssignModal,
   onInitiateReassign,
   onInitiateUnlink,
+  onReassignDrop,
 }) => {
   // Collapsed state tracking (IDs of nodes that are collapsed)
   const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
+
+  // Drag and Drop reporting line reallocation state
+  const [draggingEmpId, setDraggingEmpId] = useState<string | number | null>(null);
+  const [dropTargetKey, setDropTargetKey] = useState<string | null>(null);
 
   // Interactive Canvas Zoom & Pan State
   const [zoom, setZoom] = useState<number>(1);
@@ -350,16 +362,52 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                   0
                 );
 
+                const isMgrDropTarget = dropTargetKey === mgrKey;
+
                 return (
                   <div key={manager.id} className="flex flex-col items-center relative">
-                    {/* Manager Node Card */}
+                    {/* Manager Node Card (Drop target for reallocation) */}
                     <div
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = "move";
+                        if (dropTargetKey !== mgrKey) setDropTargetKey(mgrKey);
+                      }}
+                      onDragLeave={(e) => {
+                        if (dropTargetKey === mgrKey) setDropTargetKey(null);
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setDropTargetKey(null);
+                        try {
+                          const dataStr = e.dataTransfer.getData("application/json");
+                          if (!dataStr) return;
+                          const droppedEmp = JSON.parse(dataStr) as HierarchyMappingItem;
+                          if (String(droppedEmp.manager_id) === String(manager.id)) return;
+                          if (onReassignDrop) {
+                            onReassignDrop({
+                              employee: droppedEmp,
+                              targetManager: { id: manager.id, name: manager.name, department: manager.department },
+                            });
+                          }
+                        } catch (err) {
+                          console.error("Drop error", err);
+                        }
+                      }}
                       className={`w-64 p-3.5 rounded-2xl bg-white transition-all flex flex-col gap-2 relative group border-t-4 ${
-                        isMgrMatch
+                        isMgrDropTarget
+                          ? "ring-4 ring-indigo-400 border-2 border-dashed border-indigo-600 bg-indigo-50/90 scale-105 shadow-xl"
+                          : isMgrMatch
                           ? "border-amber-400 ring-2 ring-amber-300 shadow-lg border-t-amber-500"
                           : "border-indigo-100 shadow-md hover:shadow-lg border-t-indigo-600"
                       }`}
                     >
+                      {isMgrDropTarget && (
+                        <div className="px-2 py-1 rounded-lg bg-indigo-600 text-white text-[10px] font-bold text-center animate-pulse flex items-center justify-center gap-1 shadow-sm">
+                          <i className="bi bi-box-arrow-in-down"></i>
+                          <span>Drop to Reassign Department Manager</span>
+                        </div>
+                      )}
                       <div className="flex items-center justify-between">
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
                           👔 Manager
@@ -417,17 +465,53 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                               searchTerm.trim() !== "" &&
                               (sup.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                 sup.department?.toLowerCase().includes(searchTerm.toLowerCase()));
+                            const isSupDropTarget = dropTargetKey === supKey;
 
                             return (
                               <div key={sup.id} className="flex flex-col items-center relative">
-                                {/* Supervisor Node Card */}
+                                {/* Supervisor Node Card (Drop target for reporting line reallocation) */}
                                 <div
+                                  onDragOver={(e) => {
+                                    e.preventDefault();
+                                    e.dataTransfer.dropEffect = "move";
+                                    if (dropTargetKey !== supKey) setDropTargetKey(supKey);
+                                  }}
+                                  onDragLeave={(e) => {
+                                    if (dropTargetKey === supKey) setDropTargetKey(null);
+                                  }}
+                                  onDrop={(e) => {
+                                    e.preventDefault();
+                                    setDropTargetKey(null);
+                                    try {
+                                      const dataStr = e.dataTransfer.getData("application/json");
+                                      if (!dataStr) return;
+                                      const droppedEmp = JSON.parse(dataStr) as HierarchyMappingItem;
+                                      if (String(droppedEmp.supervisor_id) === String(sup.id)) return;
+                                      if (onReassignDrop) {
+                                        onReassignDrop({
+                                          employee: droppedEmp,
+                                          targetSupervisor: { id: sup.id, name: sup.name, department: sup.department },
+                                          targetManager: { id: manager.id, name: manager.name, department: manager.department },
+                                        });
+                                      }
+                                    } catch (err) {
+                                      console.error("Drop error", err);
+                                    }
+                                  }}
                                   className={`w-56 p-3 rounded-2xl bg-white transition-all flex flex-col gap-2 relative border-t-4 ${
-                                    isSupMatch
+                                    isSupDropTarget
+                                      ? "ring-4 ring-emerald-400 border-2 border-dashed border-emerald-600 bg-emerald-50/90 scale-105 shadow-xl"
+                                      : isSupMatch
                                       ? "border-amber-400 ring-2 ring-amber-300 shadow-md border-t-amber-500"
                                       : "border-emerald-100 shadow-sm hover:shadow-md border-t-emerald-500"
                                   }`}
                                 >
+                                  {isSupDropTarget && (
+                                    <div className="px-2 py-1 rounded-lg bg-emerald-600 text-white text-[10px] font-bold text-center animate-pulse flex items-center justify-center gap-1 shadow-sm">
+                                      <i className="bi bi-box-arrow-in-down"></i>
+                                      <span>Drop to Reassign Team Lead</span>
+                                    </div>
+                                  )}
                                   <div className="flex items-center justify-between">
                                     <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                       👷 Team Lead
@@ -472,7 +556,7 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                                   )}
                                 </div>
 
-                                {/* Level 3: Direct Reports (Staff Members) */}
+                                {/* Level 3: Direct Reports (Staff Members with Draggable reallocation) */}
                                 {!isSupCollapsed && sup.employees.length > 0 && (
                                   <div className="flex flex-col items-center">
                                     <div className="w-0.5 h-5 bg-slate-300"></div>
@@ -487,17 +571,39 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                                             emp.employee_email
                                               ?.toLowerCase()
                                               .includes(searchTerm.toLowerCase()));
+                                        const isBeingDragged = draggingEmpId === emp.employee_id;
 
                                         return (
                                           <div
                                             key={emp.id}
-                                            className={`w-52 p-2.5 rounded-xl border transition-all flex items-center justify-between gap-2 shadow-2xs ${
-                                              isSearchMatch
+                                            draggable={true}
+                                            onDragStart={(e) => {
+                                              e.dataTransfer.setData(
+                                                "application/json",
+                                                JSON.stringify(emp)
+                                              );
+                                              e.dataTransfer.effectAllowed = "move";
+                                              setDraggingEmpId(emp.employee_id);
+                                            }}
+                                            onDragEnd={() => {
+                                              setDraggingEmpId(null);
+                                              setDropTargetKey(null);
+                                            }}
+                                            className={`w-52 p-2.5 rounded-xl border transition-all flex items-center justify-between gap-2 shadow-2xs cursor-grab active:cursor-grabbing select-none ${
+                                              isBeingDragged
+                                                ? "opacity-30 scale-95 border-dashed border-indigo-500 bg-indigo-50/50"
+                                                : isSearchMatch
                                                 ? "bg-amber-50 border-amber-400 ring-2 ring-amber-300 shadow-md"
                                                 : "bg-white border-slate-200 hover:border-slate-300 hover:shadow-xs"
                                             }`}
                                           >
                                             <div className="flex items-center gap-2 min-w-0">
+                                              <span
+                                                className="text-slate-400 hover:text-slate-600 cursor-grab text-xs shrink-0"
+                                                title="Drag to reallocate reporting line"
+                                              >
+                                                <i className="bi bi-grip-vertical"></i>
+                                              </span>
                                               <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-xs shrink-0 border border-slate-200">
                                                 {emp.employee_name
                                                   ? emp.employee_name.charAt(0)
@@ -520,7 +626,7 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                                                   type="button"
                                                   onClick={() => onInitiateReassign(emp)}
                                                   className="w-6 h-6 rounded-md bg-slate-50 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 border border-slate-200 flex items-center justify-center text-[10px] transition-colors cursor-pointer"
-                                                  title="Reassign Supervisor"
+                                                  title="Reassign Reporting Line"
                                                 >
                                                   <i className="bi bi-arrow-left-right"></i>
                                                 </button>

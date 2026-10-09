@@ -30,6 +30,28 @@ const HierarchyMapping = () => {
   });
   const [saving, setSaving] = useState(false);
 
+  // Quick Reallocation / Drag-and-Drop State
+  const [reassignState, setReassignState] = useState<{
+    isOpen: boolean;
+    employee: any | null;
+    targetSupervisor: any | null;
+    targetManager: any | null;
+  }>({
+    isOpen: false,
+    employee: null,
+    targetSupervisor: null,
+    targetManager: null,
+  });
+
+  // Unlink State
+  const [unlinkState, setUnlinkState] = useState<{
+    isOpen: boolean;
+    employee: any | null;
+  }>({
+    isOpen: false,
+    employee: null,
+  });
+
   const unassignedEmployees = employees.filter(
     (e) => !hierarchy.some((h) => String(h.employee_id) === String(e.id))
   );
@@ -194,6 +216,28 @@ const HierarchyMapping = () => {
             }
             setShowModal(true);
           }}
+          onInitiateReassign={(emp) => {
+            setReassignState({
+              isOpen: true,
+              employee: emp,
+              targetSupervisor: null,
+              targetManager: null,
+            });
+          }}
+          onInitiateUnlink={(emp) => {
+            setUnlinkState({
+              isOpen: true,
+              employee: emp,
+            });
+          }}
+          onReassignDrop={(payload) => {
+            setReassignState({
+              isOpen: true,
+              employee: payload.employee,
+              targetSupervisor: payload.targetSupervisor || null,
+              targetManager: payload.targetManager || null,
+            });
+          }}
         />
       ) : (
         <HierarchyTableView
@@ -211,6 +255,20 @@ const HierarchyMapping = () => {
             setSearchTerm("");
             setSelectedDepartment("all");
             setStatusFilter("all");
+          }}
+          onInitiateReassign={(emp) => {
+            setReassignState({
+              isOpen: true,
+              employee: emp,
+              targetSupervisor: null,
+              targetManager: null,
+            });
+          }}
+          onInitiateUnlink={(emp) => {
+            setUnlinkState({
+              isOpen: true,
+              employee: emp,
+            });
           }}
         />
       )}

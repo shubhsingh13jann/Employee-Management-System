@@ -28,6 +28,8 @@ interface HierarchyTableViewProps {
   showUnassignedOnly: boolean;
   onOpenAssignModal: (preselectedEmployeeId?: string | number) => void;
   onResetFilters: () => void;
+  onInitiateReassign?: (employee: HierarchyMappingItem) => void;
+  onInitiateUnlink?: (employee: HierarchyMappingItem) => void;
 }
 
 export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
@@ -37,6 +39,8 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
   showUnassignedOnly,
   onOpenAssignModal,
   onResetFilters,
+  onInitiateReassign,
+  onInitiateUnlink,
 }) => {
   const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
@@ -284,6 +288,36 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                               <i className="bi bi-pencil-square text-indigo-500 text-xs"></i>
                               <span>Reassign Team</span>
                             </button>
+
+                            {onInitiateReassign && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setActiveMenuId(null);
+                                  onInitiateReassign(item);
+                                }}
+                                className="w-full px-2.5 py-1.5 text-xs text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg flex items-center gap-2 transition-colors cursor-pointer font-medium"
+                              >
+                                <i className="bi bi-arrow-left-right text-indigo-500 text-xs"></i>
+                                <span>Quick Reallocate</span>
+                              </button>
+                            )}
+
+                            {onInitiateUnlink && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setActiveMenuId(null);
+                                  onInitiateUnlink(item);
+                                }}
+                                className="w-full px-2.5 py-1.5 text-xs text-rose-600 hover:bg-rose-50 rounded-lg flex items-center gap-2 transition-colors cursor-pointer font-medium"
+                              >
+                                <i className="bi bi-link-45deg text-rose-500 text-xs"></i>
+                                <span>Unlink Hierarchy</span>
+                              </button>
+                            )}
+
+                            <div className="my-1 border-t border-slate-100"></div>
 
                             <button
                               type="button"
