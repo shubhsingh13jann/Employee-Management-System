@@ -1219,10 +1219,10 @@ export const getHierarchy = async (req, res) => {
   try {
     const [hierarchy] = await pool.query(`
       SELECT th.id, th.assigned_at,
-             emp.id AS employee_id, emp.name AS employee_name, emp.email AS employee_email,
-             sup.id AS supervisor_id, sup.name AS supervisor_name,
-             mgr.id AS manager_id, mgr.name AS manager_name,
-             d.name AS department_name
+             emp.id AS employee_id, emp.name AS employee_name, emp.email AS employee_email, emp.image_url AS employee_image, emp.role AS employee_role,
+             sup.id AS supervisor_id, sup.name AS supervisor_name, sup.email AS supervisor_email, sup.image_url AS supervisor_image,
+             mgr.id AS manager_id, mgr.name AS manager_name, mgr.email AS manager_email, mgr.image_url AS manager_image,
+             d.name AS department_name, d.id AS department_id
       FROM team_hierarchy th
       JOIN users emp ON th.employee_id = emp.id
       JOIN users sup ON th.supervisor_id = sup.id
@@ -1245,16 +1245,138 @@ export const assignHierarchy = async (req, res) => {
     }
 
     await pool.query(
-      `INSERT INTO team_hierarchy (employee_id, supervisor_id, manager_id)
-       VALUES (?, ?, ?)
-       ON DUPLICATE KEY UPDATE supervisor_id = VALUES(supervisor_id), manager_id = VALUES(manager_id)`,
+      `INSERT INTO team_hierarchy (employee_id, supervisor_id, manager_id, assigned_at)
+       VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+       ON DUPLICATE KEY UPDATE supervisor_id = VALUES(supervisor_id), manager_id = VALUES(manager_id), assigned_at = CURRENT_TIMESTAMP`,
       [employee_id, supervisor_id, manager_id]
     );
+
+    // Audit trail logging
+    try {
+      await pool.query(
+        `INSERT INTO user_audit_logs (user_id, action, performed_by, details, created_at)
+         VALUES (?, 'hierarchy_assigned', ?, ?, NOW())`,
+        [
+          employee_id,
+          req.user?.id || 1,
+          JSON.stringify({
+            message: `Assigned employee ${employee_id} to supervisor ${supervisor_id} and manager ${manager_id}`,
+            supervisor_id,
+            manager_id,
+          }),
+        ]
+      );
+    } catch (auditErr) {
+      console.warn("Audit log notice:", auditErr.message);
+    }
 
     return res.json({ status: true, message: "Employee successfully assigned to supervisor & manager" });
   } catch (err) {
     console.error("Assign hierarchy error:", err);
     return res.status(500).json({ status: false, error: "Failed to update team assignment" });
+  }
+};
+
+export const reassignHierarchy = async (req, res) => {
+  try {
+    const { employee_id, supervisor_id, manager_id } = req.body;
+    if (!employee_id || !supervisor_id) {
+      return res.status(400).json({ status: false, error: "Employee and new Supervisor are required." });
+    }
+
+    let resolvedManagerId = manager_id;
+    if (!resolvedManagerId) {
+      // Lookup existing manager from current mapping
+      const [existing] = await pool.query(
+        "SELECT manager_id FROM team_hierarchy WHERE employee_id = ?",
+        [employee_id]
+      );
+      if (existing && existing.length > 0 && existing[0].manager_id) {
+        resolvedManagerId = existing[0].manager_id;
+      } else {
+        // Fallback: supervisor's department manager or any manager
+        const [supRows] = await pool.query(
+          "SELECT department_id FROM users WHERE id = ?",
+          [supervisor_id]
+        );
+        if (supRows.length > 0 && supRows[0].department_id) {
+          const [deptMgr] = await pool.query(
+            "SELECT id FROM users WHERE role = 'manager' AND department_id = ? LIMIT 1",
+            [supRows[0].department_id]
+          );
+          if (deptMgr.length > 0) {
+            resolvedManagerId = deptMgr[0].id;
+          }
+        }
+      }
+    }
+
+    if (!resolvedManagerId) {
+      const [anyMgr] = await pool.query("SELECT id FROM users WHERE role = 'manager' LIMIT 1");
+      if (anyMgr.length > 0) resolvedManagerId = anyMgr[0].id;
+    }
+
+    await pool.query(
+      `INSERT INTO team_hierarchy (employee_id, supervisor_id, manager_id, assigned_at)
+       VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+       ON DUPLICATE KEY UPDATE supervisor_id = VALUES(supervisor_id), manager_id = VALUES(manager_id), assigned_at = CURRENT_TIMESTAMP`,
+      [employee_id, supervisor_id, resolvedManagerId]
+    );
+
+    // Audit Log
+    try {
+      await pool.query(
+        `INSERT INTO user_audit_logs (user_id, action, performed_by, details, created_at)
+         VALUES (?, 'hierarchy_reassigned', ?, ?, NOW())`,
+        [
+          employee_id,
+          req.user?.id || 1,
+          JSON.stringify({
+            message: `Reassigned employee ${employee_id} to supervisor ${supervisor_id} and manager ${resolvedManagerId}`,
+            supervisor_id,
+            manager_id: resolvedManagerId,
+          }),
+        ]
+      );
+    } catch (auditErr) {
+      console.warn("Audit log notice:", auditErr.message);
+    }
+
+    return res.json({ status: true, message: "Reporting relationship successfully updated!" });
+  } catch (err) {
+    console.error("Reassign hierarchy error:", err);
+    return res.status(500).json({ status: false, error: "Failed to reassign team hierarchy" });
+  }
+};
+
+export const unlinkHierarchy = async (req, res) => {
+  try {
+    const { employeeId } = req.params;
+    if (!employeeId) {
+      return res.status(400).json({ status: false, error: "Employee ID is required." });
+    }
+
+    await pool.query("DELETE FROM team_hierarchy WHERE employee_id = ?", [employeeId]);
+
+    // Audit Log
+    try {
+      await pool.query(
+        `INSERT INTO user_audit_logs (user_id, action, performed_by, details, created_at)
+         VALUES (?, 'hierarchy_unlinked', ?, ?, NOW())`,
+        [
+          employeeId,
+          req.user?.id || 1,
+          JSON.stringify({ message: `Unlinked employee ${employeeId} from reporting line` }),
+        ]
+      );
+    } catch (auditErr) {
+      console.warn("Audit log notice:", auditErr.message);
+    }
+
+    return res.json({ status: true, message: "Employee reporting relationship unlinked successfully." });
+  } catch (err) {
+    console.error("Unlink hierarchy error:", err);
+    return res.status(500).json({ status: false, error: "Failed to unlink reporting relationship" });
   }
 };
 

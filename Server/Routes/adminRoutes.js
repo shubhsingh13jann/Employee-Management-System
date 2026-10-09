@@ -25,7 +25,9 @@ import {
   updateUserDocumentStatus,
   deleteUserDocument,
   getHierarchy,
-  assignHierarchy
+  assignHierarchy,
+  reassignHierarchy,
+  unlinkHierarchy,
 } from "../controllers/adminController.js";
 import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
 
@@ -67,5 +69,7 @@ router.delete("/users/:id/documents/:docId", deleteUserDocument);
 
 router.get("/hierarchy", getHierarchy);
 router.post("/hierarchy", assignHierarchy);
+router.put("/hierarchy/reassign", reassignHierarchy);
+router.delete("/hierarchy/:employeeId", unlinkHierarchy);
 
 export { router as adminRouter };
