@@ -5,3 +5,5 @@ export * from "./HierarchyFilters";
 export * from "./HierarchyTableView";
 export * from "./AssignHierarchyModal";
 export * from "./HierarchyOrgChartView";
+export * from "./ReassignConfirmModal";
+export * from "./UnlinkConfirmModal";

@@ -8,6 +8,8 @@ import {
   HierarchyTableView,
   HierarchyOrgChartView,
   AssignHierarchyModal,
+  ReassignConfirmModal,
+  UnlinkConfirmModal,
 } from "../../Components/admin/hierarchy";
 
 const HierarchyMapping = () => {
@@ -124,6 +126,50 @@ const HierarchyMapping = () => {
       }
     } catch (err) {
       setMsg({ type: "danger", text: err.response?.data?.error || "Failed to assign team hierarchy" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleConfirmReassign = async (payload: {
+    employee_id: string | number;
+    supervisor_id: string | number;
+    manager_id?: string | number;
+  }) => {
+    try {
+      setSaving(true);
+      setMsg({ type: "", text: "" });
+      const res = await api.put("/api/admin/hierarchy/reassign", payload);
+      if (res.data.status) {
+        setMsg({ type: "success", text: "Reporting line successfully reallocated!" });
+        setReassignState({ isOpen: false, employee: null, targetSupervisor: null, targetManager: null });
+        fetchData();
+      }
+    } catch (err: any) {
+      setMsg({
+        type: "danger",
+        text: err.response?.data?.error || "Failed to reassign reporting line",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleConfirmUnlink = async (employeeId: string | number) => {
+    try {
+      setSaving(true);
+      setMsg({ type: "", text: "" });
+      const res = await api.delete(`/api/admin/hierarchy/${employeeId}`);
+      if (res.data.status) {
+        setMsg({ type: "success", text: "Reporting relationship severed successfully." });
+        setUnlinkState({ isOpen: false, employee: null });
+        fetchData();
+      }
+    } catch (err: any) {
+      setMsg({
+        type: "danger",
+        text: err.response?.data?.error || "Failed to unlink reporting relationship",
+      });
     } finally {
       setSaving(false);
     }
@@ -286,6 +332,35 @@ const HierarchyMapping = () => {
         employees={employees}
         supervisors={supervisors}
         managers={managers}
+        saving={saving}
+      />
+
+      {/* Modern Reassignment Confirmation Modal */}
+      <ReassignConfirmModal
+        isOpen={reassignState.isOpen}
+        onClose={() =>
+          setReassignState({
+            isOpen: false,
+            employee: null,
+            targetSupervisor: null,
+            targetManager: null,
+          })
+        }
+        employee={reassignState.employee}
+        targetSupervisor={reassignState.targetSupervisor}
+        targetManager={reassignState.targetManager}
+        supervisors={supervisors}
+        managers={managers}
+        onConfirm={handleConfirmReassign}
+        saving={saving}
+      />
+
+      {/* Modern Unlink Relationship Confirmation Modal */}
+      <UnlinkConfirmModal
+        isOpen={unlinkState.isOpen}
+        onClose={() => setUnlinkState({ isOpen: false, employee: null })}
+        employee={unlinkState.employee}
+        onConfirm={handleConfirmUnlink}
         saving={saving}
       />
     </div>
