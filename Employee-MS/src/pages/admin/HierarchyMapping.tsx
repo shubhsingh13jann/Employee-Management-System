@@ -20,6 +20,7 @@ const HierarchyMapping = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [viewMode, setViewMode] = useState<"table" | "tree" | "squad">("table");
 
   const [form, setForm] = useState({
     employee_id: "",
@@ -130,12 +131,14 @@ const HierarchyMapping = () => {
         </div>
       )}
 
-      {/* Modern Executive Header */}
+      {/* Modern Executive Header with View Mode Switcher */}
       <HierarchyHeader
         totalCount={hierarchy.length}
         onOpenAssignModal={() => setShowModal(true)}
         onRefresh={fetchData}
         isRefreshing={loading}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
       />
 
       {/* KPI Stats Grid */}
