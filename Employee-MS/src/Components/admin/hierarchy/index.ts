@@ -4,3 +4,4 @@ export * from "./OrphanedStaffBanner";
 export * from "./HierarchyFilters";
 export * from "./HierarchyTableView";
 export * from "./AssignHierarchyModal";
+export * from "./HierarchyOrgChartView";

@@ -6,6 +6,7 @@ import {
   OrphanedStaffBanner,
   HierarchyFilters,
   HierarchyTableView,
+  HierarchyOrgChartView,
   AssignHierarchyModal,
 } from "../../Components/admin/hierarchy";
 
@@ -182,24 +183,37 @@ const HierarchyMapping = () => {
         }}
       />
 
-      {/* Modern Hierarchy Table View */}
-      <HierarchyTableView
-        loading={loading}
-        mappings={filteredHierarchy}
-        unassignedStaff={unassignedEmployees}
-        showUnassignedOnly={statusFilter === "unassigned"}
-        onOpenAssignModal={(empId) => {
-          if (empId) {
-            setForm((prev) => ({ ...prev, employee_id: String(empId) }));
-          }
-          setShowModal(true);
-        }}
-        onResetFilters={() => {
-          setSearchTerm("");
-          setSelectedDepartment("all");
-          setStatusFilter("all");
-        }}
-      />
+      {/* Dynamic View Rendering: Org Chart Tree vs Table View */}
+      {viewMode === "tree" ? (
+        <HierarchyOrgChartView
+          mappings={filteredHierarchy}
+          searchTerm={searchTerm}
+          onOpenAssignModal={(empId) => {
+            if (empId) {
+              setForm((prev) => ({ ...prev, employee_id: String(empId) }));
+            }
+            setShowModal(true);
+          }}
+        />
+      ) : (
+        <HierarchyTableView
+          loading={loading}
+          mappings={filteredHierarchy}
+          unassignedStaff={unassignedEmployees}
+          showUnassignedOnly={statusFilter === "unassigned"}
+          onOpenAssignModal={(empId) => {
+            if (empId) {
+              setForm((prev) => ({ ...prev, employee_id: String(empId) }));
+            }
+            setShowModal(true);
+          }}
+          onResetFilters={() => {
+            setSearchTerm("");
+            setSelectedDepartment("all");
+            setStatusFilter("all");
+          }}
+        />
+      )}
 
       {/* Modern Assignment Modal */}
       <AssignHierarchyModal
