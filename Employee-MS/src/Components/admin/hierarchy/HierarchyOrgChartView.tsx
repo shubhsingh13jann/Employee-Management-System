@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { HierarchyMappingItem } from "./HierarchyTableView";
 
 interface HierarchyOrgChartViewProps {
@@ -36,6 +36,40 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
 }) => {
   // Collapsed state tracking (IDs of nodes that are collapsed)
   const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
+
+  // Interactive Canvas Zoom & Pan State
+  const [zoom, setZoom] = useState<number>(1);
+  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState<boolean>(false);
+  const [panStart, setPanStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const canvasRef = useRef<HTMLDivElement>(null);
+
+  const handleZoomIn = () => setZoom((prev) => Math.min(1.6, Number((prev + 0.1).toFixed(2))));
+  const handleZoomOut = () => setZoom((prev) => Math.max(0.6, Number((prev - 0.1).toFixed(2))));
+  const handleResetView = () => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only pan if clicking on empty canvas background (not on buttons or cards)
+    const target = e.target as HTMLElement;
+    if (target.closest("button") || target.closest("input") || target.closest(".org-card-clickable")) {
+      return;
+    }
+    setIsPanning(true);
+    setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isPanning) return;
+    setPan({
+      x: e.clientX - panStart.x,
+      y: e.clientY - panStart.y,
+    });
+  };
+
+  const handleMouseUp = () => setIsPanning(false);
 
   const toggleNodeCollapse = (nodeKey: string) => {
     setCollapsedNodes((prev) => {
@@ -83,59 +117,177 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
     return Array.from(managersMap.values());
   }, [mappings]);
 
+  // Auto-expand branches when search term matches any employee, supervisor, or manager
+  useEffect(() => {
+    if (!searchTerm.trim()) return;
+    const query = searchTerm.toLowerCase();
+    setCollapsedNodes((prev) => {
+      const next = new Set(prev);
+      managersTree.forEach((m) => {
+        const mgrMatch = m.name?.toLowerCase().includes(query) || m.department?.toLowerCase().includes(query);
+        Array.from(m.supervisors.values()).forEach((s) => {
+          const supMatch = s.name?.toLowerCase().includes(query) || s.department?.toLowerCase().includes(query);
+          const hasMatchingEmp = s.employees.some(
+            (e) =>
+              e.employee_name?.toLowerCase().includes(query) ||
+              e.employee_email?.toLowerCase().includes(query)
+          );
+          if (mgrMatch || supMatch || hasMatchingEmp) {
+            next.delete(`mgr-${m.id}`);
+            next.delete(`sup-${s.id}`);
+          }
+        });
+      });
+      return next;
+    });
+  }, [searchTerm, managersTree]);
+
+  // Total matching records count
+  const totalMatches = useMemo(() => {
+    if (!searchTerm.trim()) return 0;
+    const query = searchTerm.toLowerCase();
+    let count = 0;
+    mappings.forEach((item) => {
+      if (
+        item.employee_name?.toLowerCase().includes(query) ||
+        item.employee_email?.toLowerCase().includes(query) ||
+        item.supervisor_name?.toLowerCase().includes(query) ||
+        item.manager_name?.toLowerCase().includes(query)
+      ) {
+        count++;
+      }
+    });
+    return count;
+  }, [mappings, searchTerm]);
+
   const totalEmployeesInTree = mappings.length;
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-4 sm:p-6 mb-6 overflow-hidden">
       {/* Tree View Top Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-6 border-b border-slate-200/80">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 mb-4 border-b border-slate-200/80">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-base shadow-2xs">
             <i className="bi bi-diagram-3"></i>
           </div>
           <div>
-            <h3 className="font-bold text-sm sm:text-base text-slate-900 mb-0">
-              Interactive Chain of Command Tree
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-sm sm:text-base text-slate-900 mb-0">
+                Interactive Chain of Command Tree
+              </h3>
+              {searchTerm.trim() !== "" && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 animate-pulse">
+                  <i className="bi bi-search mr-1"></i>
+                  {totalMatches} {totalMatches === 1 ? "match" : "matches"} found
+                </span>
+              )}
+            </div>
             <p className="text-[11px] text-slate-500 mb-0">
               Visual parent-child reporting: Company ➔ Managers ➔ Team Leads ➔ Direct Reports
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setCollapsedNodes(new Set())}
-            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
-            title="Expand All Nodes"
-          >
-            <i className="bi bi-arrows-expand mr-1"></i>
-            <span>Expand All</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              const allKeys = new Set<string>();
-              managersTree.forEach((m) => {
-                allKeys.add(`mgr-${m.id}`);
-                Array.from(m.supervisors.values()).forEach((s) => {
-                  allKeys.add(`sup-${s.id}`);
+        {/* Canvas Toolbar: Expand/Collapse & Zoom/Pan Controls */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Zoom controls */}
+          <div className="flex items-center bg-slate-100/90 border border-slate-200 rounded-xl p-0.5 shadow-2xs">
+            <button
+              type="button"
+              onClick={handleZoomOut}
+              disabled={zoom <= 0.6}
+              className="w-7 h-7 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white flex items-center justify-center text-xs font-bold transition-all disabled:opacity-40 cursor-pointer"
+              title="Zoom Out"
+            >
+              <i className="bi bi-dash"></i>
+            </button>
+            <span className="px-2 text-[11px] font-mono font-bold text-slate-700 select-none">
+              {Math.round(zoom * 100)}%
+            </span>
+            <button
+              type="button"
+              onClick={handleZoomIn}
+              disabled={zoom >= 1.6}
+              className="w-7 h-7 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white flex items-center justify-center text-xs font-bold transition-all disabled:opacity-40 cursor-pointer"
+              title="Zoom In"
+            >
+              <i className="bi bi-plus"></i>
+            </button>
+            <div className="w-px h-4 bg-slate-300 mx-1"></div>
+            <button
+              type="button"
+              onClick={handleResetView}
+              className="px-2 h-7 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white flex items-center justify-center text-[10px] font-semibold transition-all cursor-pointer"
+              title="Reset Zoom & Pan"
+            >
+              Reset (100%)
+            </button>
+          </div>
+
+          {/* Branch Expand/Collapse */}
+          <div className="flex items-center gap-1.5 bg-slate-100/90 border border-slate-200 rounded-xl p-0.5 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setCollapsedNodes(new Set())}
+              className="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-slate-900 hover:bg-white transition-all cursor-pointer"
+              title="Expand All Nodes"
+            >
+              <i className="bi bi-arrows-expand mr-1"></i>
+              <span>Expand</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const allKeys = new Set<string>();
+                managersTree.forEach((m) => {
+                  allKeys.add(`mgr-${m.id}`);
+                  Array.from(m.supervisors.values()).forEach((s) => {
+                    allKeys.add(`sup-${s.id}`);
+                  });
                 });
-              });
-              setCollapsedNodes(allKeys);
-            }}
-            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
-            title="Collapse All Nodes"
-          >
-            <i className="bi bi-arrows-collapse mr-1"></i>
-            <span>Collapse All</span>
-          </button>
+                setCollapsedNodes(allKeys);
+              }}
+              className="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-slate-900 hover:bg-white transition-all cursor-pointer"
+              title="Collapse All Nodes"
+            >
+              <i className="bi bi-arrows-collapse mr-1"></i>
+              <span>Collapse</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Main Tree Canvas Container */}
-      <div className="overflow-x-auto min-h-[500px] pb-8 pt-2">
+      {/* Org Chart Legend */}
+      <div className="flex flex-wrap items-center gap-3 pb-3 mb-2 text-[10px] text-slate-500 border-b border-slate-100">
+        <span className="font-semibold text-slate-600">Hierarchy Levels:</span>
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-900 text-white font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span> Enterprise HQ
+        </span>
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-indigo-600"></span> Department Manager
+        </span>
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Team Lead / Supervisor
+        </span>
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white text-slate-700 border border-slate-200 font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Direct Report
+        </span>
+        <span className="ml-auto text-slate-400 italic">
+          💡 Click and drag empty space to pan canvas • Use + / - to zoom
+        </span>
+      </div>
+
+      {/* Main Tree Canvas Container with Pan/Zoom Transform */}
+      <div
+        ref={canvasRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        className={`overflow-auto min-h-[520px] pb-10 pt-4 bg-radial from-slate-50/80 via-white to-slate-50/40 rounded-xl select-none ${
+          isPanning ? "cursor-grabbing" : "cursor-grab"
+        }`}
+      >
         {managersTree.length === 0 ? (
           <div className="py-20 text-center max-w-sm mx-auto">
             <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-xl mx-auto mb-2">
@@ -154,7 +306,13 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
             </button>
           </div>
         ) : (
-          <div className="flex flex-col items-center min-w-max px-4">
+          <div
+            className="flex flex-col items-center min-w-max px-4 transition-transform duration-75 ease-out origin-top"
+            style={{
+              transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+              transformOrigin: "top center",
+            }}
+          >
             {/* Level 0: Enterprise Root Node */}
             <div className="flex flex-col items-center">
               <div className="px-5 py-3 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-xl border border-slate-800 flex items-center gap-3">
@@ -182,6 +340,10 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
               {managersTree.map((manager, mIdx) => {
                 const mgrKey = `mgr-${manager.id}`;
                 const isMgrCollapsed = collapsedNodes.has(mgrKey);
+                const isMgrMatch =
+                  searchTerm.trim() !== "" &&
+                  (manager.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    manager.department?.toLowerCase().includes(searchTerm.toLowerCase()));
                 const supervisorsList = Array.from(manager.supervisors.values());
                 const totalDirectReports = supervisorsList.reduce(
                   (sum, s) => sum + s.employees.length,
@@ -191,7 +353,13 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                 return (
                   <div key={manager.id} className="flex flex-col items-center relative">
                     {/* Manager Node Card */}
-                    <div className="w-64 p-3.5 rounded-2xl bg-white border border-indigo-100 shadow-md hover:shadow-lg transition-all flex flex-col gap-2 relative group border-t-4 border-t-indigo-600">
+                    <div
+                      className={`w-64 p-3.5 rounded-2xl bg-white transition-all flex flex-col gap-2 relative group border-t-4 ${
+                        isMgrMatch
+                          ? "border-amber-400 ring-2 ring-amber-300 shadow-lg border-t-amber-500"
+                          : "border-indigo-100 shadow-md hover:shadow-lg border-t-indigo-600"
+                      }`}
+                    >
                       <div className="flex items-center justify-between">
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
                           👔 Manager
@@ -245,11 +413,21 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                           {supervisorsList.map((sup) => {
                             const supKey = `sup-${sup.id}`;
                             const isSupCollapsed = collapsedNodes.has(supKey);
+                            const isSupMatch =
+                              searchTerm.trim() !== "" &&
+                              (sup.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                sup.department?.toLowerCase().includes(searchTerm.toLowerCase()));
 
                             return (
                               <div key={sup.id} className="flex flex-col items-center relative">
                                 {/* Supervisor Node Card */}
-                                <div className="w-56 p-3 rounded-2xl bg-white border border-emerald-100 shadow-sm hover:shadow-md transition-all flex flex-col gap-2 relative border-t-4 border-t-emerald-500">
+                                <div
+                                  className={`w-56 p-3 rounded-2xl bg-white transition-all flex flex-col gap-2 relative border-t-4 ${
+                                    isSupMatch
+                                      ? "border-amber-400 ring-2 ring-amber-300 shadow-md border-t-amber-500"
+                                      : "border-emerald-100 shadow-sm hover:shadow-md border-t-emerald-500"
+                                  }`}
+                                >
                                   <div className="flex items-center justify-between">
                                     <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                       👷 Team Lead
