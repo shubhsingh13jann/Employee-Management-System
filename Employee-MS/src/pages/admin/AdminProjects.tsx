@@ -4,6 +4,8 @@ import {
   AdminProjectsHeader,
   AdminProjectsKPIStats,
   AdminProjectsFilters,
+  AdminProjectsTable,
+  AdminProjectsGrid,
 } from "../../Components/admin/projects";
 
 export interface ProjectItem {
@@ -139,6 +141,37 @@ const AdminProjects: React.FC = () => {
     setStatusFilter("all");
   };
 
+  const handleUpdateStatus = async (projectId: number | string, newStatus: string) => {
+    try {
+      const res = await api.put(`/api/admin/projects/${projectId}/status`, { status: newStatus });
+      if (res.data.status) {
+        setMsg({ type: "success", text: `Initiative status successfully updated to ${newStatus}` });
+        fetchData();
+      }
+    } catch (err: any) {
+      setMsg({
+        type: "danger",
+        text: err.response?.data?.error || "Failed to update project status",
+      });
+    }
+  };
+
+  const handleDeleteProject = async (projectId: number | string) => {
+    if (!window.confirm("Are you sure you want to archive / delete this strategic initiative?")) return;
+    try {
+      const res = await api.delete(`/api/admin/projects/${projectId}`);
+      if (res.data.status) {
+        setMsg({ type: "success", text: "Strategic initiative removed successfully" });
+        fetchData();
+      }
+    } catch (err: any) {
+      setMsg({
+        type: "danger",
+        text: err.response?.data?.error || "Failed to delete project",
+      });
+    }
+  };
+
   const handleExportCSV = () => {
     // Generate CSV in Commit 4
     if (filteredProjects.length === 0) return;
@@ -263,12 +296,12 @@ const AdminProjects: React.FC = () => {
           onResetFilters={handleResetFilters}
         />
 
-        {/* View Mode Placeholder (Replaced in Commits 3 & 4 with Table, Grid, and Milestones) */}
+        {/* Dynamic View Rendering: Table vs Grid vs Milestones */}
         {loading ? (
           <div className="p-12 text-center bg-white rounded-xl border border-slate-200">
             <div className="inline-flex items-center gap-2 text-slate-500 text-xs font-medium">
               <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-              <span>Loading enterprise projects...</span>
+              <span>Loading enterprise initiatives...</span>
             </div>
           </div>
         ) : filteredProjects.length === 0 ? (
@@ -276,22 +309,34 @@ const AdminProjects: React.FC = () => {
             <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-lg mx-auto mb-2">
               <i className="bi bi-kanban"></i>
             </div>
-            <p className="font-bold text-slate-800 text-sm mb-1">No Projects Found</p>
-            <p className="text-xs text-slate-500 mb-3">No strategic initiatives match the current filter.</p>
+            <p className="font-bold text-slate-800 text-sm mb-1">No Strategic Initiatives Found</p>
+            <p className="text-xs text-slate-500 mb-3">No projects match the current filter criteria.</p>
             <button
               type="button"
               onClick={handleResetFilters}
-              className="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 font-semibold text-xs border border-indigo-200"
+              className="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 font-semibold text-xs border border-indigo-200 cursor-pointer"
             >
               Reset Filters
             </button>
           </div>
+        ) : viewMode === "grid" ? (
+          <AdminProjectsGrid
+            projects={filteredProjects}
+            onOpenEditModal={(proj) => {
+              // Edit modal wired in Commit 4
+            }}
+            onUpdateStatus={handleUpdateStatus}
+            onDeleteProject={handleDeleteProject}
+          />
         ) : (
-          <div className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-2xs">
-            <p className="text-xs font-semibold text-slate-700">
-              {filteredProjects.length} Initiatives Active in Filtered Roster
-            </p>
-          </div>
+          <AdminProjectsTable
+            projects={filteredProjects}
+            onOpenEditModal={(proj) => {
+              // Edit modal wired in Commit 4
+            }}
+            onUpdateStatus={handleUpdateStatus}
+            onDeleteProject={handleDeleteProject}
+          />
         )}
       </div>
     </div>
