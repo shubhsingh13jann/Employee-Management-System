@@ -189,9 +189,8 @@ const HierarchyMapping = () => {
   };
 
   return (
-    <div className="w-full min-h-screen p-3 sm:p-4.5 bg-slate-50/50">
-      <div className="max-w-7xl mx-auto space-y-2.5">
-        {/* Alert Notification */}
+    <div className="w-full space-y-3 sm:space-y-3.5">
+      {/* Alert Notification */}
         {msg.text && (
           <div
             className={`p-3 rounded-xl border flex items-center justify-between gap-3 text-xs sm:text-sm animate-in fade-in ${
@@ -340,7 +339,6 @@ const HierarchyMapping = () => {
             }}
           />
         )}
-      </div>
 
       {/* Modern Assignment Modal */}
       <AssignHierarchyModal
