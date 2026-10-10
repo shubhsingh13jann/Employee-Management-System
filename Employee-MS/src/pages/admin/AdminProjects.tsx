@@ -6,6 +6,7 @@ import {
   AdminProjectsFilters,
   AdminProjectsTable,
   AdminProjectsGrid,
+  CreateProjectModal,
 } from "../../Components/admin/projects";
 
 export interface ProjectItem {
@@ -54,7 +55,38 @@ const AdminProjects: React.FC = () => {
 
   // Modals / Drawers State (Wired in Commits 4 & 5)
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
+  const [editingProject, setEditingProject] = useState<ProjectItem | null>(null);
   const [showCapacityDrawer, setShowCapacityDrawer] = useState<boolean>(false);
+  const [saving, setSaving] = useState<boolean>(false);
+
+  const handleSaveProject = async (formData: any) => {
+    try {
+      setSaving(true);
+      if (editingProject) {
+        const res = await api.put(`/api/admin/projects/${editingProject.id}`, formData);
+        if (res.data.status) {
+          setMsg({ type: "success", text: "Strategic initiative updated successfully!" });
+          setShowCreateModal(false);
+          setEditingProject(null);
+          fetchData();
+        }
+      } else {
+        const res = await api.post("/api/admin/projects", formData);
+        if (res.data.status) {
+          setMsg({ type: "success", text: "Strategic initiative launched successfully!" });
+          setShowCreateModal(false);
+          fetchData();
+        }
+      }
+    } catch (err: any) {
+      setMsg({
+        type: "danger",
+        text: err.response?.data?.error || "Failed to save initiative",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -323,7 +355,8 @@ const AdminProjects: React.FC = () => {
           <AdminProjectsGrid
             projects={filteredProjects}
             onOpenEditModal={(proj) => {
-              // Edit modal wired in Commit 4
+              setEditingProject(proj);
+              setShowCreateModal(true);
             }}
             onUpdateStatus={handleUpdateStatus}
             onDeleteProject={handleDeleteProject}
@@ -332,12 +365,27 @@ const AdminProjects: React.FC = () => {
           <AdminProjectsTable
             projects={filteredProjects}
             onOpenEditModal={(proj) => {
-              // Edit modal wired in Commit 4
+              setEditingProject(proj);
+              setShowCreateModal(true);
             }}
             onUpdateStatus={handleUpdateStatus}
             onDeleteProject={handleDeleteProject}
           />
         )}
+
+        {/* Create / Edit Strategic Initiative Modal */}
+        <CreateProjectModal
+          isOpen={showCreateModal}
+          onClose={() => {
+            setShowCreateModal(false);
+            setEditingProject(null);
+          }}
+          onSubmit={handleSaveProject}
+          editingProject={editingProject}
+          departments={departments}
+          supervisors={supervisors}
+          saving={saving}
+        />
       </div>
     </div>
   );
