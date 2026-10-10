@@ -7,6 +7,8 @@ import {
   AdminProjectsTable,
   AdminProjectsGrid,
   CreateProjectModal,
+  AdminMilestoneTracker,
+  SupervisorCapacityDrawer,
 } from "../../Components/admin/projects";
 
 export interface ProjectItem {
@@ -351,6 +353,15 @@ const AdminProjects: React.FC = () => {
               Reset Filters
             </button>
           </div>
+        ) : viewMode === "milestones" ? (
+          <AdminMilestoneTracker
+            projects={filteredProjects}
+            onOpenEditModal={(proj) => {
+              setEditingProject(proj);
+              setShowCreateModal(true);
+            }}
+            onUpdateStatus={handleUpdateStatus}
+          />
         ) : viewMode === "grid" ? (
           <AdminProjectsGrid
             projects={filteredProjects}
@@ -385,6 +396,13 @@ const AdminProjects: React.FC = () => {
           departments={departments}
           supervisors={supervisors}
           saving={saving}
+        />
+
+        {/* Supervisor Capacity Heatmap Drawer */}
+        <SupervisorCapacityDrawer
+          isOpen={showCapacityDrawer}
+          onClose={() => setShowCapacityDrawer(false)}
+          onSelectSupervisorFilter={(supId) => setSelectedSupervisor(supId)}
         />
       </div>
     </div>
