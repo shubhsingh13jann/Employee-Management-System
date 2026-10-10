@@ -28,6 +28,12 @@ import {
   assignHierarchy,
   reassignHierarchy,
   unlinkHierarchy,
+  getAdminProjects,
+  createAdminProject,
+  updateAdminProjectStatus,
+  updateAdminProject,
+  deleteAdminProject,
+  getAdminSupervisorsCapacity,
 } from "../controllers/adminController.js";
 import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
 
@@ -71,5 +77,13 @@ router.get("/hierarchy", getHierarchy);
 router.post("/hierarchy", assignHierarchy);
 router.put("/hierarchy/reassign", reassignHierarchy);
 router.delete("/hierarchy/:employeeId", unlinkHierarchy);
+
+// Enterprise Projects & Strategic Milestones Routes (Section 5)
+router.get("/projects", getAdminProjects);
+router.post("/projects", createAdminProject);
+router.put("/projects/:id/status", updateAdminProjectStatus);
+router.put("/projects/:id", updateAdminProject);
+router.delete("/projects/:id", deleteAdminProject);
+router.get("/projects/supervisors-capacity", getAdminSupervisorsCapacity);
 
 export { router as adminRouter };

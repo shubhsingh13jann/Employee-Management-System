@@ -23,6 +23,7 @@ const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const Departments = lazy(() => import("./pages/admin/Departments"));
 const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
 const HierarchyMapping = lazy(() => import("./pages/admin/HierarchyMapping"));
+const AdminProjects = lazy(() => import("./pages/admin/AdminProjects"));
 
 // 💤 Lazy-Loaded Manager Pages
 const ManagerDashboard = lazy(() => import("./pages/manager/ManagerDashboard"));
@@ -97,6 +98,7 @@ const AnimatedAppContent = () => {
                 <Route path="departments" element={<Departments />} />
                 <Route path="users" element={<UserManagement />} />
                 <Route path="hierarchy" element={<HierarchyMapping />} />
+                <Route path="projects" element={<AdminProjects />} />
               </Route>
             </Route>
 

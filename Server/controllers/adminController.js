@@ -1594,3 +1594,315 @@ export const deleteUserDocument = async (req, res) => {
     return res.status(500).json({ status: false, error: "Failed to delete document" });
   }
 };
+
+// ============================================================================
+// 💼 ENTERPRISE PROJECTS & STRATEGIC MILESTONES (Section 5)
+// ============================================================================
+
+export const getAdminProjects = async (req, res) => {
+  try {
+    const { dept, status, search } = req.query;
+    let query = `
+      SELECT p.*,
+             d.name AS department_name, d.code AS department_code,
+             s.name AS supervisor_name, s.email AS supervisor_email, s.image_url AS supervisor_image,
+             creator.name AS creator_name,
+             COUNT(t.id) AS total_tasks,
+             SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) AS completed_tasks,
+             SUM(CASE WHEN t.status != 'completed' AND t.due_date < CURDATE() THEN 1 ELSE 0 END) AS overdue_tasks,
+             SUM(CASE WHEN t.status = 'in_progress' THEN 1 ELSE 0 END) AS in_progress_tasks
+      FROM projects p
+      LEFT JOIN departments d ON p.department_id = d.id
+      LEFT JOIN users s ON p.lead_supervisor_id = s.id
+      LEFT JOIN users creator ON p.created_by = creator.id
+      LEFT JOIN tasks t ON p.id = t.project_id
+      WHERE 1=1
+    `;
+    const params = [];
+    if (dept && dept !== "all") {
+      query += ` AND p.department_id = ?`;
+      params.push(dept);
+    }
+    if (status && status !== "all") {
+      query += ` AND p.status = ?`;
+      params.push(status);
+    }
+    if (search && search.trim()) {
+      const q = `%${search.trim()}%`;
+      query += ` AND (p.title LIKE ? OR p.description LIKE ? OR d.name LIKE ? OR s.name LIKE ?)`;
+      params.push(q, q, q, q);
+    }
+
+    query += ` GROUP BY p.id ORDER BY p.created_at DESC`;
+
+    const [projects] = await pool.query(query, params);
+
+    const formatted = projects.map((p) => {
+      const total = Number(p.total_tasks) || 0;
+      const completed = Number(p.completed_tasks) || 0;
+      const overdue = Number(p.overdue_tasks) || 0;
+      const progress =
+        total > 0
+          ? Math.round((completed / total) * 100)
+          : p.status === "completed"
+          ? 100
+          : 0;
+
+      let daysLeft = null;
+      let isOverdue = false;
+      if (p.target_date) {
+        const diffMs = new Date(p.target_date).getTime() - Date.now();
+        daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        if (daysLeft < 0 && p.status !== "completed") {
+          isOverdue = true;
+        }
+      }
+
+      let health = "healthy";
+      if (p.status === "completed") {
+        health = "completed";
+      } else if (isOverdue || overdue > 0) {
+        health = "critical";
+      } else if (daysLeft !== null && daysLeft <= 7 && progress < 70) {
+        health = "at_risk";
+      }
+
+      return {
+        ...p,
+        total_tasks: total,
+        completed_tasks: completed,
+        overdue_tasks: overdue,
+        in_progress_tasks: Number(p.in_progress_tasks) || 0,
+        progress_percentage: progress,
+        days_left: daysLeft,
+        is_overdue: isOverdue,
+        health,
+      };
+    });
+
+    return res.json({ status: true, projects: formatted });
+  } catch (err) {
+    console.error("getAdminProjects error:", err);
+    return res.status(500).json({ status: false, error: "Failed to fetch enterprise projects" });
+  }
+};
+
+export const createAdminProject = async (req, res) => {
+  try {
+    const {
+      title,
+      description = "",
+      department_id,
+      lead_supervisor_id,
+      status = "planning",
+      priority = "medium",
+      budget = 0.0,
+      start_date,
+      target_date,
+    } = req.body;
+
+    if (!title || !title.trim()) {
+      return res.status(400).json({ status: false, error: "Project title is required" });
+    }
+    if (!department_id) {
+      return res.status(400).json({ status: false, error: "Department is required" });
+    }
+
+    const [result] = await pool.query(
+      `INSERT INTO projects (title, description, department_id, created_by, lead_supervisor_id, status, priority, budget, start_date, target_date)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        title.trim(),
+        description.trim(),
+        department_id,
+        req.user?.id || 1,
+        lead_supervisor_id || null,
+        status,
+        priority,
+        Number(budget) || 0.0,
+        start_date || null,
+        target_date || null,
+      ]
+    );
+
+    const [newProj] = await pool.query(
+      `SELECT p.*, d.name AS department_name, s.name AS supervisor_name
+       FROM projects p
+       LEFT JOIN departments d ON p.department_id = d.id
+       LEFT JOIN users s ON p.lead_supervisor_id = s.id
+       WHERE p.id = ?`,
+      [result.insertId]
+    );
+
+    // Audit log
+    await pool.query(
+      `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+       VALUES (?, 'Enterprise Project Created', 'projects', NULL, ?, ?, ?)`,
+      [
+        req.user?.id || 1,
+        title.trim(),
+        `Created strategic initiative #${result.insertId}: ${title.trim()} (Dept ID: ${department_id})`,
+        req.user?.id || 1,
+      ]
+    );
+
+    return res.json({
+      status: true,
+      message: "Strategic initiative launched successfully",
+      project: newProj[0],
+    });
+  } catch (err) {
+    console.error("createAdminProject error:", err);
+    return res.status(500).json({ status: false, error: "Failed to create strategic initiative" });
+  }
+};
+
+export const updateAdminProjectStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!["planning", "active", "on_hold", "completed", "archived"].includes(status)) {
+      return res.status(400).json({ status: false, error: "Invalid status lifecycle value" });
+    }
+
+    const [existing] = await pool.query("SELECT * FROM projects WHERE id = ?", [id]);
+    if (existing.length === 0) {
+      return res.status(404).json({ status: false, error: "Project not found" });
+    }
+
+    await pool.query("UPDATE projects SET status = ? WHERE id = ?", [status, id]);
+
+    // Audit log
+    await pool.query(
+      `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+       VALUES (?, 'Project Lifecycle Updated', 'status', ?, ?, ?, ?)`,
+      [
+        req.user?.id || 1,
+        existing[0].status,
+        status,
+        `Transitioned initiative #${id} (${existing[0].title}) status from ${existing[0].status} to ${status}`,
+        req.user?.id || 1,
+      ]
+    );
+
+    return res.json({ status: true, message: `Project status transitioned to ${status}` });
+  } catch (err) {
+    console.error("updateAdminProjectStatus error:", err);
+    return res.status(500).json({ status: false, error: "Failed to update project status" });
+  }
+};
+
+export const updateAdminProject = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      title,
+      description = "",
+      department_id,
+      lead_supervisor_id,
+      priority = "medium",
+      budget = 0.0,
+      start_date,
+      target_date,
+    } = req.body;
+
+    const [existing] = await pool.query("SELECT * FROM projects WHERE id = ?", [id]);
+    if (existing.length === 0) {
+      return res.status(404).json({ status: false, error: "Project not found" });
+    }
+
+    await pool.query(
+      `UPDATE projects 
+       SET title = ?, description = ?, department_id = ?, lead_supervisor_id = ?, priority = ?, budget = ?, start_date = ?, target_date = ?
+       WHERE id = ?`,
+      [
+        title || existing[0].title,
+        description !== undefined ? description : existing[0].description,
+        department_id || existing[0].department_id,
+        lead_supervisor_id !== undefined ? lead_supervisor_id : existing[0].lead_supervisor_id,
+        priority || existing[0].priority,
+        budget !== undefined ? budget : existing[0].budget,
+        start_date || existing[0].start_date,
+        target_date || existing[0].target_date,
+        id,
+      ]
+    );
+
+    // Audit log
+    await pool.query(
+      `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+       VALUES (?, 'Project Details Updated', 'projects', ?, ?, ?, ?)`,
+      [
+        req.user?.id || 1,
+        existing[0].title,
+        title || existing[0].title,
+        `Updated strategic initiative #${id} metadata and parameters`,
+        req.user?.id || 1,
+      ]
+    );
+
+    return res.json({ status: true, message: "Project updated successfully" });
+  } catch (err) {
+    console.error("updateAdminProject error:", err);
+    return res.status(500).json({ status: false, error: "Failed to update project" });
+  }
+};
+
+export const deleteAdminProject = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [existing] = await pool.query("SELECT * FROM projects WHERE id = ?", [id]);
+    if (existing.length === 0) {
+      return res.status(404).json({ status: false, error: "Project not found" });
+    }
+
+    // Unlink tasks or mark deleted
+    await pool.query("DELETE FROM tasks WHERE project_id = ?", [id]);
+    await pool.query("DELETE FROM projects WHERE id = ?", [id]);
+
+    // Audit log
+    await pool.query(
+      `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+       VALUES (?, 'Project Deleted', 'projects', ?, NULL, ?, ?)`,
+      [
+        req.user?.id || 1,
+        existing[0].title,
+        `Removed strategic initiative #${id} (${existing[0].title}) and its associated tasks`,
+        req.user?.id || 1,
+      ]
+    );
+
+    return res.json({ status: true, message: "Strategic initiative deleted successfully" });
+  } catch (err) {
+    console.error("deleteAdminProject error:", err);
+    return res.status(500).json({ status: false, error: "Failed to delete project" });
+  }
+};
+
+export const getAdminSupervisorsCapacity = async (req, res) => {
+  try {
+    const [supervisors] = await pool.query(`
+      SELECT u.id, u.name, u.email, u.image_url, u.department_id,
+             d.name AS department_name, d.code AS department_code,
+             COUNT(DISTINCT p.id) AS active_projects_count,
+             COUNT(DISTINCT t.id) AS total_assigned_tasks,
+             SUM(CASE WHEN t.status != 'completed' THEN 1 ELSE 0 END) AS active_tasks_count,
+             SUM(CASE WHEN t.status != 'completed' AND t.due_date < CURDATE() THEN 1 ELSE 0 END) AS overdue_tasks_count
+      FROM users u
+      LEFT JOIN departments d ON u.department_id = d.id
+      LEFT JOIN projects p ON p.lead_supervisor_id = u.id AND p.status IN ('planning', 'active')
+      LEFT JOIN tasks t ON (t.assigned_to = u.id OR t.assigned_by = u.id)
+      WHERE u.role = 'supervisor'
+      GROUP BY u.id
+      ORDER BY active_projects_count DESC, active_tasks_count DESC
+    `);
+
+    return res.json({ status: true, supervisors });
+  } catch (err) {
+    console.error("getAdminSupervisorsCapacity error:", err);
+    return res.status(500).json({ status: false, error: "Failed to fetch supervisors capacity" });
+  }
+};
+

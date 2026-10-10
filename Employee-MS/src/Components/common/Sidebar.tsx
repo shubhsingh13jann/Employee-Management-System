@@ -59,6 +59,12 @@ const Sidebar = () => {
                 <span>Team Hierarchy</span>
               </NavLink>
             </li>
+            <li className="nav-item mb-1">
+              <NavLink to="/admin/projects" className={linkClass}>
+                <i className="bi bi-kanban-fill text-sm"></i>
+                <span>Projects & Milestones</span>
+              </NavLink>
+            </li>
           </>
         );
 
