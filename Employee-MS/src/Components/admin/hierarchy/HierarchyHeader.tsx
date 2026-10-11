@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 interface HierarchyHeaderProps {
   totalCount: number;
@@ -17,6 +17,23 @@ export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
   viewMode,
   onViewModeChange,
 }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
   return (
     <div className="relative px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl bg-gradient-to-r from-[#070d28] via-[#0d164d] to-[#1c1252] border border-indigo-500/30 shadow-xl text-white flex flex-col md:flex-row md:items-center justify-between gap-3 shrink-0 select-none mb-3">
       {/* Micro-Lightning Wave Effect Background */}
@@ -153,27 +170,55 @@ export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
           </button>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2">
+        {/* Enlarged Triple Line Button & Consolidated Dropdown Menu (Matching User Directory standard) */}
+        <div className="relative" ref={menuRef}>
           <button
             type="button"
-            onClick={onRefresh}
-            disabled={isRefreshing}
-            className="h-9 px-2.5 sm:px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-xs text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-            title="Refresh Hierarchy Data"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer shadow-xs ${
+              isMenuOpen
+                ? "bg-indigo-600 text-white border border-indigo-400/50 shadow-indigo-500/30 ring-2 ring-indigo-400/30"
+                : "bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-xs"
+            }`}
+            title="Hierarchy Management & Actions Menu"
+            aria-label="Toggle Actions Menu"
           >
-            <i className={`bi bi-arrow-clockwise text-xs ${isRefreshing ? "animate-spin" : ""}`}></i>
-            <span className="hidden sm:inline">Refresh</span>
+            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
+            </svg>
           </button>
 
-          <button
-            type="button"
-            onClick={onOpenAssignModal}
-            className="h-9 px-3 sm:px-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-all shadow-md shadow-indigo-600/30 flex items-center gap-1.5 cursor-pointer active:scale-95"
-          >
-            <i className="bi bi-person-plus-fill text-xs"></i>
-            <span>Assign Team</span>
-          </button>
+          {/* Floating Dropdown Menu */}
+          {isMenuOpen && (
+            <div className="absolute right-0 top-full mt-2 w-52 rounded-xl bg-slate-900/95 backdrop-blur-xl border border-indigo-500/30 shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 text-white">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  onOpenAssignModal();
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer shadow-sm text-left"
+              >
+                <i className="bi bi-person-plus-fill font-bold text-xs"></i>
+                <span>Assign Team Member</span>
+              </button>
+
+              <div className="h-px bg-white/10 my-1.5"></div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  onRefresh();
+                }}
+                disabled={isRefreshing}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer disabled:opacity-50 text-left"
+              >
+                <i className={`bi bi-arrow-clockwise text-indigo-400 text-sm ${isRefreshing ? "animate-spin" : ""}`}></i>
+                <span>Refresh Hierarchy</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
