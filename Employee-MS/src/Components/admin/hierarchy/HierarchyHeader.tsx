@@ -35,7 +35,7 @@ export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
   }, [isMenuOpen]);
 
   return (
-    <div className="relative px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl bg-gradient-to-r from-[#070d28] via-[#0d164d] to-[#1c1252] border border-indigo-500/30 shadow-xl text-white flex flex-col md:flex-row md:items-center justify-between gap-3 shrink-0 select-none mb-3">
+    <div className={`relative px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl bg-gradient-to-r from-[#070d28] via-[#0d164d] to-[#1c1252] border border-indigo-500/30 shadow-xl text-white flex flex-col md:flex-row md:items-center justify-between gap-3 shrink-0 select-none mb-3 ${isMenuOpen ? "z-40" : "z-20"}`}>
       {/* Micro-Lightning Wave Effect Background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl z-0">
         <svg
@@ -171,7 +171,7 @@ export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
         </div>
 
         {/* Enlarged Triple Line Button & Consolidated Dropdown Menu (Matching User Directory standard) */}
-        <div className="relative" ref={menuRef}>
+        <div className="relative z-50" ref={menuRef}>
           <button
             type="button"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -190,7 +190,7 @@ export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
 
           {/* Floating Dropdown Menu */}
           {isMenuOpen && (
-            <div className="absolute right-0 top-full mt-2 w-56 sm:w-60 min-w-[210px] rounded-xl bg-slate-900/95 backdrop-blur-xl border border-indigo-500/30 shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 text-white">
+            <div className="absolute right-0 top-full mt-2 w-56 sm:w-60 min-w-[210px] rounded-xl bg-slate-900 border border-indigo-500/50 shadow-2xl shadow-black/80 p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 text-white">
               <button
                 type="button"
                 onClick={() => {
