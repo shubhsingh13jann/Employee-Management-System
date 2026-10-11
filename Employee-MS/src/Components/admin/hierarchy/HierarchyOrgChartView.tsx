@@ -52,22 +52,54 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
   const [dropTargetKey, setDropTargetKey] = useState<string | null>(null);
 
   // Interactive Canvas Zoom & Pan State
-  const [zoom, setZoom] = useState<number>(1);
+  const [zoom, setZoom] = useState<number>(0.85);
   const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState<boolean>(false);
   const [panStart, setPanStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const canvasRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const handleZoomIn = () => setZoom((prev) => Math.min(1.5, Number((prev + 0.1).toFixed(2))));
-  const handleZoomOut = () => setZoom((prev) => Math.max(0.6, Number((prev - 0.1).toFixed(2))));
+  const handleZoomOut = () => setZoom((prev) => Math.max(0.35, Number((prev - 0.1).toFixed(2))));
   const handleResetView = () => {
-    setZoom(1);
+    setZoom(0.85);
     setPan({ x: 0, y: 0 });
+  };
+
+  const handleFitToScreen = () => {
+    if (!canvasRef.current || !contentRef.current) return;
+    const canvasRect = canvasRef.current.getBoundingClientRect();
+    const contentWidth = contentRef.current.scrollWidth;
+    const contentHeight = contentRef.current.scrollHeight;
+
+    if (contentWidth > 0 && canvasRect.width > 0) {
+      const paddingX = 48;
+      const paddingY = 48;
+      const scaleX = (canvasRect.width - paddingX) / contentWidth;
+      const scaleY = (canvasRect.height - paddingY) / contentHeight;
+      const optimalScale = Math.min(1.0, Math.max(0.35, Math.min(scaleX, scaleY > 0 ? scaleY : scaleX)));
+      setZoom(Number(optimalScale.toFixed(2)));
+      setPan({ x: 0, y: 0 });
+    }
+  };
+
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      const zoomDelta = e.deltaY < 0 ? 0.05 : -0.05;
+      setZoom((prev) => Math.min(1.5, Math.max(0.35, Number((prev + zoomDelta).toFixed(2)))));
+    }
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
-    if (target.closest("button") || target.closest("input") || target.closest(".org-card-clickable")) {
+    if (
+      target.closest("button") ||
+      target.closest("input") ||
+      target.closest(".org-card-clickable") ||
+      target.closest("[draggable='true']")
+    ) {
       return;
     }
     setIsPanning(true);
@@ -155,6 +187,14 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
     });
   }, [searchTerm, managersTree]);
 
+  // Auto-fit to screen on load and when tree structure updates
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleFitToScreen();
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [mappings.length, managersTree.length]);
+
   // Search match statistics
   const totalMatches = useMemo(() => {
     if (!searchTerm.trim()) return 0;
@@ -203,12 +243,41 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
 
         {/* Canvas Toolbar: Expand/Collapse & Zoom/Pan Controls */}
         <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+          {/* Auto-fit and expand canvas */}
+          <div className="flex items-center gap-1 bg-slate-100 border border-slate-200 rounded-lg p-0.5 shadow-2xs">
+            <button
+              type="button"
+              onClick={handleFitToScreen}
+              className="px-2 py-1 rounded-md text-[10px] font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+              title="Auto-Fit Org Chart to Viewport"
+            >
+              <i className="bi bi-aspect-ratio text-xs"></i>
+              <span>Fit Screen</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsExpanded((prev) => !prev);
+                setTimeout(handleFitToScreen, 120);
+              }}
+              className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-all cursor-pointer flex items-center gap-1 shadow-2xs ${
+                isExpanded
+                  ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                  : "text-slate-700 bg-white hover:bg-slate-50 border border-slate-200"
+              }`}
+              title={isExpanded ? "Switch to Compact View" : "Expand Full Viewport Canvas"}
+            >
+              <i className={`bi ${isExpanded ? "bi-fullscreen-exit" : "bi-arrows-angle-expand"} text-xs`}></i>
+              <span>{isExpanded ? "Compact" : "Expand"}</span>
+            </button>
+          </div>
+
           {/* Zoom controls */}
           <div className="flex items-center bg-slate-100 border border-slate-200 rounded-lg p-0.5 shadow-2xs">
             <button
               type="button"
               onClick={handleZoomOut}
-              disabled={zoom <= 0.6}
+              disabled={zoom <= 0.35}
               className="w-6 h-6 rounded-md text-slate-600 hover:text-slate-900 hover:bg-white flex items-center justify-center text-xs font-bold transition-all disabled:opacity-40 cursor-pointer"
               title="Zoom Out"
             >
@@ -237,7 +306,7 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
             </button>
           </div>
 
-          {/* Branch Expand/Collapse */}
+          {/* Branch Expand/Collapse / Depth Filter */}
           <div className="flex items-center gap-1 bg-slate-100 border border-slate-200 rounded-lg p-0.5 shadow-2xs">
             <button
               type="button"
@@ -246,7 +315,7 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
               title="Expand All Nodes"
             >
               <i className="bi bi-arrows-expand mr-1"></i>
-              <span>Expand</span>
+              <span>Expand All</span>
             </button>
             <button
               type="button"
@@ -377,7 +446,10 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className={`overflow-auto min-h-[380px] max-h-[560px] pb-8 pt-3 bg-slate-50/50 rounded-xl select-none ${
+        onWheel={handleWheel}
+        className={`overflow-hidden relative min-h-[400px] ${
+          isExpanded ? "h-[740px]" : "h-[540px]"
+        } pb-10 pt-4 bg-slate-50/70 border border-slate-200/90 rounded-xl select-none ${
           isPanning ? "cursor-grabbing" : "cursor-grab"
         }`}
       >
@@ -400,7 +472,8 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
           </div>
         ) : (
           <div
-            className="flex flex-col items-center min-w-max px-4 transition-transform duration-75 ease-out origin-top"
+            ref={contentRef}
+            className="flex flex-col items-center min-w-max px-8 transition-transform duration-75 ease-out origin-top"
             style={{
               transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
               transformOrigin: "top center",
@@ -425,12 +498,12 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
               </div>
 
               {/* Vertical connector line below Root */}
-              <div className="w-0.5 h-5 bg-indigo-300"></div>
+              <div className="w-0.5 h-5 bg-indigo-400"></div>
             </div>
 
-            {/* Level 1: Managers Tier (Horizontal Row) */}
+            {/* Level 1: Managers Tier (Horizontal Row with Branching Connectors) */}
             <div className="flex items-start justify-center gap-8 relative pt-1">
-              {managersTree.map((manager) => {
+              {managersTree.map((manager, mIdx) => {
                 const mgrKey = `mgr-${manager.id}`;
                 const isMgrCollapsed = collapsedNodes.has(mgrKey);
                 const supervisorsList = Array.from(manager.supervisors.values());
@@ -448,6 +521,25 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
 
                 return (
                   <div key={manager.id} className="flex flex-col items-center relative">
+                    {/* Horizontal branching connector line from Root to Managers */}
+                    {managersTree.length > 1 ? (
+                      <div className="w-full flex items-center h-4 relative">
+                        <div
+                          className={`w-1/2 h-0.5 ${
+                            mIdx === 0 ? "bg-transparent" : "bg-indigo-300"
+                          }`}
+                        ></div>
+                        <div className="absolute left-1/2 -translate-x-1/2 top-0 h-4 w-0.5 bg-indigo-300"></div>
+                        <div
+                          className={`w-1/2 h-0.5 ${
+                            mIdx === managersTree.length - 1 ? "bg-transparent" : "bg-indigo-300"
+                          }`}
+                        ></div>
+                      </div>
+                    ) : (
+                      <div className="w-0.5 h-4 bg-indigo-300"></div>
+                    )}
+
                     {/* Manager Node Card (Drop target for reallocation) */}
                     <div
                       onDragOver={(e) => {
@@ -540,7 +632,7 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                         <div className="w-0.5 h-4 bg-slate-300"></div>
 
                         <div className="flex items-start justify-center gap-5 relative">
-                          {supervisorsList.map((sup) => {
+                          {supervisorsList.map((sup, sIdx) => {
                             const supKey = `sup-${sup.id}`;
                             const isSupCollapsed = collapsedNodes.has(supKey);
                             const isSupMatch =
@@ -551,6 +643,27 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
 
                             return (
                               <div key={sup.id} className="flex flex-col items-center relative">
+                                {/* Horizontal branching connector from Manager to Supervisors */}
+                                {supervisorsList.length > 1 ? (
+                                  <div className="w-full flex items-center h-4 relative">
+                                    <div
+                                      className={`w-1/2 h-0.5 ${
+                                        sIdx === 0 ? "bg-transparent" : "bg-slate-300"
+                                      }`}
+                                    ></div>
+                                    <div className="absolute left-1/2 -translate-x-1/2 top-0 h-4 w-0.5 bg-slate-300"></div>
+                                    <div
+                                      className={`w-1/2 h-0.5 ${
+                                        sIdx === supervisorsList.length - 1
+                                          ? "bg-transparent"
+                                          : "bg-slate-300"
+                                      }`}
+                                    ></div>
+                                  </div>
+                                ) : (
+                                  <div className="w-0.5 h-4 bg-slate-300"></div>
+                                )}
+
                                 {/* Supervisor Node Card (Drop target for reporting line reallocation) */}
                                 <div
                                   onDragOver={(e) => {
@@ -640,10 +753,16 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
 
                                 {/* Level 3: Direct Reports (Staff Members with Draggable reallocation) */}
                                 {!isSupCollapsed && sup.employees.length > 0 && (
-                                  <div className="flex flex-col items-center">
-                                    <div className="w-0.5 h-4 bg-slate-300"></div>
+                                  <div className="flex flex-col items-center pt-1">
+                                    <div className="w-0.5 h-4 bg-emerald-400"></div>
 
-                                    <div className="flex flex-col gap-1.5 items-center">
+                                    <div
+                                      className={`grid gap-1.5 items-center ${
+                                        sup.employees.length > 3
+                                          ? "grid-cols-1 sm:grid-cols-2 w-96"
+                                          : "grid-cols-1 w-48"
+                                      }`}
+                                    >
                                       {sup.employees.map((emp) => {
                                         const isSearchMatch =
                                           searchTerm.trim() !== "" &&
