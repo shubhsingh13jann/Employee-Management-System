@@ -451,6 +451,17 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
         </div>
       )}
 
+      {/* No Search Matches Banner */}
+      {searchTerm.trim() !== "" && totalMatches === 0 && (
+        <div className="mb-2.5 px-3 py-2 rounded-xl bg-amber-50/90 border border-amber-200 text-amber-900 text-xs flex items-center justify-between gap-2 shadow-2xs">
+          <div className="flex items-center gap-2">
+            <i className="bi bi-search text-amber-600"></i>
+            <span>No hierarchy reporting lines found matching &quot;{searchTerm}&quot;</span>
+          </div>
+          <span className="text-[10px] text-amber-700">Try clearing the search filter</span>
+        </div>
+      )}
+
       {/* Main Tree Canvas Container with Pan/Zoom Transform */}
       <div
         ref={canvasRef}
@@ -806,9 +817,10 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                                               isBeingDragged
                                                 ? "opacity-30 scale-95 border-dashed border-indigo-500 bg-indigo-50/50"
                                                 : isSearchMatch
-                                                ? "bg-amber-50 border-amber-400 ring-2 ring-amber-300 shadow-md"
+                                                ? "bg-amber-50 border-amber-400 ring-2 ring-amber-300 shadow-md animate-pulse"
                                                 : "bg-white border-slate-200 hover:border-slate-300 hover:shadow-xs"
                                             }`}
+                                            title={`${emp.employee_name} (${emp.employee_email}) • Lead: ${sup.name} • Manager: ${manager.name} • Dept: ${emp.department_name || "General"}`}
                                           >
                                             <div className="flex items-center gap-1.5 min-w-0">
                                               <span
