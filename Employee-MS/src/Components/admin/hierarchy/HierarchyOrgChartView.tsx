@@ -307,33 +307,45 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
           </div>
 
           {/* Branch Expand/Collapse / Depth Filter */}
-          <div className="flex items-center gap-1 bg-slate-100 border border-slate-200 rounded-lg p-0.5 shadow-2xs">
+          <div className="flex items-center gap-0.5 bg-slate-100 border border-slate-200 rounded-lg p-0.5 shadow-2xs text-[10px]">
             <button
               type="button"
               onClick={() => setCollapsedNodes(new Set())}
-              className="px-2 py-0.5 rounded-md text-[10px] font-semibold text-slate-600 hover:text-slate-900 hover:bg-white transition-all cursor-pointer"
-              title="Expand All Nodes"
+              className="px-2 py-0.5 rounded text-slate-600 hover:text-slate-900 hover:bg-white font-semibold transition-all cursor-pointer flex items-center gap-1"
+              title="Expand All Nodes (All Staff)"
             >
-              <i className="bi bi-arrows-expand mr-1"></i>
-              <span>Expand All</span>
+              <i className="bi bi-arrows-expand text-[10px]"></i>
+              <span>All Staff</span>
             </button>
             <button
               type="button"
               onClick={() => {
-                const allKeys = new Set<string>();
+                const supKeys = new Set<string>();
                 managersTree.forEach((m) => {
-                  allKeys.add(`mgr-${m.id}`);
                   Array.from(m.supervisors.values()).forEach((s) => {
-                    allKeys.add(`sup-${s.id}`);
+                    supKeys.add(`sup-${s.id}`);
                   });
                 });
-                setCollapsedNodes(allKeys);
+                setCollapsedNodes(supKeys);
               }}
-              className="px-2 py-0.5 rounded-md text-[10px] font-semibold text-slate-600 hover:text-slate-900 hover:bg-white transition-all cursor-pointer"
-              title="Collapse All Nodes"
+              className="px-2 py-0.5 rounded text-slate-600 hover:text-slate-900 hover:bg-white font-semibold transition-all cursor-pointer"
+              title="Show Managers and Leads Only"
             >
-              <i className="bi bi-arrows-collapse mr-1"></i>
-              <span>Collapse</span>
+              Leads
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const mgrKeys = new Set<string>();
+                managersTree.forEach((m) => {
+                  mgrKeys.add(`mgr-${m.id}`);
+                });
+                setCollapsedNodes(mgrKeys);
+              }}
+              className="px-2 py-0.5 rounded text-slate-600 hover:text-slate-900 hover:bg-white font-semibold transition-all cursor-pointer"
+              title="Show Managers Only"
+            >
+              Managers
             </button>
           </div>
         </div>
@@ -861,6 +873,32 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
             </div>
           </div>
         )}
+
+        {/* Mini HUD Info Overlay (Telemetry bottom right) */}
+        <div className="absolute bottom-2.5 right-2.5 z-10 flex items-center gap-2 bg-white/90 backdrop-blur-xs border border-slate-200/90 rounded-lg px-2.5 py-1 text-[10px] text-slate-600 shadow-sm pointer-events-none select-none">
+          <span className="flex items-center gap-1 font-semibold text-slate-800">
+            <i className="bi bi-diagram-3 text-indigo-600"></i>
+            <span>{managersTree.length} Depts</span>
+          </span>
+          <span className="text-slate-300">•</span>
+          <span className="font-semibold text-emerald-700">
+            {managersTree.reduce((sum, m) => sum + m.supervisors.size, 0)} Leads
+          </span>
+          <span className="text-slate-300">•</span>
+          <span className="font-semibold text-indigo-700">
+            {totalEmployeesInTree} Mapped Staff
+          </span>
+          <span className="text-slate-300">•</span>
+          <span className="font-mono text-slate-500 font-bold">
+            {Math.round(zoom * 100)}%
+          </span>
+        </div>
+
+        {/* Pan & Drag Navigation Hint (Bottom left) */}
+        <div className="absolute bottom-2.5 left-2.5 z-10 flex items-center gap-1.5 bg-white/80 backdrop-blur-xs border border-slate-200/70 rounded-lg px-2 py-0.5 text-[9px] text-slate-500 shadow-2xs pointer-events-none select-none hidden sm:flex">
+          <i className="bi bi-arrows-move text-slate-400"></i>
+          <span>Click & drag empty canvas to pan • Ctrl + Scroll to zoom</span>
+        </div>
       </div>
     </div>
   );
