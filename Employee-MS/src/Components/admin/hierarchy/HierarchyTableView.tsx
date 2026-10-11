@@ -83,7 +83,7 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
               <th className="py-2.5 px-3 text-center min-w-[120px]">
                 Department
               </th>
-              <th className="py-2.5 px-3 text-right min-w-[110px]">
+              <th className="py-2.5 px-4 text-left min-w-[120px]">
                 Assigned On
               </th>
               <th className="py-2.5 px-3 text-center w-20">
@@ -187,7 +187,7 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                         </td>
 
                         {/* Assigned Date */}
-                        <td className="py-2.5 px-3 text-right text-[11px] text-slate-500 whitespace-nowrap">
+                        <td className="py-2.5 px-4 text-left text-[11px] text-slate-600 font-medium whitespace-nowrap">
                           {item.assigned_at
                             ? new Date(item.assigned_at).toLocaleDateString("en-US", {
                                 month: "short",
@@ -339,7 +339,7 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                       </td>
 
                       {/* Status / Pending */}
-                      <td className="py-2.5 px-3 text-right text-[11px] font-medium text-amber-600 whitespace-nowrap">
+                      <td className="py-2.5 px-4 text-left text-[11px] font-medium text-amber-600 whitespace-nowrap">
                         Pending Setup
                       </td>
 
