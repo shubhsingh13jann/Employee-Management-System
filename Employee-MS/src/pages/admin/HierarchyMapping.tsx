@@ -7,6 +7,7 @@ import {
   HierarchyFilters,
   HierarchyTableView,
   HierarchyOrgChartView,
+  HierarchySquadCardsView,
   AssignHierarchyModal,
   ReassignConfirmModal,
   UnlinkConfirmModal,
@@ -302,6 +303,35 @@ const HierarchyMapping = () => {
                 employee: payload.employee,
                 targetSupervisor: payload.targetSupervisor || null,
                 targetManager: payload.targetManager || null,
+              });
+            }}
+          />
+        ) : viewMode === "squad" ? (
+          <HierarchySquadCardsView
+            mappings={filteredHierarchy}
+            unassignedStaff={filteredUnassigned}
+            searchTerm={searchTerm}
+            onOpenAssignModal={(empId, supId) => {
+              if (empId) {
+                setForm((prev) => ({ ...prev, employee_id: String(empId) }));
+              }
+              if (supId) {
+                setForm((prev) => ({ ...prev, supervisor_id: String(supId) }));
+              }
+              setShowModal(true);
+            }}
+            onInitiateReassign={(emp) => {
+              setReassignState({
+                isOpen: true,
+                employee: emp,
+                targetSupervisor: null,
+                targetManager: null,
+              });
+            }}
+            onInitiateUnlink={(emp) => {
+              setUnlinkState({
+                isOpen: true,
+                employee: emp,
               });
             }}
           />

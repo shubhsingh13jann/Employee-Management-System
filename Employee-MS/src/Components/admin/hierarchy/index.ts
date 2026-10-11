@@ -7,3 +7,4 @@ export * from "./AssignHierarchyModal";
 export * from "./HierarchyOrgChartView";
 export * from "./ReassignConfirmModal";
 export * from "./UnlinkConfirmModal";
+export * from "./HierarchySquadCardsView";
