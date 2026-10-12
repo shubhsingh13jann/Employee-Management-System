@@ -525,7 +525,7 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
             </div>
 
             {/* Level 1: Managers Tier (Horizontal Row with Branching Connectors) */}
-            <div className="flex items-start justify-center gap-8 relative pt-1">
+            <div className="flex items-start justify-center relative pt-1">
               {managersTree.map((manager, mIdx) => {
                 const mgrKey = `mgr-${manager.id}`;
                 const isMgrCollapsed = collapsedNodes.has(mgrKey);
@@ -543,7 +543,7 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                 const isMgrDropTarget = dropTargetKey === mgrKey;
 
                 return (
-                  <div key={manager.id} className="flex flex-col items-center relative">
+                  <div key={manager.id} className="flex flex-col items-center relative px-6 sm:px-8">
                     {/* Horizontal branching connector line from Root to Managers */}
                     {managersTree.length > 1 ? (
                       <div className="w-full flex items-center h-4 relative">
@@ -591,7 +591,7 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                           console.error("Drop error", err);
                         }
                       }}
-                      className={`w-56 p-2.5 rounded-xl bg-white transition-all flex flex-col gap-1.5 relative group border-t-4 ${
+                      className={`w-64 sm:w-72 p-3 rounded-xl bg-white transition-all flex flex-col gap-2 relative group border-t-4 ${
                         isMgrDropTarget
                           ? "ring-4 ring-indigo-400 border-2 border-dashed border-indigo-600 bg-indigo-50/90 scale-105 shadow-xl"
                           : isMgrMatch
@@ -605,25 +605,25 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                           <span>Drop to Reassign Manager</span>
                         </div>
                       )}
-                      <div className="flex items-center justify-between">
-                        <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                      <div className="flex items-center justify-between gap-1.5">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0">
                           👔 Manager
                         </span>
-                        <span className="text-[9px] font-medium text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded-full">
-                          {manager.department}
+                        <span className="text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full truncate max-w-[130px]" title={manager.department}>
+                          {manager.department || "General"}
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-600 to-indigo-800 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-indigo-800 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
                           {manager.name ? manager.name.charAt(0) : "M"}
                         </div>
-                        <div className="min-w-0">
-                          <h4 className="font-bold text-slate-900 text-xs mb-0 truncate">
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-bold text-slate-900 text-xs sm:text-sm mb-0 truncate" title={manager.name}>
                             {manager.name}
                           </h4>
                           <span className="text-[10px] text-slate-400 block truncate">
-                            {supervisorsList.length} Team Leads • {totalDirectReports} Staff
+                            {supervisorsList.length} {supervisorsList.length === 1 ? "Team Lead" : "Team Leads"} • {totalDirectReports} Staff
                           </span>
                         </div>
                       </div>
@@ -633,7 +633,7 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                         <button
                           type="button"
                           onClick={() => toggleNodeCollapse(mgrKey)}
-                          className="mt-0.5 w-full py-0.5 rounded-md bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 border border-slate-200 text-[10px] font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                          className="mt-0.5 w-full py-1 px-2 rounded-md bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 border border-slate-200 text-[10px] font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
                         >
                           <i
                             className={`bi ${
@@ -642,7 +642,7 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                           ></i>
                           <span>
                             {isMgrCollapsed
-                              ? `Show ${supervisorsList.length} Leads`
+                              ? `Show ${supervisorsList.length} ${supervisorsList.length === 1 ? "Lead" : "Leads"}`
                               : "Collapse Squads"}
                           </span>
                         </button>
@@ -651,10 +651,10 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
 
                     {/* Level 2: Supervisors Connector and Branch */}
                     {!isMgrCollapsed && supervisorsList.length > 0 && (
-                      <div className="flex flex-col items-center">
+                      <div className="flex flex-col items-center w-full">
                         <div className="w-0.5 h-4 bg-slate-300"></div>
 
-                        <div className="flex items-start justify-center gap-5 relative">
+                        <div className="flex items-start justify-center relative">
                           {supervisorsList.map((sup, sIdx) => {
                             const supKey = `sup-${sup.id}`;
                             const isSupCollapsed = collapsedNodes.has(supKey);
@@ -665,7 +665,7 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                             const isSupDropTarget = dropTargetKey === supKey;
 
                             return (
-                              <div key={sup.id} className="flex flex-col items-center relative">
+                              <div key={sup.id} className="flex flex-col items-center relative px-3 sm:px-4">
                                 {/* Horizontal branching connector from Manager to Supervisors */}
                                 {supervisorsList.length > 1 ? (
                                   <div className="w-full flex items-center h-4 relative">
@@ -716,7 +716,7 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                                       console.error("Drop error", err);
                                     }
                                   }}
-                                  className={`w-50 p-2.5 rounded-xl bg-white transition-all flex flex-col gap-1.5 relative border-t-4 ${
+                                  className={`w-56 sm:w-60 p-3 rounded-xl bg-white transition-all flex flex-col gap-2 relative border-t-4 ${
                                     isSupDropTarget
                                       ? "ring-4 ring-emerald-400 border-2 border-dashed border-emerald-600 bg-emerald-50/90 scale-105 shadow-xl"
                                       : isSupMatch
@@ -730,25 +730,25 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                                       <span>Drop to Assign Lead</span>
                                     </div>
                                   )}
-                                  <div className="flex items-center justify-between">
-                                    <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                  <div className="flex items-center justify-between gap-1.5">
+                                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
                                       👷 Team Lead
                                     </span>
-                                    <span className="text-[9px] font-semibold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                                      {sup.employees.length} reports
+                                    <span className="text-[9px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 shrink-0">
+                                      {sup.employees.length} {sup.employees.length === 1 ? "report" : "reports"}
                                     </span>
                                   </div>
 
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                                  <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
                                       {sup.name ? sup.name.charAt(0) : "S"}
                                     </div>
-                                    <div className="min-w-0">
-                                      <h5 className="font-bold text-slate-900 text-xs mb-0 truncate">
+                                    <div className="min-w-0 flex-1">
+                                      <h5 className="font-bold text-slate-900 text-xs sm:text-[13px] mb-0 truncate" title={sup.name}>
                                         {sup.name}
                                       </h5>
-                                      <span className="text-[10px] text-slate-400 block truncate">
-                                        {sup.department}
+                                      <span className="text-[10px] text-slate-400 block truncate" title={sup.department}>
+                                        {sup.department || "General"}
                                       </span>
                                     </div>
                                   </div>
@@ -758,7 +758,7 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                                     <button
                                       type="button"
                                       onClick={() => toggleNodeCollapse(supKey)}
-                                      className="mt-0.5 w-full py-0.5 rounded-md bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 border border-slate-200 text-[10px] font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                                      className="mt-0.5 w-full py-1 px-2.5 rounded-md bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 border border-slate-200 text-[10px] font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
                                     >
                                       <i
                                         className={`bi ${
@@ -776,14 +776,14 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
 
                                 {/* Level 3: Direct Reports (Staff Members with Draggable reallocation) */}
                                 {!isSupCollapsed && sup.employees.length > 0 && (
-                                  <div className="flex flex-col items-center pt-1">
+                                  <div className="flex flex-col items-center pt-1 w-full">
                                     <div className="w-0.5 h-4 bg-emerald-400"></div>
 
                                     <div
-                                      className={`grid gap-1.5 items-center ${
+                                      className={`grid gap-2 items-center ${
                                         sup.employees.length > 3
-                                          ? "grid-cols-1 sm:grid-cols-2 w-96"
-                                          : "grid-cols-1 w-48"
+                                          ? "grid-cols-1 sm:grid-cols-2"
+                                          : "grid-cols-1"
                                       }`}
                                     >
                                       {sup.employees.map((emp) => {
@@ -813,7 +813,7 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                                               setDraggingEmpId(null);
                                               setDropTargetKey(null);
                                             }}
-                                            className={`w-48 p-2 rounded-lg border transition-all flex items-center justify-between gap-1.5 shadow-2xs cursor-grab active:cursor-grabbing select-none ${
+                                            className={`w-56 sm:w-60 p-2 sm:p-2.5 rounded-lg border transition-all flex items-center justify-between gap-2 shadow-2xs cursor-grab active:cursor-grabbing select-none ${
                                               isBeingDragged
                                                 ? "opacity-30 scale-95 border-dashed border-indigo-500 bg-indigo-50/50"
                                                 : isSearchMatch
@@ -822,7 +822,7 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                                             }`}
                                             title={`${emp.employee_name} (${emp.employee_email}) • Lead: ${sup.name} • Manager: ${manager.name} • Dept: ${emp.department_name || "General"}`}
                                           >
-                                            <div className="flex items-center gap-1.5 min-w-0">
+                                            <div className="flex items-center gap-2 min-w-0 flex-1">
                                               <span
                                                 className="text-slate-400 hover:text-slate-600 cursor-grab text-xs shrink-0"
                                                 title="Drag to reallocate reporting line"
@@ -834,8 +834,8 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                                                   ? emp.employee_name.charAt(0)
                                                   : "E"}
                                               </div>
-                                              <div className="min-w-0">
-                                                <p className="font-bold text-slate-900 text-[11px] mb-0 truncate">
+                                              <div className="min-w-0 flex-1">
+                                                <p className="font-bold text-slate-900 text-xs mb-0 truncate" title={emp.employee_name}>
                                                   {emp.employee_name}
                                                 </p>
                                                 <p className="text-[9px] text-slate-400 mb-0 truncate">
