@@ -396,6 +396,7 @@ const HierarchyMapping = () => {
             unassignedStaff={filteredUnassigned}
             showUnassignedOnly={activeKpiFilter === "orphaned" || statusFilter === "unassigned"}
             statusFilter={statusFilter}
+            activeKpiFilter={activeKpiFilter}
             onOpenAssignModal={(empId) => {
               if (empId) {
                 setForm((prev) => ({ ...prev, employee_id: String(empId) }));
