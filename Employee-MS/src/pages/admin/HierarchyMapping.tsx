@@ -309,12 +309,17 @@ const HierarchyMapping = () => {
               setActiveKpiFilter(null);
             }
           }}
+          activeKpiFilter={activeKpiFilter}
           unassignedCount={unassignedCount}
           totalFiltered={
-            filteredHierarchy.length +
-            (activeKpiFilter === "orphaned" || statusFilter === "unassigned" || statusFilter === "all"
-              ? filteredUnassigned.length
-              : 0)
+            activeKpiFilter === "leads"
+              ? uniqueSupervisorsCount
+              : activeKpiFilter === "managers"
+              ? uniqueManagersCount
+              : filteredHierarchy.length +
+                (activeKpiFilter === "orphaned" || statusFilter === "unassigned" || statusFilter === "all"
+                  ? filteredUnassigned.length
+                  : 0)
           }
           totalCount={hierarchy.length + unassignedCount}
           onResetFilters={() => {
@@ -397,10 +402,13 @@ const HierarchyMapping = () => {
             showUnassignedOnly={activeKpiFilter === "orphaned" || statusFilter === "unassigned"}
             statusFilter={statusFilter}
             activeKpiFilter={activeKpiFilter}
-            onOpenAssignModal={(empId) => {
-              if (empId) {
-                setForm((prev) => ({ ...prev, employee_id: String(empId) }));
-              }
+            onOpenAssignModal={(empId, supId, mgrId) => {
+              setForm((prev) => ({
+                ...prev,
+                employee_id: empId ? String(empId) : prev.employee_id,
+                supervisor_id: supId ? String(supId) : prev.supervisor_id,
+                manager_id: mgrId ? String(mgrId) : prev.manager_id,
+              }));
               setShowModal(true);
             }}
             onResetFilters={() => {

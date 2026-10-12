@@ -51,7 +51,11 @@ interface HierarchyTableViewProps {
   showUnassignedOnly: boolean;
   statusFilter?: string;
   activeKpiFilter?: "mapped" | "leads" | "managers" | "orphaned" | null;
-  onOpenAssignModal: (preselectedEmployeeId?: string | number) => void;
+  onOpenAssignModal: (
+    preselectedEmployeeId?: string | number,
+    preselectedSupervisorId?: string | number,
+    preselectedManagerId?: string | number
+  ) => void;
   onResetFilters: () => void;
   onInitiateReassign?: (employee: HierarchyMappingItem) => void;
   onInitiateUnlink?: (employee: HierarchyMappingItem) => void;
@@ -71,6 +75,8 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
 }) => {
   const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
+  const [selectedSquadLead, setSelectedSquadLead] = useState<TeamLeadGroup | null>(null);
+  const [selectedManagerGroup, setSelectedManagerGroup] = useState<ManagerGroup | null>(null);
 
   // Group mappings by Team Lead (Supervisor)
   const leadGroups = useMemo<TeamLeadGroup[]>(() => {
@@ -338,16 +344,25 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                           </span>
                         ))}
                         {lead.members.length > 4 && (
-                          <span className="px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 text-[10px] font-bold border border-purple-200">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedSquadLead(lead)}
+                            className="px-1.5 py-0.5 rounded bg-purple-50 hover:bg-purple-100 text-purple-700 text-[10px] font-bold border border-purple-200 cursor-pointer transition-colors"
+                          >
                             +{lead.members.length - 4} more
-                          </span>
+                          </button>
                         )}
                       </div>
                     </td>
 
                     {/* Squad Capacity Indicator */}
                     <td className="py-2.5 px-3 text-center">
-                      <div className="inline-flex flex-col items-center">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedSquadLead(lead)}
+                        className="inline-flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
+                        title="Click to view full squad details"
+                      >
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-purple-100/80 text-purple-800 border border-purple-200">
                           {lead.members.length} {lead.members.length === 1 ? "staff" : "squad members"}
                         </span>
@@ -358,16 +373,16 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                             ? "Optimal Span"
                             : "Heavy Squad"}
                         </span>
-                      </div>
+                      </button>
                     </td>
 
                     {/* Actions */}
                     <td className="py-2.5 px-3 text-center whitespace-nowrap">
                       <button
                         type="button"
-                        onClick={() => onOpenAssignModal()}
+                        onClick={() => onOpenAssignModal(undefined, lead.supervisorId, lead.managerId)}
                         className="px-2.5 py-1 rounded-md bg-purple-50 hover:bg-purple-100 text-purple-700 font-semibold text-xs border border-purple-200 shadow-2xs transition-colors cursor-pointer inline-flex items-center gap-1"
-                        title="Add or manage squad members"
+                        title="Add member to this squad"
                       >
                         <i className="bi bi-person-plus text-[10px]"></i>
                         <span>Add</span>
@@ -469,10 +484,15 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
 
                     {/* Total Headcount */}
                     <td className="py-2.5 px-3 text-center">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100/90 text-emerald-900 border border-emerald-300 shadow-2xs">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedManagerGroup(mgr)}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100/90 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 shadow-2xs cursor-pointer transition-colors"
+                        title="Click to view department overview"
+                      >
                         <i className="bi bi-building-check text-emerald-600 text-xs"></i>
                         <span>{mgr.totalMembersCount} Total Staff</span>
-                      </span>
+                      </button>
                     </td>
 
                     {/* Authority Tier */}
@@ -486,7 +506,7 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                     <td className="py-2.5 px-3 text-center whitespace-nowrap">
                       <button
                         type="button"
-                        onClick={() => onOpenAssignModal()}
+                        onClick={() => onOpenAssignModal(undefined, undefined, mgr.managerId)}
                         className="px-2.5 py-1 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold text-xs border border-emerald-200 shadow-2xs transition-colors cursor-pointer inline-flex items-center gap-1"
                         title="Assign team lead or staff"
                       >
@@ -795,6 +815,188 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
           </table>
         )}
       </div>
+
+      {/* 3. Interactive Squad Roster Modal */}
+      {selectedSquadLead && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200/90 w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-purple-50 via-indigo-50/50 to-white px-5 py-4 border-b border-slate-200/90 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-lg font-bold shadow-2xs">
+                  <i className="bi bi-people-fill"></i>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 leading-tight">
+                    {selectedSquadLead.supervisorName}'s Squad
+                  </h3>
+                  <p className="text-[11px] text-slate-500 leading-tight mt-0.5">
+                    {selectedSquadLead.members.length} Supervised Members • Dept: {selectedSquadLead.departmentName || "General"}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedSquadLead(null)}
+                className="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <i className="bi bi-x-lg text-xs"></i>
+              </button>
+            </div>
+
+            {/* Modal Body: Squad Members List */}
+            <div className="p-4 max-h-80 overflow-y-auto space-y-2">
+              {selectedSquadLead.members.map((m) => (
+                <div
+                  key={m.id}
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 hover:bg-slate-100/80 border border-slate-200/80 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-7 h-7 rounded-lg bg-indigo-500 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                      {m.employee_name ? m.employee_name.charAt(0) : "E"}
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-xs font-bold text-slate-900 block truncate">
+                        {m.employee_name}
+                      </span>
+                      <span className="text-[10px] text-slate-400 block truncate">
+                        {m.employee_email}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                    {onInitiateReassign && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedSquadLead(null);
+                          onInitiateReassign(m);
+                        }}
+                        className="px-2 py-1 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[10.5px] font-semibold border border-indigo-200 transition-colors cursor-pointer"
+                      >
+                        Reallocate
+                      </button>
+                    )}
+                    {onInitiateUnlink && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedSquadLead(null);
+                          onInitiateUnlink(m);
+                        }}
+                        className="p-1 rounded text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
+                        title="Unlink from squad"
+                      >
+                        <i className="bi bi-link-45deg text-sm"></i>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-slate-50 px-5 py-3 border-t border-slate-200/90 flex items-center justify-between">
+              <span className="text-[11px] text-slate-500">
+                Reporting to: <strong className="text-slate-800">{selectedSquadLead.managerName}</strong>
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  const lead = selectedSquadLead;
+                  setSelectedSquadLead(null);
+                  onOpenAssignModal(undefined, lead.supervisorId, lead.managerId);
+                }}
+                className="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer inline-flex items-center gap-1.5"
+              >
+                <i className="bi bi-person-plus text-xs"></i>
+                <span>Add Squad Member</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 4. Interactive Manager Department Hierarchy Modal */}
+      {selectedManagerGroup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200/90 w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-emerald-50 via-teal-50/50 to-white px-5 py-4 border-b border-slate-200/90 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg font-bold shadow-2xs">
+                  <i className="bi bi-person-badge-fill"></i>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 leading-tight">
+                    {selectedManagerGroup.managerName}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 leading-tight mt-0.5">
+                    {selectedManagerGroup.departmentName || "General"} Department • {selectedManagerGroup.totalMembersCount} Total Staff
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedManagerGroup(null)}
+                className="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <i className="bi bi-x-lg text-xs"></i>
+              </button>
+            </div>
+
+            {/* Modal Body: Supervisors in Department */}
+            <div className="p-4 max-h-80 overflow-y-auto space-y-2.5">
+              <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Reporting Team Leads ({selectedManagerGroup.supervisors.length})
+              </h4>
+              {selectedManagerGroup.supervisors.map((s) => (
+                <div
+                  key={s.id}
+                  className="flex items-center justify-between p-3 rounded-xl bg-slate-50/80 hover:bg-slate-100/80 border border-slate-200/80 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 font-bold text-xs flex items-center justify-center">
+                      <i className="bi bi-people-fill"></i>
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-slate-900 block">
+                        {s.name}
+                      </span>
+                      <span className="text-[10px] text-slate-400">
+                        Lead #{s.id}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                    {s.membersCount} squad members
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-slate-50 px-5 py-3 border-t border-slate-200/90 flex items-center justify-between">
+              <span className="text-[11px] text-slate-500">
+                Tier: <strong className="text-slate-800">Executive Management</strong>
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  const mgr = selectedManagerGroup;
+                  setSelectedManagerGroup(null);
+                  onOpenAssignModal(undefined, undefined, mgr.managerId);
+                }}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer inline-flex items-center gap-1.5"
+              >
+                <i className="bi bi-person-plus text-xs"></i>
+                <span>Assign Staff</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

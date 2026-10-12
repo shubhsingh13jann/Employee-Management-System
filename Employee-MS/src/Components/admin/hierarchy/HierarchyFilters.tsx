@@ -8,6 +8,7 @@ interface HierarchyFiltersProps {
   departments: string[];
   statusFilter: string;
   onStatusFilterChange: (val: string) => void;
+  activeKpiFilter?: "mapped" | "leads" | "managers" | "orphaned" | null;
   unassignedCount: number;
   totalFiltered: number;
   totalCount: number;
@@ -22,6 +23,7 @@ export const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
   departments,
   statusFilter,
   onStatusFilterChange,
+  activeKpiFilter,
   unassignedCount,
   totalFiltered,
   totalCount,
@@ -253,11 +255,30 @@ export const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
       <div className="relative z-10 flex items-center justify-between text-xs text-slate-500 mt-2.5 pt-1.5 font-medium">
         <div className="flex items-center gap-2">
           <span>
-            Showing{" "}
-            <strong className="text-indigo-600 font-bold">{totalFiltered}</strong> of{" "}
-            <strong className="text-indigo-600 font-bold">{totalCount}</strong> mappings
+            {activeKpiFilter === "leads" ? (
+              <>
+                Showing <strong className="text-purple-600 font-bold">{totalFiltered}</strong> active team lead squads
+              </>
+            ) : activeKpiFilter === "managers" ? (
+              <>
+                Showing <strong className="text-emerald-600 font-bold">{totalFiltered}</strong> department management divisions
+              </>
+            ) : activeKpiFilter === "orphaned" ? (
+              <>
+                Showing <strong className="text-amber-600 font-bold">{totalFiltered}</strong> orphaned staff needing assignment
+              </>
+            ) : activeKpiFilter === "mapped" ? (
+              <>
+                Showing <strong className="text-indigo-600 font-bold">{totalFiltered}</strong> mapped employee relationships
+              </>
+            ) : (
+              <>
+                Showing <strong className="text-indigo-600 font-bold">{totalFiltered}</strong> of{" "}
+                <strong className="text-indigo-600 font-bold">{totalCount}</strong> mappings
+              </>
+            )}
           </span>
-          {hasActiveFilters && (
+          {(hasActiveFilters || activeKpiFilter) && (
             <button
               type="button"
               onClick={onResetFilters}
