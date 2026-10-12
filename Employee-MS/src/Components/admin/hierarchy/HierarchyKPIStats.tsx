@@ -5,6 +5,12 @@ interface HierarchyKPIStatsProps {
   totalSupervisors: number;
   totalManagers: number;
   unassignedCount: number;
+  onFilterMapped?: () => void;
+  isMappedFilterActive?: boolean;
+  onFilterLeads?: () => void;
+  isLeadsFilterActive?: boolean;
+  onFilterManagers?: () => void;
+  isManagersFilterActive?: boolean;
   onFilterUnassigned?: () => void;
   isUnassignedFilterActive?: boolean;
 }
@@ -14,6 +20,12 @@ export const HierarchyKPIStats: React.FC<HierarchyKPIStatsProps> = ({
   totalSupervisors,
   totalManagers,
   unassignedCount,
+  onFilterMapped,
+  isMappedFilterActive,
+  onFilterLeads,
+  isLeadsFilterActive,
+  onFilterManagers,
+  isManagersFilterActive,
   onFilterUnassigned,
   isUnassignedFilterActive,
 }) => {
@@ -23,7 +35,15 @@ export const HierarchyKPIStats: React.FC<HierarchyKPIStatsProps> = ({
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 mb-2.5">
       {/* 1. Total Mapped Relationships */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-white via-white to-blue-50/40 rounded-xl px-3 py-2 sm:px-3.5 sm:py-2.5 border border-slate-200/90 hover:border-indigo-300 shadow-2xs hover:shadow-xs transition-all flex items-center justify-between">
+      <div
+        onClick={onFilterMapped}
+        className={`relative overflow-hidden rounded-xl px-3 py-2 sm:px-3.5 sm:py-2.5 border transition-all flex items-center justify-between cursor-pointer select-none ${
+          isMappedFilterActive
+            ? "bg-gradient-to-br from-blue-100/90 via-blue-50 to-indigo-100/80 border-blue-400 ring-2 ring-blue-400/40 shadow-xs"
+            : "bg-gradient-to-br from-white via-white to-blue-50/40 border-slate-200/90 hover:border-blue-400 shadow-2xs hover:shadow-xs"
+        }`}
+        title="Click to filter active mapped staff"
+      >
         {/* Left: Icon & Text Info */}
         <div className="relative z-10 flex items-center gap-2.5 sm:gap-3 min-w-0">
           <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-lg bg-blue-50 border border-blue-200/80 text-blue-600 flex items-center justify-center text-sm shrink-0 shadow-2xs">
@@ -101,7 +121,15 @@ export const HierarchyKPIStats: React.FC<HierarchyKPIStatsProps> = ({
       </div>
 
       {/* 2. Active Team Leads (Supervisors) */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-white via-white to-purple-50/40 rounded-xl px-3 py-2 sm:px-3.5 sm:py-2.5 border border-slate-200/90 hover:border-purple-300 shadow-2xs hover:shadow-xs transition-all flex items-center justify-between">
+      <div
+        onClick={onFilterLeads}
+        className={`relative overflow-hidden rounded-xl px-3 py-2 sm:px-3.5 sm:py-2.5 border transition-all flex items-center justify-between cursor-pointer select-none ${
+          isLeadsFilterActive
+            ? "bg-gradient-to-br from-purple-100/90 via-purple-50 to-violet-100/80 border-purple-400 ring-2 ring-purple-400/40 shadow-xs"
+            : "bg-gradient-to-br from-white via-white to-purple-50/40 border-slate-200/90 hover:border-purple-400 shadow-2xs hover:shadow-xs"
+        }`}
+        title="Click to view active team leads & squads"
+      >
         {/* Left: Icon & Text Info */}
         <div className="relative z-10 flex items-center gap-2.5 sm:gap-3 min-w-0">
           <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-lg bg-purple-50 border border-purple-200/80 text-purple-600 flex items-center justify-center text-sm shrink-0 shadow-2xs">
@@ -179,7 +207,15 @@ export const HierarchyKPIStats: React.FC<HierarchyKPIStatsProps> = ({
       </div>
 
       {/* 3. Department Managers */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-white via-white to-emerald-50/40 rounded-xl px-3 py-2 sm:px-3.5 sm:py-2.5 border border-slate-200/90 hover:border-emerald-300 shadow-2xs hover:shadow-xs transition-all flex items-center justify-between">
+      <div
+        onClick={onFilterManagers}
+        className={`relative overflow-hidden rounded-xl px-3 py-2 sm:px-3.5 sm:py-2.5 border transition-all flex items-center justify-between cursor-pointer select-none ${
+          isManagersFilterActive
+            ? "bg-gradient-to-br from-emerald-100/90 via-emerald-50 to-teal-100/80 border-emerald-400 ring-2 ring-emerald-400/40 shadow-xs"
+            : "bg-gradient-to-br from-white via-white to-emerald-50/40 border-slate-200/90 hover:border-emerald-400 shadow-2xs hover:shadow-xs"
+        }`}
+        title="Click to view department managers org chart"
+      >
         {/* Left: Icon & Text Info */}
         <div className="relative z-10 flex items-center gap-2.5 sm:gap-3 min-w-0">
           <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-lg bg-emerald-50 border border-emerald-200/80 text-emerald-600 flex items-center justify-center text-sm shrink-0 shadow-2xs">

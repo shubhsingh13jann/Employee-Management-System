@@ -236,6 +236,18 @@ const HierarchyMapping = () => {
           totalSupervisors={uniqueSupervisorsCount}
           totalManagers={uniqueManagersCount}
           unassignedCount={unassignedCount}
+          onFilterMapped={() =>
+            setStatusFilter((prev) => (prev === "assigned" ? "all" : "assigned"))
+          }
+          isMappedFilterActive={statusFilter === "assigned"}
+          onFilterLeads={() =>
+            setViewMode((prev) => (prev === "squad" ? "table" : "squad"))
+          }
+          isLeadsFilterActive={viewMode === "squad"}
+          onFilterManagers={() =>
+            setViewMode((prev) => (prev === "tree" ? "table" : "tree"))
+          }
+          isManagersFilterActive={viewMode === "tree"}
           onFilterUnassigned={() =>
             setStatusFilter((prev) => (prev === "unassigned" ? "all" : "unassigned"))
           }
