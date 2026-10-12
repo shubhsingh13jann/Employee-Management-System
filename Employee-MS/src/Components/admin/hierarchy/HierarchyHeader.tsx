@@ -190,17 +190,17 @@ export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
 
           {/* Floating Dropdown Menu */}
           {isMenuOpen && (
-            <div className="absolute right-0 top-full mt-2 w-52 rounded-xl bg-slate-900/95 backdrop-blur-xl border border-indigo-500/30 shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 text-white">
+            <div className="absolute right-0 top-full mt-2 w-56 sm:w-60 min-w-[210px] rounded-xl bg-slate-900/95 backdrop-blur-xl border border-indigo-500/30 shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 text-white">
               <button
                 type="button"
                 onClick={() => {
                   setIsMenuOpen(false);
                   onOpenAssignModal();
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer shadow-sm text-left"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer shadow-sm text-left whitespace-nowrap"
               >
-                <i className="bi bi-person-plus-fill font-bold text-xs"></i>
-                <span>Assign Team Member</span>
+                <i className="bi bi-person-plus-fill font-bold text-xs shrink-0"></i>
+                <span className="whitespace-nowrap">Assign Team Member</span>
               </button>
 
               <div className="h-px bg-white/10 my-1.5"></div>
@@ -212,10 +212,10 @@ export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
                   onRefresh();
                 }}
                 disabled={isRefreshing}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer disabled:opacity-50 text-left"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer disabled:opacity-50 text-left whitespace-nowrap"
               >
-                <i className={`bi bi-arrow-clockwise text-indigo-400 text-sm ${isRefreshing ? "animate-spin" : ""}`}></i>
-                <span>Refresh Hierarchy</span>
+                <i className={`bi bi-arrow-clockwise text-indigo-400 text-sm shrink-0 ${isRefreshing ? "animate-spin" : ""}`}></i>
+                <span className="whitespace-nowrap">Refresh Hierarchy</span>
               </button>
             </div>
           )}
