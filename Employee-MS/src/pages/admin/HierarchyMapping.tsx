@@ -25,6 +25,7 @@ const HierarchyMapping = () => {
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"table" | "tree" | "squad">("table");
+  const [activeKpiFilter, setActiveKpiFilter] = useState<"mapped" | "leads" | "managers" | "orphaned" | null>(null);
 
   const [form, setForm] = useState({
     employee_id: "",
@@ -66,7 +67,28 @@ const HierarchyMapping = () => {
     new Set(hierarchy.map((h) => h.department_name).filter(Boolean))
   ) as string[];
 
+  const handleToggleKpiCard = (key: "mapped" | "leads" | "managers" | "orphaned") => {
+    setActiveKpiFilter((prev) => {
+      if (prev === key) {
+        setStatusFilter("all");
+        return null;
+      }
+      if (key === "mapped") {
+        setStatusFilter("assigned");
+      } else if (key === "orphaned") {
+        setStatusFilter("unassigned");
+      } else {
+        setStatusFilter("all");
+      }
+      return key;
+    });
+  };
+
   const filteredHierarchy = hierarchy.filter((h) => {
+    // Hide mapped relationships if orphaned/unassigned filter is active
+    if (activeKpiFilter === "orphaned" || statusFilter === "unassigned") {
+      return false;
+    }
     if (selectedDepartment !== "all" && h.department_name !== selectedDepartment) {
       return false;
     }
@@ -80,10 +102,25 @@ const HierarchyMapping = () => {
       const matchDept = h.department_name?.toLowerCase().includes(q);
       if (!matchEmp && !matchSup && !matchMgr && !matchDept) return false;
     }
+    if (activeKpiFilter === "leads") {
+      if (!h.supervisor_id || !h.supervisor_name) return false;
+    }
+    if (activeKpiFilter === "managers") {
+      if (!h.manager_id || !h.manager_name) return false;
+    }
     return true;
   });
 
   const filteredUnassigned = unassignedEmployees.filter((u: any) => {
+    // Hide unassigned staff if mapped, leads, or managers filter is active
+    if (
+      activeKpiFilter === "mapped" ||
+      activeKpiFilter === "leads" ||
+      activeKpiFilter === "managers" ||
+      statusFilter === "assigned"
+    ) {
+      return false;
+    }
     if (selectedDepartment !== "all" && u.department_name && u.department_name !== selectedDepartment) {
       return false;
     }
@@ -236,32 +273,22 @@ const HierarchyMapping = () => {
           totalSupervisors={uniqueSupervisorsCount}
           totalManagers={uniqueManagersCount}
           unassignedCount={unassignedCount}
-          onFilterMapped={() =>
-            setStatusFilter((prev) => (prev === "assigned" ? "all" : "assigned"))
-          }
-          isMappedFilterActive={statusFilter === "assigned"}
-          onFilterLeads={() =>
-            setViewMode((prev) => (prev === "squad" ? "table" : "squad"))
-          }
-          isLeadsFilterActive={viewMode === "squad"}
-          onFilterManagers={() =>
-            setViewMode((prev) => (prev === "tree" ? "table" : "tree"))
-          }
-          isManagersFilterActive={viewMode === "tree"}
-          onFilterUnassigned={() =>
-            setStatusFilter((prev) => (prev === "unassigned" ? "all" : "unassigned"))
-          }
-          isUnassignedFilterActive={statusFilter === "unassigned"}
+          onFilterMapped={() => handleToggleKpiCard("mapped")}
+          isMappedFilterActive={activeKpiFilter === "mapped"}
+          onFilterLeads={() => handleToggleKpiCard("leads")}
+          isLeadsFilterActive={activeKpiFilter === "leads"}
+          onFilterManagers={() => handleToggleKpiCard("managers")}
+          isManagersFilterActive={activeKpiFilter === "managers"}
+          onFilterUnassigned={() => handleToggleKpiCard("orphaned")}
+          isUnassignedFilterActive={activeKpiFilter === "orphaned"}
         />
 
         {/* Orphaned Staff Alert Banner */}
         <OrphanedStaffBanner
           unassignedCount={unassignedCount}
           onQuickAssign={() => setShowModal(true)}
-          onFilterUnassigned={() =>
-            setStatusFilter((prev) => (prev === "unassigned" ? "all" : "unassigned"))
-          }
-          isFilterActive={statusFilter === "unassigned"}
+          onFilterUnassigned={() => handleToggleKpiCard("orphaned")}
+          isFilterActive={activeKpiFilter === "orphaned"}
         />
 
         {/* Filter and Search Bar */}
@@ -272,14 +299,29 @@ const HierarchyMapping = () => {
           onDepartmentChange={setSelectedDepartment}
           departments={departments}
           statusFilter={statusFilter}
-          onStatusFilterChange={setStatusFilter}
+          onStatusFilterChange={(val) => {
+            setStatusFilter(val);
+            if (val === "assigned") {
+              setActiveKpiFilter("mapped");
+            } else if (val === "unassigned") {
+              setActiveKpiFilter("orphaned");
+            } else {
+              setActiveKpiFilter(null);
+            }
+          }}
           unassignedCount={unassignedCount}
-          totalFiltered={filteredHierarchy.length}
-          totalCount={hierarchy.length}
+          totalFiltered={
+            filteredHierarchy.length +
+            (activeKpiFilter === "orphaned" || statusFilter === "unassigned" || statusFilter === "all"
+              ? filteredUnassigned.length
+              : 0)
+          }
+          totalCount={hierarchy.length + unassignedCount}
           onResetFilters={() => {
             setSearchTerm("");
             setSelectedDepartment("all");
             setStatusFilter("all");
+            setActiveKpiFilter(null);
           }}
         />
 
@@ -352,7 +394,7 @@ const HierarchyMapping = () => {
             loading={loading}
             mappings={filteredHierarchy}
             unassignedStaff={filteredUnassigned}
-            showUnassignedOnly={statusFilter === "unassigned"}
+            showUnassignedOnly={activeKpiFilter === "orphaned" || statusFilter === "unassigned"}
             statusFilter={statusFilter}
             onOpenAssignModal={(empId) => {
               if (empId) {
@@ -364,6 +406,7 @@ const HierarchyMapping = () => {
               setSearchTerm("");
               setSelectedDepartment("all");
               setStatusFilter("all");
+              setActiveKpiFilter(null);
             }}
             onInitiateReassign={(emp) => {
               setReassignState({

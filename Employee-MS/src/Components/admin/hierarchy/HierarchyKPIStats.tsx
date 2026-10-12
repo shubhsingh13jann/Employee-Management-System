@@ -33,36 +33,39 @@ export const HierarchyKPIStats: React.FC<HierarchyKPIStatsProps> = ({
     totalSupervisors > 0 ? (totalMapped / totalSupervisors).toFixed(1) : "0";
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 mb-2.5">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 mb-3">
       {/* 1. Total Mapped Relationships */}
       <div
         onClick={onFilterMapped}
-        className={`relative overflow-hidden rounded-xl px-3 py-2 sm:px-3.5 sm:py-2.5 border transition-all flex items-center justify-between cursor-pointer select-none ${
+        className={`relative overflow-hidden rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 border transition-all flex items-center justify-between cursor-pointer select-none ${
           isMappedFilterActive
             ? "bg-gradient-to-br from-blue-100/90 via-blue-50 to-indigo-100/80 border-blue-400 ring-2 ring-blue-400/40 shadow-xs"
             : "bg-gradient-to-br from-white via-white to-blue-50/40 border-slate-200/90 hover:border-blue-400 shadow-2xs hover:shadow-xs"
         }`}
-        title="Click to filter active mapped staff"
+        title="Click to toggle mapped staff filter"
       >
-        {/* Left: Icon & Text Info */}
+        {/* Left: Icon & 3-line Text with Equal Spacing */}
         <div className="relative z-10 flex items-center gap-2.5 sm:gap-3 min-w-0">
-          <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-lg bg-blue-50 border border-blue-200/80 text-blue-600 flex items-center justify-center text-sm shrink-0 shadow-2xs">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-blue-50 border border-blue-200/80 text-blue-600 flex items-center justify-center text-base sm:text-lg shrink-0 shadow-2xs">
             <i className="bi bi-people-fill"></i>
           </div>
 
-          <div className="flex flex-col justify-center gap-0.5 sm:gap-1 min-w-0">
-            <p className="text-[10px] sm:text-[10.5px] font-bold text-slate-500 uppercase tracking-wider leading-none m-0 p-0 truncate">
+          <div className="flex flex-col justify-center min-w-0 py-0.5">
+            {/* Line 1: Title */}
+            <p className="text-[10px] sm:text-[10.5px] font-bold text-slate-500 uppercase tracking-wider leading-tight m-0 p-0 truncate">
               Mapped Staff
             </p>
-            <div className="flex items-center gap-1.5 leading-none m-0 p-0">
-              <span className="text-lg sm:text-xl font-black text-slate-900 leading-none m-0 p-0">
+            {/* Line 2: Value + Badge */}
+            <div className="flex items-center gap-1.5 my-0.5 leading-none">
+              <span className="text-base sm:text-lg font-black text-slate-900 leading-none m-0 p-0">
                 {totalMapped}
               </span>
-              <span className="text-[9.5px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200 leading-none">
+              <span className="text-[9px] sm:text-[9.5px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 leading-none">
                 Active
               </span>
             </div>
-            <p className="text-[10px] sm:text-[10.5px] text-slate-400 font-medium leading-none m-0 p-0 truncate">
+            {/* Line 3: Subtitle (Fully visible, generous line height) */}
+            <p className="text-[10px] sm:text-[10.5px] text-slate-400 font-medium leading-normal m-0 p-0 block truncate">
               Assigned to reporting lines
             </p>
           </div>
@@ -123,32 +126,35 @@ export const HierarchyKPIStats: React.FC<HierarchyKPIStatsProps> = ({
       {/* 2. Active Team Leads (Supervisors) */}
       <div
         onClick={onFilterLeads}
-        className={`relative overflow-hidden rounded-xl px-3 py-2 sm:px-3.5 sm:py-2.5 border transition-all flex items-center justify-between cursor-pointer select-none ${
+        className={`relative overflow-hidden rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 border transition-all flex items-center justify-between cursor-pointer select-none ${
           isLeadsFilterActive
             ? "bg-gradient-to-br from-purple-100/90 via-purple-50 to-violet-100/80 border-purple-400 ring-2 ring-purple-400/40 shadow-xs"
             : "bg-gradient-to-br from-white via-white to-purple-50/40 border-slate-200/90 hover:border-purple-400 shadow-2xs hover:shadow-xs"
         }`}
-        title="Click to view active team leads & squads"
+        title="Click to toggle team leads filter"
       >
-        {/* Left: Icon & Text Info */}
+        {/* Left: Icon & 3-line Text with Equal Spacing */}
         <div className="relative z-10 flex items-center gap-2.5 sm:gap-3 min-w-0">
-          <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-lg bg-purple-50 border border-purple-200/80 text-purple-600 flex items-center justify-center text-sm shrink-0 shadow-2xs">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-purple-50 border border-purple-200/80 text-purple-600 flex items-center justify-center text-base sm:text-lg shrink-0 shadow-2xs">
             <i className="bi bi-people-fill"></i>
           </div>
 
-          <div className="flex flex-col justify-center gap-0.5 sm:gap-1 min-w-0">
-            <p className="text-[10px] sm:text-[10.5px] font-bold text-slate-500 uppercase tracking-wider leading-none m-0 p-0 truncate">
+          <div className="flex flex-col justify-center min-w-0 py-0.5">
+            {/* Line 1: Title */}
+            <p className="text-[10px] sm:text-[10.5px] font-bold text-slate-500 uppercase tracking-wider leading-tight m-0 p-0 truncate">
               Active Team Leads
             </p>
-            <div className="flex items-center gap-1.5 leading-none m-0 p-0">
-              <span className="text-lg sm:text-xl font-black text-slate-900 leading-none m-0 p-0">
+            {/* Line 2: Value + Badge */}
+            <div className="flex items-center gap-1.5 my-0.5 leading-none">
+              <span className="text-base sm:text-lg font-black text-slate-900 leading-none m-0 p-0">
                 {totalSupervisors}
               </span>
-              <span className="text-[9.5px] font-semibold text-slate-600 bg-slate-100 px-1.5 py-0.2 rounded border border-slate-200 leading-none">
+              <span className="text-[9px] sm:text-[9.5px] font-semibold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 leading-none">
                 ~{avgSquadSize}/lead
               </span>
             </div>
-            <p className="text-[10px] sm:text-[10.5px] text-slate-400 font-medium leading-none m-0 p-0 truncate">
+            {/* Line 3: Subtitle */}
+            <p className="text-[10px] sm:text-[10.5px] text-slate-400 font-medium leading-normal m-0 p-0 block truncate">
               Supervising squads
             </p>
           </div>
@@ -209,32 +215,35 @@ export const HierarchyKPIStats: React.FC<HierarchyKPIStatsProps> = ({
       {/* 3. Department Managers */}
       <div
         onClick={onFilterManagers}
-        className={`relative overflow-hidden rounded-xl px-3 py-2 sm:px-3.5 sm:py-2.5 border transition-all flex items-center justify-between cursor-pointer select-none ${
+        className={`relative overflow-hidden rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 border transition-all flex items-center justify-between cursor-pointer select-none ${
           isManagersFilterActive
             ? "bg-gradient-to-br from-emerald-100/90 via-emerald-50 to-teal-100/80 border-emerald-400 ring-2 ring-emerald-400/40 shadow-xs"
             : "bg-gradient-to-br from-white via-white to-emerald-50/40 border-slate-200/90 hover:border-emerald-400 shadow-2xs hover:shadow-xs"
         }`}
-        title="Click to view department managers org chart"
+        title="Click to toggle department managers filter"
       >
-        {/* Left: Icon & Text Info */}
+        {/* Left: Icon & 3-line Text with Equal Spacing */}
         <div className="relative z-10 flex items-center gap-2.5 sm:gap-3 min-w-0">
-          <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-lg bg-emerald-50 border border-emerald-200/80 text-emerald-600 flex items-center justify-center text-sm shrink-0 shadow-2xs">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-emerald-50 border border-emerald-200/80 text-emerald-600 flex items-center justify-center text-base sm:text-lg shrink-0 shadow-2xs">
             <i className="bi bi-person-badge-fill"></i>
           </div>
 
-          <div className="flex flex-col justify-center gap-0.5 sm:gap-1 min-w-0">
-            <p className="text-[10px] sm:text-[10.5px] font-bold text-slate-500 uppercase tracking-wider leading-none m-0 p-0 truncate">
+          <div className="flex flex-col justify-center min-w-0 py-0.5">
+            {/* Line 1: Title */}
+            <p className="text-[10px] sm:text-[10.5px] font-bold text-slate-500 uppercase tracking-wider leading-tight m-0 p-0 truncate">
               Dept Managers
             </p>
-            <div className="flex items-center gap-1.5 leading-none m-0 p-0">
-              <span className="text-lg sm:text-xl font-black text-slate-900 leading-none m-0 p-0">
+            {/* Line 2: Value + Badge */}
+            <div className="flex items-center gap-1.5 my-0.5 leading-none">
+              <span className="text-base sm:text-lg font-black text-slate-900 leading-none m-0 p-0">
                 {totalManagers}
               </span>
-              <span className="text-[9.5px] font-semibold text-indigo-600 bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-200 leading-none">
+              <span className="text-[9px] sm:text-[9.5px] font-semibold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200 leading-none">
                 Executive
               </span>
             </div>
-            <p className="text-[10px] sm:text-[10.5px] text-slate-400 font-medium leading-none m-0 p-0 truncate">
+            {/* Line 3: Subtitle */}
+            <p className="text-[10px] sm:text-[10.5px] text-slate-400 font-medium leading-normal m-0 p-0 block truncate">
               Top chain of command
             </p>
           </div>
@@ -295,19 +304,19 @@ export const HierarchyKPIStats: React.FC<HierarchyKPIStatsProps> = ({
       {/* 4. Unassigned / Orphaned Staff */}
       <div
         onClick={onFilterUnassigned}
-        className={`relative overflow-hidden rounded-xl px-3 py-2 sm:px-3.5 sm:py-2.5 border transition-all flex items-center justify-between cursor-pointer ${
+        className={`relative overflow-hidden rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 border transition-all flex items-center justify-between cursor-pointer select-none ${
           isUnassignedFilterActive
             ? "bg-gradient-to-br from-amber-100/90 via-amber-50 to-orange-100/80 border-amber-400 ring-2 ring-amber-400/40 shadow-xs"
             : unassignedCount > 0
             ? "bg-gradient-to-br from-amber-50/70 via-orange-50/40 to-amber-100/60 border-amber-300 hover:border-amber-400 shadow-2xs hover:shadow-xs"
             : "bg-gradient-to-br from-white via-white to-amber-50/35 border-slate-200/90 hover:border-amber-300 shadow-2xs hover:shadow-xs"
         }`}
-        title={unassignedCount > 0 ? "Click to view unassigned staff" : "All staff assigned"}
+        title={unassignedCount > 0 ? "Click to toggle unassigned staff filter" : "All staff assigned"}
       >
-        {/* Left: Icon & Text Info */}
+        {/* Left: Icon & 3-line Text with Equal Spacing */}
         <div className="relative z-10 flex items-center gap-2.5 sm:gap-3 min-w-0">
           <div
-            className={`w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-lg flex items-center justify-center text-sm shrink-0 shadow-2xs border ${
+            className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center text-base sm:text-lg shrink-0 shadow-2xs border ${
               unassignedCount > 0
                 ? "bg-amber-100/90 border-amber-300 text-amber-700"
                 : "bg-amber-50 border-amber-200/70 text-amber-600"
@@ -316,28 +325,31 @@ export const HierarchyKPIStats: React.FC<HierarchyKPIStatsProps> = ({
             <i className="bi bi-person-plus-fill"></i>
           </div>
 
-          <div className="flex flex-col justify-center gap-0.5 sm:gap-1 min-w-0">
-            <p className="text-[10px] sm:text-[10.5px] font-bold text-amber-800 uppercase tracking-wider leading-none m-0 p-0 truncate flex items-center gap-1.5">
+          <div className="flex flex-col justify-center min-w-0 py-0.5">
+            {/* Line 1: Title */}
+            <p className="text-[10px] sm:text-[10.5px] font-bold text-amber-800 uppercase tracking-wider leading-tight m-0 p-0 truncate flex items-center gap-1.5">
               <span>Orphaned Staff</span>
               {unassignedCount > 0 && (
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
               )}
             </p>
-            <div className="flex items-center gap-1.5 leading-none m-0 p-0">
-              <span className={`text-lg sm:text-xl font-black leading-none m-0 p-0 ${unassignedCount > 0 ? "text-amber-900" : "text-slate-900"}`}>
+            {/* Line 2: Value + Badge */}
+            <div className="flex items-center gap-1.5 my-0.5 leading-none">
+              <span className={`text-base sm:text-lg font-black leading-none m-0 p-0 ${unassignedCount > 0 ? "text-amber-900" : "text-slate-900"}`}>
                 {unassignedCount}
               </span>
               {unassignedCount > 0 ? (
-                <span className="text-[9.5px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.2 rounded border border-amber-300 leading-none">
+                <span className="text-[9px] sm:text-[9.5px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300 leading-none">
                   Action Needed
                 </span>
               ) : (
-                <span className="text-[9.5px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200 leading-none">
+                <span className="text-[9px] sm:text-[9.5px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 leading-none">
                   100% Assigned
                 </span>
               )}
             </div>
-            <p className="text-[10px] sm:text-[10.5px] text-slate-500 font-medium leading-none m-0 p-0 truncate">
+            {/* Line 3: Subtitle */}
+            <p className="text-[10px] sm:text-[10.5px] text-slate-500 font-medium leading-normal m-0 p-0 block truncate">
               {unassignedCount > 0 ? "Staff missing supervisor" : "No orphaned staff"}
             </p>
           </div>
