@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 
 interface HierarchyFiltersProps {
   searchTerm: string;
@@ -28,31 +28,6 @@ export const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
   onResetFilters,
 }) => {
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const deptDropdownRef = useRef<HTMLDivElement>(null);
-  const [isDeptDropdownOpen, setIsDeptDropdownOpen] = useState(false);
-
-  // Close department dropdown on outside click or Escape key
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        deptDropdownRef.current &&
-        !deptDropdownRef.current.contains(e.target as Node)
-      ) {
-        setIsDeptDropdownOpen(false);
-      }
-    };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setIsDeptDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
 
   // Keyboard shortcut: '/' focuses search input
   useEffect(() => {
@@ -75,14 +50,178 @@ export const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
     selectedDepartment !== "all" ||
     statusFilter !== "all";
 
+  // Color theme helper for department pills matching the target mockup
+  const getDeptColor = (deptName: string, isSelected: boolean) => {
+    const lower = deptName.toLowerCase();
+    if (lower.includes("account") || lower.includes("finance")) {
+      return {
+        iconBg: isSelected ? "bg-white/20 text-white" : "bg-sky-50 text-sky-600 border border-sky-100",
+        activeStyle: "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-indigo-500/20",
+      };
+    }
+    if (lower.includes("engineer") || lower.includes("tech") || lower.includes("dev")) {
+      return {
+        iconBg: isSelected ? "bg-white/20 text-white" : "bg-emerald-50 text-emerald-600 border border-emerald-100",
+        activeStyle: "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-500/20",
+      };
+    }
+    if (lower.includes("human") || lower.includes("hr") || lower.includes("people")) {
+      return {
+        iconBg: isSelected ? "bg-white/20 text-white" : "bg-amber-50 text-amber-600 border border-amber-100",
+        activeStyle: "bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md shadow-amber-500/20",
+      };
+    }
+    if (lower.includes("market") || lower.includes("sales")) {
+      return {
+        iconBg: isSelected ? "bg-white/20 text-white" : "bg-pink-50 text-pink-600 border border-pink-100",
+        activeStyle: "bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-md shadow-pink-500/20",
+      };
+    }
+    return {
+      iconBg: isSelected ? "bg-white/20 text-white" : "bg-purple-50 text-purple-600 border border-purple-100",
+      activeStyle: "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/20",
+    };
+  };
+
   return (
-    <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs p-3 mb-3 relative">
-      {/* Top Row: Search Omnibox, Department Dropdown, Status Pills & Reset */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5">
-        {/* Left: Prominent Search Omnibox */}
-        <div className="relative flex-1 min-w-[260px] max-w-xl">
-          <div className="relative flex items-center h-9.5 rounded-xl bg-slate-50/60 border border-slate-200/90 hover:border-indigo-300 focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-100 transition-all px-3 shadow-2xs">
-            <i className="bi bi-search text-slate-400 text-xs mr-2.5 shrink-0"></i>
+    <div className="relative overflow-hidden bg-white/90 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-2xs p-3 sm:p-4 mb-3">
+      {/* Silky Wave Background Ribbon Effects matching Image 2 */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 rounded-2xl">
+        <div className="absolute -bottom-8 -right-8 w-80 h-32 bg-gradient-to-tl from-indigo-200/30 via-purple-100/20 to-transparent blur-xl"></div>
+        <div className="absolute -top-10 left-1/4 w-72 h-28 bg-gradient-to-b from-sky-200/25 via-indigo-100/15 to-transparent blur-xl"></div>
+        <svg
+          className="absolute right-0 bottom-0 w-80 h-full pointer-events-none opacity-40"
+          viewBox="0 0 400 100"
+          preserveAspectRatio="none"
+          fill="none"
+        >
+          <defs>
+            <linearGradient id="filterWaveRibbon" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#818cf8" stopOpacity="0.0" />
+              <stop offset="50%" stopColor="#c084fc" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.35" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M 50,100 C 150,40 280,20 400,60 L 400,100 Z"
+            fill="url(#filterWaveRibbon)"
+          />
+          <path
+            d="M 0,100 C 120,60 250,50 400,20"
+            stroke="#818cf8"
+            strokeWidth="1.2"
+            strokeOpacity="0.3"
+            fill="none"
+          />
+        </svg>
+      </div>
+
+      {/* Main Toolbar Row: Department Pills (Left), Status Pills (Center), Search Omnibox (Right) */}
+      <div className="relative z-10 flex items-center justify-between gap-3 flex-wrap xl:flex-nowrap">
+        {/* Left: Department Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 max-w-full">
+          {/* "All Departments" Pill */}
+          <button
+            type="button"
+            onClick={() => onDepartmentChange("all")}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+              selectedDepartment === "all"
+                ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-indigo-500/25 ring-2 ring-indigo-400/30"
+                : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs hover:border-slate-300"
+            }`}
+          >
+            <div
+              className={`w-5 h-5 rounded-md flex items-center justify-center text-xs ${
+                selectedDepartment === "all"
+                  ? "bg-white/20 text-white"
+                  : "bg-indigo-50 text-indigo-600 border border-indigo-100"
+              }`}
+            >
+              <i className="bi bi-buildings"></i>
+            </div>
+            <span>All Departments</span>
+          </button>
+
+          {/* Individual Department Pills */}
+          {departments.map((dept) => {
+            const isSelected = selectedDepartment === dept;
+            const theme = getDeptColor(dept, isSelected);
+
+            return (
+              <button
+                key={dept}
+                type="button"
+                onClick={() => onDepartmentChange(dept)}
+                className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                  isSelected
+                    ? `${theme.activeStyle} ring-2 ring-indigo-400/30`
+                    : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs hover:border-slate-300"
+                }`}
+              >
+                <div
+                  className={`w-5 h-5 rounded-md flex items-center justify-center text-xs ${theme.iconBg}`}
+                >
+                  <i className="bi bi-buildings"></i>
+                </div>
+                <span>{dept}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Center: Segmented Status Control */}
+        <div className="inline-flex p-1 rounded-xl bg-white border border-slate-200/90 shadow-2xs text-xs font-semibold shrink-0 items-center gap-0.5">
+          <button
+            type="button"
+            onClick={() => onStatusFilterChange("all")}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+              statusFilter === "all"
+                ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            All
+          </button>
+          <button
+            type="button"
+            onClick={() => onStatusFilterChange("assigned")}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+              statusFilter === "assigned"
+                ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            Assigned
+          </button>
+          <div className="w-px h-3.5 bg-slate-200 mx-0.5"></div>
+          <button
+            type="button"
+            onClick={() => onStatusFilterChange("unassigned")}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+              statusFilter === "unassigned"
+                ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <span>Orphaned</span>
+            {unassignedCount > 0 && (
+              <span
+                className={`px-1.5 py-0.2 rounded-full text-[9.5px] font-bold ${
+                  statusFilter === "unassigned"
+                    ? "bg-white text-indigo-700"
+                    : "bg-amber-500 text-white"
+                }`}
+              >
+                {unassignedCount}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Right: Search Omnibox */}
+        <div className="relative flex-1 min-w-[260px] sm:min-w-[300px] max-w-md ml-auto">
+          <div className="relative flex items-center h-10 rounded-xl bg-white border border-indigo-200/90 hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 shadow-sm transition-all px-3">
+            <i className="bi bi-search text-indigo-500 text-sm mr-2.5 shrink-0"></i>
             <input
               ref={searchInputRef}
               type="text"
@@ -96,232 +235,39 @@ export const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
                 <button
                   type="button"
                   onClick={() => onSearchChange("")}
-                  className="text-slate-400 hover:text-slate-600 text-[10px] cursor-pointer w-4 h-4 rounded-full hover:bg-slate-200/70 flex items-center justify-center transition-colors"
+                  className="text-slate-400 hover:text-slate-600 text-xs cursor-pointer w-4 h-4 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors"
                   title="Clear search"
                 >
-                  <i className="bi bi-x-lg"></i>
+                  <i className="bi bi-x-circle-fill"></i>
                 </button>
               )}
-              <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[9.5px] font-semibold text-slate-400 bg-white border border-slate-200 rounded select-none shadow-2xs">
+              <div className="w-6.5 h-6.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0 select-none">
                 /
-              </kbd>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Right Controls: Department Custom Dropdown, Status Pills & Reset */}
-        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-          {/* Field: Department (Modern Custom Dropdown matching User Directory) */}
-          <div className="relative min-w-[170px]" ref={deptDropdownRef}>
-            <button
-              type="button"
-              onClick={() => setIsDeptDropdownOpen(!isDeptDropdownOpen)}
-              className={`w-full relative flex items-center justify-between h-9.5 rounded-xl border transition-all px-3 shadow-2xs text-left cursor-pointer outline-none ${
-                isDeptDropdownOpen
-                  ? "border-indigo-500 bg-white ring-2 ring-indigo-100"
-                  : selectedDepartment !== "all"
-                  ? "border-indigo-300 bg-indigo-50/50 text-indigo-900"
-                  : "border-slate-200/90 hover:border-slate-300 bg-slate-50/60 hover:bg-white text-slate-700"
-              }`}
-            >
-              <div className="flex items-center gap-2 min-w-0 pr-2">
-                <i
-                  className={`bi bi-building text-xs shrink-0 ${
-                    selectedDepartment !== "all" ? "text-indigo-600" : "text-slate-400"
-                  }`}
-                ></i>
-                <span className="text-xs font-semibold truncate">
-                  {selectedDepartment === "all" ? "All Departments" : selectedDepartment}
-                </span>
-              </div>
-              <i
-                className={`bi bi-chevron-down text-slate-400 text-[10px] font-bold shrink-0 transition-transform duration-200 ${
-                  isDeptDropdownOpen ? "rotate-180 text-indigo-600" : ""
-                }`}
-              ></i>
-            </button>
-
-            {/* Floating Menu Popover */}
-            {isDeptDropdownOpen && (
-              <div className="absolute top-full right-0 sm:left-0 mt-1.5 w-56 bg-white rounded-xl border border-slate-200/90 shadow-2xl z-50 py-1.5 overflow-hidden ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-150">
-                <div className="px-2.5 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  Filter by Department
-                </div>
-                <div className="max-h-60 overflow-y-auto custom-scrollbar p-1 space-y-0.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onDepartmentChange("all");
-                      setIsDeptDropdownOpen(false);
-                    }}
-                    className={`w-full px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between text-left cursor-pointer transition-colors ${
-                      selectedDepartment === "all"
-                        ? "bg-indigo-50 text-indigo-700 font-bold"
-                        : "text-slate-700 hover:bg-slate-50 font-medium"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <i className="bi bi-buildings text-indigo-500 text-xs shrink-0"></i>
-                      <span>All Departments</span>
-                    </div>
-                    {selectedDepartment === "all" && (
-                      <i className="bi bi-check2 text-indigo-600 font-bold text-sm"></i>
-                    )}
-                  </button>
-
-                  <div className="h-px bg-slate-100 my-1"></div>
-
-                  {departments.map((dept) => {
-                    const isSelected = selectedDepartment === dept;
-                    return (
-                      <button
-                        key={dept}
-                        type="button"
-                        onClick={() => {
-                          onDepartmentChange(dept);
-                          setIsDeptDropdownOpen(false);
-                        }}
-                        className={`w-full px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between text-left cursor-pointer transition-colors ${
-                          isSelected
-                            ? "bg-indigo-50 text-indigo-700 font-bold"
-                            : "text-slate-700 hover:bg-slate-50 font-medium"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="w-2 h-2 rounded-full bg-indigo-400 shrink-0"></span>
-                          <span className="truncate">{dept}</span>
-                        </div>
-                        {isSelected && (
-                          <i className="bi bi-check2 text-indigo-600 font-bold text-sm"></i>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Status Filter Segmented Control */}
-          <div className="inline-flex p-1 rounded-xl bg-slate-100/80 border border-slate-200/80 text-xs font-semibold shrink-0 h-9.5 items-center">
-            <button
-              type="button"
-              onClick={() => onStatusFilterChange("all")}
-              className={`h-7 px-2.5 rounded-lg transition-all cursor-pointer ${
-                statusFilter === "all"
-                  ? "bg-white text-slate-900 shadow-2xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              All
-            </button>
-            <button
-              type="button"
-              onClick={() => onStatusFilterChange("assigned")}
-              className={`h-7 px-2.5 rounded-lg transition-all cursor-pointer ${
-                statusFilter === "assigned"
-                  ? "bg-white text-slate-900 shadow-2xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Assigned
-            </button>
-            <button
-              type="button"
-              onClick={() => onStatusFilterChange("unassigned")}
-              className={`h-7 px-2.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
-                statusFilter === "unassigned"
-                  ? "bg-white text-amber-700 shadow-2xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              <span>Orphaned</span>
-              {unassignedCount > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-white text-[9.5px] font-bold">
-                  {unassignedCount}
-                </span>
-              )}
-            </button>
-          </div>
-
-          {/* Reset Filters button */}
+      {/* Bottom Row: Counter Bar matching Image 2 */}
+      <div className="relative z-10 flex items-center justify-between text-xs text-slate-500 mt-2.5 pt-1.5 font-medium">
+        <div className="flex items-center gap-2">
+          <span>
+            Showing{" "}
+            <strong className="text-indigo-600 font-bold">{totalFiltered}</strong> of{" "}
+            <strong className="text-indigo-600 font-bold">{totalCount}</strong> mappings
+          </span>
           {hasActiveFilters && (
             <button
               type="button"
               onClick={onResetFilters}
-              className="h-9.5 px-2.5 rounded-xl text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50/70 hover:bg-rose-100/70 border border-rose-200/80 transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
-              title="Reset all filters"
+              className="ml-2 text-[11px] text-rose-600 hover:text-rose-700 font-semibold cursor-pointer underline flex items-center gap-1"
             >
-              <i className="bi bi-arrow-counterclockwise text-xs"></i>
-              <span className="hidden sm:inline">Reset</span>
+              <i className="bi bi-x-circle text-[10px]"></i>
+              <span>Reset Filters</span>
             </button>
           )}
         </div>
-      </div>
-
-      {/* Counter & Active Filter Pills Bar */}
-      <div className="flex items-center justify-between text-[11px] text-slate-500 mt-2.5 pt-2 border-t border-slate-100 flex-wrap gap-2">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span>
-            Showing <strong className="text-slate-800 font-bold">{totalFiltered}</strong> of{" "}
-            <strong className="text-slate-800 font-bold">{totalCount}</strong> mappings
-          </span>
-          {hasActiveFilters && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
-              <i className="bi bi-funnel-fill text-[9px]"></i>
-              <span>Filtered View</span>
-            </span>
-          )}
-          {selectedDepartment !== "all" && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
-              <span>Dept: {selectedDepartment}</span>
-              <button
-                type="button"
-                onClick={() => onDepartmentChange("all")}
-                className="hover:text-rose-600 cursor-pointer ml-0.5 text-xs font-bold leading-none"
-                title="Remove department filter"
-              >
-                ×
-              </button>
-            </span>
-          )}
-          {statusFilter !== "all" && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200 capitalize">
-              <span>Status: {statusFilter}</span>
-              <button
-                type="button"
-                onClick={() => onStatusFilterChange("all")}
-                className="hover:text-rose-600 cursor-pointer ml-0.5 text-xs font-bold leading-none"
-                title="Remove status filter"
-              >
-                ×
-              </button>
-            </span>
-          )}
-          {searchTerm.trim() !== "" && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
-              <span>Search: &ldquo;{searchTerm}&rdquo;</span>
-              <button
-                type="button"
-                onClick={() => onSearchChange("")}
-                className="hover:text-rose-600 cursor-pointer ml-0.5 text-xs font-bold leading-none"
-                title="Clear search keyword"
-              >
-                ×
-              </button>
-            </span>
-          )}
-        </div>
-
-        {hasActiveFilters && (
-          <button
-            type="button"
-            onClick={onResetFilters}
-            className="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer ml-auto transition-colors"
-          >
-            Clear all filters
-          </button>
-        )}
       </div>
     </div>
   );
