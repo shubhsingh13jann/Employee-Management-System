@@ -115,6 +115,33 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
   const handleCollapseAll = () =>
     setCollapsedSquads(new Set(squadGroups.map((s) => String(s.supervisorId))));
 
+  // Auto-expand squads when global search is active and matches any squad member
+  React.useEffect(() => {
+    if (!searchTerm.trim()) return;
+    const q = searchTerm.toLowerCase().trim();
+    setCollapsedSquads((prev) => {
+      const next = new Set(prev);
+      squadGroups.forEach((s) => {
+        const supKey = String(s.supervisorId);
+        const hasMemberMatch = s.members.some(
+          (m) =>
+            m.employee_name.toLowerCase().includes(q) ||
+            m.employee_email.toLowerCase().includes(q) ||
+            String(m.employee_id).includes(q)
+        );
+        if (hasMemberMatch) {
+          next.delete(supKey);
+        }
+      });
+      return next;
+    });
+  }, [searchTerm, squadGroups]);
+
+  const isAllCollapsed =
+    displayedSquads.length > 0 &&
+    displayedSquads.every((s) => collapsedSquads.has(String(s.supervisorId)));
+  const isAllExpanded = collapsedSquads.size === 0;
+
   const selectedTargetSquad = useMemo(() => {
     if (!targetSquadId) return null;
     return squadGroups.find((s) => String(s.supervisorId) === targetSquadId) || null;
@@ -453,18 +480,28 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
               <button
                 type="button"
                 onClick={handleExpandAll}
-                className="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 hover:bg-white transition-all cursor-pointer text-[11px]"
+                className={`px-2.5 py-1 rounded-md transition-all cursor-pointer text-[11px] flex items-center gap-1.5 ${
+                  isAllExpanded
+                    ? "bg-white text-indigo-700 font-bold shadow-2xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+                }`}
                 title="Expand all squads"
               >
-                Expand All
+                <i className="bi bi-arrows-expand text-[10px]"></i>
+                <span>Expand All</span>
               </button>
               <button
                 type="button"
                 onClick={handleCollapseAll}
-                className="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 hover:bg-white transition-all cursor-pointer text-[11px]"
+                className={`px-2.5 py-1 rounded-md transition-all cursor-pointer text-[11px] flex items-center gap-1.5 ${
+                  isAllCollapsed
+                    ? "bg-white text-indigo-700 font-bold shadow-2xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+                }`}
                 title="Collapse all squads"
               >
-                Collapse All
+                <i className="bi bi-arrows-collapse text-[10px]"></i>
+                <span>Collapse All</span>
               </button>
             </div>
 
@@ -730,8 +767,23 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                   </div>
                 </div>
 
-                {/* Squad Members List */}
-                {!isCollapsed && (
+                {/* Squad Members List or Collapsed Summary */}
+                {isCollapsed ? (
+                  <div className="p-3 bg-slate-50/50 flex items-center justify-between border-t border-slate-100">
+                    <span className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5">
+                      <i className="bi bi-people text-slate-400 text-xs"></i>
+                      <span>Roster Collapsed ({squad.members.length} member{squad.members.length === 1 ? "" : "s"})</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => toggleSquad(supKey)}
+                      className="px-2.5 py-1 rounded-md bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-indigo-600 font-semibold text-[10px] transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+                    >
+                      <span>Expand Roster</span>
+                      <i className="bi bi-chevron-down text-[9px]"></i>
+                    </button>
+                  </div>
+                ) : (
                   <div className="p-3 flex-1 flex flex-col justify-between">
                     {/* Inline Filter if squad has > 3 members */}
                     {squad.members.length > 3 && (

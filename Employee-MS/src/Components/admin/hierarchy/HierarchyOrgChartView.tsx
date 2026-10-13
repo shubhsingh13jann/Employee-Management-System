@@ -63,8 +63,16 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
   const handleZoomIn = () => setZoom((prev) => Math.min(1.5, Number((prev + 0.1).toFixed(2))));
   const handleZoomOut = () => setZoom((prev) => Math.max(0.35, Number((prev - 0.1).toFixed(2))));
   const handleResetView = () => {
+    if (!canvasRef.current || !contentRef.current) {
+      setZoom(0.85);
+      setPan({ x: 0, y: 20 });
+      return;
+    }
+    const canvasRect = canvasRef.current.getBoundingClientRect();
+    const contentWidth = contentRef.current.scrollWidth;
+    const centerX = Math.round((canvasRect.width / 2) - (contentWidth / 2));
     setZoom(0.85);
-    setPan({ x: 0, y: 0 });
+    setPan({ x: centerX, y: 20 });
   };
 
   const handleFitToScreen = () => {
@@ -79,8 +87,10 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
       const scaleX = (canvasRect.width - paddingX) / contentWidth;
       const scaleY = (canvasRect.height - paddingY) / contentHeight;
       const optimalScale = Math.min(1.0, Math.max(0.35, Math.min(scaleX, scaleY > 0 ? scaleY : scaleX)));
-      setZoom(Number(optimalScale.toFixed(2)));
-      setPan({ x: 0, y: 0 });
+      const targetZoom = Number(optimalScale.toFixed(2));
+      setZoom(targetZoom);
+      const centerX = Math.round((canvasRect.width / 2) - (contentWidth / 2));
+      setPan({ x: centerX, y: 20 });
     }
   };
 
