@@ -28,6 +28,8 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
   onInitiateUnlink,
 }) => {
   const [collapsedSquads, setCollapsedSquads] = useState<Set<string>>(new Set());
+  const [capacityFilter, setCapacityFilter] = useState<"all" | "light" | "optimal" | "high">("all");
+  const [sortBy, setSortBy] = useState<"size-desc" | "size-asc" | "name" | "dept">("size-desc");
 
   // Group mappings by supervisor
   const squadGroups = useMemo<SquadGroup[]>(() => {
@@ -48,10 +50,39 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
       map.get(supKey)!.members.push(item);
     });
 
-    return Array.from(map.values()).sort((a, b) =>
-      b.members.length - a.members.length || a.supervisorName.localeCompare(b.supervisorName)
-    );
+    return Array.from(map.values());
   }, [mappings]);
+
+  // Capacity breakdown
+  const { lightCount, optimalCount, highCount } = useMemo(() => {
+    let light = 0;
+    let optimal = 0;
+    let high = 0;
+    squadGroups.forEach((s) => {
+      if (s.members.length <= 3) light++;
+      else if (s.members.length <= 7) optimal++;
+      else high++;
+    });
+    return { lightCount: light, optimalCount: optimal, highCount: high };
+  }, [squadGroups]);
+
+  // Filtered and sorted squads
+  const displayedSquads = useMemo(() => {
+    const filtered = squadGroups.filter((s) => {
+      if (capacityFilter === "light") return s.members.length <= 3;
+      if (capacityFilter === "optimal") return s.members.length >= 4 && s.members.length <= 7;
+      if (capacityFilter === "high") return s.members.length >= 8;
+      return true;
+    });
+
+    return filtered.sort((a, b) => {
+      if (sortBy === "size-desc") return b.members.length - a.members.length;
+      if (sortBy === "size-asc") return a.members.length - b.members.length;
+      if (sortBy === "name") return a.supervisorName.localeCompare(b.supervisorName);
+      if (sortBy === "dept") return (a.departmentName || "").localeCompare(b.departmentName || "");
+      return 0;
+    });
+  }, [squadGroups, capacityFilter, sortBy]);
 
   const toggleSquad = (supKey: string) => {
     setCollapsedSquads((prev) => {
@@ -64,6 +95,13 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
       return next;
     });
   };
+
+  const handleExpandAll = () => setCollapsedSquads(new Set());
+  const handleCollapseAll = () =>
+    setCollapsedSquads(new Set(squadGroups.map((s) => String(s.supervisorId))));
+
+  const avgSquadSize =
+    squadGroups.length > 0 ? (mappings.length / squadGroups.length).toFixed(1) : "0";
 
   const getCapacityMeta = (count: number) => {
     if (count <= 3) {
@@ -92,62 +130,169 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
 
   return (
     <div className="space-y-4">
-      {/* Squad Telemetry Banner */}
-      <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2.5">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs">
-            <i className="bi bi-people-fill"></i>
+      {/* Executive Squad Telemetry & Controls HUD */}
+      <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs p-3 sm:p-4 space-y-3">
+        {/* Top Row: Overview Metrics & Controls */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-sm shadow-xs">
+              <i className="bi bi-people-fill"></i>
+            </div>
+            <div>
+              <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight mb-0.5 flex items-center gap-2">
+                <span>Supervisor Squad Operations</span>
+                <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.2 rounded-full border border-indigo-200">
+                  {squadGroups.length} Squads
+                </span>
+              </h4>
+              <p className="text-[11px] text-slate-500 leading-tight mb-0">
+                {mappings.length} assigned personnel • Avg Span: ~{avgSquadSize} staff/squad
+              </p>
+            </div>
           </div>
-          <div>
-            <h4 className="text-xs font-bold text-slate-800 leading-none mb-0.5">
-              Squad Management Overview
-            </h4>
-            <p className="text-[10px] text-slate-500 leading-none mb-0">
-              {squadGroups.length} Active Squads • {mappings.length} Assigned Subordinates
-            </p>
+
+          {/* Action Buttons: Expand/Collapse & Sort Dropdown */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="inline-flex rounded-lg bg-slate-100 p-0.5 text-xs font-semibold">
+              <button
+                type="button"
+                onClick={handleExpandAll}
+                className="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 hover:bg-white transition-all cursor-pointer text-[11px]"
+                title="Expand all squads"
+              >
+                Expand All
+              </button>
+              <button
+                type="button"
+                onClick={handleCollapseAll}
+                className="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 hover:bg-white transition-all cursor-pointer text-[11px]"
+                title="Collapse all squads"
+              >
+                Collapse All
+              </button>
+            </div>
+
+            {/* Sort Selector */}
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200/90 rounded-lg px-2.5 py-1 text-xs">
+              <i className="bi bi-arrow-down-up text-slate-400 text-[10px]"></i>
+              <span className="text-slate-400 text-[11px]">Sort:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="bg-transparent text-slate-800 font-semibold text-[11px] outline-none cursor-pointer"
+              >
+                <option value="size-desc">Largest Squad First</option>
+                <option value="size-asc">Smallest Squad First</option>
+                <option value="name">Supervisor (A-Z)</option>
+                <option value="dept">Department (A-Z)</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-[11px]">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            Light (1-3)
-          </span>
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-            Optimal (4-7)
-          </span>
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-            High (8+)
-          </span>
+        {/* Bottom Row: Interactive Capacity Health Filters */}
+        <div className="pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[11px] font-semibold text-slate-500 mr-1">Capacity Filters:</span>
+            <button
+              type="button"
+              onClick={() => setCapacityFilter("all")}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                capacityFilter === "all"
+                  ? "bg-slate-900 text-white shadow-2xs"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              All Squads ({squadGroups.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setCapacityFilter("optimal")}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                capacityFilter === "optimal"
+                  ? "bg-indigo-600 text-white shadow-2xs"
+                  : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200/80"
+              }`}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+              <span>Optimal 4-7 ({optimalCount})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setCapacityFilter("light")}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                capacityFilter === "light"
+                  ? "bg-emerald-600 text-white shadow-2xs"
+                  : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/80"
+              }`}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              <span>Light 1-3 ({lightCount})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setCapacityFilter("high")}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                capacityFilter === "high"
+                  ? "bg-amber-600 text-white shadow-2xs"
+                  : "bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200/80"
+              }`}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+              <span>High Span 8+ ({highCount})</span>
+            </button>
+          </div>
+
+          {capacityFilter !== "all" && (
+            <button
+              type="button"
+              onClick={() => setCapacityFilter("all")}
+              className="text-[11px] font-semibold text-rose-600 hover:underline cursor-pointer flex items-center gap-1"
+            >
+              <i className="bi bi-x-circle text-[10px]"></i>
+              <span>Clear Health Filter</span>
+            </button>
+          )}
         </div>
       </div>
 
       {/* Main Squad Grid */}
-      {squadGroups.length === 0 ? (
+      {displayedSquads.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200/90 p-8 text-center shadow-2xs">
           <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xl mx-auto mb-3 shadow-xs">
             <i className="bi bi-people"></i>
           </div>
-          <h3 className="text-sm font-bold text-slate-800 mb-1">No Squads Found</h3>
+          <h3 className="text-sm font-bold text-slate-800 mb-1">No Matching Squads</h3>
           <p className="text-xs text-slate-500 max-w-sm mx-auto mb-4">
-            {searchTerm
+            {capacityFilter !== "all"
+              ? `No supervisor squads match the "${capacityFilter}" capacity load filter.`
+              : searchTerm
               ? `No supervisor squads match the search term "${searchTerm}".`
               : "No team lead reporting lines have been established yet."}
           </p>
-          <button
-            type="button"
-            onClick={() => onOpenAssignModal()}
-            className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer inline-flex items-center gap-1.5"
-          >
-            <i className="bi bi-person-plus-fill"></i>
-            <span>Create Squad Mapping</span>
-          </button>
+          <div className="flex items-center justify-center gap-2">
+            {capacityFilter !== "all" && (
+              <button
+                type="button"
+                onClick={() => setCapacityFilter("all")}
+                className="px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors cursor-pointer"
+              >
+                Show All Squads
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => onOpenAssignModal()}
+              className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer inline-flex items-center gap-1.5"
+            >
+              <i className="bi bi-person-plus-fill"></i>
+              <span>Create Squad Mapping</span>
+            </button>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5">
-          {squadGroups.map((squad) => {
+          {displayedSquads.map((squad) => {
             const supKey = String(squad.supervisorId);
             const isCollapsed = collapsedSquads.has(supKey);
             const capMeta = getCapacityMeta(squad.members.length);
