@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { HierarchyMappingItem, UnassignedEmployee } from "./HierarchyTableView";
+import { SupervisorCapacityDrawer } from "./SupervisorCapacityDrawer";
 
 export interface SquadGroup {
   supervisorId: string | number;
@@ -37,6 +38,7 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
   const [capacityFilter, setCapacityFilter] = useState<"all" | "light" | "optimal" | "high">("all");
   const [sortBy, setSortBy] = useState<"size-desc" | "size-asc" | "name" | "dept">("size-desc");
   const [cardSearches, setCardSearches] = useState<Record<string, string>>({});
+  const [inspectingSquad, setInspectingSquad] = useState<SquadGroup | null>(null);
 
   // Group mappings by supervisor
   const squadGroups = useMemo<SquadGroup[]>(() => {
@@ -356,16 +358,20 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                     </div>
 
                     <div className="flex items-center gap-1 shrink-0">
-                      {onInspectSquad && (
-                        <button
-                          type="button"
-                          onClick={() => onInspectSquad(squad)}
-                          className="p-1 rounded-md text-slate-500 hover:text-indigo-600 hover:bg-white transition-all cursor-pointer shadow-2xs border border-transparent hover:border-indigo-200"
-                          title="Inspect squad capacity and details"
-                        >
-                          <i className="bi bi-sliders text-xs"></i>
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (onInspectSquad) {
+                            onInspectSquad(squad);
+                          } else {
+                            setInspectingSquad(squad);
+                          }
+                        }}
+                        className="p-1 rounded-md text-slate-500 hover:text-indigo-600 hover:bg-white transition-all cursor-pointer shadow-2xs border border-transparent hover:border-indigo-200"
+                        title="Inspect squad capacity and details"
+                      >
+                        <i className="bi bi-sliders text-xs"></i>
+                      </button>
                       <button
                         type="button"
                         onClick={() => toggleSquad(supKey)}
@@ -577,6 +583,16 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
           </div>
         </div>
       )}
+
+      {/* Slide-out Supervisor Capacity Inspector Drawer */}
+      <SupervisorCapacityDrawer
+        isOpen={Boolean(inspectingSquad)}
+        onClose={() => setInspectingSquad(null)}
+        squad={inspectingSquad}
+        onOpenAssignModal={onOpenAssignModal}
+        onInitiateReassign={onInitiateReassign}
+        onInitiateUnlink={onInitiateUnlink}
+      />
     </div>
   );
 };

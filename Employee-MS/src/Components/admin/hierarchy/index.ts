@@ -8,3 +8,4 @@ export * from "./HierarchyOrgChartView";
 export * from "./ReassignConfirmModal";
 export * from "./UnlinkConfirmModal";
 export * from "./HierarchySquadCardsView";
+export * from "./SupervisorCapacityDrawer";
