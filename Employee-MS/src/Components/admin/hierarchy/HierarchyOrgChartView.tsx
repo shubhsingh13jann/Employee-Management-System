@@ -77,23 +77,43 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
     setPan({ x: centerX, y: 20 });
   };
 
-  const handleFitToScreen = () => {
+  const handleFitToScreen = (overrideExpanded?: boolean) => {
     if (!canvasRef.current || !contentRef.current) return;
     const canvasRect = canvasRef.current.getBoundingClientRect();
     const contentWidth = contentRef.current.scrollWidth;
     const contentHeight = contentRef.current.scrollHeight;
 
-    if (contentWidth > 0 && canvasRect.width > 0) {
+    const useExpanded = overrideExpanded !== undefined ? overrideExpanded : isExpanded;
+    const availableHeight = isFullscreen ? canvasRect.height : (useExpanded ? 740 : 540);
+    const availableWidth = canvasRect.width;
+
+    if (contentWidth > 0 && availableWidth > 0) {
       const paddingX = 48;
       const paddingY = 48;
-      const scaleX = (canvasRect.width - paddingX) / contentWidth;
-      const scaleY = (canvasRect.height - paddingY) / contentHeight;
+      const scaleX = (availableWidth - paddingX) / contentWidth;
+      const scaleY = (availableHeight - paddingY) / contentHeight;
       const optimalScale = Math.min(1.0, Math.max(0.35, Math.min(scaleX, scaleY > 0 ? scaleY : scaleX)));
       const targetZoom = Number(optimalScale.toFixed(2));
       setZoom(targetZoom);
-      const centerX = Math.round((canvasRect.width / 2) - (contentWidth / 2));
+      const centerX = Math.round((availableWidth / 2) - (contentWidth / 2));
       setPan({ x: centerX, y: 20 });
     }
+  };
+
+  const handleFitScreenClick = () => {
+    if (isFullscreen) {
+      handleFitToScreen();
+      return;
+    }
+    // In embedded mode: toggle canvas between standard (540px) and tall fitted (740px) height,
+    // and recalculate zoom and pan so all nodes fit vertically without clipping!
+    setIsExpanded((prev) => {
+      const nextExpanded = !prev;
+      setTimeout(() => {
+        handleFitToScreen(nextExpanded);
+      }, 120);
+      return nextExpanded;
+    });
   };
 
   const toggleFullscreen = () => {
@@ -317,12 +337,20 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
           <div className="flex items-center gap-1 bg-slate-100 border border-slate-200 rounded-lg p-0.5 shadow-2xs">
             <button
               type="button"
-              onClick={handleFitToScreen}
-              className="px-2.5 py-1 rounded-md text-[10px] font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
-              title="Auto-Fit Org Chart to Viewport"
+              onClick={handleFitScreenClick}
+              className={`px-2.5 py-1 rounded-md text-[10px] font-semibold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs ${
+                isExpanded && !isFullscreen
+                  ? "bg-indigo-600 text-white font-bold shadow-xs ring-2 ring-indigo-400/30"
+                  : "text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200"
+              }`}
+              title={
+                isExpanded && !isFullscreen
+                  ? "Canvas fitted & expanded (Click to return to compact 540px view)"
+                  : "Fit & expand org chart canvas to frame all reporting lines"
+              }
             >
-              <i className="bi bi-aspect-ratio text-xs"></i>
-              <span>Fit Screen</span>
+              <i className={`bi ${isExpanded && !isFullscreen ? "bi-check2-circle" : "bi-aspect-ratio"} text-xs`}></i>
+              <span>{isExpanded && !isFullscreen ? "Fitted View" : "Fit Screen"}</span>
             </button>
             <button
               type="button"
@@ -337,24 +365,6 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
               <i className={`bi ${isFullscreen ? "bi-fullscreen-exit" : "bi-arrows-fullscreen"} text-xs`}></i>
               <span>{isFullscreen ? "Exit Full Screen" : "Full Screen"}</span>
             </button>
-            {!isFullscreen && (
-              <button
-                type="button"
-                onClick={() => {
-                  setIsExpanded((prev) => !prev);
-                  setTimeout(handleFitToScreen, 120);
-                }}
-                className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-all cursor-pointer flex items-center gap-1 shadow-2xs ${
-                  isExpanded
-                    ? "bg-slate-800 text-white hover:bg-slate-700"
-                    : "text-slate-700 bg-white hover:bg-slate-50 border border-slate-200"
-                }`}
-                title={isExpanded ? "Collapse to Standard Height (540px)" : "Expand to Tall Height (740px)"}
-              >
-                <i className={`bi ${isExpanded ? "bi-arrows-collapse" : "bi-arrows-expand"} text-xs`}></i>
-                <span>{isExpanded ? "Standard (540px)" : "Tall (740px)"}</span>
-              </button>
-            )}
           </div>
 
           {/* Zoom controls */}
