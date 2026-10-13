@@ -39,6 +39,10 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
   const [sortBy, setSortBy] = useState<"size-desc" | "size-asc" | "name" | "dept">("size-desc");
   const [cardSearches, setCardSearches] = useState<Record<string, string>>({});
   const [inspectingSquad, setInspectingSquad] = useState<SquadGroup | null>(null);
+  const [unassignedSearch, setUnassignedSearch] = useState("");
+  const [targetSquadId, setTargetSquadId] = useState<string>("");
+  const [selectedUnassignedIds, setSelectedUnassignedIds] = useState<Set<string | number>>(new Set());
+  const [isTrayCollapsed, setIsTrayCollapsed] = useState(false);
 
   // Group mappings by supervisor
   const squadGroups = useMemo<SquadGroup[]>(() => {
@@ -108,6 +112,39 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
   const handleExpandAll = () => setCollapsedSquads(new Set());
   const handleCollapseAll = () =>
     setCollapsedSquads(new Set(squadGroups.map((s) => String(s.supervisorId))));
+
+  const selectedTargetSquad = useMemo(() => {
+    if (!targetSquadId) return null;
+    return squadGroups.find((s) => String(s.supervisorId) === targetSquadId) || null;
+  }, [squadGroups, targetSquadId]);
+
+  const filteredUnassigned = useMemo(() => {
+    const q = unassignedSearch.toLowerCase().trim();
+    if (!q) return unassignedStaff;
+    return unassignedStaff.filter(
+      (staff) =>
+        staff.name.toLowerCase().includes(q) ||
+        staff.email.toLowerCase().includes(q) ||
+        String(staff.id).includes(q)
+    );
+  }, [unassignedStaff, unassignedSearch]);
+
+  const toggleSelectUnassigned = (id: string | number) => {
+    setSelectedUnassignedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleSelectAllUnassigned = () => {
+    if (selectedUnassignedIds.size === filteredUnassigned.length && filteredUnassigned.length > 0) {
+      setSelectedUnassignedIds(new Set());
+    } else {
+      setSelectedUnassignedIds(new Set(filteredUnassigned.map((s) => s.id)));
+    }
+  };
 
   const avgSquadSize =
     squadGroups.length > 0 ? (mappings.length / squadGroups.length).toFixed(1) : "0";
@@ -546,41 +583,210 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
         </div>
       )}
 
-      {/* Unassigned Staff Pool Card (if any unassigned exist) */}
+      {/* Interactive Unassigned Staff Allocation Tray */}
       {unassignedStaff.length > 0 && (
-        <div className="bg-amber-50/60 border border-amber-200/90 rounded-xl p-3 sm:p-3.5 shadow-2xs">
-          <div className="flex items-center justify-between gap-2 mb-2.5">
+        <div className="bg-amber-50/50 border border-amber-200/90 rounded-xl p-3 sm:p-4 shadow-2xs space-y-3">
+          {/* Header */}
+          <div className="flex flex-wrap items-center justify-between gap-2.5">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-              <h4 className="text-xs font-bold text-amber-900 mb-0">
-                Unassigned Staff Pool ({unassignedStaff.length})
-              </h4>
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+              <div>
+                <h4 className="text-xs sm:text-sm font-bold text-amber-950 mb-0 flex items-center gap-2">
+                  <span>Unassigned Staff Allocation Tray</span>
+                  <span className="text-[10px] font-semibold text-amber-800 bg-amber-100/90 px-2 py-0.2 rounded-full border border-amber-300">
+                    {unassignedStaff.length} Unallocated Staff
+                  </span>
+                </h4>
+                <p className="text-[10px] text-amber-800/80 mb-0">
+                  Select a target supervisor squad for quick 1-click allocation or onboard staff individually.
+                </p>
+              </div>
             </div>
-            <span className="text-[10px] text-amber-700 font-semibold bg-amber-100/80 px-2 py-0.5 rounded border border-amber-300">
-              Needs Squad Assignment
-            </span>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsTrayCollapsed(!isTrayCollapsed)}
+                className="p-1 rounded-md text-amber-800 hover:bg-amber-100/80 transition-colors cursor-pointer text-xs"
+                title={isTrayCollapsed ? "Expand allocation tray" : "Collapse allocation tray"}
+              >
+                <i className={`bi bi-chevron-${isTrayCollapsed ? "down" : "up"}`}></i>
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-            {unassignedStaff.map((staff) => (
-              <div
-                key={`unassigned-pool-${staff.id}`}
-                className="bg-white rounded-lg p-2 border border-amber-200/80 shadow-2xs flex items-center justify-between gap-2"
-              >
-                <div className="min-w-0">
-                  <p className="text-xs font-bold text-slate-900 truncate mb-0">{staff.name}</p>
-                  <p className="text-[10px] text-slate-400 truncate mb-0">{staff.email}</p>
+          {!isTrayCollapsed && (
+            <>
+              {/* Controls: Target Squad Selector + Live Search */}
+              <div className="pt-2 border-t border-amber-200/60 flex flex-wrap items-center justify-between gap-2.5">
+                {/* Target Squad Quick Dropdown */}
+                <div className="flex items-center gap-2 flex-1 min-w-[240px]">
+                  <span className="text-[11px] font-bold text-amber-900 shrink-0">
+                    Target Squad:
+                  </span>
+                  <div className="relative flex-1">
+                    <select
+                      value={targetSquadId}
+                      onChange={(e) => setTargetSquadId(e.target.value)}
+                      className="w-full bg-white border border-amber-300 text-slate-800 text-xs rounded-lg px-2.5 py-1.5 font-medium outline-none focus:border-indigo-500 cursor-pointer shadow-2xs"
+                    >
+                      <option value="">-- Choose Target Supervisor Squad --</option>
+                      {squadGroups.map((s) => (
+                        <option key={`target-squad-${s.supervisorId}`} value={String(s.supervisorId)}>
+                          {s.supervisorName} ({s.members.length}/8 members{s.departmentName ? ` • ${s.departmentName}` : ""})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => onOpenAssignModal(staff.id)}
-                  className="px-2 py-0.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-semibold shrink-0 cursor-pointer shadow-2xs"
-                >
-                  Assign
-                </button>
+
+                {/* Filter and Select All */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="relative">
+                    <i className="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                    <input
+                      type="text"
+                      placeholder="Filter unassigned staff..."
+                      value={unassignedSearch}
+                      onChange={(e) => setUnassignedSearch(e.target.value)}
+                      className="pl-7 pr-6 py-1 text-xs rounded-lg bg-white border border-amber-300 text-slate-800 focus:outline-none focus:border-indigo-500 placeholder:text-slate-400 shadow-2xs w-44 sm:w-48"
+                    />
+                    {unassignedSearch && (
+                      <button
+                        type="button"
+                        onClick={() => setUnassignedSearch("")}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-[10px] cursor-pointer"
+                      >
+                        <i className="bi bi-x-circle-fill"></i>
+                      </button>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleSelectAllUnassigned}
+                    className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-white border border-amber-300 text-amber-900 hover:bg-amber-100/60 transition-colors cursor-pointer shadow-2xs"
+                  >
+                    {selectedUnassignedIds.size === filteredUnassigned.length && filteredUnassigned.length > 0
+                      ? "Deselect All"
+                      : "Select All"}
+                  </button>
+                </div>
               </div>
-            ))}
-          </div>
+
+              {/* Batch Action Banner if items selected */}
+              {selectedUnassignedIds.size > 0 && (
+                <div className="bg-indigo-600 text-white rounded-lg px-3 py-2 flex items-center justify-between text-xs shadow-xs animate-in fade-in">
+                  <div className="flex items-center gap-2">
+                    <i className="bi bi-check2-circle text-sm"></i>
+                    <span className="font-semibold">
+                      {selectedUnassignedIds.size} personnel selected
+                    </span>
+                    {selectedTargetSquad ? (
+                      <span className="text-indigo-200">
+                        ➔ Ready to onboard into <strong>{selectedTargetSquad.supervisorName}</strong>'s squad
+                      </span>
+                    ) : (
+                      <span className="text-indigo-200">
+                        ➔ Select a target squad above to batch allocate
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const firstId = Array.from(selectedUnassignedIds)[0];
+                        if (firstId) {
+                          onOpenAssignModal(
+                            firstId,
+                            selectedTargetSquad ? selectedTargetSquad.supervisorId : undefined,
+                            selectedTargetSquad ? selectedTargetSquad.managerId : undefined
+                          );
+                        }
+                      }}
+                      className="px-3 py-1 rounded bg-white text-indigo-700 font-bold hover:bg-indigo-50 transition-colors cursor-pointer shadow-2xs"
+                    >
+                      {selectedTargetSquad ? "Onboard to Squad" : "Assign Selected"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedUnassignedIds(new Set())}
+                      className="px-2 py-1 rounded text-white/80 hover:text-white hover:bg-indigo-500 text-[11px] cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Unassigned Cards Grid */}
+              {filteredUnassigned.length === 0 ? (
+                <div className="p-4 text-center text-xs text-amber-800 bg-white rounded-lg border border-amber-200">
+                  No unassigned staff match "{unassignedSearch}"
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                  {filteredUnassigned.map((staff) => {
+                    const isSelected = selectedUnassignedIds.has(staff.id);
+                    return (
+                      <div
+                        key={`unassigned-pool-${staff.id}`}
+                        className={`bg-white rounded-lg p-2.5 border transition-all flex items-center justify-between gap-2 shadow-2xs ${
+                          isSelected
+                            ? "border-indigo-500 ring-1 ring-indigo-500/20 bg-indigo-50/20"
+                            : "border-amber-200/90 hover:border-amber-300"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleSelectUnassigned(staff.id)}
+                            className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                          />
+                          <div className="w-6 h-6 rounded bg-amber-100 text-amber-800 font-bold text-[10px] flex items-center justify-center shrink-0">
+                            {staff.name.charAt(0)}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-slate-900 truncate mb-0 leading-tight">
+                              {staff.name}
+                            </p>
+                            <p className="text-[10px] text-slate-400 truncate mb-0 font-mono">
+                              EMP-{String(staff.id).padStart(4, "0")}
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            onOpenAssignModal(
+                              staff.id,
+                              selectedTargetSquad ? selectedTargetSquad.supervisorId : undefined,
+                              selectedTargetSquad ? selectedTargetSquad.managerId : undefined
+                            )
+                          }
+                          className={`px-2 py-1 rounded text-[10px] font-bold shrink-0 cursor-pointer shadow-2xs transition-all ${
+                            selectedTargetSquad
+                              ? "bg-indigo-600 hover:bg-indigo-500 text-white"
+                              : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                          }`}
+                          title={
+                            selectedTargetSquad
+                              ? `Assign to ${selectedTargetSquad.supervisorName}`
+                              : "Assign employee"
+                          }
+                        >
+                          {selectedTargetSquad ? "Onboard" : "Assign"}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
 
