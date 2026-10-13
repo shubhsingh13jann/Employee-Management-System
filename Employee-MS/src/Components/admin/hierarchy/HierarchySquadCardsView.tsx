@@ -140,7 +140,9 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
   const isAllCollapsed =
     displayedSquads.length > 0 &&
     displayedSquads.every((s) => collapsedSquads.has(String(s.supervisorId)));
-  const isAllExpanded = collapsedSquads.size === 0;
+  const isAllExpanded =
+    displayedSquads.length > 0 &&
+    displayedSquads.every((s) => !collapsedSquads.has(String(s.supervisorId)));
 
   const selectedTargetSquad = useMemo(() => {
     if (!targetSquadId) return null;
@@ -476,31 +478,31 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
 
           {/* Action Buttons: Expand/Collapse & Sort Dropdown */}
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="inline-flex rounded-lg bg-slate-100 p-0.5 text-xs font-semibold">
+            <div className="inline-flex rounded-xl bg-slate-100 p-1 text-xs font-semibold gap-1.5 shadow-2xs">
               <button
                 type="button"
                 onClick={handleExpandAll}
-                className={`px-2.5 py-1 rounded-md transition-all cursor-pointer text-[11px] flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer text-xs flex items-center gap-1.5 ${
                   isAllExpanded
-                    ? "bg-white text-indigo-700 font-bold shadow-2xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+                    ? "bg-indigo-600 text-white font-bold shadow-xs ring-2 ring-indigo-400/30"
+                    : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200/90 shadow-2xs"
                 }`}
                 title="Expand all squads"
               >
-                <i className="bi bi-arrows-expand text-[10px]"></i>
+                <i className="bi bi-arrows-expand text-xs"></i>
                 <span>Expand All</span>
               </button>
               <button
                 type="button"
                 onClick={handleCollapseAll}
-                className={`px-2.5 py-1 rounded-md transition-all cursor-pointer text-[11px] flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer text-xs flex items-center gap-1.5 ${
                   isAllCollapsed
-                    ? "bg-white text-indigo-700 font-bold shadow-2xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+                    ? "bg-indigo-600 text-white font-bold shadow-xs ring-2 ring-indigo-400/30"
+                    : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200/90 shadow-2xs"
                 }`}
                 title="Collapse all squads"
               >
-                <i className="bi bi-arrows-collapse text-[10px]"></i>
+                <i className="bi bi-arrows-collapse text-xs"></i>
                 <span>Collapse All</span>
               </button>
             </div>
@@ -673,8 +675,19 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                 className={`bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-xs transition-all flex flex-col overflow-hidden group ${cardAccentGlow}`}
               >
                 {/* Squad Card Header */}
-                <div className="p-3 sm:p-3.5 bg-gradient-to-r from-slate-50 to-indigo-50/30 border-b border-slate-200/70">
-                  <div className="flex items-start justify-between gap-2 mb-2">
+                <div
+                  className={`p-3 sm:p-3.5 bg-gradient-to-r from-slate-50 to-indigo-50/30 transition-all ${
+                    isCollapsed
+                      ? "cursor-pointer hover:bg-indigo-50/50"
+                      : "border-b border-slate-200/70"
+                  }`}
+                  onClick={(e) => {
+                    if (isCollapsed && !(e.target as HTMLElement).closest("button")) {
+                      toggleSquad(supKey);
+                    }
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-600 to-teal-700 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs border border-emerald-500/20">
                         {squad.supervisorName.charAt(0)}
@@ -694,10 +707,16 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {isCollapsed && (
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold border shadow-2xs ${capMeta.bg}`}>
+                          {squad.members.length}/8 members
+                        </span>
+                      )}
                       <button
                         type="button"
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           if (onInspectSquad) {
                             onInspectSquad(squad);
                           } else {
@@ -711,79 +730,76 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                       </button>
                       <button
                         type="button"
-                        onClick={() => toggleSquad(supKey)}
-                        className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleSquad(supKey);
+                        }}
+                        className={`px-2 py-1 rounded-md transition-all cursor-pointer shrink-0 flex items-center gap-1 text-[11px] font-semibold ${
+                          isCollapsed
+                            ? "bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 shadow-2xs"
+                            : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                        }`}
                         title={isCollapsed ? "Expand squad roster" : "Collapse squad roster"}
                       >
+                        {isCollapsed && <span>Expand</span>}
                         <i className={`bi bi-chevron-${isCollapsed ? "down" : "up"} text-xs`}></i>
                       </button>
                     </div>
                   </div>
 
-                  {/* Department & Manager Chain */}
-                  <div className="flex items-center gap-1.5 flex-wrap text-[10px] pt-1">
-                    {squad.departmentName && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-medium border border-slate-200">
-                        <i className="bi bi-building text-[9px] text-slate-500"></i>
-                        <span>{squad.departmentName}</span>
-                      </span>
-                    )}
-                    {squad.managerName && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 font-medium border border-indigo-200/80">
-                        <i className="bi bi-person-gear text-[9px] text-indigo-500"></i>
-                        <span>Mgr: {squad.managerName}</span>
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Capacity Bar & Ratio Gauge */}
-                  <div className="mt-2.5 pt-2 border-t border-slate-200/60">
-                    <div className="flex items-center justify-between text-[10px] font-semibold mb-1">
-                      <div className="flex items-center gap-1.5 text-slate-600">
-                        <span>Roster Capacity:</span>
-                        <span className="font-bold text-slate-900">{squad.members.length} / 8</span>
-                        <span className="text-slate-400 font-normal">({capMeta.capacityPercent}%)</span>
+                  {/* Department, Manager Chain & Capacity Gauges (shown when expanded) */}
+                  {!isCollapsed && (
+                    <>
+                      {/* Department & Manager Chain */}
+                      <div className="flex items-center gap-1.5 flex-wrap text-[10px] pt-2">
+                        {squad.departmentName && (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-medium border border-slate-200">
+                            <i className="bi bi-building text-[9px] text-slate-500"></i>
+                            <span>{squad.departmentName}</span>
+                          </span>
+                        )}
+                        {squad.managerName && (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 font-medium border border-indigo-200/80">
+                            <i className="bi bi-person-gear text-[9px] text-indigo-500"></i>
+                            <span>Mgr: {squad.managerName}</span>
+                          </span>
+                        )}
                       </div>
-                      <span className={`px-1.5 py-0.2 rounded border text-[9.5px] font-semibold ${capMeta.bg}`}>
-                        {capMeta.label}
-                      </span>
-                    </div>
-                    <div className="w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full ${capMeta.bar} transition-all duration-300 rounded-full`}
-                        style={{ width: `${capMeta.capacityPercent}%` }}
-                      ></div>
-                    </div>
-                    <div className="flex items-center justify-between text-[9px] text-slate-400 mt-1">
-                      <span>{capMeta.statusText}</span>
-                      <span>
-                        {8 - squad.members.length > 0
-                          ? `${8 - squad.members.length} slots available`
-                          : squad.members.length === 8
-                          ? "Target reached"
-                          : `${squad.members.length - 8} over target`}
-                      </span>
-                    </div>
-                  </div>
+
+                      {/* Capacity Bar & Ratio Gauge */}
+                      <div className="mt-2.5 pt-2 border-t border-slate-200/60">
+                        <div className="flex items-center justify-between text-[10px] font-semibold mb-1">
+                          <div className="flex items-center gap-1.5 text-slate-600">
+                            <span>Roster Capacity:</span>
+                            <span className="font-bold text-slate-900">{squad.members.length} / 8</span>
+                            <span className="text-slate-400 font-normal">({capMeta.capacityPercent}%)</span>
+                          </div>
+                          <span className={`px-1.5 py-0.2 rounded border text-[9.5px] font-semibold ${capMeta.bg}`}>
+                            {capMeta.label}
+                          </span>
+                        </div>
+                        <div className="w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full ${capMeta.bar} transition-all duration-300 rounded-full`}
+                            style={{ width: `${capMeta.capacityPercent}%` }}
+                          ></div>
+                        </div>
+                        <div className="flex items-center justify-between text-[9px] text-slate-400 mt-1">
+                          <span>{capMeta.statusText}</span>
+                          <span>
+                            {8 - squad.members.length > 0
+                              ? `${8 - squad.members.length} slots available`
+                              : squad.members.length === 8
+                              ? "Target reached"
+                              : `${squad.members.length - 8} over target`}
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
 
-                {/* Squad Members List or Collapsed Summary */}
-                {isCollapsed ? (
-                  <div className="p-3 bg-slate-50/50 flex items-center justify-between border-t border-slate-100">
-                    <span className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5">
-                      <i className="bi bi-people text-slate-400 text-xs"></i>
-                      <span>Roster Collapsed ({squad.members.length} member{squad.members.length === 1 ? "" : "s"})</span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => toggleSquad(supKey)}
-                      className="px-2.5 py-1 rounded-md bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-indigo-600 font-semibold text-[10px] transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
-                    >
-                      <span>Expand Roster</span>
-                      <i className="bi bi-chevron-down text-[9px]"></i>
-                    </button>
-                  </div>
-                ) : (
+                {!isCollapsed && (
                   <div className="p-3 flex-1 flex flex-col justify-between">
                     {/* Inline Filter if squad has > 3 members */}
                     {squad.members.length > 3 && (
