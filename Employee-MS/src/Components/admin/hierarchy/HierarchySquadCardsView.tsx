@@ -1,22 +1,27 @@
 import React, { useState, useMemo } from "react";
 import { HierarchyMappingItem, UnassignedEmployee } from "./HierarchyTableView";
 
-interface HierarchySquadCardsViewProps {
-  mappings: HierarchyMappingItem[];
-  unassignedStaff?: UnassignedEmployee[];
-  searchTerm?: string;
-  onOpenAssignModal: (employeeId?: string | number, supervisorId?: string | number) => void;
-  onInitiateReassign?: (employee: HierarchyMappingItem) => void;
-  onInitiateUnlink?: (employee: HierarchyMappingItem) => void;
-}
-
-interface SquadGroup {
+export interface SquadGroup {
   supervisorId: string | number;
   supervisorName: string;
   managerId?: string | number;
   managerName?: string;
   departmentName?: string;
   members: HierarchyMappingItem[];
+}
+
+export interface HierarchySquadCardsViewProps {
+  mappings: HierarchyMappingItem[];
+  unassignedStaff?: UnassignedEmployee[];
+  searchTerm?: string;
+  onOpenAssignModal: (
+    employeeId?: string | number,
+    supervisorId?: string | number,
+    managerId?: string | number
+  ) => void;
+  onInitiateReassign?: (employee: HierarchyMappingItem) => void;
+  onInitiateUnlink?: (employee: HierarchyMappingItem) => void;
+  onInspectSquad?: (squad: SquadGroup) => void;
 }
 
 export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = ({
@@ -26,10 +31,12 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
   onOpenAssignModal,
   onInitiateReassign,
   onInitiateUnlink,
+  onInspectSquad,
 }) => {
   const [collapsedSquads, setCollapsedSquads] = useState<Set<string>>(new Set());
   const [capacityFilter, setCapacityFilter] = useState<"all" | "light" | "optimal" | "high">("all");
   const [sortBy, setSortBy] = useState<"size-desc" | "size-asc" | "name" | "dept">("size-desc");
+  const [cardSearches, setCardSearches] = useState<Record<string, string>>({});
 
   // Group mappings by supervisor
   const squadGroups = useMemo<SquadGroup[]>(() => {
@@ -107,23 +114,38 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
     if (count <= 3) {
       return {
         label: "Light Load",
+        badgeText: "Light (1-3)",
         bg: "bg-emerald-50 text-emerald-700 border-emerald-200",
         bar: "bg-emerald-500",
         capacityPercent: Math.min(100, Math.round((count / 8) * 100)),
+        statusText: "Optimal for Mentorship",
       };
     } else if (count <= 7) {
       return {
         label: "Optimal Squad",
+        badgeText: "Optimal (4-7)",
         bg: "bg-indigo-50 text-indigo-700 border-indigo-200",
         bar: "bg-indigo-500",
         capacityPercent: Math.min(100, Math.round((count / 8) * 100)),
+        statusText: "Healthy Span",
+      };
+    } else if (count === 8) {
+      return {
+        label: "Full Capacity",
+        badgeText: "Full (8/8)",
+        bg: "bg-amber-50 text-amber-700 border-amber-200",
+        bar: "bg-amber-500",
+        capacityPercent: 100,
+        statusText: "At Target Limit",
       };
     } else {
       return {
         label: "High Span",
-        bg: "bg-amber-50 text-amber-700 border-amber-200",
-        bar: "bg-amber-500",
+        badgeText: "High Span (8+)",
+        bg: "bg-rose-50 text-rose-700 border-rose-200",
+        bar: "bg-rose-500",
         capacityPercent: 100,
+        statusText: "Consider Squad Split",
       };
     }
   };
@@ -296,11 +318,20 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
             const supKey = String(squad.supervisorId);
             const isCollapsed = collapsedSquads.has(supKey);
             const capMeta = getCapacityMeta(squad.members.length);
+            const cardSearch = (cardSearches[supKey] || "").toLowerCase().trim();
+            const displayedMembers = cardSearch
+              ? squad.members.filter(
+                  (m) =>
+                    m.employee_name.toLowerCase().includes(cardSearch) ||
+                    m.employee_email.toLowerCase().includes(cardSearch) ||
+                    String(m.employee_id).includes(cardSearch)
+                )
+              : squad.members;
 
             return (
               <div
                 key={`squad-${supKey}`}
-                className="bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-xs transition-all flex flex-col overflow-hidden"
+                className="bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-xs transition-all flex flex-col overflow-hidden group"
               >
                 {/* Squad Card Header */}
                 <div className="p-3 sm:p-3.5 bg-gradient-to-r from-slate-50 to-indigo-50/30 border-b border-slate-200/70">
@@ -324,14 +355,26 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => toggleSquad(supKey)}
-                      className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
-                      title={isCollapsed ? "Expand squad list" : "Collapse squad list"}
-                    >
-                      <i className={`bi bi-chevron-${isCollapsed ? "down" : "up"} text-xs`}></i>
-                    </button>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {onInspectSquad && (
+                        <button
+                          type="button"
+                          onClick={() => onInspectSquad(squad)}
+                          className="p-1 rounded-md text-slate-500 hover:text-indigo-600 hover:bg-white transition-all cursor-pointer shadow-2xs border border-transparent hover:border-indigo-200"
+                          title="Inspect squad capacity and details"
+                        >
+                          <i className="bi bi-sliders text-xs"></i>
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => toggleSquad(supKey)}
+                        className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+                        title={isCollapsed ? "Expand squad roster" : "Collapse squad roster"}
+                      >
+                        <i className={`bi bi-chevron-${isCollapsed ? "down" : "up"} text-xs`}></i>
+                      </button>
+                    </div>
                   </div>
 
                   {/* Department & Manager Chain */}
@@ -350,13 +393,15 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                     )}
                   </div>
 
-                  {/* Capacity Bar */}
+                  {/* Capacity Bar & Ratio Gauge */}
                   <div className="mt-2.5 pt-2 border-t border-slate-200/60">
                     <div className="flex items-center justify-between text-[10px] font-semibold mb-1">
-                      <span className="text-slate-600">
-                        Direct Reports ({squad.members.length})
-                      </span>
-                      <span className={`px-1.5 py-0.2 rounded border text-[9.5px] ${capMeta.bg}`}>
+                      <div className="flex items-center gap-1.5 text-slate-600">
+                        <span>Roster Capacity:</span>
+                        <span className="font-bold text-slate-900">{squad.members.length} / 8</span>
+                        <span className="text-slate-400 font-normal">({capMeta.capacityPercent}%)</span>
+                      </div>
+                      <span className={`px-1.5 py-0.2 rounded border text-[9.5px] font-semibold ${capMeta.bg}`}>
                         {capMeta.label}
                       </span>
                     </div>
@@ -366,72 +411,121 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                         style={{ width: `${capMeta.capacityPercent}%` }}
                       ></div>
                     </div>
+                    <div className="flex items-center justify-between text-[9px] text-slate-400 mt-1">
+                      <span>{capMeta.statusText}</span>
+                      <span>
+                        {8 - squad.members.length > 0
+                          ? `${8 - squad.members.length} slots available`
+                          : squad.members.length === 8
+                          ? "Target reached"
+                          : `${squad.members.length - 8} over target`}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Squad Members List */}
                 {!isCollapsed && (
                   <div className="p-3 flex-1 flex flex-col justify-between">
-                    <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-0.5 [scrollbar-width:thin]">
-                      {squad.members.map((member) => (
-                        <div
-                          key={`member-${member.id}`}
-                          className="flex items-center justify-between p-2 rounded-lg bg-slate-50/70 hover:bg-slate-100/80 border border-slate-200/70 transition-colors group"
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <div className="w-6 h-6 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[10px] shrink-0">
-                              {member.employee_name.charAt(0)}
-                            </div>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-semibold text-slate-800 text-xs truncate">
-                                  {member.employee_name}
-                                </span>
-                                <span className="text-[9px] text-slate-500 font-mono">
-                                  EMP-{String(member.employee_id).padStart(4, "0")}
+                    {/* Inline Filter if squad has > 3 members */}
+                    {squad.members.length > 3 && (
+                      <div className="mb-2 relative">
+                        <i className="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                        <input
+                          type="text"
+                          placeholder="Filter squad members..."
+                          value={cardSearches[supKey] || ""}
+                          onChange={(e) =>
+                            setCardSearches((prev) => ({
+                              ...prev,
+                              [supKey]: e.target.value,
+                            }))
+                          }
+                          className="w-full pl-7 pr-6 py-1 rounded-md text-[11px] bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-400 focus:outline-none transition-all placeholder:text-slate-400"
+                        />
+                        {cardSearches[supKey] && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setCardSearches((prev) => ({
+                                ...prev,
+                                [supKey]: "",
+                              }))
+                            }
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-[10px] cursor-pointer"
+                          >
+                            <i className="bi bi-x-circle-fill"></i>
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {displayedMembers.length === 0 ? (
+                      <div className="py-4 text-center text-xs text-slate-400 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                        No members match search
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-0.5 [scrollbar-width:thin]">
+                        {displayedMembers.map((member) => (
+                          <div
+                            key={`member-${member.id}`}
+                            className="flex items-center justify-between p-2 rounded-lg bg-slate-50/70 hover:bg-slate-100/80 border border-slate-200/70 transition-colors group/item"
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className="w-6 h-6 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[10px] shrink-0">
+                                {member.employee_name.charAt(0)}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-semibold text-slate-800 text-xs truncate">
+                                    {member.employee_name}
+                                  </span>
+                                  <span className="text-[9px] text-slate-500 font-mono">
+                                    EMP-{String(member.employee_id).padStart(4, "0")}
+                                  </span>
+                                </div>
+                                <span className="text-[10px] text-slate-400 block truncate">
+                                  {member.employee_email}
                                 </span>
                               </div>
-                              <span className="text-[10px] text-slate-400 block truncate">
-                                {member.employee_email}
-                              </span>
+                            </div>
+
+                            {/* Quick Actions */}
+                            <div className="flex items-center gap-1 shrink-0 opacity-80 group-hover/item:opacity-100 transition-opacity">
+                              {onInitiateReassign && (
+                                <button
+                                  type="button"
+                                  onClick={() => onInitiateReassign(member)}
+                                  className="w-6 h-6 rounded flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all cursor-pointer"
+                                  title="Reassign to another Team Lead"
+                                >
+                                  <i className="bi bi-arrow-left-right text-[10px]"></i>
+                                </button>
+                              )}
+                              {onInitiateUnlink && (
+                                <button
+                                  type="button"
+                                  onClick={() => onInitiateUnlink(member)}
+                                  className="w-6 h-6 rounded flex items-center justify-center text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all cursor-pointer"
+                                  title="Unlink from this squad"
+                                >
+                                  <i className="bi bi-x-circle text-[10px]"></i>
+                                </button>
+                              )}
                             </div>
                           </div>
-
-                          {/* Quick Actions */}
-                          <div className="flex items-center gap-1 shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
-                            {onInitiateReassign && (
-                              <button
-                                type="button"
-                                onClick={() => onInitiateReassign(member)}
-                                className="w-6 h-6 rounded flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all cursor-pointer"
-                                title="Reassign to another Team Lead"
-                              >
-                                <i className="bi bi-arrow-left-right text-[10px]"></i>
-                              </button>
-                            )}
-                            {onInitiateUnlink && (
-                              <button
-                                type="button"
-                                onClick={() => onInitiateUnlink(member)}
-                                className="w-6 h-6 rounded flex items-center justify-center text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all cursor-pointer"
-                                title="Unlink from this squad"
-                              >
-                                <i className="bi bi-x-circle text-[10px]"></i>
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
 
                     {/* Squad Card Bottom Action */}
                     <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
-                      <span className="text-[10px] text-slate-400">
-                        {squad.members.length} member{squad.members.length === 1 ? "" : "s"}
+                      <span className="text-[10px] text-slate-400 font-medium">
+                        {squad.members.length} direct report{squad.members.length === 1 ? "" : "s"}
                       </span>
                       <button
                         type="button"
-                        onClick={() => onOpenAssignModal(undefined, squad.supervisorId)}
+                        onClick={() => onOpenAssignModal(undefined, squad.supervisorId, squad.managerId)}
                         className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50/70 hover:bg-indigo-100/70 px-2.5 py-1 rounded-md transition-colors cursor-pointer flex items-center gap-1 border border-indigo-200/60"
                       >
                         <i className="bi bi-plus-lg text-[10px]"></i>

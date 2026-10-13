@@ -370,12 +370,15 @@ const HierarchyMapping = () => {
             mappings={filteredHierarchy}
             unassignedStaff={filteredUnassigned}
             searchTerm={searchTerm}
-            onOpenAssignModal={(empId, supId) => {
+            onOpenAssignModal={(empId, supId, mgrId) => {
               if (empId) {
                 setForm((prev) => ({ ...prev, employee_id: String(empId) }));
               }
               if (supId) {
                 setForm((prev) => ({ ...prev, supervisor_id: String(supId) }));
+              }
+              if (mgrId) {
+                setForm((prev) => ({ ...prev, manager_id: String(mgrId) }));
               }
               setShowModal(true);
             }}
