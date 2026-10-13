@@ -367,10 +367,19 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                 )
               : squad.members;
 
+            const cardAccentGlow =
+              squad.members.length <= 3
+                ? "hover:border-emerald-300 hover:ring-1 hover:ring-emerald-400/20"
+                : squad.members.length <= 7
+                ? "hover:border-indigo-300 hover:ring-1 hover:ring-indigo-400/20"
+                : squad.members.length === 8
+                ? "hover:border-amber-300 hover:ring-1 hover:ring-amber-400/20"
+                : "hover:border-rose-300 hover:ring-1 hover:ring-rose-400/20";
+
             return (
               <div
                 key={`squad-${supKey}`}
-                className="bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-xs transition-all flex flex-col overflow-hidden group"
+                className={`bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-xs transition-all flex flex-col overflow-hidden group ${cardAccentGlow}`}
               >
                 {/* Squad Card Header */}
                 <div className="p-3 sm:p-3.5 bg-gradient-to-r from-slate-50 to-indigo-50/30 border-b border-slate-200/70">
