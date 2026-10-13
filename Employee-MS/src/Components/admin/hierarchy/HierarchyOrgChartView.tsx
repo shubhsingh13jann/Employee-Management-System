@@ -57,6 +57,8 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
   const [isPanning, setIsPanning] = useState<boolean>(false);
   const [panStart, setPanStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -93,6 +95,51 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
       setPan({ x: centerX, y: 20 });
     }
   };
+
+  const toggleFullscreen = () => {
+    if (!isFullscreen) {
+      setIsFullscreen(true);
+      if (containerRef.current?.requestFullscreen) {
+        containerRef.current.requestFullscreen().catch(() => {
+          // Native fullscreen failed or restricted; fixed overlay remains active
+        });
+      }
+    } else {
+      setIsFullscreen(false);
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+    setTimeout(() => {
+      handleFitToScreen();
+    }, 150);
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && isFullscreen) {
+        setIsFullscreen(false);
+        setTimeout(handleFitToScreen, 150);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isFullscreen) {
+        setIsFullscreen(false);
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {});
+        }
+        setTimeout(handleFitToScreen, 150);
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isFullscreen]);
 
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     if (e.ctrlKey || e.metaKey) {
@@ -226,17 +273,30 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
   const totalEmployeesInTree = mappings.length;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs p-3 sm:p-4 mb-3 overflow-hidden">
+    <div
+      ref={containerRef}
+      className={
+        isFullscreen
+          ? "fixed inset-0 z-[100] bg-slate-100 flex flex-col p-3 sm:p-4 w-screen h-screen overflow-hidden shadow-2xl animate-in fade-in duration-150"
+          : "bg-white rounded-xl border border-slate-200/90 shadow-2xs p-3 sm:p-4 mb-3 overflow-hidden"
+      }
+    >
       {/* Tree View Compact Top Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 mb-2.5 border-b border-slate-200/80">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 mb-2.5 border-b border-slate-200/80 shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs">
             <i className="bi bi-diagram-3"></i>
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-bold text-xs sm:text-sm text-slate-900 mb-0">
-                Visual Chain of Command
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-bold text-xs sm:text-sm text-slate-900 mb-0 flex items-center gap-2">
+                <span>Visual Chain of Command</span>
+                {isFullscreen && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-600 text-white shadow-xs flex items-center gap-1">
+                    <i className="bi bi-arrows-fullscreen text-[9px]"></i>
+                    <span>Full Screen Presentation</span>
+                  </span>
+                )}
               </h3>
               {searchTerm.trim() !== "" && (
                 <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
@@ -253,12 +313,12 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
 
         {/* Canvas Toolbar: Expand/Collapse & Zoom/Pan Controls */}
         <div className="flex flex-wrap items-center gap-1.5 shrink-0">
-          {/* Auto-fit and expand canvas */}
+          {/* Viewport & Full Screen Controls */}
           <div className="flex items-center gap-1 bg-slate-100 border border-slate-200 rounded-lg p-0.5 shadow-2xs">
             <button
               type="button"
               onClick={handleFitToScreen}
-              className="px-2 py-1 rounded-md text-[10px] font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+              className="px-2.5 py-1 rounded-md text-[10px] font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
               title="Auto-Fit Org Chart to Viewport"
             >
               <i className="bi bi-aspect-ratio text-xs"></i>
@@ -266,20 +326,35 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => {
-                setIsExpanded((prev) => !prev);
-                setTimeout(handleFitToScreen, 120);
-              }}
-              className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-all cursor-pointer flex items-center gap-1 shadow-2xs ${
-                isExpanded
-                  ? "bg-indigo-600 text-white hover:bg-indigo-700"
-                  : "text-slate-700 bg-white hover:bg-slate-50 border border-slate-200"
+              onClick={toggleFullscreen}
+              className={`px-2.5 py-1 rounded-md text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-xs ${
+                isFullscreen
+                  ? "bg-rose-600 text-white hover:bg-rose-500 shadow-rose-200"
+                  : "bg-indigo-600 text-white hover:bg-indigo-500 shadow-indigo-200"
               }`}
-              title={isExpanded ? "Switch to Compact View" : "Expand Full Viewport Canvas"}
+              title={isFullscreen ? "Exit Full Screen Mode (ESC)" : "Open Full Screen Presentation Canvas"}
             >
-              <i className={`bi ${isExpanded ? "bi-fullscreen-exit" : "bi-arrows-angle-expand"} text-xs`}></i>
-              <span>{isExpanded ? "Compact" : "Expand"}</span>
+              <i className={`bi ${isFullscreen ? "bi-fullscreen-exit" : "bi-arrows-fullscreen"} text-xs`}></i>
+              <span>{isFullscreen ? "Exit Full Screen" : "Full Screen"}</span>
             </button>
+            {!isFullscreen && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsExpanded((prev) => !prev);
+                  setTimeout(handleFitToScreen, 120);
+                }}
+                className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-all cursor-pointer flex items-center gap-1 shadow-2xs ${
+                  isExpanded
+                    ? "bg-slate-800 text-white hover:bg-slate-700"
+                    : "text-slate-700 bg-white hover:bg-slate-50 border border-slate-200"
+                }`}
+                title={isExpanded ? "Collapse to Standard Height (540px)" : "Expand to Tall Height (740px)"}
+              >
+                <i className={`bi ${isExpanded ? "bi-arrows-collapse" : "bi-arrows-expand"} text-xs`}></i>
+                <span>{isExpanded ? "Standard (540px)" : "Tall (740px)"}</span>
+              </button>
+            )}
           </div>
 
           {/* Zoom controls */}
@@ -318,11 +393,16 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
 
           {/* Branch Expand/Collapse / Depth Filter */}
           <div className="flex items-center gap-0.5 bg-slate-100 border border-slate-200 rounded-lg p-0.5 shadow-2xs text-[10px]">
+            <span className="text-[10px] font-semibold text-slate-400 px-1 hidden sm:inline">Branches:</span>
             <button
               type="button"
               onClick={() => setCollapsedNodes(new Set())}
-              className="px-2 py-0.5 rounded text-slate-600 hover:text-slate-900 hover:bg-white font-semibold transition-all cursor-pointer flex items-center gap-1"
-              title="Expand All Nodes (All Staff)"
+              className={`px-2 py-0.5 rounded font-semibold transition-all cursor-pointer flex items-center gap-1 ${
+                collapsedNodes.size === 0
+                  ? "bg-white text-indigo-700 shadow-2xs border border-slate-200 font-bold"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white"
+              }`}
+              title="Expand All Hierarchy Branches (Show All Staff)"
             >
               <i className="bi bi-arrows-expand text-[10px]"></i>
               <span>All Staff</span>
@@ -338,8 +418,12 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                 });
                 setCollapsedNodes(supKeys);
               }}
-              className="px-2 py-0.5 rounded text-slate-600 hover:text-slate-900 hover:bg-white font-semibold transition-all cursor-pointer"
-              title="Show Managers and Leads Only"
+              className={`px-2 py-0.5 rounded font-semibold transition-all cursor-pointer ${
+                collapsedNodes.size > 0 && managersTree.length > 0 && !collapsedNodes.has(`mgr-${managersTree[0].id}`)
+                  ? "bg-white text-indigo-700 shadow-2xs border border-slate-200 font-bold"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white"
+              }`}
+              title="Show Managers and Leads Only (Hide Staff)"
             >
               Leads
             </button>
@@ -352,8 +436,12 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                 });
                 setCollapsedNodes(mgrKeys);
               }}
-              className="px-2 py-0.5 rounded text-slate-600 hover:text-slate-900 hover:bg-white font-semibold transition-all cursor-pointer"
-              title="Show Managers Only"
+              className={`px-2 py-0.5 rounded font-semibold transition-all cursor-pointer ${
+                collapsedNodes.size > 0 && managersTree.length > 0 && collapsedNodes.has(`mgr-${managersTree[0].id}`)
+                  ? "bg-white text-indigo-700 shadow-2xs border border-slate-200 font-bold"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white"
+              }`}
+              title="Show Managers Only (Hide Leads and Staff)"
             >
               Managers
             </button>
@@ -480,9 +568,13 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onWheel={handleWheel}
-        className={`overflow-hidden relative min-h-[400px] ${
-          isExpanded ? "h-[740px]" : "h-[540px]"
-        } pb-10 pt-4 bg-slate-50/70 border border-slate-200/90 rounded-xl select-none ${
+        className={`overflow-hidden relative select-none ${
+          isFullscreen
+            ? "flex-1 w-full h-full min-h-0 bg-white shadow-sm"
+            : isExpanded
+            ? "min-h-[400px] h-[740px] bg-slate-50/70"
+            : "min-h-[400px] h-[540px] bg-slate-50/70"
+        } pb-10 pt-4 border border-slate-200/90 rounded-xl ${
           isPanning ? "cursor-grabbing" : "cursor-grab"
         }`}
       >
