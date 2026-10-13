@@ -384,3 +384,4 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
     </div>
   );
 };
+

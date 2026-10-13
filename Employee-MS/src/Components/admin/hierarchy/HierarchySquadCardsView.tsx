@@ -593,24 +593,29 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
       )}
 
       {/* Interactive Unassigned Staff Allocation Tray */}
-      {unassignedStaff.length > 0 && (
-        <div className="bg-amber-50/50 border border-amber-200/90 rounded-xl p-3 sm:p-4 shadow-2xs space-y-3">
-          {/* Header */}
-          <div className="flex flex-wrap items-center justify-between gap-2.5">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
-              <div>
-                <h4 className="text-xs sm:text-sm font-bold text-amber-950 mb-0 flex items-center gap-2">
-                  <span>Unassigned Staff Allocation Tray</span>
-                  <span className="text-[10px] font-semibold text-amber-800 bg-amber-100/90 px-2 py-0.2 rounded-full border border-amber-300">
-                    {unassignedStaff.length} Unallocated Staff
-                  </span>
-                </h4>
-                <p className="text-[10px] text-amber-800/80 mb-0">
-                  Select a target supervisor squad for quick 1-click allocation or onboard staff individually.
-                </p>
-              </div>
+      <div className="bg-amber-50/50 border border-amber-200/90 rounded-xl p-3 sm:p-4 shadow-2xs space-y-3">
+        {/* Header */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2">
+            <span
+              className={`w-2.5 h-2.5 rounded-full ${
+                unassignedStaff.length > 0 ? "bg-amber-500 animate-pulse" : "bg-emerald-500"
+              }`}
+            ></span>
+            <div>
+              <h4 className="text-xs sm:text-sm font-bold text-amber-950 mb-0 flex items-center gap-2">
+                <span>Unassigned Staff Allocation Tray</span>
+                <span className="text-[10px] font-semibold text-amber-800 bg-amber-100/90 px-2 py-0.2 rounded-full border border-amber-300">
+                  {unassignedStaff.length > 0
+                    ? `${unassignedStaff.length} Unallocated Staff`
+                    : "All Staff Assigned (100% Coverage)"}
+                </span>
+              </h4>
+              <p className="text-[10px] text-amber-800/80 mb-0">
+                Select a target supervisor squad for quick 1-click allocation or onboard staff individually.
+              </p>
             </div>
+          </div>
 
             <div className="flex items-center gap-2">
               <button
@@ -730,7 +735,27 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
               )}
 
               {/* Unassigned Cards Grid */}
-              {filteredUnassigned.length === 0 ? (
+              {unassignedStaff.length === 0 ? (
+                <div className="p-4 text-center rounded-xl bg-white/80 border border-amber-200/80 shadow-2xs">
+                  <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm mx-auto mb-1.5 border border-emerald-200">
+                    <i className="bi bi-shield-check"></i>
+                  </div>
+                  <h5 className="text-xs font-bold text-slate-800 mb-0.5">
+                    All Workforce Personnel Allocated (100% Coverage)
+                  </h5>
+                  <p className="text-[11px] text-slate-500 max-w-md mx-auto mb-2">
+                    Every active employee is currently assigned to a supervisor squad. When new staff join or are unlinked from a squad (via the ⓧ button on any squad card above), they will appear here in this tray for direct 1-click batch allocation!
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => onOpenAssignModal()}
+                    className="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-2xs transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                  >
+                    <i className="bi bi-person-plus-fill text-[11px]"></i>
+                    <span>Open Assignment Modal</span>
+                  </button>
+                </div>
+              ) : filteredUnassigned.length === 0 ? (
                 <div className="p-4 text-center text-xs text-amber-800 bg-white rounded-lg border border-amber-200">
                   No unassigned staff match "{unassignedSearch}"
                 </div>
@@ -797,7 +822,6 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
             </>
           )}
         </div>
-      )}
 
       {/* Slide-out Supervisor Capacity Inspector Drawer */}
       <SupervisorCapacityDrawer
