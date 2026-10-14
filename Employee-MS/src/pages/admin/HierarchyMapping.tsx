@@ -501,6 +501,7 @@ const HierarchyMapping = () => {
         employees={employees}
         supervisors={supervisors}
         managers={managers}
+        mappings={hierarchy}
         saving={saving}
       />
 

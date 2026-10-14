@@ -1,12 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 
-interface UserOption {
+export interface UserOption {
   id: string | number;
   name: string;
   email?: string;
   department_name?: string;
   role?: string;
+}
+
+export interface HierarchyMappingItemSimple {
+  supervisor_id: string | number;
+  [key: string]: any;
 }
 
 interface AssignHierarchyModalProps {
@@ -26,6 +31,7 @@ interface AssignHierarchyModalProps {
   employees: UserOption[];
   supervisors: UserOption[];
   managers: UserOption[];
+  mappings?: HierarchyMappingItemSimple[];
   saving: boolean;
 }
 
@@ -38,17 +44,28 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
   employees,
   supervisors,
   managers,
+  mappings = [],
   saving,
 }) => {
   // ESC key to close
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape" && !saving) onClose();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, saving]);
+
+  // Compute live workload count per supervisor
+  const supervisorWorkloadMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    mappings.forEach((m) => {
+      const key = String(m.supervisor_id);
+      map[key] = (map[key] || 0) + 1;
+    });
+    return map;
+  }, [mappings]);
 
   if (!isOpen) return null;
 
@@ -56,15 +73,89 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
   const selectedSup = supervisors.find((s) => String(s.id) === String(form.supervisor_id));
   const selectedMgr = managers.find((m) => String(m.id) === String(form.manager_id));
 
+  const empDept = selectedEmp?.department_name;
   const isCrossDept =
-    selectedEmp?.department_name &&
+    empDept &&
     selectedSup?.department_name &&
-    selectedEmp.department_name !== selectedSup.department_name;
+    empDept.toLowerCase() !== selectedSup.department_name.toLowerCase();
+
+  // Partition supervisors into recommended (same dept) and others
+  const { recommendedSupervisors, otherSupervisors } = useMemo(() => {
+    if (!empDept) {
+      return { recommendedSupervisors: supervisors, otherSupervisors: [] };
+    }
+    const rec: UserOption[] = [];
+    const oth: UserOption[] = [];
+    supervisors.forEach((s) => {
+      if (s.department_name && s.department_name.toLowerCase() === empDept.toLowerCase()) {
+        rec.push(s);
+      } else {
+        oth.push(s);
+      }
+    });
+    return { recommendedSupervisors: rec, otherSupervisors: oth };
+  }, [supervisors, empDept]);
+
+  // Handle employee change with smart auto-recommendation
+  const handleEmployeeChange = (empId: string) => {
+    const chosenEmp = employees.find((e) => String(e.id) === String(empId));
+    let nextSupId = form.supervisor_id;
+    let nextMgrId = form.manager_id;
+
+    if (chosenEmp && chosenEmp.department_name) {
+      const matchingSups = supervisors.filter(
+        (s) => s.department_name && s.department_name.toLowerCase() === chosenEmp.department_name!.toLowerCase()
+      );
+      if (matchingSups.length > 0 && (!nextSupId || !matchingSups.some((s) => String(s.id) === String(nextSupId)))) {
+        // Pick supervisor with lowest current workload
+        const sorted = [...matchingSups].sort(
+          (a, b) => (supervisorWorkloadMap[String(a.id)] || 0) - (supervisorWorkloadMap[String(b.id)] || 0)
+        );
+        nextSupId = String(sorted[0].id);
+      }
+
+      const matchingMgr = managers.find(
+        (m) => m.department_name && m.department_name.toLowerCase() === chosenEmp.department_name!.toLowerCase()
+      );
+      if (matchingMgr) {
+        nextMgrId = String(matchingMgr.id);
+      }
+    }
+
+    onFormChange({
+      ...form,
+      employee_id: empId,
+      supervisor_id: nextSupId,
+      manager_id: nextMgrId,
+    });
+  };
+
+  // Handle supervisor change with automatic manager resolution
+  const handleSupervisorChange = (supId: string) => {
+    const chosenSup = supervisors.find((s) => String(s.id) === String(supId));
+    let nextMgrId = form.manager_id;
+    if (chosenSup && chosenSup.department_name) {
+      const matchedMgr = managers.find(
+        (m) => m.department_name && m.department_name.toLowerCase() === chosenSup.department_name!.toLowerCase()
+      );
+      if (matchedMgr) {
+        nextMgrId = String(matchedMgr.id);
+      }
+    }
+    onFormChange({
+      ...form,
+      supervisor_id: supId,
+      manager_id: nextMgrId,
+    });
+  };
+
+  const currentSupLoad = selectedSup ? (supervisorWorkloadMap[String(selectedSup.id)] || 0) : 0;
+  const newSupLoad = currentSupLoad + 1;
 
   return createPortal(
     <div
       className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-5 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-150"
-      onClick={onClose}
+      onClick={saving ? undefined : onClose}
     >
       <div
         className="w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150"
@@ -88,7 +179,8 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-xs"
+            disabled={saving}
+            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-xs disabled:opacity-50"
           >
             <i className="bi bi-x-lg"></i>
           </button>
@@ -99,15 +191,20 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
           <div className="p-5 sm:p-6 space-y-4 max-h-[75vh] overflow-y-auto">
             {/* Field 1: Subordinate Employee */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                1. Select Subordinate Employee <span className="text-rose-500">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-0">
+                  1. Select Subordinate Employee <span className="text-rose-500">*</span>
+                </label>
+                {selectedEmp?.department_name && (
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                    Dept: {selectedEmp.department_name}
+                  </span>
+                )}
+              </div>
               <div className="relative">
                 <select
                   value={form.employee_id}
-                  onChange={(e) =>
-                    onFormChange({ ...form, employee_id: e.target.value })
-                  }
+                  onChange={(e) => handleEmployeeChange(e.target.value)}
                   required
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white text-xs sm:text-sm text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer shadow-inner appearance-none pr-9"
                 >
@@ -122,62 +219,85 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                   <i className="bi bi-chevron-down"></i>
                 </div>
               </div>
-              {selectedEmp && (
-                <div className="mt-1.5 flex items-center gap-2 text-[11px] text-slate-500">
-                  <span className="font-semibold text-slate-700">Department:</span>
-                  <span className="px-2 py-0.2 rounded bg-slate-100 text-slate-700 border border-slate-200">
-                    {selectedEmp.department_name || "General"}
-                  </span>
-                </div>
-              )}
             </div>
 
-            {/* Field 2: Direct Supervisor */}
+            {/* Field 2: Direct Supervisor with Department Smart Grouping */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                2. Select Direct Supervisor (Team Lead) <span className="text-rose-500">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-0">
+                  2. Select Direct Supervisor (Team Lead) <span className="text-rose-500">*</span>
+                </label>
+                {selectedSup && (
+                  <span
+                    className={`text-[11px] font-semibold px-2 py-0.5 rounded border ${
+                      currentSupLoad <= 3
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : currentSupLoad <= 7
+                        ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                        : "bg-rose-50 text-rose-700 border-rose-200"
+                    }`}
+                  >
+                    Load: {currentSupLoad}/8 reports ({currentSupLoad <= 3 ? "Light" : currentSupLoad <= 7 ? "Optimal" : "High Span"})
+                  </span>
+                )}
+              </div>
               <div className="relative">
                 <select
                   value={form.supervisor_id}
-                  onChange={(e) =>
-                    onFormChange({ ...form, supervisor_id: e.target.value })
-                  }
+                  onChange={(e) => handleSupervisorChange(e.target.value)}
                   required
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white text-xs sm:text-sm text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer shadow-inner appearance-none pr-9"
                 >
                   <option value="">-- Choose Supervisor --</option>
-                  {supervisors.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} ({s.department_name || "Supervisor"})
-                    </option>
-                  ))}
+                  {recommendedSupervisors.length > 0 && (
+                    <optgroup label={`🌟 Department Leads (${empDept || "Recommended"})`}>
+                      {recommendedSupervisors.map((s) => {
+                        const load = supervisorWorkloadMap[String(s.id)] || 0;
+                        const statusTag = load <= 3 ? "Light" : load <= 7 ? "Optimal" : "High Span";
+                        return (
+                          <option key={`rec-sup-${s.id}`} value={s.id}>
+                            {s.name} ({s.department_name || "General"}) — {load}/8 reports [{statusTag}]
+                          </option>
+                        );
+                      })}
+                    </optgroup>
+                  )}
+                  {otherSupervisors.length > 0 && (
+                    <optgroup label="🌐 Other Department Leads">
+                      {otherSupervisors.map((s) => {
+                        const load = supervisorWorkloadMap[String(s.id)] || 0;
+                        const statusTag = load <= 3 ? "Light" : load <= 7 ? "Optimal" : "High Span";
+                        return (
+                          <option key={`oth-sup-${s.id}`} value={s.id}>
+                            {s.name} ({s.department_name || "General"}) — {load}/8 reports [{statusTag}]
+                          </option>
+                        );
+                      })}
+                    </optgroup>
+                  )}
                 </select>
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
                   <i className="bi bi-chevron-down"></i>
                 </div>
               </div>
-              {selectedSup && (
-                <div className="mt-1.5 flex items-center gap-2 text-[11px] text-slate-500">
-                  <span className="font-semibold text-slate-700">Team Lead Dept:</span>
-                  <span className="px-2 py-0.2 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
-                    {selectedSup.department_name || "Supervisor"}
-                  </span>
-                </div>
-              )}
             </div>
 
-            {/* Field 3: Department Manager */}
+            {/* Field 3: Department Manager with Auto-Fill */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                3. Select Department Manager <span className="text-rose-500">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-0">
+                  3. Select Department Manager <span className="text-rose-500">*</span>
+                </label>
+                {selectedMgr && (
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    Dept: {selectedMgr.department_name || "General"}
+                  </span>
+                )}
+              </div>
               <div className="relative">
                 <select
                   value={form.manager_id}
-                  onChange={(e) =>
-                    onFormChange({ ...form, manager_id: e.target.value })
-                  }
+                  onChange={(e) => onFormChange({ ...form, manager_id: e.target.value })}
                   required
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white text-xs sm:text-sm text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer shadow-inner appearance-none pr-9"
                 >
@@ -192,22 +312,37 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                   <i className="bi bi-chevron-down"></i>
                 </div>
               </div>
-              {selectedMgr && (
-                <div className="mt-1.5 flex items-center gap-2 text-[11px] text-slate-500">
-                  <span className="font-semibold text-slate-700">Manager Dept:</span>
-                  <span className="px-2 py-0.2 rounded bg-indigo-50 text-indigo-800 border border-indigo-200 font-medium">
-                    {selectedMgr.department_name || "Manager"}
-                  </span>
-                </div>
-              )}
             </div>
+
+            {/* Live Chain of Command Preview */}
+            {selectedEmp && selectedSup && selectedMgr && (
+              <div className="p-3.5 rounded-xl bg-slate-900 text-white border border-indigo-500/30 shadow-md space-y-2">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-indigo-300 flex items-center gap-1.5">
+                  <i className="bi bi-diagram-3-fill"></i>
+                  <span>Live Chain of Command Telemetry</span>
+                </span>
+                <div className="flex items-center gap-2 text-xs font-semibold overflow-x-auto py-1">
+                  <div className="px-2.5 py-1 rounded-lg bg-indigo-950 border border-indigo-500/50 text-indigo-200 shrink-0">
+                    👑 {selectedMgr.name} <span className="text-[10px] text-indigo-400 block font-normal">Manager</span>
+                  </div>
+                  <i className="bi bi-chevron-right text-indigo-400 text-xs shrink-0"></i>
+                  <div className="px-2.5 py-1 rounded-lg bg-emerald-950 border border-emerald-500/50 text-emerald-200 shrink-0">
+                    🛡️ {selectedSup.name} <span className="text-[10px] text-emerald-400 block font-normal">Supervisor (Load: {newSupLoad}/8)</span>
+                  </div>
+                  <i className="bi bi-chevron-right text-indigo-400 text-xs shrink-0"></i>
+                  <div className="px-2.5 py-1 rounded-lg bg-sky-950 border border-sky-500/50 text-sky-200 shrink-0">
+                    👤 {selectedEmp.name} <span className="text-[10px] text-sky-400 block font-normal">Direct Report</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Cross-Department Supervision Alert */}
             {isCrossDept && (
               <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-2.5 text-xs text-amber-800 animate-in fade-in">
-                <i className="bi bi-info-circle-fill text-amber-600 shrink-0 mt-0.5"></i>
+                <i className="bi bi-exclamation-triangle-fill text-amber-600 shrink-0 mt-0.5"></i>
                 <div>
-                  <strong className="block font-semibold">Cross-Department Supervision</strong>
+                  <strong className="block font-semibold">Cross-Department Supervision Warning</strong>
                   <span>
                     Employee is registered in <strong>{selectedEmp?.department_name}</strong> while Supervisor is in <strong>{selectedSup?.department_name}</strong>.
                   </span>
