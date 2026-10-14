@@ -23,6 +23,7 @@ export interface HierarchySquadCardsViewProps {
   onInitiateReassign?: (employee: HierarchyMappingItem) => void;
   onInitiateUnlink?: (employee: HierarchyMappingItem) => void;
   onInspectSquad?: (squad: SquadGroup) => void;
+  onOpenBatchModal?: (candidates: UnassignedEmployee[], targetSquad?: SquadGroup | null) => void;
 }
 
 export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = ({
@@ -33,6 +34,7 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
   onInitiateReassign,
   onInitiateUnlink,
   onInspectSquad,
+  onOpenBatchModal,
 }) => {
   const [collapsedSquads, setCollapsedSquads] = useState<Set<string>>(new Set());
   const [capacityFilter, setCapacityFilter] = useState<"all" | "light" | "optimal" | "high" | "unassigned">("all");
@@ -339,13 +341,18 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                 <button
                   type="button"
                   onClick={() => {
-                    const firstId = Array.from(selectedUnassignedIds)[0];
-                    if (firstId) {
-                      onOpenAssignModal(
-                        firstId,
-                        selectedTargetSquad ? selectedTargetSquad.supervisorId : undefined,
-                        selectedTargetSquad ? selectedTargetSquad.managerId : undefined
-                      );
+                    if (onOpenBatchModal) {
+                      const selectedList = unassignedStaff.filter((s) => selectedUnassignedIds.has(s.id));
+                      onOpenBatchModal(selectedList, selectedTargetSquad || null);
+                    } else {
+                      const firstId = Array.from(selectedUnassignedIds)[0];
+                      if (firstId) {
+                        onOpenAssignModal(
+                          firstId,
+                          selectedTargetSquad ? selectedTargetSquad.supervisorId : undefined,
+                          selectedTargetSquad ? selectedTargetSquad.managerId : undefined
+                        );
+                      }
                     }
                   }}
                   className="px-3 py-1 rounded bg-white text-indigo-700 font-bold hover:bg-indigo-50 transition-colors cursor-pointer shadow-2xs"

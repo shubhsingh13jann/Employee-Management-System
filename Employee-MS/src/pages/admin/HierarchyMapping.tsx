@@ -13,6 +13,7 @@ import {
   UnlinkConfirmModal,
   HierarchyExportModal,
   HierarchyPrintModal,
+  BatchOnboardModal,
 } from "../../Components/admin/hierarchy";
 
 const HierarchyMapping = () => {
@@ -58,6 +59,17 @@ const HierarchyMapping = () => {
   }>({
     isOpen: false,
     employee: null,
+  });
+
+  // Batch Onboarding State
+  const [batchModalState, setBatchModalState] = useState<{
+    isOpen: boolean;
+    candidates: any[];
+    targetSquad: any | null;
+  }>({
+    isOpen: false,
+    candidates: [],
+    targetSquad: null,
   });
 
   const unassignedEmployees = employees.filter(
@@ -224,6 +236,30 @@ const HierarchyMapping = () => {
       setMsg({
         type: "danger",
         text: err.response?.data?.error || "Failed to unlink reporting relationship",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleConfirmBatch = async (payload: {
+    employee_ids: (string | number)[];
+    supervisor_id: string | number;
+    manager_id: string | number;
+  }) => {
+    try {
+      setSaving(true);
+      setMsg({ type: "", text: "" });
+      const res = await api.post("/api/admin/hierarchy/bulk-assign", payload);
+      if (res.data.status) {
+        setMsg({ type: "success", text: res.data.message || "Batch onboarding completed successfully!" });
+        setBatchModalState({ isOpen: false, candidates: [], targetSquad: null });
+        fetchData();
+      }
+    } catch (err: any) {
+      setMsg({
+        type: "danger",
+        text: err.response?.data?.error || "Failed to execute batch onboarding",
       });
     } finally {
       setSaving(false);
@@ -404,6 +440,13 @@ const HierarchyMapping = () => {
                 employee: emp,
               });
             }}
+            onOpenBatchModal={(candidates, targetSquad) => {
+              setBatchModalState({
+                isOpen: true,
+                candidates,
+                targetSquad: targetSquad || null,
+              });
+            }}
           />
         ) : (
           <HierarchyTableView
@@ -527,6 +570,18 @@ const HierarchyMapping = () => {
         uniqueSupervisorsCount={uniqueSupervisorsCount}
         uniqueManagersCount={uniqueManagersCount}
         unassignedCount={unassignedCount}
+      />
+
+      {/* Modern Multi-Staff Batch Onboarding Modal */}
+      <BatchOnboardModal
+        isOpen={batchModalState.isOpen}
+        onClose={() => setBatchModalState({ isOpen: false, candidates: [], targetSquad: null })}
+        selectedCandidates={batchModalState.candidates}
+        initialTargetSquad={batchModalState.targetSquad}
+        supervisors={supervisors}
+        managers={managers}
+        onConfirmBatch={handleConfirmBatch}
+        saving={saving}
       />
     </div>
   );
