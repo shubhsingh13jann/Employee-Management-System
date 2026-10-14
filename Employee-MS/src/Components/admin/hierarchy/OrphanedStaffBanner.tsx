@@ -5,6 +5,7 @@ interface OrphanedStaffBannerProps {
   onQuickAssign: () => void;
   onFilterUnassigned: () => void;
   isFilterActive: boolean;
+  onOpenAutoAssignWizard?: () => void;
 }
 
 export const OrphanedStaffBanner: React.FC<OrphanedStaffBannerProps> = ({
@@ -12,6 +13,7 @@ export const OrphanedStaffBanner: React.FC<OrphanedStaffBannerProps> = ({
   onQuickAssign,
   onFilterUnassigned,
   isFilterActive,
+  onOpenAutoAssignWizard,
 }) => {
   if (unassignedCount <= 0) return null;
 
@@ -54,6 +56,17 @@ export const OrphanedStaffBanner: React.FC<OrphanedStaffBannerProps> = ({
           <i className="bi bi-diagram-2 text-xs"></i>
           <span>Assign Now</span>
         </button>
+
+        {onOpenAutoAssignWizard && (
+          <button
+            type="button"
+            onClick={onOpenAutoAssignWizard}
+            className="px-3 py-1 rounded-lg text-xs font-semibold bg-gradient-to-r from-amber-600 via-indigo-600 to-indigo-700 hover:from-amber-500 hover:to-indigo-600 text-white transition-all shadow-xs cursor-pointer flex items-center gap-1 active:scale-95"
+          >
+            <i className="bi bi-magic text-xs"></i>
+            <span>Auto-Assign Wizard</span>
+          </button>
+        )}
       </div>
     </div>
   );

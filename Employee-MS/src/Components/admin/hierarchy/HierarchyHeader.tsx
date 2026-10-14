@@ -10,6 +10,7 @@ interface HierarchyHeaderProps {
   onOpenExportModal?: () => void;
   onPrint?: () => void;
   onOpenAuditModal?: () => void;
+  onOpenAutoAssignWizard?: () => void;
 }
 
 export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
@@ -22,6 +23,7 @@ export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
   onOpenExportModal,
   onPrint,
   onOpenAuditModal,
+  onOpenAutoAssignWizard,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -265,6 +267,20 @@ export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
                 >
                   <i className="bi bi-clock-history text-amber-400 text-sm shrink-0"></i>
                   <span className="whitespace-nowrap">Hierarchy Audit Trail</span>
+                </button>
+              )}
+
+              {onOpenAutoAssignWizard && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onOpenAutoAssignWizard();
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-amber-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left whitespace-nowrap"
+                >
+                  <i className="bi bi-magic text-amber-400 text-sm shrink-0"></i>
+                  <span className="whitespace-nowrap">Auto-Assign Wizard</span>
                 </button>
               )}
             </div>

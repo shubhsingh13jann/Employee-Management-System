@@ -15,6 +15,7 @@ import {
   HierarchyPrintModal,
   BatchOnboardModal,
   HierarchyAuditModal,
+  AutoAssignWizardModal,
 } from "../../Components/admin/hierarchy";
 
 const HierarchyMapping = () => {
@@ -27,6 +28,7 @@ const HierarchyMapping = () => {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
+  const [isAutoAssignWizardOpen, setIsAutoAssignWizardOpen] = useState(false);
   const [msg, setMsg] = useState({ type: "", text: "" });
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
@@ -268,6 +270,50 @@ const HierarchyMapping = () => {
     }
   };
 
+  const handleExecuteAutoAssign = async (
+    assignments: { employee_id: string | number; supervisor_id: string | number; manager_id: string | number }[]
+  ) => {
+    try {
+      setSaving(true);
+      setMsg({ type: "", text: "" });
+
+      const grouped = new Map<
+        string,
+        { supervisor_id: string | number; manager_id: string | number; empIds: (string | number)[] }
+      >();
+
+      assignments.forEach((a) => {
+        const key = `${a.supervisor_id}_${a.manager_id}`;
+        if (!grouped.has(key)) {
+          grouped.set(key, { supervisor_id: a.supervisor_id, manager_id: a.manager_id, empIds: [] });
+        }
+        grouped.get(key)!.empIds.push(a.employee_id);
+      });
+
+      for (const grp of grouped.values()) {
+        await api.post("/api/admin/hierarchy/bulk-assign", {
+          employee_ids: grp.empIds,
+          supervisor_id: grp.supervisor_id,
+          manager_id: grp.manager_id,
+        });
+      }
+
+      setMsg({
+        type: "success",
+        text: `Successfully auto-allocated ${assignments.length} staff members to balanced department squads!`,
+      });
+      setIsAutoAssignWizardOpen(false);
+      fetchData();
+    } catch (err: any) {
+      setMsg({
+        type: "danger",
+        text: err.response?.data?.error || "Failed to execute auto-assignment wizard",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="w-full space-y-3 sm:space-y-3.5">
       {/* Alert Notification */}
@@ -310,6 +356,7 @@ const HierarchyMapping = () => {
           onOpenExportModal={() => setIsExportModalOpen(true)}
           onPrint={() => setIsPrintModalOpen(true)}
           onOpenAuditModal={() => setIsAuditModalOpen(true)}
+          onOpenAutoAssignWizard={() => setIsAutoAssignWizardOpen(true)}
         />
 
         {/* KPI Stats Grid */}
@@ -334,6 +381,7 @@ const HierarchyMapping = () => {
           onQuickAssign={() => setShowModal(true)}
           onFilterUnassigned={() => handleToggleKpiCard("orphaned")}
           isFilterActive={activeKpiFilter === "orphaned"}
+          onOpenAutoAssignWizard={() => setIsAutoAssignWizardOpen(true)}
         />
 
         {/* Filter and Search Bar */}
@@ -592,6 +640,18 @@ const HierarchyMapping = () => {
       <HierarchyAuditModal
         isOpen={isAuditModalOpen}
         onClose={() => setIsAuditModalOpen(false)}
+      />
+
+      {/* Intelligent Auto-Assign Wizard Modal */}
+      <AutoAssignWizardModal
+        isOpen={isAutoAssignWizardOpen}
+        onClose={() => setIsAutoAssignWizardOpen(false)}
+        unassignedStaff={unassignedEmployees}
+        supervisors={supervisors}
+        managers={managers}
+        mappings={hierarchy}
+        onExecuteAutoAssign={handleExecuteAutoAssign}
+        saving={saving}
       />
     </div>
   );
