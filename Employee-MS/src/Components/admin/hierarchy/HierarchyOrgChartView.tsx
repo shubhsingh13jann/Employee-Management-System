@@ -205,6 +205,110 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
     });
   };
 
+  const [isExportingImage, setIsExportingImage] = useState<boolean>(false);
+
+  const handleExportImage = () => {
+    if (!contentRef.current) return;
+    try {
+      setIsExportingImage(true);
+      const content = contentRef.current;
+      const width = Math.max(1200, content.scrollWidth + 120);
+      const height = Math.max(800, content.scrollHeight + 120);
+
+      const clone = content.cloneNode(true) as HTMLElement;
+      clone.style.transform = "none";
+      clone.style.margin = "0";
+
+      // Collect all stylesheets
+      let styles = "";
+      try {
+        styles = Array.from(document.styleSheets)
+          .map((sheet) => {
+            try {
+              return Array.from(sheet.cssRules).map((r) => r.cssText).join("\n");
+            } catch {
+              return "";
+            }
+          })
+          .join("\n");
+      } catch {
+        styles = "";
+      }
+
+      const svgData = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+          <style>${styles}</style>
+          <rect width="100%" height="100%" fill="#f8fafc"/>
+          <foreignObject width="100%" height="100%">
+            <div xmlns="http://www.w3.org/1999/xhtml" style="padding: 40px; font-family: system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100%;">
+              ${clone.outerHTML}
+            </div>
+          </foreignObject>
+        </svg>
+      `;
+
+      const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+      const URL = window.URL || window.webkitURL || window;
+      const blobURL = URL.createObjectURL(svgBlob);
+
+      const image = new Image();
+      image.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = width * 1.5;
+          canvas.height = height * 1.5;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.scale(1.5, 1.5);
+            ctx.fillStyle = "#f8fafc";
+            ctx.fillRect(0, 0, width, height);
+            ctx.drawImage(image, 0, 0);
+
+            // Watermark footer
+            ctx.fillStyle = "#64748b";
+            ctx.font = "bold 12px sans-serif";
+            ctx.fillText("Enterprise Workforce Team Hierarchy • Confidential Reporting Structure", 40, height - 20);
+
+            const pngUrl = canvas.toDataURL("image/png");
+            const downloadLink = document.createElement("a");
+            downloadLink.href = pngUrl;
+            downloadLink.download = `Workforce_Org_Chart_${new Date().toISOString().slice(0, 10)}.png`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+          }
+        } catch {
+          // If canvas fails or is tainted, download vector SVG
+          const downloadLink = document.createElement("a");
+          downloadLink.href = blobURL;
+          downloadLink.download = `Workforce_Org_Chart_${new Date().toISOString().slice(0, 10)}.svg`;
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
+        } finally {
+          URL.revokeObjectURL(blobURL);
+          setIsExportingImage(false);
+        }
+      };
+
+      image.onerror = () => {
+        // Fallback: download directly as high-res SVG
+        const downloadLink = document.createElement("a");
+        downloadLink.href = blobURL;
+        downloadLink.download = `Workforce_Org_Chart_${new Date().toISOString().slice(0, 10)}.svg`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        setIsExportingImage(false);
+      };
+
+      image.src = blobURL;
+    } catch (err) {
+      console.error("Export image error:", err);
+      setIsExportingImage(false);
+    }
+  };
+
   // Build hierarchical tree structure from flat mappings
   const managersTree = useMemo(() => {
     const managersMap = new Map<string | number, TreeNodeManager>();
@@ -364,6 +468,16 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
             >
               <i className={`bi ${isFullscreen ? "bi-fullscreen-exit" : "bi-arrows-fullscreen"} text-xs`}></i>
               <span>{isFullscreen ? "Exit Full Screen" : "Full Screen"}</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleExportImage}
+              disabled={isExportingImage}
+              className="px-2.5 py-1 rounded-md text-[10px] font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs transition-all cursor-pointer flex items-center gap-1.5"
+              title="Download High-Resolution Org Chart PNG"
+            >
+              <i className={`bi ${isExportingImage ? "bi-hourglass-split animate-spin" : "bi-camera-fill"} text-emerald-600 text-xs`}></i>
+              <span>{isExportingImage ? "Rendering..." : "Export Image"}</span>
             </button>
           </div>
 
