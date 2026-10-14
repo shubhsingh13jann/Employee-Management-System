@@ -1380,6 +1380,86 @@ export const unlinkHierarchy = async (req, res) => {
   }
 };
 
+export const bulkAssignHierarchy = async (req, res) => {
+  try {
+    const { employee_ids, supervisor_id, manager_id } = req.body;
+    if (!employee_ids || !Array.isArray(employee_ids) || employee_ids.length === 0) {
+      return res.status(400).json({ status: false, error: "At least one employee must be selected for bulk assignment." });
+    }
+    if (!supervisor_id) {
+      return res.status(400).json({ status: false, error: "Supervisor ID is required." });
+    }
+
+    let resolvedManagerId = manager_id;
+    if (!resolvedManagerId) {
+      // Lookup supervisor's department manager or any manager
+      const [supRows] = await pool.query(
+        "SELECT department_id FROM users WHERE id = ?",
+        [supervisor_id]
+      );
+      if (supRows.length > 0 && supRows[0].department_id) {
+        const [deptMgr] = await pool.query(
+          "SELECT id FROM users WHERE role = 'manager' AND department_id = ? LIMIT 1",
+          [supRows[0].department_id]
+        );
+        if (deptMgr.length > 0) {
+          resolvedManagerId = deptMgr[0].id;
+        }
+      }
+      if (!resolvedManagerId) {
+        const [anyMgr] = await pool.query(
+          "SELECT id FROM users WHERE role = 'manager' LIMIT 1"
+        );
+        resolvedManagerId = anyMgr.length > 0 ? anyMgr[0].id : 1;
+      }
+    }
+
+    // Build batch insert / upsert values
+    const values = [];
+    const placeholders = employee_ids.map((empId) => {
+      values.push(empId, supervisor_id, resolvedManagerId);
+      return "(?, ?, ?, CURRENT_TIMESTAMP)";
+    }).join(", ");
+
+    await pool.query(
+      `INSERT INTO team_hierarchy (employee_id, supervisor_id, manager_id, assigned_at)
+       VALUES ${placeholders}
+       ON DUPLICATE KEY UPDATE supervisor_id = VALUES(supervisor_id), manager_id = VALUES(manager_id), assigned_at = CURRENT_TIMESTAMP`,
+      values
+    );
+
+    // Audit Log
+    try {
+      await pool.query(
+        `INSERT INTO user_audit_logs (user_id, action, performed_by, details, created_at)
+         VALUES (?, 'hierarchy_bulk_assigned', ?, ?, NOW())`,
+        [
+          employee_ids[0],
+          req.user?.id || 1,
+          JSON.stringify({
+            message: `Bulk assigned ${employee_ids.length} employees to supervisor ${supervisor_id} and manager ${resolvedManagerId}`,
+            employee_ids,
+            supervisor_id,
+            manager_id: resolvedManagerId,
+            count: employee_ids.length,
+          }),
+        ]
+      );
+    } catch (auditErr) {
+      console.warn("Audit log notice:", auditErr.message);
+    }
+
+    return res.json({
+      status: true,
+      message: `Successfully onboarded ${employee_ids.length} employee${employee_ids.length > 1 ? "s" : ""} to squad!`,
+      count: employee_ids.length,
+    });
+  } catch (err) {
+    console.error("Bulk assign hierarchy error:", err);
+    return res.status(500).json({ status: false, error: "Failed to perform bulk team assignment" });
+  }
+};
+
 export const broadcastAnnouncement = async (req, res) => {
   try {
     const { userIds, subject, message, priority = "standard", channels } = req.body;
