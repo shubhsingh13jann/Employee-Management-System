@@ -334,6 +334,8 @@ const HierarchyMapping = () => {
             setStatusFilter("all");
             setActiveKpiFilter(null);
           }}
+          onOpenExportModal={() => setIsExportModalOpen(true)}
+          onPrint={() => setIsPrintModalOpen(true)}
         />
 
         {/* Dynamic View Rendering: Org Chart Tree vs Table View */}

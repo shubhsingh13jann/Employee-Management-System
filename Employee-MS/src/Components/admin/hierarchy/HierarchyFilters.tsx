@@ -13,6 +13,8 @@ interface HierarchyFiltersProps {
   totalFiltered: number;
   totalCount: number;
   onResetFilters: () => void;
+  onOpenExportModal?: () => void;
+  onPrint?: () => void;
 }
 
 export const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
@@ -28,6 +30,8 @@ export const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
   totalFiltered,
   totalCount,
   onResetFilters,
+  onOpenExportModal,
+  onPrint,
 }) => {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -286,6 +290,33 @@ export const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
             >
               <i className="bi bi-x-circle text-[10px]"></i>
               <span>Reset Filters</span>
+            </button>
+          )}
+        </div>
+
+        {/* Right: Quick Export & Print Shortcuts */}
+        <div className="flex items-center gap-1.5 ml-auto no-print">
+          {onOpenExportModal && (
+            <button
+              type="button"
+              onClick={onOpenExportModal}
+              className="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+              title="Export Current Workforce Roster to CSV"
+            >
+              <i className="bi bi-file-earmark-spreadsheet text-xs"></i>
+              <span>Export CSV</span>
+            </button>
+          )}
+
+          {onPrint && (
+            <button
+              type="button"
+              onClick={onPrint}
+              className="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+              title="Print Hierarchy Dossier"
+            >
+              <i className="bi bi-printer text-xs"></i>
+              <span>Print Dossier</span>
             </button>
           )}
         </div>
