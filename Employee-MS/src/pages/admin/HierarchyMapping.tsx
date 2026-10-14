@@ -16,6 +16,7 @@ import {
   BatchOnboardModal,
   HierarchyAuditModal,
   AutoAssignWizardModal,
+  HierarchyEmployeeDossierModal,
 } from "../../Components/admin/hierarchy";
 
 const HierarchyMapping = () => {
@@ -29,6 +30,7 @@ const HierarchyMapping = () => {
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
   const [isAutoAssignWizardOpen, setIsAutoAssignWizardOpen] = useState(false);
+  const [selectedDossierEmployee, setSelectedDossierEmployee] = useState<any | null>(null);
   const [msg, setMsg] = useState({ type: "", text: "" });
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
@@ -459,6 +461,7 @@ const HierarchyMapping = () => {
                 targetManager: payload.targetManager || null,
               });
             }}
+            onViewDossier={(emp) => setSelectedDossierEmployee(emp)}
           />
         ) : viewMode === "squad" ? (
           <HierarchySquadCardsView
@@ -498,6 +501,7 @@ const HierarchyMapping = () => {
                 targetSquad: targetSquad || null,
               });
             }}
+            onViewDossier={(emp) => setSelectedDossierEmployee(emp)}
           />
         ) : (
           <HierarchyTableView
@@ -536,6 +540,7 @@ const HierarchyMapping = () => {
                 employee: emp,
               });
             }}
+            onViewDossier={(emp) => setSelectedDossierEmployee(emp)}
           />
         )}
 
@@ -652,6 +657,34 @@ const HierarchyMapping = () => {
         mappings={hierarchy}
         onExecuteAutoAssign={handleExecuteAutoAssign}
         saving={saving}
+      />
+
+      {/* Interactive Employee Dossier Modal */}
+      <HierarchyEmployeeDossierModal
+        isOpen={Boolean(selectedDossierEmployee)}
+        onClose={() => setSelectedDossierEmployee(null)}
+        employee={selectedDossierEmployee}
+        onInitiateReassign={(emp) => {
+          setSelectedDossierEmployee(null);
+          setReassignState({
+            isOpen: true,
+            employee: emp,
+            targetSupervisor: null,
+            targetManager: null,
+          });
+        }}
+        onInitiateUnlink={(emp) => {
+          setSelectedDossierEmployee(null);
+          setUnlinkState({
+            isOpen: true,
+            employee: emp,
+          });
+        }}
+        onOpenAssignModal={(empId) => {
+          setSelectedDossierEmployee(null);
+          setForm((prev) => ({ ...prev, employee_id: String(empId) }));
+          setShowModal(true);
+        }}
       />
     </div>
   );

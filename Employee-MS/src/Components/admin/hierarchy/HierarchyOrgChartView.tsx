@@ -15,6 +15,7 @@ interface HierarchyOrgChartViewProps {
   onInitiateReassign?: (employee: HierarchyMappingItem) => void;
   onInitiateUnlink?: (employee: HierarchyMappingItem) => void;
   onReassignDrop?: (payload: ReassignDropPayload) => void;
+  onViewDossier?: (employee: HierarchyMappingItem | UnassignedEmployee) => void;
 }
 
 interface TreeNodeManager {
@@ -43,6 +44,7 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
   onInitiateReassign,
   onInitiateUnlink,
   onReassignDrop,
+  onViewDossier,
 }) => {
   // Collapsed state tracking (IDs of nodes that are collapsed)
   const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
@@ -1048,20 +1050,24 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
                                             }`}
                                             title={`${emp.employee_name} (${emp.employee_email}) • Lead: ${sup.name} • Manager: ${manager.name} • Dept: ${emp.department_name || "General"}`}
                                           >
-                                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                                            <div
+                                              onClick={() => onViewDossier && onViewDossier(emp)}
+                                              className={`flex items-center gap-2 min-w-0 flex-1 ${onViewDossier ? "cursor-pointer group/emp" : ""}`}
+                                              title={onViewDossier ? "Click to view Employee Dossier" : undefined}
+                                            >
                                               <span
                                                 className="text-slate-400 hover:text-slate-600 cursor-grab text-xs shrink-0"
                                                 title="Drag to reallocate reporting line"
                                               >
                                                 <i className="bi bi-grip-vertical"></i>
                                               </span>
-                                              <div className="w-6 h-6 rounded-md bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-[10px] shrink-0 border border-slate-200">
+                                              <div className="w-6 h-6 rounded-md bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-[10px] shrink-0 border border-slate-200 group-hover/emp:scale-105 transition-transform">
                                                 {emp.employee_name
                                                   ? emp.employee_name.charAt(0)
                                                   : "E"}
                                               </div>
                                               <div className="min-w-0 flex-1">
-                                                <p className="font-bold text-slate-900 text-xs mb-0 truncate" title={emp.employee_name}>
+                                                <p className="font-bold text-slate-900 group-hover/emp:text-indigo-600 transition-colors text-xs mb-0 truncate" title={emp.employee_name}>
                                                   {emp.employee_name}
                                                 </p>
                                                 <p className="text-[9px] text-slate-400 mb-0 truncate">
@@ -1072,6 +1078,16 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
 
                                             {/* Quick Actions */}
                                             <div className="flex items-center gap-1 shrink-0">
+                                              {onViewDossier && (
+                                                <button
+                                                  type="button"
+                                                  onClick={() => onViewDossier(emp)}
+                                                  className="w-5 h-5 rounded bg-slate-50 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 border border-slate-200 flex items-center justify-center text-[9px] transition-colors cursor-pointer"
+                                                  title="View Employee Dossier"
+                                                >
+                                                  <i className="bi bi-person-badge"></i>
+                                                </button>
+                                              )}
                                               {onInitiateReassign && (
                                                 <button
                                                   type="button"

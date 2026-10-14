@@ -59,6 +59,7 @@ interface HierarchyTableViewProps {
   onResetFilters: () => void;
   onInitiateReassign?: (employee: HierarchyMappingItem) => void;
   onInitiateUnlink?: (employee: HierarchyMappingItem) => void;
+  onViewDossier?: (employee: HierarchyMappingItem | UnassignedEmployee) => void;
 }
 
 export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
@@ -72,6 +73,7 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
   onResetFilters,
   onInitiateReassign,
   onInitiateUnlink,
+  onViewDossier,
 }) => {
   const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
@@ -596,13 +598,17 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                         >
                           {/* Employee Cell */}
                           <td className="py-2.5 px-4">
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                            <div
+                              onClick={() => onViewDossier && onViewDossier(item)}
+                              className={`flex items-center gap-2.5 ${onViewDossier ? "cursor-pointer group" : ""}`}
+                              title={onViewDossier ? "Click to view Employee Dossier" : undefined}
+                            >
+                              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
                                 {item.employee_name ? item.employee_name.charAt(0) : "E"}
                               </div>
                               <div className="min-w-0 max-w-xs">
                                 <div className="flex items-center gap-1.5 flex-wrap">
-                                  <span className="font-bold text-slate-900 truncate text-xs sm:text-[13px]">
+                                  <span className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors truncate text-xs sm:text-[13px]">
                                     {item.employee_name}
                                   </span>
                                   <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1 py-0.2 rounded border border-slate-200">
@@ -678,6 +684,20 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                                   } w-40 rounded-xl bg-white border border-slate-200/90 shadow-xl p-1 z-50 text-left animate-in fade-in zoom-in-95 duration-100`}
                                   onClick={(e) => e.stopPropagation()}
                                 >
+                                  {onViewDossier && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setActiveMenuId(null);
+                                        onViewDossier(item);
+                                      }}
+                                      className="w-full px-2 py-1 text-[11px] text-indigo-700 hover:bg-indigo-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-bold"
+                                    >
+                                      <i className="bi bi-person-badge-fill text-indigo-600 text-[10px]"></i>
+                                      <span>View Dossier</span>
+                                    </button>
+                                  )}
+
                                   <button
                                     type="button"
                                     onClick={() => {

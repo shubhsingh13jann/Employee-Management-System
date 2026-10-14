@@ -24,6 +24,7 @@ export interface HierarchySquadCardsViewProps {
   onInitiateUnlink?: (employee: HierarchyMappingItem) => void;
   onInspectSquad?: (squad: SquadGroup) => void;
   onOpenBatchModal?: (candidates: UnassignedEmployee[], targetSquad?: SquadGroup | null) => void;
+  onViewDossier?: (employee: HierarchyMappingItem | UnassignedEmployee) => void;
 }
 
 export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = ({
@@ -35,6 +36,7 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
   onInitiateUnlink,
   onInspectSquad,
   onOpenBatchModal,
+  onViewDossier,
 }) => {
   const [collapsedSquads, setCollapsedSquads] = useState<Set<string>>(new Set());
   const [capacityFilter, setCapacityFilter] = useState<"all" | "light" | "optimal" | "high" | "unassigned">("all");
@@ -852,13 +854,17 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                             key={`member-${member.id}`}
                             className="flex items-center justify-between p-2 rounded-lg bg-slate-50/70 hover:bg-slate-100/80 border border-slate-200/70 transition-colors group/item"
                           >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <div className="w-6 h-6 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[10px] shrink-0">
+                            <div
+                              onClick={() => onViewDossier && onViewDossier(member)}
+                              className={`flex items-center gap-2 min-w-0 ${onViewDossier ? "cursor-pointer group/emp" : ""}`}
+                              title={onViewDossier ? "Click to view Employee Dossier" : undefined}
+                            >
+                              <div className="w-6 h-6 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[10px] shrink-0 group-hover/emp:scale-105 transition-transform">
                                 {member.employee_name.charAt(0)}
                               </div>
                               <div className="min-w-0">
                                 <div className="flex items-center gap-1.5">
-                                  <span className="font-semibold text-slate-800 text-xs truncate">
+                                  <span className="font-semibold text-slate-800 text-xs truncate group-hover/emp:text-indigo-600 transition-colors">
                                     {member.employee_name}
                                   </span>
                                   <span className="text-[9px] text-slate-500 font-mono">
@@ -873,6 +879,16 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
 
                             {/* Quick Actions */}
                             <div className="flex items-center gap-1 shrink-0 opacity-80 group-hover/item:opacity-100 transition-opacity">
+                              {onViewDossier && (
+                                <button
+                                  type="button"
+                                  onClick={() => onViewDossier(member)}
+                                  className="w-6 h-6 rounded flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all cursor-pointer"
+                                  title="View Employee Dossier"
+                                >
+                                  <i className="bi bi-person-badge text-[10px]"></i>
+                                </button>
+                              )}
                               {onInitiateReassign && (
                                 <button
                                   type="button"

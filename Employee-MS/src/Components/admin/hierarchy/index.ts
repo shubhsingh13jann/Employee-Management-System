@@ -14,3 +14,4 @@ export * from "./HierarchyPrintModal";
 export * from "./BatchOnboardModal";
 export * from "./HierarchyAuditModal";
 export * from "./AutoAssignWizardModal";
+export * from "./HierarchyEmployeeDossierModal";
