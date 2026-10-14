@@ -11,6 +11,7 @@ import {
   AssignHierarchyModal,
   ReassignConfirmModal,
   UnlinkConfirmModal,
+  HierarchyExportModal,
 } from "../../Components/admin/hierarchy";
 
 const HierarchyMapping = () => {
@@ -20,6 +21,7 @@ const HierarchyMapping = () => {
   const [managers, setManagers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [msg, setMsg] = useState({ type: "", text: "" });
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
@@ -265,6 +267,7 @@ const HierarchyMapping = () => {
           isRefreshing={loading}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
+          onOpenExportModal={() => setIsExportModalOpen(true)}
         />
 
         {/* KPI Stats Grid */}
@@ -480,6 +483,24 @@ const HierarchyMapping = () => {
         employee={unlinkState.employee}
         onConfirm={handleConfirmUnlink}
         saving={saving}
+      />
+
+      {/* Comprehensive CSV Hierarchy Roster Export Modal */}
+      <HierarchyExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        hierarchy={hierarchy}
+        filteredHierarchy={filteredHierarchy}
+        unassignedStaff={unassignedEmployees}
+        filteredUnassigned={filteredUnassigned}
+        activeFiltersDesc={
+          selectedDepartment !== "all" || searchTerm.trim() || statusFilter !== "all"
+            ? `${selectedDepartment !== "all" ? `Dept: ${selectedDepartment}` : ""}${
+                searchTerm.trim() ? ` • Query: "${searchTerm}"` : ""
+              }${statusFilter !== "all" ? ` • Status: ${statusFilter}` : ""}`
+            : undefined
+        }
+        onSuccessNotification={(msgText) => setMsg({ type: "success", text: msgText })}
       />
     </div>
   );

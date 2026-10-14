@@ -7,6 +7,8 @@ interface HierarchyHeaderProps {
   isRefreshing: boolean;
   viewMode: "table" | "tree" | "squad";
   onViewModeChange: (mode: "table" | "tree" | "squad") => void;
+  onOpenExportModal?: () => void;
+  onPrint?: () => void;
 }
 
 export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
@@ -16,6 +18,8 @@ export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
   isRefreshing,
   viewMode,
   onViewModeChange,
+  onOpenExportModal,
+  onPrint,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -217,6 +221,36 @@ export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
                 <i className={`bi bi-arrow-clockwise text-indigo-400 text-sm shrink-0 ${isRefreshing ? "animate-spin" : ""}`}></i>
                 <span className="whitespace-nowrap">Refresh Hierarchy</span>
               </button>
+
+              <div className="h-px bg-white/10 my-1.5"></div>
+
+              {onOpenExportModal && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onOpenExportModal();
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left whitespace-nowrap"
+                >
+                  <i className="bi bi-file-earmark-spreadsheet text-emerald-400 text-sm shrink-0"></i>
+                  <span className="whitespace-nowrap">Export Hierarchy CSV</span>
+                </button>
+              )}
+
+              {onPrint && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onPrint();
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left whitespace-nowrap"
+                >
+                  <i className="bi bi-printer text-sky-400 text-sm shrink-0"></i>
+                  <span className="whitespace-nowrap">Print Hierarchy Dossier</span>
+                </button>
+              )}
             </div>
           )}
         </div>
