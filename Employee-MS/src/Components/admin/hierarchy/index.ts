@@ -12,3 +12,4 @@ export * from "./SupervisorCapacityDrawer";
 export * from "./HierarchyExportModal";
 export * from "./HierarchyPrintModal";
 export * from "./BatchOnboardModal";
+export * from "./HierarchyAuditModal";

@@ -14,6 +14,7 @@ import {
   HierarchyExportModal,
   HierarchyPrintModal,
   BatchOnboardModal,
+  HierarchyAuditModal,
 } from "../../Components/admin/hierarchy";
 
 const HierarchyMapping = () => {
@@ -25,6 +26,7 @@ const HierarchyMapping = () => {
   const [showModal, setShowModal] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
   const [msg, setMsg] = useState({ type: "", text: "" });
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
@@ -307,6 +309,7 @@ const HierarchyMapping = () => {
           onViewModeChange={setViewMode}
           onOpenExportModal={() => setIsExportModalOpen(true)}
           onPrint={() => setIsPrintModalOpen(true)}
+          onOpenAuditModal={() => setIsAuditModalOpen(true)}
         />
 
         {/* KPI Stats Grid */}
@@ -583,6 +586,12 @@ const HierarchyMapping = () => {
         managers={managers}
         onConfirmBatch={handleConfirmBatch}
         saving={saving}
+      />
+
+      {/* Reporting Line Audit Trail & Activity Log Modal */}
+      <HierarchyAuditModal
+        isOpen={isAuditModalOpen}
+        onClose={() => setIsAuditModalOpen(false)}
       />
     </div>
   );

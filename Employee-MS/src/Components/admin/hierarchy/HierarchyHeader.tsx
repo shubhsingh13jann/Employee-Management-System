@@ -9,6 +9,7 @@ interface HierarchyHeaderProps {
   onViewModeChange: (mode: "table" | "tree" | "squad") => void;
   onOpenExportModal?: () => void;
   onPrint?: () => void;
+  onOpenAuditModal?: () => void;
 }
 
 export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
@@ -20,6 +21,7 @@ export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
   onViewModeChange,
   onOpenExportModal,
   onPrint,
+  onOpenAuditModal,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -249,6 +251,20 @@ export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
                 >
                   <i className="bi bi-printer text-sky-400 text-sm shrink-0"></i>
                   <span className="whitespace-nowrap">Print Hierarchy Dossier</span>
+                </button>
+              )}
+
+              {onOpenAuditModal && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onOpenAuditModal();
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left whitespace-nowrap"
+                >
+                  <i className="bi bi-clock-history text-amber-400 text-sm shrink-0"></i>
+                  <span className="whitespace-nowrap">Hierarchy Audit Trail</span>
                 </button>
               )}
             </div>

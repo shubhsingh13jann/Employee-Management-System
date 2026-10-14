@@ -1460,6 +1460,42 @@ export const bulkAssignHierarchy = async (req, res) => {
   }
 };
 
+export const getHierarchyAuditLogs = async (req, res) => {
+  try {
+    const [logs] = await pool.query(`
+      SELECT ual.id, ual.action, ual.details, ual.created_at,
+             ual.performed_by, perf.name AS performed_by_name, perf.email AS performed_by_email,
+             ual.user_id AS employee_id, emp.name AS employee_name, emp.email AS employee_email
+      FROM user_audit_logs ual
+      LEFT JOIN users perf ON ual.performed_by = perf.id
+      LEFT JOIN users emp ON ual.user_id = emp.id
+      WHERE ual.action IN ('hierarchy_assigned', 'hierarchy_reassigned', 'hierarchy_unlinked', 'hierarchy_bulk_assigned')
+      ORDER BY ual.created_at DESC
+      LIMIT 100
+    `);
+
+    // Safely parse details if JSON string
+    const parsedLogs = logs.map((log) => {
+      let parsedDetails = null;
+      if (typeof log.details === "string") {
+        try {
+          parsedDetails = JSON.parse(log.details);
+        } catch {
+          parsedDetails = { message: log.details };
+        }
+      } else {
+        parsedDetails = log.details;
+      }
+      return { ...log, details: parsedDetails };
+    });
+
+    return res.json({ status: true, logs: parsedLogs });
+  } catch (err) {
+    console.error("Get hierarchy audit logs error:", err);
+    return res.status(500).json({ status: false, error: "Failed to fetch reporting line audit logs" });
+  }
+};
+
 export const broadcastAnnouncement = async (req, res) => {
   try {
     const { userIds, subject, message, priority = "standard", channels } = req.body;

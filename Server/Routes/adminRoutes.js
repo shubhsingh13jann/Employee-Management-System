@@ -29,6 +29,7 @@ import {
   reassignHierarchy,
   unlinkHierarchy,
   bulkAssignHierarchy,
+  getHierarchyAuditLogs,
   getAdminProjects,
   createAdminProject,
   updateAdminProjectStatus,
@@ -75,6 +76,7 @@ router.put("/users/:id/documents/:docId/status", updateUserDocumentStatus);
 router.delete("/users/:id/documents/:docId", deleteUserDocument);
 
 router.get("/hierarchy", getHierarchy);
+router.get("/hierarchy/audit-logs", getHierarchyAuditLogs);
 router.post("/hierarchy", assignHierarchy);
 router.post("/hierarchy/bulk-assign", bulkAssignHierarchy);
 router.put("/hierarchy/reassign", reassignHierarchy);
