@@ -321,3 +321,54 @@ h3.text-slate-800.whitespace-nowrap {
   letter-spacing: -0.01em !important;
 }
 
+/* ==========================================================================
+   WORKFORCE TEAM HIERARCHY - EXECUTIVE PRINT STYLESHEET
+   ========================================================================== */
+@media print {
+  nav,
+  aside,
+  header:not(.print-header),
+  .sidebar-container,
+  .no-print,
+  button,
+  .floating-action-bar-anim {
+    display: none !important;
+  }
+
+  body, html {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #printable-hierarchy-dossier {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .print-page-break {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .print-avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}
+
+

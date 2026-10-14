@@ -12,6 +12,7 @@ import {
   ReassignConfirmModal,
   UnlinkConfirmModal,
   HierarchyExportModal,
+  HierarchyPrintModal,
 } from "../../Components/admin/hierarchy";
 
 const HierarchyMapping = () => {
@@ -22,6 +23,7 @@ const HierarchyMapping = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [msg, setMsg] = useState({ type: "", text: "" });
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
@@ -268,6 +270,7 @@ const HierarchyMapping = () => {
           viewMode={viewMode}
           onViewModeChange={setViewMode}
           onOpenExportModal={() => setIsExportModalOpen(true)}
+          onPrint={() => setIsPrintModalOpen(true)}
         />
 
         {/* KPI Stats Grid */}
@@ -501,6 +504,27 @@ const HierarchyMapping = () => {
             : undefined
         }
         onSuccessNotification={(msgText) => setMsg({ type: "success", text: msgText })}
+      />
+
+      {/* Executive Printable Hierarchy Dossier Modal */}
+      <HierarchyPrintModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        hierarchy={hierarchy}
+        filteredHierarchy={filteredHierarchy}
+        unassignedStaff={unassignedEmployees}
+        filteredUnassigned={filteredUnassigned}
+        activeFiltersDesc={
+          selectedDepartment !== "all" || searchTerm.trim() || statusFilter !== "all"
+            ? `${selectedDepartment !== "all" ? `Dept: ${selectedDepartment}` : ""}${
+                searchTerm.trim() ? ` • Query: "${searchTerm}"` : ""
+              }${statusFilter !== "all" ? ` • Status: ${statusFilter}` : ""}`
+            : undefined
+        }
+        totalMappedCount={hierarchy.length}
+        uniqueSupervisorsCount={uniqueSupervisorsCount}
+        uniqueManagersCount={uniqueManagersCount}
+        unassignedCount={unassignedCount}
       />
     </div>
   );
