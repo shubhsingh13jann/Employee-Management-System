@@ -17,6 +17,7 @@ import {
   HierarchyAuditModal,
   AutoAssignWizardModal,
   HierarchyEmployeeDossierModal,
+  SwapReportingConfirmModal,
 } from "../../Components/admin/hierarchy";
 
 const HierarchyMapping = () => {
@@ -65,6 +66,17 @@ const HierarchyMapping = () => {
   }>({
     isOpen: false,
     employee: null,
+  });
+
+  // Swap Reporting State
+  const [swapState, setSwapState] = useState<{
+    isOpen: boolean;
+    employee1: any | null;
+    employee2: any | null;
+  }>({
+    isOpen: false,
+    employee1: null,
+    employee2: null,
   });
 
   // Batch Onboarding State
@@ -257,6 +269,29 @@ const HierarchyMapping = () => {
       setMsg({
         type: "danger",
         text: err.response?.data?.error || "Failed to unlink reporting relationship",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleConfirmSwap = async (emp1Id: string | number, emp2Id: string | number) => {
+    try {
+      setSaving(true);
+      setMsg({ type: "", text: "" });
+      const res = await api.post("/api/admin/hierarchy/swap", {
+        employeeId1: emp1Id,
+        employeeId2: emp2Id,
+      });
+      if (res.data.status) {
+        setMsg({ type: "success", text: res.data.message || "Reporting lines swapped successfully!" });
+        setSwapState({ isOpen: false, employee1: null, employee2: null });
+        fetchData();
+      }
+    } catch (err: any) {
+      setMsg({
+        type: "danger",
+        text: err.response?.data?.error || "Failed to swap reporting lines",
       });
     } finally {
       setSaving(false);
@@ -496,6 +531,13 @@ const HierarchyMapping = () => {
                 targetManager: payload.targetManager || null,
               });
             }}
+            onSwapDrop={(payload) => {
+              setSwapState({
+                isOpen: true,
+                employee1: payload.employee1,
+                employee2: payload.employee2,
+              });
+            }}
             onViewDossier={(emp) => setSelectedDossierEmployee(emp)}
           />
         ) : viewMode === "squad" ? (
@@ -632,6 +674,16 @@ const HierarchyMapping = () => {
         onClose={() => setUnlinkState({ isOpen: false, employee: null })}
         employee={unlinkState.employee}
         onConfirm={handleConfirmUnlink}
+        saving={saving}
+      />
+
+      {/* Modern Reporting Line Swap Confirmation Modal */}
+      <SwapReportingConfirmModal
+        isOpen={swapState.isOpen}
+        onClose={() => setSwapState({ isOpen: false, employee1: null, employee2: null })}
+        employee1={swapState.employee1}
+        employee2={swapState.employee2}
+        onConfirm={handleConfirmSwap}
         saving={saving}
       />
 

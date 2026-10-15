@@ -1383,6 +1383,90 @@ export const unlinkHierarchy = async (req, res) => {
   }
 };
 
+export const swapHierarchy = async (req, res) => {
+  try {
+    const { employeeId1, employeeId2 } = req.body;
+    if (!employeeId1 || !employeeId2) {
+      return res.status(400).json({ status: false, error: "Both employee IDs are required for a reporting swap." });
+    }
+    if (String(employeeId1) === String(employeeId2)) {
+      return res.status(400).json({ status: false, error: "Cannot swap an employee with themselves." });
+    }
+
+    // Retrieve both current mappings
+    const [rows1] = await pool.query(
+      "SELECT th.*, u.name as employee_name FROM team_hierarchy th JOIN users u ON th.employee_id = u.id WHERE th.employee_id = ?",
+      [employeeId1]
+    );
+    const [rows2] = await pool.query(
+      "SELECT th.*, u.name as employee_name FROM team_hierarchy th JOIN users u ON th.employee_id = u.id WHERE th.employee_id = ?",
+      [employeeId2]
+    );
+
+    if (rows1.length === 0 || rows2.length === 0) {
+      return res.status(404).json({ status: false, error: "Both employees must be currently mapped to perform a reporting swap." });
+    }
+
+    const map1 = rows1[0];
+    const map2 = rows2[0];
+
+    // Swap mappings:
+    // Employee 1 gets map2's supervisor and manager
+    // Employee 2 gets map1's supervisor and manager
+    await pool.query(
+      "UPDATE team_hierarchy SET supervisor_id = ?, manager_id = ?, assigned_at = CURRENT_TIMESTAMP WHERE employee_id = ?",
+      [map2.supervisor_id, map2.manager_id, employeeId1]
+    );
+
+    await pool.query(
+      "UPDATE team_hierarchy SET supervisor_id = ?, manager_id = ?, assigned_at = CURRENT_TIMESTAMP WHERE employee_id = ?",
+      [map1.supervisor_id, map1.manager_id, employeeId2]
+    );
+
+    // Audit Log
+    try {
+      const adminName = req.user?.name || "HR Admin";
+      await pool.query(
+        `INSERT INTO user_audit_logs (user_id, action_type, field_name, details, performed_by)
+         VALUES (?, 'hierarchy_swapped', 'team_hierarchy', ?, ?)`,
+        [
+          employeeId1,
+          JSON.stringify({
+            message: `Swapped reporting line with ${map2.employee_name} (ID: ${employeeId2})`,
+            previous_supervisor: map1.supervisor_id,
+            new_supervisor: map2.supervisor_id,
+          }),
+          adminName,
+        ]
+      );
+      await pool.query(
+        `INSERT INTO user_audit_logs (user_id, action_type, field_name, details, performed_by)
+         VALUES (?, 'hierarchy_swapped', 'team_hierarchy', ?, ?)`,
+        [
+          employeeId2,
+          JSON.stringify({
+            message: `Swapped reporting line with ${map1.employee_name} (ID: ${employeeId1})`,
+            previous_supervisor: map2.supervisor_id,
+            new_supervisor: map1.supervisor_id,
+          }),
+          adminName,
+        ]
+      );
+    } catch (auditErr) {
+      console.warn("Audit log notice:", auditErr.message);
+    }
+
+    return res.json({
+      status: true,
+      message: `Successfully swapped reporting lines between ${map1.employee_name} and ${map2.employee_name}!`,
+    });
+  } catch (err) {
+    console.error("Swap hierarchy error:", err);
+    return res.status(500).json({ status: false, error: "Failed to swap employee reporting hierarchy" });
+  }
+};
+
+
 export const bulkAssignHierarchy = async (req, res) => {
   try {
     const { employee_ids, supervisor_id, manager_id } = req.body;

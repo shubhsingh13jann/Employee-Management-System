@@ -27,6 +27,7 @@ import {
   getHierarchy,
   assignHierarchy,
   reassignHierarchy,
+  swapHierarchy,
   unlinkHierarchy,
   bulkAssignHierarchy,
   getHierarchyAuditLogs,
@@ -79,6 +80,7 @@ router.get("/hierarchy", getHierarchy);
 router.get("/hierarchy/audit-logs", getHierarchyAuditLogs);
 router.post("/hierarchy", assignHierarchy);
 router.post("/hierarchy/bulk-assign", bulkAssignHierarchy);
+router.post("/hierarchy/swap", swapHierarchy);
 router.put("/hierarchy/reassign", reassignHierarchy);
 router.delete("/hierarchy/:employeeId", unlinkHierarchy);
 

@@ -15,6 +15,7 @@ interface HierarchyOrgChartViewProps {
   onInitiateReassign?: (employee: HierarchyMappingItem) => void;
   onInitiateUnlink?: (employee: HierarchyMappingItem) => void;
   onReassignDrop?: (payload: ReassignDropPayload) => void;
+  onSwapDrop?: (payload: { employee1: HierarchyMappingItem; employee2: HierarchyMappingItem }) => void;
   onViewDossier?: (employee: HierarchyMappingItem | UnassignedEmployee) => void;
 }
 
@@ -44,6 +45,7 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
   onInitiateReassign,
   onInitiateUnlink,
   onReassignDrop,
+  onSwapDrop,
   onViewDossier,
 }) => {
   // Collapsed state tracking (IDs of nodes that are collapsed)
@@ -1390,6 +1392,8 @@ ${safeStyles}
                                               ?.toLowerCase()
                                               .includes(searchTerm.toLowerCase()));
                                         const isBeingDragged = draggingEmpId === emp.employee_id;
+                                        const swapKey = `swap_${emp.employee_id}`;
+                                        const isSwapTarget = dropTargetKey === swapKey;
 
                                         return (
                                           <div
@@ -1407,8 +1411,40 @@ ${safeStyles}
                                               setDraggingEmpId(null);
                                               setDropTargetKey(null);
                                             }}
-                                            className={`w-56 sm:w-60 p-2 sm:p-2.5 rounded-lg border transition-all flex items-center justify-between gap-2 shadow-2xs cursor-grab active:cursor-grabbing select-none ${
-                                              isBeingDragged
+                                            onDragOver={(e) => {
+                                              if (!draggingEmpId || String(draggingEmpId) === String(emp.employee_id)) return;
+                                              e.preventDefault();
+                                              e.stopPropagation();
+                                              e.dataTransfer.dropEffect = "move";
+                                              if (dropTargetKey !== swapKey) setDropTargetKey(swapKey);
+                                            }}
+                                            onDragLeave={(e) => {
+                                              if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+                                              if (dropTargetKey === swapKey) setDropTargetKey(null);
+                                            }}
+                                            onDrop={(e) => {
+                                              e.preventDefault();
+                                              e.stopPropagation();
+                                              setDropTargetKey(null);
+                                              try {
+                                                const dataStr = e.dataTransfer.getData("application/json");
+                                                if (!dataStr) return;
+                                                const droppedEmp = JSON.parse(dataStr) as HierarchyMappingItem;
+                                                if (String(droppedEmp.employee_id) === String(emp.employee_id)) return;
+                                                if (onSwapDrop) {
+                                                  onSwapDrop({
+                                                    employee1: droppedEmp,
+                                                    employee2: emp,
+                                                  });
+                                                }
+                                              } catch (err) {
+                                                console.error("Swap drop error", err);
+                                              }
+                                            }}
+                                            className={`w-56 sm:w-60 p-2 sm:p-2.5 rounded-lg border transition-all flex items-center justify-between gap-2 shadow-2xs cursor-grab active:cursor-grabbing select-none relative ${
+                                              isSwapTarget
+                                                ? "ring-4 ring-amber-400 border-2 border-dashed border-amber-600 bg-amber-50/95 scale-105 shadow-xl z-20"
+                                                : isBeingDragged
                                                 ? "opacity-30 scale-95 border-dashed border-indigo-500 bg-indigo-50/50"
                                                 : isSearchMatch
                                                 ? "bg-amber-50 border-amber-400 ring-2 ring-amber-300 shadow-md animate-pulse"
@@ -1416,10 +1452,16 @@ ${safeStyles}
                                             }`}
                                             title={`${emp.employee_name} (${emp.employee_email}) • Lead: ${sup.name} • Manager: ${manager.name} • Dept: ${emp.department_name || "General"}`}
                                           >
+                                            {isSwapTarget && (
+                                              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md bg-amber-600 text-white text-[9px] font-bold shadow-md whitespace-nowrap animate-bounce flex items-center gap-1 z-30 pointer-events-none">
+                                                <i className="bi bi-arrow-left-right"></i>
+                                                <span>Drop to Swap with {emp.employee_name}</span>
+                                              </div>
+                                            )}
                                             <div className="flex items-center gap-2 min-w-0 flex-1">
                                               <span
                                                 className="text-slate-400 hover:text-slate-600 cursor-grab text-xs shrink-0"
-                                                title="Drag to reallocate reporting line"
+                                                title="Drag to swap or reallocate reporting line"
                                               >
                                                 <i className="bi bi-grip-vertical"></i>
                                               </span>
