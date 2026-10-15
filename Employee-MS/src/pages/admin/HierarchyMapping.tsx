@@ -190,24 +190,30 @@ const HierarchyMapping = () => {
     return () => clearTimeout(timer);
   }, [msg.text]);
 
+  const [modalError, setModalError] = useState("");
+
   const handleAssign = async (e) => {
     e.preventDefault();
     if (!form.employee_id || !form.supervisor_id || !form.manager_id) {
-      return setMsg({ type: "danger", text: "Please select Employee, Supervisor, and Manager." });
+      setModalError("Please select Employee, Supervisor, and Manager.");
+      return;
     }
 
     try {
       setSaving(true);
+      setModalError("");
       setMsg({ type: "", text: "" });
       const res = await api.post("/api/admin/hierarchy", form);
       if (res.data.status) {
         setMsg({ type: "success", text: "Team assignment successfully updated!" });
         setShowModal(false);
         setForm({ employee_id: "", supervisor_id: "", manager_id: "" });
+        setModalError("");
         fetchData();
       }
-    } catch (err) {
-      setMsg({ type: "danger", text: err.response?.data?.error || "Failed to assign team hierarchy" });
+    } catch (err: any) {
+      const errText = err.response?.data?.error || "Failed to assign team hierarchy";
+      setModalError(errText);
     } finally {
       setSaving(false);
     }
@@ -568,6 +574,8 @@ const HierarchyMapping = () => {
         managers={managers}
         mappings={hierarchy}
         saving={saving}
+        errorMessage={modalError}
+        onClearError={() => setModalError("")}
       />
 
       {/* Modern Reassignment Confirmation Modal */}

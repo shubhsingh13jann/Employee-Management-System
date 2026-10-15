@@ -33,6 +33,8 @@ interface AssignHierarchyModalProps {
   managers: UserOption[];
   mappings?: HierarchyMappingItemSimple[];
   saving: boolean;
+  errorMessage?: string;
+  onClearError?: () => void;
 }
 
 export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
@@ -46,7 +48,17 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
   managers,
   mappings = [],
   saving,
+  errorMessage = "",
+  onClearError,
 }) => {
+  const [localError, setLocalError] = useState<string>("");
+
+  useEffect(() => {
+    if (!isOpen) {
+      setLocalError("");
+    }
+  }, [isOpen]);
+
   // ESC key to close
   useEffect(() => {
     if (!isOpen) return;
@@ -98,6 +110,8 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
 
   // Handle employee change with smart auto-recommendation
   const handleEmployeeChange = (empId: string) => {
+    if (localError) setLocalError("");
+    if (onClearError) onClearError();
     const chosenEmp = employees.find((e) => String(e.id) === String(empId));
     let nextSupId = form.supervisor_id;
     let nextMgrId = form.manager_id;
@@ -130,8 +144,47 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
     });
   };
 
+  // If opened with pre-filled employee_id but no supervisor, auto-resolve recommendations
+  useEffect(() => {
+    if (!isOpen || !form.employee_id) return;
+    if (form.supervisor_id && form.manager_id) return;
+    const chosenEmp = employees.find((e) => String(e.id) === String(form.employee_id));
+    if (chosenEmp && chosenEmp.department_name) {
+      let nextSup = form.supervisor_id;
+      let nextMgr = form.manager_id;
+      if (!nextSup) {
+        const matchingSups = supervisors.filter(
+          (s) => s.department_name && s.department_name.toLowerCase() === chosenEmp.department_name!.toLowerCase()
+        );
+        if (matchingSups.length > 0) {
+          const sorted = [...matchingSups].sort(
+            (a, b) => (supervisorWorkloadMap[String(a.id)] || 0) - (supervisorWorkloadMap[String(b.id)] || 0)
+          );
+          nextSup = String(sorted[0].id);
+        }
+      }
+      if (!nextMgr) {
+        const matchingMgr = managers.find(
+          (m) => m.department_name && m.department_name.toLowerCase() === chosenEmp.department_name!.toLowerCase()
+        );
+        if (matchingMgr) {
+          nextMgr = String(matchingMgr.id);
+        }
+      }
+      if (nextSup !== form.supervisor_id || nextMgr !== form.manager_id) {
+        onFormChange({
+          ...form,
+          supervisor_id: nextSup,
+          manager_id: nextMgr,
+        });
+      }
+    }
+  }, [isOpen, form.employee_id, form.supervisor_id, form.manager_id, employees, supervisors, managers, supervisorWorkloadMap]);
+
   // Handle supervisor change with automatic manager resolution
   const handleSupervisorChange = (supId: string) => {
+    if (localError) setLocalError("");
+    if (onClearError) onClearError();
     const chosenSup = supervisors.find((s) => String(s.id) === String(supId));
     let nextMgrId = form.manager_id;
     if (chosenSup && chosenSup.department_name) {
@@ -149,8 +202,28 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
     });
   };
 
+  const handleLocalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.employee_id) {
+      setLocalError("Please select a subordinate employee to assign.");
+      return;
+    }
+    if (!form.supervisor_id) {
+      setLocalError("Please select a direct supervisor (team lead) for this employee.");
+      return;
+    }
+    if (!form.manager_id) {
+      setLocalError("Please select a department manager to complete the reporting chain.");
+      return;
+    }
+    setLocalError("");
+    if (onClearError) onClearError();
+    onSubmit(e);
+  };
+
   const currentSupLoad = selectedSup ? (supervisorWorkloadMap[String(selectedSup.id)] || 0) : 0;
   const newSupLoad = currentSupLoad + 1;
+  const activeError = localError || errorMessage;
 
   return createPortal(
     <div
@@ -187,8 +260,28 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
         </div>
 
         {/* Modal Form */}
-        <form onSubmit={onSubmit}>
+        <form onSubmit={handleLocalSubmit}>
           <div className="p-5 sm:p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+            {/* Inline Error Alert Banner */}
+            {activeError && (
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center justify-between gap-2.5 animate-in fade-in">
+                <div className="flex items-center gap-2">
+                  <i className="bi bi-exclamation-triangle-fill text-rose-600 text-sm shrink-0"></i>
+                  <span className="font-semibold">{activeError}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLocalError("");
+                    if (onClearError) onClearError();
+                  }}
+                  className="text-rose-400 hover:text-rose-700 cursor-pointer"
+                  title="Dismiss error"
+                >
+                  <i className="bi bi-x-lg text-[10px]"></i>
+                </button>
+              </div>
+            )}
             {/* Field 1: Subordinate Employee */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
