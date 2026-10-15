@@ -942,7 +942,6 @@ ${safeStyles}
                 </div>
                 <div
                   className={`text-left min-w-0 ${onViewDossier ? "cursor-pointer group/ustaff" : ""}`}
-                  onMouseDown={(e) => e.stopPropagation()}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (onViewDossier) onViewDossier(staff);
@@ -1093,7 +1092,8 @@ ${safeStyles}
                         e.dataTransfer.dropEffect = "move";
                         if (dropTargetKey !== mgrKey) setDropTargetKey(mgrKey);
                       }}
-                      onDragLeave={() => {
+                      onDragLeave={(e) => {
+                        if (e.currentTarget.contains(e.relatedTarget as Node)) return;
                         if (dropTargetKey === mgrKey) setDropTargetKey(null);
                       }}
                       onDrop={(e) => {
@@ -1231,7 +1231,8 @@ ${safeStyles}
                                     e.dataTransfer.dropEffect = "move";
                                     if (dropTargetKey !== supKey) setDropTargetKey(supKey);
                                   }}
-                                  onDragLeave={() => {
+                                  onDragLeave={(e) => {
+                                    if (e.currentTarget.contains(e.relatedTarget as Node)) return;
                                     if (dropTargetKey === supKey) setDropTargetKey(null);
                                   }}
                                   onDrop={(e) => {
@@ -1326,7 +1327,7 @@ ${safeStyles}
                                 </div>
 
                                 {/* Level 3: Direct Reports (Staff Members with Draggable reallocation) */}
-                                {!isSupCollapsed && sup.employees.length > 0 && (
+                                {!isSupCollapsed && (sup.employees.length > 0 || (draggingEmpId && String(draggingEmpId) !== String(sup.id))) && (
                                   <div className="flex flex-col items-center pt-1 w-full">
                                     <div className="w-0.5 h-4 bg-emerald-400"></div>
 
@@ -1337,6 +1338,48 @@ ${safeStyles}
                                           : "grid-cols-1"
                                       }`}
                                     >
+                                      {/* Visual Drop Slot when Dragging */}
+                                      {draggingEmpId && String(draggingEmpId) !== String(sup.id) && (
+                                        <div
+                                          onDragOver={(e) => {
+                                            e.preventDefault();
+                                            e.dataTransfer.dropEffect = "move";
+                                            if (dropTargetKey !== supKey) setDropTargetKey(supKey);
+                                          }}
+                                          onDragLeave={(e) => {
+                                            if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+                                            if (dropTargetKey === supKey) setDropTargetKey(null);
+                                          }}
+                                          onDrop={(e) => {
+                                            e.preventDefault();
+                                            setDropTargetKey(null);
+                                            try {
+                                              const dataStr = e.dataTransfer.getData("application/json");
+                                              if (!dataStr) return;
+                                              const droppedEmp = JSON.parse(dataStr) as HierarchyMappingItem;
+                                              if (String(droppedEmp.supervisor_id) === String(sup.id)) return;
+                                              if (onReassignDrop) {
+                                                onReassignDrop({
+                                                  employee: droppedEmp,
+                                                  targetSupervisor: { id: sup.id, name: sup.name, department: sup.department },
+                                                  targetManager: { id: manager.id, name: manager.name, department: manager.department },
+                                                });
+                                              }
+                                            } catch (err) {
+                                              console.error("Drop error", err);
+                                            }
+                                          }}
+                                          className={`w-56 sm:w-60 p-2.5 rounded-lg border-2 border-dashed transition-all flex items-center justify-center gap-1.5 text-xs font-semibold cursor-pointer ${
+                                            dropTargetKey === supKey
+                                              ? "border-emerald-600 bg-emerald-100 text-emerald-800 scale-102 shadow-md animate-pulse"
+                                              : "border-emerald-300 bg-emerald-50/70 text-emerald-700 hover:border-emerald-500"
+                                          }`}
+                                        >
+                                          <i className="bi bi-box-arrow-in-down text-sm"></i>
+                                          <span>Drop to assign to {sup.name}</span>
+                                        </div>
+                                      )}
+
                                       {sup.employees.map((emp) => {
                                         const isSearchMatch =
                                           searchTerm.trim() !== "" &&
@@ -1373,30 +1416,34 @@ ${safeStyles}
                                             }`}
                                             title={`${emp.employee_name} (${emp.employee_email}) • Lead: ${sup.name} • Manager: ${manager.name} • Dept: ${emp.department_name || "General"}`}
                                           >
-                                            <div
-                                              onClick={() => onViewDossier && onViewDossier(emp)}
-                                              onMouseDown={(e) => e.stopPropagation()}
-                                              className={`flex items-center gap-2 min-w-0 flex-1 ${onViewDossier ? "cursor-pointer group/emp" : ""}`}
-                                              title={onViewDossier ? "Click to view Employee Dossier" : undefined}
-                                            >
+                                            <div className="flex items-center gap-2 min-w-0 flex-1">
                                               <span
                                                 className="text-slate-400 hover:text-slate-600 cursor-grab text-xs shrink-0"
                                                 title="Drag to reallocate reporting line"
                                               >
                                                 <i className="bi bi-grip-vertical"></i>
                                               </span>
-                                              <div className="w-6 h-6 rounded-md bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-[10px] shrink-0 border border-slate-200 group-hover/emp:scale-105 transition-transform">
-                                                {emp.employee_name
-                                                  ? emp.employee_name.charAt(0)
-                                                  : "E"}
-                                              </div>
-                                              <div className="min-w-0 flex-1">
-                                                <p className="font-bold text-slate-900 group-hover/emp:text-indigo-600 transition-colors text-xs mb-0 truncate" title={emp.employee_name}>
-                                                  {emp.employee_name}
-                                                </p>
-                                                <p className="text-[9px] text-slate-400 mb-0 truncate">
-                                                  EMP-{String(emp.employee_id).padStart(4, "0")}
-                                                </p>
+                                              <div
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  if (onViewDossier) onViewDossier(emp);
+                                                }}
+                                                className={`flex items-center gap-2 min-w-0 flex-1 ${onViewDossier ? "cursor-pointer group/emp" : ""}`}
+                                                title={onViewDossier ? "Click to view Employee Dossier" : undefined}
+                                              >
+                                                <div className="w-6 h-6 rounded-md bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-[10px] shrink-0 border border-slate-200 group-hover/emp:scale-105 transition-transform">
+                                                  {emp.employee_name
+                                                    ? emp.employee_name.charAt(0)
+                                                    : "E"}
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                  <p className="font-bold text-slate-900 group-hover/emp:text-indigo-600 transition-colors text-xs mb-0 truncate" title={emp.employee_name}>
+                                                    {emp.employee_name}
+                                                  </p>
+                                                  <p className="text-[9px] text-slate-400 mb-0 truncate">
+                                                    EMP-{String(emp.employee_id).padStart(4, "0")}
+                                                  </p>
+                                                </div>
                                               </div>
                                             </div>
 
