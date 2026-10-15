@@ -940,8 +940,16 @@ ${safeStyles}
                 <div className="w-5 h-5 rounded-md bg-amber-100 text-amber-800 font-bold text-[10px] flex items-center justify-center shrink-0">
                   {staff.name ? staff.name.charAt(0) : "U"}
                 </div>
-                <div className="text-left min-w-0">
-                  <span className="font-bold text-slate-800 block text-[11px] truncate max-w-[100px] leading-tight">
+                <div
+                  className={`text-left min-w-0 ${onViewDossier ? "cursor-pointer group/ustaff" : ""}`}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onViewDossier) onViewDossier(staff);
+                  }}
+                  title={onViewDossier ? "Click to view Employee Dossier" : undefined}
+                >
+                  <span className="font-bold text-slate-800 group-hover/ustaff:text-indigo-600 transition-colors block text-[11px] truncate max-w-[100px] leading-tight">
                     {staff.name}
                   </span>
                   <span className="text-[9px] text-slate-400 block truncate leading-tight">
@@ -1129,12 +1137,26 @@ ${safeStyles}
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-indigo-800 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                      <div
+                        onClick={() =>
+                          onViewDossier &&
+                          onViewDossier({
+                            id: manager.id,
+                            name: manager.name,
+                            email: `${manager.name.toLowerCase().replace(/\s+/g, ".")}@example.com`,
+                            department_name: manager.department,
+                            role: "manager",
+                          } as any)
+                        }
+                        onMouseDown={(e) => e.stopPropagation()}
+                        className={`flex items-center gap-2.5 ${onViewDossier ? "cursor-pointer group/mgr" : ""}`}
+                        title={onViewDossier ? "Click to view Manager Dossier" : undefined}
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-indigo-800 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs group-hover/mgr:scale-105 transition-transform">
                           {manager.name ? manager.name.charAt(0) : "M"}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h4 className="font-bold text-slate-900 text-xs sm:text-sm mb-0 truncate" title={manager.name}>
+                          <h4 className="font-bold text-slate-900 group-hover/mgr:text-indigo-600 transition-colors text-xs sm:text-sm mb-0 truncate" title={manager.name}>
                             {manager.name}
                           </h4>
                           <span className="text-[10px] text-slate-400 block truncate">
@@ -1254,12 +1276,26 @@ ${safeStyles}
                                     </span>
                                   </div>
 
-                                  <div className="flex items-center gap-2.5">
-                                    <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                                  <div
+                                    onClick={() =>
+                                      onViewDossier &&
+                                      onViewDossier({
+                                        id: sup.id,
+                                        name: sup.name,
+                                        email: `${sup.name.toLowerCase().replace(/\s+/g, ".")}@example.com`,
+                                        department_name: sup.department,
+                                        role: "supervisor",
+                                      } as any)
+                                    }
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    className={`flex items-center gap-2.5 ${onViewDossier ? "cursor-pointer group/sup" : ""}`}
+                                    title={onViewDossier ? "Click to view Team Lead Dossier" : undefined}
+                                  >
+                                    <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs group-hover/sup:scale-105 transition-transform">
                                       {sup.name ? sup.name.charAt(0) : "S"}
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                      <h5 className="font-bold text-slate-900 text-xs sm:text-[13px] mb-0 truncate" title={sup.name}>
+                                      <h5 className="font-bold text-slate-900 group-hover/sup:text-emerald-700 transition-colors text-xs sm:text-[13px] mb-0 truncate" title={sup.name}>
                                         {sup.name}
                                       </h5>
                                       <span className="text-[10px] text-slate-400 block truncate" title={sup.department}>
@@ -1339,6 +1375,7 @@ ${safeStyles}
                                           >
                                             <div
                                               onClick={() => onViewDossier && onViewDossier(emp)}
+                                              onMouseDown={(e) => e.stopPropagation()}
                                               className={`flex items-center gap-2 min-w-0 flex-1 ${onViewDossier ? "cursor-pointer group/emp" : ""}`}
                                               title={onViewDossier ? "Click to view Employee Dossier" : undefined}
                                             >

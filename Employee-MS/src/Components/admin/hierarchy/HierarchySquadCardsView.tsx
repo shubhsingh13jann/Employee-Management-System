@@ -426,16 +426,22 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                         onChange={() => toggleSelectUnassigned(staff.id)}
                         className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                       />
-                      <div className="w-6 h-6 rounded bg-amber-100 text-amber-800 font-bold text-[10px] flex items-center justify-center shrink-0">
-                        {staff.name.charAt(0)}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-slate-900 truncate mb-0 leading-tight">
-                          {staff.name}
-                        </p>
-                        <p className="text-[10px] text-slate-400 truncate mb-0 font-mono">
-                          EMP-{String(staff.id).padStart(4, "0")}
-                        </p>
+                      <div
+                        onClick={() => onViewDossier && onViewDossier(staff)}
+                        className={`flex items-center gap-2 min-w-0 flex-1 ${onViewDossier ? "cursor-pointer group/staff" : ""}`}
+                        title={onViewDossier ? "Click to view Employee Dossier" : undefined}
+                      >
+                        <div className="w-6 h-6 rounded bg-amber-100 text-amber-800 font-bold text-[10px] flex items-center justify-center shrink-0 group-hover/staff:scale-105 transition-transform">
+                          {staff.name.charAt(0)}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-slate-900 group-hover/staff:text-indigo-600 transition-colors truncate mb-0 leading-tight">
+                            {staff.name}
+                          </p>
+                          <p className="text-[10px] text-slate-400 truncate mb-0 font-mono">
+                            EMP-{String(staff.id).padStart(4, "0")}
+                          </p>
+                        </div>
                       </div>
                     </div>
 
@@ -742,13 +748,26 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                   }}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-600 to-teal-700 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs border border-emerald-500/20">
+                    <div
+                      onClick={() =>
+                        onViewDossier &&
+                        onViewDossier({
+                          id: squad.supervisorId,
+                          name: squad.supervisorName,
+                          email: squad.supervisorEmail || `${squad.supervisorName.toLowerCase().replace(/\s+/g, ".")}@example.com`,
+                          department_name: squad.departmentName,
+                          role: "supervisor",
+                        } as any)
+                      }
+                      className={`flex items-center gap-2.5 min-w-0 ${onViewDossier ? "cursor-pointer group/lead" : ""}`}
+                      title={onViewDossier ? "Click to view Team Lead Dossier" : undefined}
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-600 to-teal-700 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs border border-emerald-500/20 group-hover/lead:scale-105 transition-transform">
                         {squad.supervisorName.charAt(0)}
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <h4 className="font-bold text-slate-900 text-xs sm:text-sm truncate mb-0">
+                          <h4 className="font-bold text-slate-900 group-hover/lead:text-emerald-700 transition-colors text-xs sm:text-sm truncate mb-0">
                             {squad.supervisorName}
                           </h4>
                           <span className="text-[9.5px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
@@ -813,7 +832,22 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                           </span>
                         )}
                         {squad.managerName && (
-                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 font-medium border border-indigo-200/80">
+                          <span
+                            onClick={() =>
+                              onViewDossier &&
+                              onViewDossier({
+                                id: squad.managerId || 0,
+                                name: squad.managerName,
+                                email: `${squad.managerName.toLowerCase().replace(/\s+/g, ".")}@example.com`,
+                                department_name: squad.departmentName,
+                                role: "manager",
+                              } as any)
+                            }
+                            className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 font-medium border border-indigo-200/80 ${
+                              onViewDossier ? "cursor-pointer hover:bg-indigo-100 hover:border-indigo-300 transition-colors" : ""
+                            }`}
+                            title={onViewDossier ? "Click to view Manager Dossier" : undefined}
+                          >
                             <i className="bi bi-person-gear text-[9px] text-indigo-500"></i>
                             <span>Mgr: {squad.managerName}</span>
                           </span>
