@@ -466,7 +466,7 @@ const HierarchyMapping = () => {
         ) : viewMode === "squad" ? (
           <HierarchySquadCardsView
             mappings={filteredHierarchy}
-            unassignedStaff={filteredUnassigned}
+            unassignedStaff={selectedDepartment !== "all" ? unassignedEmployees.filter((u: any) => u.department_name === selectedDepartment) : unassignedEmployees}
             searchTerm={searchTerm}
             onOpenAssignModal={(empId, supId, mgrId) => {
               if (empId) {

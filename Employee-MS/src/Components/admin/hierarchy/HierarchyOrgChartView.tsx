@@ -208,23 +208,25 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
   };
 
   const [isExportingImage, setIsExportingImage] = useState<boolean>(false);
+  const [showExportMenu, setShowExportMenu] = useState<boolean>(false);
 
-  const handleExportImage = () => {
+  const handleExportImage = (format: "png" | "svg" = "png") => {
     if (!contentRef.current) return;
     try {
       setIsExportingImage(true);
+      setShowExportMenu(false);
       const content = contentRef.current;
-      const width = Math.max(1200, content.scrollWidth + 120);
-      const height = Math.max(800, content.scrollHeight + 120);
+      const width = Math.max(1400, content.scrollWidth + 160);
+      const height = Math.max(900, content.scrollHeight + 160);
 
       const clone = content.cloneNode(true) as HTMLElement;
       clone.style.transform = "none";
       clone.style.margin = "0";
 
-      // Collect all stylesheets
-      let styles = "";
+      // Collect all stylesheets safely
+      let rawStyles = "";
       try {
-        styles = Array.from(document.styleSheets)
+        rawStyles = Array.from(document.styleSheets)
           .map((sheet) => {
             try {
               return Array.from(sheet.cssRules).map((r) => r.cssText).join("\n");
@@ -234,34 +236,58 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
           })
           .join("\n");
       } catch {
-        styles = "";
+        rawStyles = "";
       }
 
-      const svgData = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-          <style>${styles}</style>
-          <rect width="100%" height="100%" fill="#f8fafc"/>
-          <foreignObject width="100%" height="100%">
-            <div xmlns="http://www.w3.org/1999/xhtml" style="padding: 40px; font-family: system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100%;">
-              ${clone.outerHTML}
-            </div>
-          </foreignObject>
-        </svg>
-      `;
+      // Escape any closing CDATA tokens in CSS to keep XML structure valid
+      const safeStyles = rawStyles.replace(/]]>/g, "]]&gt;");
+
+      // Serialize clone into 100% compliant XML / XHTML
+      const serializer = new XMLSerializer();
+      const serializedHtml = serializer.serializeToString(clone);
+
+      const svgData = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <defs>
+    <style type="text/css"><![CDATA[
+${safeStyles}
+    ]]></style>
+  </defs>
+  <rect width="100%" height="100%" fill="#f8fafc"/>
+  <foreignObject width="100%" height="100%">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="padding: 40px; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100%; box-sizing: border-box;">
+      ${serializedHtml}
+    </div>
+  </foreignObject>
+</svg>`;
 
       const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
       const URL = window.URL || window.webkitURL || window;
       const blobURL = URL.createObjectURL(svgBlob);
 
+      if (format === "svg") {
+        const downloadLink = document.createElement("a");
+        downloadLink.href = blobURL;
+        downloadLink.download = `Workforce_Org_Chart_${new Date().toISOString().slice(0, 10)}.svg`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        URL.revokeObjectURL(blobURL);
+        setIsExportingImage(false);
+        return;
+      }
+
       const image = new Image();
+      image.crossOrigin = "anonymous";
       image.onload = () => {
         try {
           const canvas = document.createElement("canvas");
-          canvas.width = width * 1.5;
-          canvas.height = height * 1.5;
+          const scale = 2; // Crisp 2x retina
+          canvas.width = width * scale;
+          canvas.height = height * scale;
           const ctx = canvas.getContext("2d");
           if (ctx) {
-            ctx.scale(1.5, 1.5);
+            ctx.scale(scale, scale);
             ctx.fillStyle = "#f8fafc";
             ctx.fillRect(0, 0, width, height);
             ctx.drawImage(image, 0, 0);
@@ -269,38 +295,49 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
             // Watermark footer
             ctx.fillStyle = "#64748b";
             ctx.font = "bold 12px sans-serif";
-            ctx.fillText("Enterprise Workforce Team Hierarchy • Confidential Reporting Structure", 40, height - 20);
+            ctx.fillText(
+              `Enterprise Workforce Team Hierarchy • Confidential Reporting Structure • ${new Date().toLocaleDateString()}`,
+              40,
+              height - 20
+            );
 
-            const pngUrl = canvas.toDataURL("image/png");
-            const downloadLink = document.createElement("a");
-            downloadLink.href = pngUrl;
-            downloadLink.download = `Workforce_Org_Chart_${new Date().toISOString().slice(0, 10)}.png`;
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
+            canvas.toBlob((blob) => {
+              if (blob) {
+                const pngUrl = URL.createObjectURL(blob);
+                const downloadLink = document.createElement("a");
+                downloadLink.href = pngUrl;
+                downloadLink.download = `Workforce_Org_Chart_${new Date().toISOString().slice(0, 10)}.png`;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                URL.revokeObjectURL(pngUrl);
+              }
+              URL.revokeObjectURL(blobURL);
+              setIsExportingImage(false);
+            }, "image/png");
           }
-        } catch {
-          // If canvas fails or is tainted, download vector SVG
+        } catch (canvasErr) {
+          console.error("Canvas export fallback to svg:", canvasErr);
           const downloadLink = document.createElement("a");
           downloadLink.href = blobURL;
           downloadLink.download = `Workforce_Org_Chart_${new Date().toISOString().slice(0, 10)}.svg`;
           document.body.appendChild(downloadLink);
           downloadLink.click();
           document.body.removeChild(downloadLink);
-        } finally {
           URL.revokeObjectURL(blobURL);
           setIsExportingImage(false);
         }
       };
 
-      image.onerror = () => {
-        // Fallback: download directly as high-res SVG
+      image.onerror = (imgErr) => {
+        console.error("Image rasterization error, falling back to clean SVG:", imgErr);
         const downloadLink = document.createElement("a");
         downloadLink.href = blobURL;
         downloadLink.download = `Workforce_Org_Chart_${new Date().toISOString().slice(0, 10)}.svg`;
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
+        URL.revokeObjectURL(blobURL);
         setIsExportingImage(false);
       };
 
@@ -471,16 +508,61 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
               <i className={`bi ${isFullscreen ? "bi-fullscreen-exit" : "bi-arrows-fullscreen"} text-xs`}></i>
               <span>{isFullscreen ? "Exit Full Screen" : "Full Screen"}</span>
             </button>
-            <button
-              type="button"
-              onClick={handleExportImage}
-              disabled={isExportingImage}
-              className="px-2.5 py-1 rounded-md text-[10px] font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs transition-all cursor-pointer flex items-center gap-1.5"
-              title="Download High-Resolution Org Chart PNG"
-            >
-              <i className={`bi ${isExportingImage ? "bi-hourglass-split animate-spin" : "bi-camera-fill"} text-emerald-600 text-xs`}></i>
-              <span>{isExportingImage ? "Rendering..." : "Export Image"}</span>
-            </button>
+            {/* Export Dropdown Group */}
+            <div className="relative">
+              <div className="inline-flex rounded-md shadow-2xs">
+                <button
+                  type="button"
+                  onClick={() => handleExportImage("png")}
+                  disabled={isExportingImage}
+                  className="px-2.5 py-1 rounded-l-md text-[10px] font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 transition-all cursor-pointer flex items-center gap-1.5"
+                  title="Download 2x High-Resolution PNG"
+                >
+                  <i className={`bi ${isExportingImage ? "bi-hourglass-split animate-spin" : "bi-camera-fill"} text-emerald-600 text-xs`}></i>
+                  <span>{isExportingImage ? "Rendering..." : "Export Image"}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  disabled={isExportingImage}
+                  className="px-1.5 py-1 rounded-r-md text-[10px] font-semibold bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border-y border-r border-emerald-300 transition-all cursor-pointer flex items-center justify-center"
+                  title="Export format options"
+                >
+                  <i className={`bi bi-chevron-${showExportMenu ? "up" : "down"} text-[9px]`}></i>
+                </button>
+              </div>
+
+              {/* Format selection popover */}
+              {showExportMenu && (
+                <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-200 rounded-xl shadow-lg p-1.5 z-50 animate-in fade-in zoom-in-95 duration-100 space-y-1">
+                  <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Export Format
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleExportImage("png")}
+                    className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-900 transition-colors flex items-center gap-2 cursor-pointer"
+                  >
+                    <i className="bi bi-file-earmark-image-fill text-emerald-600 text-xs"></i>
+                    <div>
+                      <div className="font-bold text-[11px]">Download PNG</div>
+                      <div className="text-[10px] text-slate-400">2x Retina Image (Crisp)</div>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleExportImage("svg")}
+                    className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-900 transition-colors flex items-center gap-2 cursor-pointer"
+                  >
+                    <i className="bi bi-filetype-svg text-indigo-600 text-xs"></i>
+                    <div>
+                      <div className="font-bold text-[11px]">Download SVG</div>
+                      <div className="text-[10px] text-slate-400">Scalable Vector Format</div>
+                    </div>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Zoom controls */}

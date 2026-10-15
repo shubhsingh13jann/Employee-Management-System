@@ -252,6 +252,15 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
         <div className="flex items-center gap-2">
           <button
             type="button"
+            onClick={() => setCapacityFilter("all")}
+            className="px-2.5 py-1 rounded-lg text-xs font-semibold text-amber-900 hover:text-amber-950 bg-amber-100 hover:bg-amber-200 border border-amber-300 transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+            title="Return to Squad Cards Grid"
+          >
+            <i className="bi bi-grid-fill text-[11px]"></i>
+            <span>Return to Squads</span>
+          </button>
+          <button
+            type="button"
             onClick={() => setIsTrayCollapsed(!isTrayCollapsed)}
             className="p-1 rounded-md text-amber-800 hover:bg-amber-100/80 transition-colors cursor-pointer text-xs"
             title={isTrayCollapsed ? "Expand allocation tray" : "Collapse allocation tray"}
@@ -587,19 +596,28 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
             </button>
             <button
               type="button"
-              onClick={() => setCapacityFilter("unassigned")}
-              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+              onClick={() => setCapacityFilter((prev) => (prev === "unassigned" ? "all" : "unassigned"))}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-2xs ${
                 capacityFilter === "unassigned"
-                  ? "bg-amber-600 text-white shadow-2xs ring-2 ring-amber-400/50"
-                  : "bg-amber-50/90 text-amber-900 hover:bg-amber-100 border border-amber-300"
+                  ? "bg-amber-600 text-white shadow-md ring-2 ring-amber-400"
+                  : "bg-amber-100/90 text-amber-950 hover:bg-amber-200 border border-amber-300"
               }`}
+              title="Toggle Unassigned Staff Allocation Tray"
             >
               <span
-                className={`w-1.5 h-1.5 rounded-full ${
+                className={`w-2 h-2 rounded-full ${
                   unassignedStaff.length > 0 ? "bg-amber-500 animate-pulse" : "bg-emerald-500"
                 }`}
               ></span>
-              <span>Unassigned Tray ({unassignedStaff.length})</span>
+              <i className="bi bi-inbox-fill text-xs"></i>
+              <span>Unassigned Staff Allocation Tray</span>
+              <span
+                className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                  capacityFilter === "unassigned" ? "bg-amber-700 text-white" : "bg-amber-200 text-amber-900"
+                }`}
+              >
+                {unassignedStaff.length}
+              </span>
             </button>
           </div>
 
@@ -615,6 +633,33 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
           )}
         </div>
       </div>
+
+      {/* Quick Access Notification Bar for Unassigned Allocation Tray */}
+      {capacityFilter !== "unassigned" && unassignedStaff.length > 0 && (
+        <div className="bg-gradient-to-r from-amber-50 via-amber-50/70 to-orange-50 border border-amber-200 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-2xs animate-in fade-in duration-150">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-800 border border-amber-300 flex items-center justify-center text-sm shrink-0">
+              <i className="bi bi-inbox-fill"></i>
+            </div>
+            <div>
+              <p className="text-xs font-bold text-amber-950 mb-0">
+                {unassignedStaff.length} Unassigned Personnel Awaiting Squad Allocation
+              </p>
+              <p className="text-[11px] text-amber-800/80 mb-0">
+                Click the tray tab or button to perform 1-click batch onboarding into supervisor squads.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setCapacityFilter("unassigned")}
+            className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition-all shadow-2xs cursor-pointer shrink-0 flex items-center gap-1.5"
+          >
+            <i className="bi bi-box-arrow-in-right text-xs"></i>
+            <span>Open Allocation Tray</span>
+          </button>
+        </div>
+      )}
 
       {/* Main Squad Grid or Unassigned Tray View */}
       {capacityFilter === "unassigned" ? (
