@@ -181,6 +181,15 @@ const HierarchyMapping = () => {
     fetchData();
   }, []);
 
+  // Auto-dismiss alert notification after 4 seconds
+  useEffect(() => {
+    if (!msg.text) return;
+    const timer = setTimeout(() => {
+      setMsg({ type: "", text: "" });
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [msg.text]);
+
   const handleAssign = async (e) => {
     e.preventDefault();
     if (!form.employee_id || !form.supervisor_id || !form.manager_id) {
