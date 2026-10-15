@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { HierarchyEmptyStateOnboarding } from "./HierarchyEmptyStateOnboarding";
 
 export interface HierarchyMappingItem {
   id: number | string;
@@ -62,6 +63,8 @@ interface HierarchyTableViewProps {
   onViewDossier?: (employee: HierarchyMappingItem | UnassignedEmployee) => void;
   onOpenBatchModal?: (candidates: any[], targetSquad?: any) => void;
   onBatchUnlink?: (employeeIds: (string | number)[]) => void;
+  isPreviewEmptyState?: boolean;
+  onExitSimulation?: () => void;
 }
 
 export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
@@ -78,6 +81,8 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
   onViewDossier,
   onOpenBatchModal,
   onBatchUnlink,
+  isPreviewEmptyState = false,
+  onExitSimulation,
 }) => {
   const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
@@ -636,32 +641,21 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                     </div>
                   </td>
                 </tr>
-              ) : totalVisibleCount === 0 ? (
+              ) : totalVisibleCount === 0 || isPreviewEmptyState ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-12">
-                    <div className="max-w-md mx-auto">
-                      <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-lg mx-auto mb-2">
-                        <i className="bi bi-diagram-3"></i>
-                      </div>
-                      <p className="font-bold text-slate-800 text-xs sm:text-sm mb-0.5">
-                        {isOnlyUnassigned
-                          ? "All Staff Are Mapped"
-                          : "No Hierarchy Records Found"}
-                      </p>
-                      <p className="text-[11px] text-slate-500 mb-2.5">
-                        {isOnlyUnassigned
-                          ? "Every active staff member has an assigned team lead and manager."
-                          : "No employees match your current filter or department criteria."}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={onResetFilters}
-                        className="px-3 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold transition-colors cursor-pointer inline-flex items-center gap-1.5"
-                      >
-                        <i className="bi bi-arrow-counterclockwise"></i>
-                        <span>Reset Filters</span>
-                      </button>
-                    </div>
+                  <td colSpan={7} className="p-4 sm:p-8">
+                    <HierarchyEmptyStateOnboarding
+                      onOpenAssignModal={() => onOpenAssignModal()}
+                      onResetFilters={onResetFilters}
+                      isSimulated={isPreviewEmptyState}
+                      onExitSimulation={onExitSimulation}
+                      title={isOnlyUnassigned ? "All Active Staff Are Fully Mapped" : "No Hierarchy Records Found"}
+                      description={
+                        isOnlyUnassigned
+                          ? "Every active staff member in the system currently has an assigned direct supervisor and department manager."
+                          : "Begin structuring your organizational reporting lines by assigning your first team member or clearing active filters."
+                      }
+                    />
                   </td>
                 </tr>
               ) : (

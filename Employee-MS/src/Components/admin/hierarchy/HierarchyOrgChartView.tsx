@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { HierarchyMappingItem, UnassignedEmployee } from "./HierarchyTableView";
+import { HierarchyEmptyStateOnboarding } from "./HierarchyEmptyStateOnboarding";
 
 export interface ReassignDropPayload {
   employee: HierarchyMappingItem;
@@ -17,6 +18,8 @@ interface HierarchyOrgChartViewProps {
   onReassignDrop?: (payload: ReassignDropPayload) => void;
   onSwapDrop?: (payload: { employee1: HierarchyMappingItem; employee2: HierarchyMappingItem }) => void;
   onViewDossier?: (employee: HierarchyMappingItem | UnassignedEmployee) => void;
+  isPreviewEmptyState?: boolean;
+  onExitSimulation?: () => void;
 }
 
 interface TreeNodeManager {
@@ -47,6 +50,8 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
   onReassignDrop,
   onSwapDrop,
   onViewDossier,
+  isPreviewEmptyState = false,
+  onExitSimulation,
 }) => {
   // Collapsed state tracking (IDs of nodes that are collapsed)
   const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
@@ -1000,22 +1005,15 @@ ${safeStyles}
           isPanning ? "cursor-grabbing" : "cursor-grab"
         }`}
       >
-        {managersTree.length === 0 ? (
-          <div className="py-14 text-center max-w-sm mx-auto">
-            <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-lg mx-auto mb-2">
-              <i className="bi bi-diagram-3"></i>
-            </div>
-            <p className="font-bold text-slate-800 text-xs sm:text-sm mb-0.5">No Hierarchy Mappings Active</p>
-            <p className="text-[11px] text-slate-500 mb-2.5">
-              Assign staff members to create visual organizational reporting trees.
-            </p>
-            <button
-              type="button"
-              onClick={() => onOpenAssignModal()}
-              className="px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold shadow-xs hover:bg-indigo-500 cursor-pointer"
-            >
-              Assign First Team
-            </button>
+        {managersTree.length === 0 || isPreviewEmptyState ? (
+          <div className="p-4 sm:p-8 w-full max-w-4xl mx-auto flex items-center justify-center min-h-[460px]">
+            <HierarchyEmptyStateOnboarding
+              onOpenAssignModal={() => onOpenAssignModal()}
+              isSimulated={isPreviewEmptyState}
+              onExitSimulation={onExitSimulation}
+              title="No Reporting Hierarchy Tree Active"
+              description="Assign employees to team leads and department managers to generate your dynamic visual organizational chart."
+            />
           </div>
         ) : (
           <div

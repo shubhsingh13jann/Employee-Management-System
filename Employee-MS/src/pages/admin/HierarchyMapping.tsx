@@ -38,6 +38,7 @@ const HierarchyMapping = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"table" | "tree" | "squad">("table");
   const [activeKpiFilter, setActiveKpiFilter] = useState<"mapped" | "leads" | "managers" | "orphaned" | null>(null);
+  const [isPreviewEmptyState, setIsPreviewEmptyState] = useState(false);
 
   const [form, setForm] = useState({
     employee_id: "",
@@ -495,6 +496,8 @@ const HierarchyMapping = () => {
           }}
           onOpenExportModal={() => setIsExportModalOpen(true)}
           onPrint={() => setIsPrintModalOpen(true)}
+          isPreviewEmptyState={isPreviewEmptyState}
+          onTogglePreviewEmptyState={() => setIsPreviewEmptyState((prev) => !prev)}
         />
 
         {/* Dynamic View Rendering: Org Chart Tree vs Table View */}
@@ -539,6 +542,8 @@ const HierarchyMapping = () => {
               });
             }}
             onViewDossier={(emp) => setSelectedDossierEmployee(emp)}
+            isPreviewEmptyState={isPreviewEmptyState}
+            onExitSimulation={() => setIsPreviewEmptyState(false)}
           />
         ) : viewMode === "squad" ? (
           <HierarchySquadCardsView
@@ -579,6 +584,8 @@ const HierarchyMapping = () => {
               });
             }}
             onViewDossier={(emp) => setSelectedDossierEmployee(emp)}
+            isPreviewEmptyState={isPreviewEmptyState}
+            onExitSimulation={() => setIsPreviewEmptyState(false)}
           />
         ) : (
           <HierarchyTableView
@@ -626,6 +633,8 @@ const HierarchyMapping = () => {
               });
             }}
             onBatchUnlink={handleBatchUnlink}
+            isPreviewEmptyState={isPreviewEmptyState}
+            onExitSimulation={() => setIsPreviewEmptyState(false)}
           />
         )}
 

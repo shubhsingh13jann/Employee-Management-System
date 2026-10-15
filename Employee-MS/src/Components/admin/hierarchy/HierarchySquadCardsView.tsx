@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { HierarchyMappingItem, UnassignedEmployee } from "./HierarchyTableView";
 import { SupervisorCapacityDrawer } from "./SupervisorCapacityDrawer";
+import { HierarchyEmptyStateOnboarding } from "./HierarchyEmptyStateOnboarding";
 
 export interface SquadGroup {
   supervisorId: string | number;
@@ -25,6 +26,8 @@ export interface HierarchySquadCardsViewProps {
   onInspectSquad?: (squad: SquadGroup) => void;
   onOpenBatchModal?: (candidates: UnassignedEmployee[], targetSquad?: SquadGroup | null) => void;
   onViewDossier?: (employee: HierarchyMappingItem | UnassignedEmployee) => void;
+  isPreviewEmptyState?: boolean;
+  onExitSimulation?: () => void;
 }
 
 export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = ({
@@ -37,6 +40,8 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
   onInspectSquad,
   onOpenBatchModal,
   onViewDossier,
+  isPreviewEmptyState = false,
+  onExitSimulation,
 }) => {
   const [collapsedSquads, setCollapsedSquads] = useState<Set<string>>(new Set());
   const [capacityFilter, setCapacityFilter] = useState<"all" | "light" | "optimal" | "high" | "unassigned">("all");
@@ -671,38 +676,20 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
       {capacityFilter === "unassigned" ? (
         renderUnassignedStaffTray()
       ) : (
-        displayedSquads.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200/90 p-8 text-center shadow-2xs">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xl mx-auto mb-3 shadow-xs">
-            <i className="bi bi-people"></i>
-          </div>
-          <h3 className="text-sm font-bold text-slate-800 mb-1">No Matching Squads</h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto mb-4">
-            {capacityFilter !== "all"
-              ? `No supervisor squads match the "${capacityFilter}" capacity load filter.`
-              : searchTerm
-              ? `No supervisor squads match the search term "${searchTerm}".`
-              : "No team lead reporting lines have been established yet."}
-          </p>
-          <div className="flex items-center justify-center gap-2">
-            {capacityFilter !== "all" && (
-              <button
-                type="button"
-                onClick={() => setCapacityFilter("all")}
-                className="px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors cursor-pointer"
-              >
-                Show All Squads
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => onOpenAssignModal()}
-              className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer inline-flex items-center gap-1.5"
-            >
-              <i className="bi bi-person-plus-fill"></i>
-              <span>Create Squad Mapping</span>
-            </button>
-          </div>
+        displayedSquads.length === 0 || isPreviewEmptyState ? (
+        <div className="w-full">
+          <HierarchyEmptyStateOnboarding
+            onOpenAssignModal={() => onOpenAssignModal()}
+            onResetFilters={() => setCapacityFilter("all")}
+            isSimulated={isPreviewEmptyState}
+            onExitSimulation={onExitSimulation}
+            title={capacityFilter !== "all" ? `No Squads Found in "${capacityFilter.toUpperCase()}" Span` : "No Team Lead Squads Active"}
+            description={
+              capacityFilter !== "all"
+                ? `No supervisor squads currently match the ${capacityFilter} span criteria. Reset the span filter to see all active squads.`
+                : "Organize employees into collaborative squads by assigning supervisors and establishing team capacities."
+            }
+          />
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5">

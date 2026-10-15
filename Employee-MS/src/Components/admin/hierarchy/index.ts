@@ -16,3 +16,4 @@ export * from "./HierarchyAuditModal";
 export * from "./AutoAssignWizardModal";
 export * from "./HierarchyEmployeeDossierModal";
 export * from "./SwapReportingConfirmModal";
+export * from "./HierarchyEmptyStateOnboarding";

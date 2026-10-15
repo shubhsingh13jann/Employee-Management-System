@@ -15,6 +15,8 @@ interface HierarchyFiltersProps {
   onResetFilters: () => void;
   onOpenExportModal?: () => void;
   onPrint?: () => void;
+  isPreviewEmptyState?: boolean;
+  onTogglePreviewEmptyState?: () => void;
 }
 
 export const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
@@ -32,6 +34,8 @@ export const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
   onResetFilters,
   onOpenExportModal,
   onPrint,
+  isPreviewEmptyState = false,
+  onTogglePreviewEmptyState,
 }) => {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -296,6 +300,22 @@ export const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
 
         {/* Right: Quick Export & Print Shortcuts */}
         <div className="flex items-center gap-1.5 ml-auto no-print">
+          {onTogglePreviewEmptyState && (
+            <button
+              type="button"
+              onClick={onTogglePreviewEmptyState}
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer flex items-center gap-1 shadow-2xs ${
+                isPreviewEmptyState
+                  ? "bg-purple-600 text-white shadow-xs ring-2 ring-purple-300"
+                  : "text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200"
+              }`}
+              title="Toggle Empty State & First-Time Assign Onboarding Preview"
+            >
+              <i className="bi bi-sparkles text-xs"></i>
+              <span>{isPreviewEmptyState ? "Exit Empty State" : "Preview Empty State"}</span>
+            </button>
+          )}
+
           {onOpenExportModal && (
             <button
               type="button"
