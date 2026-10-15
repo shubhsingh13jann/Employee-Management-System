@@ -207,147 +207,6 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
     });
   };
 
-  const [isExportingImage, setIsExportingImage] = useState<boolean>(false);
-  const [showExportMenu, setShowExportMenu] = useState<boolean>(false);
-
-  const handleExportImage = (format: "png" | "svg" = "png") => {
-    if (!contentRef.current) return;
-    try {
-      setIsExportingImage(true);
-      setShowExportMenu(false);
-      const content = contentRef.current;
-      const width = Math.max(1400, content.scrollWidth + 160);
-      const height = Math.max(900, content.scrollHeight + 160);
-
-      const clone = content.cloneNode(true) as HTMLElement;
-      clone.style.transform = "none";
-      clone.style.margin = "0";
-
-      // Collect all stylesheets safely
-      let rawStyles = "";
-      try {
-        rawStyles = Array.from(document.styleSheets)
-          .map((sheet) => {
-            try {
-              return Array.from(sheet.cssRules).map((r) => r.cssText).join("\n");
-            } catch {
-              return "";
-            }
-          })
-          .join("\n");
-      } catch {
-        rawStyles = "";
-      }
-
-      // Escape any closing CDATA tokens in CSS to keep XML structure valid
-      const safeStyles = rawStyles.replace(/]]>/g, "]]&gt;");
-
-      // Serialize clone into 100% compliant XML / XHTML
-      const serializer = new XMLSerializer();
-      const serializedHtml = serializer.serializeToString(clone);
-
-      const svgData = `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-  <defs>
-    <style type="text/css"><![CDATA[
-${safeStyles}
-    ]]></style>
-  </defs>
-  <rect width="100%" height="100%" fill="#f8fafc"/>
-  <foreignObject width="100%" height="100%">
-    <div xmlns="http://www.w3.org/1999/xhtml" style="padding: 40px; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100%; box-sizing: border-box;">
-      ${serializedHtml}
-    </div>
-  </foreignObject>
-</svg>`;
-
-      const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
-      const URL = window.URL || window.webkitURL || window;
-      const blobURL = URL.createObjectURL(svgBlob);
-
-      if (format === "svg") {
-        const downloadLink = document.createElement("a");
-        downloadLink.href = blobURL;
-        downloadLink.download = `Workforce_Org_Chart_${new Date().toISOString().slice(0, 10)}.svg`;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-        URL.revokeObjectURL(blobURL);
-        setIsExportingImage(false);
-        return;
-      }
-
-      const image = new Image();
-      image.crossOrigin = "anonymous";
-      image.onload = () => {
-        try {
-          const canvas = document.createElement("canvas");
-          const scale = 2; // Crisp 2x retina
-          canvas.width = width * scale;
-          canvas.height = height * scale;
-          const ctx = canvas.getContext("2d");
-          if (ctx) {
-            ctx.scale(scale, scale);
-            ctx.fillStyle = "#f8fafc";
-            ctx.fillRect(0, 0, width, height);
-            ctx.drawImage(image, 0, 0);
-
-            // Watermark footer
-            ctx.fillStyle = "#64748b";
-            ctx.font = "bold 12px sans-serif";
-            ctx.fillText(
-              `Enterprise Workforce Team Hierarchy • Confidential Reporting Structure • ${new Date().toLocaleDateString()}`,
-              40,
-              height - 20
-            );
-
-            canvas.toBlob((blob) => {
-              if (blob) {
-                const pngUrl = URL.createObjectURL(blob);
-                const downloadLink = document.createElement("a");
-                downloadLink.href = pngUrl;
-                downloadLink.download = `Workforce_Org_Chart_${new Date().toISOString().slice(0, 10)}.png`;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-                URL.revokeObjectURL(pngUrl);
-              }
-              URL.revokeObjectURL(blobURL);
-              setIsExportingImage(false);
-            }, "image/png");
-          }
-        } catch (canvasErr) {
-          console.error("Canvas export fallback to svg:", canvasErr);
-          const downloadLink = document.createElement("a");
-          downloadLink.href = blobURL;
-          downloadLink.download = `Workforce_Org_Chart_${new Date().toISOString().slice(0, 10)}.svg`;
-          document.body.appendChild(downloadLink);
-          downloadLink.click();
-          document.body.removeChild(downloadLink);
-          URL.revokeObjectURL(blobURL);
-          setIsExportingImage(false);
-        }
-      };
-
-      image.onerror = (imgErr) => {
-        console.error("Image rasterization error, falling back to clean SVG:", imgErr);
-        const downloadLink = document.createElement("a");
-        downloadLink.href = blobURL;
-        downloadLink.download = `Workforce_Org_Chart_${new Date().toISOString().slice(0, 10)}.svg`;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-        URL.revokeObjectURL(blobURL);
-        setIsExportingImage(false);
-      };
-
-      image.src = blobURL;
-    } catch (err) {
-      console.error("Export image error:", err);
-      setIsExportingImage(false);
-    }
-  };
-
   // Build hierarchical tree structure from flat mappings
   const managersTree = useMemo(() => {
     const managersMap = new Map<string | number, TreeNodeManager>();
@@ -381,6 +240,352 @@ ${safeStyles}
 
     return Array.from(managersMap.values());
   }, [mappings]);
+
+  const [isExportingImage, setIsExportingImage] = useState<boolean>(false);
+  const [showExportMenu, setShowExportMenu] = useState<boolean>(false);
+
+  // Direct HTML5 Canvas 2D High-Resolution Rasterization Engine (Guaranteed zero-taint crisp PNG)
+  const exportCanvasTreeToPng = () => {
+    const canvas = document.createElement("canvas");
+    const CARD_GAP = 28;
+    const EMP_W = 200;
+    const EMP_H = 64;
+    const SUP_W = 230;
+    const SUP_H = 76;
+    const MGR_W = 260;
+    const MGR_H = 80;
+    const HQ_W = 300;
+    const HQ_H = 70;
+
+    // Calculate layout geometry
+    interface ComputedSupervisor {
+      data: TreeNodeSupervisor;
+      width: number;
+      x: number;
+      y: number;
+      empPositions: { item: HierarchyMappingItem; x: number; y: number }[];
+    }
+    interface ComputedManager {
+      data: TreeNodeManager;
+      width: number;
+      x: number;
+      y: number;
+      supervisors: ComputedSupervisor[];
+    }
+
+    const computedManagers: ComputedManager[] = [];
+    let currentX = 60;
+
+    const yHq = 60;
+    const yMgr = 180;
+    const ySup = 320;
+    const yEmp = 460;
+
+    managersTree.forEach((mgr) => {
+      const supsList = Array.from(mgr.supervisors.values());
+      const computedSups: ComputedSupervisor[] = [];
+      let mgrCurrentX = currentX;
+
+      supsList.forEach((sup) => {
+        const empCount = sup.employees.length;
+        const supContentW = empCount > 0 ? empCount * (EMP_W + 16) - 16 : SUP_W;
+        const supWidth = Math.max(SUP_W, supContentW);
+
+        const supX = mgrCurrentX + (supWidth - SUP_W) / 2;
+        const empStartX = mgrCurrentX + (supWidth - (empCount > 0 ? empCount * (EMP_W + 16) - 16 : 0)) / 2;
+
+        const empPositions = sup.employees.map((emp, eIdx) => ({
+          item: emp,
+          x: empStartX + eIdx * (EMP_W + 16),
+          y: yEmp,
+        }));
+
+        computedSups.push({
+          data: sup,
+          width: supWidth,
+          x: supX,
+          y: ySup,
+          empPositions,
+        });
+
+        mgrCurrentX += supWidth + CARD_GAP;
+      });
+
+      const mgrWidth = Math.max(MGR_W, mgrCurrentX - currentX - CARD_GAP);
+      const mgrX = currentX + (mgrWidth - MGR_W) / 2;
+
+      computedManagers.push({
+        data: mgr,
+        width: mgrWidth,
+        x: mgrX,
+        y: yMgr,
+        supervisors: computedSups,
+      });
+
+      currentX += mgrWidth + CARD_GAP * 2;
+    });
+
+    const totalWidth = Math.max(1600, currentX + 60);
+    const totalHeight = 620;
+    const hqX = (totalWidth - HQ_W) / 2;
+
+    const scale = 2; // Crisp 2x Retina
+    canvas.width = totalWidth * scale;
+    canvas.height = totalHeight * scale;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.scale(scale, scale);
+
+    // Canvas Background
+    ctx.fillStyle = "#f8fafc";
+    ctx.fillRect(0, 0, totalWidth, totalHeight);
+
+    // Subtle Grid pattern
+    ctx.strokeStyle = "#f1f5f9";
+    ctx.lineWidth = 1;
+    for (let x = 0; x < totalWidth; x += 40) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, totalHeight);
+      ctx.stroke();
+    }
+    for (let y = 0; y < totalHeight; y += 40) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(totalWidth, y);
+      ctx.stroke();
+    }
+
+    // Helper functions
+    const drawCard = (x: number, y: number, w: number, h: number, bg: string, border: string, accent: string) => {
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, 10);
+      ctx.fillStyle = bg;
+      ctx.fill();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = border;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, 4, [10, 10, 0, 0]);
+      ctx.fillStyle = accent;
+      ctx.fill();
+      ctx.restore();
+    };
+
+    const drawLine = (x1: number, y1: number, x2: number, y2: number) => {
+      ctx.save();
+      ctx.strokeStyle = "#cbd5e1";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      const midY = (y1 + y2) / 2;
+      ctx.lineTo(x1, midY);
+      ctx.lineTo(x2, midY);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      ctx.restore();
+    };
+
+    const drawAvatar = (x: number, y: number, size: number, letter: string, bg: string, color: string) => {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+      ctx.fillStyle = bg;
+      ctx.fill();
+      ctx.fillStyle = color;
+      ctx.font = `bold ${Math.round(size * 0.46)}px system-ui, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(letter.toUpperCase(), x + size / 2, y + size / 2);
+      ctx.restore();
+    };
+
+    const drawText = (txt: string, x: number, y: number, maxW: number, font: string, color: string) => {
+      ctx.save();
+      ctx.font = font;
+      ctx.fillStyle = color;
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      let d = txt;
+      if (ctx.measureText(d).width > maxW) {
+        while (d.length > 1 && ctx.measureText(d + "…").width > maxW) {
+          d = d.slice(0, -1);
+        }
+        d += "…";
+      }
+      ctx.fillText(d, x, y);
+      ctx.restore();
+    };
+
+    // 1. Draw Connectors First (underneath cards)
+    const hqBottomX = hqX + HQ_W / 2;
+    const hqBottomY = yHq + HQ_H;
+
+    computedManagers.forEach((mgr) => {
+      const mgrTopX = mgr.x + MGR_W / 2;
+      const mgrTopY = mgr.y;
+      drawLine(hqBottomX, hqBottomY, mgrTopX, mgrTopY);
+
+      const mgrBottomX = mgrTopX;
+      const mgrBottomY = mgr.y + MGR_H;
+
+      mgr.supervisors.forEach((sup) => {
+        const supTopX = sup.x + SUP_W / 2;
+        const supTopY = sup.y;
+        drawLine(mgrBottomX, mgrBottomY, supTopX, supTopY);
+
+        const supBottomX = supTopX;
+        const supBottomY = sup.y + SUP_H;
+
+        sup.empPositions.forEach((emp) => {
+          const empTopX = emp.x + EMP_W / 2;
+          const empTopY = emp.y;
+          drawLine(supBottomX, supBottomY, empTopX, empTopY);
+        });
+      });
+    });
+
+    // 2. Draw HQ Card
+    drawCard(hqX, yHq, HQ_W, HQ_H, "#ffffff", "#e2e8f0", "#4f46e5");
+    drawAvatar(hqX + 16, yHq + 16, 38, "HQ", "#ede9fe", "#4338ca");
+    drawText("Workforce Organization", hqX + 66, yHq + 28, HQ_W - 80, "bold 13px system-ui, sans-serif", "#0f172a");
+    drawText(`${managersTree.length} Business Divisions • ${mappings.length} Staff`, hqX + 66, yHq + 46, HQ_W - 80, "500 11px system-ui, sans-serif", "#64748b");
+
+    // 3. Draw Manager Cards
+    computedManagers.forEach((mgr) => {
+      drawCard(mgr.x, mgr.y, MGR_W, MGR_H, "#ffffff", "#cbd5e1", "#6366f1");
+      drawAvatar(mgr.x + 14, mgr.y + 18, 36, mgr.data.name?.charAt(0) || "M", "#e0e7ff", "#4338ca");
+      drawText(mgr.data.name, mgr.x + 60, mgr.y + 30, MGR_W - 75, "bold 13px system-ui, sans-serif", "#1e1b4b");
+      drawText(mgr.data.department || "Division Head", mgr.x + 60, mgr.y + 48, MGR_W - 75, "500 11px system-ui, sans-serif", "#6366f1");
+      drawText(`${mgr.supervisors.length} Team Leads`, mgr.x + 60, mgr.y + 64, MGR_W - 75, "600 10px system-ui, sans-serif", "#94a3b8");
+    });
+
+    // 4. Draw Supervisor Cards
+    computedManagers.forEach((mgr) => {
+      mgr.supervisors.forEach((sup) => {
+        drawCard(sup.x, sup.y, SUP_W, SUP_H, "#ffffff", "#cbd5e1", "#10b981");
+        drawAvatar(sup.x + 12, sup.y + 16, 34, sup.data.name?.charAt(0) || "S", "#dcfce7", "#15803d");
+        drawText(sup.data.name, sup.x + 54, sup.y + 28, SUP_W - 65, "bold 12px system-ui, sans-serif", "#064e3b");
+        drawText(sup.data.department || "Team Lead", sup.x + 54, sup.y + 44, SUP_W - 65, "500 10px system-ui, sans-serif", "#059669");
+        drawText(`${sup.data.employees.length} / 8 Direct Reports`, sup.x + 54, sup.y + 60, SUP_W - 65, "600 10px system-ui, sans-serif", "#64748b");
+      });
+    });
+
+    // 5. Draw Employee Cards
+    computedManagers.forEach((mgr) => {
+      mgr.supervisors.forEach((sup) => {
+        sup.empPositions.forEach((emp) => {
+          drawCard(emp.x, emp.y, EMP_W, EMP_H, "#ffffff", "#e2e8f0", "#0284c7");
+          drawAvatar(emp.x + 10, emp.y + 14, 28, emp.item.employee_name?.charAt(0) || "E", "#e0f2fe", "#0369a1");
+          drawText(emp.item.employee_name, emp.x + 46, emp.y + 24, EMP_W - 55, "bold 11px system-ui, sans-serif", "#0f172a");
+          drawText(emp.item.employee_email, emp.x + 46, emp.y + 39, EMP_W - 55, "500 9px system-ui, sans-serif", "#64748b");
+          drawText(`EMP-${String(emp.item.employee_id).padStart(4, "0")}`, emp.x + 46, emp.y + 51, EMP_W - 55, "600 9px system-ui, sans-serif", "#94a3b8");
+        });
+      });
+    });
+
+    // 6. Watermark Footer
+    ctx.save();
+    ctx.fillStyle = "#64748b";
+    ctx.font = "bold 11px system-ui, sans-serif";
+    ctx.fillText(
+      `Enterprise Workforce Team Hierarchy • Confidential Reporting Structure • Generated ${new Date().toLocaleDateString()}`,
+      60,
+      totalHeight - 20
+    );
+    ctx.restore();
+
+    // Export cleanly to PNG Blob
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const URL = window.URL || window.webkitURL || window;
+        const pngUrl = URL.createObjectURL(blob);
+        const downloadLink = document.createElement("a");
+        downloadLink.href = pngUrl;
+        downloadLink.download = `Workforce_Org_Chart_${new Date().toISOString().slice(0, 10)}.png`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        URL.revokeObjectURL(pngUrl);
+      }
+      setIsExportingImage(false);
+    }, "image/png");
+  };
+
+  const handleExportImage = (format: "png" | "svg" = "png") => {
+    if (!contentRef.current) return;
+    try {
+      setIsExportingImage(true);
+      setShowExportMenu(false);
+
+      if (format === "png") {
+        exportCanvasTreeToPng();
+        return;
+      }
+
+      // Pure Vector SVG Export
+      const content = contentRef.current;
+      const width = Math.max(1400, content.scrollWidth + 160);
+      const height = Math.max(900, content.scrollHeight + 160);
+
+      const clone = content.cloneNode(true) as HTMLElement;
+      clone.style.transform = "none";
+      clone.style.margin = "0";
+
+      let rawStyles = "";
+      try {
+        rawStyles = Array.from(document.styleSheets)
+          .map((sheet) => {
+            try {
+              return Array.from(sheet.cssRules).map((r) => r.cssText).join("\n");
+            } catch {
+              return "";
+            }
+          })
+          .join("\n");
+      } catch {
+        rawStyles = "";
+      }
+
+      const safeStyles = rawStyles.replace(/]]>/g, "]]&gt;");
+      const serializer = new XMLSerializer();
+      const serializedHtml = serializer.serializeToString(clone);
+
+      const svgData = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <defs>
+    <style type="text/css"><![CDATA[
+${safeStyles}
+    ]]></style>
+  </defs>
+  <rect width="100%" height="100%" fill="#f8fafc"/>
+  <foreignObject width="100%" height="100%">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="padding: 40px; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100%; box-sizing: border-box;">
+      ${serializedHtml}
+    </div>
+  </foreignObject>
+</svg>`;
+
+      const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+      const URL = window.URL || window.webkitURL || window;
+      const blobURL = URL.createObjectURL(svgBlob);
+
+      const downloadLink = document.createElement("a");
+      downloadLink.href = blobURL;
+      downloadLink.download = `Workforce_Org_Chart_${new Date().toISOString().slice(0, 10)}.svg`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      URL.revokeObjectURL(blobURL);
+      setIsExportingImage(false);
+    } catch (err) {
+      console.error("Export image error:", err);
+      setIsExportingImage(false);
+    }
+  };
 
   // Auto-expand branches when search term matches any employee, supervisor, or manager
   useEffect(() => {
