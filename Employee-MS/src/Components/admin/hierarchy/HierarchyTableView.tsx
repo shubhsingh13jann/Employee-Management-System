@@ -60,6 +60,8 @@ interface HierarchyTableViewProps {
   onInitiateReassign?: (employee: HierarchyMappingItem) => void;
   onInitiateUnlink?: (employee: HierarchyMappingItem) => void;
   onViewDossier?: (employee: HierarchyMappingItem | UnassignedEmployee) => void;
+  onOpenBatchModal?: (candidates: any[], targetSquad?: any) => void;
+  onBatchUnlink?: (employeeIds: (string | number)[]) => void;
 }
 
 export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
@@ -74,11 +76,14 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
   onInitiateReassign,
   onInitiateUnlink,
   onViewDossier,
+  onOpenBatchModal,
+  onBatchUnlink,
 }) => {
   const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
   const [selectedSquadLead, setSelectedSquadLead] = useState<TeamLeadGroup | null>(null);
   const [selectedManagerGroup, setSelectedManagerGroup] = useState<ManagerGroup | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string | number>>(new Set());
 
   // Group mappings by Team Lead (Supervisor)
   const leadGroups = useMemo<TeamLeadGroup[]>(() => {
@@ -156,6 +161,69 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
   const totalVisibleCount =
     (shouldRenderAssigned ? mappings.length : 0) +
     (shouldRenderUnassigned ? unassignedStaff.length : 0);
+
+  const visibleStaffIds = useMemo(() => {
+    const ids: (string | number)[] = [];
+    if (shouldRenderAssigned) {
+      mappings.forEach((m) => ids.push(m.employee_id));
+    }
+    if (shouldRenderUnassigned) {
+      unassignedStaff.forEach((u) => ids.push(u.id));
+    }
+    return ids;
+  }, [shouldRenderAssigned, shouldRenderUnassigned, mappings, unassignedStaff]);
+
+  const isAllSelected = visibleStaffIds.length > 0 && visibleStaffIds.every((id) => selectedIds.has(id));
+  const isPartiallySelected = visibleStaffIds.some((id) => selectedIds.has(id)) && !isAllSelected;
+
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(visibleStaffIds));
+    }
+  };
+
+  const toggleSelect = (id: string | number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const selectedMappedIds = useMemo(() => {
+    return Array.from(selectedIds).filter((id) =>
+      mappings.some((m) => String(m.employee_id) === String(id))
+    );
+  }, [selectedIds, mappings]);
+
+  const handleBulkBatchAssign = () => {
+    const candidates: any[] = [];
+    selectedIds.forEach((id) => {
+      const mapped = mappings.find((m) => String(m.employee_id) === String(id));
+      if (mapped) {
+        candidates.push({
+          id: mapped.employee_id,
+          name: mapped.employee_name,
+          email: mapped.employee_email,
+          department_name: mapped.department_name,
+          current_supervisor_id: mapped.supervisor_id,
+          current_supervisor_name: mapped.supervisor_name,
+        });
+      } else {
+        const unassigned = unassignedStaff.find((u) => String(u.id) === String(id));
+        if (unassigned) {
+          candidates.push(unassigned);
+        }
+      }
+    });
+
+    if (onOpenBatchModal) {
+      onOpenBatchModal(candidates);
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden mb-3">
@@ -526,6 +594,18 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/90 border-b border-slate-200 text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
               <tr>
+                <th className="py-2.5 px-3 text-center w-10">
+                  <input
+                    type="checkbox"
+                    checked={isAllSelected}
+                    ref={(el) => {
+                      if (el) el.indeterminate = isPartiallySelected;
+                    }}
+                    onChange={toggleSelectAll}
+                    className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                    title="Select all visible staff"
+                  />
+                </th>
                 <th className="py-2.5 px-4 text-left min-w-[220px]">
                   💼 Employee (Subordinate)
                 </th>
@@ -549,7 +629,7 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12">
+                  <td colSpan={7} className="text-center py-12">
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 text-xs font-medium">
                       <div className="w-3.5 h-3.5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
                       <span>Loading hierarchy mappings...</span>
@@ -558,7 +638,7 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                 </tr>
               ) : totalVisibleCount === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12">
+                  <td colSpan={7} className="text-center py-12">
                     <div className="max-w-md mx-auto">
                       <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-lg mx-auto mb-2">
                         <i className="bi bi-diagram-3"></i>
@@ -590,12 +670,26 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                   {shouldRenderAssigned &&
                     mappings.map((item, idx, arr) => {
                       const isMenuOpen = activeMenuId === item.id;
+                      const isSelected = selectedIds.has(item.employee_id);
 
                       return (
                         <tr
                           key={`mapped-${item.id}`}
-                          className="hover:bg-slate-50/70 transition-colors"
+                          className={`transition-colors ${
+                            isSelected ? "bg-indigo-50/50 hover:bg-indigo-50/80" : "hover:bg-slate-50/70"
+                          }`}
                         >
+                          {/* Selection Checkbox */}
+                          <td className="py-2.5 px-3 text-center w-10">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleSelect(item.employee_id)}
+                              className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                              title={`Select ${item.employee_name}`}
+                            />
+                          </td>
+
                           {/* Employee Cell */}
                           <td className="py-2.5 px-4">
                             <div
@@ -762,79 +856,147 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
 
                   {/* 2. Unassigned Employees */}
                   {shouldRenderUnassigned &&
-                    unassignedStaff.map((staff) => (
-                      <tr
-                        key={`unassigned-${staff.id}`}
-                        className="hover:bg-amber-50/40 bg-amber-50/15 transition-colors"
-                      >
-                        <td className="py-2.5 px-4">
-                          <div className="flex items-center gap-2.5">
-                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-100 text-amber-800 border border-amber-200 flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
-                              {staff.name ? staff.name.charAt(0) : "U"}
-                            </div>
-                            <div className="min-w-0 max-w-xs">
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="font-bold text-slate-900 truncate text-xs sm:text-[13px]">
-                                  {staff.name}
-                                </span>
-                                <span className="text-[10px] font-semibold text-amber-700 bg-amber-100 px-1 py-0.2 rounded border border-amber-200">
-                                  Unassigned
+                    unassignedStaff.map((staff) => {
+                      const isSelected = selectedIds.has(staff.id);
+                      return (
+                        <tr
+                          key={`unassigned-${staff.id}`}
+                          className={`transition-colors ${
+                            isSelected ? "bg-amber-100/40 hover:bg-amber-100/60" : "hover:bg-amber-50/40 bg-amber-50/15"
+                          }`}
+                        >
+                          {/* Selection Checkbox */}
+                          <td className="py-2.5 px-3 text-center w-10">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleSelect(staff.id)}
+                              className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                              title={`Select ${staff.name}`}
+                            />
+                          </td>
+
+                          <td className="py-2.5 px-4">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-100 text-amber-800 border border-amber-200 flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                                {staff.name ? staff.name.charAt(0) : "U"}
+                              </div>
+                              <div className="min-w-0 max-w-xs">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className="font-bold text-slate-900 truncate text-xs sm:text-[13px]">
+                                    {staff.name}
+                                  </span>
+                                  <span className="text-[10px] font-semibold text-amber-700 bg-amber-100 px-1 py-0.2 rounded border border-amber-200">
+                                    Unassigned
+                                  </span>
+                                </div>
+                                <span className="text-[10px] text-slate-400 block truncate">
+                                  {staff.email}
                                 </span>
                               </div>
-                              <span className="text-[10px] text-slate-400 block truncate">
-                                {staff.email}
-                              </span>
                             </div>
-                          </div>
-                        </td>
+                          </td>
 
-                        {/* Supervisor Column for Unassigned */}
-                        <td className="py-2.5 px-3">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
-                            <span>Unassigned Lead</span>
-                          </span>
-                        </td>
+                          {/* Supervisor Column for Unassigned */}
+                          <td className="py-2.5 px-3">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+                              <span>Unassigned Lead</span>
+                            </span>
+                          </td>
 
-                        {/* Manager Column for Unassigned */}
-                        <td className="py-2.5 px-3">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
-                            <span>Unassigned Manager</span>
-                          </span>
-                        </td>
+                          {/* Manager Column for Unassigned */}
+                          <td className="py-2.5 px-3">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+                              <span>Unassigned Manager</span>
+                            </span>
+                          </td>
 
-                        {/* Department */}
-                        <td className="py-2.5 px-3 text-center">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                            {staff.department_name || "General"}
-                          </span>
-                        </td>
+                          {/* Department */}
+                          <td className="py-2.5 px-3 text-center">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                              {staff.department_name || "General"}
+                            </span>
+                          </td>
 
-                        {/* Status / Pending */}
-                        <td className="py-2.5 px-4 text-left text-[11px] font-medium text-amber-600 whitespace-nowrap">
-                          Pending Setup
-                        </td>
+                          {/* Status / Pending */}
+                          <td className="py-2.5 px-4 text-left text-[11px] font-medium text-amber-600 whitespace-nowrap">
+                            Pending Setup
+                          </td>
 
-                        {/* Quick Assign Action */}
-                        <td className="py-2.5 px-3 text-center whitespace-nowrap">
-                          <button
-                            type="button"
-                            onClick={() => onOpenAssignModal(staff.id)}
-                            className="px-2.5 py-1 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-2xs transition-colors cursor-pointer whitespace-nowrap inline-flex items-center gap-1"
-                          >
-                            <i className="bi bi-person-plus text-[10px]"></i>
-                            <span>Assign</span>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                          {/* Quick Assign Action */}
+                          <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                            <button
+                              type="button"
+                              onClick={() => onOpenAssignModal(staff.id)}
+                              className="px-2.5 py-1 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-2xs transition-colors cursor-pointer whitespace-nowrap inline-flex items-center gap-1"
+                            >
+                              <i className="bi bi-person-plus text-[10px]"></i>
+                              <span>Assign</span>
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                 </>
               )}
             </tbody>
           </table>
         )}
       </div>
+
+      {/* Floating Bulk Actions Dock */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-xl px-4 animate-in slide-in-from-bottom-4 fade-in duration-200">
+          <div className="bg-slate-900 text-white rounded-2xl shadow-2xl border border-indigo-500/40 p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <span className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-inner">
+                {selectedIds.size}
+              </span>
+              <div>
+                <span className="text-xs font-bold text-white block">
+                  {selectedIds.size} {selectedIds.size === 1 ? "Staff Member" : "Staff Members"} Selected
+                </span>
+                <span className="text-[10px] text-slate-300">
+                  Bulk management actions available
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={handleBulkBatchAssign}
+                className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-all shadow-md shadow-indigo-600/30 flex items-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                <i className="bi bi-people-fill text-xs"></i>
+                <span>Batch Reallocate / Assign ({selectedIds.size})</span>
+              </button>
+
+              {onBatchUnlink && selectedMappedIds.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => onBatchUnlink(selectedMappedIds)}
+                  className="px-3 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  title="Unlink selected mapped staff"
+                >
+                  <i className="bi bi-link-45deg text-xs"></i>
+                  <span>Unlink ({selectedMappedIds.length})</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setSelectedIds(new Set())}
+                className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition-colors cursor-pointer"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 3. Interactive Squad Roster Modal */}
       {selectedSquadLead && (

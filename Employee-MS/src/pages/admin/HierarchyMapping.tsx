@@ -331,6 +331,26 @@ const HierarchyMapping = () => {
     }
   };
 
+  const handleBatchUnlink = async (employeeIds: (string | number)[]) => {
+    if (!employeeIds.length) return;
+    if (!window.confirm(`Are you sure you want to unlink ${employeeIds.length} employees from their reporting lines?`)) return;
+    try {
+      setSaving(true);
+      setMsg({ type: "", text: "" });
+      await Promise.all(employeeIds.map((id) => api.delete(`/api/admin/hierarchy/${id}`)));
+      setMsg({ type: "success", text: `Successfully unlinked ${employeeIds.length} staff members.` });
+      fetchData();
+    } catch (err: any) {
+      setMsg({
+        type: "danger",
+        text: err.response?.data?.error || "Failed to unlink reporting lines",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+
   return (
     <div className="w-full space-y-3 sm:space-y-3.5">
       {/* Alert Notification */}
@@ -556,6 +576,14 @@ const HierarchyMapping = () => {
               });
             }}
             onViewDossier={(emp) => setSelectedDossierEmployee(emp)}
+            onOpenBatchModal={(candidates, targetSquad) => {
+              setBatchModalState({
+                isOpen: true,
+                candidates,
+                targetSquad: targetSquad || null,
+              });
+            }}
+            onBatchUnlink={handleBatchUnlink}
           />
         )}
 
