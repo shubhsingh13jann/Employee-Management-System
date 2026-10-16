@@ -231,12 +231,86 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
       onClick={saving ? undefined : onClose}
     >
       <div
-        className="w-full max-w-4xl bg-white rounded-3xl sm:rounded-[28px] shadow-2xl shadow-indigo-950/15 border border-slate-100 flex flex-col relative overflow-hidden animate-in zoom-in-95 duration-200"
+        className="w-full max-w-[780px] bg-white rounded-3xl sm:rounded-[28px] shadow-2xl shadow-indigo-950/15 border border-slate-100 flex flex-col relative overflow-hidden animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Soft Ambient Glow Gradients in Top-Right & Bottom-Right matching reference mockup */}
-        <div className="pointer-events-none absolute -top-16 -right-16 w-96 h-96 bg-gradient-to-bl from-indigo-100/70 via-purple-100/40 to-transparent rounded-full blur-3xl opacity-80" />
-        <div className="pointer-events-none absolute -bottom-20 -right-20 w-80 h-80 bg-gradient-to-tl from-indigo-100/60 via-pink-100/30 to-transparent rounded-full blur-3xl opacity-70" />
+        {/* Soft Ambient Vector Fluid Waves matching reference mockup Image 2 */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden z-0 select-none">
+          {/* Top-Right Fluid Ribbon Waves */}
+          <svg
+            className="absolute -top-4 -right-4 w-[380px] h-[260px] opacity-75"
+            viewBox="0 0 380 260"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <linearGradient id="topWaveGrad1" x1="140" y1="0" x2="380" y2="240" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#93C5FD" stopOpacity="0.45" />
+                <stop offset="35%" stopColor="#A5B4FC" stopOpacity="0.35" />
+                <stop offset="70%" stopColor="#C4B5FD" stopOpacity="0.25" />
+                <stop offset="100%" stopColor="#EDE9FE" stopOpacity="0.05" />
+              </linearGradient>
+              <linearGradient id="topWaveGrad2" x1="200" y1="0" x2="380" y2="200" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#818CF8" stopOpacity="0.40" />
+                <stop offset="50%" stopColor="#C084FC" stopOpacity="0.28" />
+                <stop offset="100%" stopColor="#F5F3FF" stopOpacity="0.08" />
+              </linearGradient>
+              <linearGradient id="topWaveGrad3" x1="260" y1="0" x2="380" y2="130" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#6366F1" stopOpacity="0.30" />
+                <stop offset="100%" stopColor="#A855F7" stopOpacity="0.08" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M 100 0 C 160 80, 240 150, 380 130 L 380 0 Z"
+              fill="url(#topWaveGrad1)"
+            />
+            <path
+              d="M 150 0 C 210 120, 280 200, 380 230 L 380 0 Z"
+              fill="url(#topWaveGrad2)"
+            />
+            <path
+              d="M 210 0 C 260 70, 320 120, 380 95 L 380 0 Z"
+              fill="url(#topWaveGrad3)"
+            />
+          </svg>
+
+          {/* Bottom-Right Fluid Ribbon Waves */}
+          <svg
+            className="absolute -bottom-4 -right-4 w-[360px] h-[240px] opacity-70"
+            viewBox="0 0 360 240"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <linearGradient id="botWaveGrad1" x1="360" y1="240" x2="100" y2="50" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#C084FC" stopOpacity="0.40" />
+                <stop offset="40%" stopColor="#818CF8" stopOpacity="0.35" />
+                <stop offset="80%" stopColor="#A5B4FC" stopOpacity="0.18" />
+                <stop offset="100%" stopColor="#EDE9FE" stopOpacity="0.0" />
+              </linearGradient>
+              <linearGradient id="botWaveGrad2" x1="360" y1="240" x2="180" y2="100" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#A78BFA" stopOpacity="0.30" />
+                <stop offset="100%" stopColor="#E0E7FF" stopOpacity="0.05" />
+              </linearGradient>
+              <linearGradient id="botWaveGrad3" x1="360" y1="200" x2="220" y2="30" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#93C5FD" stopOpacity="0.35" />
+                <stop offset="100%" stopColor="#F5F3FF" stopOpacity="0.06" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M 100 240 C 170 170, 260 120, 360 150 L 360 240 Z"
+              fill="url(#botWaveGrad1)"
+            />
+            <path
+              d="M 170 240 C 230 140, 290 80, 360 50 L 360 240 Z"
+              fill="url(#botWaveGrad2)"
+            />
+            <path
+              d="M 210 240 C 270 180, 310 120, 360 110 L 360 240 Z"
+              fill="url(#botWaveGrad3)"
+            />
+          </svg>
+        </div>
 
         {/* Modal Header */}
         <div className="px-6 sm:px-7 py-3 sm:py-3.5 flex items-center justify-between relative z-10 border-b border-slate-100">
@@ -288,9 +362,9 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
               </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-7 items-start">
+            <div className="flex flex-col lg:flex-row gap-5 items-start">
               {/* Left Column: Stepped Form with Vertical Timeline */}
-              <div className="lg:col-span-7 space-y-0">
+              <div className="flex-1 min-w-0 space-y-0">
                 {/* Step 1: Subordinate Employee */}
                 <div className="relative flex items-start gap-3.5">
                   {/* Timeline connector column */}
@@ -563,26 +637,26 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                 )}
               </div>
 
-              {/* Right Column: 3D Illustrated Hierarchy Graphic Card matching reference */}
-              <div className="hidden lg:flex lg:col-span-5 flex-col items-center justify-center relative min-h-[260px] py-3 px-2 select-none">
+              {/* Right Column: 3D Illustrated Org Chart Graphic - Reduced Width matching Image 2 */}
+              <div className="hidden lg:flex w-56 xl:w-60 shrink-0 flex-col items-center justify-center relative self-center py-1 select-none">
                 {/* Orbital Dashed Ring & Sparkle Accents */}
-                <div className="absolute w-52 h-52 rounded-full border border-dashed border-indigo-200/70 pointer-events-none"></div>
-                <div className="absolute top-6 left-6 w-2 h-2 rounded-full bg-indigo-500 shadow-sm shadow-indigo-400 animate-pulse"></div>
-                <div className="absolute top-4 right-10 w-2 h-2 rounded-full bg-blue-500 shadow-sm shadow-blue-400"></div>
-                <div className="absolute bottom-10 right-6 w-1.5 h-1.5 rounded-full bg-purple-400"></div>
-                <div className="absolute top-20 right-2 w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
-                <div className="absolute bottom-14 left-6 w-1 h-1 rounded-full bg-blue-400"></div>
+                <div className="absolute w-44 h-44 rounded-full border border-dashed border-indigo-200/70 pointer-events-none"></div>
+                <div className="absolute top-4 left-4 w-2 h-2 rounded-full bg-indigo-500 shadow-sm shadow-indigo-400 animate-pulse"></div>
+                <div className="absolute top-2 right-6 w-2 h-2 rounded-full bg-blue-500 shadow-sm shadow-blue-400"></div>
+                <div className="absolute bottom-8 right-4 w-1.5 h-1.5 rounded-full bg-purple-400"></div>
+                <div className="absolute top-16 right-1 w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
+                <div className="absolute bottom-10 left-4 w-1 h-1 rounded-full bg-blue-400"></div>
 
                 {/* Top Node: Manager 3D Card */}
-                <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-b from-indigo-100 to-indigo-200/70 border border-indigo-200/90 shadow-xl shadow-indigo-500/15 flex flex-col items-center justify-center p-2 relative z-10 transition-transform duration-300 hover:scale-105 group">
-                  <div className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center text-base shadow-sm">
+                <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-indigo-100/95 via-indigo-100/75 to-purple-100/60 border border-indigo-200/90 shadow-xl shadow-indigo-500/15 flex flex-col items-center justify-center p-2 relative z-10 transition-transform duration-300 hover:scale-105 group">
+                  <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm shadow-sm">
                     {selectedMgr ? (
                       <span className="font-bold text-xs">{selectedMgr.name.charAt(0)}</span>
                     ) : (
                       <i className="bi bi-person-fill"></i>
                     )}
                   </div>
-                  <span className="text-[9px] font-bold text-indigo-900 mt-1 truncate max-w-[70px] text-center">
+                  <span className="text-[9px] font-bold text-indigo-900 mt-1 truncate max-w-[65px] text-center">
                     {selectedMgr ? selectedMgr.name.split(" ")[0] : "Manager"}
                   </span>
                 </div>
@@ -590,61 +664,61 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                 {/* Tree Connecting Branch Lines */}
                 <div className="flex flex-col items-center relative z-0">
                   {/* Stem down from manager */}
-                  <div className="w-0.5 h-4 bg-indigo-400/90"></div>
+                  <div className="w-0.5 h-3.5 bg-indigo-400/90"></div>
                   {/* Horizontal bar */}
-                  <div className="w-40 h-0.5 bg-indigo-400/90 relative"></div>
+                  <div className="w-36 h-0.5 bg-indigo-400/90 relative"></div>
                   {/* 3 Vertical drops to children */}
-                  <div className="w-40 flex justify-between">
-                    <div className="w-0.5 h-4 bg-indigo-400/90"></div>
-                    <div className="w-0.5 h-4 bg-indigo-400/90"></div>
-                    <div className="w-0.5 h-4 bg-indigo-400/90"></div>
+                  <div className="w-36 flex justify-between">
+                    <div className="w-0.5 h-3.5 bg-indigo-400/90"></div>
+                    <div className="w-0.5 h-3.5 bg-indigo-400/90"></div>
+                    <div className="w-0.5 h-3.5 bg-indigo-400/90"></div>
                   </div>
                 </div>
 
                 {/* Bottom Nodes: 3 Child Cards */}
-                <div className="w-44 flex items-center justify-between relative z-10 mt-0">
+                <div className="w-40 flex items-center justify-between relative z-10 mt-0">
                   {/* Left child node */}
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-b from-indigo-50 to-indigo-100 border border-indigo-200/80 shadow-sm flex flex-col items-center justify-center text-indigo-600 transition-all hover:scale-105">
-                    <i className="bi bi-person-fill text-sm"></i>
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-b from-indigo-50 to-indigo-100 border border-indigo-200/80 shadow-sm flex flex-col items-center justify-center text-indigo-600 transition-all hover:scale-105">
+                    <i className="bi bi-person-fill text-xs"></i>
                   </div>
 
                   {/* Center child node (Prominent / Direct Lead) */}
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-b from-indigo-100 to-indigo-200/90 border border-indigo-300 shadow-md shadow-indigo-500/15 flex flex-col items-center justify-center text-indigo-700 transition-all hover:scale-105 ring-2 ring-indigo-300/40">
-                    <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[11px] shadow-xs">
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-b from-indigo-100 to-indigo-200/90 border border-indigo-300 shadow-md shadow-indigo-500/15 flex flex-col items-center justify-center text-indigo-700 transition-all hover:scale-105 ring-2 ring-indigo-300/40">
+                    <div className="w-5.5 h-5.5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] shadow-xs">
                       {selectedSup ? (
                         <span className="font-bold">{selectedSup.name.charAt(0)}</span>
                       ) : (
                         <i className="bi bi-person-fill"></i>
                       )}
                     </div>
-                    <span className="text-[8.5px] font-bold text-indigo-950 mt-0.5 truncate max-w-[46px] text-center">
+                    <span className="text-[8px] font-bold text-indigo-950 mt-0.5 truncate max-w-[42px] text-center">
                       {selectedSup ? selectedSup.name.split(" ")[0] : "Lead"}
                     </span>
                   </div>
 
                   {/* Right child node (Subordinate / Member) */}
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-b from-indigo-50 to-indigo-100 border border-indigo-200/80 shadow-sm flex flex-col items-center justify-center text-indigo-600 transition-all hover:scale-105">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-b from-indigo-50 to-indigo-100 border border-indigo-200/80 shadow-sm flex flex-col items-center justify-center text-indigo-600 transition-all hover:scale-105">
                     {selectedEmp ? (
                       <div className="w-5 h-5 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[9px] font-bold">
                         {selectedEmp.name.charAt(0)}
                       </div>
                     ) : (
-                      <i className="bi bi-person-fill text-sm"></i>
+                      <i className="bi bi-person-fill text-xs"></i>
                     )}
                   </div>
                 </div>
 
                 {/* Dynamic live reporting chain summary chip */}
                 {selectedEmp && selectedSup && selectedMgr ? (
-                  <div className="mt-3.5 px-3 py-1 rounded-full bg-indigo-50/90 border border-indigo-100/90 text-[10px] font-semibold text-indigo-900 flex items-center gap-1.5 shadow-2xs max-w-full truncate animate-in fade-in">
-                    <span className="truncate max-w-[65px]">{selectedMgr.name.split(" ")[0]}</span>
-                    <i className="bi bi-chevron-right text-[8px] text-indigo-400"></i>
-                    <span className="truncate max-w-[65px] font-bold text-indigo-700">{selectedSup.name.split(" ")[0]}</span>
-                    <i className="bi bi-chevron-right text-[8px] text-indigo-400"></i>
-                    <span className="truncate max-w-[65px] text-slate-700">{selectedEmp.name.split(" ")[0]}</span>
+                  <div className="mt-3 px-2.5 py-1 rounded-full bg-indigo-50/90 border border-indigo-100/90 text-[9.5px] font-semibold text-indigo-900 flex items-center gap-1 shadow-2xs max-w-full truncate animate-in fade-in">
+                    <span className="truncate max-w-[55px]">{selectedMgr.name.split(" ")[0]}</span>
+                    <i className="bi bi-chevron-right text-[7px] text-indigo-400"></i>
+                    <span className="truncate max-w-[55px] font-bold text-indigo-700">{selectedSup.name.split(" ")[0]}</span>
+                    <i className="bi bi-chevron-right text-[7px] text-indigo-400"></i>
+                    <span className="truncate max-w-[55px] text-slate-700">{selectedEmp.name.split(" ")[0]}</span>
                   </div>
                 ) : (
-                  <p className="mt-3.5 text-[10.5px] text-slate-400 text-center font-normal mb-0">
+                  <p className="mt-3 text-[10px] text-slate-400 text-center font-normal mb-0">
                     Interactive Org Preview
                   </p>
                 )}
