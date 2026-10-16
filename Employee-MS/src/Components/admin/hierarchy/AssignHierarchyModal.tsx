@@ -227,24 +227,28 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-5 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-150"
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-6 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={saving ? undefined : onClose}
     >
       <div
-        className="w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150"
+        className="w-full max-w-4xl bg-white rounded-3xl sm:rounded-[28px] shadow-2xl shadow-indigo-950/15 border border-slate-100 flex flex-col relative overflow-hidden animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header Bar */}
-        <div className="px-5 sm:px-6 py-4 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between border-b border-slate-800">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 flex items-center justify-center text-lg shrink-0">
-              <i className="bi bi-diagram-3-fill"></i>
+        {/* Soft Ambient Glow Gradients in Top-Right & Bottom-Right matching reference mockup */}
+        <div className="pointer-events-none absolute -top-16 -right-16 w-96 h-96 bg-gradient-to-bl from-indigo-100/70 via-purple-100/40 to-transparent rounded-full blur-3xl opacity-80" />
+        <div className="pointer-events-none absolute -bottom-20 -right-20 w-80 h-80 bg-gradient-to-tl from-indigo-100/60 via-pink-100/30 to-transparent rounded-full blur-3xl opacity-70" />
+
+        {/* Modal Header */}
+        <div className="px-6 sm:px-8 pt-6 sm:pt-7 pb-4 flex items-center justify-between relative z-10 border-b border-slate-100/80">
+          <div className="flex items-center gap-3.5 sm:gap-4">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100/60 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xl sm:text-2xl shadow-xs shrink-0">
+              <i className="bi bi-diagram-3"></i>
             </div>
             <div>
-              <h3 className="font-bold text-sm sm:text-base text-white mb-0">
+              <h3 className="font-bold text-base sm:text-xl text-slate-900 tracking-tight mb-0">
                 Map Employee to Team Hierarchy
               </h3>
-              <p className="text-[11px] text-slate-300 mb-0 font-normal">
+              <p className="text-xs sm:text-[13px] text-slate-500 mb-0 font-normal mt-0.5">
                 Establish direct supervisor and department manager reporting chain
               </p>
             </div>
@@ -253,20 +257,21 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-xs disabled:opacity-50"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200/70 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer text-xs disabled:opacity-50 shrink-0"
+            title="Close"
           >
             <i className="bi bi-x-lg"></i>
           </button>
         </div>
 
-        {/* Modal Form */}
-        <form onSubmit={handleLocalSubmit}>
-          <div className="p-5 sm:p-6 space-y-4 max-h-[75vh] overflow-y-auto">
-            {/* Inline Error Alert Banner */}
+        {/* Form Body with Left Stepped Timeline & Right 3D Org Chart */}
+        <form onSubmit={handleLocalSubmit} className="flex flex-col flex-1 relative z-10 overflow-hidden">
+          <div className="px-6 sm:px-8 py-5 sm:py-6 overflow-y-auto max-h-[calc(85vh-150px)]">
+            {/* Inline Error Alert if active */}
             {activeError && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center justify-between gap-2.5 animate-in fade-in">
-                <div className="flex items-center gap-2">
-                  <i className="bi bi-exclamation-triangle-fill text-rose-600 text-sm shrink-0"></i>
+              <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 border border-rose-200/80 text-rose-800 text-xs sm:text-sm flex items-center justify-between gap-3 animate-in fade-in shadow-2xs">
+                <div className="flex items-center gap-2.5">
+                  <i className="bi bi-exclamation-triangle-fill text-rose-600 text-base shrink-0"></i>
                   <span className="font-semibold">{activeError}</span>
                 </div>
                 <button
@@ -275,275 +280,402 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                     setLocalError("");
                     if (onClearError) onClearError();
                   }}
-                  className="text-rose-400 hover:text-rose-700 cursor-pointer"
+                  className="text-rose-400 hover:text-rose-700 cursor-pointer p-1"
                   title="Dismiss error"
                 >
-                  <i className="bi bi-x-lg text-[10px]"></i>
+                  <i className="bi bi-x-lg text-xs"></i>
                 </button>
               </div>
             )}
-            {/* Field 1: Subordinate Employee */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-0">
-                  1. Select Subordinate Employee <span className="text-rose-500">*</span>
-                </label>
-                {selectedEmp?.department_name && (
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
-                    Dept: {selectedEmp.department_name}
-                  </span>
-                )}
-              </div>
-              <div className="relative">
-                <select
-                  value={form.employee_id}
-                  onChange={(e) => handleEmployeeChange(e.target.value)}
-                  required
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white text-xs sm:text-sm text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer shadow-inner appearance-none pr-9"
-                >
-                  <option value="">-- Choose Employee --</option>
-                  {employees.map((e) => (
-                    <option key={e.id} value={e.id}>
-                      {e.name} ({e.email}) — {e.department_name || "Unassigned"}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
-                  <i className="bi bi-chevron-down"></i>
-                </div>
-              </div>
-            </div>
 
-            {/* Field 2: Direct Supervisor with Department Smart Grouping */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-0">
-                  2. Select Direct Supervisor (Team Lead) <span className="text-rose-500">*</span>
-                </label>
-                {selectedSup && (
-                  <span
-                    className={`text-[11px] font-semibold px-2 py-0.5 rounded border ${
-                      currentSupLoad <= 3
-                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                        : currentSupLoad <= 7
-                        ? "bg-indigo-50 text-indigo-700 border-indigo-200"
-                        : "bg-rose-50 text-rose-700 border-rose-200"
-                    }`}
-                  >
-                    Load: {currentSupLoad}/8 reports ({currentSupLoad <= 3 ? "Light" : currentSupLoad <= 7 ? "Optimal" : "High Span"})
-                  </span>
-                )}
-              </div>
-              <div className="relative">
-                <select
-                  value={form.supervisor_id}
-                  onChange={(e) => handleSupervisorChange(e.target.value)}
-                  required
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white text-xs sm:text-sm text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer shadow-inner appearance-none pr-9"
-                >
-                  <option value="">-- Choose Supervisor --</option>
-                  {recommendedSupervisors.length > 0 && (
-                    <optgroup label={`🌟 Department Leads (${empDept || "Recommended"})`}>
-                      {recommendedSupervisors.map((s) => {
-                        const load = supervisorWorkloadMap[String(s.id)] || 0;
-                        const statusTag = load <= 3 ? "Light" : load <= 7 ? "Optimal" : "High Span";
-                        return (
-                          <option key={`rec-sup-${s.id}`} value={s.id}>
-                            {s.name} ({s.department_name || "General"}) — {load}/8 reports [{statusTag}]
-                          </option>
-                        );
-                      })}
-                    </optgroup>
-                  )}
-                  {otherSupervisors.length > 0 && (
-                    <optgroup label="🌐 Other Department Leads">
-                      {otherSupervisors.map((s) => {
-                        const load = supervisorWorkloadMap[String(s.id)] || 0;
-                        const statusTag = load <= 3 ? "Light" : load <= 7 ? "Optimal" : "High Span";
-                        return (
-                          <option key={`oth-sup-${s.id}`} value={s.id}>
-                            {s.name} ({s.department_name || "General"}) — {load}/8 reports [{statusTag}]
-                          </option>
-                        );
-                      })}
-                    </optgroup>
-                  )}
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
-                  <i className="bi bi-chevron-down"></i>
-                </div>
-              </div>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              {/* Left Column: Stepped Form with Vertical Timeline */}
+              <div className="lg:col-span-7 space-y-0">
+                {/* Step 1: Subordinate Employee */}
+                <div className="relative flex items-start gap-4">
+                  {/* Timeline connector column */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center shadow-md shadow-indigo-600/30 ring-4 ring-indigo-50 shrink-0 z-10">
+                      1
+                    </div>
+                    <div className="w-0.5 flex-1 min-h-[50px] border-l-2 border-dashed border-indigo-200/80 my-1"></div>
+                  </div>
 
-              {/* Dedicated Smart Supervisor Workload Preview Card */}
-              {selectedSup ? (
-                <div className="mt-2 p-3 rounded-xl border border-indigo-100 bg-indigo-50/50 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
-                        {selectedSup.name.charAt(0)}
+                  {/* Step 1 Content */}
+                  <div className="flex-1 pb-5">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <h4 className="text-xs sm:text-sm font-semibold text-slate-900 mb-0">
+                        Select Subordinate Employee <span className="text-rose-500 font-bold">*</span>
+                      </h4>
+                      {selectedEmp?.department_name && (
+                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                          {selectedEmp.department_name}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] sm:text-xs text-slate-500 mb-2 font-normal">
+                      Choose the employee who will be mapped to the team hierarchy.
+                    </p>
+
+                    <div className="relative flex items-center rounded-2xl border border-slate-200/90 bg-white hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-3 focus-within:ring-indigo-500/10 transition-all shadow-2xs overflow-hidden h-[46px]">
+                      <div className="w-12 h-full flex items-center justify-center border-r border-slate-100 text-indigo-600 text-lg shrink-0 bg-slate-50/40">
+                        <i className="bi bi-person"></i>
                       </div>
-                      <div>
-                        <h5 className="text-xs font-bold text-slate-900 mb-0 leading-tight">
-                          {selectedSup.name}
-                        </h5>
-                        <p className="text-[10px] text-slate-500 mb-0 font-medium">
-                          {selectedSup.department_name || "General"} • Direct Supervisor
+                      <select
+                        value={form.employee_id}
+                        onChange={(e) => handleEmployeeChange(e.target.value)}
+                        required
+                        className="w-full h-full py-2.5 px-3.5 bg-transparent text-xs sm:text-sm text-slate-800 font-medium focus:outline-none cursor-pointer appearance-none pr-9"
+                      >
+                        <option value="">-- Choose Employee --</option>
+                        {employees.map((e) => (
+                          <option key={e.id} value={e.id}>
+                            {e.name} {e.email ? `(${e.email})` : ""} — {e.department_name || "Unassigned"}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 text-xs">
+                        <i className="bi bi-chevron-down"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Step 2: Direct Supervisor (Team Lead) */}
+                <div className="relative flex items-start gap-4">
+                  {/* Timeline connector column */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center shadow-md shadow-blue-500/30 ring-4 ring-blue-50 shrink-0 z-10">
+                      2
+                    </div>
+                    <div className="w-0.5 flex-1 min-h-[60px] border-l-2 border-dashed border-indigo-200/80 my-1"></div>
+                  </div>
+
+                  {/* Step 2 Content */}
+                  <div className="flex-1 pb-5">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <h4 className="text-xs sm:text-sm font-semibold text-slate-900 mb-0">
+                        Select Direct Supervisor (Team Lead) <span className="text-rose-500 font-bold">*</span>
+                      </h4>
+                      {selectedSup && (
+                        <span
+                          className={`text-[10.5px] font-bold px-2 py-0.5 rounded-full border ${
+                            currentSupLoad <= 3
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              : currentSupLoad <= 7
+                              ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                              : "bg-rose-50 text-rose-700 border-rose-200"
+                          }`}
+                        >
+                          {currentSupLoad}/8 reports ({currentSupLoad <= 3 ? "Light" : currentSupLoad <= 7 ? "Optimal" : "High"})
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] sm:text-xs text-slate-500 mb-2 font-normal">
+                      Choose the team lead who will directly supervise the selected employee.
+                    </p>
+
+                    <div className="relative flex items-center rounded-2xl border border-slate-200/90 bg-white hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-3 focus-within:ring-indigo-500/10 transition-all shadow-2xs overflow-hidden h-[46px]">
+                      <div className="w-12 h-full flex items-center justify-center border-r border-slate-100 text-blue-600 text-lg shrink-0 bg-slate-50/40">
+                        <i className="bi bi-people"></i>
+                      </div>
+                      <select
+                        value={form.supervisor_id}
+                        onChange={(e) => handleSupervisorChange(e.target.value)}
+                        required
+                        className="w-full h-full py-2.5 px-3.5 bg-transparent text-xs sm:text-sm text-slate-800 font-medium focus:outline-none cursor-pointer appearance-none pr-9"
+                      >
+                        <option value="">-- Choose Supervisor --</option>
+                        {recommendedSupervisors.length > 0 && (
+                          <optgroup label={`🌟 Department Leads (${empDept || "Recommended"})`}>
+                            {recommendedSupervisors.map((s) => {
+                              const load = supervisorWorkloadMap[String(s.id)] || 0;
+                              const statusTag = load <= 3 ? "Light" : load <= 7 ? "Optimal" : "High Span";
+                              return (
+                                <option key={`rec-sup-${s.id}`} value={s.id}>
+                                  {s.name} ({s.department_name || "General"}) — {load}/8 reports [{statusTag}]
+                                </option>
+                              );
+                            })}
+                          </optgroup>
+                        )}
+                        {otherSupervisors.length > 0 && (
+                          <optgroup label="🌐 Other Department Leads">
+                            {otherSupervisors.map((s) => {
+                              const load = supervisorWorkloadMap[String(s.id)] || 0;
+                              const statusTag = load <= 3 ? "Light" : load <= 7 ? "Optimal" : "High Span";
+                              return (
+                                <option key={`oth-sup-${s.id}`} value={s.id}>
+                                  {s.name} ({s.department_name || "General"}) — {load}/8 reports [{statusTag}]
+                                </option>
+                              );
+                            })}
+                          </optgroup>
+                        )}
+                      </select>
+                      <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 text-xs">
+                        <i className="bi bi-chevron-down"></i>
+                      </div>
+                    </div>
+
+                    {/* Step 2 Workload Capacity Container matching reference mockup */}
+                    {selectedSup ? (
+                      <div className="mt-2.5 p-3 sm:p-3.5 rounded-2xl border border-indigo-100 bg-indigo-50/40 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <div className="text-indigo-600 text-lg shrink-0">
+                              <i className="bi bi-speedometer2"></i>
+                            </div>
+                            <div>
+                              <h5 className="text-xs font-bold text-slate-900 mb-0">
+                                {selectedSup.name}
+                              </h5>
+                              <p className="text-[10px] text-slate-500 mb-0 font-medium">
+                                {selectedSup.department_name || "General"} • Direct Supervisor
+                              </p>
+                            </div>
+                          </div>
+                          <span
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                              currentSupLoad <= 3
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                : currentSupLoad <= 7
+                                ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                                : "bg-rose-50 text-rose-700 border-rose-200"
+                            }`}
+                          >
+                            {currentSupLoad <= 3 ? "Light Load" : currentSupLoad <= 7 ? "Optimal Span" : "High Span"}
+                          </span>
+                        </div>
+
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-[10.5px]">
+                            <span className="font-semibold text-slate-600">
+                              Workload Capacity: <span className="font-bold text-slate-900">{currentSupLoad} / 8</span> reports
+                            </span>
+                            <span className="font-mono text-slate-500 font-semibold">
+                              {Math.min(100, Math.round((currentSupLoad / 8) * 100))}%
+                            </span>
+                          </div>
+                          <div className="w-full h-1.5 rounded-full bg-slate-200 overflow-hidden flex">
+                            <div
+                              className={`h-full transition-all duration-300 ${
+                                currentSupLoad <= 3
+                                  ? "bg-emerald-500"
+                                  : currentSupLoad <= 7
+                                  ? "bg-indigo-500"
+                                  : "bg-rose-500"
+                              }`}
+                              style={{ width: `${Math.min(100, Math.round((currentSupLoad / 8) * 100))}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between text-[10px] text-slate-500 pt-0.5">
+                          <span className="flex items-center gap-1 text-slate-600">
+                            <i className="bi bi-info-circle text-indigo-500"></i>
+                            After assignment: <strong className="text-slate-800">{newSupLoad} / 8 reports</strong>
+                          </span>
+                          {newSupLoad <= 8 ? (
+                            <span className="text-emerald-700 font-semibold flex items-center gap-0.5">
+                              <i className="bi bi-check-circle-fill"></i> Within Recommended Span
+                            </span>
+                          ) : (
+                            <span className="text-amber-700 font-semibold flex items-center gap-0.5">
+                              <i className="bi bi-exclamation-triangle-fill"></i> Nearing/Exceeding 8 Capacity
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mt-2.5 p-3 rounded-2xl border border-indigo-100/80 bg-indigo-50/35 flex items-center gap-3 text-slate-500">
+                        <div className="text-indigo-500 text-lg sm:text-xl pr-3 border-r border-indigo-100/90 flex items-center justify-center shrink-0">
+                          <i className="bi bi-speedometer2"></i>
+                        </div>
+                        <p className="text-[11px] sm:text-xs text-slate-500 mb-0 font-normal leading-relaxed">
+                          Select a supervisor above to preview live team workload and mentorship capacity.
                         </p>
                       </div>
-                    </div>
-                    <span
-                      className={`text-[10.5px] font-bold px-2 py-0.5 rounded-full border ${
-                        currentSupLoad <= 3
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                          : currentSupLoad <= 7
-                          ? "bg-indigo-50 text-indigo-700 border-indigo-200"
-                          : "bg-rose-50 text-rose-700 border-rose-200"
-                      }`}
-                    >
-                      {currentSupLoad <= 3 ? "Light Load" : currentSupLoad <= 7 ? "Optimal Span" : "High Span"}
-                    </span>
-                  </div>
-
-                  {/* Capacity Progress Bar */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-[10.5px]">
-                      <span className="font-semibold text-slate-600">
-                        Workload Capacity: <span className="font-bold text-slate-900">{currentSupLoad} / 8</span> reports
-                      </span>
-                      <span className="font-mono text-slate-500 font-semibold">
-                        {Math.min(100, Math.round((currentSupLoad / 8) * 100))}%
-                      </span>
-                    </div>
-                    <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden flex">
-                      <div
-                        className={`h-full transition-all duration-300 ${
-                          currentSupLoad <= 3
-                            ? "bg-emerald-500"
-                            : currentSupLoad <= 7
-                            ? "bg-indigo-500"
-                            : "bg-rose-500"
-                        }`}
-                        style={{ width: `${Math.min(100, Math.round((currentSupLoad / 8) * 100))}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between text-[10px] text-slate-500 pt-0.5">
-                    <span className="flex items-center gap-1 text-slate-600">
-                      <i className="bi bi-info-circle text-indigo-500"></i>
-                      After assignment: <strong className="text-slate-800">{newSupLoad} / 8 reports</strong>
-                    </span>
-                    {newSupLoad <= 8 ? (
-                      <span className="text-emerald-700 font-semibold flex items-center gap-0.5">
-                        <i className="bi bi-check-circle-fill"></i> Within Recommended Span
-                      </span>
-                    ) : (
-                      <span className="text-amber-700 font-semibold flex items-center gap-0.5">
-                        <i className="bi bi-exclamation-triangle-fill"></i> Nearing/Exceeding 8 Capacity
-                      </span>
                     )}
                   </div>
                 </div>
-              ) : (
-                <div className="mt-2 p-2.5 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 flex items-center gap-2 text-slate-400 text-xs">
-                  <i className="bi bi-speedometer2 text-indigo-400 text-sm"></i>
-                  <span className="text-[11px]">Select a supervisor above to preview live team workload and mentorship capacity.</span>
-                </div>
-              )}
-            </div>
 
-            {/* Field 3: Department Manager with Auto-Fill */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-0">
-                  3. Select Department Manager <span className="text-rose-500">*</span>
-                </label>
-                {selectedMgr && (
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
-                    Dept: {selectedMgr.department_name || "General"}
-                  </span>
+                {/* Step 3: Department Manager */}
+                <div className="relative flex items-start gap-4">
+                  {/* Timeline marker without trailing line */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-8 h-8 rounded-full border-2 border-fuchsia-500 bg-white text-fuchsia-600 font-bold text-xs sm:text-sm flex items-center justify-center shadow-sm ring-4 ring-fuchsia-50 shrink-0 z-10">
+                      3
+                    </div>
+                  </div>
+
+                  {/* Step 3 Content */}
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <h4 className="text-xs sm:text-sm font-semibold text-slate-900 mb-0">
+                        Select Department Manager <span className="text-rose-500 font-bold">*</span>
+                      </h4>
+                      {selectedMgr && (
+                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-100">
+                          {selectedMgr.department_name || "Manager"}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] sm:text-xs text-slate-500 mb-2 font-normal">
+                      Choose the department manager under whom this employee will be assigned.
+                    </p>
+
+                    <div className="relative flex items-center rounded-2xl border border-slate-200/90 bg-white hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-3 focus-within:ring-indigo-500/10 transition-all shadow-2xs overflow-hidden h-[46px]">
+                      <div className="w-12 h-full flex items-center justify-center border-r border-slate-100 text-fuchsia-600 text-base shrink-0 bg-slate-50/40">
+                        <i className="bi bi-building"></i>
+                      </div>
+                      <select
+                        value={form.manager_id}
+                        onChange={(e) => onFormChange({ ...form, manager_id: e.target.value })}
+                        required
+                        className="w-full h-full py-2.5 px-3.5 bg-transparent text-xs sm:text-sm text-slate-800 font-medium focus:outline-none cursor-pointer appearance-none pr-9"
+                      >
+                        <option value="">-- Choose Manager --</option>
+                        {managers.map((m) => (
+                          <option key={m.id} value={m.id}>
+                            {m.name} ({m.department_name || "Manager"})
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 text-xs">
+                        <i className="bi bi-chevron-down"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cross-Department Supervision Alert if applicable */}
+                {isCrossDept && (
+                  <div className="mt-4 p-3.5 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-start gap-2.5 text-xs text-amber-800 animate-in fade-in shadow-2xs">
+                    <i className="bi bi-exclamation-triangle-fill text-amber-600 shrink-0 mt-0.5 text-sm"></i>
+                    <div>
+                      <strong className="block font-semibold">Cross-Department Supervision Warning</strong>
+                      <span>
+                        Employee is registered in <strong>{selectedEmp?.department_name}</strong> while Supervisor is in <strong>{selectedSup?.department_name}</strong>.
+                      </span>
+                    </div>
+                  </div>
                 )}
               </div>
-              <div className="relative">
-                <select
-                  value={form.manager_id}
-                  onChange={(e) => onFormChange({ ...form, manager_id: e.target.value })}
-                  required
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white text-xs sm:text-sm text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer shadow-inner appearance-none pr-9"
-                >
-                  <option value="">-- Choose Manager --</option>
-                  {managers.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name} ({m.department_name || "Manager"})
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
-                  <i className="bi bi-chevron-down"></i>
-                </div>
-              </div>
-            </div>
 
-            {/* Live Chain of Command Preview */}
-            {selectedEmp && selectedSup && selectedMgr && (
-              <div className="p-3.5 rounded-xl bg-slate-900 text-white border border-indigo-500/30 shadow-md space-y-2">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-indigo-300 flex items-center gap-1.5">
-                  <i className="bi bi-diagram-3-fill"></i>
-                  <span>Live Chain of Command Telemetry</span>
-                </span>
-                <div className="flex items-center gap-2 text-xs font-semibold overflow-x-auto py-1">
-                  <div className="px-2.5 py-1 rounded-lg bg-indigo-950 border border-indigo-500/50 text-indigo-200 shrink-0">
-                    👑 {selectedMgr.name} <span className="text-[10px] text-indigo-400 block font-normal">Manager</span>
-                  </div>
-                  <i className="bi bi-chevron-right text-indigo-400 text-xs shrink-0"></i>
-                  <div className="px-2.5 py-1 rounded-lg bg-emerald-950 border border-emerald-500/50 text-emerald-200 shrink-0">
-                    🛡️ {selectedSup.name} <span className="text-[10px] text-emerald-400 block font-normal">Supervisor (Load: {newSupLoad}/8)</span>
-                  </div>
-                  <i className="bi bi-chevron-right text-indigo-400 text-xs shrink-0"></i>
-                  <div className="px-2.5 py-1 rounded-lg bg-sky-950 border border-sky-500/50 text-sky-200 shrink-0">
-                    👤 {selectedEmp.name} <span className="text-[10px] text-sky-400 block font-normal">Direct Report</span>
-                  </div>
-                </div>
-              </div>
-            )}
+              {/* Right Column: 3D Illustrated Hierarchy Graphic Card matching reference */}
+              <div className="hidden lg:flex lg:col-span-5 flex-col items-center justify-center relative min-h-[350px] p-4 select-none">
+                {/* Orbital Dashed Ring & Sparkle Accents */}
+                <div className="absolute w-60 h-60 rounded-full border border-dashed border-indigo-200/70 pointer-events-none"></div>
+                <div className="absolute top-8 left-6 w-2 h-2 rounded-full bg-indigo-500 shadow-sm shadow-indigo-400 animate-pulse"></div>
+                <div className="absolute top-4 right-10 w-2 h-2 rounded-full bg-blue-500 shadow-sm shadow-blue-400"></div>
+                <div className="absolute bottom-12 right-6 w-1.5 h-1.5 rounded-full bg-purple-400"></div>
+                <div className="absolute top-24 right-2 w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
+                <div className="absolute bottom-16 left-8 w-1 h-1 rounded-full bg-blue-400"></div>
 
-            {/* Cross-Department Supervision Alert */}
-            {isCrossDept && (
-              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-2.5 text-xs text-amber-800 animate-in fade-in">
-                <i className="bi bi-exclamation-triangle-fill text-amber-600 shrink-0 mt-0.5"></i>
-                <div>
-                  <strong className="block font-semibold">Cross-Department Supervision Warning</strong>
-                  <span>
-                    Employee is registered in <strong>{selectedEmp?.department_name}</strong> while Supervisor is in <strong>{selectedSup?.department_name}</strong>.
+                {/* Top Node: Manager 3D Card */}
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-b from-indigo-100 to-indigo-200/70 border border-indigo-200/90 shadow-xl shadow-indigo-500/15 flex flex-col items-center justify-center p-2 relative z-10 transition-transform duration-300 hover:scale-105 group">
+                  <div className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center text-lg shadow-sm">
+                    {selectedMgr ? (
+                      <span className="font-bold text-xs">{selectedMgr.name.charAt(0)}</span>
+                    ) : (
+                      <i className="bi bi-person-fill"></i>
+                    )}
+                  </div>
+                  <span className="text-[9px] font-bold text-indigo-900 mt-1 truncate max-w-[72px] text-center">
+                    {selectedMgr ? selectedMgr.name.split(" ")[0] : "Manager"}
                   </span>
                 </div>
+
+                {/* Tree Connecting Branch Lines */}
+                <div className="flex flex-col items-center relative z-0">
+                  {/* Stem down from manager */}
+                  <div className="w-0.5 h-5 bg-indigo-400/90"></div>
+                  {/* Horizontal bar */}
+                  <div className="w-44 h-0.5 bg-indigo-400/90 relative"></div>
+                  {/* 3 Vertical drops to children */}
+                  <div className="w-44 flex justify-between">
+                    <div className="w-0.5 h-5 bg-indigo-400/90"></div>
+                    <div className="w-0.5 h-5 bg-indigo-400/90"></div>
+                    <div className="w-0.5 h-5 bg-indigo-400/90"></div>
+                  </div>
+                </div>
+
+                {/* Bottom Nodes: 3 Child Cards */}
+                <div className="w-48 flex items-center justify-between relative z-10 mt-0">
+                  {/* Left child node */}
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-b from-indigo-50 to-indigo-100 border border-indigo-200/80 shadow-sm flex flex-col items-center justify-center text-indigo-600 transition-all hover:scale-105">
+                    <i className="bi bi-person-fill text-base"></i>
+                  </div>
+
+                  {/* Center child node (Prominent / Direct Lead) */}
+                  <div className="w-13 h-13 rounded-2xl bg-gradient-to-b from-indigo-100 to-indigo-200/90 border border-indigo-300 shadow-md shadow-indigo-500/15 flex flex-col items-center justify-center text-indigo-700 transition-all hover:scale-105 ring-2 ring-indigo-300/40">
+                    <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs shadow-xs">
+                      {selectedSup ? (
+                        <span className="font-bold">{selectedSup.name.charAt(0)}</span>
+                      ) : (
+                        <i className="bi bi-person-fill"></i>
+                      )}
+                    </div>
+                    <span className="text-[8.5px] font-bold text-indigo-950 mt-0.5 truncate max-w-[50px] text-center">
+                      {selectedSup ? selectedSup.name.split(" ")[0] : "Lead"}
+                    </span>
+                  </div>
+
+                  {/* Right child node (Subordinate / Member) */}
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-b from-indigo-50 to-indigo-100 border border-indigo-200/80 shadow-sm flex flex-col items-center justify-center text-indigo-600 transition-all hover:scale-105">
+                    {selectedEmp ? (
+                      <div className="w-6 h-6 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[10px] font-bold">
+                        {selectedEmp.name.charAt(0)}
+                      </div>
+                    ) : (
+                      <i className="bi bi-person-fill text-base"></i>
+                    )}
+                  </div>
+                </div>
+
+                {/* Dynamic live reporting chain summary chip */}
+                {selectedEmp && selectedSup && selectedMgr ? (
+                  <div className="mt-5 px-3 py-1.5 rounded-full bg-indigo-50/90 border border-indigo-100/90 text-[10.5px] font-semibold text-indigo-900 flex items-center gap-1.5 shadow-2xs max-w-full truncate animate-in fade-in">
+                    <span className="truncate max-w-[65px]">{selectedMgr.name.split(" ")[0]}</span>
+                    <i className="bi bi-chevron-right text-[9px] text-indigo-400"></i>
+                    <span className="truncate max-w-[65px] font-bold text-indigo-700">{selectedSup.name.split(" ")[0]}</span>
+                    <i className="bi bi-chevron-right text-[9px] text-indigo-400"></i>
+                    <span className="truncate max-w-[65px] text-slate-700">{selectedEmp.name.split(" ")[0]}</span>
+                  </div>
+                ) : (
+                  <p className="mt-5 text-[11px] text-slate-400 text-center font-normal">
+                    Interactive Org Preview
+                  </p>
+                )}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Modal Footer Controls */}
-          <div className="px-5 sm:px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2.5">
+          <div className="px-6 sm:px-8 py-4 sm:py-5 bg-white border-t border-slate-100 flex items-center justify-end gap-3.5 relative z-10">
             <button
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer shadow-2xs"
+              className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200/90 transition-all cursor-pointer shadow-2xs flex items-center gap-2 disabled:opacity-50 active:scale-95"
             >
-              Cancel
+              <i className="bi bi-x-lg text-xs"></i>
+              <span>Cancel</span>
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-md shadow-indigo-600/30 flex items-center gap-2 cursor-pointer disabled:opacity-50 active:scale-95"
+              className="px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-indigo-600 via-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white transition-all shadow-lg shadow-indigo-600/25 flex items-center gap-2 cursor-pointer disabled:opacity-50 active:scale-95"
             >
               {saving ? (
                 <>
-                  <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
                   <span>Saving Assignment...</span>
                 </>
               ) : (
                 <>
-                  <i className="bi bi-check2"></i>
+                  <i className="bi bi-check2 text-base font-bold"></i>
                   <span>Save Team Assignment</span>
                 </>
               )}
