@@ -231,7 +231,7 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
       onClick={saving ? undefined : onClose}
     >
       <div
-        className="w-full max-w-[780px] bg-white rounded-3xl sm:rounded-[28px] shadow-2xl shadow-indigo-950/15 border border-slate-100 flex flex-col relative overflow-hidden animate-in zoom-in-95 duration-200"
+        className="w-full max-w-xl bg-white rounded-3xl sm:rounded-[28px] shadow-2xl shadow-indigo-950/15 border border-slate-100 flex flex-col relative overflow-hidden animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Soft Ambient Vector Fluid Waves matching reference mockup Image 2 */}
@@ -313,9 +313,9 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
         </div>
 
         {/* Modal Header */}
-        <div className="px-6 sm:px-7 py-3 sm:py-3.5 flex items-center justify-between relative z-10 border-b border-slate-100">
-          <div className="flex items-center gap-3 sm:gap-3.5">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-indigo-50 to-indigo-100/60 border border-indigo-100 text-indigo-600 flex items-center justify-center text-lg sm:text-xl shadow-xs shrink-0">
+        <div className="px-5 sm:px-6 py-3 flex items-center justify-between relative z-10 border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-50 to-indigo-100/60 border border-indigo-100 text-indigo-600 flex items-center justify-center text-lg sm:text-xl shadow-xs shrink-0">
               <i className="bi bi-diagram-3"></i>
             </div>
             <div>
@@ -331,7 +331,7 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200/70 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer text-xs disabled:opacity-50 shrink-0"
+            className="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200/70 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer text-xs disabled:opacity-50 shrink-0"
             title="Close"
           >
             <i className="bi bi-x-lg"></i>
@@ -340,10 +340,10 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
 
         {/* Form Body with Left Stepped Timeline & Right 3D Org Chart */}
         <form onSubmit={handleLocalSubmit} className="flex flex-col flex-1 relative z-10 overflow-hidden">
-          <div className="px-6 sm:px-7 pt-3.5 pb-3 overflow-y-auto max-h-[calc(85vh-120px)]">
+          <div className="px-5 sm:px-6 pt-2.5 pb-2 overflow-y-auto max-h-[calc(85vh-110px)]">
             {/* Inline Error Alert if active */}
             {activeError && (
-              <div className="mb-3.5 p-3 rounded-xl bg-rose-50 border border-rose-200/80 text-rose-800 text-xs sm:text-sm flex items-center justify-between gap-2.5 animate-in fade-in shadow-2xs">
+              <div className="mb-2.5 p-2.5 rounded-xl bg-rose-50 border border-rose-200/80 text-rose-800 text-xs flex items-center justify-between gap-2.5 animate-in fade-in shadow-2xs">
                 <div className="flex items-center gap-2">
                   <i className="bi bi-exclamation-triangle-fill text-rose-600 text-sm shrink-0"></i>
                   <span className="font-semibold">{activeError}</span>
@@ -362,44 +362,44 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
               </div>
             )}
 
-            <div className="flex flex-col lg:flex-row gap-5 items-start">
+            <div className="flex flex-col sm:flex-row gap-4 items-start">
               {/* Left Column: Stepped Form with Vertical Timeline */}
               <div className="flex-1 min-w-0 space-y-0">
                 {/* Step 1: Subordinate Employee */}
-                <div className="relative flex items-start gap-3.5">
+                <div className="relative flex items-start gap-3">
                   {/* Timeline connector column */}
                   <div className="flex flex-col items-center self-stretch">
-                    <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-700 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-indigo-600/30 ring-4 ring-indigo-50 shrink-0 z-10">
+                    <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-700 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-indigo-600/30 ring-3 ring-indigo-50 shrink-0 z-10">
                       1
                     </div>
-                    <div className="w-0.5 flex-1 border-l-2 border-dashed border-indigo-200/80 my-1"></div>
+                    <div className="w-0.5 flex-1 border-l-2 border-dashed border-indigo-200/80 my-0.5"></div>
                   </div>
 
                   {/* Step 1 Content */}
-                  <div className="flex-1 pb-2.5 sm:pb-3">
+                  <div className="flex-1 pb-1.5">
                     <div className="flex items-center justify-between mb-0.5">
                       <h4 className="text-xs sm:text-[13px] font-semibold text-slate-900 mb-0">
                         Select Subordinate Employee <span className="text-rose-500 font-bold">*</span>
                       </h4>
                       {selectedEmp?.department_name && (
-                        <span className="text-[10.5px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
                           {selectedEmp.department_name}
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-slate-500 mb-1.5 font-normal">
+                    <p className="text-[10.5px] text-slate-500 mb-1 font-normal leading-tight">
                       Choose the employee who will be mapped to the team hierarchy.
                     </p>
 
-                    <div className="relative flex items-center rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/10 transition-all shadow-2xs overflow-hidden h-[38px] sm:h-[40px]">
-                      <div className="w-10 h-full flex items-center justify-center border-r border-slate-100 text-indigo-600 text-base shrink-0 bg-slate-50/40">
+                    <div className="relative flex items-center rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/10 transition-all shadow-2xs overflow-hidden h-[36px]">
+                      <div className="w-9 h-full flex items-center justify-center border-r border-slate-100 text-indigo-600 text-sm shrink-0 bg-slate-50/40">
                         <i className="bi bi-person"></i>
                       </div>
                       <select
                         value={form.employee_id}
                         onChange={(e) => handleEmployeeChange(e.target.value)}
                         required
-                        className="w-full h-full py-1.5 px-3 bg-transparent text-xs sm:text-sm text-slate-800 font-medium focus:outline-none cursor-pointer appearance-none pr-8"
+                        className="w-full h-full py-1 px-2.5 bg-transparent text-xs text-slate-800 font-medium focus:outline-none cursor-pointer appearance-none pr-7"
                       >
                         <option value="">-- Choose Employee --</option>
                         {employees.map((e) => (
@@ -408,7 +408,7 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                           </option>
                         ))}
                       </select>
-                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                      <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-slate-400 text-xs">
                         <i className="bi bi-chevron-down"></i>
                       </div>
                     </div>
@@ -416,24 +416,24 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                 </div>
 
                 {/* Step 2: Direct Supervisor (Team Lead) */}
-                <div className="relative flex items-start gap-3.5">
+                <div className="relative flex items-start gap-3">
                   {/* Timeline connector column */}
                   <div className="flex flex-col items-center self-stretch">
-                    <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-blue-500/30 ring-4 ring-blue-50 shrink-0 z-10">
+                    <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-blue-500/30 ring-3 ring-blue-50 shrink-0 z-10">
                       2
                     </div>
-                    <div className="w-0.5 flex-1 border-l-2 border-dashed border-indigo-200/80 my-1"></div>
+                    <div className="w-0.5 flex-1 border-l-2 border-dashed border-indigo-200/80 my-0.5"></div>
                   </div>
 
                   {/* Step 2 Content */}
-                  <div className="flex-1 pb-2.5 sm:pb-3">
+                  <div className="flex-1 pb-1.5">
                     <div className="flex items-center justify-between mb-0.5">
                       <h4 className="text-xs sm:text-[13px] font-semibold text-slate-900 mb-0">
                         Select Direct Supervisor (Team Lead) <span className="text-rose-500 font-bold">*</span>
                       </h4>
                       {selectedSup && (
                         <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                          className={`text-[9.5px] font-bold px-1.5 py-0.5 rounded-full border ${
                             currentSupLoad <= 3
                               ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                               : currentSupLoad <= 7
@@ -445,19 +445,19 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-slate-500 mb-1.5 font-normal">
+                    <p className="text-[10.5px] text-slate-500 mb-1 font-normal leading-tight">
                       Choose the team lead who will directly supervise the selected employee.
                     </p>
 
-                    <div className="relative flex items-center rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/10 transition-all shadow-2xs overflow-hidden h-[38px] sm:h-[40px]">
-                      <div className="w-10 h-full flex items-center justify-center border-r border-slate-100 text-blue-600 text-base shrink-0 bg-slate-50/40">
+                    <div className="relative flex items-center rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/10 transition-all shadow-2xs overflow-hidden h-[36px]">
+                      <div className="w-9 h-full flex items-center justify-center border-r border-slate-100 text-blue-600 text-sm shrink-0 bg-slate-50/40">
                         <i className="bi bi-people"></i>
                       </div>
                       <select
                         value={form.supervisor_id}
                         onChange={(e) => handleSupervisorChange(e.target.value)}
                         required
-                        className="w-full h-full py-1.5 px-3 bg-transparent text-xs sm:text-sm text-slate-800 font-medium focus:outline-none cursor-pointer appearance-none pr-8"
+                        className="w-full h-full py-1 px-2.5 bg-transparent text-xs text-slate-800 font-medium focus:outline-none cursor-pointer appearance-none pr-7"
                       >
                         <option value="">-- Choose Supervisor --</option>
                         {recommendedSupervisors.length > 0 && (
@@ -487,30 +487,30 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                           </optgroup>
                         )}
                       </select>
-                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                      <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-slate-400 text-xs">
                         <i className="bi bi-chevron-down"></i>
                       </div>
                     </div>
 
                     {/* Step 2 Workload Capacity Container matching reference mockup */}
                     {selectedSup ? (
-                      <div className="mt-1.5 p-2 sm:p-2.5 rounded-xl border border-indigo-100 bg-indigo-50/40 space-y-1.5">
+                      <div className="mt-1 p-2 rounded-xl border border-indigo-100 bg-indigo-50/40 space-y-1">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="text-indigo-600 text-base shrink-0">
+                          <div className="flex items-center gap-1.5">
+                            <div className="text-indigo-600 text-sm shrink-0">
                               <i className="bi bi-speedometer2"></i>
                             </div>
                             <div>
-                              <h5 className="text-xs font-bold text-slate-900 mb-0">
+                              <h5 className="text-[11px] font-bold text-slate-900 mb-0 leading-tight">
                                 {selectedSup.name}
                               </h5>
-                              <p className="text-[10px] text-slate-500 mb-0 font-medium">
+                              <p className="text-[9.5px] text-slate-500 mb-0 font-medium">
                                 {selectedSup.department_name || "General"} • Direct Supervisor
                               </p>
                             </div>
                           </div>
                           <span
-                            className={`text-[9.5px] font-bold px-2 py-0.5 rounded-full border ${
+                            className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${
                               currentSupLoad <= 3
                                 ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                                 : currentSupLoad <= 7
@@ -523,9 +523,9 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                         </div>
 
                         <div className="space-y-0.5">
-                          <div className="flex items-center justify-between text-[10px]">
+                          <div className="flex items-center justify-between text-[9.5px]">
                             <span className="font-semibold text-slate-600">
-                              Workload Capacity: <span className="font-bold text-slate-900">{currentSupLoad} / 8</span> reports
+                              Capacity: <span className="font-bold text-slate-900">{currentSupLoad} / 8</span> reports
                             </span>
                             <span className="font-mono text-slate-500 font-semibold">
                               {Math.min(100, Math.round((currentSupLoad / 8) * 100))}%
@@ -545,28 +545,28 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between text-[9.5px] text-slate-500 pt-0.5">
+                        <div className="flex items-center justify-between text-[9px] text-slate-500 pt-0.5">
                           <span className="flex items-center gap-1 text-slate-600">
-                            <i className="bi bi-info-circle text-indigo-500 text-[10px]"></i>
+                            <i className="bi bi-info-circle text-indigo-500 text-[9px]"></i>
                             After: <strong className="text-slate-800">{newSupLoad} / 8 reports</strong>
                           </span>
                           {newSupLoad <= 8 ? (
                             <span className="text-emerald-700 font-semibold flex items-center gap-0.5">
-                              <i className="bi bi-check-circle-fill text-[9px]"></i> Within Span
+                              <i className="bi bi-check-circle-fill text-[8px]"></i> Within Span
                             </span>
                           ) : (
                             <span className="text-amber-700 font-semibold flex items-center gap-0.5">
-                              <i className="bi bi-exclamation-triangle-fill text-[9px]"></i> Exceeding 8 Capacity
+                              <i className="bi bi-exclamation-triangle-fill text-[8px]"></i> Exceeding 8 Capacity
                             </span>
                           )}
                         </div>
                       </div>
                     ) : (
-                      <div className="mt-1.5 p-2 sm:p-2.5 rounded-xl border border-indigo-100/80 bg-indigo-50/35 flex items-center gap-2.5 text-slate-500">
-                        <div className="text-indigo-500 text-base pr-2.5 border-r border-indigo-100/90 flex items-center justify-center shrink-0">
+                      <div className="mt-1 p-2 rounded-xl border border-indigo-100/80 bg-indigo-50/35 flex items-center gap-2 text-slate-500">
+                        <div className="text-indigo-500 text-sm pr-2 border-r border-indigo-100/90 flex items-center justify-center shrink-0">
                           <i className="bi bi-speedometer2"></i>
                         </div>
-                        <p className="text-[11px] text-slate-500 mb-0 font-normal leading-snug">
+                        <p className="text-[10.5px] text-slate-500 mb-0 font-normal leading-tight">
                           Select a supervisor above to preview live team workload and mentorship capacity.
                         </p>
                       </div>
@@ -575,39 +575,39 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                 </div>
 
                 {/* Step 3: Department Manager */}
-                <div className="relative flex items-start gap-3.5">
+                <div className="relative flex items-start gap-3">
                   {/* Timeline marker without trailing line */}
                   <div className="flex flex-col items-center">
-                    <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full border-2 border-fuchsia-500 bg-white text-fuchsia-600 font-bold text-xs flex items-center justify-center shadow-sm ring-4 ring-fuchsia-50 shrink-0 z-10">
+                    <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full border-2 border-fuchsia-500 bg-white text-fuchsia-600 font-bold text-xs flex items-center justify-center shadow-sm ring-3 ring-fuchsia-50 shrink-0 z-10">
                       3
                     </div>
                   </div>
 
                   {/* Step 3 Content */}
-                  <div className="flex-1">
+                  <div className="flex-1 pb-0">
                     <div className="flex items-center justify-between mb-0.5">
                       <h4 className="text-xs sm:text-[13px] font-semibold text-slate-900 mb-0">
                         Select Department Manager <span className="text-rose-500 font-bold">*</span>
                       </h4>
                       {selectedMgr && (
-                        <span className="text-[10.5px] font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-100">
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-100">
                           {selectedMgr.department_name || "Manager"}
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-slate-500 mb-1.5 font-normal">
+                    <p className="text-[10.5px] text-slate-500 mb-1 font-normal leading-tight">
                       Choose the department manager under whom this employee will be assigned.
                     </p>
 
-                    <div className="relative flex items-center rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/10 transition-all shadow-2xs overflow-hidden h-[38px] sm:h-[40px]">
-                      <div className="w-10 h-full flex items-center justify-center border-r border-slate-100 text-fuchsia-600 text-base shrink-0 bg-slate-50/40">
+                    <div className="relative flex items-center rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/10 transition-all shadow-2xs overflow-hidden h-[36px]">
+                      <div className="w-9 h-full flex items-center justify-center border-r border-slate-100 text-fuchsia-600 text-sm shrink-0 bg-slate-50/40">
                         <i className="bi bi-building"></i>
                       </div>
                       <select
                         value={form.manager_id}
                         onChange={(e) => onFormChange({ ...form, manager_id: e.target.value })}
                         required
-                        className="w-full h-full py-1.5 px-3 bg-transparent text-xs sm:text-sm text-slate-800 font-medium focus:outline-none cursor-pointer appearance-none pr-8"
+                        className="w-full h-full py-1 px-2.5 bg-transparent text-xs text-slate-800 font-medium focus:outline-none cursor-pointer appearance-none pr-7"
                       >
                         <option value="">-- Choose Manager --</option>
                         {managers.map((m) => (
@@ -616,7 +616,7 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                           </option>
                         ))}
                       </select>
-                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                      <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-slate-400 text-xs">
                         <i className="bi bi-chevron-down"></i>
                       </div>
                     </div>
@@ -625,38 +625,38 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
 
                 {/* Cross-Department Supervision Alert if applicable */}
                 {isCrossDept && (
-                  <div className="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200/80 flex items-start gap-2.5 text-xs text-amber-800 animate-in fade-in shadow-2xs">
-                    <i className="bi bi-exclamation-triangle-fill text-amber-600 shrink-0 mt-0.5 text-sm"></i>
+                  <div className="mt-2.5 p-2.5 rounded-xl bg-amber-50 border border-amber-200/80 flex items-start gap-2 text-xs text-amber-800 animate-in fade-in shadow-2xs">
+                    <i className="bi bi-exclamation-triangle-fill text-amber-600 shrink-0 mt-0.5 text-xs"></i>
                     <div>
-                      <strong className="block font-semibold">Cross-Department Supervision Warning</strong>
-                      <span>
-                        Employee is registered in <strong>{selectedEmp?.department_name}</strong> while Supervisor is in <strong>{selectedSup?.department_name}</strong>.
+                      <strong className="block font-semibold text-[11px]">Cross-Department Supervision Warning</strong>
+                      <span className="text-[10.5px]">
+                        Employee is in <strong>{selectedEmp?.department_name}</strong> while Supervisor is in <strong>{selectedSup?.department_name}</strong>.
                       </span>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Right Column: 3D Illustrated Org Chart Graphic - Reduced Width matching Image 2 */}
-              <div className="hidden lg:flex w-56 xl:w-60 shrink-0 flex-col items-center justify-center relative self-center py-1 select-none">
+              {/* Right Column: 3D Illustrated Org Chart Graphic - Snug width matching Image 2 */}
+              <div className="hidden sm:flex w-40 sm:w-44 shrink-0 flex-col items-center justify-center relative self-center py-0 select-none">
                 {/* Orbital Dashed Ring & Sparkle Accents */}
-                <div className="absolute w-44 h-44 rounded-full border border-dashed border-indigo-200/70 pointer-events-none"></div>
-                <div className="absolute top-4 left-4 w-2 h-2 rounded-full bg-indigo-500 shadow-sm shadow-indigo-400 animate-pulse"></div>
-                <div className="absolute top-2 right-6 w-2 h-2 rounded-full bg-blue-500 shadow-sm shadow-blue-400"></div>
-                <div className="absolute bottom-8 right-4 w-1.5 h-1.5 rounded-full bg-purple-400"></div>
-                <div className="absolute top-16 right-1 w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
-                <div className="absolute bottom-10 left-4 w-1 h-1 rounded-full bg-blue-400"></div>
+                <div className="absolute w-36 h-36 rounded-full border border-dashed border-indigo-200/70 pointer-events-none"></div>
+                <div className="absolute top-3 left-3 w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-sm shadow-indigo-400 animate-pulse"></div>
+                <div className="absolute top-1 right-5 w-1.5 h-1.5 rounded-full bg-blue-500 shadow-sm shadow-blue-400"></div>
+                <div className="absolute bottom-6 right-3 w-1.5 h-1.5 rounded-full bg-purple-400"></div>
+                <div className="absolute top-12 right-0 w-1 h-1 rounded-full bg-indigo-400"></div>
+                <div className="absolute bottom-8 left-3 w-1 h-1 rounded-full bg-blue-400"></div>
 
                 {/* Top Node: Manager 3D Card */}
-                <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-indigo-100/95 via-indigo-100/75 to-purple-100/60 border border-indigo-200/90 shadow-xl shadow-indigo-500/15 flex flex-col items-center justify-center p-2 relative z-10 transition-transform duration-300 hover:scale-105 group">
-                  <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm shadow-sm">
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-100/95 via-indigo-100/75 to-purple-100/60 border border-indigo-200/90 shadow-md shadow-indigo-500/10 flex flex-col items-center justify-center p-1.5 relative z-10 transition-transform duration-300 hover:scale-105 group">
+                  <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs shadow-xs">
                     {selectedMgr ? (
-                      <span className="font-bold text-xs">{selectedMgr.name.charAt(0)}</span>
+                      <span className="font-bold text-[11px]">{selectedMgr.name.charAt(0)}</span>
                     ) : (
                       <i className="bi bi-person-fill"></i>
                     )}
                   </div>
-                  <span className="text-[9px] font-bold text-indigo-900 mt-1 truncate max-w-[65px] text-center">
+                  <span className="text-[8.5px] font-bold text-indigo-900 mt-0.5 truncate max-w-[55px] text-center">
                     {selectedMgr ? selectedMgr.name.split(" ")[0] : "Manager"}
                   </span>
                 </div>
@@ -664,42 +664,42 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                 {/* Tree Connecting Branch Lines */}
                 <div className="flex flex-col items-center relative z-0">
                   {/* Stem down from manager */}
-                  <div className="w-0.5 h-3.5 bg-indigo-400/90"></div>
+                  <div className="w-0.5 h-3 bg-indigo-400/90"></div>
                   {/* Horizontal bar */}
-                  <div className="w-36 h-0.5 bg-indigo-400/90 relative"></div>
+                  <div className="w-28 h-0.5 bg-indigo-400/90 relative"></div>
                   {/* 3 Vertical drops to children */}
-                  <div className="w-36 flex justify-between">
-                    <div className="w-0.5 h-3.5 bg-indigo-400/90"></div>
-                    <div className="w-0.5 h-3.5 bg-indigo-400/90"></div>
-                    <div className="w-0.5 h-3.5 bg-indigo-400/90"></div>
+                  <div className="w-28 flex justify-between">
+                    <div className="w-0.5 h-3 bg-indigo-400/90"></div>
+                    <div className="w-0.5 h-3 bg-indigo-400/90"></div>
+                    <div className="w-0.5 h-3 bg-indigo-400/90"></div>
                   </div>
                 </div>
 
                 {/* Bottom Nodes: 3 Child Cards */}
-                <div className="w-40 flex items-center justify-between relative z-10 mt-0">
+                <div className="w-32 flex items-center justify-between relative z-10 mt-0">
                   {/* Left child node */}
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-b from-indigo-50 to-indigo-100 border border-indigo-200/80 shadow-sm flex flex-col items-center justify-center text-indigo-600 transition-all hover:scale-105">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-b from-indigo-50 to-indigo-100 border border-indigo-200/80 shadow-sm flex flex-col items-center justify-center text-indigo-600 transition-all hover:scale-105">
                     <i className="bi bi-person-fill text-xs"></i>
                   </div>
 
                   {/* Center child node (Prominent / Direct Lead) */}
-                  <div className="w-11 h-11 rounded-xl bg-gradient-to-b from-indigo-100 to-indigo-200/90 border border-indigo-300 shadow-md shadow-indigo-500/15 flex flex-col items-center justify-center text-indigo-700 transition-all hover:scale-105 ring-2 ring-indigo-300/40">
-                    <div className="w-5.5 h-5.5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] shadow-xs">
+                  <div className="w-9.5 h-9.5 rounded-xl bg-gradient-to-b from-indigo-100 to-indigo-200/90 border border-indigo-300 shadow-md shadow-indigo-500/15 flex flex-col items-center justify-center text-indigo-700 transition-all hover:scale-105 ring-2 ring-indigo-300/40">
+                    <div className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[9px] shadow-xs">
                       {selectedSup ? (
                         <span className="font-bold">{selectedSup.name.charAt(0)}</span>
                       ) : (
                         <i className="bi bi-person-fill"></i>
                       )}
                     </div>
-                    <span className="text-[8px] font-bold text-indigo-950 mt-0.5 truncate max-w-[42px] text-center">
+                    <span className="text-[7.5px] font-bold text-indigo-950 mt-0.5 truncate max-w-[36px] text-center">
                       {selectedSup ? selectedSup.name.split(" ")[0] : "Lead"}
                     </span>
                   </div>
 
                   {/* Right child node (Subordinate / Member) */}
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-b from-indigo-50 to-indigo-100 border border-indigo-200/80 shadow-sm flex flex-col items-center justify-center text-indigo-600 transition-all hover:scale-105">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-b from-indigo-50 to-indigo-100 border border-indigo-200/80 shadow-sm flex flex-col items-center justify-center text-indigo-600 transition-all hover:scale-105">
                     {selectedEmp ? (
-                      <div className="w-5 h-5 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[9px] font-bold">
+                      <div className="w-4.5 h-4.5 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[8px] font-bold">
                         {selectedEmp.name.charAt(0)}
                       </div>
                     ) : (
@@ -710,15 +710,15 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
 
                 {/* Dynamic live reporting chain summary chip */}
                 {selectedEmp && selectedSup && selectedMgr ? (
-                  <div className="mt-3 px-2.5 py-1 rounded-full bg-indigo-50/90 border border-indigo-100/90 text-[9.5px] font-semibold text-indigo-900 flex items-center gap-1 shadow-2xs max-w-full truncate animate-in fade-in">
-                    <span className="truncate max-w-[55px]">{selectedMgr.name.split(" ")[0]}</span>
-                    <i className="bi bi-chevron-right text-[7px] text-indigo-400"></i>
-                    <span className="truncate max-w-[55px] font-bold text-indigo-700">{selectedSup.name.split(" ")[0]}</span>
-                    <i className="bi bi-chevron-right text-[7px] text-indigo-400"></i>
-                    <span className="truncate max-w-[55px] text-slate-700">{selectedEmp.name.split(" ")[0]}</span>
+                  <div className="mt-2.5 px-2 py-0.5 rounded-full bg-indigo-50/90 border border-indigo-100/90 text-[9px] font-semibold text-indigo-900 flex items-center gap-1 shadow-2xs max-w-full truncate animate-in fade-in">
+                    <span className="truncate max-w-[48px]">{selectedMgr.name.split(" ")[0]}</span>
+                    <i className="bi bi-chevron-right text-[6px] text-indigo-400"></i>
+                    <span className="truncate max-w-[48px] font-bold text-indigo-700">{selectedSup.name.split(" ")[0]}</span>
+                    <i className="bi bi-chevron-right text-[6px] text-indigo-400"></i>
+                    <span className="truncate max-w-[48px] text-slate-700">{selectedEmp.name.split(" ")[0]}</span>
                   </div>
                 ) : (
-                  <p className="mt-3 text-[10px] text-slate-400 text-center font-normal mb-0">
+                  <p className="mt-2 text-[9.5px] text-slate-400 text-center font-normal mb-0">
                     Interactive Org Preview
                   </p>
                 )}
@@ -727,7 +727,7 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
           </div>
 
           {/* Modal Footer Controls */}
-          <div className="px-6 sm:px-7 py-3 sm:py-3.5 bg-white border-t border-slate-100 flex items-center justify-end gap-3 relative z-10">
+          <div className="px-5 sm:px-6 py-2.5 sm:py-3 bg-white border-t border-slate-100 flex items-center justify-end gap-2.5 relative z-10">
             <button
               type="button"
               onClick={onClose}
