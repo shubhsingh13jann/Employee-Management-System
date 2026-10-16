@@ -182,3 +182,4 @@ export const SwapReportingConfirmModal: React.FC<SwapReportingConfirmModalProps>
     </div>
   );
 };
+

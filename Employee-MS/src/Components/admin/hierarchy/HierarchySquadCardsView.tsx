@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { HierarchyMappingItem, UnassignedEmployee } from "./HierarchyTableView";
 import { SupervisorCapacityDrawer } from "./SupervisorCapacityDrawer";
 import { HierarchyEmptyStateOnboarding } from "./HierarchyEmptyStateOnboarding";
