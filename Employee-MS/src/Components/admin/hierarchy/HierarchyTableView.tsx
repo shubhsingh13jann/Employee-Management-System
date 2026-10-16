@@ -65,6 +65,12 @@ interface HierarchyTableViewProps {
   onBatchUnlink?: (employeeIds: (string | number)[]) => void;
   isPreviewEmptyState?: boolean;
   onExitSimulation?: () => void;
+  isSelectMode?: boolean;
+  onToggleSelectMode?: () => void;
+  selectedStaffIds?: (string | number)[];
+  onToggleSelectStaff?: (id: string | number) => void;
+  onClearSelection?: () => void;
+  onSelectAllStaff?: (ids: (string | number)[]) => void;
 }
 
 export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
@@ -83,12 +89,40 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
   onBatchUnlink,
   isPreviewEmptyState = false,
   onExitSimulation,
+  isSelectMode,
+  onToggleSelectMode,
+  selectedStaffIds,
+  onToggleSelectStaff,
+  onClearSelection,
+  onSelectAllStaff,
 }) => {
   const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
   const [selectedSquadLead, setSelectedSquadLead] = useState<TeamLeadGroup | null>(null);
   const [selectedManagerGroup, setSelectedManagerGroup] = useState<ManagerGroup | null>(null);
-  const [selectedIds, setSelectedIds] = useState<Set<string | number>>(new Set());
+  const [internalSelectedIds, setInternalSelectedIds] = useState<Set<string | number>>(new Set());
+  const [internalSelectMode, setInternalSelectMode] = useState(false);
+
+  const isControlled = selectedStaffIds !== undefined;
+  const currentSelectedSet = useMemo(() => {
+    return isControlled ? new Set(selectedStaffIds) : internalSelectedIds;
+  }, [isControlled, selectedStaffIds, internalSelectedIds]);
+
+  const isSelectModeActive = isSelectMode !== undefined ? isSelectMode : internalSelectMode;
+  const showCheckboxes = isSelectModeActive || currentSelectedSet.size > 0;
+
+  const toggleSelectModeLocal = () => {
+    if (onToggleSelectMode) {
+      onToggleSelectMode();
+    } else {
+      if (showCheckboxes) {
+        setInternalSelectMode(false);
+        setInternalSelectedIds(new Set());
+      } else {
+        setInternalSelectMode(true);
+      }
+    }
+  };
 
   // Group mappings by Team Lead (Supervisor)
   const leadGroups = useMemo<TeamLeadGroup[]>(() => {
@@ -178,35 +212,50 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
     return ids;
   }, [shouldRenderAssigned, shouldRenderUnassigned, mappings, unassignedStaff]);
 
-  const isAllSelected = visibleStaffIds.length > 0 && visibleStaffIds.every((id) => selectedIds.has(id));
-  const isPartiallySelected = visibleStaffIds.some((id) => selectedIds.has(id)) && !isAllSelected;
+  const isAllSelected = visibleStaffIds.length > 0 && visibleStaffIds.every((id) => currentSelectedSet.has(id));
+  const isPartiallySelected = visibleStaffIds.some((id) => currentSelectedSet.has(id)) && !isAllSelected;
 
   const toggleSelectAll = () => {
     if (isAllSelected) {
-      setSelectedIds(new Set());
+      if (onClearSelection) {
+        onClearSelection();
+      }
+      if (!isControlled) {
+        setInternalSelectedIds(new Set());
+      }
     } else {
-      setSelectedIds(new Set(visibleStaffIds));
+      if (onSelectAllStaff) {
+        onSelectAllStaff(visibleStaffIds);
+      }
+      if (!isControlled) {
+        setInternalSelectedIds(new Set(visibleStaffIds));
+      }
     }
   };
 
   const toggleSelect = (id: string | number) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+    if (onToggleSelectStaff) {
+      onToggleSelectStaff(id);
+    }
+    if (!isControlled) {
+      setInternalSelectedIds((prev) => {
+        const next = new Set(prev);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        return next;
+      });
+    }
   };
 
   const selectedMappedIds = useMemo(() => {
-    return Array.from(selectedIds).filter((id) =>
+    return Array.from(currentSelectedSet).filter((id) =>
       mappings.some((m) => String(m.employee_id) === String(id))
     );
-  }, [selectedIds, mappings]);
+  }, [currentSelectedSet, mappings]);
 
   const handleBulkBatchAssign = () => {
     const candidates: any[] = [];
-    selectedIds.forEach((id) => {
+    currentSelectedSet.forEach((id) => {
       const mapped = mappings.find((m) => String(m.employee_id) === String(id));
       if (mapped) {
         candidates.push({
@@ -230,6 +279,61 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
     }
   };
 
+  const handleExportSelectedCSV = () => {
+    if (currentSelectedSet.size === 0) return;
+    const selectedList: any[] = [];
+    currentSelectedSet.forEach((id) => {
+      const mapped = mappings.find((m) => String(m.employee_id) === String(id));
+      if (mapped) {
+        selectedList.push({
+          id: mapped.employee_id,
+          name: mapped.employee_name,
+          email: mapped.employee_email,
+          role: "employee",
+          department: mapped.department_name || "General",
+          supervisor: mapped.supervisor_name,
+          manager: mapped.manager_name,
+          status: "Assigned",
+        });
+      } else {
+        const unassigned = unassignedStaff.find((u) => String(u.id) === String(id));
+        if (unassigned) {
+          selectedList.push({
+            id: unassigned.id,
+            name: unassigned.name,
+            email: unassigned.email,
+            role: unassigned.role || "employee",
+            department: unassigned.department_name || "General",
+            supervisor: "Unassigned",
+            manager: "Unassigned",
+            status: "Orphaned",
+          });
+        }
+      }
+    });
+
+    const headers = ["ID", "Name", "Email", "Role", "Department", "Supervisor", "Manager", "Status"];
+    const rows = selectedList.map((u) => [
+      u.id,
+      `"${u.name.replace(/"/g, '""')}"`,
+      `"${u.email}"`,
+      u.role,
+      `"${u.department.replace(/"/g, '""')}"`,
+      `"${u.supervisor.replace(/"/g, '""')}"`,
+      `"${u.manager.replace(/"/g, '""')}"`,
+      u.status,
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `hierarchy_selected_${selectedList.length}_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden mb-3">
       {/* 1. Contextual Header Banner based on Active KPI Mode */}
@@ -245,14 +349,29 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
               {mappings.length} personnel
             </span>
           </div>
-          <button
-            type="button"
-            onClick={onResetFilters}
-            className="text-[11px] font-semibold text-purple-700 hover:text-purple-900 hover:underline cursor-pointer flex items-center gap-1"
-          >
-            <i className="bi bi-x-circle"></i>
-            <span>Reset to All Staff</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleSelectModeLocal}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-2xs ${
+                showCheckboxes
+                  ? "bg-indigo-600 text-white border-indigo-500 shadow-indigo-500/20 ring-1 ring-indigo-400/40"
+                  : "bg-white hover:bg-indigo-50/60 text-slate-700 hover:text-indigo-600 border-slate-200/90 hover:border-indigo-300"
+              }`}
+              title={showCheckboxes ? "Exit Multi-Select Mode" : "Enable Multi-Select Mode"}
+            >
+              <i className={`bi ${showCheckboxes ? "bi-check2-all text-white font-bold" : "bi-check2-square text-indigo-500"} text-xs`}></i>
+              <span>{showCheckboxes ? `Done (${currentSelectedSet.size})` : "Select"}</span>
+            </button>
+            <button
+              type="button"
+              onClick={onResetFilters}
+              className="text-[11px] font-semibold text-purple-700 hover:text-purple-900 hover:underline cursor-pointer flex items-center gap-1"
+            >
+              <i className="bi bi-x-circle"></i>
+              <span>Reset to All Staff</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -268,14 +387,29 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
               {mappings.length} personnel
             </span>
           </div>
-          <button
-            type="button"
-            onClick={onResetFilters}
-            className="text-[11px] font-semibold text-emerald-700 hover:text-emerald-900 hover:underline cursor-pointer flex items-center gap-1"
-          >
-            <i className="bi bi-x-circle"></i>
-            <span>Reset to All Staff</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleSelectModeLocal}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-2xs ${
+                showCheckboxes
+                  ? "bg-indigo-600 text-white border-indigo-500 shadow-indigo-500/20 ring-1 ring-indigo-400/40"
+                  : "bg-white hover:bg-indigo-50/60 text-slate-700 hover:text-indigo-600 border-slate-200/90 hover:border-indigo-300"
+              }`}
+              title={showCheckboxes ? "Exit Multi-Select Mode" : "Enable Multi-Select Mode"}
+            >
+              <i className={`bi ${showCheckboxes ? "bi-check2-all text-white font-bold" : "bi-check2-square text-indigo-500"} text-xs`}></i>
+              <span>{showCheckboxes ? `Done (${currentSelectedSet.size})` : "Select"}</span>
+            </button>
+            <button
+              type="button"
+              onClick={onResetFilters}
+              className="text-[11px] font-semibold text-emerald-700 hover:text-emerald-900 hover:underline cursor-pointer flex items-center gap-1"
+            >
+              <i className="bi bi-x-circle"></i>
+              <span>Reset to All Staff</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -290,14 +424,29 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
               • Showing {mappings.length} active reporting relationships
             </span>
           </div>
-          <button
-            type="button"
-            onClick={onResetFilters}
-            className="text-[11px] font-semibold text-blue-700 hover:text-blue-900 hover:underline cursor-pointer flex items-center gap-1"
-          >
-            <i className="bi bi-x-circle"></i>
-            <span>Reset to All Staff</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleSelectModeLocal}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-2xs ${
+                showCheckboxes
+                  ? "bg-indigo-600 text-white border-indigo-500 shadow-indigo-500/20 ring-1 ring-indigo-400/40"
+                  : "bg-white hover:bg-indigo-50/60 text-slate-700 hover:text-indigo-600 border-slate-200/90 hover:border-indigo-300"
+              }`}
+              title={showCheckboxes ? "Exit Multi-Select Mode" : "Enable Multi-Select Mode"}
+            >
+              <i className={`bi ${showCheckboxes ? "bi-check2-all text-white font-bold" : "bi-check2-square text-indigo-500"} text-xs`}></i>
+              <span>{showCheckboxes ? `Done (${currentSelectedSet.size})` : "Select"}</span>
+            </button>
+            <button
+              type="button"
+              onClick={onResetFilters}
+              className="text-[11px] font-semibold text-blue-700 hover:text-blue-900 hover:underline cursor-pointer flex items-center gap-1"
+            >
+              <i className="bi bi-x-circle"></i>
+              <span>Reset to All Staff</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -313,14 +462,56 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
               line assignment
             </span>
           </div>
-          <button
-            type="button"
-            onClick={onResetFilters}
-            className="text-[11px] font-semibold text-amber-800 hover:text-amber-900 hover:underline cursor-pointer flex items-center gap-1"
-          >
-            <i className="bi bi-x-circle"></i>
-            <span>Reset to All Staff</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleSelectModeLocal}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-2xs ${
+                showCheckboxes
+                  ? "bg-indigo-600 text-white border-indigo-500 shadow-indigo-500/20 ring-1 ring-indigo-400/40"
+                  : "bg-white hover:bg-indigo-50/60 text-slate-700 hover:text-indigo-600 border-slate-200/90 hover:border-indigo-300"
+              }`}
+              title={showCheckboxes ? "Exit Multi-Select Mode" : "Enable Multi-Select Mode"}
+            >
+              <i className={`bi ${showCheckboxes ? "bi-check2-all text-white font-bold" : "bi-check2-square text-indigo-500"} text-xs`}></i>
+              <span>{showCheckboxes ? `Done (${currentSelectedSet.size})` : "Select"}</span>
+            </button>
+            <button
+              type="button"
+              onClick={onResetFilters}
+              className="text-[11px] font-semibold text-amber-800 hover:text-amber-900 hover:underline cursor-pointer flex items-center gap-1"
+            >
+              <i className="bi bi-x-circle"></i>
+              <span>Reset to All Staff</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Default Sub-Toolbar if no KPI filter is active */}
+      {!activeKpiFilter && (
+        <div className="bg-slate-50/80 border-b border-slate-200/90 px-4 py-2.5 flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2 text-slate-600 font-medium">
+            <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+            <span className="font-bold text-slate-800">Team Hierarchy Roster</span>
+            <span className="text-slate-400">•</span>
+            <span>{totalVisibleCount} Total Staff Members</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleSelectModeLocal}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-2xs ${
+                showCheckboxes
+                  ? "bg-indigo-600 text-white border-indigo-500 shadow-indigo-500/20 ring-1 ring-indigo-400/40"
+                  : "bg-white hover:bg-indigo-50/60 text-slate-700 hover:text-indigo-600 border-slate-200/90 hover:border-indigo-300"
+              }`}
+              title={showCheckboxes ? "Exit Multi-Select Mode" : "Enable Multi-Select Mode"}
+            >
+              <i className={`bi ${showCheckboxes ? "bi-check2-all text-white font-bold" : "bi-check2-square text-indigo-500"} text-xs`}></i>
+              <span>{showCheckboxes ? `Done (${currentSelectedSet.size})` : "Select"}</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -331,6 +522,34 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/90 border-b border-slate-200 text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
               <tr>
+                {showCheckboxes && (
+                  <th className="w-10 px-3 py-2.5 text-center">
+                    <input
+                      type="checkbox"
+                      aria-label="Select all leads on current page"
+                      checked={leadGroups.length > 0 && leadGroups.every((l) => currentSelectedSet.has(l.supervisorId))}
+                      ref={(el) => {
+                        if (el) {
+                          const someSelected = leadGroups.some((l) => currentSelectedSet.has(l.supervisorId));
+                          const allSelected = leadGroups.length > 0 && leadGroups.every((l) => currentSelectedSet.has(l.supervisorId));
+                          el.indeterminate = someSelected && !allSelected;
+                        }
+                      }}
+                      onChange={() => {
+                        const leadIds = leadGroups.map((l) => l.supervisorId);
+                        const allSelected = leadIds.length > 0 && leadIds.every((id) => currentSelectedSet.has(id));
+                        if (allSelected) {
+                          if (onClearSelection) onClearSelection();
+                          if (!isControlled) setInternalSelectedIds(new Set());
+                        } else {
+                          if (onSelectAllStaff) onSelectAllStaff(leadIds);
+                          if (!isControlled) setInternalSelectedIds(new Set(leadIds));
+                        }
+                      }}
+                      className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
+                    />
+                  </th>
+                )}
                 <th className="py-2.5 px-4 text-left min-w-[200px]">
                   👷 Team Lead (Supervisor)
                 </th>
@@ -354,7 +573,7 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12">
+                  <td colSpan={showCheckboxes ? 7 : 6} className="text-center py-12">
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 text-xs font-medium">
                       <div className="w-3.5 h-3.5 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
                       <span>Loading team leads...</span>
@@ -363,16 +582,41 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                 </tr>
               ) : leadGroups.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-slate-400">
+                  <td colSpan={showCheckboxes ? 7 : 6} className="text-center py-12 text-slate-400">
                     No active team leads found in current filter.
                   </td>
                 </tr>
               ) : (
-                leadGroups.map((lead) => (
+                leadGroups.map((lead) => {
+                  const isSelected = currentSelectedSet.has(lead.supervisorId);
+                  return (
                   <tr
                     key={`lead-${lead.supervisorId}`}
-                    className="hover:bg-purple-50/30 transition-colors"
+                    onClick={() => {
+                      if (showCheckboxes) {
+                        toggleSelect(lead.supervisorId);
+                      }
+                    }}
+                    className={`transition-colors cursor-pointer ${
+                      isSelected ? "bg-purple-100/50 hover:bg-purple-100/80" : "hover:bg-purple-50/30"
+                    }`}
+                    title={showCheckboxes ? "Click to toggle selection" : undefined}
                   >
+                    {/* Checkbox Selector */}
+                    {showCheckboxes && (
+                      <td className="w-10 px-3 py-2.5 text-center" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          aria-label={`Select ${lead.supervisorName}`}
+                          checked={isSelected}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            toggleSelect(lead.supervisorId);
+                          }}
+                          className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
+                        />
+                      </td>
+                    )}
                     {/* Team Lead Info */}
                     <td className="py-2.5 px-4">
                       <div className="flex items-center gap-2.5">
@@ -464,8 +708,9 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                       </button>
                     </td>
                   </tr>
-                ))
-              )}
+                );
+              })
+            )}
             </tbody>
           </table>
         ) : activeKpiFilter === "managers" ? (
@@ -473,6 +718,34 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/90 border-b border-slate-200 text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
               <tr>
+                {showCheckboxes && (
+                  <th className="w-10 px-3 py-2.5 text-center">
+                    <input
+                      type="checkbox"
+                      aria-label="Select all managers on current page"
+                      checked={managerGroups.length > 0 && managerGroups.every((m) => currentSelectedSet.has(m.managerId))}
+                      ref={(el) => {
+                        if (el) {
+                          const someSelected = managerGroups.some((m) => currentSelectedSet.has(m.managerId));
+                          const allSelected = managerGroups.length > 0 && managerGroups.every((m) => currentSelectedSet.has(m.managerId));
+                          el.indeterminate = someSelected && !allSelected;
+                        }
+                      }}
+                      onChange={() => {
+                        const mgrIds = managerGroups.map((m) => m.managerId);
+                        const allSelected = mgrIds.length > 0 && mgrIds.every((id) => currentSelectedSet.has(id));
+                        if (allSelected) {
+                          if (onClearSelection) onClearSelection();
+                          if (!isControlled) setInternalSelectedIds(new Set());
+                        } else {
+                          if (onSelectAllStaff) onSelectAllStaff(mgrIds);
+                          if (!isControlled) setInternalSelectedIds(new Set(mgrIds));
+                        }
+                      }}
+                      className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
+                    />
+                  </th>
+                )}
                 <th className="py-2.5 px-4 text-left min-w-[200px]">
                   👔 Department Manager
                 </th>
@@ -496,7 +769,7 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12">
+                  <td colSpan={showCheckboxes ? 7 : 6} className="text-center py-12">
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 text-xs font-medium">
                       <div className="w-3.5 h-3.5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
                       <span>Loading department managers...</span>
@@ -505,16 +778,41 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                 </tr>
               ) : managerGroups.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-slate-400">
+                  <td colSpan={showCheckboxes ? 7 : 6} className="text-center py-12 text-slate-400">
                     No department managers found in current filter.
                   </td>
                 </tr>
               ) : (
-                managerGroups.map((mgr) => (
+                managerGroups.map((mgr) => {
+                  const isSelected = currentSelectedSet.has(mgr.managerId);
+                  return (
                   <tr
                     key={`mgr-${mgr.managerId}`}
-                    className="hover:bg-emerald-50/30 transition-colors"
+                    onClick={() => {
+                      if (showCheckboxes) {
+                        toggleSelect(mgr.managerId);
+                      }
+                    }}
+                    className={`transition-colors cursor-pointer ${
+                      isSelected ? "bg-emerald-100/50 hover:bg-emerald-100/80" : "hover:bg-emerald-50/30"
+                    }`}
+                    title={showCheckboxes ? "Click to toggle selection" : undefined}
                   >
+                    {/* Checkbox Selector */}
+                    {showCheckboxes && (
+                      <td className="w-10 px-3 py-2.5 text-center" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          aria-label={`Select ${mgr.managerName}`}
+                          checked={isSelected}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            toggleSelect(mgr.managerId);
+                          }}
+                          className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
+                        />
+                      </td>
+                    )}
                     {/* Department Manager Info */}
                     <td className="py-2.5 px-4">
                       <div className="flex items-center gap-2.5">
@@ -590,8 +888,9 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                       </button>
                     </td>
                   </tr>
-                ))
-              )}
+                );
+              })
+            )}
             </tbody>
           </table>
         ) : (
@@ -599,18 +898,21 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/90 border-b border-slate-200 text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
               <tr>
-                <th className="py-2.5 px-3 text-center w-10">
-                  <input
-                    type="checkbox"
-                    checked={isAllSelected}
-                    ref={(el) => {
-                      if (el) el.indeterminate = isPartiallySelected;
-                    }}
-                    onChange={toggleSelectAll}
-                    className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                    title="Select all visible staff"
-                  />
-                </th>
+                {showCheckboxes && (
+                  <th className="py-2.5 px-3 text-center w-10">
+                    <input
+                      type="checkbox"
+                      aria-label="Select all members on current page"
+                      checked={visibleStaffIds.length > 0 && visibleStaffIds.every((id) => currentSelectedSet.has(id))}
+                      ref={(el) => {
+                        if (el) el.indeterminate = isPartiallySelected;
+                      }}
+                      onChange={toggleSelectAll}
+                      className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
+                      title="Select all visible staff"
+                    />
+                  </th>
+                )}
                 <th className="py-2.5 px-4 text-left min-w-[220px]">
                   💼 Employee (Subordinate)
                 </th>
@@ -634,7 +936,7 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-12">
+                  <td colSpan={showCheckboxes ? 7 : 6} className="text-center py-12">
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 text-xs font-medium">
                       <div className="w-3.5 h-3.5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
                       <span>Loading hierarchy mappings...</span>
@@ -643,7 +945,7 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                 </tr>
               ) : totalVisibleCount === 0 || isPreviewEmptyState ? (
                 <tr>
-                  <td colSpan={7} className="p-4 sm:p-8">
+                  <td colSpan={showCheckboxes ? 7 : 6} className="p-4 sm:p-8">
                     <HierarchyEmptyStateOnboarding
                       onOpenAssignModal={() => onOpenAssignModal()}
                       onResetFilters={onResetFilters}
@@ -664,25 +966,39 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                   {shouldRenderAssigned &&
                     mappings.map((item, idx, arr) => {
                       const isMenuOpen = activeMenuId === item.id;
-                      const isSelected = selectedIds.has(item.employee_id);
+                      const isSelected = currentSelectedSet.has(item.employee_id);
 
                       return (
                         <tr
                           key={`mapped-${item.id}`}
-                          className={`transition-colors ${
+                          onClick={() => {
+                            if (showCheckboxes) {
+                              toggleSelect(item.employee_id);
+                            } else if (onViewDossier) {
+                              onViewDossier(item);
+                            }
+                          }}
+                          className={`transition-colors cursor-pointer group ${
                             isSelected ? "bg-indigo-50/50 hover:bg-indigo-50/80" : "hover:bg-slate-50/70"
                           }`}
+                          title={showCheckboxes ? "Click to toggle selection" : "Click row to view Employee Dossier"}
                         >
                           {/* Selection Checkbox */}
-                          <td className="py-2.5 px-3 text-center w-10">
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => toggleSelect(item.employee_id)}
-                              className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                              title={`Select ${item.employee_name}`}
-                            />
-                          </td>
+                          {showCheckboxes && (
+                            <td className="py-2.5 px-3 text-center w-10" onClick={(e) => e.stopPropagation()}>
+                              <input
+                                type="checkbox"
+                                aria-label={`Select ${item.employee_name}`}
+                                checked={isSelected}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  toggleSelect(item.employee_id);
+                                }}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
+                                title={`Select ${item.employee_name}`}
+                              />
+                            </td>
+                          )}
 
                           {/* Employee Cell */}
                           <td className="py-2.5 px-4">
@@ -851,24 +1167,38 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                   {/* 2. Unassigned Employees */}
                   {shouldRenderUnassigned &&
                     unassignedStaff.map((staff) => {
-                      const isSelected = selectedIds.has(staff.id);
+                      const isSelected = currentSelectedSet.has(staff.id);
                       return (
                         <tr
                           key={`unassigned-${staff.id}`}
-                          className={`transition-colors ${
+                          onClick={() => {
+                            if (showCheckboxes) {
+                              toggleSelect(staff.id);
+                            } else if (onViewDossier) {
+                              onViewDossier(staff);
+                            }
+                          }}
+                          className={`transition-colors cursor-pointer group ${
                             isSelected ? "bg-amber-100/40 hover:bg-amber-100/60" : "hover:bg-amber-50/40 bg-amber-50/15"
                           }`}
+                          title={showCheckboxes ? "Click to toggle selection" : "Click row to view Employee Dossier"}
                         >
                           {/* Selection Checkbox */}
-                          <td className="py-2.5 px-3 text-center w-10">
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => toggleSelect(staff.id)}
-                              className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                              title={`Select ${staff.name}`}
-                            />
-                          </td>
+                          {showCheckboxes && (
+                            <td className="py-2.5 px-3 text-center w-10" onClick={(e) => e.stopPropagation()}>
+                              <input
+                                type="checkbox"
+                                aria-label={`Select ${staff.name}`}
+                                checked={isSelected}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  toggleSelect(staff.id);
+                                }}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600"
+                                title={`Select ${staff.name}`}
+                              />
+                            </td>
+                          )}
 
                           <td className="py-2.5 px-4">
                             <div className="flex items-center gap-2.5">
@@ -940,54 +1270,70 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
         )}
       </div>
 
-      {/* Floating Bulk Actions Dock */}
-      {selectedIds.size > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-xl px-4 animate-in slide-in-from-bottom-4 fade-in duration-200">
-          <div className="bg-slate-900 text-white rounded-2xl shadow-2xl border border-indigo-500/40 p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <span className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-inner">
-                {selectedIds.size}
+      {/* Floating Bulk Actions Dock matching User Directory */}
+      {!isControlled && currentSelectedSet.size > 0 && (
+        <div
+          className="fixed bottom-6 flex justify-center items-center z-[1050] pointer-events-none px-4"
+          style={{ left: "240px", right: "0px" }}
+        >
+          <div className="floating-action-bar-anim bg-slate-900/95 backdrop-blur-xl border border-indigo-500/40 text-white rounded-2xl shadow-2xl px-3.5 py-2.5 sm:px-5 sm:py-3 flex items-center gap-2 sm:gap-3.5 ring-1 ring-white/10 pointer-events-auto max-w-full overflow-visible">
+            {/* Selected Counter Pill */}
+            <div className="flex items-center gap-2 pr-1.5 sm:pr-3 border-r border-slate-700/80 shrink-0">
+              <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+              <span className="text-xs font-bold text-white whitespace-nowrap">
+                {currentSelectedSet.size} <span className="hidden sm:inline">Selected</span>
               </span>
-              <div>
-                <span className="text-xs font-bold text-white block">
-                  {selectedIds.size} {selectedIds.size === 1 ? "Staff Member" : "Staff Members"} Selected
-                </span>
-                <span className="text-[10px] text-slate-300">
-                  Bulk management actions available
-                </span>
-              </div>
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap">
+            {/* Bulk Action Buttons */}
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 type="button"
                 onClick={handleBulkBatchAssign}
-                className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-all shadow-md shadow-indigo-600/30 flex items-center gap-1.5 cursor-pointer active:scale-95"
+                className="h-8 px-2.5 sm:px-3 rounded-xl text-xs font-semibold bg-indigo-500/25 hover:bg-indigo-500/35 text-indigo-200 border border-indigo-400/40 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95"
+                title="Batch Reallocate / Assign Selected Staff"
               >
-                <i className="bi bi-people-fill text-xs"></i>
-                <span>Batch Reallocate / Assign ({selectedIds.size})</span>
+                <i className="bi bi-people-fill text-indigo-300 text-xs"></i>
+                <span className="hidden md:inline">Batch Reallocate / Assign</span>
+                <span className="md:hidden">Assign</span>
               </button>
 
               {onBatchUnlink && selectedMappedIds.length > 0 && (
                 <button
                   type="button"
                   onClick={() => onBatchUnlink(selectedMappedIds)}
-                  className="px-3 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  className="h-8 px-2.5 sm:px-3 rounded-xl text-xs font-semibold bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95"
                   title="Unlink selected mapped staff"
                 >
-                  <i className="bi bi-link-45deg text-xs"></i>
-                  <span>Unlink ({selectedMappedIds.length})</span>
+                  <i className="bi bi-link-45deg text-rose-400 text-xs"></i>
+                  <span className="hidden md:inline">Unlink</span>
+                  <span>({selectedMappedIds.length})</span>
                 </button>
               )}
 
               <button
                 type="button"
-                onClick={() => setSelectedIds(new Set())}
-                className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition-colors cursor-pointer"
+                onClick={handleExportSelectedCSV}
+                className="h-8 px-2.5 sm:px-3 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-slate-200 border border-white/20 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                title="Export Selected Members as CSV"
               >
-                Clear
+                <i className="bi bi-download text-indigo-300 text-xs"></i>
+                <span className="hidden md:inline">Export</span>
               </button>
             </div>
+
+            {/* Clear Selection / Close */}
+            <button
+              type="button"
+              onClick={() => {
+                setInternalSelectedIds(new Set());
+                setInternalSelectMode(false);
+              }}
+              className="w-7 h-7 ml-0.5 sm:ml-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer text-xs shrink-0"
+              title="Deselect All & Exit Multi-Select"
+            >
+              ✕
+            </button>
           </div>
         </div>
       )}

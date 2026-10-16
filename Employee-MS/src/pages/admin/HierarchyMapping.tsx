@@ -40,6 +40,89 @@ const HierarchyMapping = () => {
   const [activeKpiFilter, setActiveKpiFilter] = useState<"mapped" | "leads" | "managers" | "orphaned" | null>(null);
   const [isPreviewEmptyState, setIsPreviewEmptyState] = useState(false);
 
+  // Bulk Square Select State (matching User Directory)
+  const [selectedStaffIds, setSelectedStaffIds] = useState<(string | number)[]>([]);
+  const [isSelectMode, setIsSelectMode] = useState(false);
+
+  const showCheckboxes = isSelectMode || selectedStaffIds.length > 0;
+
+  const handleToggleSelectMode = () => {
+    if (showCheckboxes) {
+      setIsSelectMode(false);
+      setSelectedStaffIds([]);
+    } else {
+      setIsSelectMode(true);
+    }
+  };
+
+  const handleToggleSelectStaff = (id: string | number) => {
+    setSelectedStaffIds((prev) => {
+      const idStr = String(id);
+      const exists = prev.some((item) => String(item) === idStr);
+      if (exists) {
+        return prev.filter((item) => String(item) !== idStr);
+      } else {
+        return [...prev, id];
+      }
+    });
+  };
+
+  const handleSelectAllStaff = (ids: (string | number)[]) => {
+    setSelectedStaffIds((prev) => {
+      const prevStr = new Set(prev.map(String));
+      const allIn = ids.every((id) => prevStr.has(String(id)));
+      if (allIn) {
+        return prev.filter((id) => !ids.map(String).includes(String(id)));
+      } else {
+        const merged = new Set([...prev.map(String), ...ids.map(String)]);
+        return Array.from(merged);
+      }
+    });
+  };
+
+  const handleClearSelection = () => {
+    setSelectedStaffIds([]);
+    setIsSelectMode(false);
+  };
+
+  const handleBulkExportSelectedCSV = () => {
+    if (selectedStaffIds.length === 0) return;
+    const selectedSet = new Set(selectedStaffIds.map(String));
+    const selectedMapped = hierarchy.filter((h: any) => selectedSet.has(String(h.employee_id)));
+    const selectedUnassigned = unassignedEmployees.filter((u: any) => selectedSet.has(String(u.id)));
+
+    const headers = ["Employee ID", "Employee Name", "Email", "Department", "Team Lead", "Reporting Manager", "Status"];
+    const rows = [
+      ...selectedMapped.map((m: any) => [
+        `EMP-${String(m.employee_id).padStart(4, "0")}`,
+        `"${m.employee_name || ""}"`,
+        m.employee_email || "",
+        `"${m.department_name || "General"}"`,
+        `"${m.supervisor_name || ""}"`,
+        `"${m.manager_name || ""}"`,
+        "Mapped",
+      ]),
+      ...selectedUnassigned.map((u: any) => [
+        `EMP-${String(u.id).padStart(4, "0")}`,
+        `"${u.name || ""}"`,
+        u.email || "",
+        `"${u.department_name || "General"}"`,
+        "Unassigned",
+        "Unassigned",
+        "Unassigned",
+      ]),
+    ];
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `selected_staff_hierarchy_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const [form, setForm] = useState({
     employee_id: "",
     supervisor_id: "",
@@ -498,6 +581,9 @@ const HierarchyMapping = () => {
           onPrint={() => setIsPrintModalOpen(true)}
           isPreviewEmptyState={isPreviewEmptyState}
           onTogglePreviewEmptyState={() => setIsPreviewEmptyState((prev) => !prev)}
+          isSelectMode={isSelectMode}
+          onToggleSelectMode={handleToggleSelectMode}
+          selectedCount={selectedStaffIds.length}
         />
 
         {/* Dynamic View Rendering: Org Chart Tree vs Table View */}
@@ -506,6 +592,9 @@ const HierarchyMapping = () => {
             mappings={filteredHierarchy}
             unassignedStaff={filteredUnassigned}
             searchTerm={searchTerm}
+            isSelectMode={isSelectMode}
+            selectedStaffIds={selectedStaffIds}
+            onToggleSelectStaff={handleToggleSelectStaff}
             onOpenAssignModal={(empId) => {
               if (empId) {
                 setForm((prev) => ({ ...prev, employee_id: String(empId) }));
@@ -550,6 +639,11 @@ const HierarchyMapping = () => {
             mappings={filteredHierarchy}
             unassignedStaff={selectedDepartment !== "all" ? unassignedEmployees.filter((u: any) => u.department_name === selectedDepartment) : unassignedEmployees}
             searchTerm={searchTerm}
+            isSelectMode={isSelectMode}
+            onToggleSelectMode={handleToggleSelectMode}
+            selectedStaffIds={selectedStaffIds}
+            onToggleSelectStaff={handleToggleSelectStaff}
+            onClearSelection={handleClearSelection}
             onOpenAssignModal={(empId, supId, mgrId) => {
               if (empId) {
                 setForm((prev) => ({ ...prev, employee_id: String(empId) }));
@@ -595,6 +689,12 @@ const HierarchyMapping = () => {
             showUnassignedOnly={activeKpiFilter === "orphaned" || statusFilter === "unassigned"}
             statusFilter={statusFilter}
             activeKpiFilter={activeKpiFilter}
+            isSelectMode={isSelectMode}
+            onToggleSelectMode={handleToggleSelectMode}
+            selectedStaffIds={selectedStaffIds}
+            onToggleSelectStaff={handleToggleSelectStaff}
+            onClearSelection={handleClearSelection}
+            onSelectAllStaff={handleSelectAllStaff}
             onOpenAssignModal={(empId, supId, mgrId) => {
               setForm((prev) => ({
                 ...prev,
@@ -792,6 +892,102 @@ const HierarchyMapping = () => {
           setShowModal(true);
         }}
       />
+
+      {/* Floating Bulk Action Bar (Exact match with User Directory) */}
+      {selectedStaffIds.length > 0 && (
+        <div
+          className="fixed bottom-6 flex justify-center items-center z-[1050] pointer-events-none px-4"
+          style={{ left: "240px", right: "0px" }}
+        >
+          <div className="floating-action-bar-anim bg-slate-900/95 backdrop-blur-xl border border-indigo-500/40 text-white rounded-2xl shadow-2xl px-3.5 py-2.5 sm:px-5 sm:py-3 flex items-center gap-2 sm:gap-3.5 ring-1 ring-white/10 pointer-events-auto max-w-full overflow-visible">
+            {/* Selected Counter Pill */}
+            <div className="flex items-center gap-2 pr-1.5 sm:pr-3 border-r border-slate-700/80 shrink-0">
+              <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+              <span className="text-xs font-bold text-white whitespace-nowrap">
+                {selectedStaffIds.length} <span className="hidden sm:inline">Selected</span>
+              </span>
+            </div>
+
+            {/* Bulk Action Buttons */}
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* Batch Assign to Squad */}
+              <button
+                type="button"
+                onClick={() => {
+                  const selectedSet = new Set(selectedStaffIds.map(String));
+                  const candidates = [
+                    ...unassignedEmployees.filter((u: any) => selectedSet.has(String(u.id))),
+                    ...hierarchy
+                      .filter((h: any) => selectedSet.has(String(h.employee_id)))
+                      .map((h: any) => ({
+                        id: h.employee_id,
+                        name: h.employee_name,
+                        email: h.employee_email,
+                        department_name: h.department_name,
+                      })),
+                  ];
+                  setBatchModalState({
+                    isOpen: true,
+                    candidates,
+                    targetSquad: null,
+                  });
+                }}
+                className="h-8 px-2.5 sm:px-3 rounded-xl text-xs font-semibold bg-indigo-500/25 hover:bg-indigo-500/35 text-indigo-200 border border-indigo-400/40 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-2xs"
+                title="Batch Assign Selected Staff to Squad"
+              >
+                <i className="bi bi-people-fill text-indigo-300 text-xs"></i>
+                <span className="hidden md:inline">Batch Assign</span>
+              </button>
+
+              {/* Bulk Unlink Relationship */}
+              <button
+                type="button"
+                onClick={() => {
+                  const selectedSet = new Set(selectedStaffIds.map(String));
+                  const mappedToUnlink = hierarchy
+                    .filter((h: any) => selectedSet.has(String(h.employee_id)))
+                    .map((h: any) => h.employee_id);
+                  if (mappedToUnlink.length > 0) {
+                    handleBatchUnlink(mappedToUnlink);
+                    handleClearSelection();
+                  } else {
+                    setMsg({
+                      type: "warning",
+                      text: "Selected staff members are already unassigned from any team lead.",
+                    });
+                  }
+                }}
+                className="h-8 px-2.5 sm:px-3 rounded-xl text-xs font-semibold bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-2xs"
+                title="Unlink Selected Reporting Relationships"
+              >
+                <i className="bi bi-link-45deg text-rose-400 text-xs"></i>
+                <span className="hidden md:inline">Unlink Reporting</span>
+              </button>
+
+              {/* Export Selected CSV */}
+              <button
+                type="button"
+                onClick={handleBulkExportSelectedCSV}
+                className="h-8 px-2.5 sm:px-3 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-slate-200 border border-white/20 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-2xs"
+                title="Export Selected Members as CSV"
+              >
+                <i className="bi bi-download text-indigo-300 text-xs"></i>
+                <span className="hidden md:inline">Export</span>
+              </button>
+            </div>
+
+            {/* Clear Selection / Close */}
+            <button
+              type="button"
+              onClick={handleClearSelection}
+              className="w-7 h-7 ml-0.5 sm:ml-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer text-xs shrink-0"
+              title="Deselect All & Exit Multi-Select"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

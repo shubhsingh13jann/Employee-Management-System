@@ -17,6 +17,9 @@ interface HierarchyFiltersProps {
   onPrint?: () => void;
   isPreviewEmptyState?: boolean;
   onTogglePreviewEmptyState?: () => void;
+  isSelectMode?: boolean;
+  onToggleSelectMode?: () => void;
+  selectedCount?: number;
 }
 
 export const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
@@ -36,8 +39,12 @@ export const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
   onPrint,
   isPreviewEmptyState = false,
   onTogglePreviewEmptyState,
+  isSelectMode = false,
+  onToggleSelectMode,
+  selectedCount = 0,
 }) => {
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const showCheckboxes = Boolean(isSelectMode || selectedCount > 0);
 
   // Keyboard shortcut: '/' focuses search input
   useEffect(() => {
@@ -337,6 +344,23 @@ export const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
             >
               <i className="bi bi-printer text-xs"></i>
               <span>Print Dossier</span>
+            </button>
+          )}
+
+          {/* Square Select Tab matching User Directory exactly */}
+          {onToggleSelectMode && (
+            <button
+              type="button"
+              onClick={onToggleSelectMode}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-2xs ${
+                showCheckboxes
+                  ? "bg-indigo-600 text-white border-indigo-500 shadow-indigo-500/20 ring-1 ring-indigo-400/40"
+                  : "bg-white hover:bg-indigo-50/60 text-slate-700 hover:text-indigo-600 border-slate-200/90 hover:border-indigo-300"
+              }`}
+              title={showCheckboxes ? "Exit Multi-Select Mode" : "Enable Multi-Select Mode"}
+            >
+              <i className={`bi ${showCheckboxes ? "bi-check2-all text-white font-bold" : "bi-check2-square text-indigo-500"} text-xs`}></i>
+              <span>{showCheckboxes ? `Done (${selectedCount})` : "Select"}</span>
             </button>
           )}
         </div>

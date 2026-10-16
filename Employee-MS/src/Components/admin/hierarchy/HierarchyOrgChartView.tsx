@@ -20,6 +20,9 @@ interface HierarchyOrgChartViewProps {
   onViewDossier?: (employee: HierarchyMappingItem | UnassignedEmployee) => void;
   isPreviewEmptyState?: boolean;
   onExitSimulation?: () => void;
+  isSelectMode?: boolean;
+  selectedStaffIds?: (string | number)[];
+  onToggleSelectStaff?: (id: string | number) => void;
 }
 
 interface TreeNodeManager {
@@ -52,7 +55,11 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
   onViewDossier,
   isPreviewEmptyState = false,
   onExitSimulation,
+  isSelectMode = false,
+  selectedStaffIds = [],
+  onToggleSelectStaff,
 }) => {
+  const showCheckboxes = isSelectMode || (selectedStaffIds && selectedStaffIds.length > 0);
   // Collapsed state tracking (IDs of nodes that are collapsed)
   const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
 
@@ -913,65 +920,95 @@ ${safeStyles}
           </div>
 
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
-            {unassignedStaff.map((staff) => (
-              <div
-                key={staff.id}
-                draggable={true}
-                onDragStart={(e) => {
-                  const dragPayload: HierarchyMappingItem = {
-                    id: staff.id,
-                    employee_id: staff.id,
-                    employee_name: staff.name,
-                    employee_email: staff.email,
-                    supervisor_id: "",
-                    supervisor_name: "Unassigned",
-                    manager_id: "",
-                    manager_name: "Unassigned",
-                    department_name: staff.department_name || "General",
-                    assigned_at: new Date().toISOString(),
-                  };
-                  e.dataTransfer.setData("application/json", JSON.stringify(dragPayload));
-                  e.dataTransfer.effectAllowed = "move";
-                  setDraggingEmpId(staff.id);
-                }}
-                onDragEnd={() => {
-                  setDraggingEmpId(null);
-                  setDropTargetKey(null);
-                }}
-                className={`shrink-0 px-2 py-1 rounded-lg border bg-white border-amber-200 hover:border-amber-400 hover:shadow-xs transition-all flex items-center gap-1.5 cursor-grab active:cursor-grabbing select-none text-[11px] ${
-                  draggingEmpId === staff.id ? "opacity-40 scale-95 border-dashed border-amber-500" : ""
-                }`}
-                title="Drag onto a Team Lead card to assign"
-              >
-                <i className="bi bi-grip-vertical text-amber-400 text-xs"></i>
-                <div className="w-5 h-5 rounded-md bg-amber-100 text-amber-800 font-bold text-[10px] flex items-center justify-center shrink-0">
-                  {staff.name ? staff.name.charAt(0) : "U"}
-                </div>
+            {unassignedStaff.map((staff) => {
+              const isStaffSelected = selectedStaffIds.some((id) => String(id) === String(staff.id));
+              return (
                 <div
-                  className={`text-left min-w-0 ${onViewDossier ? "cursor-pointer group/ustaff" : ""}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (onViewDossier) onViewDossier(staff);
+                  key={staff.id}
+                  draggable={!showCheckboxes}
+                  onDragStart={(e) => {
+                    const dragPayload: HierarchyMappingItem = {
+                      id: staff.id,
+                      employee_id: staff.id,
+                      employee_name: staff.name,
+                      employee_email: staff.email,
+                      supervisor_id: "",
+                      supervisor_name: "Unassigned",
+                      manager_id: "",
+                      manager_name: "Unassigned",
+                      department_name: staff.department_name || "General",
+                      assigned_at: new Date().toISOString(),
+                    };
+                    e.dataTransfer.setData("application/json", JSON.stringify(dragPayload));
+                    e.dataTransfer.effectAllowed = "move";
+                    setDraggingEmpId(staff.id);
                   }}
-                  title={onViewDossier ? "Click to view Employee Dossier" : undefined}
+                  onDragEnd={() => {
+                    setDraggingEmpId(null);
+                    setDropTargetKey(null);
+                  }}
+                  onClick={() => {
+                    if (showCheckboxes) {
+                      onToggleSelectStaff?.(staff.id);
+                    }
+                  }}
+                  className={`shrink-0 px-2 py-1 rounded-lg border transition-all flex items-center gap-1.5 select-none text-[11px] ${
+                    isStaffSelected
+                      ? "bg-indigo-50/90 border-indigo-400 ring-2 ring-indigo-300 shadow-md cursor-pointer"
+                      : draggingEmpId === staff.id
+                      ? "opacity-40 scale-95 border-dashed border-amber-500 bg-white"
+                      : "bg-white border-amber-200 hover:border-amber-400 hover:shadow-xs cursor-grab active:cursor-grabbing"
+                  }`}
+                  title={showCheckboxes ? "Click to toggle selection" : "Drag onto a Team Lead card to assign"}
                 >
-                  <span className="font-bold text-slate-800 group-hover/ustaff:text-indigo-600 transition-colors block text-[11px] truncate max-w-[100px] leading-tight">
-                    {staff.name}
-                  </span>
-                  <span className="text-[9px] text-slate-400 block truncate leading-tight">
-                    {staff.department_name || "General"}
-                  </span>
+                  {showCheckboxes ? (
+                    <input
+                      type="checkbox"
+                      aria-label={`Select ${staff.name}`}
+                      checked={isStaffSelected}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        onToggleSelectStaff?.(staff.id);
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600 shrink-0"
+                    />
+                  ) : (
+                    <i className="bi bi-grip-vertical text-amber-400 text-xs"></i>
+                  )}
+                  <div className="w-5 h-5 rounded-md bg-amber-100 text-amber-800 font-bold text-[10px] flex items-center justify-center shrink-0">
+                    {staff.name ? staff.name.charAt(0) : "U"}
+                  </div>
+                  <div
+                    className={`text-left min-w-0 ${!showCheckboxes && onViewDossier ? "cursor-pointer group/ustaff" : ""}`}
+                    onClick={(e) => {
+                      if (!showCheckboxes && onViewDossier) {
+                        e.stopPropagation();
+                        onViewDossier(staff);
+                      }
+                    }}
+                    title={!showCheckboxes && onViewDossier ? "Click to view Employee Dossier" : undefined}
+                  >
+                    <span className="font-bold text-slate-800 group-hover/ustaff:text-indigo-600 transition-colors block text-[11px] truncate max-w-[100px] leading-tight">
+                      {staff.name}
+                    </span>
+                    <span className="text-[9px] text-slate-400 block truncate leading-tight">
+                      {staff.department_name || "General"}
+                    </span>
+                  </div>
+                  {!showCheckboxes && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenAssignModal(staff.id)}
+                      className="ml-1 px-1.5 py-0.5 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-[9px] font-semibold transition-colors cursor-pointer"
+                      title="Assign Team"
+                    >
+                      Map
+                    </button>
+                  )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => onOpenAssignModal(staff.id)}
-                  className="ml-1 px-1.5 py-0.5 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-[9px] font-semibold transition-colors cursor-pointer"
-                  title="Assign Team"
-                >
-                  Map
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -1392,11 +1429,12 @@ ${safeStyles}
                                         const isBeingDragged = draggingEmpId === emp.employee_id;
                                         const swapKey = `swap_${emp.employee_id}`;
                                         const isSwapTarget = dropTargetKey === swapKey;
+                                        const isEmpSelected = selectedStaffIds.some((id) => String(id) === String(emp.employee_id));
 
                                         return (
                                           <div
                                             key={emp.id}
-                                            draggable={true}
+                                            draggable={!showCheckboxes}
                                             onDragStart={(e) => {
                                               e.dataTransfer.setData(
                                                 "application/json",
@@ -1410,11 +1448,12 @@ ${safeStyles}
                                               setDropTargetKey(null);
                                             }}
                                             onDragOver={(e) => {
-                                              if (!draggingEmpId || String(draggingEmpId) === String(emp.employee_id)) return;
-                                              e.preventDefault();
-                                              e.stopPropagation();
-                                              e.dataTransfer.dropEffect = "move";
-                                              if (dropTargetKey !== swapKey) setDropTargetKey(swapKey);
+                                              if (!showCheckboxes && draggingEmpId && String(draggingEmpId) !== String(emp.employee_id)) {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                e.dataTransfer.dropEffect = "move";
+                                                if (dropTargetKey !== swapKey) setDropTargetKey(swapKey);
+                                              }
                                             }}
                                             onDragLeave={(e) => {
                                               if (e.currentTarget.contains(e.relatedTarget as Node)) return;
@@ -1439,14 +1478,21 @@ ${safeStyles}
                                                 console.error("Swap drop error", err);
                                               }
                                             }}
-                                            className={`w-56 sm:w-60 p-2 sm:p-2.5 rounded-lg border transition-all flex items-center justify-between gap-2 shadow-2xs cursor-grab active:cursor-grabbing select-none relative ${
+                                            onClick={() => {
+                                              if (showCheckboxes) {
+                                                onToggleSelectStaff?.(emp.employee_id);
+                                              }
+                                            }}
+                                            className={`w-56 sm:w-60 p-2 sm:p-2.5 rounded-lg border transition-all flex items-center justify-between gap-2 shadow-2xs select-none relative ${
                                               isSwapTarget
-                                                ? "ring-4 ring-amber-400 border-2 border-dashed border-amber-600 bg-amber-50/95 scale-105 shadow-xl z-20"
+                                                ? "ring-4 ring-amber-400 border-2 border-dashed border-amber-600 bg-amber-50/95 scale-105 shadow-xl z-20 cursor-grab active:cursor-grabbing"
                                                 : isBeingDragged
-                                                ? "opacity-30 scale-95 border-dashed border-indigo-500 bg-indigo-50/50"
+                                                ? "opacity-30 scale-95 border-dashed border-indigo-500 bg-indigo-50/50 cursor-grab active:cursor-grabbing"
+                                                : isEmpSelected
+                                                ? "bg-indigo-50/90 border-indigo-400 ring-2 ring-indigo-300 shadow-md cursor-pointer"
                                                 : isSearchMatch
-                                                ? "bg-amber-50 border-amber-400 ring-2 ring-amber-300 shadow-md animate-pulse"
-                                                : "bg-white border-slate-200 hover:border-slate-300 hover:shadow-xs"
+                                                ? "bg-amber-50 border-amber-400 ring-2 ring-amber-300 shadow-md animate-pulse cursor-grab active:cursor-grabbing"
+                                                : "bg-white border-slate-200 hover:border-slate-300 hover:shadow-xs cursor-grab active:cursor-grabbing"
                                             }`}
                                             title={`${emp.employee_name} (${emp.employee_email}) • Lead: ${sup.name} • Manager: ${manager.name} • Dept: ${emp.department_name || "General"}`}
                                           >
@@ -1457,19 +1503,35 @@ ${safeStyles}
                                               </div>
                                             )}
                                             <div className="flex items-center gap-2 min-w-0 flex-1">
-                                              <span
-                                                className="text-slate-400 hover:text-slate-600 cursor-grab text-xs shrink-0"
-                                                title="Drag to swap or reallocate reporting line"
-                                              >
-                                                <i className="bi bi-grip-vertical"></i>
-                                              </span>
+                                              {showCheckboxes ? (
+                                                <input
+                                                  type="checkbox"
+                                                  aria-label={`Select ${emp.employee_name}`}
+                                                  checked={isEmpSelected}
+                                                  onChange={(e) => {
+                                                    e.stopPropagation();
+                                                    onToggleSelectStaff?.(emp.employee_id);
+                                                  }}
+                                                  onClick={(e) => e.stopPropagation()}
+                                                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600 shrink-0"
+                                                />
+                                              ) : (
+                                                <span
+                                                  className="text-slate-400 hover:text-slate-600 cursor-grab text-xs shrink-0"
+                                                  title="Drag to swap or reallocate reporting line"
+                                                >
+                                                  <i className="bi bi-grip-vertical"></i>
+                                                </span>
+                                              )}
                                               <div
                                                 onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  if (onViewDossier) onViewDossier(emp);
+                                                  if (!showCheckboxes && onViewDossier) {
+                                                    e.stopPropagation();
+                                                    onViewDossier(emp);
+                                                  }
                                                 }}
-                                                className={`flex items-center gap-2 min-w-0 flex-1 ${onViewDossier ? "cursor-pointer group/emp" : ""}`}
-                                                title={onViewDossier ? "Click to view Employee Dossier" : undefined}
+                                                className={`flex items-center gap-2 min-w-0 flex-1 ${!showCheckboxes && onViewDossier ? "cursor-pointer group/emp" : ""}`}
+                                                title={!showCheckboxes && onViewDossier ? "Click to view Employee Dossier" : undefined}
                                               >
                                                 <div className="w-6 h-6 rounded-md bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-[10px] shrink-0 border border-slate-200 group-hover/emp:scale-105 transition-transform">
                                                   {emp.employee_name

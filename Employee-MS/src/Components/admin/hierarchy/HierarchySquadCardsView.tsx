@@ -28,6 +28,11 @@ export interface HierarchySquadCardsViewProps {
   onViewDossier?: (employee: HierarchyMappingItem | UnassignedEmployee) => void;
   isPreviewEmptyState?: boolean;
   onExitSimulation?: () => void;
+  isSelectMode?: boolean;
+  onToggleSelectMode?: () => void;
+  selectedStaffIds?: (string | number)[];
+  onToggleSelectStaff?: (id: string | number) => void;
+  onClearSelection?: () => void;
 }
 
 export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = ({
@@ -42,7 +47,13 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
   onViewDossier,
   isPreviewEmptyState = false,
   onExitSimulation,
+  isSelectMode = false,
+  onToggleSelectMode,
+  selectedStaffIds = [],
+  onToggleSelectStaff,
+  onClearSelection,
 }) => {
+  const showCheckboxes = isSelectMode || (selectedStaffIds && selectedStaffIds.length > 0);
   const [collapsedSquads, setCollapsedSquads] = useState<Set<string>>(new Set());
   const [capacityFilter, setCapacityFilter] = useState<"all" | "light" | "optimal" | "high" | "unassigned">("all");
   const [sortBy, setSortBy] = useState<"size-desc" | "size-asc" | "name" | "dept">("size-desc");
@@ -414,27 +425,40 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
               {filteredUnassigned.map((staff) => {
-                const isSelected = selectedUnassignedIds.has(staff.id);
+                const isSelected = selectedStaffIds.some((id) => String(id) === String(staff.id)) || selectedUnassignedIds.has(staff.id);
                 return (
                   <div
                     key={`unassigned-pool-${staff.id}`}
+                    onClick={() => {
+                      if (showCheckboxes) {
+                        if (onToggleSelectStaff) onToggleSelectStaff(staff.id);
+                        toggleSelectUnassigned(staff.id);
+                      } else if (onViewDossier) {
+                        onViewDossier(staff);
+                      }
+                    }}
                     className={`bg-white rounded-lg p-2.5 border transition-all flex items-center justify-between gap-2 shadow-2xs ${
                       isSelected
                         ? "border-indigo-500 ring-1 ring-indigo-500/20 bg-indigo-50/20"
                         : "border-amber-200/90 hover:border-amber-300"
-                    }`}
+                    } ${showCheckboxes ? "cursor-pointer" : ""}`}
+                    title={showCheckboxes ? "Click to toggle selection" : onViewDossier ? "Click to view Employee Dossier" : undefined}
                   >
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
                       <input
                         type="checkbox"
+                        aria-label={`Select ${staff.name}`}
                         checked={isSelected}
-                        onChange={() => toggleSelectUnassigned(staff.id)}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          if (onToggleSelectStaff) onToggleSelectStaff(staff.id);
+                          toggleSelectUnassigned(staff.id);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600 shrink-0"
                       />
                       <div
-                        onClick={() => onViewDossier && onViewDossier(staff)}
-                        className={`flex items-center gap-2 min-w-0 flex-1 ${onViewDossier ? "cursor-pointer group/staff" : ""}`}
-                        title={onViewDossier ? "Click to view Employee Dossier" : undefined}
+                        className={`flex items-center gap-2 min-w-0 flex-1 ${!showCheckboxes && onViewDossier ? "cursor-pointer group/staff" : ""}`}
                       >
                         <div className="w-6 h-6 rounded bg-amber-100 text-amber-800 font-bold text-[10px] flex items-center justify-center shrink-0 group-hover/staff:scale-105 transition-transform">
                           {staff.name.charAt(0)}
@@ -551,6 +575,23 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                 <option value="dept">Department (A-Z)</option>
               </select>
             </div>
+
+            {/* Select Toggle Button matching User Directory */}
+            {onToggleSelectMode && (
+              <button
+                type="button"
+                onClick={onToggleSelectMode}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-2xs ${
+                  showCheckboxes
+                    ? "bg-indigo-600 text-white border-indigo-500 shadow-indigo-500/20 ring-1 ring-indigo-400/40"
+                    : "bg-white hover:bg-indigo-50/60 text-slate-700 hover:text-indigo-600 border-slate-200/90 hover:border-indigo-300"
+                }`}
+                title={showCheckboxes ? "Exit Multi-Select Mode" : "Enable Multi-Select Mode"}
+              >
+                <i className={`bi ${showCheckboxes ? "bi-check2-all text-white font-bold" : "bi-check2-square text-indigo-500"} text-xs`}></i>
+                <span>{showCheckboxes ? `Done (${selectedStaffIds.length})` : "Select"}</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -915,33 +956,60 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                       </div>
                     ) : (
                       <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-0.5 [scrollbar-width:thin]">
-                        {displayedMembers.map((member) => (
-                          <div
-                            key={`member-${member.id}`}
-                            className="flex items-center justify-between p-2 rounded-lg bg-slate-50/70 hover:bg-slate-100/80 border border-slate-200/70 transition-colors group/item"
-                          >
+                        {displayedMembers.map((member) => {
+                          const isSelected = selectedStaffIds.some((id) => String(id) === String(member.employee_id));
+                          return (
                             <div
-                              onClick={() => onViewDossier && onViewDossier(member)}
-                              className={`flex items-center gap-2 min-w-0 ${onViewDossier ? "cursor-pointer group/emp" : ""}`}
-                              title={onViewDossier ? "Click to view Employee Dossier" : undefined}
+                              key={`member-${member.id}`}
+                              onClick={() => {
+                                if (showCheckboxes) {
+                                  onToggleSelectStaff?.(member.employee_id);
+                                } else if (onViewDossier) {
+                                  onViewDossier(member);
+                                }
+                              }}
+                              className={`flex items-center justify-between p-2 rounded-lg transition-colors group/item ${
+                                isSelected
+                                  ? "bg-indigo-50/80 border-indigo-300 ring-1 ring-indigo-400/30"
+                                  : "bg-slate-50/70 hover:bg-slate-100/80 border border-slate-200/70"
+                              } ${showCheckboxes ? "cursor-pointer" : ""}`}
+                              title={showCheckboxes ? "Click to toggle selection" : onViewDossier ? "Click to view Employee Dossier" : undefined}
                             >
-                              <div className="w-6 h-6 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[10px] shrink-0 group-hover/emp:scale-105 transition-transform">
-                                {member.employee_name.charAt(0)}
-                              </div>
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="font-semibold text-slate-800 text-xs truncate group-hover/emp:text-indigo-600 transition-colors">
-                                    {member.employee_name}
-                                  </span>
-                                  <span className="text-[9px] text-slate-500 font-mono">
-                                    EMP-{String(member.employee_id).padStart(4, "0")}
-                                  </span>
+                              <div className="flex items-center gap-2 min-w-0 flex-1">
+                                {showCheckboxes && (
+                                  <input
+                                    type="checkbox"
+                                    aria-label={`Select ${member.employee_name}`}
+                                    checked={isSelected}
+                                    onChange={(e) => {
+                                      e.stopPropagation();
+                                      onToggleSelectStaff?.(member.employee_id);
+                                    }}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600 shrink-0"
+                                  />
+                                )}
+                                <div
+                                  className={`flex items-center gap-2 min-w-0 flex-1 ${!showCheckboxes && onViewDossier ? "cursor-pointer group/emp" : ""}`}
+                                >
+                                  <div className="w-6 h-6 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[10px] shrink-0 group-hover/item:scale-105 transition-transform">
+                                    {member.employee_name.charAt(0)}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="font-semibold text-slate-800 text-xs truncate group-hover/item:text-indigo-600 transition-colors">
+                                        {member.employee_name}
+                                      </span>
+                                      <span className="text-[9px] text-slate-500 font-mono">
+                                        EMP-{String(member.employee_id).padStart(4, "0")}
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] text-slate-400 block truncate">
+                                      {member.employee_email}
+                                    </span>
+                                  </div>
                                 </div>
-                                <span className="text-[10px] text-slate-400 block truncate">
-                                  {member.employee_email}
-                                </span>
                               </div>
-                            </div>
 
                             {/* Quick Actions */}
                             <div className="flex items-center gap-1 shrink-0 opacity-80 group-hover/item:opacity-100 transition-opacity">
@@ -977,7 +1045,8 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                               )}
                             </div>
                           </div>
-                        ))}
+                        );
+                      })}
                       </div>
                     )}
 
