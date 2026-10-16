@@ -506,7 +506,11 @@ const HierarchyMapping = () => {
         {/* Modern Executive Header with View Mode Switcher */}
         <HierarchyHeader
           totalCount={hierarchy.length}
-          onOpenAssignModal={() => setShowModal(true)}
+          onOpenAssignModal={() => {
+            setForm({ employee_id: "", supervisor_id: "", manager_id: "" });
+            setModalError("");
+            setShowModal(true);
+          }}
           onRefresh={fetchData}
           isRefreshing={loading}
           viewMode={viewMode}
@@ -536,7 +540,11 @@ const HierarchyMapping = () => {
         {/* Orphaned Staff Alert Banner */}
         <OrphanedStaffBanner
           unassignedCount={unassignedCount}
-          onQuickAssign={() => setShowModal(true)}
+          onQuickAssign={() => {
+            setForm({ employee_id: "", supervisor_id: "", manager_id: "" });
+            setModalError("");
+            setShowModal(true);
+          }}
           onFilterUnassigned={() => handleToggleKpiCard("orphaned")}
           isFilterActive={activeKpiFilter === "orphaned"}
           onOpenAutoAssignWizard={() => setIsAutoAssignWizardOpen(true)}
@@ -598,6 +606,7 @@ const HierarchyMapping = () => {
             selectedStaffIds={selectedStaffIds}
             onToggleSelectStaff={handleToggleSelectStaff}
             onOpenAssignModal={(empId) => {
+              setModalError("");
               if (empId) {
                 setForm((prev) => ({ ...prev, employee_id: String(empId) }));
               }
@@ -647,6 +656,7 @@ const HierarchyMapping = () => {
             onToggleSelectStaff={handleToggleSelectStaff}
             onClearSelection={handleClearSelection}
             onOpenAssignModal={(empId, supId, mgrId) => {
+              setModalError("");
               if (empId) {
                 setForm((prev) => ({ ...prev, employee_id: String(empId) }));
               }
@@ -698,6 +708,7 @@ const HierarchyMapping = () => {
             onClearSelection={handleClearSelection}
             onSelectAllStaff={handleSelectAllStaff}
             onOpenAssignModal={(empId, supId, mgrId) => {
+              setModalError("");
               setForm((prev) => ({
                 ...prev,
                 employee_id: empId ? String(empId) : prev.employee_id,

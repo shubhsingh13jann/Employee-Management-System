@@ -43,11 +43,11 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
   form,
   onFormChange,
   onSubmit,
-  employees,
-  supervisors,
-  managers,
+  employees = [],
+  supervisors = [],
+  managers = [],
   mappings = [],
-  saving,
+  saving = false,
   errorMessage = "",
   onClearError,
 }) => {
@@ -105,8 +105,6 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
     });
     return { recommendedSupervisors: rec, otherSupervisors: oth };
   }, [supervisors, empDept]);
-
-  if (!isOpen) return null;
 
   // Handle employee change with smart auto-recommendation
   const handleEmployeeChange = (empId: string) => {
@@ -224,6 +222,8 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
   const currentSupLoad = selectedSup ? (supervisorWorkloadMap[String(selectedSup.id)] || 0) : 0;
   const newSupLoad = currentSupLoad + 1;
   const activeError = localError || errorMessage;
+
+  if (!isOpen) return null;
 
   return createPortal(
     <div
