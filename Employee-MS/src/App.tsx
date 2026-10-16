@@ -18,30 +18,57 @@ import ResetPassword from "./pages/ResetPassword";
 import { useAuth } from "./context/AuthContext";
 import { MandatoryPasswordChangeModal } from "./Components/auth/MandatoryPasswordChangeModal";
 
+// Safe lazy-loader with auto-recovery for dynamic module import failures (e.g. HMR or chunk update)
+const lazyWithRetry = <T extends React.ComponentType<any>>(
+  factory: () => Promise<{ default: T }>
+) => {
+  return lazy(async () => {
+    try {
+      return await factory();
+    } catch (error: any) {
+      const isDynamicImportError =
+        error?.message?.includes("Failed to fetch dynamically imported module") ||
+        error?.message?.includes("Importing a module script failed") ||
+        error?.name === "ChunkLoadError";
+
+      if (isDynamicImportError) {
+        const hasRefreshed = sessionStorage.getItem("chunk_retry_refreshed") === "true";
+        if (!hasRefreshed) {
+          sessionStorage.setItem("chunk_retry_refreshed", "true");
+          window.location.reload();
+          return new Promise<{ default: T }>(() => {});
+        }
+        sessionStorage.removeItem("chunk_retry_refreshed");
+      }
+      throw error;
+    }
+  });
+};
+
 // 💤 Lazy-Loaded Admin Pages
-const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
-const Departments = lazy(() => import("./pages/admin/Departments"));
-const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
-const HierarchyMapping = lazy(() => import("./pages/admin/HierarchyMapping"));
-const AdminProjects = lazy(() => import("./pages/admin/AdminProjects"));
+const AdminDashboard = lazyWithRetry(() => import("./pages/admin/AdminDashboard"));
+const Departments = lazyWithRetry(() => import("./pages/admin/Departments"));
+const UserManagement = lazyWithRetry(() => import("./pages/admin/UserManagement"));
+const HierarchyMapping = lazyWithRetry(() => import("./pages/admin/HierarchyMapping"));
+const AdminProjects = lazyWithRetry(() => import("./pages/admin/AdminProjects"));
 
 // 💤 Lazy-Loaded Manager Pages
-const ManagerDashboard = lazy(() => import("./pages/manager/ManagerDashboard"));
-const ProjectsManager = lazy(() => import("./pages/manager/ProjectsManager"));
-const DepartmentSupervisors = lazy(() => import("./pages/manager/DepartmentSupervisors"));
-const ManagerLeaves = lazy(() => import("./pages/manager/ManagerLeaves"));
+const ManagerDashboard = lazyWithRetry(() => import("./pages/manager/ManagerDashboard"));
+const ProjectsManager = lazyWithRetry(() => import("./pages/manager/ProjectsManager"));
+const DepartmentSupervisors = lazyWithRetry(() => import("./pages/manager/DepartmentSupervisors"));
+const ManagerLeaves = lazyWithRetry(() => import("./pages/manager/ManagerLeaves"));
 
 // 💤 Lazy-Loaded Supervisor Pages
-const SupervisorDashboard = lazy(() => import("./pages/supervisor/SupervisorDashboard"));
-const SupervisorTeam = lazy(() => import("./pages/supervisor/SupervisorTeam"));
-const SupervisorTasks = lazy(() => import("./pages/supervisor/SupervisorTasks"));
-const SupervisorLeaves = lazy(() => import("./pages/supervisor/SupervisorLeaves"));
+const SupervisorDashboard = lazyWithRetry(() => import("./pages/supervisor/SupervisorDashboard"));
+const SupervisorTeam = lazyWithRetry(() => import("./pages/supervisor/SupervisorTeam"));
+const SupervisorTasks = lazyWithRetry(() => import("./pages/supervisor/SupervisorTasks"));
+const SupervisorLeaves = lazyWithRetry(() => import("./pages/supervisor/SupervisorLeaves"));
 
 // 💤 Lazy-Loaded Employee Pages
-const EmployeeDashboard = lazy(() => import("./pages/employee/EmployeeDashboard"));
-const EmployeeTasks = lazy(() => import("./pages/employee/EmployeeTasks"));
-const EmployeeLeaves = lazy(() => import("./pages/employee/EmployeeLeaves"));
-const EmployeeProfile = lazy(() => import("./pages/employee/EmployeeProfile"));
+const EmployeeDashboard = lazyWithRetry(() => import("./pages/employee/EmployeeDashboard"));
+const EmployeeTasks = lazyWithRetry(() => import("./pages/employee/EmployeeTasks"));
+const EmployeeLeaves = lazyWithRetry(() => import("./pages/employee/EmployeeLeaves"));
+const EmployeeProfile = lazyWithRetry(() => import("./pages/employee/EmployeeProfile"));
 
 const AnimatedAppContent = () => {
   const location = useLocation();

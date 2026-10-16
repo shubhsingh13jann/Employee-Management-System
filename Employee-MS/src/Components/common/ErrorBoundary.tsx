@@ -34,6 +34,16 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleRetry = () => {
+    const isDynamicImportError =
+      this.state.error?.message?.includes("Failed to fetch dynamically imported module") ||
+      this.state.error?.message?.includes("Importing a module script failed") ||
+      this.state.error?.name === "ChunkLoadError";
+
+    if (isDynamicImportError) {
+      window.location.reload();
+      return;
+    }
+
     this.setState({ hasError: false, error: null });
     if (this.props.onReset) {
       this.props.onReset();

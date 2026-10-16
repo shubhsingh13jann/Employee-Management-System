@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import api from "../../api/axios";
 import {
   HierarchyHeader,
@@ -39,6 +39,19 @@ const HierarchyMapping = () => {
   const [viewMode, setViewMode] = useState<"table" | "tree" | "squad">("table");
   const [activeKpiFilter, setActiveKpiFilter] = useState<"mapped" | "leads" | "managers" | "orphaned" | null>(null);
   const [isPreviewEmptyState, setIsPreviewEmptyState] = useState(false);
+
+  const unassignedEmployees = useMemo(
+    () => employees.filter((e: any) => !hierarchy.some((h: any) => String(h.employee_id) === String(e.id))),
+    [employees, hierarchy]
+  );
+  const unassignedCount = unassignedEmployees.length;
+  const uniqueSupervisorsCount = useMemo(() => new Set(hierarchy.map((h: any) => h.supervisor_id)).size, [hierarchy]);
+  const uniqueManagersCount = useMemo(() => new Set(hierarchy.map((h: any) => h.manager_id)).size, [hierarchy]);
+
+  const departments = useMemo(
+    () => Array.from(new Set(hierarchy.map((h: any) => h.department_name).filter(Boolean))) as string[],
+    [hierarchy]
+  );
 
   // Bulk Square Select State (matching User Directory)
   const [selectedStaffIds, setSelectedStaffIds] = useState<(string | number)[]>([]);
@@ -173,17 +186,6 @@ const HierarchyMapping = () => {
     candidates: [],
     targetSquad: null,
   });
-
-  const unassignedEmployees = employees.filter(
-    (e) => !hierarchy.some((h) => String(h.employee_id) === String(e.id))
-  );
-  const unassignedCount = unassignedEmployees.length;
-  const uniqueSupervisorsCount = new Set(hierarchy.map((h) => h.supervisor_id)).size;
-  const uniqueManagersCount = new Set(hierarchy.map((h) => h.manager_id)).size;
-
-  const departments = Array.from(
-    new Set(hierarchy.map((h) => h.department_name).filter(Boolean))
-  ) as string[];
 
   const handleToggleKpiCard = (key: "mapped" | "leads" | "managers" | "orphaned") => {
     setActiveKpiFilter((prev) => {
