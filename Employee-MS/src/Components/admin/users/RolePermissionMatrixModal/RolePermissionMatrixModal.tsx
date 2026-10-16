@@ -19,6 +19,8 @@ export interface ModuleDefinition {
 
 export type RolePermissionsMap = Record<RoleType, Record<string, Record<ActionType, boolean>>>;
 
+export type ModulePermission = Record<ActionType, boolean>;
+
 export interface RolePermissionMatrixModalProps {
   isOpen: boolean;
   onClose: () => void;

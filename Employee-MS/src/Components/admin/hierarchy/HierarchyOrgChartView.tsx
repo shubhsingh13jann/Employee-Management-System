@@ -512,21 +512,31 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
     );
     ctx.restore();
 
-    // Export cleanly to PNG Blob
-    canvas.toBlob((blob) => {
-      if (blob) {
-        const URL = window.URL || window.webkitURL || window;
-        const pngUrl = URL.createObjectURL(blob);
-        const downloadLink = document.createElement("a");
-        downloadLink.href = pngUrl;
-        downloadLink.download = `Workforce_Org_Chart_${new Date().toISOString().slice(0, 10)}.png`;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-        URL.revokeObjectURL(pngUrl);
-      }
+    // Export cleanly to PNG
+    try {
+      const pngUrl = canvas.toDataURL("image/png");
+      const downloadLink = document.createElement("a");
+      downloadLink.href = pngUrl;
+      downloadLink.download = `Workforce_Org_Chart_${new Date().toISOString().slice(0, 10)}.png`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
       setIsExportingImage(false);
-    }, "image/png");
+    } catch {
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const pngUrl = window.URL.createObjectURL(blob);
+          const downloadLink = document.createElement("a");
+          downloadLink.href = pngUrl;
+          downloadLink.download = `Workforce_Org_Chart_${new Date().toISOString().slice(0, 10)}.png`;
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
+          window.URL.revokeObjectURL(pngUrl);
+        }
+        setIsExportingImage(false);
+      }, "image/png");
+    }
   };
 
   const handleExportImage = (format: "png" | "svg" = "png") => {
@@ -584,8 +594,7 @@ ${safeStyles}
 </svg>`;
 
       const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
-      const URL = window.URL || window.webkitURL || window;
-      const blobURL = URL.createObjectURL(svgBlob);
+      const blobURL = window.URL.createObjectURL(svgBlob);
 
       const downloadLink = document.createElement("a");
       downloadLink.href = blobURL;
@@ -593,7 +602,7 @@ ${safeStyles}
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
-      URL.revokeObjectURL(blobURL);
+      window.URL.revokeObjectURL(blobURL);
       setIsExportingImage(false);
     } catch (err) {
       console.error("Export image error:", err);
@@ -950,6 +959,8 @@ ${safeStyles}
                   onClick={() => {
                     if (showCheckboxes) {
                       onToggleSelectStaff?.(staff.id);
+                    } else if (onViewDossier) {
+                      onViewDossier(staff);
                     }
                   }}
                   className={`shrink-0 px-2 py-1 rounded-lg border transition-all flex items-center gap-1.5 select-none text-[11px] ${
@@ -959,7 +970,7 @@ ${safeStyles}
                       ? "opacity-40 scale-95 border-dashed border-amber-500 bg-white"
                       : "bg-white border-amber-200 hover:border-amber-400 hover:shadow-xs cursor-grab active:cursor-grabbing"
                   }`}
-                  title={showCheckboxes ? "Click to toggle selection" : "Drag onto a Team Lead card to assign"}
+                  title={showCheckboxes ? "Click to toggle selection" : onViewDossier ? "Click to view Employee Dossier • Drag to assign" : "Drag onto a Team Lead card to assign"}
                 >
                   {showCheckboxes ? (
                     <input
@@ -999,7 +1010,10 @@ ${safeStyles}
                   {!showCheckboxes && (
                     <button
                       type="button"
-                      onClick={() => onOpenAssignModal(staff.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenAssignModal(staff.id);
+                      }}
                       className="ml-1 px-1.5 py-0.5 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-[9px] font-semibold transition-colors cursor-pointer"
                       title="Assign Team"
                     >
@@ -1206,7 +1220,10 @@ ${safeStyles}
                       {supervisorsList.length > 0 && (
                         <button
                           type="button"
-                          onClick={() => toggleNodeCollapse(mgrKey)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleNodeCollapse(mgrKey);
+                          }}
                           className="mt-0.5 w-full py-1 px-2 rounded-md bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 border border-slate-200 text-[10px] font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
                         >
                           <i
@@ -1346,7 +1363,10 @@ ${safeStyles}
                                   {sup.employees.length > 0 && (
                                     <button
                                       type="button"
-                                      onClick={() => toggleNodeCollapse(supKey)}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleNodeCollapse(supKey);
+                                      }}
                                       className="mt-0.5 w-full py-1 px-2.5 rounded-md bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 border border-slate-200 text-[10px] font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
                                     >
                                       <i
@@ -1481,6 +1501,8 @@ ${safeStyles}
                                             onClick={() => {
                                               if (showCheckboxes) {
                                                 onToggleSelectStaff?.(emp.employee_id);
+                                              } else if (onViewDossier) {
+                                                onViewDossier(emp);
                                               }
                                             }}
                                             className={`w-56 sm:w-60 p-2 sm:p-2.5 rounded-lg border transition-all flex items-center justify-between gap-2 shadow-2xs select-none relative ${
@@ -1554,7 +1576,10 @@ ${safeStyles}
                                               {onViewDossier && (
                                                 <button
                                                   type="button"
-                                                  onClick={() => onViewDossier(emp)}
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onViewDossier(emp);
+                                                  }}
                                                   className="w-5 h-5 rounded bg-slate-50 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 border border-slate-200 flex items-center justify-center text-[9px] transition-colors cursor-pointer"
                                                   title="View Employee Dossier"
                                                 >
@@ -1564,7 +1589,10 @@ ${safeStyles}
                                               {onInitiateReassign && (
                                                 <button
                                                   type="button"
-                                                  onClick={() => onInitiateReassign(emp)}
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onInitiateReassign(emp);
+                                                  }}
                                                   className="w-5 h-5 rounded bg-slate-50 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 border border-slate-200 flex items-center justify-center text-[9px] transition-colors cursor-pointer"
                                                   title="Reassign Reporting Line"
                                                 >
@@ -1574,7 +1602,10 @@ ${safeStyles}
                                               {onInitiateUnlink && (
                                                 <button
                                                   type="button"
-                                                  onClick={() => onInitiateUnlink(emp)}
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onInitiateUnlink(emp);
+                                                  }}
                                                   className="w-5 h-5 rounded bg-slate-50 hover:bg-rose-50 text-slate-500 hover:text-rose-600 border border-slate-200 flex items-center justify-center text-[9px] transition-colors cursor-pointer"
                                                   title="Unlink Reporting Relationship"
                                                 >

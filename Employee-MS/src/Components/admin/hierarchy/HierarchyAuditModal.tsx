@@ -18,6 +18,7 @@ export interface AuditLogItem {
   performed_by_name?: string;
   performed_by_email?: string;
   employee_id?: number;
+  user_id?: number;
   employee_name?: string;
   employee_email?: string;
 }

@@ -6,6 +6,7 @@ import { HierarchyEmptyStateOnboarding } from "./HierarchyEmptyStateOnboarding";
 export interface SquadGroup {
   supervisorId: string | number;
   supervisorName: string;
+  supervisorEmail?: string;
   managerId?: string | number;
   managerName?: string;
   departmentName?: string;
