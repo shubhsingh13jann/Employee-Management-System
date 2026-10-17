@@ -252,37 +252,85 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
       : hierarchy.length + (includeUnassignedInFull ? unassignedStaff.length : 0);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
-        {/* Modal Header */}
-        <div className="relative p-4 sm:p-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-start justify-between border-b border-indigo-500/30">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center justify-center text-lg font-bold shadow-inner">
-              <i className="bi bi-file-earmark-spreadsheet-fill"></i>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-150">
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl w-full max-w-[800px] overflow-hidden flex flex-col max-h-[92vh] relative">
+        {/* Modal Header with Fluid Pastel Wave Accent */}
+        <div className="relative px-6 py-5 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden">
+          {/* Subtle Top-Right Fluid Pastel Wave Background */}
+          <div className="absolute top-0 right-0 w-80 h-full pointer-events-none overflow-hidden z-0">
+            <svg viewBox="0 0 320 120" fill="none" className="w-full h-full opacity-60">
+              <path
+                d="M40 0C110 35 170 15 230 55C270 80 295 105 320 120V0H40Z"
+                fill="url(#headerWaveGrad1)"
+              />
+              <path
+                d="M100 0C160 30 210 10 260 45C290 65 310 90 320 100V0H100Z"
+                fill="url(#headerWaveGrad2)"
+                fillOpacity="0.7"
+              />
+              <defs>
+                <linearGradient id="headerWaveGrad1" x1="40" y1="0" x2="320" y2="120" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#EEF2FF" />
+                  <stop offset="0.5" stopColor="#E0E7FF" />
+                  <stop offset="1" stopColor="#F5F3FF" />
+                </linearGradient>
+                <linearGradient id="headerWaveGrad2" x1="100" y1="0" x2="320" y2="100" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#DBEAFE" />
+                  <stop offset="0.6" stopColor="#EDE9FE" />
+                  <stop offset="1" stopColor="#FAE8FF" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
+          <div className="flex items-center gap-3.5 relative z-10">
+            {/* Google Sheets Icon Squircle */}
+            <div className="w-12 h-12 rounded-2xl bg-white border border-slate-100 shadow-md shadow-emerald-500/10 flex items-center justify-center p-2 shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500 flex flex-col items-center justify-center p-1.5 shadow-xs">
+                <div className="w-full h-full border border-white/40 rounded-xs grid grid-cols-2 grid-rows-3 gap-0.5 p-0.5">
+                  <div className="bg-white rounded-2xs"></div>
+                  <div className="bg-white rounded-2xs"></div>
+                  <div className="bg-white rounded-2xs"></div>
+                  <div className="bg-white rounded-2xs"></div>
+                  <div className="bg-white rounded-2xs"></div>
+                  <div className="bg-white rounded-2xs"></div>
+                </div>
+              </div>
             </div>
+
             <div>
-              <h3 className="font-bold text-sm sm:text-base leading-tight flex items-center gap-2">
-                <span>Export Hierarchy Roster (CSV)</span>
-                <span className="text-[10px] px-2 py-0.2 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                  Excel & Sheets Ready
-                </span>
+              <h3 className="font-bold text-lg text-slate-900 leading-tight tracking-tight mb-0">
+                Export Hierarchy Roster (CSV)
               </h3>
-              <p className="text-xs text-indigo-200/80 mb-0 mt-0.5">
+              <p className="text-xs text-slate-500 mb-0 mt-0.5">
                 Download structured organizational chain of command spreadsheets
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors cursor-pointer p-1 rounded-lg hover:bg-white/10"
-          >
-            <i className="bi bi-x-lg text-sm"></i>
-          </button>
+
+          <div className="flex items-center gap-3 relative z-10">
+            {/* Excel & Sheets Ready Pill Badge */}
+            <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-xs font-semibold shadow-2xs">
+              <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px] font-bold">
+                ✓
+              </span>
+              <span>Excel & Sheets Ready</span>
+            </div>
+
+            {/* Circular Close Button */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+              aria-label="Close"
+            >
+              <i className="bi bi-x-lg text-xs"></i>
+            </button>
+          </div>
         </div>
 
         {/* Modal Body */}
-        <div className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1 text-slate-800 text-xs">
+        <div className="p-5 sm:p-6 space-y-5 overflow-y-auto flex-1 text-slate-800 text-xs">
           {/* 1. Report Type Selection */}
           <div className="space-y-1.5">
             <label className="font-bold text-slate-700 block text-xs">
