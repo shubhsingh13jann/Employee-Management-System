@@ -657,67 +657,123 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
             )}
           </div>
 
-          {/* 3. CSV Options */}
-          {reportType === "full_roster" && (
-            <div className="space-y-2 pt-2 border-t border-slate-100">
-              <label className="font-bold text-slate-700 block text-xs">
-                3. Additional Columns & Options
-              </label>
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={includeUnassignedInFull}
-                    onChange={(e) => setIncludeUnassignedInFull(e.target.checked)}
-                    className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
-                  />
-                  <div>
-                    <span className="font-semibold text-slate-800 text-xs block">
+          {/* 3. Additional Columns & Options */}
+          {reportType === "full_roster" ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-6 h-6 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
+                  3
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-sm leading-tight mb-0.5">
+                    Additional Columns & Options
+                  </h4>
+                  <p className="text-xs text-slate-500 mb-0 leading-tight">
+                    Customize the export with additional information.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2.5">
+                {/* Row 1: Include Orphaned / Unallocated Staff Rows */}
+                <div
+                  onClick={() => setIncludeUnassignedInFull(!includeUnassignedInFull)}
+                  className="rounded-2xl border border-slate-200/80 bg-slate-50/60 hover:bg-slate-50/90 p-3.5 flex items-center gap-3.5 transition-colors cursor-pointer select-none"
+                >
+                  <button
+                    type="button"
+                    className={`w-5 h-5 rounded-md flex items-center justify-center text-xs transition-colors shrink-0 ${
+                      includeUnassignedInFull
+                        ? "bg-blue-600 text-white shadow-xs"
+                        : "border-2 border-slate-300 bg-white"
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIncludeUnassignedInFull(!includeUnassignedInFull);
+                    }}
+                  >
+                    {includeUnassignedInFull && <i className="bi bi-check-lg font-bold"></i>}
+                  </button>
+
+                  <div className="w-10 h-10 rounded-xl bg-indigo-100/70 text-indigo-600 flex items-center justify-center text-lg shrink-0">
+                    <i className="bi bi-file-earmark-person-fill"></i>
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <span className="font-bold block text-sm text-slate-900 leading-tight">
                       Include Orphaned / Unallocated Staff Rows
                     </span>
-                    <span className="text-[10px] text-slate-500 block">
+                    <span className="text-xs text-slate-500 block leading-tight mt-0.5 truncate">
                       Appends employees who are currently not assigned to any supervisor squad
                     </span>
                   </div>
-                </label>
+                </div>
 
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={includeChainPath}
-                    onChange={(e) => setIncludeChainPath(e.target.checked)}
-                    className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
-                  />
-                  <div>
-                    <span className="font-semibold text-slate-800 text-xs block">
+                {/* Row 2: Include Visual Chain of Command Breadcrumb Column */}
+                <div
+                  onClick={() => setIncludeChainPath(!includeChainPath)}
+                  className="rounded-2xl border border-slate-200/80 bg-slate-50/60 hover:bg-slate-50/90 p-3.5 flex items-center gap-3.5 transition-colors cursor-pointer select-none"
+                >
+                  <button
+                    type="button"
+                    className={`w-5 h-5 rounded-md flex items-center justify-center text-xs transition-colors shrink-0 ${
+                      includeChainPath
+                        ? "bg-blue-600 text-white shadow-xs"
+                        : "border-2 border-slate-300 bg-white"
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIncludeChainPath(!includeChainPath);
+                    }}
+                  >
+                    {includeChainPath && <i className="bi bi-check-lg font-bold"></i>}
+                  </button>
+
+                  <div className="w-10 h-10 rounded-xl bg-indigo-100/70 text-indigo-600 flex items-center justify-center text-lg shrink-0">
+                    <i className="bi bi-link-45deg font-bold text-xl"></i>
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <span className="font-bold block text-sm text-slate-900 leading-tight">
                       Include Visual Chain of Command Breadcrumb Column
                     </span>
-                    <span className="text-[10px] text-slate-500 block">
-                      Generates human-readable path (e.g. Executive HQ ➔ Dept ➔ Manager ➔ Lead ➔ Staff)
+                    <span className="text-xs text-slate-500 block leading-tight mt-0.5 truncate">
+                      Generates human-readable path (e.g. Executive HQ → Dept → Manager → Lead → Staff)
                     </span>
                   </div>
-                </label>
+                </div>
               </div>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-slate-200 p-3.5 bg-slate-50/50 flex items-center gap-2.5 text-xs text-slate-500">
+              <i className="bi bi-info-circle text-slate-400 text-sm shrink-0"></i>
+              <span>Additional columns and breadcrumbs are tailored specifically for the Full Roster structure.</span>
             </div>
           )}
 
-          {/* Compatibility Note */}
-          <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/80 flex items-center justify-between text-[11px] text-slate-600">
-            <div className="flex items-center gap-2">
-              <i className="bi bi-shield-check text-emerald-600 text-sm"></i>
+          {/* RFC 4180 / UTF-8 BOM Compatibility Banner */}
+          <div className="bg-emerald-50/40 rounded-xl px-4 py-2.5 border border-emerald-200/60 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2 text-slate-600 font-medium text-xs">
+              <i className="bi bi-shield-check text-emerald-600 text-base shrink-0"></i>
               <span>UTF-8 BOM Encoded • Compatible with Excel, Google Sheets, & Numbers</span>
             </div>
-            <span className="font-mono text-[10px] font-bold text-slate-400">RFC 4180</span>
+            <div className="flex items-center gap-3">
+              <div className="h-6 w-px bg-slate-200"></div>
+              <div className="font-mono text-[10px] font-bold text-slate-400 tracking-wider text-right leading-tight">
+                <div>RFC</div>
+                <div>4180</div>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Modal Footer */}
-        <div className="p-3.5 sm:p-4 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between gap-3">
+        <div className="px-6 py-4 bg-white border-t border-slate-100 flex items-center justify-between">
           <button
             type="button"
             onClick={onClose}
             disabled={isExporting}
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-200/70 transition-colors cursor-pointer"
+            className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs sm:text-sm shadow-2xs transition-all cursor-pointer"
           >
             Cancel
           </button>
@@ -725,7 +781,7 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
             type="button"
             onClick={generateAndDownloadCsv}
             disabled={isExporting || (scope === "filtered" && filteredTotalCount === 0)}
-            className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-md shadow-emerald-600/25 transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md shadow-indigo-500/20 transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isExporting ? (
               <>
