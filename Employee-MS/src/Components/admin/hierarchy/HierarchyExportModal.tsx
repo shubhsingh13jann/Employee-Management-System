@@ -331,76 +331,173 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
 
         {/* Modal Body */}
         <div className="p-5 sm:p-6 space-y-5 overflow-y-auto flex-1 text-slate-800 text-xs">
-          {/* 1. Report Type Selection */}
-          <div className="space-y-1.5">
-            <label className="font-bold text-slate-700 block text-xs">
-              1. Select Report Structure
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {/* 1. Select Report Structure */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-6 h-6 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
+                1
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-900 text-sm leading-tight mb-0.5">
+                  Select Report Structure
+                </h4>
+                <p className="text-xs text-slate-500 mb-0 leading-tight">
+                  Choose the format for exporting the hierarchy data.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Card 1: Full Roster */}
               <button
                 type="button"
                 onClick={() => setReportType("full_roster")}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                className={`p-4 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between ${
                   reportType === "full_roster"
-                    ? "bg-indigo-50/80 border-indigo-400 text-indigo-900 shadow-2xs ring-2 ring-indigo-200"
-                    : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700"
+                    ? "bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 border-2 border-indigo-400 shadow-sm"
+                    : "bg-white hover:bg-slate-50/70 border-slate-200 text-slate-700 hover:border-slate-300"
                 }`}
               >
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <i className="bi bi-diagram-3-fill text-indigo-600 text-sm"></i>
-                    {reportType === "full_roster" && (
-                      <i className="bi bi-check-circle-fill text-indigo-600 text-xs"></i>
-                    )}
+                {/* Fluid Wave Accent on Selected Card */}
+                {reportType === "full_roster" && (
+                  <div className="absolute -bottom-1 -right-1 w-24 h-16 pointer-events-none opacity-50 overflow-hidden z-0">
+                    <svg viewBox="0 0 100 60" fill="none" className="w-full h-full">
+                      <path
+                        d="M0 60C30 40 60 55 85 30C95 18 100 8 100 0V60H0Z"
+                        fill="url(#cardWave1)"
+                      />
+                      <defs>
+                        <linearGradient id="cardWave1" x1="0" y1="60" x2="100" y2="0" gradientUnits="userSpaceOnUse">
+                          <stop stopColor="#E0E7FF" />
+                          <stop offset="1" stopColor="#DDD6FE" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
                   </div>
-                  <span className="font-bold block text-xs">Full Roster</span>
-                  <span className="text-[10px] text-slate-500 block leading-tight mt-0.5">
-                    Staff ➔ Lead ➔ Manager mapping rows
+                )}
+
+                <div className="relative z-10 w-full">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-blue-600 text-2xl flex items-center justify-center">
+                      <i className="bi bi-diagram-3-fill"></i>
+                    </div>
+                    {/* Custom Radio Button */}
+                    <div
+                      className={`w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 ${
+                        reportType === "full_roster"
+                          ? "border-2 border-blue-600 bg-white"
+                          : "border-2 border-slate-300 bg-white"
+                      }`}
+                    >
+                      {reportType === "full_roster" && (
+                        <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                      )}
+                    </div>
+                  </div>
+                  <span className="font-bold block text-sm text-slate-900">Full Roster</span>
+                  <span className="text-xs text-slate-500 block leading-relaxed mt-0.5">
+                    Staff → Lead → Manager mapping rows
                   </span>
                 </div>
               </button>
 
+              {/* Card 2: Squad Matrix */}
               <button
                 type="button"
                 onClick={() => setReportType("squad_capacity")}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                className={`p-4 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between ${
                   reportType === "squad_capacity"
-                    ? "bg-indigo-50/80 border-indigo-400 text-indigo-900 shadow-2xs ring-2 ring-indigo-200"
-                    : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700"
+                    ? "bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 border-2 border-indigo-400 shadow-sm"
+                    : "bg-white hover:bg-slate-50/70 border-slate-200 text-slate-700 hover:border-slate-300"
                 }`}
               >
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <i className="bi bi-people-fill text-purple-600 text-sm"></i>
-                    {reportType === "squad_capacity" && (
-                      <i className="bi bi-check-circle-fill text-indigo-600 text-xs"></i>
-                    )}
+                {reportType === "squad_capacity" && (
+                  <div className="absolute -bottom-1 -right-1 w-24 h-16 pointer-events-none opacity-50 overflow-hidden z-0">
+                    <svg viewBox="0 0 100 60" fill="none" className="w-full h-full">
+                      <path
+                        d="M0 60C30 40 60 55 85 30C95 18 100 8 100 0V60H0Z"
+                        fill="url(#cardWave2)"
+                      />
+                      <defs>
+                        <linearGradient id="cardWave2" x1="0" y1="60" x2="100" y2="0" gradientUnits="userSpaceOnUse">
+                          <stop stopColor="#E0E7FF" />
+                          <stop offset="1" stopColor="#DDD6FE" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
                   </div>
-                  <span className="font-bold block text-xs">Squad Matrix</span>
-                  <span className="text-[10px] text-slate-500 block leading-tight mt-0.5">
+                )}
+
+                <div className="relative z-10 w-full">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-purple-600 text-2xl flex items-center justify-center">
+                      <i className="bi bi-people-fill"></i>
+                    </div>
+                    <div
+                      className={`w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 ${
+                        reportType === "squad_capacity"
+                          ? "border-2 border-blue-600 bg-white"
+                          : "border-2 border-slate-300 bg-white"
+                      }`}
+                    >
+                      {reportType === "squad_capacity" && (
+                        <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                      )}
+                    </div>
+                  </div>
+                  <span className="font-bold block text-sm text-slate-900">Squad Matrix</span>
+                  <span className="text-xs text-slate-500 block leading-relaxed mt-0.5">
                     Supervisor workload, capacity % & spans
                   </span>
                 </div>
               </button>
 
+              {/* Card 3: Orphaned Staff */}
               <button
                 type="button"
                 onClick={() => setReportType("unassigned_only")}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                className={`p-4 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between ${
                   reportType === "unassigned_only"
-                    ? "bg-indigo-50/80 border-indigo-400 text-indigo-900 shadow-2xs ring-2 ring-indigo-200"
-                    : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700"
+                    ? "bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 border-2 border-indigo-400 shadow-sm"
+                    : "bg-white hover:bg-slate-50/70 border-slate-200 text-slate-700 hover:border-slate-300"
                 }`}
               >
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <i className="bi bi-exclamation-triangle-fill text-amber-500 text-sm"></i>
-                    {reportType === "unassigned_only" && (
-                      <i className="bi bi-check-circle-fill text-indigo-600 text-xs"></i>
-                    )}
+                {reportType === "unassigned_only" && (
+                  <div className="absolute -bottom-1 -right-1 w-24 h-16 pointer-events-none opacity-50 overflow-hidden z-0">
+                    <svg viewBox="0 0 100 60" fill="none" className="w-full h-full">
+                      <path
+                        d="M0 60C30 40 60 55 85 30C95 18 100 8 100 0V60H0Z"
+                        fill="url(#cardWave3)"
+                      />
+                      <defs>
+                        <linearGradient id="cardWave3" x1="0" y1="60" x2="100" y2="0" gradientUnits="userSpaceOnUse">
+                          <stop stopColor="#E0E7FF" />
+                          <stop offset="1" stopColor="#DDD6FE" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
                   </div>
-                  <span className="font-bold block text-xs">Orphaned Staff</span>
-                  <span className="text-[10px] text-slate-500 block leading-tight mt-0.5">
+                )}
+
+                <div className="relative z-10 w-full">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-amber-500 text-2xl flex items-center justify-center">
+                      <i className="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <div
+                      className={`w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 ${
+                        reportType === "unassigned_only"
+                          ? "border-2 border-blue-600 bg-white"
+                          : "border-2 border-slate-300 bg-white"
+                      }`}
+                    >
+                      {reportType === "unassigned_only" && (
+                        <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                      )}
+                    </div>
+                  </div>
+                  <span className="font-bold block text-sm text-slate-900">Orphaned Staff</span>
+                  <span className="text-xs text-slate-500 block leading-relaxed mt-0.5">
                     Personnel awaiting squad onboarding
                   </span>
                 </div>
