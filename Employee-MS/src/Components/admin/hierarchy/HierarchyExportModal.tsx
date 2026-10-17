@@ -505,63 +505,153 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
             </div>
           </div>
 
-          {/* 2. Scope Selection */}
-          <div className="space-y-1.5 pt-2 border-t border-slate-100">
-            <label className="font-bold text-slate-700 block text-xs">
-              2. Data Filtering Scope
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <label
-                className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
-                  scope === "filtered"
-                    ? "bg-indigo-50/80 border-indigo-400 text-indigo-950 ring-2 ring-indigo-200"
-                    : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700"
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="radio"
-                    name="scope"
-                    checked={scope === "filtered"}
-                    onChange={() => setScope("filtered")}
-                    className="accent-indigo-600"
-                  />
-                  <div>
-                    <span className="font-bold block text-xs">Active Filtered View</span>
-                    <span className="text-[10px] text-slate-500 block leading-tight">
-                      Exports <strong>{filteredTotalCount}</strong> records matching current search/dept
-                    </span>
-                  </div>
-                </div>
-              </label>
-
-              <label
-                className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
-                  scope === "all"
-                    ? "bg-indigo-50/80 border-indigo-400 text-indigo-950 ring-2 ring-indigo-200"
-                    : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700"
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <input
-                    type="radio"
-                    name="scope"
-                    checked={scope === "all"}
-                    onChange={() => setScope("all")}
-                    className="accent-indigo-600"
-                  />
-                  <div>
-                    <span className="font-bold block text-xs">Complete Workforce</span>
-                    <span className="text-[10px] text-slate-500 block leading-tight">
-                      Exports all <strong>{allTotalCount}</strong> enterprise records
-                    </span>
-                  </div>
-                </div>
-              </label>
+          {/* 2. Data Filtering Scope */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-6 h-6 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
+                2
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-900 text-sm leading-tight mb-0.5">
+                  Data Filtering Scope
+                </h4>
+                <p className="text-xs text-slate-500 mb-0 leading-tight">
+                  Choose the scope of data to include in the export.
+                </p>
+              </div>
             </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Option 1: Active Filtered View */}
+              <button
+                type="button"
+                onClick={() => setScope("filtered")}
+                className={`p-4 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden flex items-center gap-3.5 ${
+                  scope === "filtered"
+                    ? "bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 border-2 border-indigo-400 shadow-sm"
+                    : "bg-white hover:bg-slate-50/70 border-slate-200 text-slate-700 hover:border-slate-300"
+                }`}
+              >
+                {/* Fluid Wave Accent on Selected Card */}
+                {scope === "filtered" && (
+                  <div className="absolute -bottom-1 -right-1 w-28 h-16 pointer-events-none opacity-50 overflow-hidden z-0">
+                    <svg viewBox="0 0 100 60" fill="none" className="w-full h-full">
+                      <path
+                        d="M0 60C30 40 60 55 85 30C95 18 100 8 100 0V60H0Z"
+                        fill="url(#scopeWave1)"
+                      />
+                      <defs>
+                        <linearGradient id="scopeWave1" x1="0" y1="60" x2="100" y2="0" gradientUnits="userSpaceOnUse">
+                          <stop stopColor="#E0E7FF" />
+                          <stop offset="1" stopColor="#DDD6FE" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </div>
+                )}
+
+                <div className="relative z-10 flex items-center gap-3.5 w-full">
+                  {/* Custom Radio Button */}
+                  <div
+                    className={`w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 ${
+                      scope === "filtered"
+                        ? "border-2 border-blue-600 bg-white"
+                        : "border-2 border-slate-300 bg-white"
+                    }`}
+                  >
+                    {scope === "filtered" && (
+                      <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                    )}
+                  </div>
+
+                  {/* Icon Squircle */}
+                  <div
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center text-lg shrink-0 ${
+                      scope === "filtered"
+                        ? "bg-indigo-100 text-indigo-600 shadow-2xs"
+                        : "bg-indigo-50/70 text-indigo-500"
+                    }`}
+                  >
+                    <i className="bi bi-funnel-fill"></i>
+                  </div>
+
+                  {/* Texts */}
+                  <div className="min-w-0 flex-1">
+                    <span className="font-bold block text-sm text-slate-900 leading-tight">
+                      Active Filtered View
+                    </span>
+                    <span className="text-xs text-slate-500 block leading-tight mt-0.5 truncate">
+                      Exports {filteredTotalCount} records matching current search/dept
+                    </span>
+                  </div>
+                </div>
+              </button>
+
+              {/* Option 2: Complete Workforce */}
+              <button
+                type="button"
+                onClick={() => setScope("all")}
+                className={`p-4 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden flex items-center gap-3.5 ${
+                  scope === "all"
+                    ? "bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 border-2 border-indigo-400 shadow-sm"
+                    : "bg-white hover:bg-slate-50/70 border-slate-200 text-slate-700 hover:border-slate-300"
+                }`}
+              >
+                {scope === "all" && (
+                  <div className="absolute -bottom-1 -right-1 w-28 h-16 pointer-events-none opacity-50 overflow-hidden z-0">
+                    <svg viewBox="0 0 100 60" fill="none" className="w-full h-full">
+                      <path
+                        d="M0 60C30 40 60 55 85 30C95 18 100 8 100 0V60H0Z"
+                        fill="url(#scopeWave2)"
+                      />
+                      <defs>
+                        <linearGradient id="scopeWave2" x1="0" y1="60" x2="100" y2="0" gradientUnits="userSpaceOnUse">
+                          <stop stopColor="#E0E7FF" />
+                          <stop offset="1" stopColor="#DDD6FE" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </div>
+                )}
+
+                <div className="relative z-10 flex items-center gap-3.5 w-full">
+                  <div
+                    className={`w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 ${
+                      scope === "all"
+                        ? "border-2 border-blue-600 bg-white"
+                        : "border-2 border-slate-300 bg-white"
+                    }`}
+                  >
+                    {scope === "all" && (
+                      <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                    )}
+                  </div>
+
+                  <div
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center text-lg shrink-0 ${
+                      scope === "all"
+                        ? "bg-indigo-100 text-indigo-600 shadow-2xs"
+                        : "bg-indigo-50/70 text-indigo-500"
+                    }`}
+                  >
+                    <i className="bi bi-database-fill"></i>
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <span className="font-bold block text-sm text-slate-900 leading-tight">
+                      Complete Workforce
+                    </span>
+                    <span className="text-xs text-slate-500 block leading-tight mt-0.5 truncate">
+                      Exports all {allTotalCount} enterprise records
+                    </span>
+                  </div>
+                </div>
+              </button>
+            </div>
+
             {scope === "filtered" && activeFiltersDesc && (
-              <p className="text-[11px] text-indigo-700 bg-indigo-50/70 border border-indigo-200/80 rounded-lg p-2 mt-1">
-                <i className="bi bi-funnel-fill mr-1"></i>
+              <p className="text-[11px] text-indigo-700 bg-indigo-50/70 border border-indigo-200/80 rounded-xl px-3 py-1.5 mt-1 flex items-center gap-1.5">
+                <i className="bi bi-funnel-fill text-xs text-indigo-500"></i>
                 <span>Active Scope: {activeFiltersDesc}</span>
               </p>
             )}
