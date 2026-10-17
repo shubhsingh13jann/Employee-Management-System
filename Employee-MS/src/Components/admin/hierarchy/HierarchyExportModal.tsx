@@ -253,9 +253,9 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl w-full max-w-[800px] overflow-hidden flex flex-col max-h-[92vh] relative">
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl w-full max-w-[760px] overflow-hidden flex flex-col max-h-[94vh] relative">
         {/* Modal Header with Fluid Pastel Wave Accent */}
-        <div className="relative px-6 py-5 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden">
+        <div className="relative px-5 py-3.5 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0">
           {/* Subtle Top-Right Fluid Pastel Wave Background */}
           <div className="absolute top-0 right-0 w-80 h-full pointer-events-none overflow-hidden z-0">
             <svg viewBox="0 0 320 120" fill="none" className="w-full h-full opacity-60">
@@ -283,10 +283,10 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
             </svg>
           </div>
 
-          <div className="flex items-center gap-3.5 relative z-10">
+          <div className="flex items-center gap-3 relative z-10">
             {/* Google Sheets Icon Squircle */}
-            <div className="w-12 h-12 rounded-2xl bg-white border border-slate-100 shadow-md shadow-emerald-500/10 flex items-center justify-center p-2 shrink-0">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500 flex flex-col items-center justify-center p-1.5 shadow-xs">
+            <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center p-1.5 shrink-0">
+              <div className="w-7 h-7 rounded-md bg-emerald-500 flex flex-col items-center justify-center p-1 shadow-xs">
                 <div className="w-full h-full border border-white/40 rounded-xs grid grid-cols-2 grid-rows-3 gap-0.5 p-0.5">
                   <div className="bg-white rounded-2xs"></div>
                   <div className="bg-white rounded-2xs"></div>
@@ -299,19 +299,19 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
             </div>
 
             <div>
-              <h3 className="font-bold text-lg text-slate-900 leading-tight tracking-tight mb-0">
+              <h3 className="font-bold text-base sm:text-[17px] text-slate-900 leading-tight tracking-tight mb-0">
                 Export Hierarchy Roster (CSV)
               </h3>
-              <p className="text-xs text-slate-500 mb-0 mt-0.5">
+              <p className="text-[11px] sm:text-xs text-slate-500 mb-0 mt-0.5 leading-tight">
                 Download structured organizational chain of command spreadsheets
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 relative z-10">
+          <div className="flex items-center gap-2.5 relative z-10">
             {/* Excel & Sheets Ready Pill Badge */}
-            <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-xs font-semibold shadow-2xs">
-              <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px] font-bold">
+            <div className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-[11px] font-semibold shadow-2xs">
+              <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[8.5px] font-bold">
                 ✓
               </span>
               <span>Excel & Sheets Ready</span>
@@ -321,7 +321,7 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+              className="w-7.5 h-7.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
               aria-label="Close"
             >
               <i className="bi bi-x-lg text-xs"></i>
@@ -330,37 +330,37 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <div className="p-5 sm:p-6 space-y-5 overflow-y-auto flex-1 text-slate-800 text-xs">
+        <div className="px-5 py-3.5 space-y-3 overflow-y-auto flex-1 text-slate-800 text-xs">
           {/* 1. Select Report Structure */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-6 h-6 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <div className="w-5 h-5 rounded-full bg-blue-600 text-white font-bold text-[11px] flex items-center justify-center shadow-xs shrink-0">
                 1
               </div>
               <div>
-                <h4 className="font-bold text-slate-900 text-sm leading-tight mb-0.5">
+                <h4 className="font-bold text-slate-900 text-xs sm:text-[13px] leading-tight mb-0">
                   Select Report Structure
                 </h4>
-                <p className="text-xs text-slate-500 mb-0 leading-tight">
+                <p className="text-[10.5px] text-slate-500 mb-0 leading-tight">
                   Choose the format for exporting the hierarchy data.
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               {/* Card 1: Full Roster */}
               <button
                 type="button"
                 onClick={() => setReportType("full_roster")}
-                className={`p-4 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between ${
+                className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between min-h-[76px] ${
                   reportType === "full_roster"
-                    ? "bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 border-2 border-indigo-400 shadow-sm"
+                    ? "bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 border-2 border-indigo-400 shadow-xs"
                     : "bg-white hover:bg-slate-50/70 border-slate-200 text-slate-700 hover:border-slate-300"
                 }`}
               >
                 {/* Fluid Wave Accent on Selected Card */}
                 {reportType === "full_roster" && (
-                  <div className="absolute -bottom-1 -right-1 w-24 h-16 pointer-events-none opacity-50 overflow-hidden z-0">
+                  <div className="absolute -bottom-1 -right-1 w-20 h-14 pointer-events-none opacity-50 overflow-hidden z-0">
                     <svg viewBox="0 0 100 60" fill="none" className="w-full h-full">
                       <path
                         d="M0 60C30 40 60 55 85 30C95 18 100 8 100 0V60H0Z"
@@ -377,25 +377,25 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
                 )}
 
                 <div className="relative z-10 w-full">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="text-blue-600 text-2xl flex items-center justify-center">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="text-blue-600 text-lg flex items-center justify-center">
                       <i className="bi bi-diagram-3-fill"></i>
                     </div>
                     {/* Custom Radio Button */}
                     <div
-                      className={`w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 ${
+                      className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${
                         reportType === "full_roster"
                           ? "border-2 border-blue-600 bg-white"
                           : "border-2 border-slate-300 bg-white"
                       }`}
                     >
                       {reportType === "full_roster" && (
-                        <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
                       )}
                     </div>
                   </div>
-                  <span className="font-bold block text-sm text-slate-900">Full Roster</span>
-                  <span className="text-xs text-slate-500 block leading-relaxed mt-0.5">
+                  <span className="font-bold block text-xs text-slate-900 leading-tight">Full Roster</span>
+                  <span className="text-[10px] text-slate-500 block leading-tight mt-0.5">
                     Staff → Lead → Manager mapping rows
                   </span>
                 </div>
@@ -405,14 +405,14 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
               <button
                 type="button"
                 onClick={() => setReportType("squad_capacity")}
-                className={`p-4 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between ${
+                className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between min-h-[76px] ${
                   reportType === "squad_capacity"
-                    ? "bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 border-2 border-indigo-400 shadow-sm"
+                    ? "bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 border-2 border-indigo-400 shadow-xs"
                     : "bg-white hover:bg-slate-50/70 border-slate-200 text-slate-700 hover:border-slate-300"
                 }`}
               >
                 {reportType === "squad_capacity" && (
-                  <div className="absolute -bottom-1 -right-1 w-24 h-16 pointer-events-none opacity-50 overflow-hidden z-0">
+                  <div className="absolute -bottom-1 -right-1 w-20 h-14 pointer-events-none opacity-50 overflow-hidden z-0">
                     <svg viewBox="0 0 100 60" fill="none" className="w-full h-full">
                       <path
                         d="M0 60C30 40 60 55 85 30C95 18 100 8 100 0V60H0Z"
@@ -429,24 +429,24 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
                 )}
 
                 <div className="relative z-10 w-full">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="text-purple-600 text-2xl flex items-center justify-center">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="text-purple-600 text-lg flex items-center justify-center">
                       <i className="bi bi-people-fill"></i>
                     </div>
                     <div
-                      className={`w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 ${
+                      className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${
                         reportType === "squad_capacity"
                           ? "border-2 border-blue-600 bg-white"
                           : "border-2 border-slate-300 bg-white"
                       }`}
                     >
                       {reportType === "squad_capacity" && (
-                        <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
                       )}
                     </div>
                   </div>
-                  <span className="font-bold block text-sm text-slate-900">Squad Matrix</span>
-                  <span className="text-xs text-slate-500 block leading-relaxed mt-0.5">
+                  <span className="font-bold block text-xs text-slate-900 leading-tight">Squad Matrix</span>
+                  <span className="text-[10px] text-slate-500 block leading-tight mt-0.5">
                     Supervisor workload, capacity % & spans
                   </span>
                 </div>
@@ -456,14 +456,14 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
               <button
                 type="button"
                 onClick={() => setReportType("unassigned_only")}
-                className={`p-4 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between ${
+                className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between min-h-[76px] ${
                   reportType === "unassigned_only"
-                    ? "bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 border-2 border-indigo-400 shadow-sm"
+                    ? "bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 border-2 border-indigo-400 shadow-xs"
                     : "bg-white hover:bg-slate-50/70 border-slate-200 text-slate-700 hover:border-slate-300"
                 }`}
               >
                 {reportType === "unassigned_only" && (
-                  <div className="absolute -bottom-1 -right-1 w-24 h-16 pointer-events-none opacity-50 overflow-hidden z-0">
+                  <div className="absolute -bottom-1 -right-1 w-20 h-14 pointer-events-none opacity-50 overflow-hidden z-0">
                     <svg viewBox="0 0 100 60" fill="none" className="w-full h-full">
                       <path
                         d="M0 60C30 40 60 55 85 30C95 18 100 8 100 0V60H0Z"
@@ -480,24 +480,24 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
                 )}
 
                 <div className="relative z-10 w-full">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="text-amber-500 text-2xl flex items-center justify-center">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="text-amber-500 text-lg flex items-center justify-center">
                       <i className="bi bi-exclamation-triangle-fill"></i>
                     </div>
                     <div
-                      className={`w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 ${
+                      className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${
                         reportType === "unassigned_only"
                           ? "border-2 border-blue-600 bg-white"
                           : "border-2 border-slate-300 bg-white"
                       }`}
                     >
                       {reportType === "unassigned_only" && (
-                        <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
                       )}
                     </div>
                   </div>
-                  <span className="font-bold block text-sm text-slate-900">Orphaned Staff</span>
-                  <span className="text-xs text-slate-500 block leading-relaxed mt-0.5">
+                  <span className="font-bold block text-xs text-slate-900 leading-tight">Orphaned Staff</span>
+                  <span className="text-[10px] text-slate-500 block leading-tight mt-0.5">
                     Personnel awaiting squad onboarding
                   </span>
                 </div>
@@ -506,35 +506,35 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
           </div>
 
           {/* 2. Data Filtering Scope */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-6 h-6 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <div className="w-5 h-5 rounded-full bg-blue-600 text-white font-bold text-[11px] flex items-center justify-center shadow-xs shrink-0">
                 2
               </div>
               <div>
-                <h4 className="font-bold text-slate-900 text-sm leading-tight mb-0.5">
+                <h4 className="font-bold text-slate-900 text-xs sm:text-[13px] leading-tight mb-0">
                   Data Filtering Scope
                 </h4>
-                <p className="text-xs text-slate-500 mb-0 leading-tight">
+                <p className="text-[10.5px] text-slate-500 mb-0 leading-tight">
                   Choose the scope of data to include in the export.
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {/* Option 1: Active Filtered View */}
               <button
                 type="button"
                 onClick={() => setScope("filtered")}
-                className={`p-4 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden flex items-center gap-3.5 ${
+                className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all cursor-pointer relative overflow-hidden flex items-center gap-2.5 min-h-[56px] ${
                   scope === "filtered"
-                    ? "bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 border-2 border-indigo-400 shadow-sm"
+                    ? "bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 border-2 border-indigo-400 shadow-xs"
                     : "bg-white hover:bg-slate-50/70 border-slate-200 text-slate-700 hover:border-slate-300"
                 }`}
               >
                 {/* Fluid Wave Accent on Selected Card */}
                 {scope === "filtered" && (
-                  <div className="absolute -bottom-1 -right-1 w-28 h-16 pointer-events-none opacity-50 overflow-hidden z-0">
+                  <div className="absolute -bottom-1 -right-1 w-24 h-14 pointer-events-none opacity-50 overflow-hidden z-0">
                     <svg viewBox="0 0 100 60" fill="none" className="w-full h-full">
                       <path
                         d="M0 60C30 40 60 55 85 30C95 18 100 8 100 0V60H0Z"
@@ -550,23 +550,23 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
                   </div>
                 )}
 
-                <div className="relative z-10 flex items-center gap-3.5 w-full">
+                <div className="relative z-10 flex items-center gap-2.5 w-full">
                   {/* Custom Radio Button */}
                   <div
-                    className={`w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 ${
+                    className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${
                       scope === "filtered"
                         ? "border-2 border-blue-600 bg-white"
                         : "border-2 border-slate-300 bg-white"
                     }`}
                   >
                     {scope === "filtered" && (
-                      <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
                     )}
                   </div>
 
                   {/* Icon Squircle */}
                   <div
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center text-lg shrink-0 ${
+                    className={`w-8.5 h-8.5 rounded-lg flex items-center justify-center text-sm shrink-0 ${
                       scope === "filtered"
                         ? "bg-indigo-100 text-indigo-600 shadow-2xs"
                         : "bg-indigo-50/70 text-indigo-500"
@@ -577,10 +577,10 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
 
                   {/* Texts */}
                   <div className="min-w-0 flex-1">
-                    <span className="font-bold block text-sm text-slate-900 leading-tight">
+                    <span className="font-bold block text-xs text-slate-900 leading-tight">
                       Active Filtered View
                     </span>
-                    <span className="text-xs text-slate-500 block leading-tight mt-0.5 truncate">
+                    <span className="text-[10px] text-slate-500 block leading-tight mt-0.5 truncate">
                       Exports {filteredTotalCount} records matching current search/dept
                     </span>
                   </div>
@@ -591,14 +591,14 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
               <button
                 type="button"
                 onClick={() => setScope("all")}
-                className={`p-4 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden flex items-center gap-3.5 ${
+                className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all cursor-pointer relative overflow-hidden flex items-center gap-2.5 min-h-[56px] ${
                   scope === "all"
-                    ? "bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 border-2 border-indigo-400 shadow-sm"
+                    ? "bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 border-2 border-indigo-400 shadow-xs"
                     : "bg-white hover:bg-slate-50/70 border-slate-200 text-slate-700 hover:border-slate-300"
                 }`}
               >
                 {scope === "all" && (
-                  <div className="absolute -bottom-1 -right-1 w-28 h-16 pointer-events-none opacity-50 overflow-hidden z-0">
+                  <div className="absolute -bottom-1 -right-1 w-24 h-14 pointer-events-none opacity-50 overflow-hidden z-0">
                     <svg viewBox="0 0 100 60" fill="none" className="w-full h-full">
                       <path
                         d="M0 60C30 40 60 55 85 30C95 18 100 8 100 0V60H0Z"
@@ -614,21 +614,21 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
                   </div>
                 )}
 
-                <div className="relative z-10 flex items-center gap-3.5 w-full">
+                <div className="relative z-10 flex items-center gap-2.5 w-full">
                   <div
-                    className={`w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 ${
+                    className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${
                       scope === "all"
                         ? "border-2 border-blue-600 bg-white"
                         : "border-2 border-slate-300 bg-white"
                     }`}
                   >
                     {scope === "all" && (
-                      <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
                     )}
                   </div>
 
                   <div
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center text-lg shrink-0 ${
+                    className={`w-8.5 h-8.5 rounded-lg flex items-center justify-center text-sm shrink-0 ${
                       scope === "all"
                         ? "bg-indigo-100 text-indigo-600 shadow-2xs"
                         : "bg-indigo-50/70 text-indigo-500"
@@ -638,10 +638,10 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <span className="font-bold block text-sm text-slate-900 leading-tight">
+                    <span className="font-bold block text-xs text-slate-900 leading-tight">
                       Complete Workforce
                     </span>
-                    <span className="text-xs text-slate-500 block leading-tight mt-0.5 truncate">
+                    <span className="text-[10px] text-slate-500 block leading-tight mt-0.5 truncate">
                       Exports all {allTotalCount} enterprise records
                     </span>
                   </div>
@@ -650,8 +650,8 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
             </div>
 
             {scope === "filtered" && activeFiltersDesc && (
-              <p className="text-[11px] text-indigo-700 bg-indigo-50/70 border border-indigo-200/80 rounded-xl px-3 py-1.5 mt-1 flex items-center gap-1.5">
-                <i className="bi bi-funnel-fill text-xs text-indigo-500"></i>
+              <p className="text-[10.5px] text-indigo-700 bg-indigo-50/70 border border-indigo-200/80 rounded-lg px-2.5 py-1 mt-1 flex items-center gap-1.5 mb-0">
+                <i className="bi bi-funnel-fill text-[10px] text-indigo-500"></i>
                 <span>Active Scope: {activeFiltersDesc}</span>
               </p>
             )}
@@ -659,32 +659,32 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
 
           {/* 3. Additional Columns & Options */}
           {reportType === "full_roster" ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-6 h-6 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
+            <div>
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="w-5 h-5 rounded-full bg-blue-600 text-white font-bold text-[11px] flex items-center justify-center shadow-xs shrink-0">
                   3
                 </div>
                 <div>
-                  <h4 className="font-bold text-slate-900 text-sm leading-tight mb-0.5">
+                  <h4 className="font-bold text-slate-900 text-xs sm:text-[13px] leading-tight mb-0">
                     Additional Columns & Options
                   </h4>
-                  <p className="text-xs text-slate-500 mb-0 leading-tight">
+                  <p className="text-[10.5px] text-slate-500 mb-0 leading-tight">
                     Customize the export with additional information.
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-2.5">
+              <div className="space-y-1.5">
                 {/* Row 1: Include Orphaned / Unallocated Staff Rows */}
                 <div
                   onClick={() => setIncludeUnassignedInFull(!includeUnassignedInFull)}
-                  className="rounded-2xl border border-slate-200/80 bg-slate-50/60 hover:bg-slate-50/90 p-3.5 flex items-center gap-3.5 transition-colors cursor-pointer select-none"
+                  className="rounded-xl border border-slate-200/80 bg-slate-50/60 hover:bg-slate-50/90 px-3 py-2 flex items-center gap-2.5 transition-colors cursor-pointer select-none"
                 >
                   <button
                     type="button"
-                    className={`w-5 h-5 rounded-md flex items-center justify-center text-xs transition-colors shrink-0 ${
+                    className={`w-4.5 h-4.5 rounded-md flex items-center justify-center text-[10px] transition-colors shrink-0 ${
                       includeUnassignedInFull
-                        ? "bg-blue-600 text-white shadow-xs"
+                        ? "bg-blue-600 text-white shadow-2xs"
                         : "border-2 border-slate-300 bg-white"
                     }`}
                     onClick={(e) => {
@@ -695,15 +695,15 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
                     {includeUnassignedInFull && <i className="bi bi-check-lg font-bold"></i>}
                   </button>
 
-                  <div className="w-10 h-10 rounded-xl bg-indigo-100/70 text-indigo-600 flex items-center justify-center text-lg shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-100/70 text-indigo-600 flex items-center justify-center text-sm shrink-0">
                     <i className="bi bi-file-earmark-person-fill"></i>
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <span className="font-bold block text-sm text-slate-900 leading-tight">
+                    <span className="font-bold block text-xs text-slate-900 leading-tight">
                       Include Orphaned / Unallocated Staff Rows
                     </span>
-                    <span className="text-xs text-slate-500 block leading-tight mt-0.5 truncate">
+                    <span className="text-[10px] text-slate-500 block leading-tight mt-0.5 truncate">
                       Appends employees who are currently not assigned to any supervisor squad
                     </span>
                   </div>
@@ -712,13 +712,13 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
                 {/* Row 2: Include Visual Chain of Command Breadcrumb Column */}
                 <div
                   onClick={() => setIncludeChainPath(!includeChainPath)}
-                  className="rounded-2xl border border-slate-200/80 bg-slate-50/60 hover:bg-slate-50/90 p-3.5 flex items-center gap-3.5 transition-colors cursor-pointer select-none"
+                  className="rounded-xl border border-slate-200/80 bg-slate-50/60 hover:bg-slate-50/90 px-3 py-2 flex items-center gap-2.5 transition-colors cursor-pointer select-none"
                 >
                   <button
                     type="button"
-                    className={`w-5 h-5 rounded-md flex items-center justify-center text-xs transition-colors shrink-0 ${
+                    className={`w-4.5 h-4.5 rounded-md flex items-center justify-center text-[10px] transition-colors shrink-0 ${
                       includeChainPath
-                        ? "bg-blue-600 text-white shadow-xs"
+                        ? "bg-blue-600 text-white shadow-2xs"
                         : "border-2 border-slate-300 bg-white"
                     }`}
                     onClick={(e) => {
@@ -729,15 +729,15 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
                     {includeChainPath && <i className="bi bi-check-lg font-bold"></i>}
                   </button>
 
-                  <div className="w-10 h-10 rounded-xl bg-indigo-100/70 text-indigo-600 flex items-center justify-center text-lg shrink-0">
-                    <i className="bi bi-link-45deg font-bold text-xl"></i>
+                  <div className="w-8 h-8 rounded-lg bg-indigo-100/70 text-indigo-600 flex items-center justify-center text-base shrink-0">
+                    <i className="bi bi-link-45deg font-bold"></i>
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <span className="font-bold block text-sm text-slate-900 leading-tight">
+                    <span className="font-bold block text-xs text-slate-900 leading-tight">
                       Include Visual Chain of Command Breadcrumb Column
                     </span>
-                    <span className="text-xs text-slate-500 block leading-tight mt-0.5 truncate">
+                    <span className="text-[10px] text-slate-500 block leading-tight mt-0.5 truncate">
                       Generates human-readable path (e.g. Executive HQ → Dept → Manager → Lead → Staff)
                     </span>
                   </div>
@@ -745,21 +745,21 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
               </div>
             </div>
           ) : (
-            <div className="rounded-2xl border border-dashed border-slate-200 p-3.5 bg-slate-50/50 flex items-center gap-2.5 text-xs text-slate-500">
-              <i className="bi bi-info-circle text-slate-400 text-sm shrink-0"></i>
-              <span>Additional columns and breadcrumbs are tailored specifically for the Full Roster structure.</span>
+            <div className="rounded-xl border border-dashed border-slate-200 px-3 py-2 bg-slate-50/50 flex items-center gap-2 text-xs text-slate-500">
+              <i className="bi bi-info-circle text-slate-400 text-xs shrink-0"></i>
+              <span className="text-[10.5px]">Additional columns and breadcrumbs are tailored specifically for the Full Roster structure.</span>
             </div>
           )}
 
           {/* RFC 4180 / UTF-8 BOM Compatibility Banner */}
-          <div className="bg-emerald-50/40 rounded-xl px-4 py-2.5 border border-emerald-200/60 flex items-center justify-between text-xs">
-            <div className="flex items-center gap-2 text-slate-600 font-medium text-xs">
-              <i className="bi bi-shield-check text-emerald-600 text-base shrink-0"></i>
+          <div className="bg-emerald-50/40 rounded-xl px-3.5 py-1.5 border border-emerald-200/60 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2 text-slate-600 font-medium text-[11px]">
+              <i className="bi bi-shield-check text-emerald-600 text-sm shrink-0"></i>
               <span>UTF-8 BOM Encoded • Compatible with Excel, Google Sheets, & Numbers</span>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="h-6 w-px bg-slate-200"></div>
-              <div className="font-mono text-[10px] font-bold text-slate-400 tracking-wider text-right leading-tight">
+            <div className="flex items-center gap-2.5">
+              <div className="h-4.5 w-px bg-slate-200"></div>
+              <div className="font-mono text-[9px] font-bold text-slate-400 tracking-wider text-right leading-tight">
                 <div>RFC</div>
                 <div>4180</div>
               </div>
@@ -768,12 +768,12 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-4 bg-white border-t border-slate-100 flex items-center justify-between">
+        <div className="px-5 py-2.5 sm:py-3 bg-white border-t border-slate-100 flex items-center justify-between shrink-0">
           <button
             type="button"
             onClick={onClose}
             disabled={isExporting}
-            className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs sm:text-sm shadow-2xs transition-all cursor-pointer"
+            className="px-4 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs shadow-2xs transition-all cursor-pointer"
           >
             Cancel
           </button>
@@ -781,16 +781,16 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
             type="button"
             onClick={generateAndDownloadCsv}
             disabled={isExporting || (scope === "filtered" && filteredTotalCount === 0)}
-            className="px-6 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md shadow-indigo-500/20 transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-1.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-sm shadow-indigo-500/20 transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isExporting ? (
               <>
-                <i className="bi bi-arrow-repeat animate-spin text-sm"></i>
+                <i className="bi bi-arrow-repeat animate-spin text-xs"></i>
                 <span>Preparing CSV...</span>
               </>
             ) : (
               <>
-                <i className="bi bi-download text-sm"></i>
+                <i className="bi bi-download text-xs"></i>
                 <span>Download CSV File</span>
               </>
             )}
