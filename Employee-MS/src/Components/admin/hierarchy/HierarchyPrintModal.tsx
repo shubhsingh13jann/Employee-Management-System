@@ -31,6 +31,17 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
   const [includeSquadsSummary, setIncludeSquadsSummary] = useState(true);
   const [includeUnassigned, setIncludeUnassigned] = useState(true);
 
+  // Page Format state for Step 3
+  const [pageSize, setPageSize] = useState<"a4" | "letter" | "legal">("a4");
+  const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
+  const [margins, setMargins] = useState<"standard" | "narrow" | "wide">("standard");
+  const [headerStyle, setHeaderStyle] = useState<"default" | "minimal" | "executive">("default");
+
+  // Document Preview interactive controls
+  const [zoom, setZoom] = useState<number>(80);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isFitWidth, setIsFitWidth] = useState<boolean>(false);
+
   if (!isOpen) return null;
 
   const activeMappings = scope === "filtered" ? filteredHierarchy : hierarchy;
@@ -73,42 +84,110 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
   });
 
   const handlePrint = () => {
-    // Hide modal temporarily or print print-target
     window.print();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/70 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
-        {/* Modal Header (No Print) */}
-        <div className="p-4 sm:p-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between border-b border-indigo-500/30 no-print">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-300 border border-sky-400/30 flex items-center justify-center text-lg font-bold shadow-inner">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl w-full max-w-[1240px] h-[92vh] max-h-[92vh] flex flex-col overflow-hidden relative">
+        {/* Modal Header with Fluid Pastel Wave Accent */}
+        <div className="relative px-5 py-3.5 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0 no-print">
+          {/* Top-Right Fluid Pastel Wave Background matching reference design */}
+          <div className="absolute top-0 right-0 w-[440px] sm:w-[520px] h-full pointer-events-none overflow-hidden z-0">
+            <svg
+              viewBox="0 0 500 74"
+              fill="none"
+              preserveAspectRatio="none"
+              className="w-full h-full"
+            >
+              <defs>
+                <mask id="printWaveFadeMask">
+                  <linearGradient id="printWaveFadeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="black" />
+                    <stop offset="18%" stopColor="white" />
+                    <stop offset="100%" stopColor="white" />
+                  </linearGradient>
+                  <rect width="500" height="74" fill="url(#printWaveFadeMask)" />
+                </mask>
+
+                <linearGradient id="printWaveGrad1" x1="0%" y1="0%" x2="100%" y2="70%">
+                  <stop offset="0%" stopColor="#E0E7FF" stopOpacity="0.2" />
+                  <stop offset="30%" stopColor="#D7E0FC" stopOpacity="0.85" />
+                  <stop offset="65%" stopColor="#E0E7FE" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="#EDE9FE" stopOpacity="0.7" />
+                </linearGradient>
+
+                <linearGradient id="printWaveGrad2" x1="15%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#D8E2FB" stopOpacity="0.3" />
+                  <stop offset="30%" stopColor="#C7D2FE" stopOpacity="0.85" />
+                  <stop offset="60%" stopColor="#DDD6FE" stopOpacity="0.9" />
+                  <stop offset="85%" stopColor="#E9D5FF" stopOpacity="0.85" />
+                  <stop offset="100%" stopColor="#F3E8FF" stopOpacity="0.4" />
+                </linearGradient>
+
+                <linearGradient id="printWaveGrad3" x1="30%" y1="10%" x2="95%" y2="100%">
+                  <stop offset="0%" stopColor="#E0F2FE" stopOpacity="0.5" />
+                  <stop offset="45%" stopColor="#DDD6FE" stopOpacity="0.75" />
+                  <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0.7" />
+                </linearGradient>
+              </defs>
+
+              <g mask="url(#printWaveFadeMask)">
+                <path
+                  d="M0 26 C60 10 120 8 180 18 C245 28 305 50 370 38 C425 28 465 10 500 20 V0 H0 Z"
+                  fill="url(#printWaveGrad1)"
+                />
+                <path
+                  d="M30 50 C95 34 145 12 215 10 C280 8 330 32 390 44 C445 54 475 38 500 28 V0 H30 Z"
+                  fill="url(#printWaveGrad2)"
+                />
+                <path
+                  d="M130 38 C195 26 260 48 325 56 C385 64 445 50 500 38 V8 C470 20 420 18 370 24 C310 34 235 32 130 38 Z"
+                  fill="url(#printWaveGrad3)"
+                  opacity="0.75"
+                />
+              </g>
+            </svg>
+          </div>
+
+          <div className="flex items-center gap-3 relative z-10">
+            {/* Printer Squircle Icon */}
+            <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100/90 shadow-2xs flex items-center justify-center text-indigo-600 text-lg font-bold shrink-0">
               <i className="bi bi-printer-fill"></i>
             </div>
             <div>
-              <h3 className="font-bold text-sm sm:text-base leading-tight flex items-center gap-2">
-                <span>Print Hierarchy Dossier & Roster</span>
-                <span className="text-[10px] px-2 py-0.2 rounded-full font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/40">
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-base sm:text-[17px] text-slate-900 leading-tight tracking-tight mb-0">
+                  Print Hierarchy Dossier & Roster
+                </h3>
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200/70 shrink-0">
                   A4 / Letter Format
                 </span>
-              </h3>
-              <p className="text-xs text-indigo-200/80 mb-0 mt-0.5">
+              </div>
+              <p className="text-[11px] sm:text-xs text-slate-500 mb-0 mt-0.5 leading-tight">
                 Executive print layout formatted for paper records, physical audits, and PDF export
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors cursor-pointer p-1 rounded-lg hover:bg-white/10"
-          >
-            <i className="bi bi-x-lg text-sm"></i>
-          </button>
+
+          {/* Circular Close Button */}
+          <div className="relative z-10">
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-8 h-8 rounded-full bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 border border-slate-100 shadow-2xs flex items-center justify-center transition-all cursor-pointer"
+              aria-label="Close"
+            >
+              <i className="bi bi-x-lg text-xs"></i>
+            </button>
+          </div>
         </div>
 
-        {/* Print Configuration Controls Bar (No Print) */}
-        <div className="bg-slate-50 border-b border-slate-200 p-3 sm:px-5 flex flex-wrap items-center justify-between gap-3 text-xs no-print">
+        {/* Main Body: Two-Column Split Layout */}
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
+          {/* Left Column: Configuration Controls (Steps 1, 2, 3) */}
+          <div className="w-full lg:w-[380px] xl:w-[410px] shrink-0 border-r border-slate-100 p-4 sm:p-5 space-y-4 overflow-y-auto bg-white no-print [scrollbar-width:thin]">
+            {/* Configuration sections will be placed here */}
           <div className="flex items-center gap-4 flex-wrap">
             <div className="flex items-center gap-2">
               <span className="font-bold text-slate-700">Scope:</span>
@@ -166,12 +245,13 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
           </div>
         </div>
 
-        {/* Print Document Preview Area (Printable Container) */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-100/60 [scrollbar-width:thin]">
-          <div
-            id="printable-hierarchy-dossier"
-            className="bg-white p-6 sm:p-10 rounded-xl border border-slate-300 shadow-sm max-w-3xl mx-auto space-y-6 text-slate-900"
-          >
+          {/* Right Column: Document Preview Area */}
+          <div className="flex-1 bg-slate-100/70 p-4 sm:p-5 flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto flex justify-center [scrollbar-width:thin]">
+              <div
+                id="printable-hierarchy-dossier"
+                className="bg-white p-6 sm:p-10 rounded-xl border border-slate-300 shadow-sm max-w-3xl w-full space-y-6 text-slate-900 my-auto"
+              >
             {/* Corporate Header */}
             <div className="border-b-2 border-slate-900 pb-4 flex items-start justify-between">
               <div>
@@ -439,6 +519,8 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             </div>
           </div>
         </div>
+      </div>
+    </div>
 
         {/* Modal Footer (No Print) */}
         <div className="p-3.5 sm:p-4 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between gap-3 no-print">
