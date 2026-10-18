@@ -350,14 +350,128 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                 </button>
               </div>
             </div>
-          </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] text-slate-500 italic">
-              Tip: In the browser print dialog, choose &quot;Save as PDF&quot; to export.
-            </span>
+            {/* Step 3: Page Format */}
+            <div>
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-indigo-700 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
+                  3
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-xs sm:text-[13px] leading-tight mb-0">
+                    Page Format
+                  </h4>
+                  <p className="text-[10.5px] text-slate-500 mb-0 mt-0.5 leading-tight">
+                    Configure page layout and appearance.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                {/* Page Size */}
+                <div>
+                  <label className="text-[10.5px] font-bold text-slate-700 mb-1 block">
+                    Page Size
+                  </label>
+                  <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-2 flex items-center gap-2 shadow-2xs">
+                    <div className="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
+                      <i className="bi bi-file-earmark-text"></i>
+                    </div>
+                    <select
+                      value={pageSize}
+                      onChange={(e) => setPageSize(e.target.value as any)}
+                      aria-label="Page Size"
+                      className="bg-transparent text-xs font-semibold text-slate-800 w-full outline-hidden cursor-pointer appearance-none pr-4"
+                    >
+                      <option value="a4">A4 (210 × 297 mm)</option>
+                      <option value="letter">Letter (8.5 × 11 in)</option>
+                      <option value="legal">Legal (8.5 × 14 in)</option>
+                    </select>
+                    <i className="bi bi-chevron-down text-slate-400 text-[10px] absolute right-2.5 pointer-events-none"></i>
+                  </div>
+                </div>
+
+                {/* Orientation */}
+                <div>
+                  <label className="text-[10.5px] font-bold text-slate-700 mb-1 block">
+                    Orientation
+                  </label>
+                  <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-2 flex items-center gap-2 shadow-2xs">
+                    <div className="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
+                      <i className="bi bi-phone"></i>
+                    </div>
+                    <select
+                      value={orientation}
+                      onChange={(e) => setOrientation(e.target.value as any)}
+                      aria-label="Orientation"
+                      className="bg-transparent text-xs font-semibold text-slate-800 w-full outline-hidden cursor-pointer appearance-none pr-4"
+                    >
+                      <option value="portrait">Portrait</option>
+                      <option value="landscape">Landscape</option>
+                    </select>
+                    <i className="bi bi-chevron-down text-slate-400 text-[10px] absolute right-2.5 pointer-events-none"></i>
+                  </div>
+                </div>
+
+                {/* Margins */}
+                <div>
+                  <label className="text-[10.5px] font-bold text-slate-700 mb-1 block">
+                    Margins
+                  </label>
+                  <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-2 flex items-center gap-2 shadow-2xs">
+                    <div className="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
+                      <i className="bi bi-bounding-box"></i>
+                    </div>
+                    <select
+                      value={margins}
+                      onChange={(e) => setMargins(e.target.value as any)}
+                      aria-label="Margins"
+                      className="bg-transparent text-xs font-semibold text-slate-800 w-full outline-hidden cursor-pointer appearance-none pr-4"
+                    >
+                      <option value="standard">Standard</option>
+                      <option value="narrow">Narrow</option>
+                      <option value="wide">Wide</option>
+                    </select>
+                    <i className="bi bi-chevron-down text-slate-400 text-[10px] absolute right-2.5 pointer-events-none"></i>
+                  </div>
+                </div>
+
+                {/* Header Style */}
+                <div>
+                  <label className="text-[10.5px] font-bold text-slate-700 mb-1 block">
+                    Header Style
+                  </label>
+                  <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-2 flex items-center gap-2 shadow-2xs">
+                    <div className="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
+                      <i className="bi bi-layout-text-window-reverse"></i>
+                    </div>
+                    <select
+                      value={headerStyle}
+                      onChange={(e) => setHeaderStyle(e.target.value as any)}
+                      aria-label="Header Style"
+                      className="bg-transparent text-xs font-semibold text-slate-800 w-full outline-hidden cursor-pointer appearance-none pr-4"
+                    >
+                      <option value="default">Default</option>
+                      <option value="minimal">Minimal</option>
+                      <option value="executive">Executive</option>
+                    </select>
+                    <i className="bi bi-chevron-down text-slate-400 text-[10px] absolute right-2.5 pointer-events-none"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tip Callout Banner */}
+            <div className="bg-gradient-to-r from-amber-50/70 via-indigo-50/30 to-purple-50/20 border border-amber-200/70 rounded-2xl p-3 flex items-start gap-2.5 shadow-2xs">
+              <div className="w-5.5 h-5.5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs shrink-0 mt-0.5">
+                <i className="bi bi-lightbulb-fill"></i>
+              </div>
+              <p className="text-[11px] text-slate-600 leading-relaxed mb-0">
+                <strong className="text-slate-800">Tip:</strong> In the browser print dialog, choose{" "}
+                <span className="font-semibold text-indigo-700">&quot;Save as PDF&quot;</span> to export.
+              </p>
+            </div>
           </div>
-        </div>
 
           {/* Right Column: Document Preview Area */}
           <div className="flex-1 bg-slate-100/70 p-4 sm:p-5 flex flex-col overflow-hidden">
@@ -634,6 +748,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
           </div>
         </div>
       </div>
+    </div>
 
         {/* Modal Footer (No Print) */}
         <div className="p-3.5 sm:p-4 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between gap-3 no-print">
