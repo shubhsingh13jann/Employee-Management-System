@@ -849,11 +849,11 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
     </div>
 
         {/* Modal Footer (No Print) */}
-        <div className="p-3.5 sm:p-4 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between gap-3 no-print">
+        <div className="px-5 py-3 sm:py-3.5 bg-white border-t border-slate-100 flex items-center justify-between gap-3 shrink-0 no-print">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-200/70 transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 shadow-2xs transition-all cursor-pointer"
           >
             Close Preview
           </button>
@@ -861,13 +861,44 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             <button
               type="button"
               onClick={handlePrint}
-              className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 shadow-md shadow-indigo-600/25 transition-all cursor-pointer flex items-center gap-2"
+              className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 shadow-md shadow-indigo-600/25 transition-all cursor-pointer flex items-center gap-2"
             >
               <i className="bi bi-printer-fill text-sm"></i>
               <span>Print Dossier / Export to PDF</span>
             </button>
           </div>
         </div>
+
+        {/* Dynamic Print Stylesheet responding to Step 3 controls */}
+        <style>{`
+          @media print {
+            body * {
+              visibility: hidden;
+            }
+            #printable-hierarchy-dossier, #printable-hierarchy-dossier * {
+              visibility: visible;
+            }
+            #printable-hierarchy-dossier {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100% !important;
+              max-width: 100% !important;
+              margin: 0 !important;
+              padding: 8mm !important;
+              box-shadow: none !important;
+              border: none !important;
+              transform: none !important;
+            }
+            .no-print {
+              display: none !important;
+            }
+            @page {
+              size: ${pageSize} ${orientation};
+              margin: ${margins === "narrow" ? "10mm" : margins === "wide" ? "25mm" : "15mm"};
+            }
+          }
+        `}</style>
       </div>
     </div>
   );
