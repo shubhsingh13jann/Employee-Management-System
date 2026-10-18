@@ -255,31 +255,71 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-150">
       <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl w-full max-w-[750px] overflow-hidden flex flex-col max-h-[94vh] relative">
         {/* Modal Header with Fluid Pastel Wave Accent */}
-        <div className="relative px-4 sm:px-5 py-3 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0">
-          {/* Subtle Top-Right Fluid Pastel Wave Background */}
-          <div className="absolute top-0 right-0 w-80 h-full pointer-events-none overflow-hidden z-0">
-            <svg viewBox="0 0 320 120" fill="none" className="w-full h-full opacity-60">
-              <path
-                d="M40 0C110 35 170 15 230 55C270 80 295 105 320 120V0H40Z"
-                fill="url(#headerWaveGrad1)"
-              />
-              <path
-                d="M100 0C160 30 210 10 260 45C290 65 310 90 320 100V0H100Z"
-                fill="url(#headerWaveGrad2)"
-                fillOpacity="0.7"
-              />
+        <div className="relative px-4 sm:px-5 py-3 sm:py-3.5 bg-white flex items-center justify-between overflow-hidden shrink-0">
+          {/* Top-Right Fluid Pastel Wave Background matching reference design */}
+          <div className="absolute top-0 right-0 w-[440px] sm:w-[500px] h-full pointer-events-none overflow-hidden z-0">
+            <svg
+              viewBox="0 0 500 74"
+              fill="none"
+              preserveAspectRatio="none"
+              className="w-full h-full"
+            >
               <defs>
-                <linearGradient id="headerWaveGrad1" x1="40" y1="0" x2="320" y2="120" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#EEF2FF" />
-                  <stop offset="0.5" stopColor="#E0E7FF" />
-                  <stop offset="1" stopColor="#F5F3FF" />
+                {/* Left fade mask to seamlessly blend into pure white */}
+                <mask id="headerWaveFadeMask">
+                  <linearGradient id="waveFadeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="black" />
+                    <stop offset="18%" stopColor="white" />
+                    <stop offset="100%" stopColor="white" />
+                  </linearGradient>
+                  <rect width="500" height="74" fill="url(#waveFadeGrad)" />
+                </mask>
+
+                {/* Wave 1: Soft Sky-Blue / Periwinkle Gradient */}
+                <linearGradient id="headerWaveGrad1" x1="0%" y1="0%" x2="100%" y2="70%">
+                  <stop offset="0%" stopColor="#E0E7FF" stopOpacity="0.2" />
+                  <stop offset="30%" stopColor="#D7E0FC" stopOpacity="0.85" />
+                  <stop offset="65%" stopColor="#E0E7FE" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="#EDE9FE" stopOpacity="0.7" />
                 </linearGradient>
-                <linearGradient id="headerWaveGrad2" x1="100" y1="0" x2="320" y2="100" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#DBEAFE" />
-                  <stop offset="0.6" stopColor="#EDE9FE" />
-                  <stop offset="1" stopColor="#FAE8FF" />
+
+                {/* Wave 2: Richer Lavender / Violet Sweep */}
+                <linearGradient id="headerWaveGrad2" x1="15%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#D8E2FB" stopOpacity="0.3" />
+                  <stop offset="30%" stopColor="#C7D2FE" stopOpacity="0.85" />
+                  <stop offset="60%" stopColor="#DDD6FE" stopOpacity="0.9" />
+                  <stop offset="85%" stopColor="#E9D5FF" stopOpacity="0.85" />
+                  <stop offset="100%" stopColor="#F3E8FF" stopOpacity="0.4" />
+                </linearGradient>
+
+                {/* Wave 3: Subtle Pastel Ribbon Glow */}
+                <linearGradient id="headerWaveGrad3" x1="30%" y1="10%" x2="95%" y2="100%">
+                  <stop offset="0%" stopColor="#E0F2FE" stopOpacity="0.5" />
+                  <stop offset="45%" stopColor="#DDD6FE" stopOpacity="0.75" />
+                  <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0.7" />
                 </linearGradient>
               </defs>
+
+              <g mask="url(#headerWaveFadeMask)">
+                {/* Layer 1: Broad soft background crest flowing from upper left towards upper right */}
+                <path
+                  d="M0 26 C60 10 120 8 180 18 C245 28 305 50 370 38 C425 28 465 10 500 20 V0 H0 Z"
+                  fill="url(#headerWaveGrad1)"
+                />
+
+                {/* Layer 2: Main organic curved ribbon flowing across center-right */}
+                <path
+                  d="M30 50 C95 34 145 12 215 10 C280 8 330 32 390 44 C445 54 475 38 500 28 V0 H30 Z"
+                  fill="url(#headerWaveGrad2)"
+                />
+
+                {/* Layer 3: Soft swoop ribbon sweeping under badge and close button */}
+                <path
+                  d="M130 38 C195 26 260 48 325 56 C385 64 445 50 500 38 V8 C470 20 420 18 370 24 C310 34 235 32 130 38 Z"
+                  fill="url(#headerWaveGrad3)"
+                  opacity="0.75"
+                />
+              </g>
             </svg>
           </div>
 
@@ -330,7 +370,7 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="w-7.5 h-7.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+              className="w-7.5 h-7.5 rounded-full bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 border border-slate-100 shadow-2xs flex items-center justify-center transition-all cursor-pointer"
               aria-label="Close"
             >
               <i className="bi bi-x-lg text-xs"></i>
