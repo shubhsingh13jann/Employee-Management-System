@@ -475,10 +475,108 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
 
           {/* Right Column: Document Preview Area */}
           <div className="flex-1 bg-slate-100/70 p-4 sm:p-5 flex flex-col overflow-hidden">
-            <div className="flex-1 overflow-y-auto flex justify-center [scrollbar-width:thin]">
+            {/* Top Preview Toolbar matching Image 1 */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs px-3.5 py-2 flex items-center justify-between gap-3 mb-3.5 shrink-0 no-print">
+              {/* Left: Page Navigation */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage <= 1}
+                  className="w-7 h-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-35 disabled:hover:bg-white text-slate-600 flex items-center justify-center transition-all cursor-pointer text-xs"
+                  title="Previous Page"
+                  aria-label="Previous Page"
+                >
+                  <i className="bi bi-arrow-left"></i>
+                </button>
+                <div className="px-2.5 py-0.5 rounded-lg bg-slate-50 border border-slate-200/80 text-xs font-bold text-slate-700 font-mono tracking-wide">
+                  {currentPage} / 4
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.min(4, p + 1))}
+                  disabled={currentPage >= 4}
+                  className="w-7 h-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-35 disabled:hover:bg-white text-slate-600 flex items-center justify-center transition-all cursor-pointer text-xs"
+                  title="Next Page"
+                  aria-label="Next Page"
+                >
+                  <i className="bi bi-arrow-right"></i>
+                </button>
+              </div>
+
+              {/* Center: Zoom Controls */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setZoom((z) => Math.max(50, z - 10))}
+                  className="w-7 h-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center transition-all cursor-pointer text-xs font-bold"
+                  title="Zoom Out"
+                  aria-label="Zoom Out"
+                >
+                  <i className="bi bi-dash"></i>
+                </button>
+                <div className="px-3 py-0.5 rounded-lg bg-slate-50 border border-slate-200/80 text-xs font-bold text-slate-700 font-mono min-w-[52px] text-center">
+                  {zoom}%
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setZoom((z) => Math.min(150, z + 10))}
+                  className="w-7 h-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center transition-all cursor-pointer text-xs font-bold"
+                  title="Zoom In"
+                  aria-label="Zoom In"
+                >
+                  <i className="bi bi-plus"></i>
+                </button>
+              </div>
+
+              {/* Right: Quick Action Tools */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {}}
+                  className="w-7.5 h-7.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-all cursor-pointer"
+                  title="Search Dossier"
+                  aria-label="Search Dossier"
+                >
+                  <i className="bi bi-search text-xs"></i>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsFitWidth(!isFitWidth)}
+                  className={`w-7.5 h-7.5 rounded-lg border text-xs flex items-center justify-center transition-all cursor-pointer ${
+                    isFitWidth
+                      ? "border-indigo-400 bg-indigo-50 text-indigo-700"
+                      : "border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800"
+                  }`}
+                  title={isFitWidth ? "Original Width" : "Fit to Width"}
+                  aria-label="Fit to Width"
+                >
+                  <i className="bi bi-arrows-fullscreen text-xs"></i>
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePrint}
+                  className="w-7.5 h-7.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-all cursor-pointer"
+                  title="Download / Print PDF"
+                  aria-label="Download / Print PDF"
+                >
+                  <i className="bi bi-download text-xs"></i>
+                </button>
+              </div>
+            </div>
+
+            {/* Scrollable Document Canvas with Zoom Scaling */}
+            <div className="flex-1 overflow-y-auto flex justify-center [scrollbar-width:thin] pb-6">
               <div
                 id="printable-hierarchy-dossier"
-                className="bg-white p-6 sm:p-10 rounded-xl border border-slate-300 shadow-sm max-w-3xl w-full space-y-6 text-slate-900 my-auto"
+                style={{
+                  transform: !isFitWidth ? `scale(${zoom / 100})` : undefined,
+                  transformOrigin: "top center",
+                  transition: "transform 0.15s ease-out",
+                }}
+                className={`bg-white p-6 sm:p-10 rounded-xl border border-slate-300 shadow-md transition-all space-y-6 text-slate-900 ${
+                  isFitWidth ? "w-full max-w-none" : "w-full max-w-3xl"
+                }`}
               >
             {/* Corporate Header */}
             <div className="border-b-2 border-slate-900 pb-4 flex items-start justify-between">
