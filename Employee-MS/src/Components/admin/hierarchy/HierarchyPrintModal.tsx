@@ -187,33 +187,82 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
           {/* Left Column: Configuration Controls (Steps 1, 2, 3) */}
           <div className="w-full lg:w-[380px] xl:w-[410px] shrink-0 border-r border-slate-100 p-4 sm:p-5 space-y-4 overflow-y-auto bg-white no-print [scrollbar-width:thin]">
-            {/* Configuration sections will be placed here */}
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-700">Scope:</span>
-              <label className="flex items-center gap-1 cursor-pointer">
-                <input
-                  type="radio"
-                  name="printScope"
-                  checked={scope === "filtered"}
-                  onChange={() => setScope("filtered")}
-                  className="accent-indigo-600"
-                />
-                <span className="font-medium text-slate-700">Filtered View ({activeMappings.length})</span>
-              </label>
-              <label className="flex items-center gap-1 cursor-pointer ml-2">
-                <input
-                  type="radio"
-                  name="printScope"
-                  checked={scope === "all"}
-                  onChange={() => setScope("all")}
-                  className="accent-indigo-600"
-                />
-                <span className="font-medium text-slate-700">All Workforce ({hierarchy.length})</span>
-              </label>
-            </div>
+            {/* Step 1: Report Scope */}
+            <div>
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-indigo-700 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
+                  1
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-xs sm:text-[13px] leading-tight mb-0">
+                    Report Scope
+                  </h4>
+                  <p className="text-[10.5px] text-slate-500 mb-0 mt-0.5 leading-tight">
+                    Choose the data scope to include in the report.
+                  </p>
+                </div>
+              </div>
 
-            <div className="h-4 w-px bg-slate-300 hidden sm:block"></div>
+              <div className="grid grid-cols-2 gap-2.5">
+                {/* Filtered View Card */}
+                <button
+                  type="button"
+                  onClick={() => setScope("filtered")}
+                  className={`p-2.5 sm:p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
+                    scope === "filtered"
+                      ? "border-2 border-blue-500 bg-gradient-to-br from-blue-50/70 to-indigo-50/40 shadow-xs"
+                      : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300"
+                  }`}
+                >
+                  <div
+                    className={`w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 ${
+                      scope === "filtered"
+                        ? "border-2 border-blue-600 bg-white"
+                        : "border-2 border-slate-300 bg-white"
+                    }`}
+                  >
+                    {scope === "filtered" && (
+                      <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                    )}
+                  </div>
+                  <div className="text-blue-600 text-lg shrink-0 flex items-center justify-center">
+                    <i className="bi bi-funnel"></i>
+                  </div>
+                  <span className="font-bold text-xs sm:text-[12px] text-slate-900 leading-tight truncate">
+                    Filtered View ({filteredHierarchy.length})
+                  </span>
+                </button>
+
+                {/* All Workforce Card */}
+                <button
+                  type="button"
+                  onClick={() => setScope("all")}
+                  className={`p-2.5 sm:p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
+                    scope === "all"
+                      ? "border-2 border-blue-500 bg-gradient-to-br from-blue-50/70 to-indigo-50/40 shadow-xs"
+                      : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300"
+                  }`}
+                >
+                  <div
+                    className={`w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 ${
+                      scope === "all"
+                        ? "border-2 border-blue-600 bg-white"
+                        : "border-2 border-slate-300 bg-white"
+                    }`}
+                  >
+                    {scope === "all" && (
+                      <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                    )}
+                  </div>
+                  <div className="text-blue-600 text-lg shrink-0 flex items-center justify-center">
+                    <i className="bi bi-database"></i>
+                  </div>
+                  <span className="font-bold text-xs sm:text-[12px] text-slate-900 leading-tight truncate">
+                    All Workforce ({hierarchy.length})
+                  </span>
+                </button>
+              </div>
+            </div>
 
             <div className="flex items-center gap-3">
               <label className="flex items-center gap-1.5 cursor-pointer">
@@ -520,7 +569,6 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
           </div>
         </div>
       </div>
-    </div>
 
         {/* Modal Footer (No Print) */}
         <div className="p-3.5 sm:p-4 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between gap-3 no-print">
