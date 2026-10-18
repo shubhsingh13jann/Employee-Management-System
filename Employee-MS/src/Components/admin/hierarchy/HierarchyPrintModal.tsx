@@ -264,26 +264,91 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <label className="flex items-center gap-1.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={includeSquadsSummary}
-                  onChange={(e) => setIncludeSquadsSummary(e.target.checked)}
-                  className="rounded text-indigo-600 focus:ring-indigo-500"
-                />
-                <span className="text-slate-700 font-medium">Squads Summary</span>
-              </label>
+            {/* Step 2: Additional Sections */}
+            <div>
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-indigo-700 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
+                  2
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-xs sm:text-[13px] leading-tight mb-0">
+                    Additional Sections
+                  </h4>
+                  <p className="text-[10.5px] text-slate-500 mb-0 mt-0.5 leading-tight">
+                    Select the sections to include in the print layout.
+                  </p>
+                </div>
+              </div>
 
-              <label className="flex items-center gap-1.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={includeUnassigned}
-                  onChange={(e) => setIncludeUnassigned(e.target.checked)}
-                  className="rounded text-indigo-600 focus:ring-indigo-500"
-                />
-                <span className="text-slate-700 font-medium">Unassigned Staff</span>
-              </label>
+              <div className="space-y-2">
+                {/* Squads Summary Card */}
+                <button
+                  type="button"
+                  onClick={() => setIncludeSquadsSummary(!includeSquadsSummary)}
+                  className={`w-full p-2.5 sm:p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-3 ${
+                    includeSquadsSummary
+                      ? "border-slate-200/90 bg-white hover:bg-slate-50/80 shadow-2xs"
+                      : "border-slate-200 bg-slate-50/50 hover:bg-slate-100/60 opacity-75"
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-colors ${
+                      includeSquadsSummary
+                        ? "bg-blue-600 text-white shadow-2xs"
+                        : "border-2 border-slate-300 bg-white"
+                    }`}
+                  >
+                    {includeSquadsSummary && <i className="bi bi-check text-sm font-black"></i>}
+                  </div>
+
+                  <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-sm shrink-0">
+                    <i className="bi bi-people-fill"></i>
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <span className="font-bold block text-xs sm:text-[12.5px] text-slate-900 leading-tight">
+                      Squads Summary
+                    </span>
+                    <span className="text-[10px] sm:text-[10.5px] text-slate-500 block leading-tight mt-0.5 truncate">
+                      Include supervisor squad roster and capacity summary
+                    </span>
+                  </div>
+                </button>
+
+                {/* Unassigned Staff Card */}
+                <button
+                  type="button"
+                  onClick={() => setIncludeUnassigned(!includeUnassigned)}
+                  className={`w-full p-2.5 sm:p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-3 ${
+                    includeUnassigned
+                      ? "border-slate-200/90 bg-white hover:bg-slate-50/80 shadow-2xs"
+                      : "border-slate-200 bg-slate-50/50 hover:bg-slate-100/60 opacity-75"
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-colors ${
+                      includeUnassigned
+                        ? "bg-blue-600 text-white shadow-2xs"
+                        : "border-2 border-slate-300 bg-white"
+                    }`}
+                  >
+                    {includeUnassigned && <i className="bi bi-check text-sm font-black"></i>}
+                  </div>
+
+                  <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-sm shrink-0">
+                    <i className="bi bi-person-fill"></i>
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <span className="font-bold block text-xs sm:text-[12.5px] text-slate-900 leading-tight">
+                      Unassigned Staff
+                    </span>
+                    <span className="text-[10px] sm:text-[10.5px] text-slate-500 block leading-tight mt-0.5 truncate">
+                      Include staff who are not assigned to any supervisor
+                    </span>
+                  </div>
+                </button>
+              </div>
             </div>
           </div>
 
