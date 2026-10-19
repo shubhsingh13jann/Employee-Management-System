@@ -164,14 +164,14 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <div style={{ fontSize: "14px" }} className="font-bold text-slate-900 leading-tight tracking-tight mb-0">
+                <div style={{ fontSize: "14.7px" }} className="font-bold text-slate-900 leading-tight tracking-tight mb-0">
                   Print Hierarchy Dossier & Roster
                 </div>
-                <span className="text-[9.5px] px-2 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200/70 shrink-0">
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200/70 shrink-0">
                   A4 / Letter Format
                 </span>
               </div>
-              <p style={{ fontSize: "11px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
+              <p style={{ fontSize: "11.5px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
                 Executive print layout formatted for paper records, physical audits, and PDF export
               </p>
             </div>
@@ -201,10 +201,10 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                   1
                 </div>
                 <div>
-                  <div style={{ fontSize: "12px" }} className="font-bold text-slate-900 leading-tight mb-0">
+                  <div style={{ fontSize: "12.6px" }} className="font-bold text-slate-900 leading-tight mb-0">
                     Report Scope
                   </div>
-                  <p style={{ fontSize: "10.5px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
+                  <p style={{ fontSize: "11px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
                     Choose the data scope to include in the report.
                   </p>
                 </div>
@@ -278,10 +278,10 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                   2
                 </div>
                 <div>
-                  <div style={{ fontSize: "12px" }} className="font-bold text-slate-900 leading-tight mb-0">
+                  <div style={{ fontSize: "12.6px" }} className="font-bold text-slate-900 leading-tight mb-0">
                     Additional Sections
                   </div>
-                  <p style={{ fontSize: "10.5px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
+                  <p style={{ fontSize: "11px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
                     Select the sections to include in the print layout.
                   </p>
                 </div>
@@ -365,10 +365,10 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                   3
                 </div>
                 <div>
-                  <div style={{ fontSize: "12px" }} className="font-bold text-slate-900 leading-tight mb-0">
+                  <div style={{ fontSize: "12.6px" }} className="font-bold text-slate-900 leading-tight mb-0">
                     Page Format
                   </div>
-                  <p style={{ fontSize: "10.5px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
+                  <p style={{ fontSize: "11px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
                     Configure page layout and appearance.
                   </p>
                 </div>
@@ -593,24 +593,24 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             <div className="border-b-2 border-slate-900 pb-2.5 sm:pb-3 flex items-start justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-5 h-5 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] shadow-2xs shrink-0">
+                  <div className="w-5.5 h-5.5 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-[10.5px] shadow-2xs shrink-0">
                     <i className="bi bi-bar-chart-fill"></i>
                   </div>
                   <div
-                    style={{ fontSize: "13px", lineHeight: "1.2", letterSpacing: "0.05em" }}
+                    style={{ fontSize: "13.75px", lineHeight: "1.2", letterSpacing: "0.05em" }}
                     className="font-bold text-slate-900 uppercase whitespace-nowrap"
                   >
                     EMS Enterprise Workforce
                   </div>
                 </div>
                 <div
-                  style={{ fontSize: "12px", lineHeight: "1.3" }}
+                  style={{ fontSize: "12.6px", lineHeight: "1.3" }}
                   className="font-semibold text-slate-800 whitespace-nowrap"
                 >
                   Workforce Team Hierarchy & Reporting Lines Dossier
                 </div>
                 <div
-                  style={{ fontSize: "9.5px", lineHeight: "1.2" }}
+                  style={{ fontSize: "10px", lineHeight: "1.2" }}
                   className="text-slate-500 mb-0 mt-0.5 whitespace-nowrap"
                 >
                   Official Organizational Chain of Command Audit Record
@@ -618,11 +618,11 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
               </div>
 
               <div
-                style={{ fontSize: "9.5px", lineHeight: "1.3" }}
+                style={{ fontSize: "10px", lineHeight: "1.3" }}
                 className="text-right text-slate-600 space-y-0.5 shrink-0"
               >
                 <div
-                  style={{ fontSize: "10px" }}
+                  style={{ fontSize: "10.5px" }}
                   className="font-bold text-slate-900 tracking-wider uppercase mb-0.5"
                 >
                   CONFIDENTIAL REPORT
@@ -631,7 +631,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                 <p className="mb-0">Time: <span className="text-slate-700">{currentTime}</span></p>
                 <p className="mb-0">Scope: <strong className="capitalize text-slate-800">{scope === "filtered" ? "Filtered View" : "All Workforce"}</strong></p>
                 {activeFiltersDesc && (
-                  <p style={{ fontSize: "9px" }} className="text-indigo-700 max-w-[200px] truncate mb-0">
+                  <p style={{ fontSize: "9.5px" }} className="text-indigo-700 max-w-[200px] truncate mb-0">
                     {activeFiltersDesc}
                   </p>
                 )}
@@ -678,14 +678,14 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             <div>
               <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-200">
                 <div
-                  style={{ fontSize: "11px", lineHeight: "1.2", letterSpacing: "0.04em" }}
+                  style={{ fontSize: "11.6px", lineHeight: "1.2", letterSpacing: "0.04em" }}
                   className="font-bold text-slate-900 uppercase flex items-center gap-1.5 whitespace-nowrap"
                 >
-                  <i className="bi bi-diagram-3 text-blue-600" style={{ fontSize: "12px" }}></i>
+                  <i className="bi bi-diagram-3 text-blue-600" style={{ fontSize: "12.6px" }}></i>
                   <span>1. Detailed Workforce Reporting Relationships ({activeMappings.length})</span>
                 </div>
                 <span
-                  style={{ fontSize: "9px" }}
+                  style={{ fontSize: "9.5px" }}
                   className="text-slate-400 font-normal whitespace-nowrap shrink-0"
                 >
                   Ordered by Department & Supervisor
@@ -759,10 +759,10 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
               <div className="pt-2">
                 <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-200">
                   <div
-                    style={{ fontSize: "11px", lineHeight: "1.2", letterSpacing: "0.04em" }}
+                    style={{ fontSize: "11.6px", lineHeight: "1.2", letterSpacing: "0.04em" }}
                     className="font-bold text-slate-900 uppercase flex items-center gap-1.5 whitespace-nowrap"
                   >
-                    <i className="bi bi-people-fill text-purple-600" style={{ fontSize: "12px" }}></i>
+                    <i className="bi bi-people-fill text-purple-600" style={{ fontSize: "12.6px" }}></i>
                     <span>2. Supervisor Squad Roster & Capacity Summary ({squadsList.length} Squads)</span>
                   </div>
                 </div>
@@ -830,10 +830,10 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
               <div className="pt-2">
                 <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-200">
                   <div
-                    style={{ fontSize: "11px", lineHeight: "1.2", letterSpacing: "0.04em" }}
+                    style={{ fontSize: "11.6px", lineHeight: "1.2", letterSpacing: "0.04em" }}
                     className="font-bold text-amber-900 uppercase flex items-center gap-1.5 whitespace-nowrap"
                   >
-                    <i className="bi bi-exclamation-triangle-fill text-amber-600" style={{ fontSize: "12px" }}></i>
+                    <i className="bi bi-exclamation-triangle-fill text-amber-600" style={{ fontSize: "12.6px" }}></i>
                     <span>3. Unallocated Personnel Awaiting Squad Assignment ({activeUnassigned.length})</span>
                   </div>
                 </div>
