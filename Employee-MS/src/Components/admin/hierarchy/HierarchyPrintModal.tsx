@@ -94,7 +94,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl w-full max-w-[1240px] h-[92vh] max-h-[92vh] flex flex-col overflow-hidden relative"
+        className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl w-full max-w-[1140px] h-[92vh] max-h-[92vh] flex flex-col overflow-hidden relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header with Fluid Pastel Wave Accent */}
@@ -483,11 +483,11 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
           {/* Right Column: Document Preview Area */}
           <div className="flex-1 bg-slate-100/70 flex flex-col overflow-hidden">
             {/* Scrollable Document Canvas with Sticky Toolbar */}
-            <div className="flex-1 overflow-y-auto [scrollbar-width:thin] px-2.5 sm:px-4 py-3">
+            <div className="flex-1 overflow-y-auto [scrollbar-width:thin] px-2.5 sm:px-3.5 py-3">
               <div className="flex flex-col items-center w-full min-h-full">
                 {/* Top Preview Toolbar matching Image 1 */}
                 <div className="sticky top-0 z-20 w-full flex justify-center pb-3 pt-0.5 bg-slate-100/90 backdrop-blur-xs no-print">
-                  <div className={`w-full ${isFitWidth ? "max-w-none" : "max-w-4xl"} bg-white rounded-2xl border border-slate-200/90 shadow-2xs px-3.5 py-2 flex items-center justify-between gap-3`}>
+                  <div className={`w-full ${isFitWidth ? "max-w-none" : "max-w-3xl"} bg-white rounded-2xl border border-slate-200/90 shadow-2xs px-3.5 py-2 flex items-center justify-between gap-3`}>
                     {/* Left: Page Navigation */}
                     <div className="flex items-center gap-1.5">
                       <button
@@ -585,8 +585,8 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                     transformOrigin: "top center",
                     transition: "transform 0.15s ease-out",
                   }}
-                  className={`bg-white px-4 sm:px-6 py-4 sm:py-5 rounded-xl border border-slate-300 shadow-md transition-all space-y-4 text-slate-900 mb-6 ${
-                    isFitWidth ? "w-full max-w-none" : "w-full max-w-4xl"
+                  className={`bg-white p-5 sm:p-7 rounded-xl border border-slate-300 shadow-md transition-all space-y-4 text-slate-900 mb-6 ${
+                    isFitWidth ? "w-full max-w-none" : "w-full max-w-3xl"
                   }`}
                 >
             {/* Corporate Header */}
