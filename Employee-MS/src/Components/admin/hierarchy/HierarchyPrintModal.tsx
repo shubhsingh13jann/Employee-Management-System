@@ -94,11 +94,11 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl w-full max-w-[1140px] h-[92vh] max-h-[92vh] flex flex-col overflow-hidden relative"
+        className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl w-full max-w-[1010px] h-[92vh] max-h-[92vh] flex flex-col overflow-hidden relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header with Fluid Pastel Wave Accent */}
-        <div className="relative px-5 py-3.5 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0 no-print">
+        <div className="relative px-4 sm:px-4.5 py-3 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0 no-print">
           {/* Top-Right Fluid Pastel Wave Background matching reference design */}
           <div className="absolute top-0 right-0 w-[440px] sm:w-[520px] h-full pointer-events-none overflow-hidden z-0">
             <svg
@@ -157,21 +157,21 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             </svg>
           </div>
 
-          <div className="flex items-center gap-3 relative z-10">
+          <div className="flex items-center gap-2.5 relative z-10">
             {/* Printer Squircle Icon */}
-            <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100/90 shadow-2xs flex items-center justify-center text-indigo-600 text-lg font-bold shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100/90 shadow-2xs flex items-center justify-center text-indigo-600 text-xs font-bold shrink-0">
               <i className="bi bi-printer-fill"></i>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <div style={{ fontSize: "14.7px" }} className="font-bold text-slate-900 leading-tight tracking-tight mb-0">
+                <div style={{ fontSize: "14px" }} className="font-bold text-slate-900 leading-tight tracking-tight mb-0">
                   Print Hierarchy Dossier & Roster
                 </div>
-                <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200/70 shrink-0">
+                <span className="text-[9.5px] px-2 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200/70 shrink-0">
                   A4 / Letter Format
                 </span>
               </div>
-              <p style={{ fontSize: "11.5px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
+              <p style={{ fontSize: "11px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
                 Executive print layout formatted for paper records, physical audits, and PDF export
               </p>
             </div>
@@ -193,7 +193,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
         {/* Main Body: Two-Column Split Layout */}
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
           {/* Left Column: Configuration Controls (Steps 1, 2, 3) */}
-          <div className="w-full lg:w-[360px] xl:w-[390px] shrink-0 border-r border-slate-100 p-3.5 sm:p-4.5 space-y-3.5 overflow-y-auto bg-white no-print [scrollbar-width:thin]">
+          <div className="w-full lg:w-[330px] shrink-0 border-r border-slate-100 p-4 sm:p-4.5 space-y-3.5 overflow-y-auto bg-white no-print [scrollbar-width:thin]">
             {/* Step 1: Report Scope */}
             <div>
               <div className="flex items-center gap-2.5 mb-2">
@@ -486,7 +486,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             <div className="flex-1 overflow-y-auto [scrollbar-width:thin] px-2.5 sm:px-3.5 py-3">
               <div className="flex flex-col items-center w-full min-h-full">
                 {/* Top Preview Toolbar matching Image 1 */}
-                <div className="sticky top-0 z-20 w-full flex justify-center pb-3 pt-0.5 bg-slate-100/90 backdrop-blur-xs no-print">
+                <div className="sticky top-0 z-20 w-full flex justify-center pb-2.5 pt-0.5 bg-slate-100/90 backdrop-blur-xs no-print">
                   <div className={`w-full ${isFitWidth ? "max-w-none" : "max-w-3xl"} bg-white rounded-2xl border border-slate-200/90 shadow-2xs px-3.5 py-2 flex items-center justify-between gap-3`}>
                     {/* Left: Page Navigation */}
                     <div className="flex items-center gap-1.5">
@@ -585,7 +585,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                     transformOrigin: "top center",
                     transition: "transform 0.15s ease-out",
                   }}
-                  className={`bg-white p-5 sm:p-7 rounded-xl border border-slate-300 shadow-md transition-all space-y-4 text-slate-900 mb-6 ${
+                  className={`bg-white p-4 sm:p-5.5 rounded-xl border border-slate-300 shadow-md transition-all space-y-4 text-slate-900 mb-6 ${
                     isFitWidth ? "w-full max-w-none" : "w-full max-w-3xl"
                   }`}
                 >
