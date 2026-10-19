@@ -164,14 +164,14 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-base sm:text-[17px] text-slate-900 leading-tight tracking-tight mb-0">
+                <h3 className="font-bold text-sm sm:text-[15px] text-slate-900 leading-tight tracking-tight mb-0">
                   Print Hierarchy Dossier & Roster
                 </h3>
-                <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200/70 shrink-0">
+                <span className="text-[9.5px] px-2 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200/70 shrink-0">
                   A4 / Letter Format
                 </span>
               </div>
-              <p className="text-[11px] sm:text-xs text-slate-500 mb-0 mt-0.5 leading-tight">
+              <p className="text-[11px] text-slate-500 mb-0 mt-0.5 leading-tight">
                 Executive print layout formatted for paper records, physical audits, and PDF export
               </p>
             </div>
@@ -590,31 +590,31 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                   }`}
                 >
             {/* Corporate Header */}
-            <div className="border-b-2 border-slate-900 pb-2.5 sm:pb-3 flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2.5 mb-1">
-                  <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+            <div className="border-b-2 border-slate-900 pb-2.5 sm:pb-3 flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-5.5 h-5.5 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-2xs shrink-0">
                     <i className="bi bi-bar-chart-fill"></i>
                   </div>
-                  <h1 className="text-lg sm:text-xl font-black tracking-tight text-slate-900 uppercase">
+                  <h1 className="text-xs sm:text-[13px] font-bold tracking-wider text-slate-900 uppercase truncate">
                     EMS Enterprise Workforce
                   </h1>
                 </div>
-                <h2 className="text-sm sm:text-[15px] font-bold text-slate-900 leading-tight">
+                <h2 className="text-[11.5px] sm:text-xs font-semibold text-slate-800 leading-snug">
                   Workforce Team Hierarchy & Reporting Lines Dossier
                 </h2>
-                <p className="text-[11px] text-slate-500 mb-0 mt-0.5 leading-tight">
+                <p className="text-[10px] text-slate-500 mb-0 mt-0.5 leading-tight">
                   Official Organizational Chain of Command Audit Record
                 </p>
               </div>
 
-              <div className="text-right text-[10px] text-slate-600 space-y-0.5">
-                <p className="font-bold text-slate-900 text-xs tracking-wider">CONFIDENTIAL REPORT</p>
-                <p>Date: <strong className="text-slate-800">{currentDate}</strong></p>
-                <p>Time: <span className="text-slate-700">{currentTime}</span></p>
-                <p>Scope: <strong className="capitalize text-slate-800">{scope === "filtered" ? "Filtered View" : "All Workforce"}</strong></p>
+              <div className="text-right text-[9.5px] text-slate-600 space-y-0.5 shrink-0">
+                <p className="font-bold text-slate-900 text-[10px] tracking-wider uppercase mb-0.5">CONFIDENTIAL REPORT</p>
+                <p className="mb-0">Date: <strong className="text-slate-800">{currentDate}</strong></p>
+                <p className="mb-0">Time: <span className="text-slate-700">{currentTime}</span></p>
+                <p className="mb-0">Scope: <strong className="capitalize text-slate-800">{scope === "filtered" ? "Filtered View" : "All Workforce"}</strong></p>
                 {activeFiltersDesc && (
-                  <p className="text-[9.5px] text-indigo-700 max-w-[200px] truncate">
+                  <p className="text-[9px] text-indigo-700 max-w-[200px] truncate mb-0">
                     {activeFiltersDesc}
                   </p>
                 )}
@@ -624,34 +624,34 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             {/* Executive KPI Summary Bar matching Image 1 */}
             <div className="grid grid-cols-4 gap-2 text-center py-2 px-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
               <div className="border-r border-slate-100 pr-2">
-                <span className="text-[9.5px] text-slate-400 uppercase font-bold tracking-wider block">
+                <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
                   Mapped Personnel
                 </span>
-                <span className="text-lg font-black text-blue-600 block mt-0.5">
+                <span className="text-sm sm:text-base font-bold text-blue-600 block mt-0.5">
                   {activeMappings.length}
                 </span>
               </div>
               <div className="border-r border-slate-100 pr-2">
-                <span className="text-[9.5px] text-slate-400 uppercase font-bold tracking-wider block">
+                <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
                   Team Lead Squads
                 </span>
-                <span className="text-lg font-black text-purple-600 block mt-0.5">
+                <span className="text-sm sm:text-base font-bold text-purple-600 block mt-0.5">
                   {squadsList.length}
                 </span>
               </div>
               <div className="border-r border-slate-100 pr-2">
-                <span className="text-[9.5px] text-slate-400 uppercase font-bold tracking-wider block">
+                <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
                   Dept Managers
                 </span>
-                <span className="text-lg font-black text-emerald-600 block mt-0.5">
+                <span className="text-sm sm:text-base font-bold text-emerald-600 block mt-0.5">
                   {uniqueManagersCount}
                 </span>
               </div>
               <div>
-                <span className="text-[9.5px] text-slate-400 uppercase font-bold tracking-wider block">
+                <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
                   Unallocated Staff
                 </span>
-                <span className="text-lg font-black text-amber-600 block mt-0.5">
+                <span className="text-sm sm:text-base font-bold text-amber-600 block mt-0.5">
                   {activeUnassigned.length}
                 </span>
               </div>
@@ -660,11 +660,11 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             {/* Section 1: Detailed Workforce Reporting Matrix */}
             <div>
               <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-200">
-                <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <i className="bi bi-diagram-3 text-blue-600 text-base"></i>
+                <h3 className="text-[11px] sm:text-xs font-bold text-slate-900 uppercase tracking-wide flex items-center gap-1.5">
+                  <i className="bi bi-diagram-3 text-blue-600 text-sm"></i>
                   <span>1. Detailed Workforce Reporting Relationships ({activeMappings.length})</span>
                 </h3>
-                <span className="text-[10px] text-slate-400 font-medium">
+                <span className="text-[9.5px] text-slate-400 font-normal">
                   Ordered by Department & Supervisor
                 </span>
               </div>
@@ -735,8 +735,8 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             {includeSquadsSummary && squadsList.length > 0 && (
               <div className="pt-2">
                 <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-200">
-                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                    <i className="bi bi-people-fill text-purple-600 text-base"></i>
+                  <h3 className="text-[11px] sm:text-xs font-bold text-slate-900 uppercase tracking-wide flex items-center gap-1.5">
+                    <i className="bi bi-people-fill text-purple-600 text-sm"></i>
                     <span>2. Supervisor Squad Roster & Capacity Summary ({squadsList.length} Squads)</span>
                   </h3>
                 </div>
@@ -803,8 +803,8 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             {includeUnassigned && activeUnassigned.length > 0 && (
               <div className="pt-2">
                 <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-200">
-                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5 text-amber-900">
-                    <i className="bi bi-exclamation-triangle-fill text-amber-600"></i>
+                  <h3 className="text-[11px] sm:text-xs font-bold text-amber-900 uppercase tracking-wide flex items-center gap-1.5">
+                    <i className="bi bi-exclamation-triangle-fill text-amber-600 text-sm"></i>
                     <span>3. Unallocated Personnel Awaiting Squad Assignment ({activeUnassigned.length})</span>
                   </h3>
                 </div>
