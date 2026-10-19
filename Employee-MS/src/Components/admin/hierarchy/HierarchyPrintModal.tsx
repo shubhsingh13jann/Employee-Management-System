@@ -483,7 +483,8 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
           {/* Right Column: Document Preview Area */}
           <div className="flex-1 bg-slate-100/70 p-3 sm:p-4 flex flex-col overflow-hidden">
             {/* Top Preview Toolbar matching Image 1 */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs px-3.5 py-2 flex items-center justify-between gap-3 mb-3.5 shrink-0 no-print">
+            <div className="w-full flex justify-center mb-3 shrink-0 no-print px-2 sm:px-4">
+              <div className={`w-full ${isFitWidth ? "max-w-none" : "max-w-3xl"} bg-white rounded-2xl border border-slate-200/90 shadow-2xs px-3.5 py-2 flex items-center justify-between gap-3`}>
               {/* Left: Page Navigation */}
               <div className="flex items-center gap-1.5">
                 <button
@@ -571,6 +572,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                 </button>
               </div>
             </div>
+          </div>
 
             {/* Scrollable Document Canvas with Zoom Scaling */}
             <div className="flex-1 overflow-y-auto flex justify-center [scrollbar-width:thin] p-2 sm:p-4">
