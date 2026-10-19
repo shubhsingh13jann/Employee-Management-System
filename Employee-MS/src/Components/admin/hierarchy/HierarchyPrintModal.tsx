@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 
 export interface HierarchyPrintModalProps {
   isOpen: boolean;
@@ -87,9 +88,15 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
     window.print();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl w-full max-w-[1240px] h-[92vh] max-h-[92vh] flex flex-col overflow-hidden relative">
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-2 sm:p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl w-full max-w-[1240px] h-[92vh] max-h-[92vh] flex flex-col overflow-hidden relative"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Modal Header with Fluid Pastel Wave Accent */}
         <div className="relative px-5 py-3.5 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0 no-print">
           {/* Top-Right Fluid Pastel Wave Background matching reference design */}
@@ -186,7 +193,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
         {/* Main Body: Two-Column Split Layout */}
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
           {/* Left Column: Configuration Controls (Steps 1, 2, 3) */}
-          <div className="w-full lg:w-[380px] xl:w-[410px] shrink-0 border-r border-slate-100 p-4 sm:p-5 space-y-4 overflow-y-auto bg-white no-print [scrollbar-width:thin]">
+          <div className="w-full lg:w-[360px] xl:w-[390px] shrink-0 border-r border-slate-100 p-3.5 sm:p-4.5 space-y-3.5 overflow-y-auto bg-white no-print [scrollbar-width:thin]">
             {/* Step 1: Report Scope */}
             <div>
               <div className="flex items-center gap-2.5 mb-2">
@@ -474,7 +481,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
           </div>
 
           {/* Right Column: Document Preview Area */}
-          <div className="flex-1 bg-slate-100/70 p-4 sm:p-5 flex flex-col overflow-hidden">
+          <div className="flex-1 bg-slate-100/70 p-3 sm:p-4 flex flex-col overflow-hidden">
             {/* Top Preview Toolbar matching Image 1 */}
             <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs px-3.5 py-2 flex items-center justify-between gap-3 mb-3.5 shrink-0 no-print">
               {/* Left: Page Navigation */}
@@ -566,7 +573,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             </div>
 
             {/* Scrollable Document Canvas with Zoom Scaling */}
-            <div className="flex-1 overflow-y-auto flex justify-center [scrollbar-width:thin] pb-6">
+            <div className="flex-1 overflow-y-auto flex justify-center [scrollbar-width:thin] p-2 sm:p-4">
               <div
                 id="printable-hierarchy-dossier"
                 style={{
@@ -574,12 +581,12 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                   transformOrigin: "top center",
                   transition: "transform 0.15s ease-out",
                 }}
-                className={`bg-white p-6 sm:p-10 rounded-xl border border-slate-300 shadow-md transition-all space-y-6 text-slate-900 ${
+                className={`bg-white p-5 sm:p-7 rounded-xl border border-slate-300 shadow-md transition-all space-y-4 text-slate-900 ${
                   isFitWidth ? "w-full max-w-none" : "w-full max-w-3xl"
                 }`}
               >
             {/* Corporate Header */}
-            <div className="border-b-2 border-slate-900 pb-3.5 flex items-start justify-between">
+            <div className="border-b-2 border-slate-900 pb-2.5 sm:pb-3 flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-2.5 mb-1">
                   <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
@@ -611,7 +618,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             </div>
 
             {/* Executive KPI Summary Bar matching Image 1 */}
-            <div className="grid grid-cols-4 gap-2 text-center py-2.5 px-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
+            <div className="grid grid-cols-4 gap-2 text-center py-2 px-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
               <div className="border-r border-slate-100 pr-2">
                 <span className="text-[9.5px] text-slate-400 uppercase font-bold tracking-wider block">
                   Mapped Personnel
@@ -667,11 +674,11 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                   <table className="w-full text-left text-[11px] border-collapse border border-slate-200">
                     <thead>
                       <tr className="bg-slate-50 text-slate-600 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200">
-                        <th className="p-2 border-r border-slate-200">Employee ID & Name</th>
-                        <th className="p-2 border-r border-slate-200">Department</th>
-                        <th className="p-2 border-r border-slate-200">Direct Team Lead (Supervisor)</th>
-                        <th className="p-2 border-r border-slate-200">Department Manager</th>
-                        <th className="p-2 text-center">Status</th>
+                        <th className="px-2.5 py-1.5 border-r border-slate-200">Employee ID & Name</th>
+                        <th className="px-2.5 py-1.5 border-r border-slate-200">Department</th>
+                        <th className="px-2.5 py-1.5 border-r border-slate-200">Direct Team Lead (Supervisor)</th>
+                        <th className="px-2.5 py-1.5 border-r border-slate-200">Department Manager</th>
+                        <th className="px-2.5 py-1.5 text-center">Status</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200">
@@ -680,35 +687,35 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                           key={`print-row-${item.id || idx}`}
                           className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"}
                         >
-                          <td className="p-2 border-r border-slate-200">
-                            <span className="font-bold text-slate-900 block">
+                          <td className="px-2.5 py-1.5 border-r border-slate-200">
+                            <span className="font-bold text-slate-900 block leading-tight">
                               {item.employee_name}
                             </span>
                             <span className="text-[9.5px] text-slate-400 block font-mono">
                               EMP-{String(item.employee_id).padStart(4, "0")} • {item.employee_email}
                             </span>
                           </td>
-                          <td className="p-2 border-r border-slate-200 font-medium text-slate-800">
+                          <td className="px-2.5 py-1.5 border-r border-slate-200 font-medium text-slate-800">
                             {item.department_name || "General"}
                           </td>
-                          <td className="p-2 border-r border-slate-200">
-                            <span className="font-semibold text-purple-700 block">
+                          <td className="px-2.5 py-1.5 border-r border-slate-200">
+                            <span className="font-semibold text-purple-700 block leading-tight">
                               {item.supervisor_name}
                             </span>
                             <span className="text-[9.5px] text-slate-400 font-mono">
                               SUP-{String(item.supervisor_id).padStart(4, "0")}
                             </span>
                           </td>
-                          <td className="p-2 border-r border-slate-200">
-                            <span className="font-semibold text-slate-800 block">
+                          <td className="px-2.5 py-1.5 border-r border-slate-200">
+                            <span className="font-semibold text-slate-800 block leading-tight">
                               {item.manager_name}
                             </span>
                             <span className="text-[9.5px] text-slate-400 font-mono">
                               MGR-{String(item.manager_id).padStart(4, "0")}
                             </span>
                           </td>
-                          <td className="p-2 text-center">
-                            <span className="inline-block px-2.5 py-0.5 rounded-full text-[9.5px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                          <td className="px-2.5 py-1.5 text-center">
+                            <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                               Active
                             </span>
                           </td>
@@ -734,11 +741,11 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                   <table className="w-full text-left text-[11px] border-collapse border border-slate-200">
                     <thead>
                       <tr className="bg-slate-50 text-slate-600 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200">
-                        <th className="p-2 border-r border-slate-200">Team Lead (Supervisor)</th>
-                        <th className="p-2 border-r border-slate-200">Division / Manager</th>
-                        <th className="p-2 border-r border-slate-200 text-center">Direct Reports</th>
-                        <th className="p-2 border-r border-slate-200 text-center">Capacity Load</th>
-                        <th className="p-2">Assigned Staff Members</th>
+                        <th className="px-2.5 py-1.5 border-r border-slate-200">Team Lead (Supervisor)</th>
+                        <th className="px-2.5 py-1.5 border-r border-slate-200">Division / Manager</th>
+                        <th className="px-2.5 py-1.5 border-r border-slate-200 text-center">Direct Reports</th>
+                        <th className="px-2.5 py-1.5 border-r border-slate-200 text-center">Capacity Load</th>
+                        <th className="px-2.5 py-1.5">Assigned Staff Members</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200">
@@ -750,22 +757,22 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                             key={`squad-print-${sq.supervisorId}`}
                             className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"}
                           >
-                            <td className="p-2 border-r border-slate-200 font-bold text-slate-900">
+                            <td className="px-2.5 py-1.5 border-r border-slate-200 font-bold text-slate-900">
                               {sq.supervisorName}
                               <span className="block text-[9.5px] font-normal text-slate-400 font-mono">
                                 SUP-{String(sq.supervisorId).padStart(4, "0")}
                               </span>
                             </td>
-                            <td className="p-2 border-r border-slate-200">
+                            <td className="px-2.5 py-1.5 border-r border-slate-200">
                               <span className="font-semibold text-slate-800">{sq.departmentName}</span>
                               <span className="block text-[9.5px] text-slate-400">Mgr: {sq.managerName}</span>
                             </td>
-                            <td className="p-2 border-r border-slate-200 text-center font-bold text-slate-900">
+                            <td className="px-2.5 py-1.5 border-r border-slate-200 text-center font-bold text-slate-900">
                               {count} / 8
                             </td>
-                            <td className="p-2 border-r border-slate-200 text-center">
+                            <td className="px-2.5 py-1.5 border-r border-slate-200 text-center">
                               <span
-                                className={`inline-block px-2 py-0.5 rounded-full text-[9.5px] font-bold ${
+                                className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-bold ${
                                   count >= 8
                                     ? "bg-amber-50 text-amber-700 border border-amber-200"
                                     : count >= 4
@@ -776,7 +783,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                                 {cap}% • {count >= 8 ? "High Span" : count >= 4 ? "Optimal" : "Light"}
                               </span>
                             </td>
-                            <td className="p-2 text-[10px] text-slate-700">
+                            <td className="px-2.5 py-1.5 text-[10px] text-slate-700">
                               {sq.members.map((m) => m.employee_name).join(", ")}
                             </td>
                           </tr>
@@ -802,28 +809,28 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                   <table className="w-full text-left text-[11px] border-collapse border border-amber-200 bg-amber-50/20">
                     <thead>
                       <tr className="bg-amber-100/70 text-amber-900 text-[10px] font-bold uppercase tracking-wider border-b border-amber-200">
-                        <th className="p-2 border-r border-amber-200">Employee ID & Name</th>
-                        <th className="p-2 border-r border-amber-200">Email Address</th>
-                        <th className="p-2 border-r border-amber-200">Department</th>
-                        <th className="p-2">Recommended Next Action</th>
+                        <th className="px-2.5 py-1.5 border-r border-amber-200">Employee ID & Name</th>
+                        <th className="px-2.5 py-1.5 border-r border-amber-200">Email Address</th>
+                        <th className="px-2.5 py-1.5 border-r border-amber-200">Department</th>
+                        <th className="px-2.5 py-1.5">Recommended Next Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-amber-200">
                       {activeUnassigned.map((staff) => (
                         <tr key={`unassigned-print-${staff.id}`}>
-                          <td className="p-2 border-r border-amber-200 font-bold text-slate-900">
+                          <td className="px-2.5 py-1.5 border-r border-amber-200 font-bold text-slate-900">
                             {staff.name}
                             <span className="block text-[9.5px] font-normal text-slate-500">
                               EMP-{String(staff.id).padStart(4, "0")}
                             </span>
                           </td>
-                          <td className="p-2 border-r border-amber-200 text-slate-700">
+                          <td className="px-2.5 py-1.5 border-r border-amber-200 text-slate-700">
                             {staff.email}
                           </td>
-                          <td className="p-2 border-r border-amber-200 font-medium text-slate-800">
+                          <td className="px-2.5 py-1.5 border-r border-amber-200 font-medium text-slate-800">
                             {staff.department_name || staff.department || "Unallocated"}
                           </td>
-                          <td className="p-2 text-amber-800 font-semibold text-[10px]">
+                          <td className="px-2.5 py-1.5 text-amber-800 font-semibold text-[10px]">
                             Assign to active Team Lead squad via Onboarding Tray
                           </td>
                         </tr>
@@ -900,7 +907,8 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
           }
         `}</style>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

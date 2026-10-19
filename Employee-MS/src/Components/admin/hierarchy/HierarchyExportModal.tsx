@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 
 export interface HierarchyExportModalProps {
   isOpen: boolean;
@@ -251,9 +252,15 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
       ? unassignedStaff.length
       : hierarchy.length + (includeUnassignedInFull ? unassignedStaff.length : 0);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl w-full max-w-[750px] overflow-hidden flex flex-col max-h-[94vh] relative">
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-2 sm:p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl w-full max-w-[750px] overflow-hidden flex flex-col max-h-[94vh] relative"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Modal Header with Fluid Pastel Wave Accent */}
         <div className="relative px-4 sm:px-5 py-3 sm:py-3.5 bg-white flex items-center justify-between overflow-hidden shrink-0">
           {/* Top-Right Fluid Pastel Wave Background matching reference design */}
@@ -865,7 +872,8 @@ export const HierarchyExportModal: React.FC<HierarchyExportModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
