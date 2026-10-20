@@ -220,66 +220,54 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl w-full max-w-[1010px] h-[92vh] max-h-[92vh] flex flex-col overflow-hidden relative"
+        className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl w-full max-w-[1024px] h-[92vh] max-h-[92vh] flex flex-col overflow-hidden relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header with Fluid Pastel Wave Accent */}
-        <div className="relative px-3.5 sm:px-4 py-2.5 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0 no-print">
+        <div className="relative px-5 sm:px-6 py-2.5 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0 no-print">
           {/* Top-Right Fluid Pastel Wave Background matching reference design */}
-          <div className="absolute top-0 right-0 w-[440px] sm:w-[520px] h-full pointer-events-none overflow-hidden z-0">
+          <div className="absolute top-0 right-0 w-[480px] sm:w-[560px] h-full pointer-events-none overflow-hidden z-0">
             <svg
-              viewBox="0 0 500 74"
+              viewBox="0 0 560 74"
               fill="none"
               preserveAspectRatio="none"
               className="w-full h-full"
             >
               <defs>
-                <mask id="printWaveFadeMask">
-                  <linearGradient id="printWaveFadeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="black" />
-                    <stop offset="18%" stopColor="white" />
-                    <stop offset="100%" stopColor="white" />
-                  </linearGradient>
-                  <rect width="500" height="74" fill="url(#printWaveFadeMask)" />
-                </mask>
-
-                <linearGradient id="printWaveGrad1" x1="0%" y1="0%" x2="100%" y2="70%">
-                  <stop offset="0%" stopColor="#E0E7FF" stopOpacity="0.2" />
-                  <stop offset="30%" stopColor="#D7E0FC" stopOpacity="0.85" />
-                  <stop offset="65%" stopColor="#E0E7FE" stopOpacity="0.9" />
-                  <stop offset="100%" stopColor="#EDE9FE" stopOpacity="0.7" />
+                <linearGradient id="printWaveGrad1" x1="0%" y1="0%" x2="100%" y2="60%">
+                  <stop offset="0%" stopColor="#C7D2FE" stopOpacity="0" />
+                  <stop offset="25%" stopColor="#C7D2FE" stopOpacity="0.4" />
+                  <stop offset="60%" stopColor="#DDD6FE" stopOpacity="0.75" />
+                  <stop offset="100%" stopColor="#E9D5FF" stopOpacity="0.85" />
                 </linearGradient>
 
-                <linearGradient id="printWaveGrad2" x1="15%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#D8E2FB" stopOpacity="0.3" />
-                  <stop offset="30%" stopColor="#C7D2FE" stopOpacity="0.85" />
-                  <stop offset="60%" stopColor="#DDD6FE" stopOpacity="0.9" />
-                  <stop offset="85%" stopColor="#E9D5FF" stopOpacity="0.85" />
-                  <stop offset="100%" stopColor="#F3E8FF" stopOpacity="0.4" />
+                <linearGradient id="printWaveGrad2" x1="0%" y1="0%" x2="100%" y2="80%">
+                  <stop offset="0%" stopColor="#BAE6FD" stopOpacity="0" />
+                  <stop offset="30%" stopColor="#C7D2FE" stopOpacity="0.45" />
+                  <stop offset="70%" stopColor="#DDD6FE" stopOpacity="0.7" />
+                  <stop offset="100%" stopColor="#F3E8FF" stopOpacity="0.65" />
                 </linearGradient>
 
-                <linearGradient id="printWaveGrad3" x1="30%" y1="10%" x2="95%" y2="100%">
-                  <stop offset="0%" stopColor="#E0F2FE" stopOpacity="0.5" />
-                  <stop offset="45%" stopColor="#DDD6FE" stopOpacity="0.75" />
-                  <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0.7" />
+                <linearGradient id="printWaveGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#E0F2FE" stopOpacity="0" />
+                  <stop offset="35%" stopColor="#C4B5FD" stopOpacity="0.35" />
+                  <stop offset="80%" stopColor="#A78BFA" stopOpacity="0.55" />
+                  <stop offset="100%" stopColor="#C084FC" stopOpacity="0.45" />
                 </linearGradient>
               </defs>
 
-              <g mask="url(#printWaveFadeMask)">
-                <path
-                  d="M0 26 C60 10 120 8 180 18 C245 28 305 50 370 38 C425 28 465 10 500 20 V0 H0 Z"
-                  fill="url(#printWaveGrad1)"
-                />
-                <path
-                  d="M30 50 C95 34 145 12 215 10 C280 8 330 32 390 44 C445 54 475 38 500 28 V0 H30 Z"
-                  fill="url(#printWaveGrad2)"
-                />
-                <path
-                  d="M130 38 C195 26 260 48 325 56 C385 64 445 50 500 38 V8 C470 20 420 18 370 24 C310 34 235 32 130 38 Z"
-                  fill="url(#printWaveGrad3)"
-                  opacity="0.75"
-                />
-              </g>
+              <path
+                d="M0 32 C100 12 180 8 270 22 C350 34 420 54 490 40 C525 32 545 14 560 22 V0 H0 Z"
+                fill="url(#printWaveGrad1)"
+              />
+              <path
+                d="M50 56 C140 40 210 14 300 12 C375 10 430 36 495 46 C530 52 548 36 560 28 V0 H50 Z"
+                fill="url(#printWaveGrad2)"
+              />
+              <path
+                d="M160 44 C240 30 320 52 395 58 C455 62 515 48 560 36 V0 H160 Z"
+                fill="url(#printWaveGrad3)"
+              />
             </svg>
           </div>
 
@@ -319,7 +307,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
         {/* Main Body: Two-Column Split Layout */}
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
           {/* Left Column: Configuration Controls (Steps 1, 2, 3) */}
-          <div className="w-full lg:w-[340px] shrink-0 border-r border-slate-100 px-3.5 sm:px-4 pt-2 sm:pt-2.5 pb-8 space-y-3.5 overflow-y-auto bg-white no-print [scrollbar-width:thin]">
+          <div className="w-full lg:w-[352px] shrink-0 border-r border-slate-100 px-5 sm:px-5.5 pt-3.5 pb-8 space-y-3.5 overflow-y-auto bg-white no-print [scrollbar-width:thin]">
             {/* Step 1: Report Scope */}
             <div>
               <div className="flex items-center gap-2 mb-2">
