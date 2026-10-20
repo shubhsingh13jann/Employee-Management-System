@@ -239,46 +239,32 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
 
   const departmentList = Array.from(deptMap.values());
 
-  // Physical paper sheet pixel specifications and aspect ratios (Standard 96 DPI paper metrics)
-  const sheetWidth = isFitWidth
+  const pageMinHeight =
+    orientation === "landscape"
+      ? pageSize === "legal"
+        ? "600px"
+        : pageSize === "letter"
+        ? "640px"
+        : "620px"
+      : pageSize === "legal"
+      ? "1186px"
+      : pageSize === "letter"
+      ? "958px"
+      : "1018px";
+
+  const dossierMaxWidth = isFitWidth
     ? "100%"
     : orientation === "landscape"
     ? pageSize === "legal"
-      ? 1186
+      ? "1220px"
       : pageSize === "letter"
-      ? 958
-      : 1018
+      ? "1020px"
+      : "1050px"
     : pageSize === "legal"
-    ? 720
+    ? "790px"
     : pageSize === "letter"
-    ? 740
-    : 720;
-
-  const sheetMinHeight =
-    orientation === "landscape"
-      ? pageSize === "legal"
-        ? 720
-        : pageSize === "letter"
-        ? 740
-        : 720
-      : pageSize === "legal"
-      ? 1186
-      : pageSize === "letter"
-      ? 958
-      : 1018;
-
-  const pageAspectRatio =
-    orientation === "landscape"
-      ? pageSize === "legal"
-        ? "14 / 8.5"
-        : pageSize === "letter"
-        ? "11 / 8.5"
-        : "297 / 210"
-      : pageSize === "legal"
-      ? "8.5 / 14"
-      : pageSize === "letter"
-      ? "8.5 / 11"
-      : "210 / 297";
+    ? "780px"
+    : "750px";
 
   const renderSubPageHeader = (pageNum: number, sectionTitle: string, sectionSubtitle: string) => {
     if (headerStyle === "executive") {
@@ -379,7 +365,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
     >
       <div
         className={`bg-white rounded-3xl border border-slate-200/90 shadow-2xl w-full ${
-          orientation === "landscape" ? "max-w-[1380px] xl:max-w-[1440px]" : "max-w-[1010px]"
+          orientation === "landscape" ? "w-[96vw] max-w-[1400px]" : "max-w-[1010px]"
         } h-[92vh] max-h-[92vh] flex flex-col overflow-hidden relative transition-all duration-300`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -698,7 +684,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                     setOrientation(val);
                     setOpenDropdown(null);
                   }}
-                  icon={orientation === "landscape" ? "bi bi-aspect-ratio" : "bi bi-phone"}
+                  icon="bi bi-phone"
                   isOpen={openDropdown === "orientation"}
                   onToggle={() => setOpenDropdown(openDropdown === "orientation" ? null : "orientation")}
                 />
@@ -748,7 +734,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             {/* Top Preview Toolbar: Positioned outside the scroll container with solid background so scrolled content never bleeds behind it */}
             <div className="shrink-0 z-20 w-full flex justify-center px-2.5 sm:px-3.5 py-2.5 bg-slate-100 border-b border-slate-200/80 no-print">
               <div className={`w-full ${isFitWidth ? "max-w-none" : orientation === "landscape" ? "max-w-5xl" : "max-w-3xl"} bg-white rounded-2xl border border-slate-200/90 shadow-2xs px-3.5 py-2 flex items-center justify-between gap-3`}>
-                {/* Left: Page Navigation with Quick Page Turn Buttons */}
+                {/* Left: Page Navigation with Arrows and Current Tab Number Cube */}
                 <div className="flex items-center gap-1.5">
                   <button
                     type="button"
@@ -758,28 +744,11 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                     title="Previous Page"
                     aria-label="Previous Page"
                   >
-                    <i className="bi bi-chevron-left"></i>
+                    <i className="bi bi-arrow-left"></i>
                   </button>
-
-                  <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200/80">
-                    {[1, 2, 3, 4].map((pageNum) => (
-                      <button
-                        key={pageNum}
-                        type="button"
-                        onClick={() => setCurrentPage(pageNum)}
-                        className={`w-6 h-6 rounded-md text-xs font-bold font-mono transition-all cursor-pointer flex items-center justify-center ${
-                          currentPage === pageNum
-                            ? "bg-indigo-600 text-white shadow-2xs"
-                            : "text-slate-600 hover:bg-white"
-                        }`}
-                        title={`Go to Page ${pageNum}`}
-                      >
-                        {pageNum}
-                      </button>
-                    ))}
-                    <span className="text-[11px] font-semibold text-slate-400 px-1 font-mono">/ 4</span>
+                  <div className="px-2.5 py-0.5 rounded-lg bg-slate-50 border border-slate-200/80 text-xs font-bold text-slate-700 font-mono tracking-wide">
+                    {currentPage} / 4
                   </div>
-
                   <button
                     type="button"
                     onClick={() => setCurrentPage((p) => Math.min(4, p + 1))}
@@ -788,7 +757,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                     title="Next Page"
                     aria-label="Next Page"
                   >
-                    <i className="bi bi-chevron-right"></i>
+                    <i className="bi bi-arrow-right"></i>
                   </button>
                 </div>
 
@@ -855,29 +824,20 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             </div>
 
             {/* Scrollable Document Canvas */}
-            <div className="flex-1 overflow-auto [scrollbar-width:thin] px-2.5 sm:px-3.5 py-4">
-              <div className="flex flex-col items-center min-w-full w-max mx-auto min-h-full">
-                {/* Scaled Preview Wrapper: Synchronizes scaled visual dimensions with layout flow */}
+            <div className="flex-1 overflow-y-auto [scrollbar-width:thin] px-2.5 sm:px-3.5 py-4">
+              <div className="flex flex-col items-center w-full min-h-full">
+                {/* Printable Document Sheets Container */}
                 <div
+                  id="printable-hierarchy-dossier"
                   style={{
-                    width: isFitWidth ? "100%" : `${sheetWidth * (zoom / 100)}px`,
-                    minHeight: isFitWidth ? undefined : `${sheetMinHeight * (zoom / 100)}px`,
+                    transform: !isFitWidth ? `scale(${zoom / 100})` : undefined,
+                    transformOrigin: "top center",
+                    transition: "all 0.2s ease-out",
+                    width: "100%",
+                    maxWidth: dossierMaxWidth,
                   }}
-                  className="flex flex-col items-center transition-all duration-200"
+                  className="w-full flex flex-col items-center mb-6"
                 >
-                  {/* Printable Document Sheets Container */}
-                  <div
-                    id="printable-hierarchy-dossier"
-                    style={{
-                      width: isFitWidth ? "100%" : `${sheetWidth}px`,
-                      minWidth: isFitWidth ? undefined : `${sheetWidth}px`,
-                      maxWidth: isFitWidth ? "100%" : `${sheetWidth}px`,
-                      transform: !isFitWidth && zoom !== 100 ? `scale(${zoom / 100})` : undefined,
-                      transformOrigin: "top center",
-                      transition: "transform 0.2s ease-out, width 0.2s ease-out",
-                    }}
-                    className="shrink-0 flex flex-col items-center mb-6"
-                  >
                   {/* ===================== PAGE 1 ===================== */}
                   <div
                     className={`print-page bg-white rounded-xl border border-slate-300 shadow-md text-slate-900 transition-all w-full ${
@@ -891,10 +851,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                         ? "p-6 sm:p-8"
                         : "p-4 sm:p-5.5"
                     }`}
-                    style={{
-                      aspectRatio: pageAspectRatio,
-                      minHeight: isFitWidth ? undefined : `${sheetMinHeight}px`,
-                    }}
+                    style={{ minHeight: pageMinHeight }}
                   >
                     <div className="space-y-4">
                       {/* Document Header (Responding dynamically to Header Style: default | minimal | executive) */}
@@ -1157,10 +1114,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                         ? "p-6 sm:p-8"
                         : "p-4 sm:p-5.5"
                     }`}
-                    style={{
-                      aspectRatio: pageAspectRatio,
-                      minHeight: isFitWidth ? undefined : `${sheetMinHeight}px`,
-                    }}
+                    style={{ minHeight: pageMinHeight }}
                   >
                     <div className="space-y-4">
                       {renderSubPageHeader(
@@ -1297,10 +1251,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                         ? "p-6 sm:p-8"
                         : "p-4 sm:p-5.5"
                     }`}
-                    style={{
-                      aspectRatio: pageAspectRatio,
-                      minHeight: isFitWidth ? undefined : `${sheetMinHeight}px`,
-                    }}
+                    style={{ minHeight: pageMinHeight }}
                   >
                     <div className="space-y-4">
                       {renderSubPageHeader(
@@ -1453,10 +1404,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                         ? "p-6 sm:p-8"
                         : "p-4 sm:p-5.5"
                     }`}
-                    style={{
-                      aspectRatio: pageAspectRatio,
-                      minHeight: isFitWidth ? undefined : `${sheetMinHeight}px`,
-                    }}
+                    style={{ minHeight: pageMinHeight }}
                   >
                     <div className="space-y-4">
                       {renderSubPageHeader(
@@ -1619,50 +1567,9 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                   </div>
                 </div>
               </div>
-
-              {/* Bottom Canvas Page Switcher (No Print) */}
-              <div
-                style={{
-                  width: isFitWidth ? "100%" : `${sheetWidth * (zoom / 100)}px`,
-                  maxWidth: "100%",
-                }}
-                className="w-full flex items-center justify-between pt-3 pb-2 text-xs text-slate-500 no-print"
-              >
-                  <button
-                    type="button"
-                    disabled={currentPage <= 1}
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    className="flex items-center gap-1.5 font-bold text-slate-700 hover:text-indigo-600 disabled:opacity-30 disabled:hover:text-slate-700 cursor-pointer transition-colors px-2.5 py-1 rounded-lg hover:bg-slate-200/60"
-                  >
-                    <i className="bi bi-arrow-left"></i> Previous Page
-                  </button>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11.5px] font-semibold text-slate-600">
-                      Viewing Page {currentPage} of 4:
-                    </span>
-                    <span className="text-[11.5px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-2.5 py-0.5 rounded-full">
-                      {currentPage === 1
-                        ? "1. Workforce Relationships"
-                        : currentPage === 2
-                        ? "2. Supervisor Squads & Capacity"
-                        : currentPage === 3
-                        ? "3. Unallocated & Departments"
-                        : "4. Governance Audit & Certification"}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    disabled={currentPage >= 4}
-                    onClick={() => setCurrentPage((p) => Math.min(4, p + 1))}
-                    className="flex items-center gap-1.5 font-bold text-slate-700 hover:text-indigo-600 disabled:opacity-30 disabled:hover:text-slate-700 cursor-pointer transition-colors px-2.5 py-1 rounded-lg hover:bg-slate-200/60"
-                  >
-                    Next Page <i className="bi bi-arrow-right"></i>
-                  </button>
-                </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
 
         {/* Modal Footer (No Print) */}
         <div className="pl-6 pr-5 sm:pr-6 py-3 sm:py-3.5 bg-white border-t border-slate-100 flex items-center justify-between gap-3 shrink-0 no-print">
@@ -1707,7 +1614,6 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
               left: 0;
               top: 0;
               width: 100% !important;
-              min-width: 100% !important;
               max-width: 100% !important;
               margin: 0 !important;
               padding: 0 !important;
@@ -1717,7 +1623,6 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
               display: block !important;
             }
             .print-page {
-              aspect-ratio: auto !important;
               display: flex !important;
               flex-direction: column !important;
               justify-content: space-between !important;
