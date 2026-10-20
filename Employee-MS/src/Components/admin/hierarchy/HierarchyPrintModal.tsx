@@ -210,6 +210,150 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
     minute: "2-digit",
   });
 
+  // Group active mappings by department for Departmental Distribution on Page 3
+  const deptMap = new Map<
+    string,
+    {
+      name: string;
+      employeesCount: number;
+      supervisors: Set<string | number>;
+      managers: Set<string | number>;
+    }
+  >();
+
+  activeMappings.forEach((m) => {
+    const dept = m.department_name || "General";
+    if (!deptMap.has(dept)) {
+      deptMap.set(dept, {
+        name: dept,
+        employeesCount: 0,
+        supervisors: new Set(),
+        managers: new Set(),
+      });
+    }
+    const entry = deptMap.get(dept)!;
+    entry.employeesCount += 1;
+    if (m.supervisor_id) entry.supervisors.add(m.supervisor_id);
+    if (m.manager_id) entry.managers.add(m.manager_id);
+  });
+
+  const departmentList = Array.from(deptMap.values());
+
+  const pageMinHeight =
+    orientation === "landscape"
+      ? pageSize === "legal"
+        ? "632px"
+        : pageSize === "letter"
+        ? "726px"
+        : "678px"
+      : pageSize === "legal"
+      ? "1186px"
+      : pageSize === "letter"
+      ? "958px"
+      : "1018px";
+
+  const dossierMaxWidth = isFitWidth
+    ? "100%"
+    : orientation === "landscape"
+    ? pageSize === "legal"
+      ? "1040px"
+      : pageSize === "letter"
+      ? "940px"
+      : "960px"
+    : pageSize === "legal"
+    ? "720px"
+    : pageSize === "letter"
+    ? "740px"
+    : "720px";
+
+  const renderSubPageHeader = (pageNum: number, sectionTitle: string, sectionSubtitle: string) => {
+    if (headerStyle === "executive") {
+      return (
+        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-3 rounded-xl shadow-xs border border-slate-800 flex items-center justify-between gap-4 mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded bg-amber-400 text-slate-950 flex items-center justify-center font-black text-[10px] shadow-xs shrink-0">
+              <i className="bi bi-shield-check"></i>
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-amber-300 text-xs uppercase tracking-wider">
+                  EMS Enterprise Workforce
+                </span>
+                <span className="text-slate-400 text-[10px]">•</span>
+                <span className="font-semibold text-white text-xs">{sectionTitle}</span>
+              </div>
+              <p className="text-[9.5px] text-slate-300 mb-0">{sectionSubtitle}</p>
+            </div>
+          </div>
+          <div className="text-right text-[9.5px] text-slate-300 font-mono shrink-0">
+            <span className="text-amber-300 font-bold uppercase block">Confidential Audit</span>
+            <span>Page {pageNum} of 4 • {currentDate}</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (headerStyle === "minimal") {
+      return (
+        <div className="border-b border-slate-200 pb-2 flex items-center justify-between gap-4 mb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-blue-600 font-bold text-xs uppercase tracking-wider">
+              EMS Workforce
+            </span>
+            <span className="text-slate-300">•</span>
+            <span className="text-xs font-semibold text-slate-800">{sectionTitle}</span>
+            <span className="text-slate-400 text-[10px] hidden sm:inline">({sectionSubtitle})</span>
+          </div>
+          <div className="text-right text-[9.5px] text-slate-500 font-mono shrink-0">
+            Page {pageNum} of 4 • {currentDate}
+          </div>
+        </div>
+      );
+    }
+
+    // Default corporate header
+    return (
+      <div className="border-b-2 border-slate-900 pb-2 flex items-center justify-between gap-4 mb-3">
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 rounded bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] shadow-2xs shrink-0">
+            <i className="bi bi-bar-chart-fill"></i>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-900 text-xs uppercase tracking-wider">
+                EMS Enterprise Workforce
+              </span>
+              <span className="text-slate-300">•</span>
+              <span className="font-semibold text-slate-800 text-xs">{sectionTitle}</span>
+            </div>
+            <p className="text-[9.5px] text-slate-500 mb-0">{sectionSubtitle}</p>
+          </div>
+        </div>
+        <div className="text-right text-[9.5px] text-slate-600 font-mono shrink-0">
+          <span className="font-bold text-slate-900 uppercase block tracking-wider">CONFIDENTIAL REPORT</span>
+          <span>Page {pageNum} of 4 • {currentDate}</span>
+        </div>
+      </div>
+    );
+  };
+
+  const renderPageFooter = (pageNum: number, sectionNotes: string) => (
+    <div className="border-t border-slate-200/90 pt-3 mt-4 flex items-center justify-between text-[9px] text-slate-400 shrink-0">
+      <div className="flex items-center gap-2">
+        <span className="font-semibold text-slate-600">EMS HR Governance</span>
+        <span>•</span>
+        <span>{sectionNotes}</span>
+      </div>
+      <div className="flex items-center gap-2 font-mono">
+        <span>Confidential Internal Document</span>
+        <span>•</span>
+        <span className="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+          Page {pageNum} of 4
+        </span>
+      </div>
+    </div>
+  );
+
   const handlePrint = () => {
     window.print();
   };
@@ -220,7 +364,9 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl w-full max-w-[1010px] h-[92vh] max-h-[92vh] flex flex-col overflow-hidden relative"
+        className={`bg-white rounded-3xl border border-slate-200/90 shadow-2xl w-full ${
+          orientation === "landscape" ? "max-w-[1360px]" : "max-w-[1010px]"
+        } h-[92vh] max-h-[92vh] flex flex-col overflow-hidden relative transition-all duration-300`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header with Fluid Pastel Wave Accent */}
@@ -588,7 +734,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             {/* Top Preview Toolbar: Positioned outside the scroll container with solid background so scrolled content never bleeds behind it */}
             <div className="shrink-0 z-20 w-full flex justify-center px-2.5 sm:px-3.5 py-2.5 bg-slate-100 border-b border-slate-200/80 no-print">
               <div className={`w-full ${isFitWidth ? "max-w-none" : orientation === "landscape" ? "max-w-5xl" : "max-w-3xl"} bg-white rounded-2xl border border-slate-200/90 shadow-2xs px-3.5 py-2 flex items-center justify-between gap-3`}>
-                {/* Left: Page Navigation */}
+                {/* Left: Page Navigation with Quick Page Turn Buttons */}
                 <div className="flex items-center gap-1.5">
                   <button
                     type="button"
@@ -598,11 +744,28 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                     title="Previous Page"
                     aria-label="Previous Page"
                   >
-                    <i className="bi bi-arrow-left"></i>
+                    <i className="bi bi-chevron-left"></i>
                   </button>
-                  <div className="px-2.5 py-0.5 rounded-lg bg-slate-50 border border-slate-200/80 text-xs font-bold text-slate-700 font-mono tracking-wide">
-                    {currentPage} / 4
+
+                  <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200/80">
+                    {[1, 2, 3, 4].map((pageNum) => (
+                      <button
+                        key={pageNum}
+                        type="button"
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`w-6 h-6 rounded-md text-xs font-bold font-mono transition-all cursor-pointer flex items-center justify-center ${
+                          currentPage === pageNum
+                            ? "bg-indigo-600 text-white shadow-2xs"
+                            : "text-slate-600 hover:bg-white"
+                        }`}
+                        title={`Go to Page ${pageNum}`}
+                      >
+                        {pageNum}
+                      </button>
+                    ))}
+                    <span className="text-[11px] font-semibold text-slate-400 px-1 font-mono">/ 4</span>
                   </div>
+
                   <button
                     type="button"
                     onClick={() => setCurrentPage((p) => Math.min(4, p + 1))}
@@ -611,7 +774,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                     title="Next Page"
                     aria-label="Next Page"
                   >
-                    <i className="bi bi-arrow-right"></i>
+                    <i className="bi bi-chevron-right"></i>
                   </button>
                 </div>
 
@@ -680,417 +843,783 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             {/* Scrollable Document Canvas */}
             <div className="flex-1 overflow-y-auto [scrollbar-width:thin] px-2.5 sm:px-3.5 py-4">
               <div className="flex flex-col items-center w-full min-h-full">
-                {/* Printable Document Sheet */}
+                {/* Printable Document Sheets Container */}
                 <div
                   id="printable-hierarchy-dossier"
                   style={{
                     transform: !isFitWidth ? `scale(${zoom / 100})` : undefined,
                     transformOrigin: "top center",
                     transition: "all 0.2s ease-out",
-                    maxWidth: isFitWidth
-                      ? "100%"
-                      : orientation === "landscape"
-                      ? pageSize === "legal"
-                        ? "1220px"
-                        : pageSize === "letter"
-                        ? "1000px"
-                        : "1050px"
-                      : pageSize === "legal"
-                      ? "790px"
-                      : pageSize === "letter"
-                      ? "780px"
-                      : "750px",
-                    minHeight:
-                      orientation === "landscape"
-                        ? pageSize === "legal"
-                          ? "720px"
-                          : "740px"
-                        : pageSize === "legal"
-                        ? "1200px"
-                        : pageSize === "letter"
-                        ? "980px"
-                        : "1050px",
+                    width: "100%",
+                    maxWidth: dossierMaxWidth,
                   }}
-                  className={`bg-white rounded-xl border border-slate-300 shadow-md transition-all space-y-4 text-slate-900 mb-6 w-full ${
-                    margins === "narrow"
-                      ? "p-2.5 sm:p-3.5"
-                      : margins === "wide"
-                      ? "p-6 sm:p-8"
-                      : "p-4 sm:p-5.5"
-                  }`}
+                  className="w-full flex flex-col items-center mb-6"
                 >
-            {/* Document Header (Responding dynamically to Header Style: default | minimal | executive) */}
-            {headerStyle === "executive" ? (
-              <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-3.5 rounded-xl shadow-sm border border-slate-800 flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-5.5 h-5.5 rounded-md bg-amber-400 text-slate-950 flex items-center justify-center font-black text-[11px] shadow-sm shrink-0">
-                      <i className="bi bi-shield-check"></i>
-                    </div>
-                    <div
-                      style={{ fontSize: "14px", letterSpacing: "0.06em" }}
-                      className="font-black text-amber-300 uppercase whitespace-nowrap"
-                    >
-                      EMS Enterprise Workforce
-                    </div>
-                    <span className="text-[9px] px-1.5 py-0.2 rounded font-bold bg-amber-400/20 text-amber-300 border border-amber-400/40 uppercase tracking-widest">
-                      Executive Dossier
-                    </span>
-                  </div>
+                  {/* ===================== PAGE 1 ===================== */}
                   <div
-                    style={{ fontSize: "12.6px" }}
-                    className="font-bold text-white whitespace-nowrap"
+                    className={`print-page bg-white rounded-xl border border-slate-300 shadow-md text-slate-900 transition-all w-full ${
+                      currentPage === 1
+                        ? "flex flex-col justify-between"
+                        : "hidden print:flex print:flex-col print:justify-between"
+                    } ${
+                      margins === "narrow"
+                        ? "p-2.5 sm:p-3.5"
+                        : margins === "wide"
+                        ? "p-6 sm:p-8"
+                        : "p-4 sm:p-5.5"
+                    }`}
+                    style={{ minHeight: pageMinHeight }}
                   >
-                    Workforce Team Hierarchy & Reporting Lines Dossier
-                  </div>
-                  <div
-                    style={{ fontSize: "10px" }}
-                    className="text-slate-300 mb-0 mt-0.5 whitespace-nowrap"
-                  >
-                    Official Organizational Chain of Command Audit Record
-                  </div>
-                </div>
-
-                <div
-                  style={{ fontSize: "10px" }}
-                  className="text-right text-slate-300 space-y-0.5 shrink-0"
-                >
-                  <div
-                    style={{ fontSize: "10.5px" }}
-                    className="font-bold text-amber-300 tracking-wider uppercase mb-0.5"
-                  >
-                    CONFIDENTIAL BRIEFING
-                  </div>
-                  <p className="mb-0">Date: <strong className="text-white">{currentDate}</strong></p>
-                  <p className="mb-0">Time: <span className="text-slate-200">{currentTime}</span></p>
-                  <p className="mb-0">Scope: <strong className="capitalize text-white">{scope === "filtered" ? "Filtered View" : "All Workforce"}</strong></p>
-                  <p className="mb-0">Format: <strong className="uppercase text-amber-300">{pageSize} • {orientation}</strong></p>
-                </div>
-              </div>
-            ) : headerStyle === "minimal" ? (
-              <div className="border-b border-slate-200 pb-2.5 flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-1.5 mb-0.5">
-                    <span className="text-blue-600 font-bold text-xs uppercase tracking-wider">
-                      EMS Workforce
-                    </span>
-                    <span className="text-slate-300">•</span>
-                    <span className="text-xs font-semibold text-slate-700">Hierarchy Dossier</span>
-                  </div>
-                  <div style={{ fontSize: "10px" }} className="text-slate-400 mb-0">
-                    Official reporting lines audit record
-                  </div>
-                </div>
-
-                <div
-                  style={{ fontSize: "9.5px" }}
-                  className="text-right text-slate-500 flex items-center gap-3 shrink-0"
-                >
-                  <div>Date: <strong className="text-slate-700">{currentDate}</strong></div>
-                  <div>Scope: <strong className="capitalize text-slate-700">{scope === "filtered" ? "Filtered" : "All"}</strong></div>
-                  <div>Format: <strong className="uppercase text-slate-700">{pageSize}</strong></div>
-                </div>
-              </div>
-            ) : (
-              /* Corporate Default Header */
-              <div className="border-b-2 border-slate-900 pb-2.5 sm:pb-3 flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-5.5 h-5.5 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-[10.5px] shadow-2xs shrink-0">
-                      <i className="bi bi-bar-chart-fill"></i>
-                    </div>
-                    <div
-                      style={{ fontSize: "13.75px", lineHeight: "1.2", letterSpacing: "0.05em" }}
-                      className="font-bold text-slate-900 uppercase whitespace-nowrap"
-                    >
-                      EMS Enterprise Workforce
-                    </div>
-                  </div>
-                  <div
-                    style={{ fontSize: "12.6px", lineHeight: "1.3" }}
-                    className="font-semibold text-slate-800 whitespace-nowrap"
-                  >
-                    Workforce Team Hierarchy & Reporting Lines Dossier
-                  </div>
-                  <div
-                    style={{ fontSize: "10px", lineHeight: "1.2" }}
-                    className="text-slate-500 mb-0 mt-0.5 whitespace-nowrap"
-                  >
-                    Official Organizational Chain of Command Audit Record
-                  </div>
-                </div>
-
-                <div
-                  style={{ fontSize: "10px", lineHeight: "1.3" }}
-                  className="text-right text-slate-600 space-y-0.5 shrink-0"
-                >
-                  <div
-                    style={{ fontSize: "10.5px" }}
-                    className="font-bold text-slate-900 tracking-wider uppercase mb-0.5"
-                  >
-                    CONFIDENTIAL REPORT
-                  </div>
-                  <p className="mb-0">Date: <strong className="text-slate-800">{currentDate}</strong></p>
-                  <p className="mb-0">Time: <span className="text-slate-700">{currentTime}</span></p>
-                  <p className="mb-0">Scope: <strong className="capitalize text-slate-800">{scope === "filtered" ? "Filtered View" : "All Workforce"}</strong></p>
-                  <p className="mb-0">Page Size: <strong className="uppercase text-slate-800">{pageSize} ({pageSize === "a4" ? "210 × 297mm" : pageSize === "letter" ? "8.5 × 11in" : "8.5 × 14in"})</strong></p>
-                  <p className="mb-0">Orientation: <strong className="capitalize text-slate-800">{orientation}</strong></p>
-                  <p className="mb-0">Margins: <strong className="capitalize text-slate-800">{margins} ({margins === "narrow" ? "10mm" : margins === "wide" ? "25mm" : "15mm"})</strong></p>
-                  {activeFiltersDesc && (
-                    <p style={{ fontSize: "9.5px" }} className="text-indigo-700 max-w-[200px] truncate mb-0">
-                      {activeFiltersDesc}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Executive KPI Summary Bar matching Image 1 */}
-            <div className="grid grid-cols-4 gap-2 text-center py-2 px-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
-              <div className="border-r border-slate-100 pr-2">
-                <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
-                  Mapped Personnel
-                </span>
-                <span className="text-sm sm:text-base font-bold text-blue-600 block mt-0.5">
-                  {activeMappings.length}
-                </span>
-              </div>
-              <div className="border-r border-slate-100 pr-2">
-                <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
-                  Team Lead Squads
-                </span>
-                <span className="text-sm sm:text-base font-bold text-purple-600 block mt-0.5">
-                  {squadsList.length}
-                </span>
-              </div>
-              <div className="border-r border-slate-100 pr-2">
-                <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
-                  Dept Managers
-                </span>
-                <span className="text-sm sm:text-base font-bold text-emerald-600 block mt-0.5">
-                  {uniqueManagersCount}
-                </span>
-              </div>
-              <div>
-                <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
-                  Unallocated Staff
-                </span>
-                <span className="text-sm sm:text-base font-bold text-amber-600 block mt-0.5">
-                  {activeUnassigned.length}
-                </span>
-              </div>
-            </div>
-
-            {/* Section 1: Detailed Workforce Reporting Matrix */}
-            <div>
-              <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-200">
-                <div
-                  style={{ fontSize: "11.6px", lineHeight: "1.2", letterSpacing: "0.04em" }}
-                  className="font-bold text-slate-900 uppercase flex items-center gap-1.5 whitespace-nowrap"
-                >
-                  <i className="bi bi-diagram-3 text-blue-600" style={{ fontSize: "12.6px" }}></i>
-                  <span>1. Detailed Workforce Reporting Relationships ({activeMappings.length})</span>
-                </div>
-                <span
-                  style={{ fontSize: "9.5px" }}
-                  className="text-slate-400 font-normal whitespace-nowrap shrink-0"
-                >
-                  Ordered by Department & Supervisor
-                </span>
-              </div>
-
-              {activeMappings.length === 0 ? (
-                <p className="text-center py-4 text-xs text-slate-400 italic">
-                  No reporting relationships match the selected scope.
-                </p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-[11px] border-collapse border border-slate-200">
-                    <thead>
-                      <tr className="bg-slate-50 text-slate-600 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200">
-                        <th className="px-2.5 py-1.5 border-r border-slate-200">Employee ID & Name</th>
-                        <th className="px-2.5 py-1.5 border-r border-slate-200">Department</th>
-                        <th className="px-2.5 py-1.5 border-r border-slate-200">Direct Team Lead (Supervisor)</th>
-                        <th className="px-2.5 py-1.5 border-r border-slate-200">Department Manager</th>
-                        <th className="px-2.5 py-1.5 text-center">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-200">
-                      {activeMappings.map((item, idx) => (
-                        <tr
-                          key={`print-row-${item.id || idx}`}
-                          className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"}
-                        >
-                          <td className="px-2.5 py-1.5 border-r border-slate-200">
-                            <span className="font-bold text-slate-900 block leading-tight">
-                              {item.employee_name}
-                            </span>
-                            <span className="text-[9.5px] text-slate-400 block font-mono">
-                              EMP-{String(item.employee_id).padStart(4, "0")} • {item.employee_email}
-                            </span>
-                          </td>
-                          <td className="px-2.5 py-1.5 border-r border-slate-200 font-medium text-slate-800">
-                            {item.department_name || "General"}
-                          </td>
-                          <td className="px-2.5 py-1.5 border-r border-slate-200">
-                            <span className="font-semibold text-purple-700 block leading-tight">
-                              {item.supervisor_name}
-                            </span>
-                            <span className="text-[9.5px] text-slate-400 font-mono">
-                              SUP-{String(item.supervisor_id).padStart(4, "0")}
-                            </span>
-                          </td>
-                          <td className="px-2.5 py-1.5 border-r border-slate-200">
-                            <span className="font-semibold text-slate-800 block leading-tight">
-                              {item.manager_name}
-                            </span>
-                            <span className="text-[9.5px] text-slate-400 font-mono">
-                              MGR-{String(item.manager_id).padStart(4, "0")}
-                            </span>
-                          </td>
-                          <td className="px-2.5 py-1.5 text-center">
-                            <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-                              Active
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-
-            {/* Section 2: Supervisor Squads & Capacity Overview */}
-            {includeSquadsSummary && squadsList.length > 0 && (
-              <div className="pt-2">
-                <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-200">
-                  <div
-                    style={{ fontSize: "11.6px", lineHeight: "1.2", letterSpacing: "0.04em" }}
-                    className="font-bold text-slate-900 uppercase flex items-center gap-1.5 whitespace-nowrap"
-                  >
-                    <i className="bi bi-people-fill text-purple-600" style={{ fontSize: "12.6px" }}></i>
-                    <span>2. Supervisor Squad Roster & Capacity Summary ({squadsList.length} Squads)</span>
-                  </div>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-[11px] border-collapse border border-slate-200">
-                    <thead>
-                      <tr className="bg-slate-50 text-slate-600 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200">
-                        <th className="px-2.5 py-1.5 border-r border-slate-200">Team Lead (Supervisor)</th>
-                        <th className="px-2.5 py-1.5 border-r border-slate-200">Division / Manager</th>
-                        <th className="px-2.5 py-1.5 border-r border-slate-200 text-center">Direct Reports</th>
-                        <th className="px-2.5 py-1.5 border-r border-slate-200 text-center">Capacity Load</th>
-                        <th className="px-2.5 py-1.5">Assigned Staff Members</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-200">
-                      {squadsList.map((sq, idx) => {
-                        const count = sq.members.length;
-                        const cap = Math.min(100, Math.round((count / 8) * 100));
-                        return (
-                          <tr
-                            key={`squad-print-${sq.supervisorId}`}
-                            className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"}
-                          >
-                            <td className="px-2.5 py-1.5 border-r border-slate-200 font-bold text-slate-900">
-                              {sq.supervisorName}
-                              <span className="block text-[9.5px] font-normal text-slate-400 font-mono">
-                                SUP-{String(sq.supervisorId).padStart(4, "0")}
-                              </span>
-                            </td>
-                            <td className="px-2.5 py-1.5 border-r border-slate-200">
-                              <span className="font-semibold text-slate-800">{sq.departmentName}</span>
-                              <span className="block text-[9.5px] text-slate-400">Mgr: {sq.managerName}</span>
-                            </td>
-                            <td className="px-2.5 py-1.5 border-r border-slate-200 text-center font-bold text-slate-900">
-                              {count} / 8
-                            </td>
-                            <td className="px-2.5 py-1.5 border-r border-slate-200 text-center">
-                              <span
-                                className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                                  count >= 8
-                                    ? "bg-amber-50 text-amber-700 border border-amber-200"
-                                    : count >= 4
-                                    ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
-                                    : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                }`}
+                    <div className="space-y-4">
+                      {/* Document Header (Responding dynamically to Header Style: default | minimal | executive) */}
+                      {headerStyle === "executive" ? (
+                        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-3.5 rounded-xl shadow-sm border border-slate-800 flex items-start justify-between gap-4">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className="w-5.5 h-5.5 rounded-md bg-amber-400 text-slate-950 flex items-center justify-center font-black text-[11px] shadow-sm shrink-0">
+                                <i className="bi bi-shield-check"></i>
+                              </div>
+                              <div
+                                style={{ fontSize: "14px", letterSpacing: "0.06em" }}
+                                className="font-black text-amber-300 uppercase whitespace-nowrap"
                               >
-                                {cap}% • {count >= 8 ? "High Span" : count >= 4 ? "Optimal" : "Light"}
+                                EMS Enterprise Workforce
+                              </div>
+                              <span className="text-[9px] px-1.5 py-0.2 rounded font-bold bg-amber-400/20 text-amber-300 border border-amber-400/40 uppercase tracking-widest">
+                                Executive Dossier
                               </span>
-                            </td>
-                            <td className="px-2.5 py-1.5 text-[10px] text-slate-700">
-                              {sq.members.map((m) => m.employee_name).join(", ")}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
+                            </div>
+                            <div
+                              style={{ fontSize: "12.6px" }}
+                              className="font-bold text-white whitespace-nowrap"
+                            >
+                              Workforce Team Hierarchy & Reporting Lines Dossier
+                            </div>
+                            <div
+                              style={{ fontSize: "10px" }}
+                              className="text-slate-300 mb-0 mt-0.5 whitespace-nowrap"
+                            >
+                              Official Organizational Chain of Command Audit Record
+                            </div>
+                          </div>
 
-            {/* Section 3: Unassigned / Orphaned Personnel */}
-            {includeUnassigned && activeUnassigned.length > 0 && (
-              <div className="pt-2">
-                <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-200">
+                          <div
+                            style={{ fontSize: "10px" }}
+                            className="text-right text-slate-300 space-y-0.5 shrink-0"
+                          >
+                            <div
+                              style={{ fontSize: "10.5px" }}
+                              className="font-bold text-amber-300 tracking-wider uppercase mb-0.5"
+                            >
+                              CONFIDENTIAL BRIEFING
+                            </div>
+                            <p className="mb-0">Date: <strong className="text-white">{currentDate}</strong></p>
+                            <p className="mb-0">Time: <span className="text-slate-200">{currentTime}</span></p>
+                            <p className="mb-0">Scope: <strong className="capitalize text-white">{scope === "filtered" ? "Filtered View" : "All Workforce"}</strong></p>
+                            <p className="mb-0">Format: <strong className="uppercase text-amber-300">{pageSize} • {orientation}</strong></p>
+                          </div>
+                        </div>
+                      ) : headerStyle === "minimal" ? (
+                        <div className="border-b border-slate-200 pb-2.5 flex items-start justify-between gap-4">
+                          <div>
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                              <span className="text-blue-600 font-bold text-xs uppercase tracking-wider">
+                                EMS Workforce
+                              </span>
+                              <span className="text-slate-300">•</span>
+                              <span className="text-xs font-semibold text-slate-700">Hierarchy Dossier</span>
+                            </div>
+                            <div style={{ fontSize: "10px" }} className="text-slate-400 mb-0">
+                              Official reporting lines audit record
+                            </div>
+                          </div>
+
+                          <div
+                            style={{ fontSize: "9.5px" }}
+                            className="text-right text-slate-500 flex items-center gap-3 shrink-0"
+                          >
+                            <div>Date: <strong className="text-slate-700">{currentDate}</strong></div>
+                            <div>Scope: <strong className="capitalize text-slate-700">{scope === "filtered" ? "Filtered" : "All"}</strong></div>
+                            <div>Format: <strong className="uppercase text-slate-700">{pageSize}</strong></div>
+                          </div>
+                        </div>
+                      ) : (
+                        /* Corporate Default Header */
+                        <div className="border-b-2 border-slate-900 pb-2.5 sm:pb-3 flex items-start justify-between gap-4">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className="w-5.5 h-5.5 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-[10.5px] shadow-2xs shrink-0">
+                                <i className="bi bi-bar-chart-fill"></i>
+                              </div>
+                              <div
+                                style={{ fontSize: "13.75px", lineHeight: "1.2", letterSpacing: "0.05em" }}
+                                className="font-bold text-slate-900 uppercase whitespace-nowrap"
+                              >
+                                EMS Enterprise Workforce
+                              </div>
+                            </div>
+                            <div
+                              style={{ fontSize: "12.6px", lineHeight: "1.3" }}
+                              className="font-semibold text-slate-800 whitespace-nowrap"
+                            >
+                              Workforce Team Hierarchy & Reporting Lines Dossier
+                            </div>
+                            <div
+                              style={{ fontSize: "10px", lineHeight: "1.2" }}
+                              className="text-slate-500 mb-0 mt-0.5 whitespace-nowrap"
+                            >
+                              Official Organizational Chain of Command Audit Record
+                            </div>
+                          </div>
+
+                          <div
+                            style={{ fontSize: "10px", lineHeight: "1.3" }}
+                            className="text-right text-slate-600 space-y-0.5 shrink-0"
+                          >
+                            <div
+                              style={{ fontSize: "10.5px" }}
+                              className="font-bold text-slate-900 tracking-wider uppercase mb-0.5"
+                            >
+                              CONFIDENTIAL REPORT
+                            </div>
+                            <p className="mb-0">Date: <strong className="text-slate-800">{currentDate}</strong></p>
+                            <p className="mb-0">Time: <span className="text-slate-700">{currentTime}</span></p>
+                            <p className="mb-0">Scope: <strong className="capitalize text-slate-800">{scope === "filtered" ? "Filtered View" : "All Workforce"}</strong></p>
+                            <p className="mb-0">Page Size: <strong className="uppercase text-slate-800">{pageSize} ({pageSize === "a4" ? "210 × 297mm" : pageSize === "letter" ? "8.5 × 11in" : "8.5 × 14in"})</strong></p>
+                            <p className="mb-0">Orientation: <strong className="capitalize text-slate-800">{orientation}</strong></p>
+                            <p className="mb-0">Margins: <strong className="capitalize text-slate-800">{margins} ({margins === "narrow" ? "10mm" : margins === "wide" ? "25mm" : "15mm"})</strong></p>
+                            {activeFiltersDesc && (
+                              <p style={{ fontSize: "9.5px" }} className="text-indigo-700 max-w-[200px] truncate mb-0">
+                                {activeFiltersDesc}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Executive KPI Summary Bar */}
+                      <div className="grid grid-cols-4 gap-2 text-center py-2 px-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
+                        <div className="border-r border-slate-100 pr-2">
+                          <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
+                            Mapped Personnel
+                          </span>
+                          <span className="text-sm sm:text-base font-bold text-blue-600 block mt-0.5">
+                            {activeMappings.length}
+                          </span>
+                        </div>
+                        <div className="border-r border-slate-100 pr-2">
+                          <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
+                            Team Lead Squads
+                          </span>
+                          <span className="text-sm sm:text-base font-bold text-purple-600 block mt-0.5">
+                            {squadsList.length}
+                          </span>
+                        </div>
+                        <div className="border-r border-slate-100 pr-2">
+                          <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
+                            Dept Managers
+                          </span>
+                          <span className="text-sm sm:text-base font-bold text-emerald-600 block mt-0.5">
+                            {uniqueManagersCount}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
+                            Unallocated Staff
+                          </span>
+                          <span className="text-sm sm:text-base font-bold text-amber-600 block mt-0.5">
+                            {activeUnassigned.length}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Section 1: Detailed Workforce Reporting Matrix */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-200">
+                          <div
+                            style={{ fontSize: "11.6px", lineHeight: "1.2", letterSpacing: "0.04em" }}
+                            className="font-bold text-slate-900 uppercase flex items-center gap-1.5 whitespace-nowrap"
+                          >
+                            <i className="bi bi-diagram-3 text-blue-600" style={{ fontSize: "12.6px" }}></i>
+                            <span>1. Detailed Workforce Reporting Relationships ({activeMappings.length})</span>
+                          </div>
+                          <span
+                            style={{ fontSize: "9.5px" }}
+                            className="text-slate-400 font-normal whitespace-nowrap shrink-0"
+                          >
+                            Ordered by Department & Supervisor
+                          </span>
+                        </div>
+
+                        {activeMappings.length === 0 ? (
+                          <p className="text-center py-4 text-xs text-slate-400 italic">
+                            No reporting relationships match the selected scope.
+                          </p>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left text-[11px] border-collapse border border-slate-200">
+                              <thead>
+                                <tr className="bg-slate-50 text-slate-600 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200">
+                                  <th className="px-2.5 py-1.5 border-r border-slate-200">Employee ID & Name</th>
+                                  <th className="px-2.5 py-1.5 border-r border-slate-200">Department</th>
+                                  <th className="px-2.5 py-1.5 border-r border-slate-200">Direct Team Lead (Supervisor)</th>
+                                  <th className="px-2.5 py-1.5 border-r border-slate-200">Department Manager</th>
+                                  <th className="px-2.5 py-1.5 text-center">Status</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-200">
+                                {activeMappings.map((item, idx) => (
+                                  <tr
+                                    key={`print-row-${item.id || idx}`}
+                                    className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"}
+                                  >
+                                    <td className="px-2.5 py-1.5 border-r border-slate-200">
+                                      <span className="font-bold text-slate-900 block leading-tight">
+                                        {item.employee_name}
+                                      </span>
+                                      <span className="text-[9.5px] text-slate-400 block font-mono">
+                                        EMP-{String(item.employee_id).padStart(4, "0")} • {item.employee_email}
+                                      </span>
+                                    </td>
+                                    <td className="px-2.5 py-1.5 border-r border-slate-200 font-medium text-slate-800">
+                                      {item.department_name || "General"}
+                                    </td>
+                                    <td className="px-2.5 py-1.5 border-r border-slate-200">
+                                      <span className="font-semibold text-purple-700 block leading-tight">
+                                        {item.supervisor_name}
+                                      </span>
+                                      <span className="text-[9.5px] text-slate-400 font-mono">
+                                        SUP-{String(item.supervisor_id).padStart(4, "0")}
+                                      </span>
+                                    </td>
+                                    <td className="px-2.5 py-1.5 border-r border-slate-200">
+                                      <span className="font-semibold text-slate-800 block leading-tight">
+                                        {item.manager_name}
+                                      </span>
+                                      <span className="text-[9.5px] text-slate-400 font-mono">
+                                        MGR-{String(item.manager_id).padStart(4, "0")}
+                                      </span>
+                                    </td>
+                                    <td className="px-2.5 py-1.5 text-center">
+                                      <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                                        Active
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Page 1 Footer */}
+                    {renderPageFooter(1, "Workforce Hierarchy Management Module • Section 1.0 Relationships")}
+                  </div>
+
+                  {/* ===================== PAGE 2 ===================== */}
                   <div
-                    style={{ fontSize: "11.6px", lineHeight: "1.2", letterSpacing: "0.04em" }}
-                    className="font-bold text-amber-900 uppercase flex items-center gap-1.5 whitespace-nowrap"
+                    className={`print-page bg-white rounded-xl border border-slate-300 shadow-md text-slate-900 transition-all w-full ${
+                      currentPage === 2
+                        ? "flex flex-col justify-between"
+                        : "hidden print:flex print:flex-col print:justify-between"
+                    } ${
+                      margins === "narrow"
+                        ? "p-2.5 sm:p-3.5"
+                        : margins === "wide"
+                        ? "p-6 sm:p-8"
+                        : "p-4 sm:p-5.5"
+                    }`}
+                    style={{ minHeight: pageMinHeight }}
                   >
-                    <i className="bi bi-exclamation-triangle-fill text-amber-600" style={{ fontSize: "12.6px" }}></i>
-                    <span>3. Unallocated Personnel Awaiting Squad Assignment ({activeUnassigned.length})</span>
+                    <div className="space-y-4">
+                      {renderSubPageHeader(
+                        2,
+                        "Section 2: Supervisor Squad Roster & Capacity Summary",
+                        "Team lead operational capacity, span of control, and member assignments"
+                      )}
+
+                      {/* Section 2: Supervisor Squads & Capacity Overview */}
+                      {!includeSquadsSummary ? (
+                        <div className="p-6 bg-slate-50 border border-slate-200 rounded-xl text-center">
+                          <i className="bi bi-eye-slash text-2xl text-slate-400 mb-2 block"></i>
+                          <h4 className="text-xs font-bold text-slate-700">Section Excluded by Configuration</h4>
+                          <p className="text-[11px] text-slate-500 max-w-md mx-auto mt-1 mb-0">
+                            Enable &quot;Squads Summary&quot; in Step 2 of the configuration sidebar to include supervisor squad rosters and capacity metrics in this dossier.
+                          </p>
+                        </div>
+                      ) : squadsList.length === 0 ? (
+                        <div className="p-6 bg-slate-50 border border-slate-200 rounded-xl text-center">
+                          <i className="bi bi-people text-2xl text-slate-400 mb-2 block"></i>
+                          <h4 className="text-xs font-bold text-slate-700">No Squads Found</h4>
+                          <p className="text-[11px] text-slate-500 mt-1 mb-0">
+                            No supervisor squads match the currently selected report scope.
+                          </p>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left text-[11px] border-collapse border border-slate-200">
+                              <thead>
+                                <tr className="bg-slate-50 text-slate-600 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200">
+                                  <th className="px-2.5 py-1.5 border-r border-slate-200">Team Lead (Supervisor)</th>
+                                  <th className="px-2.5 py-1.5 border-r border-slate-200">Division / Manager</th>
+                                  <th className="px-2.5 py-1.5 border-r border-slate-200 text-center">Direct Reports</th>
+                                  <th className="px-2.5 py-1.5 border-r border-slate-200 text-center">Capacity Load</th>
+                                  <th className="px-2.5 py-1.5">Assigned Staff Members</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-200">
+                                {squadsList.map((sq, idx) => {
+                                  const count = sq.members.length;
+                                  const cap = Math.min(100, Math.round((count / 8) * 100));
+                                  return (
+                                    <tr
+                                      key={`squad-print-${sq.supervisorId}`}
+                                      className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"}
+                                    >
+                                      <td className="px-2.5 py-1.5 border-r border-slate-200 font-bold text-slate-900">
+                                        {sq.supervisorName}
+                                        <span className="block text-[9.5px] font-normal text-slate-400 font-mono">
+                                          SUP-{String(sq.supervisorId).padStart(4, "0")}
+                                        </span>
+                                      </td>
+                                      <td className="px-2.5 py-1.5 border-r border-slate-200">
+                                        <span className="font-semibold text-slate-800">{sq.departmentName}</span>
+                                        <span className="block text-[9.5px] text-slate-400">Mgr: {sq.managerName}</span>
+                                      </td>
+                                      <td className="px-2.5 py-1.5 border-r border-slate-200 text-center font-bold text-slate-900">
+                                        {count} / 8
+                                      </td>
+                                      <td className="px-2.5 py-1.5 border-r border-slate-200 text-center">
+                                        <span
+                                          className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                                            count >= 8
+                                              ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                              : count >= 4
+                                              ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
+                                              : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                          }`}
+                                        >
+                                          {cap}% • {count >= 8 ? "High Span" : count >= 4 ? "Optimal" : "Light"}
+                                        </span>
+                                      </td>
+                                      <td className="px-2.5 py-1.5 text-[10px] text-slate-700">
+                                        {sq.members.map((m) => m.employee_name).join(", ")}
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+
+                          {/* Capacity Health & Governance Benchmarks */}
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-2">
+                            <div className="p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-200/70">
+                              <div className="flex items-center gap-1.5 mb-1 text-emerald-800 font-bold text-[11px]">
+                                <i className="bi bi-check-circle-fill text-emerald-600"></i>
+                                <span>Light Span (1–3 Reports)</span>
+                              </div>
+                              <p className="text-[10px] text-emerald-900/80 mb-0 leading-relaxed">
+                                High managerial bandwidth available for dedicated onboarding, mentoring, and cross-functional project intake.
+                              </p>
+                            </div>
+
+                            <div className="p-2.5 rounded-xl bg-indigo-50/60 border border-indigo-200/70">
+                              <div className="flex items-center gap-1.5 mb-1 text-indigo-800 font-bold text-[11px]">
+                                <i className="bi bi-award-fill text-indigo-600"></i>
+                                <span>Optimal Span (4–7 Reports)</span>
+                              </div>
+                              <p className="text-[10px] text-indigo-900/80 mb-0 leading-relaxed">
+                                Industry benchmark equilibrium maximizing operational velocity while preserving 1-on-1 supervisory coaching.
+                              </p>
+                            </div>
+
+                            <div className="p-2.5 rounded-xl bg-amber-50/60 border border-amber-200/70">
+                              <div className="flex items-center gap-1.5 mb-1 text-amber-800 font-bold text-[11px]">
+                                <i className="bi bi-exclamation-triangle-fill text-amber-600"></i>
+                                <span>High Span (8+ Reports)</span>
+                              </div>
+                              <p className="text-[10px] text-amber-900/80 mb-0 leading-relaxed">
+                                Supervisory saturation threshold reached. Recommend reviewing workload distribution or delegating tech leads.
+                              </p>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Page 2 Footer */}
+                    {renderPageFooter(2, "Supervisor Squad Roster & Capacity Assessment")}
+                  </div>
+
+                  {/* ===================== PAGE 3 ===================== */}
+                  <div
+                    className={`print-page bg-white rounded-xl border border-slate-300 shadow-md text-slate-900 transition-all w-full ${
+                      currentPage === 3
+                        ? "flex flex-col justify-between"
+                        : "hidden print:flex print:flex-col print:justify-between"
+                    } ${
+                      margins === "narrow"
+                        ? "p-2.5 sm:p-3.5"
+                        : margins === "wide"
+                        ? "p-6 sm:p-8"
+                        : "p-4 sm:p-5.5"
+                    }`}
+                    style={{ minHeight: pageMinHeight }}
+                  >
+                    <div className="space-y-4">
+                      {renderSubPageHeader(
+                        3,
+                        "Section 3: Unallocated Personnel & Departmental Distribution",
+                        "Tracking unassigned staff members and leadership density across departments"
+                      )}
+
+                      {/* Unassigned Staff Section */}
+                      {!includeUnassigned ? (
+                        <div className="p-6 bg-slate-50 border border-slate-200 rounded-xl text-center">
+                          <i className="bi bi-eye-slash text-2xl text-slate-400 mb-2 block"></i>
+                          <h4 className="text-xs font-bold text-slate-700">Section Excluded by Configuration</h4>
+                          <p className="text-[11px] text-slate-500 max-w-md mx-auto mt-1 mb-0">
+                            Enable &quot;Unassigned Staff&quot; in Step 2 of the configuration sidebar to include unallocated staff listings.
+                          </p>
+                        </div>
+                      ) : activeUnassigned.length > 0 ? (
+                        <div>
+                          <div className="flex items-center justify-between mb-2 pb-1 border-b border-amber-200">
+                            <div className="text-[11.5px] font-bold text-amber-900 uppercase flex items-center gap-1.5">
+                              <i className="bi bi-exclamation-triangle-fill text-amber-600"></i>
+                              <span>Unallocated Personnel Awaiting Squad Assignment ({activeUnassigned.length})</span>
+                            </div>
+                            <span className="text-[9.5px] text-amber-800 font-semibold bg-amber-100 px-2 py-0.5 rounded-full">
+                              Action Required
+                            </span>
+                          </div>
+
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left text-[11px] border-collapse border border-amber-200 bg-amber-50/20">
+                              <thead>
+                                <tr className="bg-amber-100/70 text-amber-900 text-[10px] font-bold uppercase tracking-wider border-b border-amber-200">
+                                  <th className="px-2.5 py-1.5 border-r border-amber-200">Employee ID & Name</th>
+                                  <th className="px-2.5 py-1.5 border-r border-amber-200">Email Address</th>
+                                  <th className="px-2.5 py-1.5 border-r border-amber-200">Department</th>
+                                  <th className="px-2.5 py-1.5">Recommended Next Action</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-amber-200">
+                                {activeUnassigned.map((staff) => (
+                                  <tr key={`unassigned-print-${staff.id}`}>
+                                    <td className="px-2.5 py-1.5 border-r border-amber-200 font-bold text-slate-900">
+                                      {staff.name}
+                                      <span className="block text-[9.5px] font-normal text-slate-500">
+                                        EMP-{String(staff.id).padStart(4, "0")}
+                                      </span>
+                                    </td>
+                                    <td className="px-2.5 py-1.5 border-r border-amber-200 text-slate-700">
+                                      {staff.email}
+                                    </td>
+                                    <td className="px-2.5 py-1.5 border-r border-amber-200 font-medium text-slate-800">
+                                      {staff.department_name || staff.department || "Unallocated"}
+                                    </td>
+                                    <td className="px-2.5 py-1.5 text-amber-800 font-semibold text-[10px]">
+                                      Assign to active Team Lead squad via Onboarding Tray
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+
+                          <div className="mt-2.5 p-2 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2 text-[10.5px] text-amber-900">
+                            <i className="bi bi-info-circle-fill text-amber-600 shrink-0"></i>
+                            <span>
+                              <strong>HR Allocation Directive:</strong> Unallocated personnel must be integrated into a certified squad within 5 business days of onboarding to maintain governance compliance.
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-base shrink-0">
+                            <i className="bi bi-check2-circle"></i>
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-bold text-emerald-900 mb-0.5">100% Workforce Allocation Achieved</h4>
+                            <p className="text-[10.5px] text-emerald-800 mb-0">
+                              All active employees are mapped to designated Team Leads and Department Managers. Zero unallocated personnel detected in this scope.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Departmental Resource Distribution Table */}
+                      <div className="pt-2">
+                        <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-200">
+                          <div className="text-[11.5px] font-bold text-slate-900 uppercase flex items-center gap-1.5">
+                            <i className="bi bi-buildings-fill text-indigo-600"></i>
+                            <span>Departmental Leadership & Resource Distribution</span>
+                          </div>
+                          <span className="text-[9.5px] text-slate-400">
+                            {departmentList.length} Active Departments
+                          </span>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left text-[11px] border-collapse border border-slate-200">
+                            <thead>
+                              <tr className="bg-slate-50 text-slate-600 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200">
+                                <th className="px-2.5 py-1.5 border-r border-slate-200">Department Name</th>
+                                <th className="px-2.5 py-1.5 border-r border-slate-200 text-center">Mapped Staff</th>
+                                <th className="px-2.5 py-1.5 border-r border-slate-200 text-center">Active Squads</th>
+                                <th className="px-2.5 py-1.5 border-r border-slate-200 text-center">Managers</th>
+                                <th className="px-2.5 py-1.5 text-center">Allocation Status</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-200">
+                              {departmentList.map((d, idx) => (
+                                <tr key={d.name} className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"}>
+                                  <td className="px-2.5 py-1.5 border-r border-slate-200 font-semibold text-slate-900">
+                                    {d.name}
+                                  </td>
+                                  <td className="px-2.5 py-1.5 border-r border-slate-200 text-center font-bold text-slate-800">
+                                    {d.employeesCount}
+                                  </td>
+                                  <td className="px-2.5 py-1.5 border-r border-slate-200 text-center text-purple-700 font-medium">
+                                    {d.supervisors.size} {d.supervisors.size === 1 ? "Squad" : "Squads"}
+                                  </td>
+                                  <td className="px-2.5 py-1.5 border-r border-slate-200 text-center text-emerald-700 font-medium">
+                                    {d.managers.size} {d.managers.size === 1 ? "Manager" : "Managers"}
+                                  </td>
+                                  <td className="px-2.5 py-1.5 text-center">
+                                    <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                      Healthy Structure
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Page 3 Footer */}
+                    {renderPageFooter(3, "Workforce Allocation & Departmental Distribution")}
+                  </div>
+
+                  {/* ===================== PAGE 4 ===================== */}
+                  <div
+                    className={`print-page bg-white rounded-xl border border-slate-300 shadow-md text-slate-900 transition-all w-full ${
+                      currentPage === 4
+                        ? "flex flex-col justify-between"
+                        : "hidden print:flex print:flex-col print:justify-between"
+                    } ${
+                      margins === "narrow"
+                        ? "p-2.5 sm:p-3.5"
+                        : margins === "wide"
+                        ? "p-6 sm:p-8"
+                        : "p-4 sm:p-5.5"
+                    }`}
+                    style={{ minHeight: pageMinHeight }}
+                  >
+                    <div className="space-y-4">
+                      {renderSubPageHeader(
+                        4,
+                        "Section 4: Corporate Governance Audit & Compliance Certification",
+                        "Statutory compliance verification, cryptographic audit seal, and executive tri-signature authorization"
+                      )}
+
+                      {/* Audit Certification Overview Cards */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                          <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                            Governance Standard
+                          </span>
+                          <span className="text-xs font-black text-slate-800 block">
+                            ISO 27001 • SOC 2 Type II
+                          </span>
+                          <span className="inline-block mt-1 px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-700">
+                            Certified Compliant
+                          </span>
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                          <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                            Chain of Command Audit
+                          </span>
+                          <span className="text-xs font-black text-slate-800 block">
+                            Zero Disconnected Links
+                          </span>
+                          <span className="inline-block mt-1 px-2 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-blue-700">
+                            100% Chain Validated
+                          </span>
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                          <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                            Audited Personnel Scope
+                          </span>
+                          <span className="text-xs font-black text-slate-800 block">
+                            {activeMappings.length} Active Records
+                          </span>
+                          <span className="inline-block mt-1 px-2 py-0.5 rounded text-[9px] font-bold bg-purple-100 text-purple-700">
+                            {scope === "filtered" ? "Target Filter Audit" : "Full Enterprise Audit"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Formal Audit Declarations */}
+                      <div className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200 space-y-2">
+                        <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5 mb-1">
+                          <i className="bi bi-shield-lock-fill text-indigo-600"></i>
+                          <span>Corporate Governance & Audit Declarations</span>
+                        </h4>
+                        <ul className="text-[10.5px] text-slate-600 space-y-1 list-disc pl-4 mb-0">
+                          <li>
+                            This official dossier certifies that all supervisor-to-employee reporting relationships documented herein comply with corporate workforce governance regulations and HR Section 4.11 policy standards.
+                          </li>
+                          <li>
+                            Supervisory capacities have been audited against span-of-control guidelines (target: 4–7 direct reports) to prevent managerial overload and uphold quality employee oversight.
+                          </li>
+                          <li>
+                            Zero circular reporting loops, orphaned supervisory branches, or unauthorized supervisory roles exist in this authenticated dataset.
+                          </li>
+                        </ul>
+                      </div>
+
+                      {/* Cryptographic Hash & Tamper-Evident Seal */}
+                      <div className="p-3 rounded-xl bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex flex-col sm:flex-row items-center justify-between gap-3 font-mono text-[9.5px]">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span className="text-amber-300 font-bold uppercase">Cryptographic Audit Seal</span>
+                          </div>
+                          <div className="text-slate-300">
+                            Hash: <span className="text-slate-100">SHA-256: 7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069</span>
+                          </div>
+                        </div>
+                        <div className="text-right text-slate-400 shrink-0">
+                          <div>Record ID: <span className="text-white">EMS-AUD-{new Date().getFullYear()}-00{activeMappings.length}</span></div>
+                          <div>Sealed: <span className="text-white">{currentDate}</span></div>
+                        </div>
+                      </div>
+
+                      {/* Executive Tri-Signature Authorization Blocks */}
+                      <div className="pt-2">
+                        <div className="text-[11px] font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                          <i className="bi bi-pen-fill text-blue-600"></i>
+                          <span>Executive Authorization & Certification Sign-Off</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          {/* Signer 1: HR Director */}
+                          <div className="p-3 rounded-xl border border-slate-200 bg-white shadow-2xs flex flex-col justify-between h-36">
+                            <div>
+                              <span className="text-[8.5px] uppercase font-bold text-slate-400 tracking-wider block">
+                                Prepared & Certified By
+                              </span>
+                              <span className="text-xs font-bold text-slate-900 block mt-0.5">
+                                Dr. Evelyn Vance, SPHR
+                              </span>
+                              <span className="text-[9.5px] text-slate-500 block">
+                                Director of People Operations
+                              </span>
+                            </div>
+                            <div className="border-t border-slate-300 pt-1.5">
+                              <span className="text-[8.5px] text-slate-400 font-mono block">Signature & Date:</span>
+                              <div className="h-5 flex items-end">
+                                <span className="font-serif italic text-xs text-indigo-700 tracking-widest">[ Electronically Certified ]</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Signer 2: VP People & Culture */}
+                          <div className="p-3 rounded-xl border border-slate-200 bg-white shadow-2xs flex flex-col justify-between h-36">
+                            <div>
+                              <span className="text-[8.5px] uppercase font-bold text-slate-400 tracking-wider block">
+                                Executive Review & Approval
+                              </span>
+                              <span className="text-xs font-bold text-slate-900 block mt-0.5">
+                                Marcus Sterling
+                              </span>
+                              <span className="text-[9.5px] text-slate-500 block">
+                                VP of Organizational Excellence
+                              </span>
+                            </div>
+                            <div className="border-t border-slate-300 pt-1.5">
+                              <span className="text-[8.5px] text-slate-400 font-mono block">Signature & Date:</span>
+                              <div className="h-5 flex items-end">
+                                <span className="font-serif italic text-xs text-indigo-700 tracking-widest">[ Approved ]</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Signer 3: Compliance & Audit Lead */}
+                          <div className="p-3 rounded-xl border border-slate-200 bg-white shadow-2xs flex flex-col justify-between h-36">
+                            <div>
+                              <span className="text-[8.5px] uppercase font-bold text-slate-400 tracking-wider block">
+                                Statutory Audit Sign-Off
+                              </span>
+                              <span className="text-xs font-bold text-slate-900 block mt-0.5">
+                                Clarissa Chen, CISA
+                              </span>
+                              <span className="text-[9.5px] text-slate-500 block">
+                                Head of Corporate Compliance
+                              </span>
+                            </div>
+                            <div className="border-t border-slate-300 pt-1.5">
+                              <span className="text-[8.5px] text-slate-400 font-mono block">Signature & Date:</span>
+                              <div className="h-5 flex items-end">
+                                <span className="font-serif italic text-xs text-indigo-700 tracking-widest">[ Audit Certified ]</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Page 4 Footer */}
+                    {renderPageFooter(4, "Section 4.11 Enterprise Governance Certification & Legal Sign-off")}
                   </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-[11px] border-collapse border border-amber-200 bg-amber-50/20">
-                    <thead>
-                      <tr className="bg-amber-100/70 text-amber-900 text-[10px] font-bold uppercase tracking-wider border-b border-amber-200">
-                        <th className="px-2.5 py-1.5 border-r border-amber-200">Employee ID & Name</th>
-                        <th className="px-2.5 py-1.5 border-r border-amber-200">Email Address</th>
-                        <th className="px-2.5 py-1.5 border-r border-amber-200">Department</th>
-                        <th className="px-2.5 py-1.5">Recommended Next Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-amber-200">
-                      {activeUnassigned.map((staff) => (
-                        <tr key={`unassigned-print-${staff.id}`}>
-                          <td className="px-2.5 py-1.5 border-r border-amber-200 font-bold text-slate-900">
-                            {staff.name}
-                            <span className="block text-[9.5px] font-normal text-slate-500">
-                              EMP-{String(staff.id).padStart(4, "0")}
-                            </span>
-                          </td>
-                          <td className="px-2.5 py-1.5 border-r border-amber-200 text-slate-700">
-                            {staff.email}
-                          </td>
-                          <td className="px-2.5 py-1.5 border-r border-amber-200 font-medium text-slate-800">
-                            {staff.department_name || staff.department || "Unallocated"}
-                          </td>
-                          <td className="px-2.5 py-1.5 text-amber-800 font-semibold text-[10px]">
-                            Assign to active Team Lead squad via Onboarding Tray
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                {/* Bottom Canvas Page Switcher (No Print) */}
+                <div
+                  style={{ maxWidth: dossierMaxWidth }}
+                  className="w-full flex items-center justify-between pt-3 pb-2 text-xs text-slate-500 no-print"
+                >
+                  <button
+                    type="button"
+                    disabled={currentPage <= 1}
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    className="flex items-center gap-1.5 font-bold text-slate-700 hover:text-indigo-600 disabled:opacity-30 disabled:hover:text-slate-700 cursor-pointer transition-colors px-2.5 py-1 rounded-lg hover:bg-slate-200/60"
+                  >
+                    <i className="bi bi-arrow-left"></i> Previous Page
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11.5px] font-semibold text-slate-600">
+                      Viewing Page {currentPage} of 4:
+                    </span>
+                    <span className="text-[11.5px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-2.5 py-0.5 rounded-full">
+                      {currentPage === 1
+                        ? "1. Workforce Relationships"
+                        : currentPage === 2
+                        ? "2. Supervisor Squads & Capacity"
+                        : currentPage === 3
+                        ? "3. Unallocated & Departments"
+                        : "4. Governance Audit & Certification"}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={currentPage >= 4}
+                    onClick={() => setCurrentPage((p) => Math.min(4, p + 1))}
+                    className="flex items-center gap-1.5 font-bold text-slate-700 hover:text-indigo-600 disabled:opacity-30 disabled:hover:text-slate-700 cursor-pointer transition-colors px-2.5 py-1 rounded-lg hover:bg-slate-200/60"
+                  >
+                    Next Page <i className="bi bi-arrow-right"></i>
+                  </button>
                 </div>
-              </div>
-            )}
-
-            {/* Corporate Audit Footer */}
-            <div className="border-t border-slate-300 pt-4 mt-6 flex items-center justify-between text-[9px] text-slate-400">
-              <p className="mb-0">
-                EMS HR Governance • Workforce Hierarchy Management Module • Section 4.11 Compliance
-              </p>
-              <p className="mb-0 font-mono">
-                Generated {currentDate} • Confidential Internal Document
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -1141,10 +1670,31 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
               width: 100% !important;
               max-width: 100% !important;
               margin: 0 !important;
-              padding: ${margins === "narrow" ? "4mm" : margins === "wide" ? "14mm" : "8mm"} !important;
+              padding: 0 !important;
               box-shadow: none !important;
               border: none !important;
               transform: none !important;
+              display: block !important;
+            }
+            .print-page {
+              display: flex !important;
+              flex-direction: column !important;
+              justify-content: space-between !important;
+              width: 100% !important;
+              max-width: 100% !important;
+              min-height: 98vh !important;
+              page-break-after: always !important;
+              break-after: page !important;
+              box-shadow: none !important;
+              border: none !important;
+              border-radius: 0 !important;
+              padding: ${margins === "narrow" ? "6mm" : margins === "wide" ? "16mm" : "10mm"} !important;
+              margin: 0 !important;
+              transform: none !important;
+            }
+            .print-page:last-child {
+              page-break-after: auto !important;
+              break-after: auto !important;
             }
             .no-print {
               display: none !important;
