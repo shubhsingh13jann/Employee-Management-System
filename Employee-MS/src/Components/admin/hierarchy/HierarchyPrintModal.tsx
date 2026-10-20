@@ -98,7 +98,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header with Fluid Pastel Wave Accent */}
-        <div className="relative px-4 sm:px-4.5 py-3 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0 no-print">
+        <div className="relative px-3.5 sm:px-4 py-2.5 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0 no-print">
           {/* Top-Right Fluid Pastel Wave Background matching reference design */}
           <div className="absolute top-0 right-0 w-[440px] sm:w-[520px] h-full pointer-events-none overflow-hidden z-0">
             <svg
@@ -193,49 +193,49 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
         {/* Main Body: Two-Column Split Layout */}
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
           {/* Left Column: Configuration Controls (Steps 1, 2, 3) */}
-          <div className="w-full lg:w-[330px] shrink-0 border-r border-slate-100 p-4 sm:p-4.5 space-y-3.5 overflow-y-auto bg-white no-print [scrollbar-width:thin]">
+          <div className="w-full lg:w-[340px] shrink-0 border-r border-slate-100 px-3.5 sm:px-4 pt-2 sm:pt-2.5 pb-3.5 space-y-3 overflow-y-auto bg-white no-print [scrollbar-width:thin]">
             {/* Step 1: Report Scope */}
             <div>
-              <div className="flex items-center gap-2.5 mb-2">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-indigo-700 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="w-6.5 h-6.5 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-indigo-700 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
                   1
                 </div>
                 <div>
                   <div style={{ fontSize: "12.6px" }} className="font-bold text-slate-900 leading-tight mb-0">
                     Report Scope
                   </div>
-                  <p style={{ fontSize: "11px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
+                  <p style={{ fontSize: "10.5px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
                     Choose the data scope to include in the report.
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-2">
                 {/* Filtered View Card */}
                 <button
                   type="button"
                   onClick={() => setScope("filtered")}
-                  className={`p-2.5 sm:p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
+                  className={`px-2 py-1.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-1.5 ${
                     scope === "filtered"
                       ? "border-2 border-blue-500 bg-gradient-to-br from-blue-50/70 to-indigo-50/40 shadow-xs"
                       : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300"
                   }`}
                 >
                   <div
-                    className={`w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 ${
+                    className={`w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 ${
                       scope === "filtered"
                         ? "border-2 border-blue-600 bg-white"
                         : "border-2 border-slate-300 bg-white"
                     }`}
                   >
                     {scope === "filtered" && (
-                      <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
                     )}
                   </div>
-                  <div className="text-blue-600 text-lg shrink-0 flex items-center justify-center">
+                  <div className="text-blue-600 text-sm shrink-0 flex items-center justify-center">
                     <i className="bi bi-funnel"></i>
                   </div>
-                  <span className="font-bold text-xs sm:text-[12px] text-slate-900 leading-tight truncate">
+                  <span className="font-bold text-[10.5px] sm:text-[11px] text-slate-900 leading-tight whitespace-nowrap">
                     Filtered View ({filteredHierarchy.length})
                   </span>
                 </button>
@@ -244,27 +244,27 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setScope("all")}
-                  className={`p-2.5 sm:p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
+                  className={`px-2 py-1.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-1.5 ${
                     scope === "all"
                       ? "border-2 border-blue-500 bg-gradient-to-br from-blue-50/70 to-indigo-50/40 shadow-xs"
                       : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300"
                   }`}
                 >
                   <div
-                    className={`w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 ${
+                    className={`w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 ${
                       scope === "all"
                         ? "border-2 border-blue-600 bg-white"
                         : "border-2 border-slate-300 bg-white"
                     }`}
                   >
                     {scope === "all" && (
-                      <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
                     )}
                   </div>
-                  <div className="text-blue-600 text-lg shrink-0 flex items-center justify-center">
+                  <div className="text-blue-600 text-sm shrink-0 flex items-center justify-center">
                     <i className="bi bi-database"></i>
                   </div>
-                  <span className="font-bold text-xs sm:text-[12px] text-slate-900 leading-tight truncate">
+                  <span className="font-bold text-[10.5px] sm:text-[11px] text-slate-900 leading-tight whitespace-nowrap">
                     All Workforce ({hierarchy.length})
                   </span>
                 </button>
@@ -273,50 +273,50 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
 
             {/* Step 2: Additional Sections */}
             <div>
-              <div className="flex items-center gap-2.5 mb-2">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-indigo-700 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="w-6.5 h-6.5 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-indigo-700 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
                   2
                 </div>
                 <div>
                   <div style={{ fontSize: "12.6px" }} className="font-bold text-slate-900 leading-tight mb-0">
                     Additional Sections
                   </div>
-                  <p style={{ fontSize: "11px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
+                  <p style={{ fontSize: "10.5px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
                     Select the sections to include in the print layout.
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {/* Squads Summary Card */}
                 <button
                   type="button"
                   onClick={() => setIncludeSquadsSummary(!includeSquadsSummary)}
-                  className={`w-full p-2.5 sm:p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-3 ${
+                  className={`w-full px-2.5 py-1.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2 ${
                     includeSquadsSummary
                       ? "border-slate-200/90 bg-white hover:bg-slate-50/80 shadow-2xs"
                       : "border-slate-200 bg-slate-50/50 hover:bg-slate-100/60 opacity-75"
                   }`}
                 >
                   <div
-                    className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-colors ${
+                    className={`w-4 h-4 rounded flex items-center justify-center shrink-0 transition-colors ${
                       includeSquadsSummary
                         ? "bg-blue-600 text-white shadow-2xs"
                         : "border-2 border-slate-300 bg-white"
                     }`}
                   >
-                    {includeSquadsSummary && <i className="bi bi-check text-sm font-black"></i>}
+                    {includeSquadsSummary && <i className="bi bi-check text-xs font-black"></i>}
                   </div>
 
-                  <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-sm shrink-0">
+                  <div className="w-6.5 h-6.5 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs shrink-0">
                     <i className="bi bi-people-fill"></i>
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <span className="font-bold block text-xs sm:text-[12.5px] text-slate-900 leading-tight">
+                    <span className="font-bold block text-xs text-slate-900 leading-tight">
                       Squads Summary
                     </span>
-                    <span className="text-[10px] sm:text-[10.5px] text-slate-500 block leading-tight mt-0.5 truncate">
+                    <span className="text-[10px] text-slate-500 block leading-tight mt-0.5 truncate">
                       Include supervisor squad roster and capacity summary
                     </span>
                   </div>
@@ -326,31 +326,38 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setIncludeUnassigned(!includeUnassigned)}
-                  className={`w-full p-2.5 sm:p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-3 ${
+                  className={`w-full px-2.5 py-1.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2 ${
                     includeUnassigned
                       ? "border-slate-200/90 bg-white hover:bg-slate-50/80 shadow-2xs"
                       : "border-slate-200 bg-slate-50/50 hover:bg-slate-100/60 opacity-75"
                   }`}
                 >
                   <div
-                    className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-colors ${
+                    className={`w-4 h-4 rounded flex items-center justify-center shrink-0 transition-colors ${
                       includeUnassigned
                         ? "bg-blue-600 text-white shadow-2xs"
                         : "border-2 border-slate-300 bg-white"
                     }`}
                   >
-                    {includeUnassigned && <i className="bi bi-check text-sm font-black"></i>}
+                    {includeUnassigned && <i className="bi bi-check text-xs font-black"></i>}
                   </div>
 
-                  <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-sm shrink-0">
+                  <div className="w-6.5 h-6.5 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs shrink-0">
                     <i className="bi bi-person-fill"></i>
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <span className="font-bold block text-xs sm:text-[12.5px] text-slate-900 leading-tight">
-                      Unassigned Staff
-                    </span>
-                    <span className="text-[10px] sm:text-[10.5px] text-slate-500 block leading-tight mt-0.5 truncate">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-xs text-slate-900 block leading-tight">
+                        Unassigned Staff
+                      </span>
+                      {activeUnassigned.length > 0 && (
+                        <span className="text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-amber-100 text-amber-700">
+                          {activeUnassigned.length}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[10px] text-slate-500 block leading-tight mt-0.5 truncate">
                       Include staff who are not assigned to any supervisor
                     </span>
                   </div>
@@ -360,28 +367,28 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
 
             {/* Step 3: Page Format */}
             <div>
-              <div className="flex items-center gap-2.5 mb-2">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-indigo-700 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="w-6.5 h-6.5 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-indigo-700 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
                   3
                 </div>
                 <div>
                   <div style={{ fontSize: "12.6px" }} className="font-bold text-slate-900 leading-tight mb-0">
                     Page Format
                   </div>
-                  <p style={{ fontSize: "11px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
+                  <p style={{ fontSize: "10.5px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
                     Configure page layout and appearance.
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-2">
                 {/* Page Size */}
                 <div>
-                  <label className="text-[10.5px] font-bold text-slate-700 mb-1 block">
+                  <label className="text-[10px] font-bold text-slate-700 mb-0.5 block">
                     Page Size
                   </label>
-                  <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-2 flex items-center gap-2 shadow-2xs">
-                    <div className="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
+                  <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-1.5 flex items-center gap-1.5 shadow-2xs">
+                    <div className="w-5.5 h-5.5 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
                       <i className="bi bi-file-earmark-text"></i>
                     </div>
                     <select
@@ -394,17 +401,17 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                       <option value="letter">Letter (8.5 × 11 in)</option>
                       <option value="legal">Legal (8.5 × 14 in)</option>
                     </select>
-                    <i className="bi bi-chevron-down text-slate-400 text-[10px] absolute right-2.5 pointer-events-none"></i>
+                    <i className="bi bi-chevron-down text-slate-400 text-[10px] absolute right-2 pointer-events-none"></i>
                   </div>
                 </div>
 
                 {/* Orientation */}
                 <div>
-                  <label className="text-[10.5px] font-bold text-slate-700 mb-1 block">
+                  <label className="text-[10px] font-bold text-slate-700 mb-0.5 block">
                     Orientation
                   </label>
-                  <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-2 flex items-center gap-2 shadow-2xs">
-                    <div className="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
+                  <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-1.5 flex items-center gap-1.5 shadow-2xs">
+                    <div className="w-5.5 h-5.5 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
                       <i className="bi bi-phone"></i>
                     </div>
                     <select
@@ -416,17 +423,17 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                       <option value="portrait">Portrait</option>
                       <option value="landscape">Landscape</option>
                     </select>
-                    <i className="bi bi-chevron-down text-slate-400 text-[10px] absolute right-2.5 pointer-events-none"></i>
+                    <i className="bi bi-chevron-down text-slate-400 text-[10px] absolute right-2 pointer-events-none"></i>
                   </div>
                 </div>
 
                 {/* Margins */}
                 <div>
-                  <label className="text-[10.5px] font-bold text-slate-700 mb-1 block">
+                  <label className="text-[10px] font-bold text-slate-700 mb-0.5 block">
                     Margins
                   </label>
-                  <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-2 flex items-center gap-2 shadow-2xs">
-                    <div className="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
+                  <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-1.5 flex items-center gap-1.5 shadow-2xs">
+                    <div className="w-5.5 h-5.5 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
                       <i className="bi bi-bounding-box"></i>
                     </div>
                     <select
@@ -439,17 +446,17 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                       <option value="narrow">Narrow</option>
                       <option value="wide">Wide</option>
                     </select>
-                    <i className="bi bi-chevron-down text-slate-400 text-[10px] absolute right-2.5 pointer-events-none"></i>
+                    <i className="bi bi-chevron-down text-slate-400 text-[10px] absolute right-2 pointer-events-none"></i>
                   </div>
                 </div>
 
                 {/* Header Style */}
                 <div>
-                  <label className="text-[10.5px] font-bold text-slate-700 mb-1 block">
+                  <label className="text-[10px] font-bold text-slate-700 mb-0.5 block">
                     Header Style
                   </label>
-                  <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-2 flex items-center gap-2 shadow-2xs">
-                    <div className="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
+                  <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-1.5 flex items-center gap-1.5 shadow-2xs">
+                    <div className="w-5.5 h-5.5 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
                       <i className="bi bi-layout-text-window-reverse"></i>
                     </div>
                     <select
@@ -462,18 +469,18 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                       <option value="minimal">Minimal</option>
                       <option value="executive">Executive</option>
                     </select>
-                    <i className="bi bi-chevron-down text-slate-400 text-[10px] absolute right-2.5 pointer-events-none"></i>
+                    <i className="bi bi-chevron-down text-slate-400 text-[10px] absolute right-2 pointer-events-none"></i>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Tip Callout Banner */}
-            <div className="bg-gradient-to-r from-amber-50/70 via-indigo-50/30 to-purple-50/20 border border-amber-200/70 rounded-2xl p-3 flex items-start gap-2.5 shadow-2xs">
-              <div className="w-5.5 h-5.5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs shrink-0 mt-0.5">
+            <div className="bg-gradient-to-r from-amber-50/70 via-indigo-50/30 to-purple-50/20 border border-amber-200/70 rounded-xl p-2.5 flex items-start gap-2 shadow-2xs">
+              <div className="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs shrink-0 mt-0.5">
                 <i className="bi bi-lightbulb-fill"></i>
               </div>
-              <p className="text-[11px] text-slate-600 leading-relaxed mb-0">
+              <p className="text-[10.5px] text-slate-600 leading-relaxed mb-0">
                 <strong className="text-slate-800">Tip:</strong> In the browser print dialog, choose{" "}
                 <span className="font-semibold text-indigo-700">&quot;Save as PDF&quot;</span> to export.
               </p>
