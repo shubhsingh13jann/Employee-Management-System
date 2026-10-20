@@ -210,35 +210,6 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
     minute: "2-digit",
   });
 
-  // Group active mappings by department for Departmental Distribution on Page 3
-  const deptMap = new Map<
-    string,
-    {
-      name: string;
-      employeesCount: number;
-      supervisors: Set<string | number>;
-      managers: Set<string | number>;
-    }
-  >();
-
-  activeMappings.forEach((m) => {
-    const dept = m.department_name || "General";
-    if (!deptMap.has(dept)) {
-      deptMap.set(dept, {
-        name: dept,
-        employeesCount: 0,
-        supervisors: new Set(),
-        managers: new Set(),
-      });
-    }
-    const entry = deptMap.get(dept)!;
-    entry.employeesCount += 1;
-    if (m.supervisor_id) entry.supervisors.add(m.supervisor_id);
-    if (m.manager_id) entry.managers.add(m.manager_id);
-  });
-
-  const departmentList = Array.from(deptMap.values());
-
   const pageMinHeight =
     orientation === "landscape"
       ? pageSize === "legal"
@@ -265,94 +236,6 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
     : pageSize === "letter"
     ? "780px"
     : "750px";
-
-  const renderSubPageHeader = (pageNum: number, sectionTitle: string, sectionSubtitle: string) => {
-    if (headerStyle === "executive") {
-      return (
-        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-3 rounded-xl shadow-xs border border-slate-800 flex items-center justify-between gap-4 mb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded bg-amber-400 text-slate-950 flex items-center justify-center font-black text-[10px] shadow-xs shrink-0">
-              <i className="bi bi-shield-check"></i>
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-amber-300 text-xs uppercase tracking-wider">
-                  EMS Enterprise Workforce
-                </span>
-                <span className="text-slate-400 text-[10px]">•</span>
-                <span className="font-semibold text-white text-xs">{sectionTitle}</span>
-              </div>
-              <p className="text-[9.5px] text-slate-300 mb-0">{sectionSubtitle}</p>
-            </div>
-          </div>
-          <div className="text-right text-[9.5px] text-slate-300 font-mono shrink-0">
-            <span className="text-amber-300 font-bold uppercase block">Confidential Audit</span>
-            <span>Page {pageNum} of 4 • {currentDate}</span>
-          </div>
-        </div>
-      );
-    }
-
-    if (headerStyle === "minimal") {
-      return (
-        <div className="border-b border-slate-200 pb-2 flex items-center justify-between gap-4 mb-3">
-          <div className="flex items-center gap-2">
-            <span className="text-blue-600 font-bold text-xs uppercase tracking-wider">
-              EMS Workforce
-            </span>
-            <span className="text-slate-300">•</span>
-            <span className="text-xs font-semibold text-slate-800">{sectionTitle}</span>
-            <span className="text-slate-400 text-[10px] hidden sm:inline">({sectionSubtitle})</span>
-          </div>
-          <div className="text-right text-[9.5px] text-slate-500 font-mono shrink-0">
-            Page {pageNum} of 4 • {currentDate}
-          </div>
-        </div>
-      );
-    }
-
-    // Default corporate header
-    return (
-      <div className="border-b-2 border-slate-900 pb-2 flex items-center justify-between gap-4 mb-3">
-        <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] shadow-2xs shrink-0">
-            <i className="bi bi-bar-chart-fill"></i>
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-900 text-xs uppercase tracking-wider">
-                EMS Enterprise Workforce
-              </span>
-              <span className="text-slate-300">•</span>
-              <span className="font-semibold text-slate-800 text-xs">{sectionTitle}</span>
-            </div>
-            <p className="text-[9.5px] text-slate-500 mb-0">{sectionSubtitle}</p>
-          </div>
-        </div>
-        <div className="text-right text-[9.5px] text-slate-600 font-mono shrink-0">
-          <span className="font-bold text-slate-900 uppercase block tracking-wider">CONFIDENTIAL REPORT</span>
-          <span>Page {pageNum} of 4 • {currentDate}</span>
-        </div>
-      </div>
-    );
-  };
-
-  const renderPageFooter = (pageNum: number, sectionNotes: string) => (
-    <div className="border-t border-slate-200/90 pt-3 mt-4 flex items-center justify-between text-[9px] text-slate-400 shrink-0">
-      <div className="flex items-center gap-2">
-        <span className="font-semibold text-slate-600">EMS HR Governance</span>
-        <span>•</span>
-        <span>{sectionNotes}</span>
-      </div>
-      <div className="flex items-center gap-2 font-mono">
-        <span>Confidential Internal Document</span>
-        <span>•</span>
-        <span className="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
-          Page {pageNum} of 4
-        </span>
-      </div>
-    </div>
-  );
 
   const handlePrint = () => {
     window.print();
@@ -746,13 +629,13 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                   >
                     <i className="bi bi-arrow-left"></i>
                   </button>
-                  <div className="px-2.5 py-0.5 rounded-lg bg-slate-50 border border-slate-200/80 text-xs font-bold text-slate-700 font-mono tracking-wide">
-                    {currentPage} / 4
+                  <div className="w-7 h-7 rounded-lg bg-slate-50 border border-slate-200/80 text-xs font-bold text-slate-700 font-mono flex items-center justify-center shadow-2xs">
+                    {currentPage}
                   </div>
                   <button
                     type="button"
-                    onClick={() => setCurrentPage((p) => Math.min(4, p + 1))}
-                    disabled={currentPage >= 4}
+                    onClick={() => setCurrentPage((p) => Math.min(1, p + 1))}
+                    disabled={currentPage >= 1}
                     className="w-7 h-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-35 disabled:hover:bg-white text-slate-600 flex items-center justify-center transition-all cursor-pointer text-xs"
                     title="Next Page"
                     aria-label="Next Page"
@@ -826,34 +709,24 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             {/* Scrollable Document Canvas */}
             <div className="flex-1 overflow-y-auto [scrollbar-width:thin] px-2.5 sm:px-3.5 pt-1.5 pb-6">
               <div className="flex flex-col items-center w-full min-h-full">
-                {/* Printable Document Sheets Container */}
+                {/* Printable Document Sheet */}
                 <div
                   id="printable-hierarchy-dossier"
                   style={{
                     transform: !isFitWidth ? `scale(${zoom / 100})` : undefined,
                     transformOrigin: "top center",
                     transition: "all 0.2s ease-out",
-                    width: "100%",
                     maxWidth: dossierMaxWidth,
+                    minHeight: pageMinHeight,
                   }}
-                  className="w-full flex flex-col items-center mb-6"
+                  className={`bg-white rounded-xl border border-slate-300 shadow-md transition-all space-y-4 text-slate-900 mb-6 w-full ${
+                    margins === "narrow"
+                      ? "p-2.5 sm:p-3.5"
+                      : margins === "wide"
+                      ? "p-6 sm:p-8"
+                      : "p-4 sm:p-5.5"
+                  }`}
                 >
-                  {/* ===================== PAGE 1 ===================== */}
-                  <div
-                    className={`print-page bg-white rounded-xl border border-slate-300 shadow-md text-slate-900 transition-all w-full ${
-                      currentPage === 1
-                        ? "flex flex-col justify-between"
-                        : "hidden print:flex print:flex-col print:justify-between"
-                    } ${
-                      margins === "narrow"
-                        ? "p-2.5 sm:p-3.5"
-                        : margins === "wide"
-                        ? "p-6 sm:p-8"
-                        : "p-4 sm:p-5.5"
-                    }`}
-                    style={{ minHeight: pageMinHeight }}
-                  >
-                    <div className="space-y-4">
                       {/* Document Header (Responding dynamically to Header Style: default | minimal | executive) */}
                       {headerStyle === "executive" ? (
                         <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-3.5 rounded-xl shadow-sm border border-slate-800 flex items-start justify-between gap-4">
@@ -1095,53 +968,20 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                           </div>
                         )}
                       </div>
-                    </div>
-
-                    {/* Page 1 Footer */}
-                    {renderPageFooter(1, "Workforce Hierarchy Management Module • Section 1.0 Relationships")}
-                  </div>
-
-                  {/* ===================== PAGE 2 ===================== */}
-                  <div
-                    className={`print-page bg-white rounded-xl border border-slate-300 shadow-md text-slate-900 transition-all w-full ${
-                      currentPage === 2
-                        ? "flex flex-col justify-between"
-                        : "hidden print:flex print:flex-col print:justify-between"
-                    } ${
-                      margins === "narrow"
-                        ? "p-2.5 sm:p-3.5"
-                        : margins === "wide"
-                        ? "p-6 sm:p-8"
-                        : "p-4 sm:p-5.5"
-                    }`}
-                    style={{ minHeight: pageMinHeight }}
-                  >
-                    <div className="space-y-4">
-                      {renderSubPageHeader(
-                        2,
-                        "Section 2: Supervisor Squad Roster & Capacity Summary",
-                        "Team lead operational capacity, span of control, and member assignments"
-                      )}
 
                       {/* Section 2: Supervisor Squads & Capacity Overview */}
-                      {!includeSquadsSummary ? (
-                        <div className="p-6 bg-slate-50 border border-slate-200 rounded-xl text-center">
-                          <i className="bi bi-eye-slash text-2xl text-slate-400 mb-2 block"></i>
-                          <h4 className="text-xs font-bold text-slate-700">Section Excluded by Configuration</h4>
-                          <p className="text-[11px] text-slate-500 max-w-md mx-auto mt-1 mb-0">
-                            Enable &quot;Squads Summary&quot; in Step 2 of the configuration sidebar to include supervisor squad rosters and capacity metrics in this dossier.
-                          </p>
-                        </div>
-                      ) : squadsList.length === 0 ? (
-                        <div className="p-6 bg-slate-50 border border-slate-200 rounded-xl text-center">
-                          <i className="bi bi-people text-2xl text-slate-400 mb-2 block"></i>
-                          <h4 className="text-xs font-bold text-slate-700">No Squads Found</h4>
-                          <p className="text-[11px] text-slate-500 mt-1 mb-0">
-                            No supervisor squads match the currently selected report scope.
-                          </p>
-                        </div>
-                      ) : (
-                        <>
+                      {includeSquadsSummary && squadsList.length > 0 && (
+                        <div className="pt-2">
+                          <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-200">
+                            <div
+                              style={{ fontSize: "11.6px", lineHeight: "1.2", letterSpacing: "0.04em" }}
+                              className="font-bold text-slate-900 uppercase flex items-center gap-1.5 whitespace-nowrap"
+                            >
+                              <i className="bi bi-people-fill text-purple-600" style={{ fontSize: "12.6px" }}></i>
+                              <span>2. Supervisor Squad Roster & Capacity Summary ({squadsList.length} Squads)</span>
+                            </div>
+                          </div>
+
                           <div className="overflow-x-auto">
                             <table className="w-full text-left text-[11px] border-collapse border border-slate-200">
                               <thead>
@@ -1197,88 +1037,20 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                               </tbody>
                             </table>
                           </div>
-
-                          {/* Capacity Health & Governance Benchmarks */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-2">
-                            <div className="p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-200/70">
-                              <div className="flex items-center gap-1.5 mb-1 text-emerald-800 font-bold text-[11px]">
-                                <i className="bi bi-check-circle-fill text-emerald-600"></i>
-                                <span>Light Span (1–3 Reports)</span>
-                              </div>
-                              <p className="text-[10px] text-emerald-900/80 mb-0 leading-relaxed">
-                                High managerial bandwidth available for dedicated onboarding, mentoring, and cross-functional project intake.
-                              </p>
-                            </div>
-
-                            <div className="p-2.5 rounded-xl bg-indigo-50/60 border border-indigo-200/70">
-                              <div className="flex items-center gap-1.5 mb-1 text-indigo-800 font-bold text-[11px]">
-                                <i className="bi bi-award-fill text-indigo-600"></i>
-                                <span>Optimal Span (4–7 Reports)</span>
-                              </div>
-                              <p className="text-[10px] text-indigo-900/80 mb-0 leading-relaxed">
-                                Industry benchmark equilibrium maximizing operational velocity while preserving 1-on-1 supervisory coaching.
-                              </p>
-                            </div>
-
-                            <div className="p-2.5 rounded-xl bg-amber-50/60 border border-amber-200/70">
-                              <div className="flex items-center gap-1.5 mb-1 text-amber-800 font-bold text-[11px]">
-                                <i className="bi bi-exclamation-triangle-fill text-amber-600"></i>
-                                <span>High Span (8+ Reports)</span>
-                              </div>
-                              <p className="text-[10px] text-amber-900/80 mb-0 leading-relaxed">
-                                Supervisory saturation threshold reached. Recommend reviewing workload distribution or delegating tech leads.
-                              </p>
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
-
-                    {/* Page 2 Footer */}
-                    {renderPageFooter(2, "Supervisor Squad Roster & Capacity Assessment")}
-                  </div>
-
-                  {/* ===================== PAGE 3 ===================== */}
-                  <div
-                    className={`print-page bg-white rounded-xl border border-slate-300 shadow-md text-slate-900 transition-all w-full ${
-                      currentPage === 3
-                        ? "flex flex-col justify-between"
-                        : "hidden print:flex print:flex-col print:justify-between"
-                    } ${
-                      margins === "narrow"
-                        ? "p-2.5 sm:p-3.5"
-                        : margins === "wide"
-                        ? "p-6 sm:p-8"
-                        : "p-4 sm:p-5.5"
-                    }`}
-                    style={{ minHeight: pageMinHeight }}
-                  >
-                    <div className="space-y-4">
-                      {renderSubPageHeader(
-                        3,
-                        "Section 3: Unallocated Personnel & Departmental Distribution",
-                        "Tracking unassigned staff members and leadership density across departments"
-                      )}
-
-                      {/* Unassigned Staff Section */}
-                      {!includeUnassigned ? (
-                        <div className="p-6 bg-slate-50 border border-slate-200 rounded-xl text-center">
-                          <i className="bi bi-eye-slash text-2xl text-slate-400 mb-2 block"></i>
-                          <h4 className="text-xs font-bold text-slate-700">Section Excluded by Configuration</h4>
-                          <p className="text-[11px] text-slate-500 max-w-md mx-auto mt-1 mb-0">
-                            Enable &quot;Unassigned Staff&quot; in Step 2 of the configuration sidebar to include unallocated staff listings.
-                          </p>
                         </div>
-                      ) : activeUnassigned.length > 0 ? (
-                        <div>
-                          <div className="flex items-center justify-between mb-2 pb-1 border-b border-amber-200">
-                            <div className="text-[11.5px] font-bold text-amber-900 uppercase flex items-center gap-1.5">
-                              <i className="bi bi-exclamation-triangle-fill text-amber-600"></i>
-                              <span>Unallocated Personnel Awaiting Squad Assignment ({activeUnassigned.length})</span>
+                      )}
+
+                      {/* Section 3: Unassigned / Orphaned Personnel */}
+                      {includeUnassigned && activeUnassigned.length > 0 && (
+                        <div className="pt-2">
+                          <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-200">
+                            <div
+                              style={{ fontSize: "11.6px", lineHeight: "1.2", letterSpacing: "0.04em" }}
+                              className="font-bold text-amber-900 uppercase flex items-center gap-1.5 whitespace-nowrap"
+                            >
+                              <i className="bi bi-exclamation-triangle-fill text-amber-600" style={{ fontSize: "12.6px" }}></i>
+                              <span>3. Unallocated Personnel Awaiting Squad Assignment ({activeUnassigned.length})</span>
                             </div>
-                            <span className="text-[9.5px] text-amber-800 font-semibold bg-amber-100 px-2 py-0.5 rounded-full">
-                              Action Required
-                            </span>
                           </div>
 
                           <div className="overflow-x-auto">
@@ -1314,257 +1086,18 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                               </tbody>
                             </table>
                           </div>
-
-                          <div className="mt-2.5 p-2 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2 text-[10.5px] text-amber-900">
-                            <i className="bi bi-info-circle-fill text-amber-600 shrink-0"></i>
-                            <span>
-                              <strong>HR Allocation Directive:</strong> Unallocated personnel must be integrated into a certified squad within 5 business days of onboarding to maintain governance compliance.
-                            </span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-base shrink-0">
-                            <i className="bi bi-check2-circle"></i>
-                          </div>
-                          <div>
-                            <h4 className="text-xs font-bold text-emerald-900 mb-0.5">100% Workforce Allocation Achieved</h4>
-                            <p className="text-[10.5px] text-emerald-800 mb-0">
-                              All active employees are mapped to designated Team Leads and Department Managers. Zero unallocated personnel detected in this scope.
-                            </p>
-                          </div>
                         </div>
                       )}
 
-                      {/* Departmental Resource Distribution Table */}
-                      <div className="pt-2">
-                        <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-200">
-                          <div className="text-[11.5px] font-bold text-slate-900 uppercase flex items-center gap-1.5">
-                            <i className="bi bi-buildings-fill text-indigo-600"></i>
-                            <span>Departmental Leadership & Resource Distribution</span>
-                          </div>
-                          <span className="text-[9.5px] text-slate-400">
-                            {departmentList.length} Active Departments
-                          </span>
-                        </div>
-
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-left text-[11px] border-collapse border border-slate-200">
-                            <thead>
-                              <tr className="bg-slate-50 text-slate-600 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200">
-                                <th className="px-2.5 py-1.5 border-r border-slate-200">Department Name</th>
-                                <th className="px-2.5 py-1.5 border-r border-slate-200 text-center">Mapped Staff</th>
-                                <th className="px-2.5 py-1.5 border-r border-slate-200 text-center">Active Squads</th>
-                                <th className="px-2.5 py-1.5 border-r border-slate-200 text-center">Managers</th>
-                                <th className="px-2.5 py-1.5 text-center">Allocation Status</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-200">
-                              {departmentList.map((d, idx) => (
-                                <tr key={d.name} className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"}>
-                                  <td className="px-2.5 py-1.5 border-r border-slate-200 font-semibold text-slate-900">
-                                    {d.name}
-                                  </td>
-                                  <td className="px-2.5 py-1.5 border-r border-slate-200 text-center font-bold text-slate-800">
-                                    {d.employeesCount}
-                                  </td>
-                                  <td className="px-2.5 py-1.5 border-r border-slate-200 text-center text-purple-700 font-medium">
-                                    {d.supervisors.size} {d.supervisors.size === 1 ? "Squad" : "Squads"}
-                                  </td>
-                                  <td className="px-2.5 py-1.5 border-r border-slate-200 text-center text-emerald-700 font-medium">
-                                    {d.managers.size} {d.managers.size === 1 ? "Manager" : "Managers"}
-                                  </td>
-                                  <td className="px-2.5 py-1.5 text-center">
-                                    <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                      Healthy Structure
-                                    </span>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
+                      {/* Corporate Audit Footer */}
+                      <div className="border-t border-slate-300 pt-4 mt-6 flex items-center justify-between text-[9px] text-slate-400">
+                        <p className="mb-0">
+                          EMS HR Governance • Workforce Hierarchy Management Module • Section 4.11 Compliance
+                        </p>
+                        <p className="mb-0 font-mono">
+                          Generated {currentDate} • Confidential Internal Document
+                        </p>
                       </div>
-                    </div>
-
-                    {/* Page 3 Footer */}
-                    {renderPageFooter(3, "Workforce Allocation & Departmental Distribution")}
-                  </div>
-
-                  {/* ===================== PAGE 4 ===================== */}
-                  <div
-                    className={`print-page bg-white rounded-xl border border-slate-300 shadow-md text-slate-900 transition-all w-full ${
-                      currentPage === 4
-                        ? "flex flex-col justify-between"
-                        : "hidden print:flex print:flex-col print:justify-between"
-                    } ${
-                      margins === "narrow"
-                        ? "p-2.5 sm:p-3.5"
-                        : margins === "wide"
-                        ? "p-6 sm:p-8"
-                        : "p-4 sm:p-5.5"
-                    }`}
-                    style={{ minHeight: pageMinHeight }}
-                  >
-                    <div className="space-y-4">
-                      {renderSubPageHeader(
-                        4,
-                        "Section 4: Corporate Governance Audit & Compliance Certification",
-                        "Statutory compliance verification, cryptographic audit seal, and executive tri-signature authorization"
-                      )}
-
-                      {/* Audit Certification Overview Cards */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
-                          <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                            Governance Standard
-                          </span>
-                          <span className="text-xs font-black text-slate-800 block">
-                            ISO 27001 • SOC 2 Type II
-                          </span>
-                          <span className="inline-block mt-1 px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-700">
-                            Certified Compliant
-                          </span>
-                        </div>
-
-                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
-                          <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                            Chain of Command Audit
-                          </span>
-                          <span className="text-xs font-black text-slate-800 block">
-                            Zero Disconnected Links
-                          </span>
-                          <span className="inline-block mt-1 px-2 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-blue-700">
-                            100% Chain Validated
-                          </span>
-                        </div>
-
-                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
-                          <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                            Audited Personnel Scope
-                          </span>
-                          <span className="text-xs font-black text-slate-800 block">
-                            {activeMappings.length} Active Records
-                          </span>
-                          <span className="inline-block mt-1 px-2 py-0.5 rounded text-[9px] font-bold bg-purple-100 text-purple-700">
-                            {scope === "filtered" ? "Target Filter Audit" : "Full Enterprise Audit"}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Formal Audit Declarations */}
-                      <div className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200 space-y-2">
-                        <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5 mb-1">
-                          <i className="bi bi-shield-lock-fill text-indigo-600"></i>
-                          <span>Corporate Governance & Audit Declarations</span>
-                        </h4>
-                        <ul className="text-[10.5px] text-slate-600 space-y-1 list-disc pl-4 mb-0">
-                          <li>
-                            This official dossier certifies that all supervisor-to-employee reporting relationships documented herein comply with corporate workforce governance regulations and HR Section 4.11 policy standards.
-                          </li>
-                          <li>
-                            Supervisory capacities have been audited against span-of-control guidelines (target: 4–7 direct reports) to prevent managerial overload and uphold quality employee oversight.
-                          </li>
-                          <li>
-                            Zero circular reporting loops, orphaned supervisory branches, or unauthorized supervisory roles exist in this authenticated dataset.
-                          </li>
-                        </ul>
-                      </div>
-
-                      {/* Cryptographic Hash & Tamper-Evident Seal */}
-                      <div className="p-3 rounded-xl bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex flex-col sm:flex-row items-center justify-between gap-3 font-mono text-[9.5px]">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                            <span className="text-amber-300 font-bold uppercase">Cryptographic Audit Seal</span>
-                          </div>
-                          <div className="text-slate-300">
-                            Hash: <span className="text-slate-100">SHA-256: 7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069</span>
-                          </div>
-                        </div>
-                        <div className="text-right text-slate-400 shrink-0">
-                          <div>Record ID: <span className="text-white">EMS-AUD-{new Date().getFullYear()}-00{activeMappings.length}</span></div>
-                          <div>Sealed: <span className="text-white">{currentDate}</span></div>
-                        </div>
-                      </div>
-
-                      {/* Executive Tri-Signature Authorization Blocks */}
-                      <div className="pt-2">
-                        <div className="text-[11px] font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                          <i className="bi bi-pen-fill text-blue-600"></i>
-                          <span>Executive Authorization & Certification Sign-Off</span>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                          {/* Signer 1: HR Director */}
-                          <div className="p-3 rounded-xl border border-slate-200 bg-white shadow-2xs flex flex-col justify-between h-36">
-                            <div>
-                              <span className="text-[8.5px] uppercase font-bold text-slate-400 tracking-wider block">
-                                Prepared & Certified By
-                              </span>
-                              <span className="text-xs font-bold text-slate-900 block mt-0.5">
-                                Dr. Evelyn Vance, SPHR
-                              </span>
-                              <span className="text-[9.5px] text-slate-500 block">
-                                Director of People Operations
-                              </span>
-                            </div>
-                            <div className="border-t border-slate-300 pt-1.5">
-                              <span className="text-[8.5px] text-slate-400 font-mono block">Signature & Date:</span>
-                              <div className="h-5 flex items-end">
-                                <span className="font-serif italic text-xs text-indigo-700 tracking-widest">[ Electronically Certified ]</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Signer 2: VP People & Culture */}
-                          <div className="p-3 rounded-xl border border-slate-200 bg-white shadow-2xs flex flex-col justify-between h-36">
-                            <div>
-                              <span className="text-[8.5px] uppercase font-bold text-slate-400 tracking-wider block">
-                                Executive Review & Approval
-                              </span>
-                              <span className="text-xs font-bold text-slate-900 block mt-0.5">
-                                Marcus Sterling
-                              </span>
-                              <span className="text-[9.5px] text-slate-500 block">
-                                VP of Organizational Excellence
-                              </span>
-                            </div>
-                            <div className="border-t border-slate-300 pt-1.5">
-                              <span className="text-[8.5px] text-slate-400 font-mono block">Signature & Date:</span>
-                              <div className="h-5 flex items-end">
-                                <span className="font-serif italic text-xs text-indigo-700 tracking-widest">[ Approved ]</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Signer 3: Compliance & Audit Lead */}
-                          <div className="p-3 rounded-xl border border-slate-200 bg-white shadow-2xs flex flex-col justify-between h-36">
-                            <div>
-                              <span className="text-[8.5px] uppercase font-bold text-slate-400 tracking-wider block">
-                                Statutory Audit Sign-Off
-                              </span>
-                              <span className="text-xs font-bold text-slate-900 block mt-0.5">
-                                Clarissa Chen, CISA
-                              </span>
-                              <span className="text-[9.5px] text-slate-500 block">
-                                Head of Corporate Compliance
-                              </span>
-                            </div>
-                            <div className="border-t border-slate-300 pt-1.5">
-                              <span className="text-[8.5px] text-slate-400 font-mono block">Signature & Date:</span>
-                              <div className="h-5 flex items-end">
-                                <span className="font-serif italic text-xs text-indigo-700 tracking-widest">[ Audit Certified ]</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Page 4 Footer */}
-                    {renderPageFooter(4, "Section 4.11 Enterprise Governance Certification & Legal Sign-off")}
-                  </div>
                 </div>
               </div>
             </div>
@@ -1616,31 +1149,10 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
               width: 100% !important;
               max-width: 100% !important;
               margin: 0 !important;
-              padding: 0 !important;
+              padding: ${margins === "narrow" ? "4mm" : margins === "wide" ? "14mm" : "8mm"} !important;
               box-shadow: none !important;
               border: none !important;
               transform: none !important;
-              display: block !important;
-            }
-            .print-page {
-              display: flex !important;
-              flex-direction: column !important;
-              justify-content: space-between !important;
-              width: 100% !important;
-              max-width: 100% !important;
-              min-height: 98vh !important;
-              page-break-after: always !important;
-              break-after: page !important;
-              box-shadow: none !important;
-              border: none !important;
-              border-radius: 0 !important;
-              padding: ${margins === "narrow" ? "6mm" : margins === "wide" ? "16mm" : "10mm"} !important;
-              margin: 0 !important;
-              transform: none !important;
-            }
-            .print-page:last-child {
-              page-break-after: auto !important;
-              break-after: auto !important;
             }
             .no-print {
               display: none !important;
