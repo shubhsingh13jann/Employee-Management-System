@@ -719,57 +719,131 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                       : "p-4 sm:p-5.5"
                   }`}
                 >
-            {/* Corporate Header */}
-            <div className="border-b-2 border-slate-900 pb-2.5 sm:pb-3 flex items-start justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-5.5 h-5.5 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-[10.5px] shadow-2xs shrink-0">
-                    <i className="bi bi-bar-chart-fill"></i>
+            {/* Document Header (Responding dynamically to Header Style: default | minimal | executive) */}
+            {headerStyle === "executive" ? (
+              <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-3.5 rounded-xl shadow-sm border border-slate-800 flex items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-5.5 h-5.5 rounded-md bg-amber-400 text-slate-950 flex items-center justify-center font-black text-[11px] shadow-sm shrink-0">
+                      <i className="bi bi-shield-check"></i>
+                    </div>
+                    <div
+                      style={{ fontSize: "14px", letterSpacing: "0.06em" }}
+                      className="font-black text-amber-300 uppercase whitespace-nowrap"
+                    >
+                      EMS Enterprise Workforce
+                    </div>
+                    <span className="text-[9px] px-1.5 py-0.2 rounded font-bold bg-amber-400/20 text-amber-300 border border-amber-400/40 uppercase tracking-widest">
+                      Executive Dossier
+                    </span>
                   </div>
                   <div
-                    style={{ fontSize: "13.75px", lineHeight: "1.2", letterSpacing: "0.05em" }}
-                    className="font-bold text-slate-900 uppercase whitespace-nowrap"
+                    style={{ fontSize: "12.6px" }}
+                    className="font-bold text-white whitespace-nowrap"
                   >
-                    EMS Enterprise Workforce
+                    Workforce Team Hierarchy & Reporting Lines Dossier
+                  </div>
+                  <div
+                    style={{ fontSize: "10px" }}
+                    className="text-slate-300 mb-0 mt-0.5 whitespace-nowrap"
+                  >
+                    Official Organizational Chain of Command Audit Record
                   </div>
                 </div>
-                <div
-                  style={{ fontSize: "12.6px", lineHeight: "1.3" }}
-                  className="font-semibold text-slate-800 whitespace-nowrap"
-                >
-                  Workforce Team Hierarchy & Reporting Lines Dossier
-                </div>
-                <div
-                  style={{ fontSize: "10px", lineHeight: "1.2" }}
-                  className="text-slate-500 mb-0 mt-0.5 whitespace-nowrap"
-                >
-                  Official Organizational Chain of Command Audit Record
-                </div>
-              </div>
 
-              <div
-                style={{ fontSize: "10px", lineHeight: "1.3" }}
-                className="text-right text-slate-600 space-y-0.5 shrink-0"
-              >
                 <div
-                  style={{ fontSize: "10.5px" }}
-                  className="font-bold text-slate-900 tracking-wider uppercase mb-0.5"
+                  style={{ fontSize: "10px" }}
+                  className="text-right text-slate-300 space-y-0.5 shrink-0"
                 >
-                  CONFIDENTIAL REPORT
+                  <div
+                    style={{ fontSize: "10.5px" }}
+                    className="font-bold text-amber-300 tracking-wider uppercase mb-0.5"
+                  >
+                    CONFIDENTIAL BRIEFING
+                  </div>
+                  <p className="mb-0">Date: <strong className="text-white">{currentDate}</strong></p>
+                  <p className="mb-0">Time: <span className="text-slate-200">{currentTime}</span></p>
+                  <p className="mb-0">Scope: <strong className="capitalize text-white">{scope === "filtered" ? "Filtered View" : "All Workforce"}</strong></p>
+                  <p className="mb-0">Format: <strong className="uppercase text-amber-300">{pageSize} • {orientation}</strong></p>
                 </div>
-                <p className="mb-0">Date: <strong className="text-slate-800">{currentDate}</strong></p>
-                <p className="mb-0">Time: <span className="text-slate-700">{currentTime}</span></p>
-                <p className="mb-0">Scope: <strong className="capitalize text-slate-800">{scope === "filtered" ? "Filtered View" : "All Workforce"}</strong></p>
-                <p className="mb-0">Page Size: <strong className="uppercase text-slate-800">{pageSize} ({pageSize === "a4" ? "210 × 297mm" : pageSize === "letter" ? "8.5 × 11in" : "8.5 × 14in"})</strong></p>
-                <p className="mb-0">Orientation: <strong className="capitalize text-slate-800">{orientation}</strong></p>
-                <p className="mb-0">Margins: <strong className="capitalize text-slate-800">{margins} ({margins === "narrow" ? "10mm" : margins === "wide" ? "25mm" : "15mm"})</strong></p>
-                {activeFiltersDesc && (
-                  <p style={{ fontSize: "9.5px" }} className="text-indigo-700 max-w-[200px] truncate mb-0">
-                    {activeFiltersDesc}
-                  </p>
-                )}
               </div>
-            </div>
+            ) : headerStyle === "minimal" ? (
+              <div className="border-b border-slate-200 pb-2.5 flex items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <span className="text-blue-600 font-bold text-xs uppercase tracking-wider">
+                      EMS Workforce
+                    </span>
+                    <span className="text-slate-300">•</span>
+                    <span className="text-xs font-semibold text-slate-700">Hierarchy Dossier</span>
+                  </div>
+                  <div style={{ fontSize: "10px" }} className="text-slate-400 mb-0">
+                    Official reporting lines audit record
+                  </div>
+                </div>
+
+                <div
+                  style={{ fontSize: "9.5px" }}
+                  className="text-right text-slate-500 flex items-center gap-3 shrink-0"
+                >
+                  <div>Date: <strong className="text-slate-700">{currentDate}</strong></div>
+                  <div>Scope: <strong className="capitalize text-slate-700">{scope === "filtered" ? "Filtered" : "All"}</strong></div>
+                  <div>Format: <strong className="uppercase text-slate-700">{pageSize}</strong></div>
+                </div>
+              </div>
+            ) : (
+              /* Corporate Default Header */
+              <div className="border-b-2 border-slate-900 pb-2.5 sm:pb-3 flex items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-5.5 h-5.5 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-[10.5px] shadow-2xs shrink-0">
+                      <i className="bi bi-bar-chart-fill"></i>
+                    </div>
+                    <div
+                      style={{ fontSize: "13.75px", lineHeight: "1.2", letterSpacing: "0.05em" }}
+                      className="font-bold text-slate-900 uppercase whitespace-nowrap"
+                    >
+                      EMS Enterprise Workforce
+                    </div>
+                  </div>
+                  <div
+                    style={{ fontSize: "12.6px", lineHeight: "1.3" }}
+                    className="font-semibold text-slate-800 whitespace-nowrap"
+                  >
+                    Workforce Team Hierarchy & Reporting Lines Dossier
+                  </div>
+                  <div
+                    style={{ fontSize: "10px", lineHeight: "1.2" }}
+                    className="text-slate-500 mb-0 mt-0.5 whitespace-nowrap"
+                  >
+                    Official Organizational Chain of Command Audit Record
+                  </div>
+                </div>
+
+                <div
+                  style={{ fontSize: "10px", lineHeight: "1.3" }}
+                  className="text-right text-slate-600 space-y-0.5 shrink-0"
+                >
+                  <div
+                    style={{ fontSize: "10.5px" }}
+                    className="font-bold text-slate-900 tracking-wider uppercase mb-0.5"
+                  >
+                    CONFIDENTIAL REPORT
+                  </div>
+                  <p className="mb-0">Date: <strong className="text-slate-800">{currentDate}</strong></p>
+                  <p className="mb-0">Time: <span className="text-slate-700">{currentTime}</span></p>
+                  <p className="mb-0">Scope: <strong className="capitalize text-slate-800">{scope === "filtered" ? "Filtered View" : "All Workforce"}</strong></p>
+                  <p className="mb-0">Page Size: <strong className="uppercase text-slate-800">{pageSize} ({pageSize === "a4" ? "210 × 297mm" : pageSize === "letter" ? "8.5 × 11in" : "8.5 × 14in"})</strong></p>
+                  <p className="mb-0">Orientation: <strong className="capitalize text-slate-800">{orientation}</strong></p>
+                  <p className="mb-0">Margins: <strong className="capitalize text-slate-800">{margins} ({margins === "narrow" ? "10mm" : margins === "wide" ? "25mm" : "15mm"})</strong></p>
+                  {activeFiltersDesc && (
+                    <p style={{ fontSize: "9.5px" }} className="text-indigo-700 max-w-[200px] truncate mb-0">
+                      {activeFiltersDesc}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Executive KPI Summary Bar matching Image 1 */}
             <div className="grid grid-cols-4 gap-2 text-center py-2 px-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
