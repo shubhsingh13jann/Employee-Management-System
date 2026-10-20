@@ -303,7 +303,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                   Print Hierarchy Dossier & Roster
                 </div>
                 <span className="text-[9.5px] px-2 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200/70 shrink-0">
-                  A4 / Letter Format
+                  {pageSize === "a4" ? "A4 (210 × 297mm)" : pageSize === "letter" ? "Letter (8.5 × 11in)" : "Legal (8.5 × 14in)"}
                 </span>
               </div>
               <p style={{ fontSize: "11px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
@@ -686,11 +686,11 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                   style={{
                     transform: !isFitWidth ? `scale(${zoom / 100})` : undefined,
                     transformOrigin: "top center",
-                    transition: "transform 0.15s ease-out",
+                    transition: "all 0.2s ease-out",
+                    maxWidth: isFitWidth ? "100%" : pageSize === "legal" ? "790px" : pageSize === "letter" ? "780px" : "750px",
+                    minHeight: pageSize === "legal" ? "1200px" : pageSize === "letter" ? "980px" : "1050px",
                   }}
-                  className={`bg-white p-4 sm:p-5.5 rounded-xl border border-slate-300 shadow-md transition-all space-y-4 text-slate-900 mb-6 ${
-                    isFitWidth ? "w-full max-w-none" : "w-full max-w-3xl"
-                  }`}
+                  className="bg-white p-4 sm:p-5.5 rounded-xl border border-slate-300 shadow-md transition-all space-y-4 text-slate-900 mb-6 w-full"
                 >
             {/* Corporate Header */}
             <div className="border-b-2 border-slate-900 pb-2.5 sm:pb-3 flex items-start justify-between gap-4">
@@ -733,6 +733,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                 <p className="mb-0">Date: <strong className="text-slate-800">{currentDate}</strong></p>
                 <p className="mb-0">Time: <span className="text-slate-700">{currentTime}</span></p>
                 <p className="mb-0">Scope: <strong className="capitalize text-slate-800">{scope === "filtered" ? "Filtered View" : "All Workforce"}</strong></p>
+                <p className="mb-0">Page Size: <strong className="uppercase text-slate-800">{pageSize} ({pageSize === "a4" ? "210 × 297mm" : pageSize === "letter" ? "8.5 × 11in" : "8.5 × 14in"})</strong></p>
                 {activeFiltersDesc && (
                   <p style={{ fontSize: "9.5px" }} className="text-indigo-700 max-w-[200px] truncate mb-0">
                     {activeFiltersDesc}
