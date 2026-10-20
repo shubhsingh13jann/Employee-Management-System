@@ -193,10 +193,10 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
         {/* Main Body: Two-Column Split Layout */}
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
           {/* Left Column: Configuration Controls (Steps 1, 2, 3) */}
-          <div className="w-full lg:w-[340px] shrink-0 border-r border-slate-100 px-3.5 sm:px-4 pt-2 sm:pt-2.5 pb-3.5 space-y-3 overflow-y-auto bg-white no-print [scrollbar-width:thin]">
+          <div className="w-full lg:w-[340px] shrink-0 border-r border-slate-100 px-3.5 sm:px-4 pt-2 sm:pt-2.5 pb-3.5 space-y-3.5 overflow-y-auto bg-white no-print [scrollbar-width:thin]">
             {/* Step 1: Report Scope */}
             <div>
-              <div className="flex items-center gap-2 mb-1.5">
+              <div className="flex items-center gap-2 mb-2">
                 <div className="w-6.5 h-6.5 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-indigo-700 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
                   1
                 </div>
@@ -204,7 +204,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                   <div style={{ fontSize: "12.6px" }} className="font-bold text-slate-900 leading-tight mb-0">
                     Report Scope
                   </div>
-                  <p style={{ fontSize: "10.5px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
+                  <p style={{ fontSize: "10.5px" }} className="text-slate-500 mb-0 mt-1 leading-normal">
                     Choose the data scope to include in the report.
                   </p>
                 </div>
@@ -215,7 +215,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setScope("filtered")}
-                  className={`px-2 py-1.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-2.5 py-2 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-1.5 ${
                     scope === "filtered"
                       ? "border-2 border-blue-500 bg-gradient-to-br from-blue-50/70 to-indigo-50/40 shadow-xs"
                       : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300"
@@ -244,7 +244,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setScope("all")}
-                  className={`px-2 py-1.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-2.5 py-2 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-1.5 ${
                     scope === "all"
                       ? "border-2 border-blue-500 bg-gradient-to-br from-blue-50/70 to-indigo-50/40 shadow-xs"
                       : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300"
@@ -273,7 +273,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
 
             {/* Step 2: Additional Sections */}
             <div>
-              <div className="flex items-center gap-2 mb-1.5">
+              <div className="flex items-center gap-2 mb-2">
                 <div className="w-6.5 h-6.5 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-indigo-700 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
                   2
                 </div>
@@ -281,18 +281,18 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                   <div style={{ fontSize: "12.6px" }} className="font-bold text-slate-900 leading-tight mb-0">
                     Additional Sections
                   </div>
-                  <p style={{ fontSize: "10.5px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
+                  <p style={{ fontSize: "10.5px" }} className="text-slate-500 mb-0 mt-1 leading-normal">
                     Select the sections to include in the print layout.
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {/* Squads Summary Card */}
                 <button
                   type="button"
                   onClick={() => setIncludeSquadsSummary(!includeSquadsSummary)}
-                  className={`w-full px-2.5 py-1.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2 ${
+                  className={`w-full px-2.5 py-2 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
                     includeSquadsSummary
                       ? "border-slate-200/90 bg-white hover:bg-slate-50/80 shadow-2xs"
                       : "border-slate-200 bg-slate-50/50 hover:bg-slate-100/60 opacity-75"
@@ -316,7 +316,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                     <span className="font-bold block text-xs text-slate-900 leading-tight">
                       Squads Summary
                     </span>
-                    <span className="text-[10px] text-slate-500 block leading-tight mt-0.5 truncate">
+                    <span className="text-[10px] text-slate-500 block leading-normal mt-1 truncate">
                       Include supervisor squad roster and capacity summary
                     </span>
                   </div>
@@ -326,7 +326,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setIncludeUnassigned(!includeUnassigned)}
-                  className={`w-full px-2.5 py-1.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2 ${
+                  className={`w-full px-2.5 py-2 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
                     includeUnassigned
                       ? "border-slate-200/90 bg-white hover:bg-slate-50/80 shadow-2xs"
                       : "border-slate-200 bg-slate-50/50 hover:bg-slate-100/60 opacity-75"
@@ -357,7 +357,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                         </span>
                       )}
                     </div>
-                    <span className="text-[10px] text-slate-500 block leading-tight mt-0.5 truncate">
+                    <span className="text-[10px] text-slate-500 block leading-normal mt-1 truncate">
                       Include staff who are not assigned to any supervisor
                     </span>
                   </div>
@@ -367,7 +367,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
 
             {/* Step 3: Page Format */}
             <div>
-              <div className="flex items-center gap-2 mb-1.5">
+              <div className="flex items-center gap-2 mb-2">
                 <div className="w-6.5 h-6.5 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-indigo-700 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
                   3
                 </div>
@@ -375,7 +375,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                   <div style={{ fontSize: "12.6px" }} className="font-bold text-slate-900 leading-tight mb-0">
                     Page Format
                   </div>
-                  <p style={{ fontSize: "10.5px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
+                  <p style={{ fontSize: "10.5px" }} className="text-slate-500 mb-0 mt-1 leading-normal">
                     Configure page layout and appearance.
                   </p>
                 </div>
@@ -384,7 +384,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
               <div className="grid grid-cols-2 gap-2">
                 {/* Page Size */}
                 <div>
-                  <label className="text-[10px] font-bold text-slate-700 mb-0.5 block">
+                  <label className="text-[10px] font-bold text-slate-700 mb-1 block">
                     Page Size
                   </label>
                   <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-1.5 flex items-center gap-1.5 shadow-2xs">
@@ -407,7 +407,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
 
                 {/* Orientation */}
                 <div>
-                  <label className="text-[10px] font-bold text-slate-700 mb-0.5 block">
+                  <label className="text-[10px] font-bold text-slate-700 mb-1 block">
                     Orientation
                   </label>
                   <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-1.5 flex items-center gap-1.5 shadow-2xs">
@@ -429,7 +429,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
 
                 {/* Margins */}
                 <div>
-                  <label className="text-[10px] font-bold text-slate-700 mb-0.5 block">
+                  <label className="text-[10px] font-bold text-slate-700 mb-1 block">
                     Margins
                   </label>
                   <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-1.5 flex items-center gap-1.5 shadow-2xs">
@@ -452,7 +452,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
 
                 {/* Header Style */}
                 <div>
-                  <label className="text-[10px] font-bold text-slate-700 mb-0.5 block">
+                  <label className="text-[10px] font-bold text-slate-700 mb-1 block">
                     Header Style
                   </label>
                   <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-1.5 flex items-center gap-1.5 shadow-2xs">
