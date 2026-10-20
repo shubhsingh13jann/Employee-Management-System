@@ -303,7 +303,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                   Print Hierarchy Dossier & Roster
                 </div>
                 <span className="text-[9.5px] px-2 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200/70 shrink-0">
-                  {pageSize === "a4" ? "A4 (210 × 297mm)" : pageSize === "letter" ? "Letter (8.5 × 11in)" : "Legal (8.5 × 14in)"}
+                  {pageSize.toUpperCase()} • {orientation.charAt(0).toUpperCase() + orientation.slice(1)}
                 </span>
               </div>
               <p style={{ fontSize: "11px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
@@ -587,7 +587,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
           <div className="flex-1 bg-slate-100 flex flex-col overflow-hidden min-w-0">
             {/* Top Preview Toolbar: Positioned outside the scroll container with solid background so scrolled content never bleeds behind it */}
             <div className="shrink-0 z-20 w-full flex justify-center px-2.5 sm:px-3.5 py-2.5 bg-slate-100 border-b border-slate-200/80 no-print">
-              <div className={`w-full ${isFitWidth ? "max-w-none" : "max-w-3xl"} bg-white rounded-2xl border border-slate-200/90 shadow-2xs px-3.5 py-2 flex items-center justify-between gap-3`}>
+              <div className={`w-full ${isFitWidth ? "max-w-none" : orientation === "landscape" ? "max-w-5xl" : "max-w-3xl"} bg-white rounded-2xl border border-slate-200/90 shadow-2xs px-3.5 py-2 flex items-center justify-between gap-3`}>
                 {/* Left: Page Navigation */}
                 <div className="flex items-center gap-1.5">
                   <button
@@ -687,8 +687,29 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                     transform: !isFitWidth ? `scale(${zoom / 100})` : undefined,
                     transformOrigin: "top center",
                     transition: "all 0.2s ease-out",
-                    maxWidth: isFitWidth ? "100%" : pageSize === "legal" ? "790px" : pageSize === "letter" ? "780px" : "750px",
-                    minHeight: pageSize === "legal" ? "1200px" : pageSize === "letter" ? "980px" : "1050px",
+                    maxWidth: isFitWidth
+                      ? "100%"
+                      : orientation === "landscape"
+                      ? pageSize === "legal"
+                        ? "1220px"
+                        : pageSize === "letter"
+                        ? "1000px"
+                        : "1050px"
+                      : pageSize === "legal"
+                      ? "790px"
+                      : pageSize === "letter"
+                      ? "780px"
+                      : "750px",
+                    minHeight:
+                      orientation === "landscape"
+                        ? pageSize === "legal"
+                          ? "720px"
+                          : "740px"
+                        : pageSize === "legal"
+                        ? "1200px"
+                        : pageSize === "letter"
+                        ? "980px"
+                        : "1050px",
                   }}
                   className="bg-white p-4 sm:p-5.5 rounded-xl border border-slate-300 shadow-md transition-all space-y-4 text-slate-900 mb-6 w-full"
                 >
@@ -734,6 +755,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                 <p className="mb-0">Time: <span className="text-slate-700">{currentTime}</span></p>
                 <p className="mb-0">Scope: <strong className="capitalize text-slate-800">{scope === "filtered" ? "Filtered View" : "All Workforce"}</strong></p>
                 <p className="mb-0">Page Size: <strong className="uppercase text-slate-800">{pageSize} ({pageSize === "a4" ? "210 × 297mm" : pageSize === "letter" ? "8.5 × 11in" : "8.5 × 14in"})</strong></p>
+                <p className="mb-0">Orientation: <strong className="capitalize text-slate-800">{orientation}</strong></p>
                 {activeFiltersDesc && (
                   <p style={{ fontSize: "9.5px" }} className="text-indigo-700 max-w-[200px] truncate mb-0">
                     {activeFiltersDesc}
