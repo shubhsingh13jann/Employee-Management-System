@@ -732,7 +732,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
           {/* Right Column: Document Preview Area */}
           <div className="flex-1 bg-slate-100 flex flex-col overflow-hidden min-w-0">
             {/* Top Preview Toolbar: Positioned outside the scroll container with solid background so scrolled content never bleeds behind it */}
-            <div className="shrink-0 z-20 w-full flex justify-center px-2.5 sm:px-3.5 py-2.5 bg-slate-100 border-b border-slate-200/80 no-print">
+            <div className="shrink-0 z-20 w-full flex justify-center px-2.5 sm:px-3.5 py-1.5 bg-slate-100 border-b border-slate-200/80 no-print">
               <div className={`w-full ${isFitWidth ? "max-w-none" : orientation === "landscape" ? "max-w-5xl" : "max-w-3xl"} bg-white rounded-2xl border border-slate-200/90 shadow-2xs px-3.5 py-2 flex items-center justify-between gap-3`}>
                 {/* Left: Page Navigation with Arrows and Current Tab Number Cube */}
                 <div className="flex items-center gap-1.5">
@@ -824,7 +824,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
             </div>
 
             {/* Scrollable Document Canvas */}
-            <div className="flex-1 overflow-y-auto [scrollbar-width:thin] px-2.5 sm:px-3.5 py-4">
+            <div className="flex-1 overflow-y-auto [scrollbar-width:thin] px-2.5 sm:px-3.5 pt-1.5 pb-6">
               <div className="flex flex-col items-center w-full min-h-full">
                 {/* Printable Document Sheets Container */}
                 <div
