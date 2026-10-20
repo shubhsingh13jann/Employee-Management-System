@@ -711,7 +711,13 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                         ? "980px"
                         : "1050px",
                   }}
-                  className="bg-white p-4 sm:p-5.5 rounded-xl border border-slate-300 shadow-md transition-all space-y-4 text-slate-900 mb-6 w-full"
+                  className={`bg-white rounded-xl border border-slate-300 shadow-md transition-all space-y-4 text-slate-900 mb-6 w-full ${
+                    margins === "narrow"
+                      ? "p-2.5 sm:p-3.5"
+                      : margins === "wide"
+                      ? "p-6 sm:p-8"
+                      : "p-4 sm:p-5.5"
+                  }`}
                 >
             {/* Corporate Header */}
             <div className="border-b-2 border-slate-900 pb-2.5 sm:pb-3 flex items-start justify-between gap-4">
@@ -756,6 +762,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                 <p className="mb-0">Scope: <strong className="capitalize text-slate-800">{scope === "filtered" ? "Filtered View" : "All Workforce"}</strong></p>
                 <p className="mb-0">Page Size: <strong className="uppercase text-slate-800">{pageSize} ({pageSize === "a4" ? "210 × 297mm" : pageSize === "letter" ? "8.5 × 11in" : "8.5 × 14in"})</strong></p>
                 <p className="mb-0">Orientation: <strong className="capitalize text-slate-800">{orientation}</strong></p>
+                <p className="mb-0">Margins: <strong className="capitalize text-slate-800">{margins} ({margins === "narrow" ? "10mm" : margins === "wide" ? "25mm" : "15mm"})</strong></p>
                 {activeFiltersDesc && (
                   <p style={{ fontSize: "9.5px" }} className="text-indigo-700 max-w-[200px] truncate mb-0">
                     {activeFiltersDesc}
@@ -1060,7 +1067,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
               width: 100% !important;
               max-width: 100% !important;
               margin: 0 !important;
-              padding: 8mm !important;
+              padding: ${margins === "narrow" ? "4mm" : margins === "wide" ? "14mm" : "8mm"} !important;
               box-shadow: none !important;
               border: none !important;
               transform: none !important;
