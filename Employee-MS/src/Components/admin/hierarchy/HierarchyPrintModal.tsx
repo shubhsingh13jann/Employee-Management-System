@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 
 export interface HierarchyPrintModalProps {
@@ -14,6 +14,108 @@ export interface HierarchyPrintModalProps {
   uniqueManagersCount: number;
   unassignedCount: number;
 }
+
+const PAGE_SIZE_OPTIONS = [
+  { value: "a4", label: "A4 (210 × 297 mm)" },
+  { value: "letter", label: "Letter (8.5 × 11 in)" },
+  { value: "legal", label: "Legal (8.5 × 14 in)" },
+];
+
+const ORIENTATION_OPTIONS = [
+  { value: "portrait", label: "Portrait" },
+  { value: "landscape", label: "Landscape" },
+];
+
+const MARGINS_OPTIONS = [
+  { value: "standard", label: "Standard" },
+  { value: "narrow", label: "Narrow" },
+  { value: "wide", label: "Wide" },
+];
+
+const HEADER_STYLE_OPTIONS = [
+  { value: "default", label: "Default" },
+  { value: "minimal", label: "Minimal" },
+  { value: "executive", label: "Executive" },
+];
+
+interface CustomFormatDropdownProps {
+  label: string;
+  value: string;
+  options: { value: string; label: string }[];
+  onChange: (val: any) => void;
+  icon: string;
+  isOpen: boolean;
+  onToggle: () => void;
+}
+
+const CustomFormatDropdown: React.FC<CustomFormatDropdownProps> = ({
+  label,
+  value,
+  options,
+  onChange,
+  icon,
+  isOpen,
+  onToggle,
+}) => {
+  const selected = options.find((o) => o.value === value);
+
+  return (
+    <div className={`relative ${isOpen ? "z-40" : "z-10"}`} data-format-dropdown>
+      <label className="text-[10px] font-bold text-slate-700 mb-1 block">
+        {label}
+      </label>
+      <button
+        type="button"
+        onClick={onToggle}
+        className={`w-full relative border rounded-xl bg-white p-1.5 flex items-center gap-1.5 shadow-2xs text-left cursor-pointer transition-all ${
+          isOpen
+            ? "border-indigo-500 ring-2 ring-indigo-100 shadow-xs"
+            : "border-slate-200/90 hover:border-slate-300"
+        }`}
+      >
+        <div className="w-5.5 h-5.5 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
+          <i className={icon}></i>
+        </div>
+        <span className="text-xs font-semibold text-slate-800 w-full truncate pr-4">
+          {selected?.label || value}
+        </span>
+        <i
+          className={`bi bi-chevron-down text-slate-400 text-[10px] absolute right-2 transition-transform duration-200 pointer-events-none ${
+            isOpen ? "rotate-180 text-indigo-600" : ""
+          }`}
+        ></i>
+      </button>
+
+      {/* Floating Menu Popover (Matching UserManagement / UserFormModal standard) */}
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1.5 w-full min-w-[140px] bg-white rounded-xl border border-slate-200/90 shadow-2xl z-50 py-1 overflow-hidden ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-150">
+          <div className="max-h-48 overflow-y-auto [scrollbar-width:thin] p-1 space-y-0.5">
+            {options.map((opt) => {
+              const isSelected = value === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => onChange(opt.value)}
+                  className={`w-full px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between text-left cursor-pointer transition-all duration-150 ${
+                    isSelected
+                      ? "bg-indigo-50 text-[#4f46e5] font-semibold"
+                      : "text-slate-700 hover:bg-slate-50 hover:text-indigo-600 font-medium"
+                  }`}
+                >
+                  <span className="truncate">{opt.label}</span>
+                  {isSelected && (
+                    <i className="bi bi-check2 text-sm text-[#4f46e5] font-bold ml-1 shrink-0"></i>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
   isOpen,
@@ -37,11 +139,35 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
   const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
   const [margins, setMargins] = useState<"standard" | "narrow" | "wide">("standard");
   const [headerStyle, setHeaderStyle] = useState<"default" | "minimal" | "executive">("default");
+  const [openDropdown, setOpenDropdown] = useState<"pageSize" | "orientation" | "margins" | "headerStyle" | null>(null);
 
   // Document Preview interactive controls
   const [zoom, setZoom] = useState<number>(80);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isFitWidth, setIsFitWidth] = useState<boolean>(false);
+
+  // Close custom dropdown on click outside or Escape key
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && !target.closest("[data-format-dropdown]")) {
+        setOpenDropdown(null);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpenDropdown(null);
+      }
+    };
+    if (openDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [openDropdown]);
 
   if (!isOpen) return null;
 
@@ -193,7 +319,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
         {/* Main Body: Two-Column Split Layout */}
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
           {/* Left Column: Configuration Controls (Steps 1, 2, 3) */}
-          <div className="w-full lg:w-[340px] shrink-0 border-r border-slate-100 px-3.5 sm:px-4 pt-2 sm:pt-2.5 pb-3.5 space-y-3.5 overflow-y-auto bg-white no-print [scrollbar-width:thin]">
+          <div className="w-full lg:w-[340px] shrink-0 border-r border-slate-100 px-3.5 sm:px-4 pt-2 sm:pt-2.5 pb-8 space-y-3.5 overflow-y-auto bg-white no-print [scrollbar-width:thin]">
             {/* Step 1: Report Scope */}
             <div>
               <div className="flex items-center gap-2 mb-2">
@@ -215,7 +341,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setScope("filtered")}
-                  className={`px-2.5 py-2 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-2.5 py-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-1.5 ${
                     scope === "filtered"
                       ? "border-2 border-blue-500 bg-gradient-to-br from-blue-50/70 to-indigo-50/40 shadow-xs"
                       : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300"
@@ -244,7 +370,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setScope("all")}
-                  className={`px-2.5 py-2 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-2.5 py-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-1.5 ${
                     scope === "all"
                       ? "border-2 border-blue-500 bg-gradient-to-br from-blue-50/70 to-indigo-50/40 shadow-xs"
                       : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300"
@@ -287,12 +413,12 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2.5">
                 {/* Squads Summary Card */}
                 <button
                   type="button"
                   onClick={() => setIncludeSquadsSummary(!includeSquadsSummary)}
-                  className={`w-full px-2.5 py-2 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
+                  className={`w-full px-2.5 py-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
                     includeSquadsSummary
                       ? "border-slate-200/90 bg-white hover:bg-slate-50/80 shadow-2xs"
                       : "border-slate-200 bg-slate-50/50 hover:bg-slate-100/60 opacity-75"
@@ -312,11 +438,11 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                     <i className="bi bi-people-fill"></i>
                   </div>
 
-                  <div className="min-w-0 flex-1">
+                  <div className="min-w-0 flex-1 flex flex-col gap-1">
                     <span className="font-bold block text-xs text-slate-900 leading-tight">
                       Squads Summary
                     </span>
-                    <span className="text-[10px] text-slate-500 block leading-normal mt-1 truncate">
+                    <span className="text-[10px] text-slate-500 block leading-normal truncate">
                       Include supervisor squad roster and capacity summary
                     </span>
                   </div>
@@ -326,7 +452,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setIncludeUnassigned(!includeUnassigned)}
-                  className={`w-full px-2.5 py-2 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
+                  className={`w-full px-2.5 py-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
                     includeUnassigned
                       ? "border-slate-200/90 bg-white hover:bg-slate-50/80 shadow-2xs"
                       : "border-slate-200 bg-slate-50/50 hover:bg-slate-100/60 opacity-75"
@@ -346,7 +472,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                     <i className="bi bi-person-fill"></i>
                   </div>
 
-                  <div className="min-w-0 flex-1">
+                  <div className="min-w-0 flex-1 flex flex-col gap-1">
                     <div className="flex items-center gap-1.5">
                       <span className="font-bold text-xs text-slate-900 block leading-tight">
                         Unassigned Staff
@@ -357,7 +483,7 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
                         </span>
                       )}
                     </div>
-                    <span className="text-[10px] text-slate-500 block leading-normal mt-1 truncate">
+                    <span className="text-[10px] text-slate-500 block leading-normal truncate">
                       Include staff who are not assigned to any supervisor
                     </span>
                   </div>
@@ -382,96 +508,57 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
               </div>
 
               <div className="grid grid-cols-2 gap-2">
-                {/* Page Size */}
-                <div>
-                  <label className="text-[10px] font-bold text-slate-700 mb-1 block">
-                    Page Size
-                  </label>
-                  <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-1.5 flex items-center gap-1.5 shadow-2xs">
-                    <div className="w-5.5 h-5.5 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
-                      <i className="bi bi-file-earmark-text"></i>
-                    </div>
-                    <select
-                      value={pageSize}
-                      onChange={(e) => setPageSize(e.target.value as any)}
-                      aria-label="Page Size"
-                      className="bg-transparent text-xs font-semibold text-slate-800 w-full outline-hidden cursor-pointer appearance-none pr-4"
-                    >
-                      <option value="a4">A4 (210 × 297 mm)</option>
-                      <option value="letter">Letter (8.5 × 11 in)</option>
-                      <option value="legal">Legal (8.5 × 14 in)</option>
-                    </select>
-                    <i className="bi bi-chevron-down text-slate-400 text-[10px] absolute right-2 pointer-events-none"></i>
-                  </div>
-                </div>
+                <CustomFormatDropdown
+                  label="Page Size"
+                  value={pageSize}
+                  options={PAGE_SIZE_OPTIONS}
+                  onChange={(val) => {
+                    setPageSize(val);
+                    setOpenDropdown(null);
+                  }}
+                  icon="bi bi-file-earmark-text"
+                  isOpen={openDropdown === "pageSize"}
+                  onToggle={() => setOpenDropdown(openDropdown === "pageSize" ? null : "pageSize")}
+                />
 
-                {/* Orientation */}
-                <div>
-                  <label className="text-[10px] font-bold text-slate-700 mb-1 block">
-                    Orientation
-                  </label>
-                  <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-1.5 flex items-center gap-1.5 shadow-2xs">
-                    <div className="w-5.5 h-5.5 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
-                      <i className="bi bi-phone"></i>
-                    </div>
-                    <select
-                      value={orientation}
-                      onChange={(e) => setOrientation(e.target.value as any)}
-                      aria-label="Orientation"
-                      className="bg-transparent text-xs font-semibold text-slate-800 w-full outline-hidden cursor-pointer appearance-none pr-4"
-                    >
-                      <option value="portrait">Portrait</option>
-                      <option value="landscape">Landscape</option>
-                    </select>
-                    <i className="bi bi-chevron-down text-slate-400 text-[10px] absolute right-2 pointer-events-none"></i>
-                  </div>
-                </div>
+                <CustomFormatDropdown
+                  label="Orientation"
+                  value={orientation}
+                  options={ORIENTATION_OPTIONS}
+                  onChange={(val) => {
+                    setOrientation(val);
+                    setOpenDropdown(null);
+                  }}
+                  icon="bi bi-phone"
+                  isOpen={openDropdown === "orientation"}
+                  onToggle={() => setOpenDropdown(openDropdown === "orientation" ? null : "orientation")}
+                />
 
-                {/* Margins */}
-                <div>
-                  <label className="text-[10px] font-bold text-slate-700 mb-1 block">
-                    Margins
-                  </label>
-                  <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-1.5 flex items-center gap-1.5 shadow-2xs">
-                    <div className="w-5.5 h-5.5 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
-                      <i className="bi bi-bounding-box"></i>
-                    </div>
-                    <select
-                      value={margins}
-                      onChange={(e) => setMargins(e.target.value as any)}
-                      aria-label="Margins"
-                      className="bg-transparent text-xs font-semibold text-slate-800 w-full outline-hidden cursor-pointer appearance-none pr-4"
-                    >
-                      <option value="standard">Standard</option>
-                      <option value="narrow">Narrow</option>
-                      <option value="wide">Wide</option>
-                    </select>
-                    <i className="bi bi-chevron-down text-slate-400 text-[10px] absolute right-2 pointer-events-none"></i>
-                  </div>
-                </div>
+                <CustomFormatDropdown
+                  label="Margins"
+                  value={margins}
+                  options={MARGINS_OPTIONS}
+                  onChange={(val) => {
+                    setMargins(val);
+                    setOpenDropdown(null);
+                  }}
+                  icon="bi bi-bounding-box"
+                  isOpen={openDropdown === "margins"}
+                  onToggle={() => setOpenDropdown(openDropdown === "margins" ? null : "margins")}
+                />
 
-                {/* Header Style */}
-                <div>
-                  <label className="text-[10px] font-bold text-slate-700 mb-1 block">
-                    Header Style
-                  </label>
-                  <div className="relative border border-slate-200/90 rounded-xl bg-white hover:border-slate-300 p-1.5 flex items-center gap-1.5 shadow-2xs">
-                    <div className="w-5.5 h-5.5 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
-                      <i className="bi bi-layout-text-window-reverse"></i>
-                    </div>
-                    <select
-                      value={headerStyle}
-                      onChange={(e) => setHeaderStyle(e.target.value as any)}
-                      aria-label="Header Style"
-                      className="bg-transparent text-xs font-semibold text-slate-800 w-full outline-hidden cursor-pointer appearance-none pr-4"
-                    >
-                      <option value="default">Default</option>
-                      <option value="minimal">Minimal</option>
-                      <option value="executive">Executive</option>
-                    </select>
-                    <i className="bi bi-chevron-down text-slate-400 text-[10px] absolute right-2 pointer-events-none"></i>
-                  </div>
-                </div>
+                <CustomFormatDropdown
+                  label="Header Style"
+                  value={headerStyle}
+                  options={HEADER_STYLE_OPTIONS}
+                  onChange={(val) => {
+                    setHeaderStyle(val);
+                    setOpenDropdown(null);
+                  }}
+                  icon="bi bi-layout-text-window-reverse"
+                  isOpen={openDropdown === "headerStyle"}
+                  onToggle={() => setOpenDropdown(openDropdown === "headerStyle" ? null : "headerStyle")}
+                />
               </div>
             </div>
 
