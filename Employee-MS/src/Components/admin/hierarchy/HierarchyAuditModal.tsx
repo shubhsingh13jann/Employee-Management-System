@@ -315,15 +315,80 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-5 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-150"
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-5 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-3xl bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 max-h-[85vh]"
+        className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 max-h-[90vh] relative"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="px-5 sm:px-6 py-4 bg-gradient-to-r from-slate-900 via-slate-950 to-indigo-950 text-white flex items-center justify-between border-b border-indigo-500/20">
+        {/* Header with Fluid Pastel Wave Background */}
+        <div className="relative pl-6 pr-5 py-4 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0">
+          {/* Top-Right Fluid Pastel Wave Background matching reference design */}
+          <div className="absolute top-0 right-0 w-[440px] sm:w-[520px] h-full pointer-events-none overflow-hidden z-0">
+            <svg
+              viewBox="0 0 500 74"
+              fill="none"
+              preserveAspectRatio="none"
+              className="w-full h-full"
+            >
+              <defs>
+                {/* Left fade mask to seamlessly blend into pure white */}
+                <mask id="auditModalWaveFadeMask">
+                  <linearGradient id="auditModalWaveFadeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="black" />
+                    <stop offset="18%" stopColor="white" />
+                    <stop offset="100%" stopColor="white" />
+                  </linearGradient>
+                  <rect width="500" height="74" fill="url(#auditModalWaveFadeGrad)" />
+                </mask>
+
+                {/* Wave 1: Soft Sky-Blue / Periwinkle Gradient */}
+                <linearGradient id="auditModalWaveGrad1" x1="0%" y1="0%" x2="100%" y2="70%">
+                  <stop offset="0%" stopColor="#E0E7FF" stopOpacity="0.2" />
+                  <stop offset="30%" stopColor="#D7E0FC" stopOpacity="0.85" />
+                  <stop offset="65%" stopColor="#E0E7FE" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="#EDE9FE" stopOpacity="0.7" />
+                </linearGradient>
+
+                {/* Wave 2: Richer Lavender / Violet Sweep */}
+                <linearGradient id="auditModalWaveGrad2" x1="15%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#D8E2FB" stopOpacity="0.3" />
+                  <stop offset="30%" stopColor="#C7D2FE" stopOpacity="0.85" />
+                  <stop offset="60%" stopColor="#DDD6FE" stopOpacity="0.9" />
+                  <stop offset="85%" stopColor="#E9D5FF" stopOpacity="0.85" />
+                  <stop offset="100%" stopColor="#F3E8FF" stopOpacity="0.4" />
+                </linearGradient>
+
+                {/* Wave 3: Subtle Pastel Ribbon Glow */}
+                <linearGradient id="auditModalWaveGrad3" x1="30%" y1="10%" x2="95%" y2="100%">
+                  <stop offset="0%" stopColor="#E0F2FE" stopOpacity="0.5" />
+                  <stop offset="45%" stopColor="#DDD6FE" stopOpacity="0.75" />
+                  <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0.7" />
+                </linearGradient>
+              </defs>
+
+              <g mask="url(#auditModalWaveFadeMask)">
+                {/* Layer 1: Broad soft background crest */}
+                <path
+                  d="M0 26 C60 10 120 8 180 18 C245 28 305 50 370 38 C425 28 465 10 500 20 V0 H0 Z"
+                  fill="url(#auditModalWaveGrad1)"
+                />
+                {/* Layer 2: Main curved ribbon */}
+                <path
+                  d="M0 50 C80 34 145 12 215 10 C280 8 330 32 390 44 C445 54 475 38 500 28 V0 H0 Z"
+                  fill="url(#auditModalWaveGrad2)"
+                />
+                {/* Layer 3: Soft swoop ribbon sweeping under actions */}
+                <path
+                  d="M130 38 C195 26 260 48 325 56 C385 64 445 50 500 38 V8 C470 20 420 18 370 24 C310 34 235 32 130 38 Z"
+                  fill="url(#auditModalWaveGrad3)"
+                  opacity="0.75"
+                />
+              </g>
+            </svg>
+          </div>
+
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center text-lg shadow-md shrink-0">
               <i className="bi bi-clock-history"></i>
