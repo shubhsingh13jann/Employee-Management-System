@@ -580,19 +580,140 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
           </button>
         </div>
 
-        {/* Filter and Search Bar */}
-        <div className="px-5 py-3 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-
+        {/* Secondary Toolbar: Search Input + Date Range Selector + Sort Order */}
+        <div
+          ref={dropdownRef}
+          className="px-6 py-2.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3"
+        >
           {/* Search Box */}
-          <div className="relative w-full sm:w-56">
-            <i className="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <div className="relative w-full sm:w-80">
+            <i className="bi bi-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search audit trail..."
-              className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 text-xs text-slate-900 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full pl-9 pr-8 py-2 rounded-xl border border-slate-200/90 bg-white text-xs text-slate-800 placeholder-slate-400 shadow-2xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                aria-label="Clear search"
+              >
+                <i className="bi bi-x text-xs"></i>
+              </button>
+            )}
+          </div>
+
+          {/* Right Action Dropdowns */}
+          <div className="flex items-center gap-2.5 self-end sm:self-auto">
+            {/* Date Filter Dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setOpenDropdown(openDropdown === "date" ? null : "date")}
+                className="px-3.5 py-2 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 text-xs font-medium text-slate-700 shadow-2xs flex items-center gap-2 cursor-pointer transition-all"
+              >
+                <i className="bi bi-calendar3 text-indigo-600 text-xs"></i>
+                <span>
+                  {dateFilter === "all"
+                    ? "All Dates"
+                    : dateFilter === "today"
+                    ? "Today"
+                    : dateFilter === "week"
+                    ? "Last 7 Days"
+                    : "Last 30 Days"}
+                </span>
+                <i
+                  className={`bi bi-chevron-down text-slate-400 text-[10px] transition-transform ${
+                    openDropdown === "date" ? "rotate-180" : ""
+                  }`}
+                ></i>
+              </button>
+
+              {openDropdown === "date" && (
+                <div className="absolute right-0 top-full mt-1.5 w-44 bg-white rounded-xl border border-slate-200 shadow-xl py-1 z-30 animate-in fade-in zoom-in-95 duration-100">
+                  {[
+                    { id: "all", label: "All Dates", icon: "bi-calendar3" },
+                    { id: "today", label: "Today", icon: "bi-calendar-check" },
+                    { id: "week", label: "Last 7 Days", icon: "bi-calendar-week" },
+                    { id: "month", label: "Last 30 Days", icon: "bi-calendar-month" },
+                  ].map((opt) => (
+                    <button
+                      key={`date-opt-${opt.id}`}
+                      type="button"
+                      onClick={() => {
+                        setDateFilter(opt.id as DateFilterOption);
+                        setOpenDropdown(null);
+                      }}
+                      className={`w-full px-3 py-1.5 text-xs text-left flex items-center justify-between transition-colors cursor-pointer ${
+                        dateFilter === opt.id
+                          ? "bg-indigo-50 text-indigo-700 font-bold"
+                          : "text-slate-700 hover:bg-slate-50 font-medium"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <i className={`bi ${opt.icon} text-xs text-indigo-500`}></i>
+                        <span>{opt.label}</span>
+                      </div>
+                      {dateFilter === opt.id && (
+                        <i className="bi bi-check2 text-indigo-600 text-xs font-bold"></i>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Sort Order Dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setOpenDropdown(openDropdown === "sort" ? null : "sort")}
+                className="px-3.5 py-2 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 text-xs font-medium text-slate-700 shadow-2xs flex items-center gap-2 cursor-pointer transition-all"
+              >
+                <i className="bi bi-arrow-down-up text-indigo-600 text-xs"></i>
+                <span>{sortOrder === "newest" ? "Newest First" : "Oldest First"}</span>
+                <i
+                  className={`bi bi-chevron-down text-slate-400 text-[10px] transition-transform ${
+                    openDropdown === "sort" ? "rotate-180" : ""
+                  }`}
+                ></i>
+              </button>
+
+              {openDropdown === "sort" && (
+                <div className="absolute right-0 top-full mt-1.5 w-40 bg-white rounded-xl border border-slate-200 shadow-xl py-1 z-30 animate-in fade-in zoom-in-95 duration-100">
+                  {[
+                    { id: "newest", label: "Newest First", icon: "bi-sort-down" },
+                    { id: "oldest", label: "Oldest First", icon: "bi-sort-up" },
+                  ].map((opt) => (
+                    <button
+                      key={`sort-opt-${opt.id}`}
+                      type="button"
+                      onClick={() => {
+                        setSortOrder(opt.id as SortOrderOption);
+                        setOpenDropdown(null);
+                      }}
+                      className={`w-full px-3 py-1.5 text-xs text-left flex items-center justify-between transition-colors cursor-pointer ${
+                        sortOrder === opt.id
+                          ? "bg-indigo-50 text-indigo-700 font-bold"
+                          : "text-slate-700 hover:bg-slate-50 font-medium"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <i className={`bi ${opt.icon} text-xs text-indigo-500`}></i>
+                        <span>{opt.label}</span>
+                      </div>
+                      {sortOrder === opt.id && (
+                        <i className="bi bi-check2 text-indigo-600 text-xs font-bold"></i>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
