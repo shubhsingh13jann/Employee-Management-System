@@ -446,31 +446,142 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
           </div>
         </div>
 
+        {/* Action Filter Pills Bar */}
+        <div className="px-6 pt-3.5 pb-1 flex items-center gap-2.5 sm:gap-3 flex-wrap">
+          {/* 1. All Activities */}
+          <button
+            type="button"
+            onClick={() => setActionFilter("all")}
+            className={`px-4 py-2 rounded-2xl text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer ${
+              actionFilter === "all"
+                ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 text-white shadow-md shadow-indigo-600/25"
+                : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs"
+            }`}
+          >
+            <i className="bi bi-list-ul text-sm"></i>
+            <span>All Activities</span>
+            <span
+              className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                actionFilter === "all"
+                  ? "bg-white/25 text-white"
+                  : "bg-indigo-50 text-indigo-700 border border-indigo-100/80"
+              }`}
+            >
+              {counts.all}
+            </span>
+          </button>
+
+          {/* 2. Assigned */}
+          <button
+            type="button"
+            onClick={() => setActionFilter("hierarchy_assigned")}
+            className={`px-4 py-2 rounded-2xl text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer ${
+              actionFilter === "hierarchy_assigned"
+                ? "bg-blue-600 text-white shadow-md shadow-blue-600/25"
+                : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs"
+            }`}
+          >
+            <i
+              className={`bi bi-person-fill-add text-sm ${
+                actionFilter === "hierarchy_assigned" ? "text-white" : "text-blue-600"
+              }`}
+            ></i>
+            <span>Assigned</span>
+            <span
+              className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                actionFilter === "hierarchy_assigned"
+                  ? "bg-white/25 text-white"
+                  : "bg-blue-50 text-blue-600 border border-blue-100/80"
+              }`}
+            >
+              {counts.assigned}
+            </span>
+          </button>
+
+          {/* 3. Reassigned */}
+          <button
+            type="button"
+            onClick={() => setActionFilter("hierarchy_reassigned")}
+            className={`px-4 py-2 rounded-2xl text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer ${
+              actionFilter === "hierarchy_reassigned"
+                ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/25"
+                : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs"
+            }`}
+          >
+            <i
+              className={`bi bi-arrow-left-right text-sm ${
+                actionFilter === "hierarchy_reassigned" ? "text-white" : "text-emerald-500"
+              }`}
+            ></i>
+            <span>Reassigned</span>
+            <span
+              className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                actionFilter === "hierarchy_reassigned"
+                  ? "bg-white/25 text-white"
+                  : "bg-emerald-50 text-emerald-600 border border-emerald-100/80"
+              }`}
+            >
+              {counts.reassigned}
+            </span>
+          </button>
+
+          {/* 4. Bulk Onboard */}
+          <button
+            type="button"
+            onClick={() => setActionFilter("hierarchy_bulk_assigned")}
+            className={`px-4 py-2 rounded-2xl text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer ${
+              actionFilter === "hierarchy_bulk_assigned"
+                ? "bg-amber-600 text-white shadow-md shadow-amber-600/25"
+                : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs"
+            }`}
+          >
+            <i
+              className={`bi bi-people-fill text-sm ${
+                actionFilter === "hierarchy_bulk_assigned" ? "text-white" : "text-amber-500"
+              }`}
+            ></i>
+            <span>Bulk Onboard</span>
+            <span
+              className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                actionFilter === "hierarchy_bulk_assigned"
+                  ? "bg-white/25 text-white"
+                  : "bg-amber-50 text-amber-600 border border-amber-100/80"
+              }`}
+            >
+              {counts.bulk}
+            </span>
+          </button>
+
+          {/* 5. Unlinked */}
+          <button
+            type="button"
+            onClick={() => setActionFilter("hierarchy_unlinked")}
+            className={`px-4 py-2 rounded-2xl text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer ${
+              actionFilter === "hierarchy_unlinked"
+                ? "bg-rose-600 text-white shadow-md shadow-rose-600/25"
+                : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs"
+            }`}
+          >
+            <i
+              className={`bi bi-link-45deg text-sm ${
+                actionFilter === "hierarchy_unlinked" ? "text-white" : "text-rose-500"
+              }`}
+            ></i>
+            <span>Unlinked</span>
+            <span
+              className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                actionFilter === "hierarchy_unlinked"
+                  ? "bg-white/25 text-white"
+                  : "bg-rose-50 text-rose-600 border border-rose-100/80"
+              }`}
+            >
+              {counts.unlinked}
+            </span>
+          </button>
+        </div>
+
         {/* Filter and Search Bar */}
         <div className="px-5 py-3 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-          {/* Action Filter Pills */}
-          <div className="flex items-center gap-1.5 flex-wrap w-full sm:w-auto">
-            {[
-              { id: "all", label: "All Activities" },
-              { id: "hierarchy_assigned", label: "Assigned" },
-              { id: "hierarchy_reassigned", label: "Reassigned" },
-              { id: "hierarchy_bulk_assigned", label: "Bulk Onboard" },
-              { id: "hierarchy_unlinked", label: "Unlinked" },
-            ].map((pill) => (
-              <button
-                key={`audit-pill-${pill.id}`}
-                type="button"
-                onClick={() => setActionFilter(pill.id)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  actionFilter === pill.id
-                    ? "bg-indigo-600 text-white shadow-2xs"
-                    : "bg-white text-slate-600 hover:bg-slate-200/70 border border-slate-200"
-                }`}
-              >
-                {pill.label}
-              </button>
-            ))}
-          </div>
 
           {/* Search Box */}
           <div className="relative w-full sm:w-56">
