@@ -389,40 +389,59 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
             </svg>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center text-lg shadow-md shrink-0">
-              <i className="bi bi-clock-history"></i>
+          {/* Left: Clock Icon + Title and Subtitle */}
+          <div className="flex items-center gap-3 relative z-10 min-w-0">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-700 text-white flex items-center justify-center text-xl shadow-md shadow-indigo-500/25 shrink-0">
+              <i className="bi bi-clock"></i>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-sm sm:text-base text-white mb-0">
-                  Hierarchy Audit Trail & Activity Log
-                </h3>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">
-                  {logs.length} Recorded Events
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-300 mb-0 font-normal">
+            <div className="min-w-0">
+              <h3 className="font-bold text-base sm:text-lg text-slate-900 mb-0 tracking-tight leading-tight truncate">
+                Hierarchy Audit Trail & Activity Log
+              </h3>
+              <p className="text-[11px] sm:text-xs text-slate-500 mb-0 font-normal leading-normal mt-0.5 truncate">
                 Verifiable historical timeline of reporting line assignments, reallocations, and unlinks
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          {/* Right: Recorded Events Pill + Refresh Button + Close Button */}
+          <div className="flex items-center gap-2.5 relative z-10 shrink-0">
+            {/* Stat Pill: Recorded Events */}
+            <div className="px-3.5 py-1.5 rounded-2xl bg-indigo-50/70 border border-indigo-100/90 flex items-center gap-2.5 shadow-2xs">
+              <div className="text-indigo-600 text-base flex items-center justify-center">
+                <i className="bi bi-layers-fill"></i>
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="text-xs font-bold text-slate-900 leading-tight">
+                  {logs.length} Recorded
+                </span>
+                <span className="text-[10px] text-slate-500 font-medium leading-tight">
+                  Events
+                </span>
+              </div>
+            </div>
+
+            {/* Refresh Button */}
             <button
               type="button"
               onClick={fetchLogs}
               disabled={loading}
-              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-colors cursor-pointer text-xs"
+              className="w-9 h-9 rounded-xl bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 border border-slate-200/90 shadow-2xs flex items-center justify-center transition-all cursor-pointer"
               title="Refresh Audit Logs"
+              aria-label="Refresh Audit Logs"
             >
               <i className={`bi bi-arrow-clockwise text-sm ${loading ? "animate-spin" : ""}`}></i>
             </button>
+
+            {/* Close Button */}
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-colors cursor-pointer text-xs"
+              className="w-9 h-9 rounded-xl bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 border border-slate-200/90 shadow-2xs flex items-center justify-center transition-all cursor-pointer"
+              title="Close"
+              aria-label="Close"
             >
-              <i className="bi bi-x-lg text-sm"></i>
+              <i className="bi bi-x-lg text-xs"></i>
             </button>
           </div>
         </div>
