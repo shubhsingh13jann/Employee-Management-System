@@ -762,16 +762,34 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
                     hour12: true,
                   });
 
+                const displayMessage =
+                  item.details?.message ||
+                  (item.action === "hierarchy_bulk_assigned"
+                    ? `Bulk onboarded ${item.details?.count || "team"} employees`
+                    : item.action === "hierarchy_reassigned"
+                    ? `Reassigned employee ${item.employee_id || ""} to supervisor and manager`
+                    : item.action === "hierarchy_assigned"
+                    ? `Assigned employee ${item.employee_id || ""} to supervisor and manager`
+                    : item.action === "hierarchy_unlinked"
+                    ? `Unlinked employee ${item.employee_id || ""} from reporting line`
+                    : "Reporting relationship updated.");
+
+                const executorName =
+                  item.performed_by_name ||
+                  (typeof item.performed_by === "string" && isNaN(Number(item.performed_by))
+                    ? item.performed_by
+                    : "Shubh Singh");
+
                 return (
                   <div
                     key={`audit-event-${item.id}`}
-                    className="p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 bg-white hover:border-slate-300 hover:shadow-xs transition-all flex items-start sm:items-center justify-between gap-3 sm:gap-4"
+                    className="group p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 bg-white hover:border-indigo-200 hover:bg-slate-50/30 hover:shadow-xs transition-all flex items-start sm:items-center justify-between gap-3 sm:gap-4"
                   >
                     {/* Left: Status Squircle Icon + Content */}
                     <div className="flex items-center gap-3.5 min-w-0 flex-1">
                       {/* Squircle Status Icon */}
                       <div
-                        className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-base border shadow-2xs ${badge.iconBg}`}
+                        className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-base border shadow-2xs transition-transform duration-200 group-hover:scale-105 ${badge.iconBg}`}
                       >
                         <i className={`bi ${badge.icon}`}></i>
                       </div>
@@ -781,7 +799,7 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
                         {/* Line 1: Action Badge + Employee Name + EMP Code */}
                         <div className="flex items-center gap-2.5 flex-wrap">
                           <span
-                            className={`px-2.5 py-0.5 rounded-lg text-[10.5px] font-bold border ${badge.badgeStyle}`}
+                            className={`px-2.5 py-0.5 rounded-lg text-[10.5px] font-bold border transition-colors ${badge.badgeStyle}`}
                           >
                             {badge.label}
                           </span>
@@ -795,7 +813,7 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
 
                         {/* Line 2: Details Message */}
                         <p className="text-xs text-slate-600 mb-0 font-normal leading-relaxed">
-                          {item.details?.message || "Reporting relationship updated."}
+                          {displayMessage}
                         </p>
 
                         {/* Line 3: Executed by tag with shield icon */}
@@ -803,7 +821,7 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
                           <i className="bi bi-shield-fill-check text-indigo-600 text-xs"></i>
                           <span>Executed by:</span>
                           <span className="font-semibold text-slate-800">
-                            {item.performed_by_name || "Shubh Singh"}
+                            {executorName}
                           </span>
                         </div>
                       </div>
@@ -815,7 +833,7 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
                         <i className="bi bi-calendar3 text-slate-400 text-xs"></i>
                         <span>{formattedDate}</span>
                       </div>
-                      <span className="text-xs font-semibold text-indigo-600 block text-right">
+                      <span className="text-xs font-semibold text-indigo-600 block text-right font-sans">
                         Ref #{item.id}
                       </span>
                     </div>
