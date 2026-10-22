@@ -330,7 +330,7 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
           onClick={(e) => e.stopPropagation()}
         >
         {/* Header with Fluid Pastel Wave Background */}
-        <div className="relative pl-6 pr-5 py-4 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0">
+        <div className="relative pl-6 pr-5 py-2.5 sm:py-3 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0">
           {/* Top-Right Fluid Pastel Wave Background matching reference design */}
           <div className="absolute top-0 right-0 w-[440px] sm:w-[560px] h-full pointer-events-none overflow-hidden z-0">
             <svg
@@ -398,24 +398,24 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
 
           {/* Left: Clock Icon + Title and Subtitle */}
           <div className="flex items-center gap-3 relative z-10 min-w-0">
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-700 text-white flex items-center justify-center text-xl shadow-md shadow-indigo-500/25 shrink-0">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-700 text-white flex items-center justify-center text-lg sm:text-xl shadow-md shadow-indigo-500/25 shrink-0">
               <i className="bi bi-clock"></i>
             </div>
             <div className="min-w-0">
               <h3 className="font-bold text-base sm:text-lg text-slate-900 mb-0 tracking-tight leading-tight truncate">
                 Hierarchy Audit Trail & Activity Log
               </h3>
-              <p className="text-[11px] sm:text-xs text-slate-500 mb-0 font-normal leading-normal mt-0.5 truncate">
+              <p className="text-[11px] sm:text-xs text-slate-500 mb-0 font-normal leading-tight mt-0.5 truncate">
                 Verifiable historical timeline of reporting line assignments, reallocations, and unlinks
               </p>
             </div>
           </div>
 
           {/* Right: Recorded Events Pill + Refresh Button + Close Button */}
-          <div className="flex items-center gap-2.5 relative z-10 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 relative z-10 shrink-0">
             {/* Stat Pill: Recorded Events */}
-            <div className="px-3.5 py-1.5 rounded-2xl bg-indigo-50/70 border border-indigo-100/90 flex items-center gap-2.5 shadow-2xs">
-              <div className="text-indigo-600 text-base flex items-center justify-center">
+            <div className="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl sm:rounded-2xl bg-indigo-50/70 border border-indigo-100/90 flex items-center gap-2 sm:gap-2.5 shadow-2xs">
+              <div className="text-indigo-600 text-sm sm:text-base flex items-center justify-center">
                 <i className="bi bi-layers-fill"></i>
               </div>
               <div className="flex flex-col text-left">
@@ -433,7 +433,7 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
               type="button"
               onClick={fetchLogs}
               disabled={loading}
-              className="w-9 h-9 rounded-xl bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 border border-slate-200/90 shadow-2xs flex items-center justify-center transition-all cursor-pointer"
+              className="w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-xl bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 border border-slate-200/90 shadow-2xs flex items-center justify-center transition-all cursor-pointer"
               title="Refresh Audit Logs"
               aria-label="Refresh Audit Logs"
             >
@@ -444,7 +444,7 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="w-9 h-9 rounded-xl bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 border border-slate-200/90 shadow-2xs flex items-center justify-center transition-all cursor-pointer"
+              className="w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-xl bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 border border-slate-200/90 shadow-2xs flex items-center justify-center transition-all cursor-pointer"
               title="Close"
               aria-label="Close"
             >
