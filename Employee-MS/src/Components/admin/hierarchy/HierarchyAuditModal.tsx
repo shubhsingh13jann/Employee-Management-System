@@ -453,13 +453,13 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
           </div>
         </div>
 
-        {/* Action Filter Pills Bar */}
-        <div className="px-6 pt-3.5 pb-1 flex items-center gap-2.5 sm:gap-3 flex-nowrap overflow-x-auto [scrollbar-width:none]">
+        {/* Action Filter Pills Bar - shrink-0 with symmetric padding so pills are never squished or clipped */}
+        <div className="shrink-0 px-6 py-2.5 flex items-center gap-2 sm:gap-2.5 flex-nowrap overflow-x-auto [scrollbar-width:none]">
           {/* 1. All Activities */}
           <button
             type="button"
             onClick={() => setActionFilter("all")}
-            className={`px-4 py-2 rounded-2xl text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer shrink-0 ${
+            className={`px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer shrink-0 ${
               actionFilter === "all"
                 ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 text-white shadow-md shadow-indigo-600/25"
                 : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs"
@@ -468,7 +468,7 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
             <i className="bi bi-list-ul text-sm"></i>
             <span>All Activities</span>
             <span
-              className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+              className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ${
                 actionFilter === "all"
                   ? "bg-white/25 text-white"
                   : "bg-indigo-50 text-indigo-700 border border-indigo-100/80"
@@ -482,7 +482,7 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
           <button
             type="button"
             onClick={() => setActionFilter("hierarchy_assigned")}
-            className={`px-4 py-2 rounded-2xl text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer shrink-0 ${
+            className={`px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer shrink-0 ${
               actionFilter === "hierarchy_assigned"
                 ? "bg-blue-600 text-white shadow-md shadow-blue-600/25"
                 : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs"
@@ -495,7 +495,7 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
             ></i>
             <span>Assigned</span>
             <span
-              className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+              className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ${
                 actionFilter === "hierarchy_assigned"
                   ? "bg-white/25 text-white"
                   : "bg-blue-50 text-blue-600 border border-blue-100/80"
@@ -509,7 +509,7 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
           <button
             type="button"
             onClick={() => setActionFilter("hierarchy_reassigned")}
-            className={`px-4 py-2 rounded-2xl text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer shrink-0 ${
+            className={`px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer shrink-0 ${
               actionFilter === "hierarchy_reassigned"
                 ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/25"
                 : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs"
@@ -522,7 +522,7 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
             ></i>
             <span>Reassigned</span>
             <span
-              className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+              className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ${
                 actionFilter === "hierarchy_reassigned"
                   ? "bg-white/25 text-white"
                   : "bg-emerald-50 text-emerald-600 border border-emerald-100/80"
@@ -536,7 +536,7 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
           <button
             type="button"
             onClick={() => setActionFilter("hierarchy_bulk_assigned")}
-            className={`px-4 py-2 rounded-2xl text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer shrink-0 ${
+            className={`px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer shrink-0 ${
               actionFilter === "hierarchy_bulk_assigned"
                 ? "bg-amber-600 text-white shadow-md shadow-amber-600/25"
                 : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs"
@@ -549,7 +549,7 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
             ></i>
             <span>Bulk Onboard</span>
             <span
-              className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+              className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ${
                 actionFilter === "hierarchy_bulk_assigned"
                   ? "bg-white/25 text-white"
                   : "bg-amber-50 text-amber-600 border border-amber-100/80"
@@ -563,7 +563,7 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
           <button
             type="button"
             onClick={() => setActionFilter("hierarchy_unlinked")}
-            className={`px-4 py-2 rounded-2xl text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer shrink-0 ${
+            className={`px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer shrink-0 ${
               actionFilter === "hierarchy_unlinked"
                 ? "bg-rose-600 text-white shadow-md shadow-rose-600/25"
                 : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs"
@@ -576,7 +576,7 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
             ></i>
             <span>Unlinked</span>
             <span
-              className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+              className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ${
                 actionFilter === "hierarchy_unlinked"
                   ? "bg-white/25 text-white"
                   : "bg-rose-50 text-rose-600 border border-rose-100/80"
@@ -590,7 +590,7 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
         {/* Secondary Toolbar: Search Input + Date Range Selector + Sort Order */}
         <div
           ref={dropdownRef}
-          className="px-6 py-2.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3"
+          className="shrink-0 px-6 py-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3"
         >
           {/* Search Box */}
           <div className="relative w-full sm:w-80">
