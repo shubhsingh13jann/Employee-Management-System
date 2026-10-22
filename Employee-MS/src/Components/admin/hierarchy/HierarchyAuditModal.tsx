@@ -747,7 +747,7 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
               </div>
             </div>
           ) : (
-            <div className="space-y-2.5 pb-2">
+            <div className="space-y-2 pb-2">
               {filteredLogs.map((item) => {
                 const badge = getActionBadge(item.action);
                 const dateObj = new Date(item.created_at);
@@ -785,36 +785,36 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
                 return (
                   <div
                     key={`audit-event-${item.id}`}
-                    className="group p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 bg-white hover:border-indigo-200 hover:bg-slate-50/30 hover:shadow-xs transition-all flex items-start sm:items-center justify-between gap-3 sm:gap-4"
+                    className="group p-2.5 sm:p-3 rounded-2xl border border-slate-200/80 bg-white hover:border-indigo-200 hover:bg-slate-50/30 hover:shadow-xs transition-all flex items-start sm:items-center justify-between gap-3 sm:gap-3.5"
                   >
                     {/* Left: Status Squircle Icon + Content */}
-                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       {/* Squircle Status Icon */}
                       <div
-                        className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-base border shadow-2xs transition-transform duration-200 group-hover:scale-105 ${badge.iconBg}`}
+                        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 text-sm sm:text-base border shadow-2xs transition-transform duration-200 group-hover:scale-105 ${badge.iconBg}`}
                       >
                         <i className={`bi ${badge.icon}`}></i>
                       </div>
 
                       {/* Content Details */}
-                      <div className="min-w-0 flex-1 space-y-1">
+                      <div className="min-w-0 flex-1 space-y-0.5">
                         {/* Line 1: Action Badge + Employee Name + EMP Code */}
-                        <div className="flex items-center gap-2.5 flex-wrap">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <span
-                            className={`px-2.5 py-0.5 rounded-lg text-[10.5px] font-bold border transition-colors ${badge.badgeStyle}`}
+                            className={`px-2 py-0.5 rounded-lg text-[10px] sm:text-[10.5px] font-bold border transition-colors ${badge.badgeStyle}`}
                           >
                             {badge.label}
                           </span>
                           <span className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">
                             {item.employee_name || "Employee"}
                           </span>
-                          <span className="text-[11px] font-mono font-medium text-slate-400">
+                          <span className="text-[10.5px] font-mono font-medium text-slate-400">
                             EMP-{String(item.employee_id || item.user_id || 1).padStart(4, "0")}
                           </span>
                         </div>
 
                         {/* Line 2: Details Message */}
-                        <p className="text-xs text-slate-600 mb-0 font-normal leading-relaxed">
+                        <p className="text-xs text-slate-600 mb-0 font-normal leading-normal">
                           {displayMessage}
                         </p>
 
@@ -830,12 +830,12 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
                     </div>
 
                     {/* Right: Timestamp + Ref # tag */}
-                    <div className="shrink-0 text-right space-y-1 self-start sm:self-center">
+                    <div className="shrink-0 text-right space-y-0.5 self-start sm:self-center">
                       <div className="flex items-center justify-end gap-1.5 text-xs text-slate-600 font-normal">
                         <i className="bi bi-calendar3 text-slate-400 text-xs"></i>
                         <span>{formattedDate}</span>
                       </div>
-                      <span className="text-xs font-semibold text-indigo-600 block text-right font-sans">
+                      <span className="text-[11px] sm:text-xs font-semibold text-indigo-600 block text-right font-sans">
                         Ref #{item.id}
                       </span>
                     </div>
