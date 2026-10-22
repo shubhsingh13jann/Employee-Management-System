@@ -320,13 +320,15 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-5 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150"
+      className="fixed inset-0 z-[10000] bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150"
       onClick={onClose}
     >
-      <div
-        className="w-full max-w-5xl lg:max-w-[1060px] bg-white rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 max-h-[90vh] relative"
-        onClick={(e) => e.stopPropagation()}
-      >
+      {/* Centered strictly within the right side content portion (excluding the 240px left sidebar on md+) */}
+      <div className="fixed inset-y-0 right-0 left-0 md:left-[240px] flex items-center justify-center p-3 sm:p-5 pointer-events-none">
+        <div
+          className="w-full max-w-5xl lg:max-w-[1060px] bg-white rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 max-h-[90vh] relative pointer-events-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Header with Fluid Pastel Wave Background */}
         <div className="relative pl-6 pr-5 py-4 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0">
           {/* Top-Right Fluid Pastel Wave Background matching reference design */}
@@ -875,6 +877,7 @@ export const HierarchyAuditModal: React.FC<HierarchyAuditModalProps> = ({
             background: #94a3b8;
           }
         `}</style>
+        </div>
       </div>
     </div>,
     document.body
