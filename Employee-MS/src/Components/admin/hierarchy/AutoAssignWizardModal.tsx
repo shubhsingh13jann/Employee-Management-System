@@ -399,18 +399,18 @@ export const AutoAssignWizardModal: React.FC<AutoAssignWizardModalProps> = ({
           </div>
 
         {/* Main Content Body: Proposals Table or Illustrated Empty State */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 [scrollbar-width:thin] flex flex-col justify-center">
+        <div className="flex-1 overflow-y-auto px-6 py-3 sm:py-3.5 [scrollbar-width:thin] flex flex-col justify-center">
           {proposals.length === 0 ? (
-            <div className="w-full border-2 border-dashed border-indigo-100/90 rounded-3xl bg-slate-50/20 py-12 px-6 flex flex-col items-center justify-center text-center my-auto min-h-[340px]">
+            <div className="w-full border-2 border-dashed border-indigo-100/90 rounded-3xl bg-slate-50/20 py-5 sm:py-6 px-6 flex flex-col items-center justify-center text-center my-auto min-h-[175px]">
               {/* 3D Illustrated Document Graphic matching reference */}
-              <div className="relative mb-2 sm:mb-2.5 flex items-center justify-center">
+              <div className="relative mb-2 flex items-center justify-center">
                 {/* Soft ambient aura/cloud behind */}
-                <div className="absolute w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-100/70 via-blue-100/60 to-purple-100/40 blur-xl pointer-events-none"></div>
+                <div className="absolute w-20 h-20 rounded-full bg-gradient-to-tr from-indigo-100/70 via-blue-100/60 to-purple-100/40 blur-lg pointer-events-none"></div>
 
                 {/* SVG 3D-Style Document Graphic with tight bounding box */}
                 <svg
-                  width="112"
-                  height="102"
+                  width="92"
+                  height="82"
                   viewBox="15 8 100 98"
                   fill="none"
                   className="relative z-10 drop-shadow-md"
@@ -507,10 +507,10 @@ export const AutoAssignWizardModal: React.FC<AutoAssignWizardModalProps> = ({
               </div>
 
               {/* Title & Subtitle */}
-              <h3 className="text-base sm:text-lg font-bold text-slate-800 mb-1 tracking-tight">
+              <h3 className="text-sm sm:text-base font-bold text-slate-800 mb-0.5 tracking-tight">
                 All Staff Are Fully Assigned!
               </h3>
-              <p className="text-xs text-slate-400 mb-0 font-normal">
+              <p className="text-[11.5px] sm:text-xs text-slate-400 mb-0 font-normal">
                 No orphaned or unassigned personnel need allocation.
               </p>
             </div>
