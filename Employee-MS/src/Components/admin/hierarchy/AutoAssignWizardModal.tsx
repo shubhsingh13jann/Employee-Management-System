@@ -192,86 +192,211 @@ export const AutoAssignWizardModal: React.FC<AutoAssignWizardModalProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-5 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-150"
+      className="fixed inset-0 z-[10000] bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150"
       onClick={saving ? undefined : onClose}
     >
-      <div
-        className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 max-h-[85vh]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="px-5 sm:px-6 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between border-b border-indigo-500/20">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-indigo-600 text-white flex items-center justify-center text-lg shadow-md shrink-0">
-              <i className="bi bi-magic text-xl"></i>
+      {/* Centered strictly within the right-side content portion (offsetting the 240px sidebar on md+) */}
+      <div className="fixed inset-y-0 right-0 left-0 md:left-[240px] flex items-center justify-center p-3 sm:p-5 pointer-events-none">
+        <div
+          className="w-full max-w-4xl lg:max-w-5xl bg-white rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 max-h-[88vh] relative pointer-events-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header with Fluid Pastel Wave Background */}
+          <div className="relative pl-6 pr-5 py-3 sm:py-3.5 bg-white flex items-center justify-between border-b border-slate-100/90 overflow-hidden shrink-0">
+            {/* Top-Right Fluid Pastel Wave Background */}
+            <div className="absolute top-0 right-0 w-[440px] sm:w-[560px] h-full pointer-events-none overflow-hidden z-0">
+              <svg
+                viewBox="0 0 500 74"
+                fill="none"
+                preserveAspectRatio="none"
+                className="w-full h-full"
+              >
+                <defs>
+                  {/* Left fade mask to seamlessly blend into pure white */}
+                  <mask id="autoAssignWaveFadeMask">
+                    <linearGradient id="autoAssignWaveFadeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="black" />
+                      <stop offset="18%" stopColor="white" />
+                      <stop offset="100%" stopColor="white" />
+                    </linearGradient>
+                    <rect width="500" height="74" fill="url(#autoAssignWaveFadeGrad)" />
+                  </mask>
+
+                  {/* Wave 1: Soft Sky-Blue / Periwinkle Gradient */}
+                  <linearGradient id="autoAssignWaveGrad1" x1="0%" y1="0%" x2="100%" y2="70%">
+                    <stop offset="0%" stopColor="#E0E7FF" stopOpacity="0.2" />
+                    <stop offset="30%" stopColor="#D7E0FC" stopOpacity="0.85" />
+                    <stop offset="65%" stopColor="#E0E7FE" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="#EDE9FE" stopOpacity="0.7" />
+                  </linearGradient>
+
+                  {/* Wave 2: Richer Lavender / Violet Sweep */}
+                  <linearGradient id="autoAssignWaveGrad2" x1="15%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#D8E2FB" stopOpacity="0.3" />
+                    <stop offset="30%" stopColor="#C7D2FE" stopOpacity="0.85" />
+                    <stop offset="60%" stopColor="#DDD6FE" stopOpacity="0.9" />
+                    <stop offset="85%" stopColor="#E9D5FF" stopOpacity="0.85" />
+                    <stop offset="100%" stopColor="#F3E8FF" stopOpacity="0.4" />
+                  </linearGradient>
+
+                  {/* Wave 3: Subtle Pastel Ribbon Glow */}
+                  <linearGradient id="autoAssignWaveGrad3" x1="30%" y1="10%" x2="95%" y2="100%">
+                    <stop offset="0%" stopColor="#E0F2FE" stopOpacity="0.5" />
+                    <stop offset="45%" stopColor="#DDD6FE" stopOpacity="0.75" />
+                    <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0.7" />
+                  </linearGradient>
+                </defs>
+
+                <g mask="url(#autoAssignWaveFadeMask)">
+                  {/* Layer 1: Broad soft background crest */}
+                  <path
+                    d="M0 26 C60 10 120 8 180 18 C245 28 305 50 370 38 C425 28 465 10 500 20 V0 H0 Z"
+                    fill="url(#autoAssignWaveGrad1)"
+                  />
+                  {/* Layer 2: Main curved ribbon */}
+                  <path
+                    d="M0 50 C80 34 145 12 215 10 C280 8 330 32 390 44 C445 54 475 38 500 28 V0 H0 Z"
+                    fill="url(#autoAssignWaveGrad2)"
+                  />
+                  {/* Layer 3: Soft swoop ribbon sweeping under actions */}
+                  <path
+                    d="M130 38 C195 26 260 48 325 56 C385 64 445 50 500 38 V8 C470 20 420 18 370 24 C310 34 235 32 130 38 Z"
+                    fill="url(#autoAssignWaveGrad3)"
+                    opacity="0.75"
+                  />
+                </g>
+              </svg>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-sm sm:text-base text-white mb-0">
-                  Intelligent Auto-Assign Wizard
-                </h3>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/30 text-amber-200 border border-amber-400/30">
-                  AI Workload Balancing
+
+            {/* Left: Magic Wand Squircle Icon + Title & AI Tag */}
+            <div className="flex items-center gap-3 relative z-10 min-w-0">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-amber-400 via-rose-500 to-indigo-600 text-white flex items-center justify-center text-xl shadow-md shadow-pink-500/25 shrink-0">
+                <i className="bi bi-magic"></i>
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h3 className="font-extrabold text-base sm:text-lg text-slate-900 mb-0 tracking-tight leading-tight">
+                    Intelligent Auto-Assign Wizard
+                  </h3>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs">
+                    AI Workload Balancing
+                  </span>
+                </div>
+                <p className="text-[11px] sm:text-xs text-slate-500 mb-0 font-normal leading-tight mt-0.5">
+                  Department-matched auto-allocation prioritizing team leads with available capacity
+                </p>
+              </div>
+            </div>
+
+            {/* Right: Circular Close Button */}
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={saving}
+              className="w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-full bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 border border-slate-200/90 shadow-2xs flex items-center justify-center transition-all cursor-pointer text-xs disabled:opacity-50 relative z-10"
+              title="Close"
+              aria-label="Close"
+            >
+              <i className="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          {/* 4 Executive Metric KPI Cards Strip */}
+          <div className="px-6 py-3.5 bg-white border-b border-slate-100/90 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 shrink-0">
+            {/* 1. Total Unassigned */}
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center gap-3.5 hover:bg-slate-50/60 transition-all">
+              <div className="w-11 h-11 rounded-xl bg-blue-100/70 text-blue-600 flex items-center justify-center text-lg shrink-0">
+                <i className="bi bi-people-fill"></i>
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
+                  TOTAL UNASSIGNED
+                </span>
+                <span className="text-base sm:text-lg font-extrabold text-slate-800 leading-tight block">
+                  {unassignedStaff.length} Staff
                 </span>
               </div>
-              <p className="text-[11px] text-slate-300 mb-0 font-normal">
-                Department-matched auto-allocation prioritizing team leads with available capacity
-              </p>
+            </div>
+
+            {/* 2. Optimal Matches */}
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-emerald-50/30 border border-emerald-100/90 shadow-2xs flex items-center gap-3.5 hover:bg-emerald-50/60 transition-all">
+              <div className="w-11 h-11 rounded-xl bg-emerald-100/70 text-emerald-600 flex items-center justify-center text-lg shrink-0">
+                <i className="bi bi-bullseye"></i>
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 block mb-0.5">
+                  OPTIMAL MATCHES
+                </span>
+                <span className="text-base sm:text-lg font-extrabold text-slate-800 leading-tight block">
+                  {proposals.length} Proposed
+                </span>
+              </div>
+            </div>
+
+            {/* 3. Selected for Action */}
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-purple-50/30 border border-purple-100/90 shadow-2xs flex items-center gap-3.5 hover:bg-purple-50/60 transition-all">
+              <div className="w-11 h-11 rounded-xl bg-purple-100/70 text-purple-600 flex items-center justify-center text-lg shrink-0">
+                <i className="bi bi-lightning-charge-fill"></i>
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 block mb-0.5">
+                  SELECTED FOR ACTION
+                </span>
+                <span className="text-base sm:text-lg font-extrabold text-slate-800 leading-tight block">
+                  {selectedProposals.length} Ready
+                </span>
+              </div>
+            </div>
+
+            {/* 4. Available Leads */}
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-amber-50/30 border border-amber-100/90 shadow-2xs flex items-center gap-3.5 hover:bg-amber-50/60 transition-all">
+              <div className="w-11 h-11 rounded-xl bg-amber-100/70 text-amber-600 flex items-center justify-center text-lg shrink-0">
+                <i className="bi bi-person-badge-fill"></i>
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
+                  AVAILABLE LEADS
+                </span>
+                <span className="text-base sm:text-lg font-extrabold text-slate-800 leading-tight block">
+                  {supervisors.length} Supervisors
+                </span>
+              </div>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={saving}
-            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-xs disabled:opacity-50"
-          >
-            <i className="bi bi-x-lg"></i>
-          </button>
-        </div>
 
-        {/* Telemetry KPI Strip */}
-        <div className="px-5 py-3 bg-slate-50 border-b border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
-            <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Unassigned</span>
-            <span className="text-base font-bold text-slate-800">{unassignedStaff.length} Staff</span>
-          </div>
-          <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 shadow-2xs">
-            <span className="text-[10px] uppercase font-bold text-emerald-600 block">Optimal Matches</span>
-            <span className="text-base font-bold text-emerald-800">{proposals.length} Proposed</span>
-          </div>
-          <div className="p-2.5 rounded-xl bg-indigo-50 border border-indigo-200 shadow-2xs">
-            <span className="text-[10px] uppercase font-bold text-indigo-600 block">Selected for Action</span>
-            <span className="text-base font-bold text-indigo-800">{selectedProposals.length} Ready</span>
-          </div>
-          <div className="p-2.5 rounded-xl bg-slate-100 border border-slate-200 shadow-2xs">
-            <span className="text-[10px] uppercase font-bold text-slate-500 block">Available Leads</span>
-            <span className="text-base font-bold text-slate-700">{supervisors.length} Supervisors</span>
-          </div>
-        </div>
+          {/* Action Controls & Select All Bar */}
+          <div className="px-6 py-2.5 bg-white border-b border-slate-100 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-3">
+              {/* Select All with Custom Checkbox */}
+              <button
+                type="button"
+                onClick={() => handleSelectAll(true)}
+                className="flex items-center gap-2 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer group"
+              >
+                <span className="w-4 h-4 rounded border-2 border-indigo-600 flex items-center justify-center text-indigo-600 text-[10px] group-hover:bg-indigo-50 transition-colors">
+                  <i className="bi bi-check font-extrabold"></i>
+                </span>
+                <span>Select All ({proposals.length})</span>
+              </button>
 
-        {/* Action Controls & Select All Bar */}
-        <div className="px-5 py-2.5 bg-white border-b border-slate-100 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => handleSelectAll(true)}
-              className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer"
-            >
-              Select All ({proposals.length})
-            </button>
-            <span className="text-slate-300">•</span>
-            <button
-              type="button"
-              onClick={() => handleSelectAll(false)}
-              className="text-xs font-semibold text-slate-500 hover:text-slate-700 cursor-pointer"
-            >
-              Deselect All
-            </button>
+              <span className="text-slate-200 font-light">|</span>
+
+              {/* Deselect All with Custom Checkbox */}
+              <button
+                type="button"
+                onClick={() => handleSelectAll(false)}
+                className="flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer group"
+              >
+                <span className="w-4 h-4 rounded border-2 border-slate-300 group-hover:border-slate-400 transition-colors"></span>
+                <span>Deselect All</span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-1.5 text-xs text-slate-400 font-normal">
+              <i className="bi bi-info-circle text-indigo-400 text-xs"></i>
+              <span>Preview and override individual supervisor assignments before executing</span>
+            </div>
           </div>
-          <span className="text-xs text-slate-500">
-            Preview and override individual supervisor assignments before executing
-          </span>
-        </div>
 
         {/* Proposals Table */}
         <div className="flex-1 overflow-y-auto p-5 [scrollbar-width:thin]">
@@ -401,6 +526,7 @@ export const AutoAssignWizardModal: React.FC<AutoAssignWizardModalProps> = ({
               )}
             </button>
           </div>
+        </div>
         </div>
       </div>
     </div>,
