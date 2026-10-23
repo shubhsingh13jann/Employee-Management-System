@@ -398,13 +398,121 @@ export const AutoAssignWizardModal: React.FC<AutoAssignWizardModalProps> = ({
             </div>
           </div>
 
-        {/* Proposals Table */}
-        <div className="flex-1 overflow-y-auto p-5 [scrollbar-width:thin]">
+        {/* Main Content Body: Proposals Table or Illustrated Empty State */}
+        <div className="flex-1 overflow-y-auto px-6 py-4 [scrollbar-width:thin] flex flex-col justify-center">
           {proposals.length === 0 ? (
-            <div className="py-12 text-center text-slate-400 space-y-2">
-              <i className="bi bi-check-circle-fill text-3xl text-emerald-500"></i>
-              <p className="text-xs font-bold text-slate-700 mb-0">All Staff Are Fully Assigned!</p>
-              <p className="text-[11px] text-slate-400 mb-0">No orphaned or unassigned personnel need allocation.</p>
+            <div className="w-full border-2 border-dashed border-indigo-100/90 rounded-3xl bg-slate-50/20 py-12 px-6 flex flex-col items-center justify-center text-center my-auto min-h-[340px]">
+              {/* 3D Illustrated Document Graphic matching reference */}
+              <div className="relative mb-5 flex items-center justify-center">
+                {/* Soft ambient aura/cloud behind */}
+                <div className="absolute w-28 h-28 rounded-full bg-gradient-to-tr from-indigo-100/70 via-blue-100/60 to-purple-100/40 blur-xl pointer-events-none"></div>
+
+                {/* SVG 3D-Style Document Graphic */}
+                <svg
+                  width="130"
+                  height="120"
+                  viewBox="0 0 130 120"
+                  fill="none"
+                  className="relative z-10 drop-shadow-md"
+                >
+                  <defs>
+                    <linearGradient id="docPaperGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#FFFFFF" />
+                      <stop offset="40%" stopColor="#F5F7FF" />
+                      <stop offset="100%" stopColor="#E4EAFA" />
+                    </linearGradient>
+                    <linearGradient id="docFoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#D5E0F8" />
+                      <stop offset="100%" stopColor="#BCCEF4" />
+                    </linearGradient>
+                    <linearGradient id="sparkleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#93C5FD" />
+                      <stop offset="100%" stopColor="#60A5FA" />
+                    </linearGradient>
+                    <linearGradient id="checkCircleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#10B981" />
+                      <stop offset="100%" stopColor="#059669" />
+                    </linearGradient>
+                    <filter id="badgeShadow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feDropShadow dx="0" dy="4" stdDeviation="3" floodColor="#059669" floodOpacity="0.25" />
+                    </filter>
+                  </defs>
+
+                  {/* Sparkle Left Top (small) */}
+                  <path
+                    d="M 24 58 Q 24 64 19 64 Q 24 64 24 70 Q 24 64 29 64 Q 24 64 24 58 Z"
+                    fill="url(#sparkleGrad)"
+                    opacity="0.85"
+                  />
+
+                  {/* Sparkle Right Top (large 4-pointed star) */}
+                  <g transform="translate(98, 20) rotate(12)">
+                    <path
+                      d="M 0 -11 Q 0 0 11 0 Q 0 0 0 11 Q 0 0 -11 0 Q 0 0 0 -11 Z"
+                      fill="url(#sparkleGrad)"
+                    />
+                  </g>
+
+                  {/* Main Document Body with folded corner */}
+                  <path
+                    d="M 44 24
+                       L 75 24
+                       L 92 41
+                       L 92 90
+                       A 12 12 0 0 1 80 102
+                       L 44 102
+                       A 12 12 0 0 1 32 90
+                       L 32 36
+                       A 12 12 0 0 1 44 24 Z"
+                    fill="url(#docPaperGrad)"
+                    stroke="#D3E0FA"
+                    strokeWidth="1.5"
+                  />
+
+                  {/* Folded Top-Right Flap */}
+                  <path
+                    d="M 75 24
+                       L 75 36
+                       A 5 5 0 0 0 80 41
+                       L 92 41 Z"
+                    fill="url(#docFoldGrad)"
+                    stroke="#CADAF8"
+                    strokeWidth="1"
+                  />
+
+                  {/* Document Line 1 */}
+                  <rect x="42" y="47" width="28" height="4.5" rx="2.25" fill="#BFD2F8" />
+
+                  {/* Document Line 2 */}
+                  <rect x="42" y="58" width="36" height="4.5" rx="2.25" fill="#BFD2F8" />
+
+                  {/* Document Line 3 */}
+                  <rect x="42" y="69" width="22" height="4.5" rx="2.25" fill="#CADAF8" />
+
+                  {/* Checkmark Badge on Bottom-Right */}
+                  <g filter="url(#badgeShadow)">
+                    <circle cx="85" cy="88" r="15" fill="white" />
+                    <circle cx="85" cy="88" r="13" fill="url(#checkCircleGrad)" />
+                    {/* White Checkmark */}
+                    <path
+                      d="M 79 88 L 83 92 L 91 84"
+                      fill="none"
+                      stroke="#FFFFFF"
+                      strokeWidth="2.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </g>
+                </svg>
+              </div>
+
+              {/* Title & Subtitle */}
+              <h3 className="text-base sm:text-lg font-bold text-slate-800 mb-1 tracking-tight">
+                All Staff Are Fully Assigned!
+              </h3>
+              <p className="text-xs text-slate-400 mb-0 font-normal">
+                No orphaned or unassigned personnel need allocation.
+              </p>
             </div>
           ) : (
             <div className="space-y-2.5">
@@ -413,45 +521,54 @@ export const AutoAssignWizardModal: React.FC<AutoAssignWizardModalProps> = ({
                 return (
                   <div
                     key={`auto-prop-${prop.employeeId}`}
-                    className={`p-3 rounded-xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-3 ${
+                    className={`p-3.5 sm:p-4 rounded-2xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-3.5 ${
                       prop.selected
-                        ? "bg-white border-indigo-200 shadow-2xs ring-1 ring-indigo-100"
-                        : "bg-slate-50/70 border-slate-200 opacity-60"
+                        ? "bg-white border-indigo-200/90 shadow-2xs ring-1 ring-indigo-100/70"
+                        : "bg-slate-50/60 border-slate-200/70 opacity-60 hover:opacity-100"
                     }`}
                   >
-                    {/* Left: Checkbox & Employee */}
-                    <div className="flex items-center gap-3 min-w-0 md:w-1/3">
-                      <input
-                        type="checkbox"
-                        checked={prop.selected}
-                        onChange={() => toggleProposal(idx)}
-                        className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer shrink-0"
-                      />
-                      <div className="w-8 h-8 rounded-full bg-slate-200 font-bold text-slate-700 flex items-center justify-center text-xs shrink-0">
+                    {/* Left: Checkbox & Employee Details */}
+                    <div className="flex items-center gap-3 min-w-0 md:w-5/12">
+                      <button
+                        type="button"
+                        onClick={() => toggleProposal(idx)}
+                        className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-colors cursor-pointer shrink-0 ${
+                          prop.selected
+                            ? "bg-indigo-600 border-indigo-600 text-white"
+                            : "bg-white border-slate-300 hover:border-slate-400"
+                        }`}
+                      >
+                        {prop.selected && <i className="bi bi-check text-xs font-black"></i>}
+                      </button>
+
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100/90 font-bold text-indigo-700 flex items-center justify-center text-xs shrink-0 shadow-2xs">
                         {prop.employeeName.charAt(0)}
                       </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <p className="text-xs font-bold text-slate-900 truncate mb-0 leading-tight">
                             {prop.employeeName}
                           </p>
-                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200 shrink-0">
+                          <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200/80 font-medium shrink-0">
                             {prop.departmentName}
                           </span>
                         </div>
-                        <p className="text-[10.5px] text-slate-400 truncate mb-0 font-mono">
+                        <p className="text-[10.5px] text-slate-400 truncate mb-0 font-mono mt-0.5">
                           EMP-{String(prop.employeeId).padStart(4, "0")}
                         </p>
                       </div>
                     </div>
 
-                    {/* Middle: Proposed Chain of Command */}
-                    <div className="flex items-center gap-2 flex-1 min-w-0 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200/80">
+                    {/* Middle: Proposed Chain of Command Allocation */}
+                    <div className="flex items-center gap-2.5 flex-1 min-w-0 bg-slate-50/80 px-3.5 py-2 rounded-xl border border-slate-200/80">
                       <i className="bi bi-arrow-right text-indigo-500 text-xs shrink-0"></i>
 
                       {/* Supervisor Dropdown Override */}
                       <div className="min-w-0 flex-1">
-                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Proposed Team Lead</span>
+                        <span className="text-[9.5px] uppercase font-bold text-slate-400 block mb-0.5">
+                          Proposed Team Lead
+                        </span>
                         <select
                           value={prop.proposedSupervisorId}
                           onChange={(e) => handleSupervisorChange(idx, e.target.value)}
@@ -470,7 +587,7 @@ export const AutoAssignWizardModal: React.FC<AutoAssignWizardModalProps> = ({
                         <span className="text-[10px] font-bold text-emerald-700 block">
                           Load: {afterLoad}/8
                         </span>
-                        <span className="text-[9.5px] text-slate-400">
+                        <span className="text-[9px] font-medium text-slate-400">
                           {afterLoad <= 3 ? "Light" : "Optimal"}
                         </span>
                       </div>
@@ -479,7 +596,9 @@ export const AutoAssignWizardModal: React.FC<AutoAssignWizardModalProps> = ({
 
                       {/* Manager */}
                       <div className="min-w-0 shrink-0">
-                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Manager</span>
+                        <span className="text-[9.5px] uppercase font-bold text-slate-400 block mb-0.5">
+                          Manager
+                        </span>
                         <span className="text-xs font-semibold text-indigo-900 truncate block">
                           👑 {prop.proposedManagerName}
                         </span>
@@ -492,18 +611,24 @@ export const AutoAssignWizardModal: React.FC<AutoAssignWizardModalProps> = ({
           )}
         </div>
 
-        {/* Footer */}
-        <div className="px-5 sm:px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3 shrink-0">
-          <span className="text-xs text-slate-600">
-            <strong>{selectedProposals.length}</strong> of <strong>{proposals.length}</strong> proposals selected for auto-assignment
-          </span>
+        {/* Executive Modal Footer */}
+        <div className="px-6 py-4 bg-white border-t border-slate-100 flex items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 border border-purple-100 flex items-center justify-center text-sm shrink-0 shadow-2xs">
+              <i className="bi bi-file-earmark-text"></i>
+            </div>
+            <span className="text-xs text-slate-600 font-normal">
+              <strong className="font-bold text-slate-800">{selectedProposals.length}</strong> of{" "}
+              <strong className="font-bold text-slate-800">{proposals.length}</strong> proposals selected for auto-assignment
+            </span>
+          </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <button
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer shadow-2xs"
+              className="px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200/90 shadow-2xs transition-all cursor-pointer disabled:opacity-50"
             >
               Cancel
             </button>
@@ -511,7 +636,7 @@ export const AutoAssignWizardModal: React.FC<AutoAssignWizardModalProps> = ({
               type="button"
               onClick={handleExecute}
               disabled={saving || selectedProposals.length === 0}
-              className="px-5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-amber-600 to-indigo-600 hover:from-amber-500 hover:to-indigo-500 text-white transition-all shadow-md shadow-indigo-600/30 flex items-center gap-2 cursor-pointer disabled:opacity-50 active:scale-95"
+              className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 hover:from-pink-600 hover:via-purple-700 hover:to-indigo-700 shadow-md shadow-purple-500/25 flex items-center gap-2 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-98"
             >
               {saving ? (
                 <>
