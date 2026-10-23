@@ -301,63 +301,63 @@ export const AutoAssignWizardModal: React.FC<AutoAssignWizardModalProps> = ({
             </button>
           </div>
 
-          {/* 4 Executive Metric KPI Cards Strip */}
-          <div className="px-6 py-3.5 bg-white border-b border-slate-100/90 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 shrink-0">
+          {/* 4 Executive Metric KPI Cards Strip - compact padding and standard typography */}
+          <div className="px-6 py-2.5 bg-white border-b border-slate-100/90 grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 shrink-0">
             {/* 1. Total Unassigned */}
-            <div className="p-3 sm:p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center gap-3.5 hover:bg-slate-50/60 transition-all">
-              <div className="w-11 h-11 rounded-xl bg-blue-100/70 text-blue-600 flex items-center justify-center text-lg shrink-0">
+            <div className="px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl sm:rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center gap-2.5 hover:bg-slate-50/60 transition-all">
+              <div className="w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-blue-100/70 text-blue-600 flex items-center justify-center text-sm sm:text-base shrink-0">
                 <i className="bi bi-people-fill"></i>
               </div>
               <div className="min-w-0 flex-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
+                <span className="text-[9px] sm:text-[9.5px] font-bold uppercase tracking-wide text-slate-400 block truncate">
                   TOTAL UNASSIGNED
                 </span>
-                <span className="text-base sm:text-lg font-extrabold text-slate-800 leading-tight block">
+                <span className="text-xs sm:text-sm font-bold text-slate-800 leading-tight block truncate">
                   {unassignedStaff.length} Staff
                 </span>
               </div>
             </div>
 
             {/* 2. Optimal Matches */}
-            <div className="p-3 sm:p-3.5 rounded-2xl bg-emerald-50/30 border border-emerald-100/90 shadow-2xs flex items-center gap-3.5 hover:bg-emerald-50/60 transition-all">
-              <div className="w-11 h-11 rounded-xl bg-emerald-100/70 text-emerald-600 flex items-center justify-center text-lg shrink-0">
+            <div className="px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl sm:rounded-2xl bg-emerald-50/30 border border-emerald-100/90 shadow-2xs flex items-center gap-2.5 hover:bg-emerald-50/60 transition-all">
+              <div className="w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-emerald-100/70 text-emerald-600 flex items-center justify-center text-sm sm:text-base shrink-0">
                 <i className="bi bi-bullseye"></i>
               </div>
               <div className="min-w-0 flex-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 block mb-0.5">
+                <span className="text-[9px] sm:text-[9.5px] font-bold uppercase tracking-wide text-emerald-600 block truncate">
                   OPTIMAL MATCHES
                 </span>
-                <span className="text-base sm:text-lg font-extrabold text-slate-800 leading-tight block">
+                <span className="text-xs sm:text-sm font-bold text-slate-800 leading-tight block truncate">
                   {proposals.length} Proposed
                 </span>
               </div>
             </div>
 
             {/* 3. Selected for Action */}
-            <div className="p-3 sm:p-3.5 rounded-2xl bg-purple-50/30 border border-purple-100/90 shadow-2xs flex items-center gap-3.5 hover:bg-purple-50/60 transition-all">
-              <div className="w-11 h-11 rounded-xl bg-purple-100/70 text-purple-600 flex items-center justify-center text-lg shrink-0">
+            <div className="px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl sm:rounded-2xl bg-purple-50/30 border border-purple-100/90 shadow-2xs flex items-center gap-2.5 hover:bg-purple-50/60 transition-all">
+              <div className="w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-purple-100/70 text-purple-600 flex items-center justify-center text-sm sm:text-base shrink-0">
                 <i className="bi bi-lightning-charge-fill"></i>
               </div>
               <div className="min-w-0 flex-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 block mb-0.5">
+                <span className="text-[9px] sm:text-[9.5px] font-bold uppercase tracking-wide text-purple-600 block truncate">
                   SELECTED FOR ACTION
                 </span>
-                <span className="text-base sm:text-lg font-extrabold text-slate-800 leading-tight block">
+                <span className="text-xs sm:text-sm font-bold text-slate-800 leading-tight block truncate">
                   {selectedProposals.length} Ready
                 </span>
               </div>
             </div>
 
             {/* 4. Available Leads */}
-            <div className="p-3 sm:p-3.5 rounded-2xl bg-amber-50/30 border border-amber-100/90 shadow-2xs flex items-center gap-3.5 hover:bg-amber-50/60 transition-all">
-              <div className="w-11 h-11 rounded-xl bg-amber-100/70 text-amber-600 flex items-center justify-center text-lg shrink-0">
+            <div className="px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl sm:rounded-2xl bg-amber-50/30 border border-amber-100/90 shadow-2xs flex items-center gap-2.5 hover:bg-amber-50/60 transition-all">
+              <div className="w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-amber-100/70 text-amber-600 flex items-center justify-center text-sm sm:text-base shrink-0">
                 <i className="bi bi-person-badge-fill"></i>
               </div>
               <div className="min-w-0 flex-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
+                <span className="text-[9px] sm:text-[9.5px] font-bold uppercase tracking-wide text-slate-400 block truncate">
                   AVAILABLE LEADS
                 </span>
-                <span className="text-base sm:text-lg font-extrabold text-slate-800 leading-tight block">
+                <span className="text-xs sm:text-sm font-bold text-slate-800 leading-tight block truncate">
                   {supervisors.length} Supervisors
                 </span>
               </div>
