@@ -403,15 +403,15 @@ export const AutoAssignWizardModal: React.FC<AutoAssignWizardModalProps> = ({
           {proposals.length === 0 ? (
             <div className="w-full border-2 border-dashed border-indigo-100/90 rounded-3xl bg-slate-50/20 py-12 px-6 flex flex-col items-center justify-center text-center my-auto min-h-[340px]">
               {/* 3D Illustrated Document Graphic matching reference */}
-              <div className="relative mb-5 flex items-center justify-center">
+              <div className="relative mb-2 sm:mb-2.5 flex items-center justify-center">
                 {/* Soft ambient aura/cloud behind */}
-                <div className="absolute w-28 h-28 rounded-full bg-gradient-to-tr from-indigo-100/70 via-blue-100/60 to-purple-100/40 blur-xl pointer-events-none"></div>
+                <div className="absolute w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-100/70 via-blue-100/60 to-purple-100/40 blur-xl pointer-events-none"></div>
 
-                {/* SVG 3D-Style Document Graphic */}
+                {/* SVG 3D-Style Document Graphic with tight bounding box */}
                 <svg
-                  width="130"
-                  height="120"
-                  viewBox="0 0 130 120"
+                  width="112"
+                  height="102"
+                  viewBox="15 8 100 98"
                   fill="none"
                   className="relative z-10 drop-shadow-md"
                 >
@@ -434,7 +434,7 @@ export const AutoAssignWizardModal: React.FC<AutoAssignWizardModalProps> = ({
                       <stop offset="100%" stopColor="#059669" />
                     </linearGradient>
                     <filter id="badgeShadow" x="-20%" y="-20%" width="140%" height="140%">
-                      <feDropShadow dx="0" dy="4" stdDeviation="3" floodColor="#059669" floodOpacity="0.25" />
+                      <feDropShadow dx="0" dy="3" stdDeviation="2.5" floodColor="#059669" floodOpacity="0.25" />
                     </filter>
                   </defs>
 
