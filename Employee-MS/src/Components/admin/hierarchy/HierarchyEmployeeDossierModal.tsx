@@ -140,7 +140,7 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
               <div className="min-w-0">
                 {/* Employee Name + EMP-ID Pill */}
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="font-bold text-sm sm:text-base text-slate-900 mb-0 tracking-tight leading-tight truncate">
+                  <h3 className="font-bold text-[13.5px] sm:text-[14.5px] text-slate-900 mb-0 tracking-tight leading-tight truncate">
                     {empName}
                   </h3>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-2xs">
@@ -193,7 +193,7 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
           </div>
 
           {/* Body: Two-Column Layout with increased left column width */}
-          <div className="p-3.5 sm:p-4 grid grid-cols-1 md:grid-cols-12 gap-3.5">
+          <div className="px-5 py-3.5 sm:py-4 grid grid-cols-1 md:grid-cols-12 gap-3.5">
             {/* Left Column: Organizational Chain of Command (increased width: 8 of 12 cols) */}
             <div className="md:col-span-8 flex flex-col justify-between border border-slate-200/80 rounded-2xl p-3.5 sm:p-4 bg-white shadow-2xs">
               <div>
@@ -204,10 +204,10 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
                       <i className="bi bi-diagram-3-fill"></i>
                     </div>
                     <div className="min-w-0">
-                      <h4 className="text-[12px] sm:text-[12.5px] font-bold text-slate-800 tracking-tight leading-snug truncate mb-0">
+                      <h4 className="text-[11px] sm:text-[11.5px] font-bold text-slate-800 tracking-tight leading-snug truncate mb-0">
                         Organizational Chain of Command
                       </h4>
-                      <p className="text-[9.5px] text-slate-400 font-normal leading-tight mt-0.5 truncate mb-0">
+                      <p className="text-[9px] sm:text-[9.5px] text-slate-400 font-normal leading-tight mt-0.5 truncate mb-0">
                         Reporting hierarchy for this employee
                       </p>
                     </div>
@@ -336,7 +336,7 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
                   <div className="w-7.5 h-7.5 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs sm:text-sm shrink-0 shadow-2xs">
                     <i className="bi bi-person"></i>
                   </div>
-                  <h4 className="text-[12px] sm:text-[12.5px] font-bold text-slate-800 tracking-tight leading-snug truncate mb-0">
+                  <h4 className="text-[11px] sm:text-[11.5px] font-bold text-slate-800 tracking-tight leading-snug truncate mb-0">
                     Employee Details
                   </h4>
                 </div>
