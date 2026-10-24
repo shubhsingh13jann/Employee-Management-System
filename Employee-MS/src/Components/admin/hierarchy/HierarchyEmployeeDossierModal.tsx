@@ -195,58 +195,158 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
             </button>
           </div>
 
-          {/* Body Content Placeholder for Feature 1 (To be expanded in Features 2 & 3) */}
-          <div className="p-6 space-y-4">
-            {/* Chain of Command Dossier Card */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">
-                Organizational Chain of Command
-              </span>
-              {isMapped && mappingItem ? (
-                <div className="space-y-2.5">
-                  <div className="p-2.5 rounded-lg bg-white border border-slate-200/90 flex items-center justify-between gap-3 shadow-2xs">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-800 font-bold flex items-center justify-center text-xs shrink-0">
-                        👑
-                      </div>
-                      <div className="min-w-0">
-                        <span className="text-[10px] font-bold uppercase text-indigo-600 block">
-                          Department Manager
-                        </span>
-                        <p className="text-xs font-bold text-slate-900 truncate mb-0">
-                          {mappingItem.manager_name}
-                        </p>
-                      </div>
+          {/* Body: Two-Column Layout matching reference image */}
+          <div className="p-5 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5">
+            {/* Left Column: Organizational Chain of Command */}
+            <div className="lg:col-span-7 flex flex-col justify-between border border-slate-200/80 rounded-3xl p-4 sm:p-5 bg-white shadow-2xs">
+              <div>
+                {/* Header: Title with Hierarchy Icon + Established Date Badge */}
+                <div className="flex items-center justify-between gap-3 mb-4 sm:mb-5 pb-3 border-b border-slate-100/80">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 border border-indigo-100/90 text-indigo-600 flex items-center justify-center text-base sm:text-lg shrink-0 shadow-2xs">
+                      <i className="bi bi-diagram-3-fill"></i>
                     </div>
-                    <span className="text-[11px] text-slate-400 font-mono shrink-0">
-                      MGR-{String(mappingItem.manager_id).padStart(4, "0")}
-                    </span>
+                    <div className="min-w-0">
+                      <h4 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight leading-snug truncate mb-0">
+                        Organizational Chain of Command
+                      </h4>
+                      <p className="text-xs text-slate-400 font-normal leading-tight mt-0.5 truncate mb-0">
+                        Reporting hierarchy for this employee
+                      </p>
+                    </div>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-white border border-slate-200/90 flex items-center justify-between gap-3 shadow-2xs">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-xs shrink-0">
-                        🛡️
-                      </div>
-                      <div className="min-w-0">
-                        <span className="text-[10px] font-bold uppercase text-emerald-600 block">
-                          Direct Team Lead / Supervisor
-                        </span>
-                        <p className="text-xs font-bold text-slate-900 truncate mb-0">
-                          {mappingItem.supervisor_name}
-                        </p>
-                      </div>
+
+                  {/* Established Date Box */}
+                  <div className="px-3 py-1.5 rounded-xl bg-indigo-50/50 border border-indigo-100/80 flex items-center gap-2.5 shadow-2xs shrink-0">
+                    <div className="w-7 h-7 rounded-lg bg-indigo-100/70 text-indigo-600 flex items-center justify-center text-xs shrink-0">
+                      <i className="bi bi-calendar3"></i>
                     </div>
-                    <span className="text-[11px] text-slate-400 font-mono shrink-0">
-                      SUP-{String(mappingItem.supervisor_id).padStart(4, "0")}
-                    </span>
+                    <div className="min-w-0">
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
+                        Established Date
+                      </span>
+                      <span className="text-xs sm:text-[12.5px] font-bold text-slate-800 leading-tight block">
+                        {isMapped && mappingItem ? establishedDate : "Pending"}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              ) : (
-                <div className="py-4 text-center space-y-2">
-                  <i className="bi bi-person-x text-2xl text-amber-500"></i>
-                  <p className="text-xs font-bold text-slate-700 mb-0">No Assigned Supervisor or Manager</p>
+
+                {/* Connected Timeline & Hierarchy Cards */}
+                {isMapped && mappingItem ? (
+                  <div className="relative pl-7 sm:pl-8 space-y-3 mb-4">
+                    {/* Vertical connecting dashed line running between center of top dot and bottom dot */}
+                    <div className="absolute left-[11px] sm:left-[13px] top-6 bottom-6 w-0 border-l-2 border-dashed border-slate-300/80 pointer-events-none"></div>
+
+                    {/* Node 1: Department Manager */}
+                    <div className="relative">
+                      {/* Purple Dot with white ring */}
+                      <div className="absolute -left-7 sm:-left-8 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-indigo-600 ring-4 ring-indigo-100 shadow-2xs flex items-center justify-center z-10">
+                        <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
+                      </div>
+
+                      {/* Department Manager Card */}
+                      <div className="rounded-2xl bg-purple-50/40 border border-purple-100/90 p-3 sm:p-3.5 flex items-center justify-between gap-3 shadow-2xs hover:bg-purple-50/60 transition-all">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-100/70 text-amber-600 flex items-center justify-center text-lg shrink-0 shadow-2xs">
+                            👑
+                          </div>
+                          <div className="min-w-0">
+                            <span className="text-[10px] sm:text-[10.5px] font-extrabold uppercase tracking-wider text-purple-700 block leading-tight">
+                              DEPARTMENT MANAGER
+                            </span>
+                            <span className="text-xs sm:text-sm font-bold text-slate-800 leading-tight block mt-0.5 truncate">
+                              {mappingItem.manager_name}
+                            </span>
+                          </div>
+                        </div>
+
+                        <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 font-bold text-xs font-mono tracking-wide border border-slate-200/60 shrink-0">
+                          MGR-{String(mappingItem.manager_id).padStart(4, "0")}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Node 2: Direct Team Lead / Supervisor */}
+                    <div className="relative">
+                      {/* Green Dot with white ring */}
+                      <div className="absolute -left-7 sm:-left-8 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-emerald-500 ring-4 ring-emerald-100 shadow-2xs flex items-center justify-center z-10">
+                        <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
+                      </div>
+
+                      {/* Direct Team Lead Card */}
+                      <div className="rounded-2xl bg-emerald-50/40 border border-emerald-100/90 p-3 sm:p-3.5 flex items-center justify-between gap-3 shadow-2xs hover:bg-emerald-50/60 transition-all">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-sky-100/70 text-sky-600 flex items-center justify-center text-lg shrink-0 shadow-2xs">
+                            🛡️
+                          </div>
+                          <div className="min-w-0">
+                            <span className="text-[10px] sm:text-[10.5px] font-extrabold uppercase tracking-wider text-emerald-700 block leading-tight">
+                              DIRECT TEAM LEAD / SUPERVISOR
+                            </span>
+                            <span className="text-xs sm:text-sm font-bold text-slate-800 leading-tight block mt-0.5 truncate">
+                              {mappingItem.supervisor_name}
+                            </span>
+                          </div>
+                        </div>
+
+                        <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 font-bold text-xs font-mono tracking-wide border border-slate-200/60 shrink-0">
+                          SUP-{String(mappingItem.supervisor_id).padStart(4, "0")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-6 px-4 text-center rounded-2xl border-2 border-dashed border-amber-200/80 bg-amber-50/30 my-3">
+                    <i className="bi bi-person-exclamation text-3xl text-amber-500 mb-2 block"></i>
+                    <h5 className="text-xs sm:text-sm font-bold text-slate-800 mb-1">
+                      No Assigned Reporting Hierarchy
+                    </h5>
+                    <p className="text-xs text-slate-400 mb-3 max-w-sm mx-auto">
+                      This employee is currently orphaned or unassigned and has no direct supervisor or manager assigned.
+                    </p>
+                    {onOpenAssignModal && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          onOpenAssignModal(empId);
+                        }}
+                        className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-all cursor-pointer inline-flex items-center gap-1.5"
+                      >
+                        <i className="bi bi-person-plus-fill"></i>
+                        <span>Assign Hierarchy Now</span>
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Bottom Info Note Box */}
+              <div className="rounded-2xl bg-indigo-50/30 border border-indigo-100/70 p-3 sm:p-3.5 flex items-center gap-3 mt-1">
+                <i className="bi bi-info-circle text-indigo-500 text-base sm:text-lg shrink-0"></i>
+                <p className="text-xs text-slate-500 font-normal leading-relaxed mb-0">
+                  This shows the current organizational reporting chain for {empName} based on department structure.
+                </p>
+              </div>
+            </div>
+
+            {/* Right Column: Temporary placeholder for Feature 3 */}
+            <div className="lg:col-span-5 flex flex-col justify-between border border-slate-200/80 rounded-3xl p-4 sm:p-5 bg-white shadow-2xs">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-3 border-b border-slate-100/80">
+                  <i className="bi bi-person text-indigo-600 text-base"></i>
+                  <h4 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight mb-0">
+                    Employee Details
+                  </h4>
                 </div>
-              )}
+                <div className="space-y-3 text-xs text-slate-600">
+                  <div><strong>Email:</strong> {empEmail}</div>
+                  <div><strong>Employee ID:</strong> EMP-{String(empId).padStart(4, "0")}</div>
+                  <div><strong>Department:</strong> {deptName}</div>
+                  <div><strong>Status:</strong> {isMapped ? "Active Reporting Line" : "Orphaned Staff"}</div>
+                </div>
+              </div>
             </div>
           </div>
 
