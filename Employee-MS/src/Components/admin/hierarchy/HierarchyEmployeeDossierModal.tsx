@@ -64,7 +64,7 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
       {/* Centered strictly within the right-side content portion (offsetting sidebar on md+) */}
       <div className="fixed inset-y-0 right-0 left-0 md:left-[240px] flex items-center justify-center p-3 sm:p-4 pointer-events-none">
         <div
-          className="w-full max-w-[760px] bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 pointer-events-auto"
+          className="w-full max-w-[800px] bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 pointer-events-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header with Fluid Pastel Wave Background matching reference */}
@@ -192,37 +192,37 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
             </button>
           </div>
 
-          {/* Body: Two-Column Layout matching reference image */}
+          {/* Body: Two-Column Layout with increased left column width */}
           <div className="p-3.5 sm:p-4 grid grid-cols-1 md:grid-cols-12 gap-3.5">
-            {/* Left Column: Organizational Chain of Command */}
-            <div className="md:col-span-7 flex flex-col justify-between border border-slate-200/80 rounded-2xl p-3.5 sm:p-4 bg-white shadow-2xs">
+            {/* Left Column: Organizational Chain of Command (increased width: 8 of 12 cols) */}
+            <div className="md:col-span-8 flex flex-col justify-between border border-slate-200/80 rounded-2xl p-3.5 sm:p-4 bg-white shadow-2xs">
               <div>
                 {/* Header: Title with Hierarchy Icon + Established Date Badge */}
-                <div className="flex items-center justify-between gap-2 mb-3 pb-2.5 border-b border-slate-100">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-sm shrink-0 shadow-2xs">
+                <div className="flex items-center justify-between gap-3 mb-3 pb-2.5 border-b border-slate-100">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className="w-7.5 h-7.5 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs sm:text-sm shrink-0 shadow-2xs">
                       <i className="bi bi-diagram-3-fill"></i>
                     </div>
                     <div className="min-w-0">
-                      <h4 className="text-xs sm:text-[13px] font-bold text-slate-800 tracking-tight leading-snug whitespace-nowrap mb-0">
+                      <h4 className="text-[12px] sm:text-[12.5px] font-bold text-slate-800 tracking-tight leading-snug truncate mb-0">
                         Organizational Chain of Command
                       </h4>
-                      <p className="text-[10px] text-slate-400 font-normal leading-tight mt-0.5 whitespace-nowrap mb-0">
+                      <p className="text-[9.5px] text-slate-400 font-normal leading-tight mt-0.5 truncate mb-0">
                         Reporting hierarchy for this employee
                       </p>
                     </div>
                   </div>
 
                   {/* Established Date Box */}
-                  <div className="px-2.5 py-1 rounded-xl bg-indigo-50/40 border border-indigo-100/70 flex items-center gap-2 shadow-2xs shrink-0">
-                    <div className="w-6 h-6 rounded-md bg-indigo-100/70 text-indigo-600 flex items-center justify-center text-xs shrink-0">
+                  <div className="px-2 py-0.5 rounded-lg bg-indigo-50/50 border border-indigo-100/80 flex items-center gap-1.5 shadow-2xs shrink-0">
+                    <div className="w-5.5 h-5.5 rounded-md bg-indigo-100/80 text-indigo-600 flex items-center justify-center text-[10px] shrink-0">
                       <i className="bi bi-calendar3"></i>
                     </div>
                     <div className="min-w-0">
-                      <span className="text-[8.5px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
+                      <span className="text-[7.5px] font-extrabold uppercase tracking-wider text-slate-400 block leading-none">
                         Established Date
                       </span>
-                      <span className="text-[11px] font-bold text-slate-800 leading-tight block mt-0.5">
+                      <span className="text-[10.5px] font-bold text-slate-800 leading-none block mt-0.5">
                         {isMapped && mappingItem ? establishedDate : "Pending"}
                       </span>
                     </div>
@@ -328,15 +328,15 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
               </div>
             </div>
 
-            {/* Right Column: Employee Details Card matching reference */}
-            <div className="md:col-span-5 flex flex-col justify-between border border-slate-200/80 rounded-2xl p-3.5 sm:p-4 bg-white shadow-2xs">
+            {/* Right Column: Employee Details Card (4 of 12 cols) */}
+            <div className="md:col-span-4 flex flex-col justify-between border border-slate-200/80 rounded-2xl p-3.5 sm:p-4 bg-white shadow-2xs">
               <div>
-                {/* Header: Employee Details Icon & Title */}
+                {/* Header: Employee Details Icon (equalised to left logo) & Title */}
                 <div className="flex items-center gap-2 mb-3 pb-2.5 border-b border-slate-100">
-                  <div className="w-6 h-6 rounded-md bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
+                  <div className="w-7.5 h-7.5 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs sm:text-sm shrink-0 shadow-2xs">
                     <i className="bi bi-person"></i>
                   </div>
-                  <h4 className="text-xs sm:text-[13px] font-bold text-slate-800 tracking-tight leading-snug mb-0">
+                  <h4 className="text-[12px] sm:text-[12.5px] font-bold text-slate-800 tracking-tight leading-snug truncate mb-0">
                     Employee Details
                   </h4>
                 </div>
