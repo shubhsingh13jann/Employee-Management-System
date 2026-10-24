@@ -331,20 +331,96 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
               </div>
             </div>
 
-            {/* Right Column: Temporary placeholder for Feature 3 */}
+            {/* Right Column: Employee Details Card matching reference */}
             <div className="lg:col-span-5 flex flex-col justify-between border border-slate-200/80 rounded-3xl p-4 sm:p-5 bg-white shadow-2xs">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 pb-3 border-b border-slate-100/80">
-                  <i className="bi bi-person text-indigo-600 text-base"></i>
-                  <h4 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight mb-0">
+              <div>
+                {/* Header: Employee Details Icon & Title */}
+                <div className="flex items-center gap-2.5 mb-4 sm:mb-5 pb-3 border-b border-slate-100/80">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-base shrink-0">
+                    <i className="bi bi-person"></i>
+                  </div>
+                  <h4 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight leading-snug mb-0">
                     Employee Details
                   </h4>
                 </div>
-                <div className="space-y-3 text-xs text-slate-600">
-                  <div><strong>Email:</strong> {empEmail}</div>
-                  <div><strong>Employee ID:</strong> EMP-{String(empId).padStart(4, "0")}</div>
-                  <div><strong>Department:</strong> {deptName}</div>
-                  <div><strong>Status:</strong> {isMapped ? "Active Reporting Line" : "Orphaned Staff"}</div>
+
+                {/* 4 Structured Detail Rows with matching icon badge wrappers */}
+                <div className="space-y-3.5 sm:space-y-4">
+                  {/* Row 1: Email */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50/70 border border-indigo-100/80 text-indigo-600 flex items-center justify-center text-base shrink-0 shadow-2xs">
+                      <i className="bi bi-envelope"></i>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="text-[10px] sm:text-[10.5px] font-semibold text-slate-400 block leading-tight">
+                        Email
+                      </span>
+                      <span className="text-xs sm:text-sm font-bold text-slate-700 block truncate mt-0.5">
+                        {empEmail}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Row 2: Employee ID */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50/70 border border-indigo-100/80 text-indigo-600 flex items-center justify-center text-base shrink-0 shadow-2xs">
+                      <i className="bi bi-person-vcard"></i>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="text-[10px] sm:text-[10.5px] font-semibold text-slate-400 block leading-tight">
+                        Employee ID
+                      </span>
+                      <span className="text-xs sm:text-sm font-bold text-slate-700 block truncate mt-0.5">
+                        EMP-{String(empId).padStart(4, "0")}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Row 3: Department */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50/70 border border-indigo-100/80 text-indigo-600 flex items-center justify-center text-base shrink-0 shadow-2xs">
+                      <i className="bi bi-building"></i>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="text-[10px] sm:text-[10.5px] font-semibold text-slate-400 block leading-tight">
+                        Department
+                      </span>
+                      <span className="text-xs sm:text-sm font-bold text-slate-700 block truncate mt-0.5">
+                        {deptName}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Row 4: Status */}
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-base shrink-0 shadow-2xs border ${
+                        isMapped
+                          ? "bg-emerald-50/80 border-emerald-100 text-emerald-600"
+                          : "bg-amber-50/80 border-amber-100 text-amber-600"
+                      }`}
+                    >
+                      <span
+                        className={`w-3 h-3 rounded-full ${
+                          isMapped
+                            ? "bg-emerald-500 shadow-xs shadow-emerald-500/50"
+                            : "bg-amber-500 shadow-xs shadow-amber-500/50"
+                        }`}
+                      ></span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="text-[10px] sm:text-[10.5px] font-semibold text-slate-400 block leading-tight">
+                        Status
+                      </span>
+                      <span
+                        className={`text-xs sm:text-sm font-bold block truncate mt-0.5 ${
+                          isMapped ? "text-emerald-600" : "text-amber-600"
+                        }`}
+                      >
+                        {isMapped ? "Active Reporting Line" : "Orphaned Staff"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
