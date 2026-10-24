@@ -187,7 +187,7 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
             <button
               type="button"
               onClick={onClose}
-              className="w-9 h-9 rounded-xl bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 border border-slate-200/90 shadow-2xs flex items-center justify-center transition-all cursor-pointer text-xs relative z-10"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 border border-slate-200/90 shadow-2xs flex items-center justify-center transition-all cursor-pointer text-xs relative z-10"
               title="Close"
               aria-label="Close"
             >
@@ -196,9 +196,9 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
           </div>
 
           {/* Body: Two-Column Layout matching reference image */}
-          <div className="p-5 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <div className="overflow-y-auto max-h-[calc(88vh-140px)] [scrollbar-width:thin] p-5 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5">
             {/* Left Column: Organizational Chain of Command */}
-            <div className="lg:col-span-7 flex flex-col justify-between border border-slate-200/80 rounded-3xl p-4 sm:p-5 bg-white shadow-2xs">
+            <div className="lg:col-span-7 flex flex-col justify-between border border-slate-200/80 rounded-3xl p-4 sm:p-5 bg-white shadow-2xs min-h-full">
               <div>
                 {/* Header: Title with Hierarchy Icon + Established Date Badge */}
                 <div className="flex items-center justify-between gap-3 mb-4 sm:mb-5 pb-3 border-b border-slate-100/80">
@@ -217,15 +217,15 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
                   </div>
 
                   {/* Established Date Box */}
-                  <div className="px-3 py-1.5 rounded-xl bg-indigo-50/50 border border-indigo-100/80 flex items-center gap-2.5 shadow-2xs shrink-0">
-                    <div className="w-7 h-7 rounded-lg bg-indigo-100/70 text-indigo-600 flex items-center justify-center text-xs shrink-0">
+                  <div className="px-3.5 py-2 rounded-2xl bg-indigo-50/40 border border-indigo-100/80 flex items-center gap-2.5 shadow-2xs shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-indigo-100/80 text-indigo-600 flex items-center justify-center text-sm shrink-0">
                       <i className="bi bi-calendar3"></i>
                     </div>
                     <div className="min-w-0">
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
+                      <span className="text-[9px] sm:text-[9.5px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
                         Established Date
                       </span>
-                      <span className="text-xs sm:text-[12.5px] font-bold text-slate-800 leading-tight block">
+                      <span className="text-xs sm:text-[13px] font-bold text-slate-800 leading-tight block mt-0.5">
                         {isMapped && mappingItem ? establishedDate : "Pending"}
                       </span>
                     </div>
@@ -323,7 +323,7 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
               </div>
 
               {/* Bottom Info Note Box */}
-              <div className="rounded-2xl bg-indigo-50/30 border border-indigo-100/70 p-3 sm:p-3.5 flex items-center gap-3 mt-1">
+              <div className="rounded-2xl bg-indigo-50/30 border border-indigo-100/70 p-3 sm:p-3.5 flex items-center gap-3 mt-auto">
                 <i className="bi bi-info-circle text-indigo-500 text-base sm:text-lg shrink-0"></i>
                 <p className="text-xs text-slate-500 font-normal leading-relaxed mb-0">
                   This shows the current organizational reporting chain for {empName} based on department structure.
@@ -332,7 +332,7 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
             </div>
 
             {/* Right Column: Employee Details Card matching reference */}
-            <div className="lg:col-span-5 flex flex-col justify-between border border-slate-200/80 rounded-3xl p-4 sm:p-5 bg-white shadow-2xs">
+            <div className="lg:col-span-5 flex flex-col justify-between border border-slate-200/80 rounded-3xl p-4 sm:p-5 bg-white shadow-2xs min-h-full">
               <div>
                 {/* Header: Employee Details Icon & Title */}
                 <div className="flex items-center gap-2.5 mb-4 sm:mb-5 pb-3 border-b border-slate-100/80">
@@ -427,13 +427,13 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
           </div>
 
           {/* Modal Footer Controls */}
-          <div className="px-6 py-4 bg-white border-t border-slate-100/90 flex items-center justify-end gap-2.5 sm:gap-3">
+          <div className="px-6 py-3.5 sm:py-4 bg-white border-t border-slate-100/90 flex items-center justify-end gap-2.5 sm:gap-3">
             <button
               type="button"
               onClick={handleCopyCard}
-              className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200/90 shadow-2xs transition-all cursor-pointer flex items-center gap-2"
+              className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200/90 shadow-2xs transition-all cursor-pointer flex items-center gap-2 active:scale-98"
             >
-              <i className={`bi ${copied ? "bi-check2 text-emerald-600 font-bold" : "bi-clipboard"}`}></i>
+              <i className={`bi ${copied ? "bi-check2 text-emerald-600 font-bold" : "bi-file-earmark-text text-slate-500 text-sm"}`}></i>
               <span>{copied ? "Copied to Clipboard!" : "Copy Details"}</span>
             </button>
 
@@ -444,9 +444,9 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
                   onClose();
                   onInitiateReassign(mappingItem);
                 }}
-                className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-indigo-50/60 hover:bg-indigo-100/70 text-indigo-600 border border-indigo-200/80 shadow-2xs transition-all cursor-pointer flex items-center gap-2"
+                className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-indigo-50/60 hover:bg-indigo-100/70 text-indigo-600 border border-indigo-200/80 shadow-2xs transition-all cursor-pointer flex items-center gap-2 active:scale-98"
               >
-                <i className="bi bi-arrow-repeat text-xs"></i>
+                <i className="bi bi-arrow-repeat text-sm"></i>
                 <span>Reallocate</span>
               </button>
             )}
@@ -458,9 +458,9 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
                   onClose();
                   onInitiateUnlink(mappingItem);
                 }}
-                className="px-4 py-2.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50/70 bg-rose-50/40 border border-rose-200 shadow-2xs transition-all cursor-pointer flex items-center gap-2"
+                className="px-4 py-2.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50/70 bg-rose-50/40 border border-rose-200 shadow-2xs transition-all cursor-pointer flex items-center gap-2 active:scale-98"
               >
-                <i className="bi bi-link-45deg text-xs"></i>
+                <i className="bi bi-link-45deg text-sm"></i>
                 <span>Unlink</span>
               </button>
             )}
@@ -468,7 +468,7 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-all cursor-pointer flex items-center gap-2"
+              className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/25 transition-all cursor-pointer flex items-center gap-2 active:scale-98"
             >
               <i className="bi bi-x-lg text-xs"></i>
               <span>Close</span>
