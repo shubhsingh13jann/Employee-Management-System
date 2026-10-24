@@ -68,7 +68,7 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header with Fluid Pastel Wave Background matching reference */}
-          <div className="relative px-5 py-3 sm:py-3.5 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0">
+          <div className="relative px-3.5 sm:px-4 py-3 sm:py-3.5 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0">
             {/* Top-Right Fluid Pastel Wave Background */}
             <div className="absolute top-0 right-0 w-[360px] sm:w-[460px] h-full pointer-events-none overflow-hidden z-0">
               <svg
@@ -193,7 +193,7 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
           </div>
 
           {/* Body: Two-Column Layout with increased left column width */}
-          <div className="px-5 py-3.5 sm:py-4 grid grid-cols-1 md:grid-cols-12 gap-3.5">
+          <div className="p-3.5 sm:p-4 grid grid-cols-1 md:grid-cols-12 gap-3.5">
             {/* Left Column: Organizational Chain of Command (increased width: 8 of 12 cols) */}
             <div className="md:col-span-8 flex flex-col justify-between border border-slate-200/80 rounded-2xl p-3.5 sm:p-4 bg-white shadow-2xs">
               <div>
@@ -424,7 +424,7 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
           </div>
 
           {/* Modal Footer Controls */}
-          <div className="px-5 py-2.5 sm:py-3 bg-white border-t border-slate-100 flex items-center justify-end gap-2">
+          <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 bg-white border-t border-slate-100 flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={handleCopyCard}
