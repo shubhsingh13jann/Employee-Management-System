@@ -68,7 +68,7 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header with Fluid Pastel Wave Background matching reference */}
-          <div className="relative px-3.5 sm:px-4 py-3 sm:py-3.5 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0">
+          <div className="relative px-3.5 sm:px-4 py-3 sm:py-3.5 bg-white flex items-center justify-between border-b border-slate-200 overflow-hidden shrink-0">
             {/* Top-Right Fluid Pastel Wave Background */}
             <div className="absolute top-0 right-0 w-[360px] sm:w-[460px] h-full pointer-events-none overflow-hidden z-0">
               <svg
@@ -424,7 +424,7 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
           </div>
 
           {/* Modal Footer Controls */}
-          <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 bg-white border-t border-slate-100 flex items-center justify-end gap-2">
+          <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 bg-white border-t border-slate-200 flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={handleCopyCard}
