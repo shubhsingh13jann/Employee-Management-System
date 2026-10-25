@@ -226,6 +226,7 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
   const isStep1Done = Boolean(form.employee_id);
   const isStep2Done = Boolean(form.supervisor_id);
   const isStep3Done = Boolean(form.manager_id);
+  const activeStep = !form.employee_id ? 1 : !form.supervisor_id ? 2 : 3;
 
   const focusStep = (stepNumber: 1 | 2 | 3) => {
     if (stepNumber === 1) {
@@ -342,9 +343,9 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
             </button>
           </div>
 
-        {/* Form Body with Left Stepped Timeline & Right 3D Org Chart */}
+        {/* Form Body: Left Stepper Navigation, Center Form Fields, and Right Live Hierarchy Preview */}
         <form onSubmit={handleLocalSubmit} className="flex flex-col flex-1 relative z-10 overflow-hidden">
-          <div className="px-5 sm:px-6 pt-3.5 pb-3 overflow-y-auto max-h-[calc(85vh-120px)]">
+          <div className="px-5 sm:px-6 py-4 overflow-y-auto max-h-[calc(88vh-140px)] [scrollbar-width:thin]">
             {/* Inline Error Alert if active */}
             {activeError && (
               <div className="mb-3.5 p-3 rounded-xl bg-rose-50 border border-rose-200/80 text-rose-800 text-xs sm:text-sm flex items-center justify-between gap-2.5 animate-in fade-in shadow-2xs">
@@ -366,9 +367,118 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
               </div>
             )}
 
-            <div className="flex flex-col lg:flex-row gap-3.5 items-start">
-              {/* Left Column: Stepped Form with Functional Vertical Timeline */}
-              <div className="flex-1 min-w-0 space-y-0">
+            <div className="flex flex-col md:flex-row gap-5 items-start">
+              {/* 1. Left Vertical Stepper Navigation matching reference */}
+              <div className="hidden md:flex w-44 lg:w-48 shrink-0 flex-col py-1 select-none">
+                {/* Step 1 Item */}
+                <div
+                  onClick={() => focusStep(1)}
+                  className={`p-2.5 rounded-2xl transition-all cursor-pointer ${
+                    activeStep === 1
+                      ? "bg-indigo-50/80 border border-indigo-100 shadow-2xs"
+                      : "hover:bg-slate-50/80"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className={`w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center shrink-0 transition-colors ${
+                        isStep1Done
+                          ? "bg-emerald-500 text-white shadow-2xs"
+                          : activeStep === 1
+                          ? "bg-indigo-600 text-white shadow-xs"
+                          : "bg-slate-100 text-slate-500 border border-slate-200"
+                      }`}
+                    >
+                      {isStep1Done ? <i className="bi bi-check-lg text-xs font-extrabold"></i> : "1"}
+                    </div>
+                    <div className="min-w-0">
+                      <span className={`text-xs font-bold block leading-tight truncate ${activeStep === 1 ? "text-indigo-900" : "text-slate-700"}`}>
+                        Select Employee
+                      </span>
+                      <span className={`text-[10px] block leading-tight truncate mt-0.5 ${activeStep === 1 ? "text-indigo-500 font-medium" : "text-slate-400"}`}>
+                        Choose the employee to map
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Connecting Dashed Line 1 to 2 */}
+                <div className="pl-5 py-1">
+                  <div className={`w-0 border-l-2 border-dashed h-7 ${isStep1Done ? "border-indigo-400" : "border-slate-300"}`}></div>
+                </div>
+
+                {/* Step 2 Item */}
+                <div
+                  onClick={() => focusStep(2)}
+                  className={`p-2.5 rounded-2xl transition-all cursor-pointer ${
+                    activeStep === 2
+                      ? "bg-indigo-50/80 border border-indigo-100 shadow-2xs"
+                      : "hover:bg-slate-50/80"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className={`w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center shrink-0 transition-colors ${
+                        isStep2Done
+                          ? "bg-emerald-500 text-white shadow-2xs"
+                          : activeStep === 2
+                          ? "bg-indigo-600 text-white shadow-xs"
+                          : "bg-slate-100 text-slate-500 border border-slate-200"
+                      }`}
+                    >
+                      {isStep2Done ? <i className="bi bi-check-lg text-xs font-extrabold"></i> : "2"}
+                    </div>
+                    <div className="min-w-0">
+                      <span className={`text-xs font-bold block leading-tight truncate ${activeStep === 2 ? "text-indigo-900" : "text-slate-700"}`}>
+                        Select Team Lead
+                      </span>
+                      <span className={`text-[10px] block leading-tight truncate mt-0.5 ${activeStep === 2 ? "text-indigo-500 font-medium" : "text-slate-400"}`}>
+                        Assign direct supervisor
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Connecting Dashed Line 2 to 3 */}
+                <div className="pl-5 py-1">
+                  <div className={`w-0 border-l-2 border-dashed h-7 ${isStep2Done ? "border-indigo-400" : "border-slate-300"}`}></div>
+                </div>
+
+                {/* Step 3 Item */}
+                <div
+                  onClick={() => focusStep(3)}
+                  className={`p-2.5 rounded-2xl transition-all cursor-pointer ${
+                    activeStep === 3
+                      ? "bg-indigo-50/80 border border-indigo-100 shadow-2xs"
+                      : "hover:bg-slate-50/80"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className={`w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center shrink-0 transition-colors ${
+                        isStep3Done
+                          ? "bg-emerald-500 text-white shadow-2xs"
+                          : activeStep === 3
+                          ? "bg-indigo-600 text-white shadow-xs"
+                          : "bg-slate-100 text-slate-500 border border-slate-200"
+                      }`}
+                    >
+                      {isStep3Done ? <i className="bi bi-check-lg text-xs font-extrabold"></i> : "3"}
+                    </div>
+                    <div className="min-w-0">
+                      <span className={`text-xs font-bold block leading-tight truncate ${activeStep === 3 ? "text-indigo-900" : "text-slate-700"}`}>
+                        Select Department Manager
+                      </span>
+                      <span className={`text-[10px] block leading-tight truncate mt-0.5 ${activeStep === 3 ? "text-indigo-500 font-medium" : "text-slate-400"}`}>
+                        Assign department manager
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Center Column: Form Inputs & Supervisor Capacity Card */}
+              <div className="flex-1 min-w-0 space-y-3.5">
                 {/* Step 1: Subordinate Employee */}
                 <div className="relative flex items-start gap-3">
                   {/* Timeline connector column */}
