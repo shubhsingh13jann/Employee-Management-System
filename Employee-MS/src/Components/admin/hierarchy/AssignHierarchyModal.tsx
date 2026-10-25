@@ -335,16 +335,16 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
             </div>
 
             {/* Left: Hierarchy Icon + Title & Subtitle */}
-            <div className="flex items-center gap-3 sm:gap-3.5 relative z-10 min-w-0">
-              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xl shadow-xs shrink-0">
+            <div className="flex items-center gap-3 relative z-10 min-w-0">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-indigo-50 border border-indigo-100/90 text-indigo-600 flex items-center justify-center text-lg shadow-2xs shrink-0">
                 <i className="bi bi-diagram-3-fill"></i>
               </div>
               <div className="min-w-0">
-                <h3 className="font-bold text-base sm:text-lg text-slate-900 mb-0 tracking-tight leading-tight truncate">
+                <h3 className="font-bold text-sm sm:text-base text-slate-900 mb-0 tracking-tight leading-tight truncate">
                   Map Employee to Team Hierarchy
                 </h3>
-                <p className="text-xs text-slate-400 mb-0 font-normal leading-tight mt-0.5 truncate">
-                  Establish direct supervisor and department manager reporting chain
+                <p className="text-[11px] sm:text-xs text-slate-400 mb-0 font-normal leading-tight mt-0.5 truncate">
+                  Assign subordinate employees to their direct supervisor and department manager to establish clear reporting structures
                 </p>
               </div>
             </div>
@@ -909,20 +909,19 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
           </div>
 
           {/* Modal Footer Controls */}
-          <div className="px-5 sm:px-6 py-3 sm:py-3.5 bg-white border-t border-slate-100 flex items-center justify-end gap-3 relative z-10">
+          <div className="px-5 sm:px-6 py-3 sm:py-3.5 bg-slate-50/50 border-t border-slate-200/90 flex items-center justify-end gap-2.5 relative z-10">
             <button
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200/90 transition-all cursor-pointer shadow-2xs flex items-center gap-1.5 disabled:opacity-50 active:scale-95"
+              className="px-4 py-2 rounded-xl text-xs sm:text-[13px] font-semibold text-slate-600 hover:text-slate-800 bg-white hover:bg-slate-50 border border-slate-200/90 transition-all cursor-pointer shadow-2xs flex items-center gap-1.5 disabled:opacity-50 active:scale-95"
             >
-              <i className="bi bi-x-lg text-xs"></i>
               <span>Cancel</span>
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-indigo-600 via-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white transition-all shadow-md shadow-indigo-600/25 flex items-center gap-2 cursor-pointer disabled:opacity-50 active:scale-95"
+              className="px-5 py-2 rounded-xl text-xs sm:text-[13px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition-all shadow-md shadow-indigo-600/20 flex items-center gap-2 cursor-pointer disabled:opacity-50 active:scale-95"
             >
               {saving ? (
                 <>
