@@ -478,175 +478,136 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
               </div>
 
               {/* 2. Center Column: Form Inputs & Supervisor Capacity Card */}
-              <div className="flex-1 min-w-0 space-y-3.5">
+              <div className="flex-1 min-w-0 space-y-3">
                 {/* Step 1: Subordinate Employee */}
-                <div className="relative flex items-start gap-3">
-                  {/* Timeline connector column */}
-                  <div className="flex flex-col items-center self-stretch">
-                    <button
-                      type="button"
-                      onClick={() => focusStep(1)}
-                      title="Step 1: Select Subordinate Employee"
-                      className={`w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full font-bold text-xs flex items-center justify-center shrink-0 z-10 transition-all cursor-pointer hover:scale-110 active:scale-95 ${
-                        isStep1Done
-                          ? "bg-gradient-to-br from-emerald-500 to-indigo-600 text-white shadow-md shadow-indigo-600/30 ring-4 ring-emerald-50"
-                          : "bg-gradient-to-br from-indigo-600 to-indigo-700 text-white shadow-md shadow-indigo-600/30 ring-4 ring-indigo-100/80 animate-pulse"
-                      }`}
-                    >
-                      {isStep1Done ? <i className="bi bi-check-lg text-xs font-extrabold"></i> : "1"}
-                    </button>
-                    <div
-                      className={`w-0.5 flex-1 my-1 transition-all duration-300 ${
-                        isStep1Done
-                          ? "bg-gradient-to-b from-indigo-500 to-blue-500 rounded-full shadow-xs"
-                          : "border-l-2 border-dashed border-slate-200"
-                      }`}
-                    ></div>
-                  </div>
-
-                  {/* Step 1 Content */}
-                  <div className="flex-1 pb-2.5 sm:pb-3">
-                    <div className="flex items-center justify-between mb-0.5">
-                      <label
-                        htmlFor="modal-employee-select"
-                        className="text-xs sm:text-[13px] font-semibold text-slate-900 mb-0 cursor-pointer hover:text-indigo-600 transition-colors"
-                      >
-                        Select Subordinate Employee <span className="text-rose-500 font-bold">*</span>
-                      </label>
-                      {selectedEmp?.department_name && (
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
-                          {selectedEmp.department_name}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-slate-500 mb-1.5 font-normal">
-                      Choose the employee who will be mapped to the team hierarchy.
-                    </p>
-
-                    <div className="relative flex items-center rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/10 transition-all shadow-2xs overflow-hidden h-[38px] sm:h-[40px]">
-                      <div className="w-10 h-full flex items-center justify-center border-r border-slate-100 text-indigo-600 text-base shrink-0 bg-slate-50/40">
+                <div className="space-y-1.5" onClick={() => focusStep(1)}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2">
+                      <div className="w-6 h-6 rounded-lg bg-indigo-50 border border-indigo-100/80 flex items-center justify-center text-indigo-600 text-xs font-bold shrink-0 mt-0.5">
                         <i className="bi bi-person"></i>
                       </div>
-                      <select
-                        id="modal-employee-select"
-                        value={form.employee_id}
-                        onChange={(e) => handleEmployeeChange(e.target.value)}
-                        required
-                        className="w-full h-full py-1.5 px-3 bg-transparent text-xs sm:text-sm text-slate-800 font-medium focus:outline-none cursor-pointer appearance-none pr-8"
-                      >
-                        <option value="">-- Choose Employee --</option>
-                        {employees.map((e) => (
-                          <option key={e.id} value={e.id}>
-                            {e.name} {e.email ? `(${e.email})` : ""} — {e.department_name || "Unassigned"}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
-                        <i className="bi bi-chevron-down"></i>
+                      <div>
+                        <label
+                          htmlFor="modal-employee-select"
+                          className="text-xs sm:text-[12.5px] font-bold text-slate-900 block leading-tight cursor-pointer hover:text-indigo-600 transition-colors"
+                        >
+                          1. Select Subordinate Employee <span className="text-rose-500 font-bold">*</span>
+                        </label>
+                        <p className="text-[10.5px] text-slate-400 font-normal leading-tight mt-0.5 mb-0">
+                          Choose the employee who will be mapped to the team hierarchy.
+                        </p>
                       </div>
+                    </div>
+                    {selectedEmp?.department_name && (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 shrink-0">
+                        {selectedEmp.department_name}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="relative flex items-center rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/10 transition-all shadow-2xs overflow-hidden h-[38px] sm:h-[40px]">
+                    <div className="w-10 h-full flex items-center justify-center border-r border-slate-100 text-indigo-600 text-sm shrink-0 bg-slate-50/40">
+                      <i className="bi bi-person"></i>
+                    </div>
+                    <select
+                      id="modal-employee-select"
+                      value={form.employee_id}
+                      onChange={(e) => handleEmployeeChange(e.target.value)}
+                      required
+                      className="w-full h-full py-1.5 px-3 bg-transparent text-xs sm:text-[13px] text-slate-800 font-medium focus:outline-none cursor-pointer appearance-none pr-8"
+                    >
+                      <option value="">-- Choose Employee --</option>
+                      {employees.map((e) => (
+                        <option key={e.id} value={e.id}>
+                          {e.name} {e.email ? `(${e.email})` : ""} — {e.department_name || "Unassigned"}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                      <i className="bi bi-chevron-down"></i>
                     </div>
                   </div>
                 </div>
 
                 {/* Step 2: Direct Supervisor (Team Lead) */}
-                <div className="relative flex items-start gap-3">
-                  {/* Timeline connector column */}
-                  <div className="flex flex-col items-center self-stretch">
-                    <button
-                      type="button"
-                      onClick={() => focusStep(2)}
-                      title="Step 2: Select Direct Supervisor"
-                      className={`w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full font-bold text-xs flex items-center justify-center shrink-0 z-10 transition-all cursor-pointer hover:scale-110 active:scale-95 ${
-                        isStep2Done
-                          ? "bg-gradient-to-br from-emerald-500 to-blue-600 text-white shadow-md shadow-blue-500/30 ring-4 ring-emerald-50"
-                          : isStep1Done
-                          ? "bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/30 ring-4 ring-blue-100/80 animate-pulse"
-                          : "bg-slate-100 text-slate-400 border border-slate-200 ring-2 ring-slate-50"
-                      }`}
-                    >
-                      {isStep2Done ? <i className="bi bi-check-lg text-xs font-extrabold"></i> : "2"}
-                    </button>
-                    <div
-                      className={`w-0.5 flex-1 my-1 transition-all duration-300 ${
-                        isStep2Done
-                          ? "bg-gradient-to-b from-blue-500 to-fuchsia-500 rounded-full shadow-xs"
-                          : "border-l-2 border-dashed border-slate-200"
-                      }`}
-                    ></div>
-                  </div>
-
-                  {/* Step 2 Content */}
-                  <div className="flex-1 pb-2.5 sm:pb-3">
-                    <div className="flex items-center justify-between mb-0.5">
-                      <label
-                        htmlFor="modal-supervisor-select"
-                        className="text-xs sm:text-[13px] font-semibold text-slate-900 mb-0 cursor-pointer hover:text-indigo-600 transition-colors"
-                      >
-                        Select Direct Supervisor (Team Lead) <span className="text-rose-500 font-bold">*</span>
-                      </label>
-                      {selectedSup && (
-                        <span
-                          className={`text-[9.5px] font-bold px-2 py-0.5 rounded-full border ${
-                            currentSupLoad <= 3
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                              : currentSupLoad <= 7
-                              ? "bg-indigo-50 text-indigo-700 border-indigo-200"
-                              : "bg-rose-50 text-rose-700 border-rose-200"
-                          }`}
-                        >
-                          {currentSupLoad}/8 reports ({currentSupLoad <= 3 ? "Light" : currentSupLoad <= 7 ? "Optimal" : "High"})
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-slate-500 mb-1.5 font-normal">
-                      Choose the team lead who will directly supervise the selected employee.
-                    </p>
-
-                    <div className="relative flex items-center rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/10 transition-all shadow-2xs overflow-hidden h-[38px] sm:h-[40px]">
-                      <div className="w-10 h-full flex items-center justify-center border-r border-slate-100 text-blue-600 text-base shrink-0 bg-slate-50/40">
+                <div className="space-y-1.5" onClick={() => focusStep(2)}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2">
+                      <div className="w-6 h-6 rounded-lg bg-blue-50 border border-blue-100/80 flex items-center justify-center text-blue-600 text-xs font-bold shrink-0 mt-0.5">
                         <i className="bi bi-people"></i>
                       </div>
-                      <select
-                        id="modal-supervisor-select"
-                        value={form.supervisor_id}
-                        onChange={(e) => handleSupervisorChange(e.target.value)}
-                        required
-                        className="w-full h-full py-1.5 px-3 bg-transparent text-xs sm:text-sm text-slate-800 font-medium focus:outline-none cursor-pointer appearance-none pr-8"
-                      >
-                        <option value="">-- Choose Supervisor --</option>
-                        {recommendedSupervisors.length > 0 && (
-                          <optgroup label={`🌟 Department Leads (${empDept || "Recommended"})`}>
-                            {recommendedSupervisors.map((s) => {
-                              const load = supervisorWorkloadMap[String(s.id)] || 0;
-                              const statusTag = load <= 3 ? "Light" : load <= 7 ? "Optimal" : "High Span";
-                              return (
-                                <option key={`rec-sup-${s.id}`} value={s.id}>
-                                  {s.name} ({s.department_name || "General"}) — {load}/8 reports [{statusTag}]
-                                </option>
-                              );
-                            })}
-                          </optgroup>
-                        )}
-                        {otherSupervisors.length > 0 && (
-                          <optgroup label="🌐 Other Department Leads">
-                            {otherSupervisors.map((s) => {
-                              const load = supervisorWorkloadMap[String(s.id)] || 0;
-                              const statusTag = load <= 3 ? "Light" : load <= 7 ? "Optimal" : "High Span";
-                              return (
-                                <option key={`oth-sup-${s.id}`} value={s.id}>
-                                  {s.name} ({s.department_name || "General"}) — {load}/8 reports [{statusTag}]
-                                </option>
-                              );
-                            })}
-                          </optgroup>
-                        )}
-                      </select>
-                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
-                        <i className="bi bi-chevron-down"></i>
+                      <div>
+                        <label
+                          htmlFor="modal-supervisor-select"
+                          className="text-xs sm:text-[12.5px] font-bold text-slate-900 block leading-tight cursor-pointer hover:text-indigo-600 transition-colors"
+                        >
+                          2. Select Direct Supervisor (Team Lead) <span className="text-rose-500 font-bold">*</span>
+                        </label>
+                        <p className="text-[10.5px] text-slate-400 font-normal leading-tight mt-0.5 mb-0">
+                          Choose the team lead who will directly supervise the selected employee.
+                        </p>
                       </div>
                     </div>
+                    {selectedSup && (
+                      <span
+                        className={`text-[9.5px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${
+                          currentSupLoad <= 3
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : currentSupLoad <= 7
+                            ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                            : "bg-rose-50 text-rose-700 border-rose-200"
+                        }`}
+                      >
+                        {currentSupLoad}/8 reports ({currentSupLoad <= 3 ? "Light" : currentSupLoad <= 7 ? "Optimal" : "High"})
+                      </span>
+                    )}
+                  </div>
 
-                    {/* Step 2 Workload Capacity Container matching reference mockup */}
+                  <div className="relative flex items-center rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/10 transition-all shadow-2xs overflow-hidden h-[38px] sm:h-[40px]">
+                    <div className="w-10 h-full flex items-center justify-center border-r border-slate-100 text-blue-600 text-sm shrink-0 bg-slate-50/40">
+                      <i className="bi bi-people"></i>
+                    </div>
+                    <select
+                      id="modal-supervisor-select"
+                      value={form.supervisor_id}
+                      onChange={(e) => handleSupervisorChange(e.target.value)}
+                      required
+                      className="w-full h-full py-1.5 px-3 bg-transparent text-xs sm:text-[13px] text-slate-800 font-medium focus:outline-none cursor-pointer appearance-none pr-8"
+                    >
+                      <option value="">-- Choose Supervisor --</option>
+                      {recommendedSupervisors.length > 0 && (
+                        <optgroup label={`🌟 Department Leads (${empDept || "Recommended"})`}>
+                          {recommendedSupervisors.map((s) => {
+                            const load = supervisorWorkloadMap[String(s.id)] || 0;
+                            const statusTag = load <= 3 ? "Light" : load <= 7 ? "Optimal" : "High Span";
+                            return (
+                              <option key={`rec-sup-${s.id}`} value={s.id}>
+                                {s.name} ({s.department_name || "General"}) — {load}/8 reports [{statusTag}]
+                              </option>
+                            );
+                          })}
+                        </optgroup>
+                      )}
+                      {otherSupervisors.length > 0 && (
+                        <optgroup label="🌐 Other Department Leads">
+                          {otherSupervisors.map((s) => {
+                            const load = supervisorWorkloadMap[String(s.id)] || 0;
+                            const statusTag = load <= 3 ? "Light" : load <= 7 ? "Optimal" : "High Span";
+                            return (
+                              <option key={`oth-sup-${s.id}`} value={s.id}>
+                                {s.name} ({s.department_name || "General"}) — {load}/8 reports [{statusTag}]
+                              </option>
+                            );
+                          })}
+                        </optgroup>
+                      )}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                      <i className="bi bi-chevron-down"></i>
+                    </div>
+                  </div>
+
+                  {/* Step 2 Workload Capacity Container matching reference mockup */}
                     {selectedSup ? (
                       <div className="mt-1.5 p-2 sm:p-2.5 rounded-xl border border-indigo-100 bg-indigo-50/40 space-y-1.5">
                         <div className="flex items-center justify-between">
@@ -725,7 +686,6 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                         </p>
                       </div>
                     )}
-                  </div>
                 </div>
 
                 {/* Step 3: Department Manager */}
