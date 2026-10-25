@@ -608,146 +608,132 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                   </div>
 
                   {/* Step 2 Workload Capacity Container matching reference mockup */}
-                    {selectedSup ? (
-                      <div className="mt-1.5 p-2 sm:p-2.5 rounded-xl border border-indigo-100 bg-indigo-50/40 space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="text-indigo-600 text-base shrink-0">
-                              <i className="bi bi-speedometer2"></i>
-                            </div>
-                            <div>
-                              <h5 className="text-xs font-bold text-slate-900 mb-0">
-                                {selectedSup.name}
-                              </h5>
-                              <p className="text-[10px] text-slate-500 mb-0 font-medium">
-                                {selectedSup.department_name || "General"} • Direct Supervisor
-                              </p>
-                            </div>
+                  {selectedSup ? (
+                    <div className="mt-2 p-2.5 sm:p-3 rounded-xl border border-slate-200/90 bg-slate-50/70 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs shrink-0">
+                            {selectedSup.name.charAt(0).toUpperCase()}
                           </div>
-                          <span
-                            className={`text-[9.5px] font-bold px-2 py-0.5 rounded-full border ${
+                          <div>
+                            <h5 className="text-xs sm:text-[12.5px] font-bold text-slate-900 mb-0 leading-tight">
+                              {selectedSup.name}
+                            </h5>
+                            <p className="text-[10px] text-slate-500 mb-0 font-medium leading-tight mt-0.5">
+                              SUP-{String(selectedSup.id).padStart(4, "0")} • {selectedSup.department_name || "General"} • Direct Supervisor
+                            </p>
+                          </div>
+                        </div>
+                        <span
+                          className={`text-[9.5px] font-bold px-2 py-0.5 rounded-full border ${
+                            currentSupLoad <= 3
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              : currentSupLoad <= 7
+                              ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                              : "bg-rose-50 text-rose-700 border-rose-200"
+                          }`}
+                        >
+                          {currentSupLoad <= 3 ? "Light Load" : currentSupLoad <= 7 ? "Optimal Span" : "High Span"}
+                        </span>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-[10.5px]">
+                          <span className="font-semibold text-slate-600">
+                            Workload Capacity: <span className="font-bold text-slate-900">{currentSupLoad} / 8</span> reports
+                          </span>
+                          <span className="font-mono text-slate-500 font-semibold">
+                            {Math.min(100, Math.round((currentSupLoad / 8) * 100))}%
+                          </span>
+                        </div>
+                        <div className="w-full h-1.5 rounded-full bg-slate-200/80 overflow-hidden flex">
+                          <div
+                            className={`h-full transition-all duration-300 ${
                               currentSupLoad <= 3
-                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                ? "bg-emerald-500"
                                 : currentSupLoad <= 7
-                                ? "bg-indigo-50 text-indigo-700 border-indigo-200"
-                                : "bg-rose-50 text-rose-700 border-rose-200"
+                                ? "bg-indigo-500"
+                                : "bg-rose-500"
                             }`}
-                          >
-                            {currentSupLoad <= 3 ? "Light Load" : currentSupLoad <= 7 ? "Optimal Span" : "High Span"}
-                          </span>
-                        </div>
-
-                        <div className="space-y-0.5">
-                          <div className="flex items-center justify-between text-[10px]">
-                            <span className="font-semibold text-slate-600">
-                              Workload Capacity: <span className="font-bold text-slate-900">{currentSupLoad} / 8</span> reports
-                            </span>
-                            <span className="font-mono text-slate-500 font-semibold">
-                              {Math.min(100, Math.round((currentSupLoad / 8) * 100))}%
-                            </span>
-                          </div>
-                          <div className="w-full h-1.5 rounded-full bg-slate-200 overflow-hidden flex">
-                            <div
-                              className={`h-full transition-all duration-300 ${
-                                currentSupLoad <= 3
-                                  ? "bg-emerald-500"
-                                  : currentSupLoad <= 7
-                                  ? "bg-indigo-500"
-                                  : "bg-rose-500"
-                              }`}
-                              style={{ width: `${Math.min(100, Math.round((currentSupLoad / 8) * 100))}%` }}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between text-[9.5px] text-slate-500 pt-0.5">
-                          <span className="flex items-center gap-1 text-slate-600">
-                            <i className="bi bi-info-circle text-indigo-500 text-[10px]"></i>
-                            After: <strong className="text-slate-800">{newSupLoad} / 8 reports</strong>
-                          </span>
-                          {newSupLoad <= 8 ? (
-                            <span className="text-emerald-700 font-semibold flex items-center gap-0.5">
-                              <i className="bi bi-check-circle-fill text-[9px]"></i> Within Span
-                            </span>
-                          ) : (
-                            <span className="text-amber-700 font-semibold flex items-center gap-0.5">
-                              <i className="bi bi-exclamation-triangle-fill text-[9px]"></i> Exceeding 8 Capacity
-                            </span>
-                          )}
+                            style={{ width: `${Math.min(100, Math.round((currentSupLoad / 8) * 100))}%` }}
+                          />
                         </div>
                       </div>
-                    ) : (
-                      <div className="mt-1.5 p-2 sm:p-2.5 rounded-xl border border-indigo-100/80 bg-indigo-50/35 flex items-center gap-2.5 text-slate-500">
-                        <div className="text-indigo-500 text-base pr-2.5 border-r border-indigo-100/90 flex items-center justify-center shrink-0">
-                          <i className="bi bi-speedometer2"></i>
-                        </div>
-                        <p className="text-[11px] text-slate-500 mb-0 font-normal leading-snug">
-                          Select a supervisor above to preview live team workload and mentorship capacity.
-                        </p>
+
+                      <div className="flex items-center justify-between text-[10px] text-slate-500 pt-0.5 border-t border-slate-200/60">
+                        <span className="flex items-center gap-1 text-slate-600">
+                          <i className="bi bi-info-circle text-indigo-500 text-[10.5px]"></i>
+                          After: <strong className="text-slate-800">{newSupLoad} / 8 reports</strong>
+                        </span>
+                        {newSupLoad <= 8 ? (
+                          <span className="text-emerald-700 font-semibold flex items-center gap-1">
+                            <i className="bi bi-check-circle-fill text-[9.5px]"></i> Within Span
+                          </span>
+                        ) : (
+                          <span className="text-amber-700 font-semibold flex items-center gap-1">
+                            <i className="bi bi-exclamation-triangle-fill text-[9.5px]"></i> Exceeding 8 Capacity
+                          </span>
+                        )}
                       </div>
-                    )}
+                    </div>
+                  ) : (
+                    <div className="mt-2 p-2.5 rounded-xl border border-dashed border-slate-200 bg-slate-50/40 flex items-center gap-2.5 text-slate-500">
+                      <div className="text-indigo-400 text-sm pr-2 border-r border-slate-200 flex items-center justify-center shrink-0">
+                        <i className="bi bi-speedometer2"></i>
+                      </div>
+                      <p className="text-[10.5px] text-slate-400 mb-0 font-normal leading-snug">
+                        Select a supervisor above to preview live team workload and mentorship capacity.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Step 3: Department Manager */}
-                <div className="relative flex items-start gap-3">
-                  {/* Timeline marker without trailing line */}
-                  <div className="flex flex-col items-center">
-                    <button
-                      type="button"
-                      onClick={() => focusStep(3)}
-                      title="Step 3: Select Department Manager"
-                      className={`w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full font-bold text-xs flex items-center justify-center shrink-0 z-10 transition-all cursor-pointer hover:scale-110 active:scale-95 ${
-                        isStep3Done
-                          ? "bg-gradient-to-br from-fuchsia-500 to-pink-500 text-white shadow-md shadow-fuchsia-500/30 ring-4 ring-fuchsia-100"
-                          : isStep2Done
-                          ? "border-2 border-fuchsia-500 bg-white text-fuchsia-600 ring-4 ring-fuchsia-100 animate-pulse"
-                          : "bg-slate-100 text-slate-400 border border-slate-200 ring-2 ring-slate-50"
-                      }`}
-                    >
-                      {isStep3Done ? <i className="bi bi-check-lg text-xs font-extrabold"></i> : "3"}
-                    </button>
-                  </div>
-
-                  {/* Step 3 Content */}
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-0.5">
-                      <label
-                        htmlFor="modal-manager-select"
-                        className="text-xs sm:text-[13px] font-semibold text-slate-900 mb-0 cursor-pointer hover:text-indigo-600 transition-colors"
-                      >
-                        Select Department Manager <span className="text-rose-500 font-bold">*</span>
-                      </label>
-                      {selectedMgr && (
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-100">
-                          {selectedMgr.department_name || "Manager"}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-slate-500 mb-1.5 font-normal">
-                      Choose the department manager under whom this employee will be assigned.
-                    </p>
-
-                    <div className="relative flex items-center rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/10 transition-all shadow-2xs overflow-hidden h-[38px] sm:h-[40px]">
-                      <div className="w-10 h-full flex items-center justify-center border-r border-slate-100 text-fuchsia-600 text-base shrink-0 bg-slate-50/40">
+                <div className="space-y-1.5" onClick={() => focusStep(3)}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2">
+                      <div className="w-6 h-6 rounded-lg bg-purple-50 border border-purple-100/80 flex items-center justify-center text-purple-600 text-xs font-bold shrink-0 mt-0.5">
                         <i className="bi bi-building"></i>
                       </div>
-                      <select
-                        id="modal-manager-select"
-                        value={form.manager_id}
-                        onChange={(e) => onFormChange({ ...form, manager_id: e.target.value })}
-                        required
-                        className="w-full h-full py-1.5 px-3 bg-transparent text-xs sm:text-sm text-slate-800 font-medium focus:outline-none cursor-pointer appearance-none pr-8"
-                      >
-                        <option value="">-- Choose Manager --</option>
-                        {managers.map((m) => (
-                          <option key={m.id} value={m.id}>
-                            {m.name} ({m.department_name || "Manager"})
-                          </option>
-                        ))}
-                      </select>
-                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
-                        <i className="bi bi-chevron-down"></i>
+                      <div>
+                        <label
+                          htmlFor="modal-manager-select"
+                          className="text-xs sm:text-[12.5px] font-bold text-slate-900 block leading-tight cursor-pointer hover:text-indigo-600 transition-colors"
+                        >
+                          3. Select Department Manager <span className="text-rose-500 font-bold">*</span>
+                        </label>
+                        <p className="text-[10.5px] text-slate-400 font-normal leading-tight mt-0.5 mb-0">
+                          Choose the department manager under whom this employee will be assigned.
+                        </p>
                       </div>
+                    </div>
+                    {selectedMgr && (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-100 shrink-0">
+                        {selectedMgr.department_name || "Manager"}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="relative flex items-center rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/10 transition-all shadow-2xs overflow-hidden h-[38px] sm:h-[40px]">
+                    <div className="w-10 h-full flex items-center justify-center border-r border-slate-100 text-purple-600 text-sm shrink-0 bg-slate-50/40">
+                      <i className="bi bi-building"></i>
+                    </div>
+                    <select
+                      id="modal-manager-select"
+                      value={form.manager_id}
+                      onChange={(e) => onFormChange({ ...form, manager_id: e.target.value })}
+                      required
+                      className="w-full h-full py-1.5 px-3 bg-transparent text-xs sm:text-[13px] text-slate-800 font-medium focus:outline-none cursor-pointer appearance-none pr-8"
+                    >
+                      <option value="">-- Choose Manager --</option>
+                      {managers.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name} ({m.department_name || "Manager"})
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                      <i className="bi bi-chevron-down"></i>
                     </div>
                   </div>
                 </div>
