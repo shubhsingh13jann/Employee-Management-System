@@ -241,108 +241,106 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-5 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-[10000] bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150"
       onClick={saving ? undefined : onClose}
     >
-      <div
-        className="w-full max-w-[600px] bg-white rounded-3xl sm:rounded-[28px] shadow-2xl shadow-indigo-950/15 border border-slate-100 flex flex-col relative overflow-hidden animate-in zoom-in-95 duration-200"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Soft Ambient Vector Fluid Waves matching reference mockup Image 2 */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden z-0 select-none">
-          {/* Top-Right Fluid Ribbon Waves */}
-          <svg
-            className="absolute -top-4 -right-4 w-[320px] h-[220px] opacity-75"
-            viewBox="0 0 320 220"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              <linearGradient id="topWaveGrad1" x1="120" y1="0" x2="320" y2="200" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#93C5FD" stopOpacity="0.45" />
-                <stop offset="35%" stopColor="#A5B4FC" stopOpacity="0.35" />
-                <stop offset="70%" stopColor="#C4B5FD" stopOpacity="0.25" />
-                <stop offset="100%" stopColor="#EDE9FE" stopOpacity="0.05" />
-              </linearGradient>
-              <linearGradient id="topWaveGrad2" x1="180" y1="0" x2="320" y2="180" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#818CF8" stopOpacity="0.40" />
-                <stop offset="50%" stopColor="#C084FC" stopOpacity="0.28" />
-                <stop offset="100%" stopColor="#F5F3FF" stopOpacity="0.08" />
-              </linearGradient>
-              <linearGradient id="topWaveGrad3" x1="220" y1="0" x2="320" y2="120" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#6366F1" stopOpacity="0.30" />
-                <stop offset="100%" stopColor="#A855F7" stopOpacity="0.08" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M 90 0 C 140 70, 200 130, 320 110 L 320 0 Z"
-              fill="url(#topWaveGrad1)"
-            />
-            <path
-              d="M 130 0 C 180 100, 240 170, 320 190 L 320 0 Z"
-              fill="url(#topWaveGrad2)"
-            />
-            <path
-              d="M 180 0 C 220 60, 270 100, 320 80 L 320 0 Z"
-              fill="url(#topWaveGrad3)"
-            />
-          </svg>
+      {/* Centered strictly within the right-side content portion (offsetting sidebar on md+) */}
+      <div className="fixed inset-y-0 right-0 left-0 md:left-[240px] flex items-center justify-center p-3 sm:p-5 pointer-events-none">
+        <div
+          className="w-full max-w-4xl lg:max-w-5xl bg-white rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 pointer-events-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header with Fluid Pastel Wave Background matching reference */}
+          <div className="relative px-5 sm:px-6 py-3.5 sm:py-4 bg-white flex items-center justify-between border-b border-slate-200 overflow-hidden shrink-0">
+            {/* Top-Right Fluid Pastel Wave Background */}
+            <div className="absolute top-0 right-0 w-[420px] sm:w-[540px] h-full pointer-events-none overflow-hidden z-0">
+              <svg
+                viewBox="0 0 500 74"
+                fill="none"
+                preserveAspectRatio="none"
+                className="w-full h-full"
+              >
+                <defs>
+                  {/* Left fade mask to seamlessly blend into pure white */}
+                  <mask id="assignWaveFadeMask">
+                    <linearGradient id="assignWaveFadeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="black" />
+                      <stop offset="18%" stopColor="white" />
+                      <stop offset="100%" stopColor="white" />
+                    </linearGradient>
+                    <rect width="500" height="74" fill="url(#assignWaveFadeGrad)" />
+                  </mask>
 
-          {/* Bottom-Right Fluid Ribbon Waves */}
-          <svg
-            className="absolute -bottom-4 -right-4 w-[300px] h-[200px] opacity-70"
-            viewBox="0 0 300 200"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              <linearGradient id="botWaveGrad1" x1="300" y1="200" x2="80" y2="40" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#C084FC" stopOpacity="0.40" />
-                <stop offset="40%" stopColor="#818CF8" stopOpacity="0.35" />
-                <stop offset="80%" stopColor="#A5B4FC" stopOpacity="0.18" />
-                <stop offset="100%" stopColor="#EDE9FE" stopOpacity="0.0" />
-              </linearGradient>
-              <linearGradient id="botWaveGrad2" x1="300" y1="200" x2="150" y2="80" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#A78BFA" stopOpacity="0.30" />
-                <stop offset="100%" stopColor="#E0E7FF" stopOpacity="0.05" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M 80 200 C 140 140, 220 100, 300 120 L 300 200 Z"
-              fill="url(#botWaveGrad1)"
-            />
-            <path
-              d="M 140 200 C 190 120, 240 70, 300 40 L 300 200 Z"
-              fill="url(#botWaveGrad2)"
-            />
-          </svg>
-        </div>
+                  {/* Wave 1: Soft Sky-Blue / Periwinkle Gradient */}
+                  <linearGradient id="assignWaveGrad1" x1="0%" y1="0%" x2="100%" y2="70%">
+                    <stop offset="0%" stopColor="#E0E7FF" stopOpacity="0.2" />
+                    <stop offset="30%" stopColor="#D7E0FC" stopOpacity="0.85" />
+                    <stop offset="65%" stopColor="#E0E7FE" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="#EDE9FE" stopOpacity="0.7" />
+                  </linearGradient>
 
-        {/* Modal Header */}
-        <div className="px-5 sm:px-6 py-3 sm:py-3.5 flex items-center justify-between relative z-10 border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-50 to-indigo-100/60 border border-indigo-100 text-indigo-600 flex items-center justify-center text-lg shadow-xs shrink-0">
-              <i className="bi bi-diagram-3"></i>
+                  {/* Wave 2: Richer Lavender / Violet Sweep */}
+                  <linearGradient id="assignWaveGrad2" x1="15%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#D8E2FB" stopOpacity="0.3" />
+                    <stop offset="30%" stopColor="#C7D2FE" stopOpacity="0.85" />
+                    <stop offset="60%" stopColor="#DDD6FE" stopOpacity="0.9" />
+                    <stop offset="85%" stopColor="#E9D5FF" stopOpacity="0.85" />
+                    <stop offset="100%" stopColor="#F3E8FF" stopOpacity="0.4" />
+                  </linearGradient>
+
+                  {/* Wave 3: Subtle Pastel Ribbon Glow */}
+                  <linearGradient id="assignWaveGrad3" x1="30%" y1="10%" x2="95%" y2="100%">
+                    <stop offset="0%" stopColor="#E0F2FE" stopOpacity="0.5" />
+                    <stop offset="45%" stopColor="#DDD6FE" stopOpacity="0.75" />
+                    <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0.7" />
+                  </linearGradient>
+                </defs>
+
+                <g mask="url(#assignWaveFadeMask)">
+                  <path
+                    d="M0 26 C60 10 120 8 180 18 C245 28 305 50 370 38 C425 28 465 10 500 20 V0 H0 Z"
+                    fill="url(#assignWaveGrad1)"
+                  />
+                  <path
+                    d="M0 50 C80 34 145 12 215 10 C280 8 330 32 390 44 C445 54 475 38 500 28 V0 H0 Z"
+                    fill="url(#assignWaveGrad2)"
+                  />
+                  <path
+                    d="M130 38 C195 26 260 48 325 56 C385 64 445 50 500 38 V8 C470 20 420 18 370 24 C310 34 235 32 130 38 Z"
+                    fill="url(#assignWaveGrad3)"
+                    opacity="0.75"
+                  />
+                </g>
+              </svg>
             </div>
-            <div>
-              <h3 className="font-bold text-base sm:text-lg text-slate-900 tracking-tight mb-0">
-                Map Employee to Team Hierarchy
-              </h3>
-              <p className="text-xs text-slate-500 mb-0 font-normal mt-0.5">
-                Establish direct supervisor and department manager reporting chain
-              </p>
+
+            {/* Left: Hierarchy Icon + Title & Subtitle */}
+            <div className="flex items-center gap-3 sm:gap-3.5 relative z-10 min-w-0">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xl shadow-xs shrink-0">
+                <i className="bi bi-diagram-3-fill"></i>
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-bold text-base sm:text-lg text-slate-900 mb-0 tracking-tight leading-tight truncate">
+                  Map Employee to Team Hierarchy
+                </h3>
+                <p className="text-xs text-slate-400 mb-0 font-normal leading-tight mt-0.5 truncate">
+                  Establish direct supervisor and department manager reporting chain
+                </p>
+              </div>
             </div>
+
+            {/* Right: Rounded Square Close Button */}
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={saving}
+              className="w-8.5 h-8.5 rounded-xl bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 border border-slate-200/90 shadow-2xs flex items-center justify-center transition-all cursor-pointer text-xs disabled:opacity-50 relative z-10 shrink-0"
+              title="Close"
+              aria-label="Close"
+            >
+              <i className="bi bi-x-lg"></i>
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={saving}
-            className="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200/70 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer text-xs disabled:opacity-50 shrink-0"
-            title="Close"
-          >
-            <i className="bi bi-x-lg"></i>
-          </button>
-        </div>
 
         {/* Form Body with Left Stepped Timeline & Right 3D Org Chart */}
         <form onSubmit={handleLocalSubmit} className="flex flex-col flex-1 relative z-10 overflow-hidden">
@@ -817,6 +815,7 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>,
     document.body
