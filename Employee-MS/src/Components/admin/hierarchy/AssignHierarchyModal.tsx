@@ -89,6 +89,25 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
     selectedSup?.department_name &&
     empDept.toLowerCase() !== selectedSup.department_name.toLowerCase();
 
+  // Peer subordinates reporting to the selected supervisor
+  const peerSubordinates = useMemo(() => {
+    if (!form.supervisor_id || !mappings) return [];
+    return mappings.filter(
+      (m) =>
+        String(m.supervisor_id) === String(form.supervisor_id) &&
+        String(m.employee_id) !== String(form.employee_id)
+    );
+  }, [form.supervisor_id, form.employee_id, mappings]);
+
+  const peer1Name = peerSubordinates[0]?.employee_name || "Dwight Schrute";
+  const peer1Id = peerSubordinates[0]?.employee_id
+    ? `EMP-${String(peerSubordinates[0].employee_id).padStart(4, "0")}`
+    : "EMP-0002";
+  const peer2Name = peerSubordinates[1]?.employee_name || "Kevin Malone";
+  const peer2Id = peerSubordinates[1]?.employee_id
+    ? `EMP-${String(peerSubordinates[1].employee_id).padStart(4, "0")}`
+    : "EMP-0003";
+
   // Partition supervisors into recommended (same dept) and others
   const { recommendedSupervisors, otherSupervisors } = useMemo(() => {
     if (!empDept) {
@@ -752,91 +771,139 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                 )}
               </div>
 
-              {/* Right Column: 3D Illustrated Org Chart Graphic - Snug next to form */}
-              <div className="hidden lg:flex w-44 shrink-0 flex-col items-center justify-center relative self-center py-1 select-none">
-                {/* Orbital Dashed Ring & Sparkle Accents */}
-                <div className="absolute w-40 h-40 rounded-full border border-dashed border-indigo-200/70 pointer-events-none"></div>
-                <div className="absolute top-3 left-3 w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-sm shadow-indigo-400 animate-pulse"></div>
-                <div className="absolute top-2 right-4 w-2 h-2 rounded-full bg-blue-500 shadow-sm shadow-blue-400"></div>
-                <div className="absolute bottom-6 right-3 w-1.5 h-1.5 rounded-full bg-purple-400"></div>
-                <div className="absolute top-14 right-0 w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
-                <div className="absolute bottom-8 left-3 w-1 h-1 rounded-full bg-blue-400"></div>
-
-                {/* Top Node: Manager 3D Card */}
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-100/95 via-indigo-100/75 to-purple-100/60 border border-indigo-200/90 shadow-md shadow-indigo-500/15 flex flex-col items-center justify-center p-1.5 relative z-10 transition-transform duration-300 hover:scale-105 group">
-                  <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs shadow-sm">
-                    {selectedMgr ? (
-                      <span className="font-bold">{selectedMgr.name.charAt(0)}</span>
-                    ) : (
-                      <i className="bi bi-person-fill"></i>
-                    )}
-                  </div>
-                  <span className="text-[8.5px] font-bold text-indigo-900 mt-0.5 truncate max-w-[56px] text-center">
-                    {selectedMgr ? selectedMgr.name.split(" ")[0] : "Manager"}
-                  </span>
-                </div>
-
-                {/* Tree Connecting Branch Lines */}
-                <div className="flex flex-col items-center relative z-0">
-                  {/* Stem down from manager */}
-                  <div className="w-0.5 h-3 bg-indigo-400/90"></div>
-                  {/* Horizontal bar */}
-                  <div className="w-32 h-0.5 bg-indigo-400/90 relative"></div>
-                  {/* 3 Vertical drops to children */}
-                  <div className="w-32 flex justify-between">
-                    <div className="w-0.5 h-3 bg-indigo-400/90"></div>
-                    <div className="w-0.5 h-3 bg-indigo-400/90"></div>
-                    <div className="w-0.5 h-3 bg-indigo-400/90"></div>
-                  </div>
-                </div>
-
-                {/* Bottom Nodes: 3 Child Cards */}
-                <div className="w-36 flex items-center justify-between relative z-10 mt-0">
-                  {/* Left child node */}
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-b from-indigo-50 to-indigo-100 border border-indigo-200/80 shadow-xs flex flex-col items-center justify-center text-indigo-600 transition-all hover:scale-105">
-                    <i className="bi bi-person-fill text-xs"></i>
-                  </div>
-
-                  {/* Center child node (Prominent / Direct Lead) */}
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-b from-indigo-100 to-indigo-200/90 border border-indigo-300 shadow-sm flex flex-col items-center justify-center text-indigo-700 transition-all hover:scale-105 ring-2 ring-indigo-300/40">
-                    <div className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[9px] shadow-xs">
-                      {selectedSup ? (
-                        <span className="font-bold">{selectedSup.name.charAt(0)}</span>
-                      ) : (
-                        <i className="bi bi-person-fill"></i>
-                      )}
+              {/* Right Column: Live Hierarchy Preview Tree */}
+              <div className="hidden lg:flex w-72 lg:w-80 shrink-0 flex-col justify-between rounded-2xl border border-slate-200/90 bg-slate-50/70 p-3 sm:p-3.5 select-none shadow-2xs">
+                {/* Header with Live Preview Badge */}
+                <div>
+                  <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200/70">
+                    <div className="flex items-center gap-1.5">
+                      <i className="bi bi-diagram-3-fill text-indigo-600 text-xs"></i>
+                      <span className="text-xs font-bold text-slate-800">Hierarchy Preview</span>
                     </div>
-                    <span className="text-[7.5px] font-bold text-indigo-950 mt-0.5 truncate max-w-[36px] text-center">
-                      {selectedSup ? selectedSup.name.split(" ")[0] : "Lead"}
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                      Live Preview
                     </span>
                   </div>
 
-                  {/* Right child node (Subordinate / Member) */}
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-b from-indigo-50 to-indigo-100 border border-indigo-200/80 shadow-xs flex flex-col items-center justify-center text-indigo-600 transition-all hover:scale-105">
-                    {selectedEmp ? (
-                      <div className="w-4.5 h-4.5 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[8.5px] font-bold">
-                        {selectedEmp.name.charAt(0)}
+                  {/* 1. Top Node: Department Manager */}
+                  <div className="w-full bg-white rounded-xl border border-slate-200/90 p-2 sm:p-2.5 shadow-2xs flex items-center gap-2.5 hover:border-purple-300 transition-colors">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                      {selectedMgr ? selectedMgr.name.charAt(0).toUpperCase() : "M"}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="text-xs font-bold text-slate-900 block truncate leading-tight">
+                        {selectedMgr ? selectedMgr.name : "Select Manager"}
+                      </span>
+                      <span className="text-[10px] text-slate-400 block truncate leading-tight mt-0.5 font-medium">
+                        {selectedMgr ? `MGR-${String(selectedMgr.id).padStart(4, "0")} • Department Manager` : "Department Manager"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Vertical Connector Line from Manager to Supervisor */}
+                  <div className="w-0.5 h-3 bg-slate-300 mx-auto"></div>
+
+                  {/* 2. Middle Node: Direct Supervisor */}
+                  <div className="w-full bg-blue-50/40 rounded-xl border border-blue-200/90 p-2 sm:p-2.5 shadow-2xs flex items-center justify-between gap-2 hover:border-blue-400 transition-colors">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                        {selectedSup ? selectedSup.name.charAt(0).toUpperCase() : "S"}
                       </div>
-                    ) : (
-                      <i className="bi bi-person-fill text-xs"></i>
+                      <div className="min-w-0">
+                        <span className="text-xs font-bold text-slate-900 block truncate leading-tight">
+                          {selectedSup ? selectedSup.name : "Select Supervisor"}
+                        </span>
+                        <span className="text-[10px] text-slate-500 block truncate leading-tight mt-0.5 font-medium">
+                          {selectedSup ? `SUP-${String(selectedSup.id).padStart(4, "0")} • Team Lead` : "Team Lead / Supervisor"}
+                        </span>
+                      </div>
+                    </div>
+                    {selectedSup && (
+                      <span
+                        className={`text-[9px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${
+                          currentSupLoad <= 3
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : currentSupLoad <= 7
+                            ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                            : "bg-rose-50 text-rose-700 border-rose-200"
+                        }`}
+                      >
+                        {currentSupLoad} Reports
+                      </span>
                     )}
+                  </div>
+
+                  {/* Tree Connector Lines from Supervisor to 3 Subordinates */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-0.5 h-2.5 bg-slate-300"></div>
+                    <div className="w-[82%] h-0.5 bg-slate-300"></div>
+                    <div className="w-[82%] flex justify-between">
+                      <div className="w-0.5 h-2.5 bg-slate-300"></div>
+                      <div className="w-0.5 h-2.5 bg-slate-300"></div>
+                      <div className="w-0.5 h-2.5 bg-slate-300"></div>
+                    </div>
+                  </div>
+
+                  {/* 3. Bottom Row: 3 Subordinate Cards (Selected Employee highlighted) */}
+                  <div className="flex items-stretch justify-between gap-1.5 mt-0.5">
+                    {/* Child 1: Selected Employee */}
+                    <div className="flex-1 min-w-0 rounded-xl border-2 border-indigo-500 bg-indigo-50/90 p-1.5 sm:p-2 shadow-2xs flex flex-col items-center text-center relative ring-2 ring-indigo-200/50">
+                      <span className="text-[7.5px] font-extrabold text-indigo-700 uppercase tracking-wider mb-1 px-1 py-0.2 rounded bg-indigo-200/70 block w-full truncate">
+                        You (Selected)
+                      </span>
+                      <div className="w-6 h-6 rounded-md bg-indigo-600 text-white font-bold text-[10px] flex items-center justify-center shadow-2xs shrink-0">
+                        {selectedEmp ? selectedEmp.name.charAt(0).toUpperCase() : "A"}
+                      </div>
+                      <span className="text-[10px] font-bold text-indigo-950 block truncate w-full mt-1 leading-tight">
+                        {selectedEmp ? selectedEmp.name.split(" ")[0] : "Employee"}
+                      </span>
+                      <span className="text-[8.5px] text-indigo-500 block truncate w-full font-medium leading-tight mt-0.5">
+                        {selectedEmp ? `EMP-${String(selectedEmp.id).padStart(4, "0")}` : "EMP-0001"}
+                      </span>
+                    </div>
+
+                    {/* Child 2: Peer Subordinate 1 */}
+                    <div className="flex-1 min-w-0 rounded-xl border border-slate-200 bg-white p-1.5 sm:p-2 shadow-2xs flex flex-col items-center text-center">
+                      <span className="text-[7.5px] font-medium text-slate-400 mb-1 block w-full truncate">
+                        Peer Report
+                      </span>
+                      <div className="w-6 h-6 rounded-md bg-slate-100 text-slate-600 font-bold text-[10px] flex items-center justify-center shrink-0">
+                        {peer1Name.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="text-[10px] font-semibold text-slate-700 block truncate w-full mt-1 leading-tight">
+                        {peer1Name.split(" ")[0]}
+                      </span>
+                      <span className="text-[8.5px] text-slate-400 block truncate w-full font-medium leading-tight mt-0.5">
+                        {peer1Id}
+                      </span>
+                    </div>
+
+                    {/* Child 3: Peer Subordinate 2 */}
+                    <div className="flex-1 min-w-0 rounded-xl border border-slate-200 bg-white p-1.5 sm:p-2 shadow-2xs flex flex-col items-center text-center">
+                      <span className="text-[7.5px] font-medium text-slate-400 mb-1 block w-full truncate">
+                        Peer Report
+                      </span>
+                      <div className="w-6 h-6 rounded-md bg-slate-100 text-slate-600 font-bold text-[10px] flex items-center justify-center shrink-0">
+                        {peer2Name.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="text-[10px] font-semibold text-slate-700 block truncate w-full mt-1 leading-tight">
+                        {peer2Name.split(" ")[0]}
+                      </span>
+                      <span className="text-[8.5px] text-slate-400 block truncate w-full font-medium leading-tight mt-0.5">
+                        {peer2Id}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Dynamic live reporting chain summary chip */}
-                {selectedEmp && selectedSup && selectedMgr ? (
-                  <div className="mt-2.5 px-2.5 py-1 rounded-full bg-indigo-50/90 border border-indigo-100/90 text-[9px] font-semibold text-indigo-900 flex items-center gap-1 shadow-2xs max-w-full truncate animate-in fade-in">
-                    <span className="truncate max-w-[50px]">{selectedMgr.name.split(" ")[0]}</span>
-                    <i className="bi bi-chevron-right text-[7px] text-indigo-400"></i>
-                    <span className="truncate max-w-[50px] font-bold text-indigo-700">{selectedSup.name.split(" ")[0]}</span>
-                    <i className="bi bi-chevron-right text-[7px] text-indigo-400"></i>
-                    <span className="truncate max-w-[50px] text-slate-700">{selectedEmp.name.split(" ")[0]}</span>
-                  </div>
-                ) : (
-                  <p className="mt-2.5 text-[9.5px] text-slate-400 text-center font-normal mb-0">
-                    Interactive Org Preview
+                {/* Bottom Informational Note matching mockup */}
+                <div className="mt-3 p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 flex items-start gap-2 shadow-2xs">
+                  <i className="bi bi-info-circle-fill text-indigo-500 text-xs shrink-0 mt-0.5"></i>
+                  <p className="text-[10px] text-slate-500 font-normal leading-tight mb-0">
+                    Assigning will update team reporting relationships and calculate updated capacity scores.
                   </p>
-                )}
+                </div>
               </div>
             </div>
           </div>
