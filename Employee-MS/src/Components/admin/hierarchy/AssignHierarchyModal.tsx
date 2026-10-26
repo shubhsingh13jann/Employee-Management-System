@@ -267,7 +267,7 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
       {/* Centered strictly within the right-side content portion (offsetting sidebar on md+) */}
       <div className="fixed inset-y-0 right-0 left-0 md:left-[240px] flex items-center justify-center p-3 sm:p-5 pointer-events-none">
         <div
-          className="w-full max-w-4xl lg:max-w-[935px] bg-white rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 pointer-events-auto"
+          className="w-full max-w-4xl lg:max-w-[985px] bg-white rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 pointer-events-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header with Fluid Pastel Wave Background matching reference */}
@@ -388,7 +388,7 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
 
             <div className="flex flex-col md:flex-row gap-3.5 sm:gap-4 items-start">
               {/* 1. Left Vertical Stepper Navigation matching reference */}
-              <div className="hidden md:flex w-48 lg:w-52 shrink-0 flex-col py-0.5 select-none">
+              <div className="hidden md:flex w-46 lg:w-48 shrink-0 flex-col py-0.5 select-none">
                 {/* Step 1 Item */}
                 <div
                   onClick={() => focusStep(1)}
@@ -499,23 +499,18 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
               {/* 2. Center Column: Form Inputs & Supervisor Capacity Card */}
               <div className="flex-1 min-w-0 space-y-3">
                 {/* Step 1: Subordinate Employee */}
-                <div className="space-y-1.5" onClick={() => focusStep(1)}>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-2">
-                      <div className="w-6 h-6 rounded-lg bg-indigo-50 border border-indigo-100/80 flex items-center justify-center text-indigo-600 text-xs font-bold shrink-0 mt-0.5">
+                <div className="space-y-1" onClick={() => focusStep(1)}>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-6 h-6 rounded-lg bg-indigo-50 border border-indigo-100/80 flex items-center justify-center text-indigo-600 text-xs font-bold shrink-0">
                         <i className="bi bi-person"></i>
                       </div>
-                      <div>
-                        <label
-                          htmlFor="modal-employee-select"
-                          className="text-xs sm:text-[12.5px] font-bold text-slate-900 block leading-tight cursor-pointer hover:text-indigo-600 transition-colors"
-                        >
-                          1. Select Subordinate Employee <span className="text-rose-500 font-bold">*</span>
-                        </label>
-                        <p className="text-[10.5px] text-slate-400 font-normal leading-tight mt-0.5 mb-0">
-                          Choose the employee who will be mapped to the team hierarchy.
-                        </p>
-                      </div>
+                      <label
+                        htmlFor="modal-employee-select"
+                        className="text-xs sm:text-[12.5px] font-bold text-slate-900 block leading-tight cursor-pointer hover:text-indigo-600 transition-colors truncate"
+                      >
+                        1. Select Subordinate Employee <span className="text-rose-500 font-bold">*</span>
+                      </label>
                     </div>
                     {selectedEmp?.department_name && (
                       <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 shrink-0">
@@ -523,6 +518,9 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                       </span>
                     )}
                   </div>
+                  <p className="text-[10.5px] text-slate-400 font-normal leading-tight pl-8 mb-1 whitespace-nowrap overflow-hidden text-ellipsis">
+                    Choose the employee who will be mapped to the team hierarchy.
+                  </p>
 
                   <div className="relative flex items-center rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/10 transition-all shadow-2xs overflow-hidden h-[38px] sm:h-[40px]">
                     <div className="w-10 h-full flex items-center justify-center border-r border-slate-100 text-indigo-600 text-sm shrink-0 bg-slate-50/40">
@@ -549,23 +547,18 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                 </div>
 
                 {/* Step 2: Direct Supervisor (Team Lead) */}
-                <div className="space-y-1.5" onClick={() => focusStep(2)}>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-2">
-                      <div className="w-6 h-6 rounded-lg bg-blue-50 border border-blue-100/80 flex items-center justify-center text-blue-600 text-xs font-bold shrink-0 mt-0.5">
+                <div className="space-y-1" onClick={() => focusStep(2)}>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-6 h-6 rounded-lg bg-blue-50 border border-blue-100/80 flex items-center justify-center text-blue-600 text-xs font-bold shrink-0">
                         <i className="bi bi-people"></i>
                       </div>
-                      <div>
-                        <label
-                          htmlFor="modal-supervisor-select"
-                          className="text-xs sm:text-[12.5px] font-bold text-slate-900 block leading-tight cursor-pointer hover:text-indigo-600 transition-colors"
-                        >
-                          2. Select Direct Supervisor (Team Lead) <span className="text-rose-500 font-bold">*</span>
-                        </label>
-                        <p className="text-[10.5px] text-slate-400 font-normal leading-tight mt-0.5 mb-0">
-                          Choose the team lead who will directly supervise the selected employee.
-                        </p>
-                      </div>
+                      <label
+                        htmlFor="modal-supervisor-select"
+                        className="text-xs sm:text-[12.5px] font-bold text-slate-900 block leading-tight cursor-pointer hover:text-indigo-600 transition-colors truncate"
+                      >
+                        2. Select Direct Supervisor (Team Lead) <span className="text-rose-500 font-bold">*</span>
+                      </label>
                     </div>
                     {selectedSup && (
                       <span
@@ -581,6 +574,9 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                       </span>
                     )}
                   </div>
+                  <p className="text-[10.5px] text-slate-400 font-normal leading-tight pl-8 mb-1 whitespace-nowrap overflow-hidden text-ellipsis">
+                    Choose the team lead who will directly supervise the selected employee.
+                  </p>
 
                   <div className="relative flex items-center rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/10 transition-all shadow-2xs overflow-hidden h-[38px] sm:h-[40px]">
                     <div className="w-10 h-full flex items-center justify-center border-r border-slate-100 text-blue-600 text-sm shrink-0 bg-slate-50/40">
@@ -708,23 +704,18 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                 </div>
 
                 {/* Step 3: Department Manager */}
-                <div className="space-y-1.5" onClick={() => focusStep(3)}>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-2">
-                      <div className="w-6 h-6 rounded-lg bg-purple-50 border border-purple-100/80 flex items-center justify-center text-purple-600 text-xs font-bold shrink-0 mt-0.5">
+                <div className="space-y-1" onClick={() => focusStep(3)}>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-6 h-6 rounded-lg bg-purple-50 border border-purple-100/80 flex items-center justify-center text-purple-600 text-xs font-bold shrink-0">
                         <i className="bi bi-building"></i>
                       </div>
-                      <div>
-                        <label
-                          htmlFor="modal-manager-select"
-                          className="text-xs sm:text-[12.5px] font-bold text-slate-900 block leading-tight cursor-pointer hover:text-indigo-600 transition-colors"
-                        >
-                          3. Select Department Manager <span className="text-rose-500 font-bold">*</span>
-                        </label>
-                        <p className="text-[10.5px] text-slate-400 font-normal leading-tight mt-0.5 mb-0">
-                          Choose the department manager under whom this employee will be assigned.
-                        </p>
-                      </div>
+                      <label
+                        htmlFor="modal-manager-select"
+                        className="text-xs sm:text-[12.5px] font-bold text-slate-900 block leading-tight cursor-pointer hover:text-indigo-600 transition-colors truncate"
+                      >
+                        3. Select Department Manager <span className="text-rose-500 font-bold">*</span>
+                      </label>
                     </div>
                     {selectedMgr && (
                       <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-100 shrink-0">
@@ -732,6 +723,9 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                       </span>
                     )}
                   </div>
+                  <p className="text-[10.5px] text-slate-400 font-normal leading-tight pl-8 mb-1 whitespace-nowrap overflow-hidden text-ellipsis">
+                    Choose the department manager under whom this employee will be assigned.
+                  </p>
 
                   <div className="relative flex items-center rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/10 transition-all shadow-2xs overflow-hidden h-[38px] sm:h-[40px]">
                     <div className="w-10 h-full flex items-center justify-center border-r border-slate-100 text-purple-600 text-sm shrink-0 bg-slate-50/40">
@@ -772,7 +766,7 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
               </div>
 
               {/* Right Column: Live Hierarchy Preview Tree */}
-              <div className="hidden lg:flex w-72 lg:w-[310px] shrink-0 flex-col justify-between rounded-2xl border border-slate-200/90 bg-slate-50/70 p-2.5 sm:p-3 select-none shadow-2xs">
+              <div className="hidden lg:flex w-72 lg:w-[295px] shrink-0 flex-col justify-between rounded-2xl border border-slate-200/90 bg-slate-50/70 p-2.5 sm:p-3 select-none shadow-2xs">
                 {/* Header with Live Preview Badge */}
                 <div>
                   <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200/70">
