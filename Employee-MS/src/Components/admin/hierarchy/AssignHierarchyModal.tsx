@@ -159,6 +159,9 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
       supervisor_id: nextSupId,
       manager_id: nextMgrId,
     });
+    if (empId) {
+      setActiveStep(2);
+    }
   };
 
   // If opened with pre-filled employee_id but no supervisor, auto-resolve recommendations
@@ -217,6 +220,9 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
       supervisor_id: supId,
       manager_id: nextMgrId,
     });
+    if (supId) {
+      setActiveStep(3);
+    }
   };
 
   const handleLocalSubmit = (e: React.FormEvent) => {
@@ -242,9 +248,12 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
   const newSupLoad = currentSupLoad + 1;
   const activeError = localError || errorMessage;
 
+  const isStep1Done = Boolean(form.employee_id);
+  const isStep2Done = Boolean(form.supervisor_id);
+  const isStep3Done = Boolean(form.manager_id);
   const [activeStep, setActiveStep] = useState<1 | 2 | 3>(1);
 
-  // Auto-advance active step when form is filled, while allowing manual clicking
+  // Sync active step when modal opens or when resetting form
   useEffect(() => {
     if (!form.employee_id) {
       setActiveStep(1);
@@ -253,7 +262,13 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
     } else {
       setActiveStep(3);
     }
-  }, [form.employee_id, form.supervisor_id]);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!form.employee_id) {
+      setActiveStep(1);
+    }
+  }, [form.employee_id]);
 
   const focusStep = (stepNumber: 1 | 2 | 3) => {
     setActiveStep(stepNumber);
@@ -410,7 +425,7 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                   <div className="flex items-center gap-2">
                     <div
                       className={`w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center shrink-0 transition-colors ${
-                        activeStep === 1
+                        activeStep === 1 || isStep1Done
                           ? "bg-[#5239fa] text-white shadow-xs"
                           : "bg-[#dce3ec] text-slate-700"
                       }`}
@@ -430,7 +445,9 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
 
                 {/* Connecting Dashed Line 1 to 2 */}
                 <div className="pl-[21px] py-0.5">
-                  <div className={`w-0 border-l-2 border-dashed h-6 ${activeStep >= 1 ? "border-[#5239fa]" : "border-slate-300"}`}></div>
+                  <div className={`w-0 border-l-2 border-dashed h-6 transition-colors duration-200 ${
+                    isStep1Done || activeStep >= 2 ? "border-[#5239fa]" : "border-slate-300"
+                  }`}></div>
                 </div>
 
                 {/* Step 2 Item */}
@@ -445,7 +462,7 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                   <div className="flex items-center gap-2">
                     <div
                       className={`w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center shrink-0 transition-colors ${
-                        activeStep === 2
+                        activeStep === 2 || isStep2Done
                           ? "bg-[#5239fa] text-white shadow-xs"
                           : "bg-[#dce3ec] text-slate-700"
                       }`}
@@ -465,7 +482,9 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
 
                 {/* Connecting Dashed Line 2 to 3 */}
                 <div className="pl-[21px] py-0.5">
-                  <div className={`w-0 border-l-2 border-dashed h-6 ${activeStep >= 2 ? "border-[#5239fa]" : "border-slate-300"}`}></div>
+                  <div className={`w-0 border-l-2 border-dashed h-6 transition-colors duration-200 ${
+                    isStep2Done || activeStep >= 3 ? "border-[#5239fa]" : "border-slate-300"
+                  }`}></div>
                 </div>
 
                 {/* Step 3 Item */}
@@ -480,7 +499,7 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                   <div className="flex items-center gap-2">
                     <div
                       className={`w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center shrink-0 transition-colors ${
-                        activeStep === 3
+                        activeStep === 3 || isStep3Done
                           ? "bg-[#5239fa] text-white shadow-xs"
                           : "bg-[#dce3ec] text-slate-700"
                       }`}
@@ -533,6 +552,7 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                       id="modal-employee-select"
                       value={form.employee_id}
                       onChange={(e) => handleEmployeeChange(e.target.value)}
+                      onFocus={() => setActiveStep(1)}
                       required
                       className="w-full h-full py-1.5 px-3 bg-transparent text-xs sm:text-[13px] text-slate-800 font-medium focus:outline-none cursor-pointer appearance-none pr-8"
                     >
@@ -589,6 +609,7 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                       id="modal-supervisor-select"
                       value={form.supervisor_id}
                       onChange={(e) => handleSupervisorChange(e.target.value)}
+                      onFocus={() => setActiveStep(2)}
                       required
                       className="w-full h-full py-1.5 px-3 bg-transparent text-xs sm:text-[13px] text-slate-800 font-medium focus:outline-none cursor-pointer appearance-none pr-8"
                     >
@@ -737,7 +758,11 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                     <select
                       id="modal-manager-select"
                       value={form.manager_id}
-                      onChange={(e) => onFormChange({ ...form, manager_id: e.target.value })}
+                      onChange={(e) => {
+                        onFormChange({ ...form, manager_id: e.target.value });
+                        setActiveStep(3);
+                      }}
+                      onFocus={() => setActiveStep(3)}
                       required
                       className="w-full h-full py-1.5 px-3 bg-transparent text-xs sm:text-[13px] text-slate-800 font-medium focus:outline-none cursor-pointer appearance-none pr-8"
                     >
