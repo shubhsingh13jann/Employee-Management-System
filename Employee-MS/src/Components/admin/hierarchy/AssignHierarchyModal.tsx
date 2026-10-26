@@ -267,11 +267,11 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
       {/* Centered strictly within the right-side content portion (offsetting sidebar on md+) */}
       <div className="fixed inset-y-0 right-0 left-0 md:left-[240px] flex items-center justify-center p-3 sm:p-5 pointer-events-none">
         <div
-          className="w-full max-w-4xl lg:max-w-5xl bg-white rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 pointer-events-auto"
+          className="w-full max-w-4xl lg:max-w-[935px] bg-white rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 pointer-events-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header with Fluid Pastel Wave Background matching reference */}
-          <div className="relative px-5 sm:px-6 py-3.5 sm:py-4 bg-white flex items-center justify-between border-b border-slate-200 overflow-hidden shrink-0">
+          <div className="relative px-4 sm:px-5 py-3 sm:py-3.5 bg-white flex items-center justify-between border-b border-slate-200 overflow-hidden shrink-0">
             {/* Top-Right Fluid Pastel Wave Background */}
             <div className="absolute top-0 right-0 w-[420px] sm:w-[540px] h-full pointer-events-none overflow-hidden z-0">
               <svg
@@ -364,7 +364,7 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
 
         {/* Form Body: Left Stepper Navigation, Center Form Fields, and Right Live Hierarchy Preview */}
         <form onSubmit={handleLocalSubmit} className="flex flex-col flex-1 relative z-10 overflow-hidden">
-          <div className="px-5 sm:px-6 py-4 overflow-y-auto max-h-[calc(88vh-140px)] [scrollbar-width:thin]">
+          <div className="px-4 sm:px-5 py-3.5 overflow-y-auto max-h-[calc(88vh-140px)] [scrollbar-width:thin]">
             {/* Inline Error Alert if active */}
             {activeError && (
               <div className="mb-3.5 p-3 rounded-xl bg-rose-50 border border-rose-200/80 text-rose-800 text-xs sm:text-sm flex items-center justify-between gap-2.5 animate-in fade-in shadow-2xs">
@@ -386,19 +386,19 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
               </div>
             )}
 
-            <div className="flex flex-col md:flex-row gap-5 items-start">
+            <div className="flex flex-col md:flex-row gap-3.5 sm:gap-4 items-start">
               {/* 1. Left Vertical Stepper Navigation matching reference */}
-              <div className="hidden md:flex w-44 lg:w-48 shrink-0 flex-col py-1 select-none">
+              <div className="hidden md:flex w-48 lg:w-52 shrink-0 flex-col py-0.5 select-none">
                 {/* Step 1 Item */}
                 <div
                   onClick={() => focusStep(1)}
-                  className={`p-2.5 rounded-2xl transition-all cursor-pointer ${
+                  className={`px-2.5 py-2 rounded-xl transition-all cursor-pointer ${
                     activeStep === 1
                       ? "bg-indigo-50/80 border border-indigo-100 shadow-2xs"
                       : "hover:bg-slate-50/80"
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2">
                     <div
                       className={`w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center shrink-0 transition-colors ${
                         isStep1Done
@@ -422,20 +422,20 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                 </div>
 
                 {/* Connecting Dashed Line 1 to 2 */}
-                <div className="pl-5 py-1">
-                  <div className={`w-0 border-l-2 border-dashed h-7 ${isStep1Done ? "border-indigo-400" : "border-slate-300"}`}></div>
+                <div className="pl-[21px] py-0.5">
+                  <div className={`w-0 border-l-2 border-dashed h-6 ${isStep1Done ? "border-indigo-400" : "border-slate-300"}`}></div>
                 </div>
 
                 {/* Step 2 Item */}
                 <div
                   onClick={() => focusStep(2)}
-                  className={`p-2.5 rounded-2xl transition-all cursor-pointer ${
+                  className={`px-2.5 py-2 rounded-xl transition-all cursor-pointer ${
                     activeStep === 2
                       ? "bg-indigo-50/80 border border-indigo-100 shadow-2xs"
                       : "hover:bg-slate-50/80"
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2">
                     <div
                       className={`w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center shrink-0 transition-colors ${
                         isStep2Done
@@ -459,20 +459,20 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                 </div>
 
                 {/* Connecting Dashed Line 2 to 3 */}
-                <div className="pl-5 py-1">
-                  <div className={`w-0 border-l-2 border-dashed h-7 ${isStep2Done ? "border-indigo-400" : "border-slate-300"}`}></div>
+                <div className="pl-[21px] py-0.5">
+                  <div className={`w-0 border-l-2 border-dashed h-6 ${isStep2Done ? "border-indigo-400" : "border-slate-300"}`}></div>
                 </div>
 
                 {/* Step 3 Item */}
                 <div
                   onClick={() => focusStep(3)}
-                  className={`p-2.5 rounded-2xl transition-all cursor-pointer ${
+                  className={`px-2.5 py-2 rounded-xl transition-all cursor-pointer ${
                     activeStep === 3
                       ? "bg-indigo-50/80 border border-indigo-100 shadow-2xs"
                       : "hover:bg-slate-50/80"
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2">
                     <div
                       className={`w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center shrink-0 transition-colors ${
                         isStep3Done
@@ -772,7 +772,7 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
               </div>
 
               {/* Right Column: Live Hierarchy Preview Tree */}
-              <div className="hidden lg:flex w-72 lg:w-80 shrink-0 flex-col justify-between rounded-2xl border border-slate-200/90 bg-slate-50/70 p-3 sm:p-3.5 select-none shadow-2xs">
+              <div className="hidden lg:flex w-72 lg:w-[310px] shrink-0 flex-col justify-between rounded-2xl border border-slate-200/90 bg-slate-50/70 p-2.5 sm:p-3 select-none shadow-2xs">
                 {/* Header with Live Preview Badge */}
                 <div>
                   <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200/70">
@@ -909,7 +909,7 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
           </div>
 
           {/* Modal Footer Controls */}
-          <div className="px-5 sm:px-6 py-3 sm:py-3.5 bg-slate-50/50 border-t border-slate-200/90 flex items-center justify-end gap-2.5 relative z-10">
+          <div className="px-4 sm:px-5 py-2.5 sm:py-3 bg-slate-50/50 border-t border-slate-200/90 flex items-center justify-end gap-2.5 relative z-10">
             <button
               type="button"
               onClick={onClose}
