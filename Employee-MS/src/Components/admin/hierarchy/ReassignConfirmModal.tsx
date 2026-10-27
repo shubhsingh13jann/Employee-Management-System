@@ -151,19 +151,23 @@ export const ReassignConfirmModal: React.FC<ReassignConfirmModalProps> = ({
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          {/* Employee Info Card */}
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
-              {employee.employee_name ? employee.employee_name.charAt(0) : "E"}
+          {/* Employee Info Profile Card */}
+          <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-200/80 flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xl shadow-xs shrink-0 select-none">
+              {employee.employee_name ? employee.employee_name.charAt(0).toUpperCase() : "E"}
             </div>
             <div className="min-w-0 flex-1">
-              <h4 className="font-bold text-slate-900 text-sm mb-0 truncate">
+              <h4 className="font-bold text-slate-900 text-base mb-0 tracking-tight truncate">
                 {employee.employee_name}
               </h4>
-              <p className="text-xs text-slate-500 mb-0 truncate">{employee.employee_email}</p>
-              <span className="inline-block px-2 py-0.5 mt-1 rounded text-[10px] font-semibold bg-slate-200 text-slate-700">
-                EMP-{String(employee.employee_id).padStart(4, "0")} • {employee.department_name || "General"}
-              </span>
+              <p className="text-xs text-slate-400 mb-0 font-normal mt-0.5 truncate">
+                {employee.employee_email || "employee@company.com"}
+              </p>
+              <div className="mt-2 flex items-center gap-2">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-slate-200/80 text-slate-600">
+                  EMP-{String(employee.employee_id).padStart(4, "0")} • {employee.department_name || "Accounts"}
+                </span>
+              </div>
             </div>
           </div>
 
