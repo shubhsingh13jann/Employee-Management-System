@@ -236,46 +236,59 @@ export const ReassignConfirmModal: React.FC<ReassignConfirmModalProps> = ({
             </div>
           </div>
 
-          {/* Supervisor Selection */}
+          {/* Supervisor Selection with Icon Prefix */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+            <label className="block text-xs font-bold text-slate-800 mb-1.5">
               New Team Lead / Supervisor <span className="text-rose-500">*</span>
             </label>
-            <select
-              value={selectedSupervisorId}
-              onChange={(e) => setSelectedSupervisorId(e.target.value)}
-              required
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 bg-white"
-            >
-              <option value="">Select Supervisor...</option>
-              {supervisors.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} {s.department ? `(${s.department})` : ""}
-                </option>
-              ))}
-            </select>
+            <div className="relative flex items-center rounded-xl border border-slate-200 bg-white shadow-2xs hover:border-slate-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all overflow-hidden">
+              <div className="w-11 h-11 flex items-center justify-center bg-slate-50/70 border-r border-slate-100 text-blue-600 text-base shrink-0">
+                <i className="bi bi-person-fill"></i>
+              </div>
+              <select
+                value={selectedSupervisorId}
+                onChange={(e) => setSelectedSupervisorId(e.target.value)}
+                required
+                className="w-full h-11 pl-3.5 pr-10 bg-transparent text-xs font-semibold text-slate-800 appearance-none focus:outline-hidden cursor-pointer"
+              >
+                <option value="">Select Supervisor...</option>
+                {supervisors.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} {s.department ? `(${s.department})` : ""}
+                  </option>
+                ))}
+              </select>
+              <i className="bi bi-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 text-xs"></i>
+            </div>
           </div>
 
-          {/* Manager Selection (Optional Override) */}
+          {/* Manager Selection (Optional Override) with Icon Prefix */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+            <label className="block text-xs font-bold text-slate-800 mb-1.5">
               Department Manager (Optional Override)
             </label>
-            <select
-              value={selectedManagerId}
-              onChange={(e) => setSelectedManagerId(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 bg-white"
-            >
-              <option value="">Auto-resolve from Department / Supervisor</option>
-              {managers.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name} {m.department ? `(${m.department})` : ""}
-                </option>
-              ))}
-            </select>
-            <p className="text-[11px] text-slate-400 mt-1 mb-0">
-              If left blank, the manager will be automatically resolved from the supervisor&apos;s department.
-            </p>
+            <div className="relative flex items-center rounded-xl border border-slate-200 bg-white shadow-2xs hover:border-slate-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all overflow-hidden">
+              <div className="w-11 h-11 flex items-center justify-center bg-slate-50/70 border-r border-slate-100 text-blue-600 text-base shrink-0">
+                <i className="bi bi-building-fill"></i>
+              </div>
+              <select
+                value={selectedManagerId}
+                onChange={(e) => setSelectedManagerId(e.target.value)}
+                className="w-full h-11 pl-3.5 pr-10 bg-transparent text-xs font-semibold text-slate-800 appearance-none focus:outline-hidden cursor-pointer"
+              >
+                <option value="">Auto-resolve from Department / Supervisor</option>
+                {managers.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name} {m.department ? `(${m.department})` : ""}
+                  </option>
+                ))}
+              </select>
+              <i className="bi bi-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 text-xs"></i>
+            </div>
+            <div className="flex items-center gap-1.5 mt-2 text-xs text-slate-500 font-normal">
+              <i className="bi bi-info-circle text-blue-500 text-sm shrink-0"></i>
+              <span>If left blank, the manager will be automatically resolved from the supervisor&apos;s department.</span>
+            </div>
           </div>
 
           {/* Actions */}
