@@ -171,30 +171,68 @@ export const ReassignConfirmModal: React.FC<ReassignConfirmModalProps> = ({
             </div>
           </div>
 
-          {/* Current vs Target Reporting Preview */}
-          <div className="grid grid-cols-2 gap-3 text-xs">
-            <div className="p-3 rounded-xl bg-rose-50/70 border border-rose-100">
-              <span className="text-[10px] font-bold text-rose-600 block uppercase tracking-wider mb-1">
-                Current Chain
-              </span>
-              <p className="font-semibold text-slate-800 mb-0.5 truncate">
-                👷 {currentSupervisorName}
-              </p>
-              <p className="text-[11px] text-slate-500 mb-0 truncate">
-                👔 {currentManagerName}
-              </p>
+          {/* Current vs Target Reporting Preview Comparison Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Current Chain */}
+            <div className="p-4 rounded-2xl bg-[#fef4f5] border border-rose-200/80">
+              <div className="flex items-center gap-2 mb-3.5">
+                <div className="w-7 h-7 rounded-lg bg-rose-100/90 text-rose-500 flex items-center justify-center text-xs shadow-2xs shrink-0">
+                  <i className="bi bi-diagram-3-fill"></i>
+                </div>
+                <span className="text-xs font-black tracking-wider text-rose-600 uppercase">
+                  Current Chain
+                </span>
+              </div>
+              <div className="relative pl-1 space-y-3">
+                <div className="absolute left-[19px] top-[16px] bottom-[16px] w-px bg-rose-200 pointer-events-none"></div>
+                <div className="flex items-center gap-3 relative z-10">
+                  <div className="w-8 h-8 rounded-xl bg-amber-100/90 text-amber-500 flex items-center justify-center text-sm shadow-2xs shrink-0">
+                    <i className="bi bi-person-fill"></i>
+                  </div>
+                  <span className="text-xs font-semibold text-slate-800 truncate">
+                    {currentSupervisorName}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 relative z-10">
+                  <div className="w-8 h-8 rounded-xl bg-blue-100/90 text-blue-500 flex items-center justify-center text-sm shadow-2xs shrink-0">
+                    <i className="bi bi-building-fill"></i>
+                  </div>
+                  <span className="text-xs font-semibold text-slate-800 truncate">
+                    {currentManagerName}
+                  </span>
+                </div>
+              </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-100">
-              <span className="text-[10px] font-bold text-emerald-600 block uppercase tracking-wider mb-1">
-                Target Chain
-              </span>
-              <p className="font-semibold text-slate-800 mb-0.5 truncate">
-                👷 {targetSupervisorObj?.name || "Select Lead..."}
-              </p>
-              <p className="text-[11px] text-slate-500 mb-0 truncate">
-                👔 {targetManagerObj?.name || "Auto / Inherited"}
-              </p>
+            {/* Target Chain */}
+            <div className="p-4 rounded-2xl bg-[#f1fdf8] border border-emerald-200/80">
+              <div className="flex items-center gap-2 mb-3.5">
+                <div className="w-7 h-7 rounded-lg bg-emerald-100/90 text-emerald-600 flex items-center justify-center text-xs shadow-2xs shrink-0">
+                  <i className="bi bi-diagram-3-fill"></i>
+                </div>
+                <span className="text-xs font-black tracking-wider text-emerald-600 uppercase">
+                  Target Chain
+                </span>
+              </div>
+              <div className="relative pl-1 space-y-3">
+                <div className="absolute left-[19px] top-[16px] bottom-[16px] w-px bg-emerald-200 pointer-events-none"></div>
+                <div className="flex items-center gap-3 relative z-10">
+                  <div className="w-8 h-8 rounded-xl bg-amber-100/90 text-amber-500 flex items-center justify-center text-sm shadow-2xs shrink-0">
+                    <i className="bi bi-person-fill"></i>
+                  </div>
+                  <span className="text-xs font-semibold text-slate-800 truncate">
+                    {targetSupervisorObj?.name || "Select Lead..."}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 relative z-10">
+                  <div className="w-8 h-8 rounded-xl bg-blue-100/90 text-blue-500 flex items-center justify-center text-sm shadow-2xs shrink-0">
+                    <i className="bi bi-building-fill"></i>
+                  </div>
+                  <span className="text-xs font-semibold text-slate-800 truncate">
+                    {targetManagerObj?.name || (targetSupervisorObj ? `${targetSupervisorObj.name} (Resolved)` : "Auto / Inherited")}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
