@@ -73,30 +73,77 @@ export const ReassignConfirmModal: React.FC<ReassignConfirmModalProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150">
       <div
-        className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150"
+        className="bg-white rounded-3xl max-w-3xl w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="px-6 py-4.5 bg-gradient-to-r from-indigo-900 to-indigo-800 text-white flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-indigo-200">
-              <i className="bi bi-arrow-left-right text-base"></i>
+        {/* Header with Fluid Pastel Wave Background matching reference */}
+        <div className="relative px-5 sm:px-6 py-4 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0">
+          {/* Top-Right Fluid Pastel Wave Background */}
+          <div className="absolute top-0 right-0 w-[420px] sm:w-[500px] h-full pointer-events-none overflow-hidden z-0">
+            <svg
+              viewBox="0 0 500 74"
+              fill="none"
+              preserveAspectRatio="none"
+              className="w-full h-full"
+            >
+              <defs>
+                <mask id="reassignWaveFadeMask">
+                  <linearGradient id="reassignWaveFadeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="black" />
+                    <stop offset="18%" stopColor="white" />
+                    <stop offset="100%" stopColor="white" />
+                  </linearGradient>
+                  <rect width="500" height="74" fill="url(#reassignWaveFadeGrad)" />
+                </mask>
+                <linearGradient id="reassignWaveGrad1" x1="0%" y1="0%" x2="100%" y2="70%">
+                  <stop offset="0%" stopColor="#E0E7FF" stopOpacity="0.2" />
+                  <stop offset="30%" stopColor="#D7E0FC" stopOpacity="0.85" />
+                  <stop offset="65%" stopColor="#E0E7FE" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="#EDE9FE" stopOpacity="0.7" />
+                </linearGradient>
+                <linearGradient id="reassignWaveGrad2" x1="15%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#D8E2FB" stopOpacity="0.3" />
+                  <stop offset="30%" stopColor="#C7D2FE" stopOpacity="0.85" />
+                  <stop offset="60%" stopColor="#DDD6FE" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="#F5F3FF" stopOpacity="0.5" />
+                </linearGradient>
+              </defs>
+              <g mask="url(#reassignWaveFadeMask)">
+                <path
+                  d="M0,32 C70,12 140,52 230,22 C320,-8 390,42 500,12 L500,0 L0,0 Z"
+                  fill="url(#reassignWaveGrad1)"
+                />
+                <path
+                  d="M60,48 C150,18 240,64 340,28 C410,2 470,38 500,24 L500,0 L60,0 Z"
+                  fill="url(#reassignWaveGrad2)"
+                  opacity="0.85"
+                />
+              </g>
+            </svg>
+          </div>
+
+          {/* Left: Reassignment Icon + Title & Subtitle */}
+          <div className="flex items-center gap-3.5 relative z-10 min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-indigo-50 border border-indigo-100/90 text-indigo-600 flex items-center justify-center text-lg shadow-2xs shrink-0">
+              <i className="bi bi-arrow-left-right text-indigo-600 text-lg"></i>
             </div>
-            <div>
-              <h3 className="font-bold text-base text-white mb-0">
+            <div className="min-w-0">
+              <h3 className="font-bold text-lg text-slate-900 tracking-tight leading-snug mb-0 truncate">
                 Confirm Reporting Line Reassignment
               </h3>
-              <p className="text-xs text-indigo-200 mb-0">
+              <p className="text-xs text-slate-400 mb-0 font-normal leading-tight mt-0.5 truncate">
                 Reallocate staff reporting hierarchy and update chain of command
               </p>
             </div>
           </div>
+
+          {/* Close button */}
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-all cursor-pointer shadow-xs relative z-10 shrink-0"
           >
             <i className="bi bi-x-lg text-xs"></i>
           </button>
