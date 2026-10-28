@@ -90,7 +90,7 @@ export const ReassignConfirmModal: React.FC<ReassignConfirmModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header with Fluid Pastel Wave Background matching reference & other modals */}
-        <div className="relative px-5 sm:px-6 py-3 sm:py-3.5 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0">
+        <div className="relative px-4 sm:px-5 py-3 sm:py-3.5 bg-white flex items-center justify-between border-b border-slate-200 overflow-hidden shrink-0">
           {/* Top-Right Fluid Pastel Wave Background */}
           <div className="absolute top-0 right-0 w-[440px] sm:w-[560px] h-full pointer-events-none overflow-hidden z-0">
             <svg
@@ -159,10 +159,10 @@ export const ReassignConfirmModal: React.FC<ReassignConfirmModalProps> = ({
               <i className="bi bi-arrow-left-right text-indigo-600 text-lg"></i>
             </div>
             <div className="min-w-0">
-              <h3 className="font-bold text-base sm:text-lg text-slate-900 tracking-tight leading-snug mb-0 truncate">
+              <h3 className="font-bold text-base sm:text-lg text-slate-900 tracking-tight leading-normal mb-0 truncate">
                 Confirm Reporting Line Reassignment
               </h3>
-              <p className="text-[11px] sm:text-xs text-slate-400 mb-0 font-normal leading-tight mt-0.5 truncate">
+              <p className="text-[11px] sm:text-xs text-slate-400 mb-0 font-normal leading-normal mt-0.5 pb-0.5 truncate">
                 Reallocate staff reporting hierarchy and update chain of command
               </p>
             </div>
@@ -180,7 +180,7 @@ export const ReassignConfirmModal: React.FC<ReassignConfirmModalProps> = ({
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="flex flex-col">
-          <div className="p-4 sm:p-5 space-y-3 sm:space-y-3.5">
+          <div className="px-4 sm:px-5 py-3.5 sm:py-4 space-y-3 sm:space-y-3.5">
             {/* Employee Info Profile Card */}
             <div className="p-3 sm:p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 flex items-center gap-3.5">
               <div className="w-12 h-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg shadow-xs shrink-0 select-none">
@@ -323,7 +323,7 @@ export const ReassignConfirmModal: React.FC<ReassignConfirmModalProps> = ({
           </div>
 
           {/* Actions Footer - Dedicated Full-Width Bottom Bar */}
-          <div className="px-5 sm:px-6 py-3 sm:py-3.5 bg-slate-50/50 border-t border-slate-100 flex items-center justify-end gap-2.5 shrink-0">
+          <div className="px-4 sm:px-5 py-3 sm:py-3.5 bg-slate-50/50 border-t border-slate-200 flex items-center justify-end gap-2.5 shrink-0">
             <button
               type="button"
               onClick={onClose}
