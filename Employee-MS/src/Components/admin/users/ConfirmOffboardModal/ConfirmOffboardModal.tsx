@@ -77,30 +77,67 @@ export const ConfirmOffboardModal: React.FC<ConfirmOffboardModalProps> = ({
         style={{ maxWidth: "672px" }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top Right Corner Wave SVG */}
-        <svg className="top-right-wave" viewBox="0 0 220 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M40 0C80 40 140 30 180 15C200 7.5 210 0 220 0V180C190 140 150 110 100 130C50 150 20 110 0 80V0H40Z" fill="url(#pinkGradTop)" opacity="0.12" />
-          <path d="M100 0C140 25 180 35 220 10V120C190 90 160 80 120 100C80 120 40 80 0 50V0H100Z" fill="url(#pinkGradTop)" opacity="0.18" />
-          <path d="M150 0C180 20 200 15 220 5V60C200 40 180 45 160 30C140 15 100 20 60 0H150Z" fill="url(#pinkGradTop)" opacity="0.25" />
-          <defs>
-            <linearGradient id="pinkGradTop" x1="0" y1="0" x2="220" y2="180" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#f43f5e" />
-              <stop offset="1" stopColor="#fb7185" stopOpacity="0.2" />
-            </linearGradient>
-          </defs>
-        </svg>
+        {/* Top-Right Fluid Pastel Rose Wave Background matching Unlink Hierarchy modal */}
+        <div className="absolute top-0 right-0 w-[360px] sm:w-[460px] h-[78px] sm:h-[84px] pointer-events-none overflow-hidden z-0">
+          <svg
+            viewBox="0 0 500 74"
+            fill="none"
+            preserveAspectRatio="none"
+            className="w-full h-full"
+          >
+            <defs>
+              {/* Left fade mask to seamlessly blend into pure white without harsh edges */}
+              <mask id="offboardWaveFadeMask">
+                <linearGradient id="offboardWaveFadeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="black" />
+                  <stop offset="22%" stopColor="white" />
+                  <stop offset="100%" stopColor="white" />
+                </linearGradient>
+                <rect width="500" height="74" fill="url(#offboardWaveFadeGrad)" />
+              </mask>
 
-        {/* Bottom Left Corner Wave SVG */}
-        <svg className="bottom-left-wave" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0 160V60C30 80 70 90 110 70C150 50 180 90 200 120V160H0Z" fill="url(#pinkGradBot)" opacity="0.15" />
-          <path d="M0 160V100C20 115 50 120 80 105C120 90 150 120 170 140V160H0Z" fill="url(#pinkGradBot)" opacity="0.22" />
-          <defs>
-            <linearGradient id="pinkGradBot" x1="0" y1="160" x2="200" y2="0" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#f43f5e" />
-              <stop offset="1" stopColor="#fda4af" stopOpacity="0.1" />
-            </linearGradient>
-          </defs>
-        </svg>
+              {/* Wave 1: Soft Rose Blush */}
+              <linearGradient id="offboardWaveGrad1" x1="0%" y1="0%" x2="100%" y2="70%">
+                <stop offset="0%" stopColor="#FFE4E6" stopOpacity="0.25" />
+                <stop offset="30%" stopColor="#FECDD3" stopOpacity="0.85" />
+                <stop offset="65%" stopColor="#FFE4E6" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="#FFF1F2" stopOpacity="0.7" />
+              </linearGradient>
+
+              {/* Wave 2: Richer Rose / Pink Sweep */}
+              <linearGradient id="offboardWaveGrad2" x1="15%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#FFE4E6" stopOpacity="0.3" />
+                <stop offset="30%" stopColor="#FDA4AF" stopOpacity="0.7" />
+                <stop offset="60%" stopColor="#FECDD3" stopOpacity="0.85" />
+                <stop offset="85%" stopColor="#FFE4E6" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="#FFF1F2" stopOpacity="0.4" />
+              </linearGradient>
+
+              {/* Wave 3: Subtle Warm Pink Ribbon Glow */}
+              <linearGradient id="offboardWaveGrad3" x1="30%" y1="10%" x2="95%" y2="100%">
+                <stop offset="0%" stopColor="#FFF1F2" stopOpacity="0.5" />
+                <stop offset="45%" stopColor="#FECDD3" stopOpacity="0.75" />
+                <stop offset="100%" stopColor="#FDA4AF" stopOpacity="0.5" />
+              </linearGradient>
+            </defs>
+
+            <g mask="url(#offboardWaveFadeMask)">
+              <path
+                d="M0 26 C60 10 120 8 180 18 C245 28 305 50 370 38 C425 28 465 10 500 20 V0 H0 Z"
+                fill="url(#offboardWaveGrad1)"
+              />
+              <path
+                d="M0 50 C80 34 145 12 215 10 C280 8 330 32 390 44 C445 54 475 38 500 28 V0 H0 Z"
+                fill="url(#offboardWaveGrad2)"
+              />
+              <path
+                d="M130 38 C195 26 260 48 325 56 C385 64 445 50 500 38 V8 C470 20 420 18 370 24 C310 34 235 32 130 38 Z"
+                fill="url(#offboardWaveGrad3)"
+                opacity="0.75"
+              />
+            </g>
+          </svg>
+        </div>
 
         {/* Close (X) Button */}
         <button
