@@ -89,10 +89,10 @@ export const ReassignConfirmModal: React.FC<ReassignConfirmModalProps> = ({
         className="bg-white rounded-3xl max-w-4xl lg:max-w-[960px] w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header with Fluid Pastel Wave Background matching reference */}
+        {/* Header with Fluid Pastel Wave Background matching reference & other modals */}
         <div className="relative px-5 sm:px-6 py-3 sm:py-3.5 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0">
           {/* Top-Right Fluid Pastel Wave Background */}
-          <div className="absolute top-0 right-0 w-[420px] sm:w-[500px] h-full pointer-events-none overflow-hidden z-0">
+          <div className="absolute top-0 right-0 w-[440px] sm:w-[560px] h-full pointer-events-none overflow-hidden z-0">
             <svg
               viewBox="0 0 500 74"
               fill="none"
@@ -100,36 +100,54 @@ export const ReassignConfirmModal: React.FC<ReassignConfirmModalProps> = ({
               className="w-full h-full"
             >
               <defs>
+                {/* Left fade mask to seamlessly blend into pure white without harsh edges */}
                 <mask id="reassignWaveFadeMask">
                   <linearGradient id="reassignWaveFadeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stopColor="black" />
-                    <stop offset="18%" stopColor="white" />
+                    <stop offset="22%" stopColor="white" />
                     <stop offset="100%" stopColor="white" />
                   </linearGradient>
                   <rect width="500" height="74" fill="url(#reassignWaveFadeGrad)" />
                 </mask>
+
+                {/* Wave 1: Soft Sky-Blue / Periwinkle Gradient */}
                 <linearGradient id="reassignWaveGrad1" x1="0%" y1="0%" x2="100%" y2="70%">
                   <stop offset="0%" stopColor="#E0E7FF" stopOpacity="0.2" />
                   <stop offset="30%" stopColor="#D7E0FC" stopOpacity="0.85" />
                   <stop offset="65%" stopColor="#E0E7FE" stopOpacity="0.9" />
                   <stop offset="100%" stopColor="#EDE9FE" stopOpacity="0.7" />
                 </linearGradient>
+
+                {/* Wave 2: Richer Lavender / Violet Sweep */}
                 <linearGradient id="reassignWaveGrad2" x1="15%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="#D8E2FB" stopOpacity="0.3" />
                   <stop offset="30%" stopColor="#C7D2FE" stopOpacity="0.85" />
                   <stop offset="60%" stopColor="#DDD6FE" stopOpacity="0.9" />
-                  <stop offset="100%" stopColor="#F5F3FF" stopOpacity="0.5" />
+                  <stop offset="85%" stopColor="#E9D5FF" stopOpacity="0.85" />
+                  <stop offset="100%" stopColor="#F3E8FF" stopOpacity="0.4" />
+                </linearGradient>
+
+                {/* Wave 3: Subtle Pastel Ribbon Glow */}
+                <linearGradient id="reassignWaveGrad3" x1="30%" y1="10%" x2="95%" y2="100%">
+                  <stop offset="0%" stopColor="#E0F2FE" stopOpacity="0.5" />
+                  <stop offset="45%" stopColor="#DDD6FE" stopOpacity="0.75" />
+                  <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0.7" />
                 </linearGradient>
               </defs>
+
               <g mask="url(#reassignWaveFadeMask)">
                 <path
-                  d="M0,32 C70,12 140,52 230,22 C320,-8 390,42 500,12 L500,0 L0,0 Z"
+                  d="M0 26 C60 10 120 8 180 18 C245 28 305 50 370 38 C425 28 465 10 500 20 V0 H0 Z"
                   fill="url(#reassignWaveGrad1)"
                 />
                 <path
-                  d="M60,48 C150,18 240,64 340,28 C410,2 470,38 500,24 L500,0 L60,0 Z"
+                  d="M0 50 C80 34 145 12 215 10 C280 8 330 32 390 44 C445 54 475 38 500 28 V0 H0 Z"
                   fill="url(#reassignWaveGrad2)"
-                  opacity="0.85"
+                />
+                <path
+                  d="M130 38 C195 26 260 48 325 56 C385 64 445 50 500 38 V8 C470 20 420 18 370 24 C310 34 235 32 130 38 Z"
+                  fill="url(#reassignWaveGrad3)"
+                  opacity="0.75"
                 />
               </g>
             </svg>
