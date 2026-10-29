@@ -17,3 +17,4 @@ export * from "./AutoAssignWizardModal";
 export * from "./HierarchyEmployeeDossierModal";
 export * from "./SwapReportingConfirmModal";
 export * from "./HierarchyEmptyStateOnboarding";
+export * from "./SquadBroadcastModal";

@@ -16,6 +16,7 @@ import {
   BatchOnboardModal,
   HierarchyAuditModal,
   AutoAssignWizardModal,
+  SquadBroadcastModal,
   HierarchyEmployeeDossierModal,
   SwapReportingConfirmModal,
 } from "../../Components/admin/hierarchy";
@@ -31,6 +32,7 @@ const HierarchyMapping = () => {
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
   const [isAutoAssignWizardOpen, setIsAutoAssignWizardOpen] = useState(false);
+  const [broadcastSquadTarget, setBroadcastSquadTarget] = useState<any | null>(null);
   const [selectedDossierEmployee, setSelectedDossierEmployee] = useState<any | null>(null);
   const [msg, setMsg] = useState({ type: "", text: "" });
   const [searchTerm, setSearchTerm] = useState("");
@@ -664,6 +666,7 @@ const HierarchyMapping = () => {
             isPreviewEmptyState={isPreviewEmptyState}
             onExitSimulation={() => setIsPreviewEmptyState(false)}
             onUpdateSupervisorCapacity={handleUpdateSupervisorCapacity}
+            onBroadcastSquad={(squad: any) => setBroadcastSquadTarget(squad)}
           />
         ) : viewMode === "squad" ? (
           <HierarchySquadCardsView
@@ -896,6 +899,14 @@ const HierarchyMapping = () => {
         mappings={hierarchy}
         onExecuteAutoAssign={handleExecuteAutoAssign}
         saving={saving}
+      />
+
+      {/* Targeted Squad Broadcast Modal */}
+      <SquadBroadcastModal
+        isOpen={Boolean(broadcastSquadTarget)}
+        onClose={() => setBroadcastSquadTarget(null)}
+        squad={broadcastSquadTarget}
+        onSuccess={(msgText) => setMsg({ type: "success", text: msgText })}
       />
 
       {/* Interactive Employee Dossier Modal */}

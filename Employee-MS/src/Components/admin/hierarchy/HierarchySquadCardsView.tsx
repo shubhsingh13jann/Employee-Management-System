@@ -36,6 +36,7 @@ export interface HierarchySquadCardsViewProps {
   onToggleSelectStaff?: (id: string | number) => void;
   onClearSelection?: () => void;
   onUpdateSupervisorCapacity?: (supervisorId: string | number, maxCapacity: number) => Promise<void>;
+  onBroadcastSquad?: (squad: SquadGroup) => void;
 }
 
 export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = ({
@@ -56,6 +57,7 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
   onToggleSelectStaff,
   onClearSelection,
   onUpdateSupervisorCapacity,
+  onBroadcastSquad,
 }) => {
   const showCheckboxes = isSelectMode || (selectedStaffIds && selectedStaffIds.length > 0);
   const [collapsedSquads, setCollapsedSquads] = useState<Set<string>>(new Set());
@@ -819,6 +821,19 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold border shadow-2xs ${capMeta.bg}`}>
                           {squad.members.length}/{squad.supervisorMaxCapacity || 8} members
                         </span>
+                      )}
+                      {onBroadcastSquad && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onBroadcastSquad(squad);
+                          }}
+                          className="p-1 rounded-md text-slate-500 hover:text-indigo-600 hover:bg-white transition-all cursor-pointer shadow-2xs border border-transparent hover:border-indigo-200"
+                          title="Broadcast announcement to this squad"
+                        >
+                          <i className="bi bi-megaphone text-xs"></i>
+                        </button>
                       )}
                       <button
                         type="button"
