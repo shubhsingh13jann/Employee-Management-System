@@ -610,9 +610,102 @@ ${safeStyles}
     }
   };
 
-  // Auto-expand branches when search term matches any employee, supervisor, or manager
+  // Smart search match indexing & camera auto-centering states
+  const [currentMatchIndex, setCurrentMatchIndex] = useState<number>(0);
+  const [activeFocusedNodeId, setActiveFocusedNodeId] = useState<string | null>(null);
+
+  // Compute ordered array of matching DOM IDs across tree
+  const matchingNodeIds = useMemo(() => {
+    if (!searchTerm.trim()) return [];
+    const q = searchTerm.toLowerCase();
+    const ids: string[] = [];
+
+    managersTree.forEach((m) => {
+      const mgrMatch =
+        m.name?.toLowerCase().includes(q) ||
+        m.department?.toLowerCase().includes(q);
+      if (mgrMatch) {
+        ids.push(`mgr-${m.id}`);
+      }
+
+      Array.from(m.supervisors.values()).forEach((s) => {
+        const supMatch =
+          s.name?.toLowerCase().includes(q) ||
+          s.department?.toLowerCase().includes(q);
+        if (supMatch) {
+          ids.push(`sup-${s.id}`);
+        }
+
+        s.employees.forEach((e) => {
+          const empMatch =
+            e.employee_name?.toLowerCase().includes(q) ||
+            e.employee_email?.toLowerCase().includes(q) ||
+            e.department_name?.toLowerCase().includes(q);
+          if (empMatch) {
+            ids.push(`emp-${e.employee_id}`);
+          }
+        });
+      });
+    });
+
+    return ids;
+  }, [searchTerm, managersTree]);
+
+  // Center canvas viewport on a target DOM node with smooth camera flight
+  const centerOnNode = (nodeId: string) => {
+    setActiveFocusedNodeId(nodeId);
+
+    // Expand ancestor branches if the target node is inside a collapsed branch
+    setCollapsedNodes((prev) => {
+      const next = new Set(prev);
+      let changed = false;
+
+      managersTree.forEach((m) => {
+        Array.from(m.supervisors.values()).forEach((s) => {
+          const hasEmp = s.employees.some((e) => `emp-${e.employee_id}` === nodeId);
+          if (hasEmp || `sup-${s.id}` === nodeId) {
+            if (next.has(`mgr-${m.id}`)) {
+              next.delete(`mgr-${m.id}`);
+              changed = true;
+            }
+          }
+          if (hasEmp && next.has(`sup-${s.id}`)) {
+            next.delete(`sup-${s.id}`);
+            changed = true;
+          }
+        });
+      });
+
+      return changed ? next : prev;
+    });
+
+    // Let the DOM update then calculate viewport delta and pan
+    setTimeout(() => {
+      const el = document.getElementById(nodeId);
+      const canvasEl = canvasRef.current;
+      if (!el || !canvasEl) return;
+
+      const elRect = el.getBoundingClientRect();
+      const canvasRect = canvasEl.getBoundingClientRect();
+
+      const deltaX = canvasRect.left + canvasRect.width / 2 - (elRect.left + elRect.width / 2);
+      const deltaY = canvasRect.top + canvasRect.height / 2 - (elRect.top + elRect.height / 2);
+
+      setPan((prev) => ({
+        x: Math.round(prev.x + deltaX),
+        y: Math.round(prev.y + deltaY),
+      }));
+    }, 60);
+  };
+
+  // Auto-expand branches and auto-center on first match when search term changes
   useEffect(() => {
-    if (!searchTerm.trim()) return;
+    if (!searchTerm.trim()) {
+      setActiveFocusedNodeId(null);
+      setCurrentMatchIndex(0);
+      return;
+    }
+
     const query = searchTerm.toLowerCase();
     setCollapsedNodes((prev) => {
       const next = new Set(prev);
@@ -633,7 +726,28 @@ ${safeStyles}
       });
       return next;
     });
-  }, [searchTerm, managersTree]);
+
+    if (matchingNodeIds.length > 0) {
+      setCurrentMatchIndex(0);
+      centerOnNode(matchingNodeIds[0]);
+    } else {
+      setActiveFocusedNodeId(null);
+    }
+  }, [searchTerm, matchingNodeIds]);
+
+  const handleNextMatch = () => {
+    if (matchingNodeIds.length === 0) return;
+    const nextIdx = (currentMatchIndex + 1) % matchingNodeIds.length;
+    setCurrentMatchIndex(nextIdx);
+    centerOnNode(matchingNodeIds[nextIdx]);
+  };
+
+  const handlePrevMatch = () => {
+    if (matchingNodeIds.length === 0) return;
+    const prevIdx = (currentMatchIndex - 1 + matchingNodeIds.length) % matchingNodeIds.length;
+    setCurrentMatchIndex(prevIdx);
+    centerOnNode(matchingNodeIds[prevIdx]);
+  };
 
   // Auto-fit to screen on load and when tree structure updates
   useEffect(() => {
@@ -1056,6 +1170,41 @@ ${safeStyles}
           isPanning ? "cursor-grabbing" : "cursor-grab"
         }`}
       >
+        {/* Floating Search Auto-Centering HUD Navigator */}
+        {matchingNodeIds.length > 0 && (
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-white/95 backdrop-blur-md border border-amber-300 shadow-lg rounded-full px-3 py-1 text-xs text-slate-800 animate-in fade-in slide-in-from-top-2 duration-150">
+            <div className="flex items-center gap-1 text-amber-600 font-bold text-[11px]">
+              <i className="bi bi-search text-xs"></i>
+              <span>Match {currentMatchIndex + 1} of {matchingNodeIds.length}</span>
+            </div>
+            <div className="w-px h-3.5 bg-slate-200 mx-1"></div>
+            <button
+              type="button"
+              onClick={handlePrevMatch}
+              className="w-6 h-6 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
+              title="Previous search match (Shift + Enter)"
+            >
+              <i className="bi bi-chevron-left text-xs"></i>
+            </button>
+            <button
+              type="button"
+              onClick={handleNextMatch}
+              className="w-6 h-6 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
+              title="Next search match (Enter)"
+            >
+              <i className="bi bi-chevron-right text-xs"></i>
+            </button>
+            <button
+              type="button"
+              onClick={() => centerOnNode(matchingNodeIds[currentMatchIndex])}
+              className="px-2 py-0.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-[10px] flex items-center gap-1 shadow-2xs transition-colors cursor-pointer ml-0.5"
+              title="Focus and center camera on this node"
+            >
+              <i className="bi bi-crosshair text-[10px]"></i>
+              <span>Center</span>
+            </button>
+          </div>
+        )}
         {managersTree.length === 0 || isPreviewEmptyState ? (
           <div className="p-4 sm:p-8 w-full max-w-4xl mx-auto flex items-center justify-center min-h-[460px]">
             <HierarchyEmptyStateOnboarding
@@ -1069,7 +1218,9 @@ ${safeStyles}
         ) : (
           <div
             ref={contentRef}
-            className="flex flex-col items-center min-w-max px-8 transition-transform duration-75 ease-out origin-top"
+            className={`flex flex-col items-center min-w-max px-8 origin-top ${
+              isPanning ? "transition-none" : "transition-transform duration-300 ease-out"
+            }`}
             style={{
               transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
               transformOrigin: "top center",
@@ -1138,6 +1289,7 @@ ${safeStyles}
 
                     {/* Manager Node Card (Drop target for reallocation) */}
                     <div
+                      id={mgrKey}
                       onDragOver={(e) => {
                         e.preventDefault();
                         e.dataTransfer.dropEffect = "move";
@@ -1166,7 +1318,9 @@ ${safeStyles}
                         }
                       }}
                       className={`w-64 sm:w-72 p-3 rounded-xl bg-white transition-all flex flex-col gap-2 relative group border-t-4 ${
-                        isMgrDropTarget
+                        activeFocusedNodeId === mgrKey
+                          ? "ring-4 ring-amber-400 ring-offset-2 animate-pulse shadow-xl shadow-amber-500/40 z-30 border-t-amber-500"
+                          : isMgrDropTarget
                           ? "ring-4 ring-indigo-400 border-2 border-dashed border-indigo-600 bg-indigo-50/90 scale-105 shadow-xl"
                           : isMgrMatch
                           ? "border-amber-400 ring-2 ring-amber-300 shadow-md border-t-amber-500"
@@ -1280,6 +1434,7 @@ ${safeStyles}
 
                                 {/* Supervisor Node Card (Drop target for reporting line reallocation) */}
                                 <div
+                                  id={supKey}
                                   onDragOver={(e) => {
                                     e.preventDefault();
                                     e.dataTransfer.dropEffect = "move";
@@ -1309,7 +1464,9 @@ ${safeStyles}
                                     }
                                   }}
                                   className={`w-56 sm:w-60 p-3 rounded-xl bg-white transition-all flex flex-col gap-2 relative border-t-4 ${
-                                    isSupDropTarget
+                                    activeFocusedNodeId === supKey
+                                      ? "ring-4 ring-amber-400 ring-offset-2 animate-pulse shadow-xl shadow-amber-500/40 z-30 border-t-amber-500"
+                                      : isSupDropTarget
                                       ? "ring-4 ring-emerald-400 border-2 border-dashed border-emerald-600 bg-emerald-50/90 scale-105 shadow-xl"
                                       : isSupMatch
                                       ? "border-amber-400 ring-2 ring-amber-300 shadow-md border-t-amber-500"
@@ -1454,6 +1611,7 @@ ${safeStyles}
                                         return (
                                           <div
                                             key={emp.id}
+                                            id={`emp-${emp.employee_id}`}
                                             draggable={!showCheckboxes}
                                             onDragStart={(e) => {
                                               e.dataTransfer.setData(
@@ -1506,7 +1664,9 @@ ${safeStyles}
                                               }
                                             }}
                                             className={`w-56 sm:w-60 p-2 sm:p-2.5 rounded-lg border transition-all flex items-center justify-between gap-2 shadow-2xs select-none relative ${
-                                              isSwapTarget
+                                              activeFocusedNodeId === `emp-${emp.employee_id}`
+                                                ? "ring-4 ring-amber-400 ring-offset-2 animate-pulse shadow-xl shadow-amber-500/40 z-30 bg-amber-50 border-amber-400"
+                                                : isSwapTarget
                                                 ? "ring-4 ring-amber-400 border-2 border-dashed border-amber-600 bg-amber-50/95 scale-105 shadow-xl z-20 cursor-grab active:cursor-grabbing"
                                                 : isBeingDragged
                                                 ? "opacity-30 scale-95 border-dashed border-indigo-500 bg-indigo-50/50 cursor-grab active:cursor-grabbing"
