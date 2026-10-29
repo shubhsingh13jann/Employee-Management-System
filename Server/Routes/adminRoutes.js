@@ -33,6 +33,9 @@ import {
   getHierarchyAuditLogs,
   updateSupervisorCapacity,
   broadcastSquad,
+  getHierarchyDelegations,
+  createHierarchyDelegation,
+  revokeHierarchyDelegation,
   getAdminProjects,
   createAdminProject,
   updateAdminProjectStatus,
@@ -86,6 +89,10 @@ router.post("/hierarchy/swap", swapHierarchy);
 router.put("/hierarchy/reassign", reassignHierarchy);
 router.put("/hierarchy/supervisor-capacity", updateSupervisorCapacity);
 router.post("/hierarchy/broadcast-squad", broadcastSquad);
+router.get("/hierarchy/delegations", getHierarchyDelegations);
+router.post("/hierarchy/delegate-lead", createHierarchyDelegation);
+router.put("/hierarchy/delegations/:id/cancel", revokeHierarchyDelegation);
+router.delete("/hierarchy/delegations/:id", revokeHierarchyDelegation);
 router.delete("/hierarchy/:employeeId", unlinkHierarchy);
 
 // Enterprise Projects & Strategic Milestones Routes (Section 5)

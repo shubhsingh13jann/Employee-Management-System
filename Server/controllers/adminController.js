@@ -1222,12 +1222,15 @@ export const getHierarchy = async (req, res) => {
              emp.id AS employee_id, emp.name AS employee_name, emp.email AS employee_email, emp.image_url AS employee_image, emp.role AS employee_role,
              sup.id AS supervisor_id, sup.name AS supervisor_name, sup.email AS supervisor_email, sup.image_url AS supervisor_image, COALESCE(sup.max_span_capacity, 8) AS supervisor_max_capacity,
              mgr.id AS manager_id, mgr.name AS manager_name, mgr.email AS manager_email, mgr.image_url AS manager_image,
-             d.name AS department_name, d.id AS department_id
+             d.name AS department_name, d.id AS department_id,
+             del.acting_supervisor_id, acting_sup.name AS acting_supervisor_name, del.start_date AS delegation_start_date, del.end_date AS delegation_end_date, del.reason AS delegation_reason
       FROM team_hierarchy th
       JOIN users emp ON th.employee_id = emp.id
       JOIN users sup ON th.supervisor_id = sup.id
       JOIN users mgr ON th.manager_id = mgr.id
       LEFT JOIN departments d ON emp.department_id = d.id
+      LEFT JOIN hierarchy_delegations del ON (del.original_supervisor_id = sup.id AND del.is_active = TRUE AND CURRENT_DATE BETWEEN del.start_date AND del.end_date)
+      LEFT JOIN users acting_sup ON del.acting_supervisor_id = acting_sup.id
       ORDER BY d.name, sup.name, emp.name
     `);
     return res.json({ status: true, hierarchy });
@@ -2324,5 +2327,122 @@ export const broadcastSquad = async (req, res) => {
   } catch (err) {
     console.error("Squad broadcast error:", err);
     return res.status(500).json({ status: false, error: "Failed to broadcast announcement to squad" });
+  }
+};
+
+export const getHierarchyDelegations = async (req, res) => {
+  try {
+    const [delegations] = await pool.query(`
+      SELECT hd.id, hd.original_supervisor_id, hd.acting_supervisor_id,
+             hd.start_date, hd.end_date, hd.reason, hd.is_active, hd.created_at,
+             orig.name AS original_supervisor_name, orig.email AS original_supervisor_email,
+             acting.name AS acting_supervisor_name, acting.email AS acting_supervisor_email,
+             d.name AS department_name
+      FROM hierarchy_delegations hd
+      JOIN users orig ON hd.original_supervisor_id = orig.id
+      JOIN users acting ON hd.acting_supervisor_id = acting.id
+      LEFT JOIN departments d ON orig.department_id = d.id
+      ORDER BY hd.created_at DESC
+    `);
+    return res.json({ status: true, delegations });
+  } catch (err) {
+    console.error("Get hierarchy delegations error:", err);
+    return res.status(500).json({ status: false, error: "Failed to fetch delegations" });
+  }
+};
+
+export const createHierarchyDelegation = async (req, res) => {
+  try {
+    const { original_supervisor_id, acting_supervisor_id, start_date, end_date, reason } = req.body;
+    if (!original_supervisor_id || !acting_supervisor_id || !start_date || !end_date) {
+      return res.status(400).json({ status: false, error: "Original supervisor, acting lead, start date, and end date are required." });
+    }
+    if (String(original_supervisor_id) === String(acting_supervisor_id)) {
+      return res.status(400).json({ status: false, error: "Acting supervisor must be different from the original supervisor." });
+    }
+
+    const adminName = req.user?.name || "HR Admin";
+
+    // Deactivate any existing active delegation for this supervisor
+    await pool.query(
+      "UPDATE hierarchy_delegations SET is_active = FALSE WHERE original_supervisor_id = ? AND is_active = TRUE",
+      [original_supervisor_id]
+    );
+
+    const [result] = await pool.query(
+      `INSERT INTO hierarchy_delegations (original_supervisor_id, acting_supervisor_id, start_date, end_date, reason, is_active, delegated_by)
+       VALUES (?, ?, ?, ?, ?, TRUE, ?)`,
+      [original_supervisor_id, acting_supervisor_id, start_date, end_date, reason || "", req.user?.id || null]
+    );
+
+    // Audit trail logging
+    try {
+      await pool.query(
+        `INSERT INTO user_audit_logs (user_id, action_type, field_name, details, performed_by)
+         VALUES (?, 'hierarchy_delegation_created', 'hierarchy_delegations', ?, ?)`,
+        [
+          original_supervisor_id,
+          JSON.stringify({
+            message: `Delegated supervisor leadership for user ${original_supervisor_id} to acting lead ${acting_supervisor_id} (${start_date} to ${end_date})`,
+            original_supervisor_id,
+            acting_supervisor_id,
+            start_date,
+            end_date,
+            reason: reason || "",
+          }),
+          adminName,
+        ]
+      );
+    } catch (auditErr) {
+      console.warn("Audit log notice:", auditErr.message);
+    }
+
+    return res.json({
+      status: true,
+      message: "Temporary team lead delegation active successfully!",
+      delegationId: result.insertId,
+    });
+  } catch (err) {
+    console.error("Create hierarchy delegation error:", err);
+    return res.status(500).json({ status: false, error: "Failed to create leadership delegation" });
+  }
+};
+
+export const revokeHierarchyDelegation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ status: false, error: "Delegation ID is required" });
+    }
+
+    const [rows] = await pool.query("SELECT * FROM hierarchy_delegations WHERE id = ?", [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ status: false, error: "Delegation not found" });
+    }
+
+    await pool.query("UPDATE hierarchy_delegations SET is_active = FALSE WHERE id = ?", [id]);
+
+    const adminName = req.user?.name || "HR Admin";
+    try {
+      await pool.query(
+        `INSERT INTO user_audit_logs (user_id, action_type, field_name, details, performed_by)
+         VALUES (?, 'hierarchy_delegation_revoked', 'hierarchy_delegations', ?, ?)`,
+        [
+          rows[0].original_supervisor_id,
+          JSON.stringify({
+            message: `Revoked leadership delegation #${id} for supervisor ${rows[0].original_supervisor_id}`,
+            delegation_id: id,
+          }),
+          adminName,
+        ]
+      );
+    } catch (auditErr) {
+      console.warn("Audit log notice:", auditErr.message);
+    }
+
+    return res.json({ status: true, message: "Leadership delegation revoked and primary lead restored." });
+  } catch (err) {
+    console.error("Revoke hierarchy delegation error:", err);
+    return res.status(500).json({ status: false, error: "Failed to revoke leadership delegation" });
   }
 };

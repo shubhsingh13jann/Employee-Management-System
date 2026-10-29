@@ -202,3 +202,21 @@ CREATE TABLE IF NOT EXISTS department_transfers (
     INDEX idx_transfer_source (source_department_id),
     INDEX idx_transfer_target (target_department_id)
 );
+
+-- 15. Hierarchy Delegations (Temporary / Acting Team Lead)
+CREATE TABLE IF NOT EXISTS hierarchy_delegations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    original_supervisor_id INT NOT NULL,
+    acting_supervisor_id INT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    reason VARCHAR(255) NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    delegated_by INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (original_supervisor_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (acting_supervisor_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_orig_sup (original_supervisor_id),
+    INDEX idx_acting_sup (acting_supervisor_id),
+    INDEX idx_delegation_active (is_active)
+);
