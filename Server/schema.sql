@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(150) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('admin', 'manager', 'supervisor', 'employee') NOT NULL DEFAULT 'employee',
+    max_span_capacity INT DEFAULT 8,
     department_id INT NULL,
     salary DECIMAL(12, 2) DEFAULT 0.00,
     phone VARCHAR(20) DEFAULT '',

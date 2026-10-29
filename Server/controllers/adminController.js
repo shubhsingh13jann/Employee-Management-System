@@ -602,7 +602,7 @@ export const getUsers = async (req, res) => {
   try {
     const { role, department_id, search } = req.query;
     let query = `
-      SELECT u.id, u.name, u.email, u.role, u.department_id, u.salary, u.phone, u.address, u.image_url, u.status, u.created_at, u.must_change_password,
+      SELECT u.id, u.name, u.email, u.role, u.department_id, COALESCE(u.max_span_capacity, 8) AS max_span_capacity, u.salary, u.phone, u.address, u.image_url, u.status, u.created_at, u.must_change_password,
              d.name AS department_name, d.code AS department_code,
              sup.id AS supervisor_id, sup.name AS supervisor_name,
              (SELECT COUNT(*) FROM team_hierarchy WHERE supervisor_id = u.id) AS direct_reports_count,
@@ -680,7 +680,7 @@ export const getUserDetails = async (req, res) => {
   try {
     const { id } = req.params;
     const [[user]] = await pool.query(`
-      SELECT u.id, u.name, u.email, u.role, u.department_id, u.salary, u.phone, u.address, u.image_url, u.status, u.created_at, u.must_change_password,
+      SELECT u.id, u.name, u.email, u.role, u.department_id, COALESCE(u.max_span_capacity, 8) AS max_span_capacity, u.salary, u.phone, u.address, u.image_url, u.status, u.created_at, u.must_change_password,
              d.name AS department_name, d.code AS department_code, d.head_id AS dept_head_id,
              sup.id AS supervisor_id, sup.name AS supervisor_name, sup.email AS supervisor_email,
              mgr.id AS manager_id, mgr.name AS manager_name,
@@ -1220,7 +1220,7 @@ export const getHierarchy = async (req, res) => {
     const [hierarchy] = await pool.query(`
       SELECT th.id, th.assigned_at,
              emp.id AS employee_id, emp.name AS employee_name, emp.email AS employee_email, emp.image_url AS employee_image, emp.role AS employee_role,
-             sup.id AS supervisor_id, sup.name AS supervisor_name, sup.email AS supervisor_email, sup.image_url AS supervisor_image,
+             sup.id AS supervisor_id, sup.name AS supervisor_name, sup.email AS supervisor_email, sup.image_url AS supervisor_image, COALESCE(sup.max_span_capacity, 8) AS supervisor_max_capacity,
              mgr.id AS manager_id, mgr.name AS manager_name, mgr.email AS manager_email, mgr.image_url AS manager_image,
              d.name AS department_name, d.id AS department_id
       FROM team_hierarchy th
@@ -1280,7 +1280,7 @@ export const assignHierarchy = async (req, res) => {
 
 export const reassignHierarchy = async (req, res) => {
   try {
-    const { employee_id, supervisor_id, manager_id } = req.body;
+    const { employee_id, supervisor_id, manager_id, sync_department } = req.body;
     if (!employee_id || !supervisor_id) {
       return res.status(400).json({ status: false, error: "Employee and new Supervisor are required." });
     }
@@ -1324,6 +1324,41 @@ export const reassignHierarchy = async (req, res) => {
       [employee_id, supervisor_id, resolvedManagerId]
     );
 
+    // If cross-department transfer synchronization requested, update employee's department
+    let departmentTransferred = false;
+    let newDepartmentName = "";
+    if (sync_department) {
+      const [supDeptRows] = await pool.query(
+        "SELECT u.department_id, d.name AS department_name FROM users u LEFT JOIN departments d ON u.department_id = d.id WHERE u.id = ?",
+        [supervisor_id]
+      );
+      if (supDeptRows.length > 0 && supDeptRows[0].department_id) {
+        const targetDeptId = supDeptRows[0].department_id;
+        newDepartmentName = supDeptRows[0].department_name || "";
+        await pool.query("UPDATE users SET department_id = ? WHERE id = ?", [targetDeptId, employee_id]);
+        departmentTransferred = true;
+
+        try {
+          const adminName = req.user?.name || "HR Admin";
+          await pool.query(
+            `INSERT INTO user_audit_logs (user_id, action_type, field_name, details, performed_by)
+             VALUES (?, 'department_transferred', 'department_id', ?, ?)`,
+            [
+              employee_id,
+              JSON.stringify({
+                message: `Transferred employee ${employee_id} to department ${newDepartmentName} (ID: ${targetDeptId}) alongside hierarchy reallocation`,
+                new_department_id: targetDeptId,
+                supervisor_id,
+              }),
+              adminName,
+            ]
+          );
+        } catch (deptAuditErr) {
+          console.warn("Department transfer audit log notice:", deptAuditErr.message);
+        }
+      }
+    }
+
     // Audit Log
     try {
       const adminName = req.user?.name || "HR Admin";
@@ -1333,9 +1368,10 @@ export const reassignHierarchy = async (req, res) => {
         [
           employee_id,
           JSON.stringify({
-            message: `Reassigned employee ${employee_id} to supervisor ${supervisor_id} and manager ${resolvedManagerId}`,
+            message: `Reassigned employee ${employee_id} to supervisor ${supervisor_id} and manager ${resolvedManagerId}${departmentTransferred ? ` with auto-transfer to ${newDepartmentName}` : ""}`,
             supervisor_id,
             manager_id: resolvedManagerId,
+            sync_department: Boolean(sync_department),
           }),
           adminName,
         ]
@@ -1344,10 +1380,61 @@ export const reassignHierarchy = async (req, res) => {
       console.warn("Audit log notice:", auditErr.message);
     }
 
-    return res.json({ status: true, message: "Reporting relationship successfully updated!" });
+    return res.json({
+      status: true,
+      message: departmentTransferred
+        ? `Reporting line reallocated & employee department synced to ${newDepartmentName}!`
+        : "Reporting relationship successfully updated!",
+    });
   } catch (err) {
     console.error("Reassign hierarchy error:", err);
     return res.status(500).json({ status: false, error: "Failed to reassign team hierarchy" });
+  }
+};
+
+export const updateSupervisorCapacity = async (req, res) => {
+  try {
+    const { supervisor_id, max_span_capacity } = req.body;
+    if (!supervisor_id || max_span_capacity === undefined || max_span_capacity === null) {
+      return res.status(400).json({ status: false, error: "Supervisor ID and max capacity are required." });
+    }
+    const capNum = parseInt(max_span_capacity, 10);
+    if (isNaN(capNum) || capNum < 1 || capNum > 50) {
+      return res.status(400).json({ status: false, error: "Max capacity must be a valid number between 1 and 50." });
+    }
+
+    await pool.query("UPDATE users SET max_span_capacity = ? WHERE id = ? AND role = 'supervisor'", [
+      capNum,
+      supervisor_id,
+    ]);
+
+    // Audit Log
+    try {
+      const adminName = req.user?.name || "HR Admin";
+      await pool.query(
+        `INSERT INTO user_audit_logs (user_id, action_type, field_name, details, performed_by)
+         VALUES (?, 'capacity_updated', 'max_span_capacity', ?, ?)`,
+        [
+          supervisor_id,
+          JSON.stringify({
+            message: `Updated max span capacity for supervisor ${supervisor_id} to ${capNum} direct reports`,
+            max_span_capacity: capNum,
+          }),
+          adminName,
+        ]
+      );
+    } catch (auditErr) {
+      console.warn("Audit log notice:", auditErr.message);
+    }
+
+    return res.json({
+      status: true,
+      message: `Supervisor capacity successfully updated to ${capNum} reports!`,
+      max_span_capacity: capNum,
+    });
+  } catch (err) {
+    console.error("Update supervisor capacity error:", err);
+    return res.status(500).json({ status: false, error: "Failed to update supervisor capacity" });
   }
 };
 
