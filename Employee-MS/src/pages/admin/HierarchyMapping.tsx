@@ -321,13 +321,14 @@ const HierarchyMapping = () => {
     employee_id: string | number;
     supervisor_id: string | number;
     manager_id?: string | number;
+    sync_department?: boolean;
   }) => {
     try {
       setSaving(true);
       setMsg({ type: "", text: "" });
       const res = await api.put("/api/admin/hierarchy/reassign", payload);
       if (res.data.status) {
-        setMsg({ type: "success", text: "Reporting line successfully reallocated!" });
+        setMsg({ type: "success", text: res.data.message || "Reporting line successfully reallocated!" });
         setReassignState({ isOpen: false, employee: null, targetSupervisor: null, targetManager: null });
         fetchData();
       }

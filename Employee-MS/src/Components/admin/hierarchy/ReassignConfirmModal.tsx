@@ -1,18 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { HierarchyMappingItem } from "./HierarchyTableView";
 
+interface SupervisorOption {
+  id: string | number;
+  name: string;
+  department?: string;
+  department_name?: string;
+}
+
 interface ReassignConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
   employee: HierarchyMappingItem | null;
-  targetSupervisor: { id: string | number; name: string; department?: string } | null;
-  targetManager: { id: string | number; name: string; department?: string } | null;
-  supervisors: { id: string | number; name: string; department?: string }[];
-  managers: { id: string | number; name: string; department?: string }[];
+  targetSupervisor: SupervisorOption | null;
+  targetManager: SupervisorOption | null;
+  supervisors: SupervisorOption[];
+  managers: SupervisorOption[];
   onConfirm: (payload: {
     employee_id: string | number;
     supervisor_id: string | number;
     manager_id?: string | number;
+    sync_department?: boolean;
   }) => Promise<void>;
   saving: boolean;
 }
@@ -30,6 +38,11 @@ export const ReassignConfirmModal: React.FC<ReassignConfirmModalProps> = ({
 }) => {
   const [selectedSupervisorId, setSelectedSupervisorId] = useState<string>("");
   const [selectedManagerId, setSelectedManagerId] = useState<string>("");
+  const [syncDepartment, setSyncDepartment] = useState<boolean>(true);
+
+  useEffect(() => {
+    setSyncDepartment(true);
+  }, [selectedSupervisorId, isOpen]);
 
   useEffect(() => {
     if (targetSupervisor) {
@@ -70,6 +83,7 @@ export const ReassignConfirmModal: React.FC<ReassignConfirmModalProps> = ({
       employee_id: employee.employee_id,
       supervisor_id: selectedSupervisorId,
       manager_id: selectedManagerId || undefined,
+      sync_department: isCrossDepartment ? syncDepartment : false,
     });
   };
 
@@ -82,6 +96,14 @@ export const ReassignConfirmModal: React.FC<ReassignConfirmModalProps> = ({
   const targetManagerObj = managers.find(
     (m) => String(m.id) === String(selectedManagerId)
   );
+
+  const employeeDeptName = employee.department_name || "General";
+  const targetSupervisorDeptName =
+    targetSupervisorObj?.department_name || targetSupervisorObj?.department || "";
+  const isCrossDepartment =
+    Boolean(targetSupervisorDeptName) &&
+    Boolean(employeeDeptName) &&
+    employeeDeptName.trim().toLowerCase() !== targetSupervisorDeptName.trim().toLowerCase();
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150">
@@ -320,6 +342,39 @@ export const ReassignConfirmModal: React.FC<ReassignConfirmModalProps> = ({
                 <span>If left blank, the manager will be automatically resolved from the supervisor&apos;s department.</span>
               </div>
             </div>
+
+            {/* Cross-Department Transfer Notice & Synchronization Option */}
+            {isCrossDepartment && (
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-amber-50/90 border border-amber-200/90 text-amber-900 shadow-2xs animate-in fade-in">
+                <div className="flex items-start gap-2.5">
+                  <div className="w-7 h-7 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xs shrink-0 mt-0.5 shadow-2xs">
+                    <i className="bi bi-arrow-left-right text-sm"></i>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-bold text-amber-950">Cross-Department Transfer Detected</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-amber-200/80 text-amber-800 border border-amber-300/60">
+                        {employeeDeptName} → {targetSupervisorDeptName}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-amber-800/90 mt-1 mb-2 leading-relaxed">
+                      The selected supervisor belongs to <strong>{targetSupervisorDeptName}</strong>, while {employee.employee_name || "this employee"} is currently assigned to <strong>{employeeDeptName}</strong>.
+                    </p>
+                    <label className="flex items-center gap-2.5 cursor-pointer select-none bg-white/80 hover:bg-white p-2 sm:p-2.5 rounded-xl border border-amber-200 transition-colors shadow-2xs">
+                      <input
+                        type="checkbox"
+                        checked={syncDepartment}
+                        onChange={(e) => setSyncDepartment(e.target.checked)}
+                        className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-amber-300 cursor-pointer"
+                      />
+                      <span className="text-xs font-bold text-slate-800">
+                        Automatically update employee&apos;s primary department to <span className="text-indigo-600 underline decoration-indigo-400">{targetSupervisorDeptName}</span>
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Actions Footer - Dedicated Full-Width Bottom Bar */}
