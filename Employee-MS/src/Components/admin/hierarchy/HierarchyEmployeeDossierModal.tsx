@@ -9,6 +9,9 @@ interface HierarchyEmployeeDossierModalProps {
   onInitiateReassign?: (employee: HierarchyMappingItem) => void;
   onInitiateUnlink?: (employee: HierarchyMappingItem) => void;
   onOpenAssignModal?: (employeeId: string | number) => void;
+  secondaryReports?: any[];
+  onOpenMatrixModal?: (employee: any) => void;
+  onUnlinkSecondary?: (secondaryRecordId: string | number) => void;
 }
 
 export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierModalProps> = ({
@@ -18,6 +21,9 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
   onInitiateReassign,
   onInitiateUnlink,
   onOpenAssignModal,
+  secondaryReports = [],
+  onOpenMatrixModal,
+  onUnlinkSecondary,
 }) => {
   const [copied, setCopied] = useState(false);
 
@@ -317,6 +323,104 @@ export const HierarchyEmployeeDossierModal: React.FC<HierarchyEmployeeDossierMod
                     )}
                   </div>
                 )}
+
+                {/* Secondary / Dotted-Line Matrix Reporting Section */}
+                <div className="mt-3.5 pt-3 border-t border-slate-100">
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-5 h-5 rounded-md bg-purple-100 text-purple-700 flex items-center justify-center text-[10px]">
+                        <i className="bi bi-diagram-2"></i>
+                      </div>
+                      <span className="text-[11px] font-bold text-slate-800">
+                        Dotted-Line / Matrix Reporting
+                      </span>
+                    </div>
+
+                    {onOpenMatrixModal && (
+                      <button
+                        type="button"
+                        onClick={() => onOpenMatrixModal(employee)}
+                        className="px-2 py-0.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-[10px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                        title="Assign secondary / cross-functional supervisor"
+                      >
+                        <i className="bi bi-plus text-xs"></i>
+                        <span>Add Dotted-Line</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {(() => {
+                    const empMatrix = (secondaryReports || []).filter(
+                      (r: any) => String(r.employee_id) === String(empId)
+                    );
+
+                    if (empMatrix.length === 0) {
+                      return (
+                        <div className="py-2.5 px-3 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 flex items-center justify-between text-xs text-slate-400">
+                          <span>No secondary / matrix reporting lines assigned</span>
+                          {onOpenMatrixModal && (
+                            <button
+                              type="button"
+                              onClick={() => onOpenMatrixModal(employee)}
+                              className="text-[10px] text-purple-600 hover:text-purple-700 font-bold hover:underline cursor-pointer"
+                            >
+                              + Assign Lead
+                            </button>
+                          )}
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="space-y-1.5">
+                        {empMatrix.map((item: any) => (
+                          <div
+                            key={item.id}
+                            className="p-2 rounded-xl bg-purple-50/40 border border-purple-100 flex items-center justify-between gap-2 shadow-2xs"
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className="w-7 h-7 rounded-lg bg-purple-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                                {item.secondary_supervisor_name ? item.secondary_supervisor_name.charAt(0) : "S"}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-bold text-slate-900 text-xs truncate">
+                                    {item.secondary_supervisor_name}
+                                  </span>
+                                  <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-purple-100 text-purple-800">
+                                    {item.role_title || "Dotted-Line"}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-[9.5px] text-slate-400">
+                                  <span>SUP-{String(item.secondary_supervisor_id).padStart(4, "0")}</span>
+                                  {item.project_title && (
+                                    <>
+                                      <span>•</span>
+                                      <span className="text-purple-700 font-medium truncate max-w-[120px]">
+                                        Project: {item.project_title}
+                                      </span>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {onUnlinkSecondary && (
+                              <button
+                                type="button"
+                                onClick={() => onUnlinkSecondary(item.id)}
+                                className="p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer shrink-0"
+                                title="Unlink dotted-line reporting"
+                              >
+                                <i className="bi bi-x-circle text-xs"></i>
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
               </div>
 
               {/* Bottom Info Note Box */}

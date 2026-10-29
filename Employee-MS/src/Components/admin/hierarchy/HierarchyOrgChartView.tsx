@@ -23,6 +23,7 @@ interface HierarchyOrgChartViewProps {
   isSelectMode?: boolean;
   selectedStaffIds?: (string | number)[];
   onToggleSelectStaff?: (id: string | number) => void;
+  matrixReports?: any[];
 }
 
 interface TreeNodeManager {
@@ -58,8 +59,10 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
   isSelectMode = false,
   selectedStaffIds = [],
   onToggleSelectStaff,
+  matrixReports = [],
 }) => {
   const showCheckboxes = isSelectMode || (selectedStaffIds && selectedStaffIds.length > 0);
+  const [showMatrixLinks, setShowMatrixLinks] = useState<boolean>(false);
   // Collapsed state tracking (IDs of nodes that are collapsed)
   const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
 
@@ -996,6 +999,21 @@ ${safeStyles}
               Managers
             </button>
           </div>
+
+          {/* Matrix / Dotted-Line Toggle */}
+          <button
+            type="button"
+            onClick={() => setShowMatrixLinks((prev) => !prev)}
+            className={`px-2 py-1 rounded-lg text-[10px] font-semibold transition-all cursor-pointer flex items-center gap-1 shadow-2xs border ${
+              showMatrixLinks
+                ? "bg-purple-600 text-white border-purple-600 shadow-xs ring-2 ring-purple-400/30"
+                : "bg-purple-50 text-purple-700 hover:bg-purple-100 border-purple-200"
+            }`}
+            title="Toggle cross-functional secondary matrix reporting connections"
+          >
+            <i className="bi bi-diagram-2 text-xs"></i>
+            <span>Matrix Links {matrixReports.length > 0 ? `(${matrixReports.length})` : ""}</span>
+          </button>
         </div>
       </div>
 
@@ -1014,6 +1032,11 @@ ${safeStyles}
         <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-white text-slate-700 border border-slate-200 font-medium">
           <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Direct Report
         </span>
+        {showMatrixLinks && (
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-purple-50 text-purple-700 border border-purple-200 font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-600"></span> Matrix Link
+          </span>
+        )}
         <span className="ml-auto text-slate-400 italic hidden md:inline">
           💡 Drag & drop staff cards to reallocate reporting lines
         </span>
@@ -1727,6 +1750,18 @@ ${safeStyles}
                                                   <p className="text-[9px] text-slate-400 mb-0 truncate">
                                                     EMP-{String(emp.employee_id).padStart(4, "0")}
                                                   </p>
+                                                  {showMatrixLinks && (() => {
+                                                    const matrixLink = (matrixReports || []).find(
+                                                      (r: any) => String(r.employee_id) === String(emp.employee_id)
+                                                    );
+                                                    if (!matrixLink) return null;
+                                                    return (
+                                                      <div className="mt-0.5 flex items-center gap-1 text-[8.5px] text-purple-700 font-semibold truncate" title={`Matrix: ${matrixLink.secondary_supervisor_name} (${matrixLink.role_title || "Dotted-Line"})`}>
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0"></span>
+                                                        <span className="truncate">Matrix: {matrixLink.secondary_supervisor_name}</span>
+                                                      </div>
+                                                    );
+                                                  })()}
                                                 </div>
                                               </div>
                                             </div>

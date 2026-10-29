@@ -19,3 +19,4 @@ export * from "./SwapReportingConfirmModal";
 export * from "./HierarchyEmptyStateOnboarding";
 export * from "./SquadBroadcastModal";
 export * from "./SupervisorDelegationModal";
+export * from "./MatrixAssignModal";

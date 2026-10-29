@@ -18,6 +18,7 @@ import {
   AutoAssignWizardModal,
   SquadBroadcastModal,
   SupervisorDelegationModal,
+  MatrixAssignModal,
   HierarchyEmployeeDossierModal,
   SwapReportingConfirmModal,
 } from "../../Components/admin/hierarchy";
@@ -35,6 +36,9 @@ const HierarchyMapping = () => {
   const [isAutoAssignWizardOpen, setIsAutoAssignWizardOpen] = useState(false);
   const [broadcastSquadTarget, setBroadcastSquadTarget] = useState<any | null>(null);
   const [delegationTargetSupervisor, setDelegationTargetSupervisor] = useState<any | null>(null);
+  const [matrixReports, setMatrixReports] = useState<any[]>([]);
+  const [matrixAssignTargetEmployee, setMatrixAssignTargetEmployee] = useState<any | null>(null);
+  const [projects, setProjects] = useState<any[]>([]);
   const [selectedDossierEmployee, setSelectedDossierEmployee] = useState<any | null>(null);
   const [msg, setMsg] = useState({ type: "", text: "" });
   const [searchTerm, setSearchTerm] = useState("");
@@ -260,9 +264,11 @@ const HierarchyMapping = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [hRes, uRes] = await Promise.all([
+      const [hRes, uRes, secRes, projRes] = await Promise.all([
         api.get("/api/admin/hierarchy"),
-        api.get("/api/admin/users")
+        api.get("/api/admin/users"),
+        api.get("/api/admin/hierarchy/secondary").catch(() => ({ data: { status: false, data: [] } })),
+        api.get("/api/admin/projects").catch(() => ({ data: { status: false, projects: [] } })),
       ]);
 
       if (hRes.data.status) setHierarchy(hRes.data.hierarchy);
@@ -271,6 +277,12 @@ const HierarchyMapping = () => {
         setEmployees(all.filter((u) => u.role === "employee"));
         setSupervisors(all.filter((u) => u.role === "supervisor"));
         setManagers(all.filter((u) => u.role === "manager"));
+      }
+      if (secRes.data?.status && Array.isArray(secRes.data.data)) {
+        setMatrixReports(secRes.data.data);
+      }
+      if (projRes.data?.status && Array.isArray(projRes.data.projects)) {
+        setProjects(projRes.data.projects);
       }
     } catch (err) {
       setMsg({ type: "danger", text: err.response?.data?.error || "Failed to load team hierarchy" });
@@ -515,6 +527,21 @@ const HierarchyMapping = () => {
       setSaving(false);
     }
   };
+  const handleUnlinkSecondary = async (secondaryId: string | number) => {
+    if (!window.confirm("Are you sure you want to remove this dotted-line reporting link?")) return;
+    try {
+      const res = await api.delete(`/api/admin/hierarchy/secondary/${secondaryId}`);
+      if (res.data?.status) {
+        setMsg({ type: "success", text: "Dotted-line reporting link removed successfully" });
+        fetchData();
+      } else {
+        setMsg({ type: "danger", text: res.data?.error || "Failed to remove dotted-line reporting link" });
+      }
+    } catch (err: any) {
+      setMsg({ type: "danger", text: err.response?.data?.error || "Failed to remove dotted-line link" });
+    }
+  };
+
 
 
   return (
@@ -644,6 +671,7 @@ const HierarchyMapping = () => {
         {/* Dynamic View Rendering: Org Chart Tree vs Table View */}
         {viewMode === "tree" ? (
           <HierarchyOrgChartView
+            matrixReports={matrixReports}
             mappings={filteredHierarchy}
             unassignedStaff={filteredUnassigned}
             searchTerm={searchTerm}
@@ -947,12 +975,29 @@ const HierarchyMapping = () => {
           setMsg({ type: "success", text: "Team lead delegation updated successfully!" });
         }}
       />
+      {/* Secondary / Matrix Assignment Modal */}
+      <MatrixAssignModal
+        isOpen={Boolean(matrixAssignTargetEmployee)}
+        onClose={() => setMatrixAssignTargetEmployee(null)}
+        employee={matrixAssignTargetEmployee}
+        availableSupervisors={supervisors}
+        availableProjects={projects}
+        onSuccess={(text) => {
+          fetchData();
+          setMsg({ type: "success", text });
+        }}
+      />
+
+
 
       {/* Interactive Employee Dossier Modal */}
       <HierarchyEmployeeDossierModal
         isOpen={Boolean(selectedDossierEmployee)}
         onClose={() => setSelectedDossierEmployee(null)}
         employee={selectedDossierEmployee}
+        secondaryReports={matrixReports}
+        onOpenMatrixModal={(emp) => setMatrixAssignTargetEmployee(emp)}
+        onUnlinkSecondary={handleUnlinkSecondary}
         onInitiateReassign={(emp) => {
           setSelectedDossierEmployee(null);
           setReassignState({
