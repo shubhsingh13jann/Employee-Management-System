@@ -7,6 +7,7 @@ export interface SquadGroup {
   supervisorId: string | number;
   supervisorName: string;
   supervisorEmail?: string;
+  supervisorMaxCapacity?: number;
   managerId?: string | number;
   managerName?: string;
   departmentName?: string;
@@ -34,6 +35,7 @@ export interface HierarchySquadCardsViewProps {
   selectedStaffIds?: (string | number)[];
   onToggleSelectStaff?: (id: string | number) => void;
   onClearSelection?: () => void;
+  onUpdateSupervisorCapacity?: (supervisorId: string | number, maxCapacity: number) => Promise<void>;
 }
 
 export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = ({
@@ -53,6 +55,7 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
   selectedStaffIds = [],
   onToggleSelectStaff,
   onClearSelection,
+  onUpdateSupervisorCapacity,
 }) => {
   const showCheckboxes = isSelectMode || (selectedStaffIds && selectedStaffIds.length > 0);
   const [collapsedSquads, setCollapsedSquads] = useState<Set<string>>(new Set());
@@ -78,6 +81,7 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
           managerId: item.manager_id,
           managerName: item.manager_name,
           departmentName: item.department_name,
+          supervisorMaxCapacity: item.supervisor_max_capacity || 8,
           members: [],
         });
       }
@@ -201,29 +205,30 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
   const avgSquadSize =
     squadGroups.length > 0 ? (mappings.length / squadGroups.length).toFixed(1) : "0";
 
-  const getCapacityMeta = (count: number) => {
-    if (count <= 3) {
+  const getCapacityMeta = (count: number, maxCap: number = 8) => {
+    const lightCap = Math.max(1, Math.ceil(maxCap * 0.4));
+    if (count <= lightCap) {
       return {
         label: "Light Load",
-        badgeText: "Light (1-3)",
+        badgeText: `Light (≤${lightCap})`,
         bg: "bg-emerald-50 text-emerald-700 border-emerald-200",
         bar: "bg-emerald-500",
-        capacityPercent: Math.min(100, Math.round((count / 8) * 100)),
+        capacityPercent: Math.min(100, Math.round((count / maxCap) * 100)),
         statusText: "Optimal for Mentorship",
       };
-    } else if (count <= 7) {
+    } else if (count < maxCap) {
       return {
         label: "Optimal Squad",
-        badgeText: "Optimal (4-7)",
+        badgeText: `Optimal (${lightCap + 1}-${maxCap - 1})`,
         bg: "bg-indigo-50 text-indigo-700 border-indigo-200",
         bar: "bg-indigo-500",
-        capacityPercent: Math.min(100, Math.round((count / 8) * 100)),
+        capacityPercent: Math.min(100, Math.round((count / maxCap) * 100)),
         statusText: "Healthy Span",
       };
-    } else if (count === 8) {
+    } else if (count === maxCap) {
       return {
         label: "Full Capacity",
-        badgeText: "Full (8/8)",
+        badgeText: `Full (${maxCap}/${maxCap})`,
         bg: "bg-amber-50 text-amber-700 border-amber-200",
         bar: "bg-amber-500",
         capacityPercent: 100,
@@ -232,7 +237,7 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
     } else {
       return {
         label: "High Span",
-        badgeText: "High Span (8+)",
+        badgeText: `High Span (${count}/${maxCap})`,
         bg: "bg-rose-50 text-rose-700 border-rose-200",
         bar: "bg-rose-500",
         capacityPercent: 100,
@@ -812,7 +817,7 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                     <div className="flex items-center gap-1.5 shrink-0">
                       {isCollapsed && (
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold border shadow-2xs ${capMeta.bg}`}>
-                          {squad.members.length}/8 members
+                          {squad.members.length}/{squad.supervisorMaxCapacity || 8} members
                         </span>
                       )}
                       <button
@@ -1110,6 +1115,7 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
         onOpenAssignModal={onOpenAssignModal}
         onInitiateReassign={onInitiateReassign}
         onInitiateUnlink={onInitiateUnlink}
+        onUpdateSupervisorCapacity={onUpdateSupervisorCapacity}
       />
     </div>
   );

@@ -317,6 +317,24 @@ const HierarchyMapping = () => {
     }
   };
 
+  const handleUpdateSupervisorCapacity = async (supervisorId: string | number, maxCapacity: number) => {
+    try {
+      const res = await api.put("/api/admin/hierarchy/supervisor-capacity", {
+        supervisor_id: supervisorId,
+        max_span_capacity: maxCapacity,
+      });
+      if (res.data.status) {
+        setMsg({ type: "success", text: res.data.message || `Supervisor capacity updated to ${maxCapacity} reports!` });
+        fetchData();
+      }
+    } catch (err: any) {
+      setMsg({
+        type: "danger",
+        text: err.response?.data?.error || "Failed to update supervisor capacity",
+      });
+    }
+  };
+
   const handleConfirmReassign = async (payload: {
     employee_id: string | number;
     supervisor_id: string | number;
@@ -645,6 +663,7 @@ const HierarchyMapping = () => {
             onViewDossier={(emp) => setSelectedDossierEmployee(emp)}
             isPreviewEmptyState={isPreviewEmptyState}
             onExitSimulation={() => setIsPreviewEmptyState(false)}
+            onUpdateSupervisorCapacity={handleUpdateSupervisorCapacity}
           />
         ) : viewMode === "squad" ? (
           <HierarchySquadCardsView

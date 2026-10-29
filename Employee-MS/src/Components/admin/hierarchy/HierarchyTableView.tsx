@@ -9,6 +9,7 @@ export interface HierarchyMappingItem {
   employee_email: string;
   supervisor_id: number | string;
   supervisor_name: string;
+  supervisor_max_capacity?: number;
   manager_id: number | string;
   manager_name: string;
   department_name?: string;
@@ -26,6 +27,7 @@ export interface TeamLeadGroup {
   supervisorId: string | number;
   supervisorName: string;
   supervisorEmail?: string;
+  supervisorMaxCapacity?: number;
   managerId?: string | number;
   managerName?: string;
   departmentName?: string;
@@ -136,6 +138,7 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
           managerId: item.manager_id,
           managerName: item.manager_name,
           departmentName: item.department_name,
+          supervisorMaxCapacity: item.supervisor_max_capacity || 8,
           members: [],
         });
       }

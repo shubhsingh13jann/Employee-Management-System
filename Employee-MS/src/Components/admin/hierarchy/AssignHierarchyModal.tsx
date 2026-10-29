@@ -671,10 +671,10 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                       <div className="space-y-1">
                         <div className="flex items-center justify-between text-[10.5px]">
                           <span className="font-semibold text-slate-600">
-                            Workload Capacity: <span className="font-bold text-slate-900">{currentSupLoad} / 8</span> reports
+                            Workload Capacity: <span className="font-bold text-slate-900">{currentSupLoad} / {selectedSup?.max_span_capacity || 8}</span> reports
                           </span>
                           <span className="font-mono text-slate-500 font-semibold">
-                            {Math.min(100, Math.round((currentSupLoad / 8) * 100))}%
+                            {Math.min(100, Math.round((currentSupLoad / (selectedSup?.max_span_capacity || 8)) * 100))}%
                           </span>
                         </div>
                         <div className="w-full h-1.5 rounded-full bg-slate-200/80 overflow-hidden flex">
@@ -686,7 +686,7 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                                 ? "bg-indigo-500"
                                 : "bg-rose-500"
                             }`}
-                            style={{ width: `${Math.min(100, Math.round((currentSupLoad / 8) * 100))}%` }}
+                            style={{ width: `${Math.min(100, Math.round((currentSupLoad / (selectedSup?.max_span_capacity || 8)) * 100))}%` }}
                           />
                         </div>
                       </div>
@@ -694,15 +694,15 @@ export const AssignHierarchyModal: React.FC<AssignHierarchyModalProps> = ({
                       <div className="flex items-center justify-between text-[10px] text-slate-500 pt-0.5 border-t border-slate-200/60">
                         <span className="flex items-center gap-1 text-slate-600">
                           <i className="bi bi-info-circle text-indigo-500 text-[10.5px]"></i>
-                          After: <strong className="text-slate-800">{newSupLoad} / 8 reports</strong>
+                          After: <strong className="text-slate-800">{newSupLoad} / {selectedSup?.max_span_capacity || 8} reports</strong>
                         </span>
-                        {newSupLoad <= 8 ? (
+                        {newSupLoad <= (selectedSup?.max_span_capacity || 8) ? (
                           <span className="text-emerald-700 font-semibold flex items-center gap-1">
                             <i className="bi bi-check-circle-fill text-[9.5px]"></i> Within Span
                           </span>
                         ) : (
                           <span className="text-amber-700 font-semibold flex items-center gap-1">
-                            <i className="bi bi-exclamation-triangle-fill text-[9.5px]"></i> Exceeding 8 Capacity
+                            <i className="bi bi-exclamation-triangle-fill text-[9.5px]"></i> Exceeding Target Capacity
                           </span>
                         )}
                       </div>

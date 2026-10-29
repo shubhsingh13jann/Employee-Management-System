@@ -13,6 +13,7 @@ export interface SupervisorCapacityDrawerProps {
   ) => void;
   onInitiateReassign?: (employee: HierarchyMappingItem) => void;
   onInitiateUnlink?: (employee: HierarchyMappingItem) => void;
+  onUpdateSupervisorCapacity?: (supervisorId: string | number, maxCapacity: number) => Promise<void>;
 }
 
 export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> = ({
@@ -22,6 +23,7 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
   onOpenAssignModal,
   onInitiateReassign,
   onInitiateUnlink,
+  onUpdateSupervisorCapacity,
 }) => {
   const [memberFilter, setMemberFilter] = useState("");
 
@@ -43,10 +45,21 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
     }
   }, [isOpen, squad?.supervisorId]);
 
+  const [customCapacity, setCustomCapacity] = useState<number>(squad?.supervisorMaxCapacity || 8);
+  const [isSavingCapacity, setIsSavingCapacity] = useState<boolean>(false);
+  const [capacitySavedMsg, setCapacitySavedMsg] = useState<string>("");
+
+  useEffect(() => {
+    if (squad) {
+      setCustomCapacity(squad.supervisorMaxCapacity || 8);
+      setCapacitySavedMsg("");
+    }
+  }, [squad?.supervisorId, squad?.supervisorMaxCapacity]);
+
   if (!isOpen || !squad) return null;
 
   const count = squad.members.length;
-  const maxCapacity = 8;
+  const maxCapacity = customCapacity;
   const capacityPercent = Math.min(100, Math.round((count / maxCapacity) * 100));
 
   let healthBadge = {
@@ -75,7 +88,7 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
       bg: "bg-amber-50 text-amber-700 border-amber-200",
       barColor: "bg-amber-500",
       textColor: "text-amber-600",
-      advice: "Maximum target capacity reached (8 direct reports). Avoid assigning further staff without rebalancing existing members.",
+      advice: `Maximum target capacity reached (${maxCapacity} direct reports). Avoid assigning further staff without rebalancing existing members.`,
       adviceBg: "bg-amber-50/70 border-amber-200/80 text-amber-900",
       adviceIcon: "bi-exclamation-triangle-fill text-amber-600",
     };
@@ -85,7 +98,7 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
       bg: "bg-rose-50 text-rose-700 border-rose-200",
       barColor: "bg-rose-500",
       textColor: "text-rose-600",
-      advice: `High span of control (${count} direct reports). High risk of management overhead; consider splitting squad or appointing a co-lead.`,
+      advice: `High span of control (${count} direct reports exceeding ceiling of ${maxCapacity}). High risk of management overhead; consider splitting squad or rebalancing.`,
       adviceBg: "bg-rose-50/70 border-rose-200/80 text-rose-900",
       adviceIcon: "bi-exclamation-octagon-fill text-rose-600",
     };
@@ -226,6 +239,63 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
                   />
                 </div>
               </div>
+
+              {/* Configurable Span Target Control */}
+              <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-3">
+                <div>
+                  <span className="text-[11px] font-bold text-slate-700 block">Supervisor Target Ceiling</span>
+                  <span className="text-[10px] text-slate-400 block">Set max allowable direct reports</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 overflow-hidden shadow-2xs">
+                    <button
+                      type="button"
+                      onClick={() => setCustomCapacity((prev) => Math.max(1, prev - 1))}
+                      className="w-7 h-7 flex items-center justify-center text-slate-600 hover:bg-slate-200 font-bold text-xs cursor-pointer transition-colors"
+                      title="Decrease Ceiling"
+                    >
+                      -
+                    </button>
+                    <span className="w-8 text-center text-xs font-bold text-slate-800 font-mono">
+                      {customCapacity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setCustomCapacity((prev) => Math.min(50, prev + 1))}
+                      className="w-7 h-7 flex items-center justify-center text-slate-600 hover:bg-slate-200 font-bold text-xs cursor-pointer transition-colors"
+                      title="Increase Ceiling"
+                    >
+                      +
+                    </button>
+                  </div>
+                  {customCapacity !== (squad.supervisorMaxCapacity || 8) && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (onUpdateSupervisorCapacity) {
+                          try {
+                            setIsSavingCapacity(true);
+                            await onUpdateSupervisorCapacity(squad.supervisorId, customCapacity);
+                            setCapacitySavedMsg("Capacity updated!");
+                            setTimeout(() => setCapacitySavedMsg(""), 3000);
+                          } finally {
+                            setIsSavingCapacity(false);
+                          }
+                        }
+                      }}
+                      disabled={isSavingCapacity}
+                      className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold shadow-2xs transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      {isSavingCapacity ? "..." : "Save"}
+                    </button>
+                  )}
+                </div>
+              </div>
+              {capacitySavedMsg && (
+                <p className="text-[10px] text-emerald-600 font-semibold mb-0 flex items-center gap-1">
+                  <i className="bi bi-check-circle-fill text-[9.5px]"></i> {capacitySavedMsg}
+                </p>
+              )}
 
               {/* Span Guidance Callout */}
               <div className={`p-3 rounded-lg border flex items-start gap-2.5 text-xs ${healthBadge.adviceBg}`}>
