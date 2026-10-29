@@ -2234,3 +2234,95 @@ export const getAdminSupervisorsCapacity = async (req, res) => {
   }
 };
 
+
+export const broadcastSquad = async (req, res) => {
+  try {
+    const { supervisor_id, subject, message, priority = "standard", include_supervisor = true } = req.body;
+    if (!supervisor_id) {
+      return res.status(400).json({ status: false, error: "Supervisor ID is required." });
+    }
+    if (!subject || !subject.trim() || !message || !message.trim()) {
+      return res.status(400).json({ status: false, error: "Subject and announcement message are required." });
+    }
+
+    // Fetch all active subordinates in squad
+    const [subordinates] = await pool.query(
+      `SELECT emp.id, emp.name, emp.email, emp.role 
+       FROM team_hierarchy th
+       JOIN users emp ON th.employee_id = emp.id
+       WHERE th.supervisor_id = ? AND emp.status = "active"`,
+      [supervisor_id]
+    );
+
+    const [supervisorRows] = await pool.query(
+      "SELECT id, name, email, role FROM users WHERE id = ?",
+      [supervisor_id]
+    );
+
+    const recipients = [...subordinates];
+    if (include_supervisor && supervisorRows.length > 0) {
+      recipients.push(supervisorRows[0]);
+    }
+
+    if (recipients.length === 0) {
+      return res.status(400).json({ status: false, error: "No active squad members found to broadcast to." });
+    }
+
+    const adminName = req.user?.name || "Enterprise Administrator";
+    let emailSentCount = 0;
+    let emailFailedCount = 0;
+
+    const emailPromises = recipients.map(async (recipient) => {
+      try {
+        const result = await sendBroadcastEmail(recipient.email, recipient.name, {
+          subject: subject.trim(),
+          message: message.trim(),
+          priority,
+          senderName: adminName,
+        });
+        if (result && result.success) {
+          emailSentCount++;
+        } else {
+          emailFailedCount++;
+        }
+      } catch (err) {
+        console.error(`Failed to send squad broadcast email to ${recipient.email}:`, err.message);
+        emailFailedCount++;
+      }
+    });
+
+    await Promise.all(emailPromises);
+
+    // Audit Trail Logging
+    try {
+      await pool.query(
+        `INSERT INTO user_audit_logs (user_id, action_type, field_name, details, performed_by)
+         VALUES (?, "squad_broadcast", "announcement", ?, ?)`,
+        [
+          supervisor_id,
+          JSON.stringify({
+            message: `Dispatched squad broadcast "${subject.trim()}" to ${recipients.length} members under supervisor ${supervisor_id}`,
+            supervisor_id,
+            subject: subject.trim(),
+            recipients_count: recipients.length,
+            priority,
+          }),
+          adminName,
+        ]
+      );
+    } catch (auditErr) {
+      console.warn("Squad broadcast audit log notice:", auditErr.message);
+    }
+
+    return res.json({
+      status: true,
+      message: `Broadcast successfully dispatched to ${recipients.length} squad member${recipients.length > 1 ? "s" : ""}!`,
+      recipientsCount: recipients.length,
+      sentCount: emailSentCount,
+      failedCount: emailFailedCount,
+    });
+  } catch (err) {
+    console.error("Squad broadcast error:", err);
+    return res.status(500).json({ status: false, error: "Failed to broadcast announcement to squad" });
+  }
+};

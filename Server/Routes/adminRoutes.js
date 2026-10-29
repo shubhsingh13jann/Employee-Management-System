@@ -32,6 +32,7 @@ import {
   bulkAssignHierarchy,
   getHierarchyAuditLogs,
   updateSupervisorCapacity,
+  broadcastSquad,
   getAdminProjects,
   createAdminProject,
   updateAdminProjectStatus,
@@ -84,6 +85,7 @@ router.post("/hierarchy/bulk-assign", bulkAssignHierarchy);
 router.post("/hierarchy/swap", swapHierarchy);
 router.put("/hierarchy/reassign", reassignHierarchy);
 router.put("/hierarchy/supervisor-capacity", updateSupervisorCapacity);
+router.post("/hierarchy/broadcast-squad", broadcastSquad);
 router.delete("/hierarchy/:employeeId", unlinkHierarchy);
 
 // Enterprise Projects & Strategic Milestones Routes (Section 5)
