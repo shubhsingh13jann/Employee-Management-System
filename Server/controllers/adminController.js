@@ -2446,3 +2446,120 @@ export const revokeHierarchyDelegation = async (req, res) => {
     return res.status(500).json({ status: false, error: "Failed to revoke leadership delegation" });
   }
 };
+
+
+export const getSecondaryHierarchy = async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT sth.id, sth.assigned_at, sth.role_title, sth.project_id,
+             emp.id AS employee_id, emp.name AS employee_name, emp.email AS employee_email, emp.image_url AS employee_image,
+             emp_d.name AS employee_department,
+             sec_sup.id AS secondary_supervisor_id, sec_sup.name AS secondary_supervisor_name, sec_sup.email AS secondary_supervisor_email,
+             sec_sup.image_url AS secondary_supervisor_image,
+             sup_d.name AS secondary_supervisor_department,
+             p.title AS project_title
+      FROM secondary_team_hierarchy sth
+      JOIN users emp ON sth.employee_id = emp.id
+      JOIN users sec_sup ON sth.secondary_supervisor_id = sec_sup.id
+      LEFT JOIN departments emp_d ON emp.department_id = emp_d.id
+      LEFT JOIN departments sup_d ON sec_sup.department_id = sup_d.id
+      LEFT JOIN projects p ON sth.project_id = p.id
+      ORDER BY sec_sup.name, emp.name
+    `);
+    return res.json({ status: true, matrixReports: rows });
+  } catch (err) {
+    console.error("Get secondary hierarchy error:", err);
+    return res.status(500).json({ status: false, error: "Failed to fetch matrix reporting hierarchy" });
+  }
+};
+
+export const assignSecondaryHierarchy = async (req, res) => {
+  try {
+    const { employee_id, secondary_supervisor_id, project_id, role_title = "Dotted-Line Member" } = req.body;
+    if (!employee_id || !secondary_supervisor_id) {
+      return res.status(400).json({ status: false, error: "Employee and secondary supervisor are required" });
+    }
+    if (String(employee_id) === String(secondary_supervisor_id)) {
+      return res.status(400).json({ status: false, error: "An employee cannot be their own secondary supervisor" });
+    }
+
+    // Check if secondary supervisor is already their primary supervisor
+    const [primary] = await pool.query("SELECT supervisor_id FROM team_hierarchy WHERE employee_id = ?", [employee_id]);
+    if (primary.length > 0 && String(primary[0].supervisor_id) === String(secondary_supervisor_id)) {
+      return res.status(400).json({ status: false, error: "Selected user is already this employee's primary supervisor" });
+    }
+
+    await pool.query(
+      `INSERT INTO secondary_team_hierarchy (employee_id, secondary_supervisor_id, project_id, role_title, assigned_at)
+       VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+       ON DUPLICATE KEY UPDATE project_id = VALUES(project_id), role_title = VALUES(role_title), assigned_at = CURRENT_TIMESTAMP`,
+      [employee_id, secondary_supervisor_id, project_id || null, role_title.trim() || "Dotted-Line Member"]
+    );
+
+    const adminName = req.user?.name || "HR Admin";
+    try {
+      await pool.query(
+        `INSERT INTO user_audit_logs (user_id, action_type, field_name, details, performed_by)
+         VALUES (?, 'secondary_hierarchy_assigned', 'secondary_team_hierarchy', ?, ?)`,
+        [
+          employee_id,
+          JSON.stringify({
+            message: `Assigned dotted-line / secondary supervisor ${secondary_supervisor_id} (${role_title}) to employee ${employee_id}`,
+            employee_id,
+            secondary_supervisor_id,
+            project_id: project_id || null,
+            role_title: role_title.trim() || "Dotted-Line Member",
+          }),
+          adminName,
+        ]
+      );
+    } catch (auditErr) {
+      console.warn("Audit log notice:", auditErr.message);
+    }
+
+    return res.json({ status: true, message: "Secondary matrix reporting line assigned successfully!" });
+  } catch (err) {
+    console.error("Assign secondary hierarchy error:", err);
+    return res.status(500).json({ status: false, error: "Failed to assign secondary hierarchy" });
+  }
+};
+
+export const unlinkSecondaryHierarchy = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ status: false, error: "Record ID is required" });
+    }
+
+    const [rows] = await pool.query("SELECT * FROM secondary_team_hierarchy WHERE id = ?", [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ status: false, error: "Secondary reporting record not found" });
+    }
+
+    await pool.query("DELETE FROM secondary_team_hierarchy WHERE id = ?", [id]);
+
+    const adminName = req.user?.name || "HR Admin";
+    try {
+      await pool.query(
+        `INSERT INTO user_audit_logs (user_id, action_type, field_name, details, performed_by)
+         VALUES (?, 'secondary_hierarchy_unlinked', 'secondary_team_hierarchy', ?, ?)`,
+        [
+          rows[0].employee_id,
+          JSON.stringify({
+            message: `Severed dotted-line reporting link between employee ${rows[0].employee_id} and secondary supervisor ${rows[0].secondary_supervisor_id}`,
+            employee_id: rows[0].employee_id,
+            secondary_supervisor_id: rows[0].secondary_supervisor_id,
+          }),
+          adminName,
+        ]
+      );
+    } catch (auditErr) {
+      console.warn("Audit log notice:", auditErr.message);
+    }
+
+    return res.json({ status: true, message: "Secondary reporting relationship unlinked successfully." });
+  } catch (err) {
+    console.error("Unlink secondary hierarchy error:", err);
+    return res.status(500).json({ status: false, error: "Failed to unlink secondary reporting relationship" });
+  }
+};

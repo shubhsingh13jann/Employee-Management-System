@@ -36,6 +36,9 @@ import {
   getHierarchyDelegations,
   createHierarchyDelegation,
   revokeHierarchyDelegation,
+  getSecondaryHierarchy,
+  assignSecondaryHierarchy,
+  unlinkSecondaryHierarchy,
   getAdminProjects,
   createAdminProject,
   updateAdminProjectStatus,
@@ -93,6 +96,9 @@ router.get("/hierarchy/delegations", getHierarchyDelegations);
 router.post("/hierarchy/delegate-lead", createHierarchyDelegation);
 router.put("/hierarchy/delegations/:id/cancel", revokeHierarchyDelegation);
 router.delete("/hierarchy/delegations/:id", revokeHierarchyDelegation);
+router.get("/hierarchy/secondary", getSecondaryHierarchy);
+router.post("/hierarchy/secondary", assignSecondaryHierarchy);
+router.delete("/hierarchy/secondary/:id", unlinkSecondaryHierarchy);
 router.delete("/hierarchy/:employeeId", unlinkHierarchy);
 
 // Enterprise Projects & Strategic Milestones Routes (Section 5)

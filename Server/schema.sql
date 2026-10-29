@@ -220,3 +220,19 @@ CREATE TABLE IF NOT EXISTS hierarchy_delegations (
     INDEX idx_acting_sup (acting_supervisor_id),
     INDEX idx_delegation_active (is_active)
 );
+
+-- 16. Secondary / Dotted-Line Matrix Team Hierarchy
+CREATE TABLE IF NOT EXISTS secondary_team_hierarchy (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id INT NOT NULL,
+    secondary_supervisor_id INT NOT NULL,
+    project_id INT NULL,
+    role_title VARCHAR(100) DEFAULT 'Dotted-Line Member',
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (employee_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (secondary_supervisor_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL,
+    UNIQUE KEY unique_matrix_report (employee_id, secondary_supervisor_id),
+    INDEX idx_matrix_emp (employee_id),
+    INDEX idx_matrix_sup (secondary_supervisor_id)
+);
