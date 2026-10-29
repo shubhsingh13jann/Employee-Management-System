@@ -17,6 +17,7 @@ import {
   HierarchyAuditModal,
   AutoAssignWizardModal,
   SquadBroadcastModal,
+  SupervisorDelegationModal,
   HierarchyEmployeeDossierModal,
   SwapReportingConfirmModal,
 } from "../../Components/admin/hierarchy";
@@ -33,6 +34,7 @@ const HierarchyMapping = () => {
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
   const [isAutoAssignWizardOpen, setIsAutoAssignWizardOpen] = useState(false);
   const [broadcastSquadTarget, setBroadcastSquadTarget] = useState<any | null>(null);
+  const [delegationTargetSupervisor, setDelegationTargetSupervisor] = useState<any | null>(null);
   const [selectedDossierEmployee, setSelectedDossierEmployee] = useState<any | null>(null);
   const [msg, setMsg] = useState({ type: "", text: "" });
   const [searchTerm, setSearchTerm] = useState("");
@@ -335,6 +337,28 @@ const HierarchyMapping = () => {
         text: err.response?.data?.error || "Failed to update supervisor capacity",
       });
     }
+  };
+
+  const handleOpenDelegation = (squadOrLead: any) => {
+    const supervisorId = squadOrLead.supervisorId || squadOrLead.supervisor_id || squadOrLead.id;
+    const supervisorName = squadOrLead.supervisorName || squadOrLead.supervisor_name || squadOrLead.name;
+    const departmentName = squadOrLead.departmentName || squadOrLead.department_name;
+    const memberCount = squadOrLead.members ? squadOrLead.members.length : undefined;
+
+    const sampleRecord = hierarchy.find((h: any) => String(h.supervisor_id) === String(supervisorId));
+
+    setDelegationTargetSupervisor({
+      id: supervisorId,
+      name: supervisorName,
+      email: squadOrLead.supervisorEmail || squadOrLead.email || sampleRecord?.supervisor_email,
+      department_name: departmentName,
+      memberCount,
+      acting_supervisor_id: squadOrLead.actingSupervisorId || sampleRecord?.acting_supervisor_id,
+      acting_supervisor_name: squadOrLead.actingSupervisorName || sampleRecord?.acting_supervisor_name,
+      delegation_start_date: squadOrLead.delegationStartDate || sampleRecord?.delegation_start_date,
+      delegation_end_date: squadOrLead.delegationEndDate || sampleRecord?.delegation_end_date,
+      delegation_reason: squadOrLead.delegationReason || sampleRecord?.delegation_reason,
+    });
   };
 
   const handleConfirmReassign = async (payload: {
@@ -667,6 +691,7 @@ const HierarchyMapping = () => {
             onExitSimulation={() => setIsPreviewEmptyState(false)}
             onUpdateSupervisorCapacity={handleUpdateSupervisorCapacity}
             onBroadcastSquad={(squad: any) => setBroadcastSquadTarget(squad)}
+            onDelegateLead={handleOpenDelegation}
           />
         ) : viewMode === "squad" ? (
           <HierarchySquadCardsView
@@ -772,6 +797,7 @@ const HierarchyMapping = () => {
             isPreviewEmptyState={isPreviewEmptyState}
             onExitSimulation={() => setIsPreviewEmptyState(false)}
             onBroadcastSquad={(squad: any) => setBroadcastSquadTarget(squad)}
+            onDelegateLead={handleOpenDelegation}
           />
         )}
 
@@ -908,6 +934,18 @@ const HierarchyMapping = () => {
         onClose={() => setBroadcastSquadTarget(null)}
         squad={broadcastSquadTarget}
         onSuccess={(msgText) => setMsg({ type: "success", text: msgText })}
+      />
+
+      {/* Temporary Team Lead Delegation Modal */}
+      <SupervisorDelegationModal
+        isOpen={Boolean(delegationTargetSupervisor)}
+        onClose={() => setDelegationTargetSupervisor(null)}
+        supervisor={delegationTargetSupervisor}
+        availableSupervisors={supervisors}
+        onSuccess={() => {
+          fetchData();
+          setMsg({ type: "success", text: "Team lead delegation updated successfully!" });
+        }}
       />
 
       {/* Interactive Employee Dossier Modal */}

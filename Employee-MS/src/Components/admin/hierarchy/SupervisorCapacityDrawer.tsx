@@ -15,6 +15,7 @@ export interface SupervisorCapacityDrawerProps {
   onInitiateUnlink?: (employee: HierarchyMappingItem) => void;
   onUpdateSupervisorCapacity?: (supervisorId: string | number, maxCapacity: number) => Promise<void>;
   onBroadcastSquad?: (squad: SquadGroup) => void;
+  onDelegateLead?: (squad: SquadGroup) => void;
 }
 
 export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> = ({
@@ -26,6 +27,7 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
   onInitiateUnlink,
   onUpdateSupervisorCapacity,
   onBroadcastSquad,
+  onDelegateLead,
 }) => {
   const [memberFilter, setMemberFilter] = useState("");
 
@@ -157,6 +159,17 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
                   <span>Broadcast</span>
                 </button>
               )}
+              {onDelegateLead && (
+                <button
+                  type="button"
+                  onClick={() => onDelegateLead(squad)}
+                  className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                  title="Delegate temporary team leadership (Leave coverage)"
+                >
+                  <i className="bi bi-person-badge-fill text-amber-600 text-xs"></i>
+                  <span>Delegate</span>
+                </button>
+              )}
               <button
                 type="button"
                 onClick={onClose}
@@ -204,6 +217,20 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
                       </span>
                     )}
                   </div>
+
+                  {squad.actingSupervisorName && (
+                    <div className="mt-2.5 p-2 rounded-lg bg-amber-50 border border-amber-200/90 flex items-center gap-2 shadow-2xs">
+                      <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                      <div className="text-[11px] text-amber-900 leading-tight">
+                        <span className="font-bold">Acting Lead:</span> {squad.actingSupervisorName}{" "}
+                        {squad.delegationStartDate && squad.delegationEndDate && (
+                          <span className="text-[10px] text-amber-700">
+                            ({squad.delegationStartDate.slice(0, 10)} to {squad.delegationEndDate.slice(0, 10)})
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

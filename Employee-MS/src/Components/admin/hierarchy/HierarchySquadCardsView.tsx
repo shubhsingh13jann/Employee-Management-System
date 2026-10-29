@@ -11,6 +11,11 @@ export interface SquadGroup {
   managerId?: string | number;
   managerName?: string;
   departmentName?: string;
+  actingSupervisorId?: string | number | null;
+  actingSupervisorName?: string | null;
+  delegationStartDate?: string | null;
+  delegationEndDate?: string | null;
+  delegationReason?: string | null;
   members: HierarchyMappingItem[];
 }
 
@@ -37,6 +42,7 @@ export interface HierarchySquadCardsViewProps {
   onClearSelection?: () => void;
   onUpdateSupervisorCapacity?: (supervisorId: string | number, maxCapacity: number) => Promise<void>;
   onBroadcastSquad?: (squad: SquadGroup) => void;
+  onDelegateLead?: (squad: SquadGroup) => void;
 }
 
 export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = ({
@@ -58,6 +64,7 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
   onClearSelection,
   onUpdateSupervisorCapacity,
   onBroadcastSquad,
+  onDelegateLead,
 }) => {
   const showCheckboxes = isSelectMode || (selectedStaffIds && selectedStaffIds.length > 0);
   const [collapsedSquads, setCollapsedSquads] = useState<Set<string>>(new Set());
@@ -84,6 +91,11 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
           managerName: item.manager_name,
           departmentName: item.department_name,
           supervisorMaxCapacity: item.supervisor_max_capacity || 8,
+          actingSupervisorId: item.acting_supervisor_id,
+          actingSupervisorName: item.acting_supervisor_name,
+          delegationStartDate: item.delegation_start_date,
+          delegationEndDate: item.delegation_end_date,
+          delegationReason: item.delegation_reason,
           members: [],
         });
       }
@@ -813,6 +825,17 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                         <p className="text-[10px] text-slate-500 truncate mb-0 mt-0.5">
                           ID: SUP-{String(squad.supervisorId).padStart(4, "0")}
                         </p>
+                        {squad.actingSupervisorName && (
+                          <div className="mt-1 flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200/90 text-[10px] text-amber-900 font-semibold shadow-2xs">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                            <span>Acting Lead: <strong>{squad.actingSupervisorName}</strong></span>
+                            {squad.delegationStartDate && squad.delegationEndDate && (
+                              <span className="text-[9px] text-amber-700 font-normal">
+                                ({squad.delegationStartDate.slice(5, 10)} to {squad.delegationEndDate.slice(5, 10)})
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -833,6 +856,19 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                           title="Broadcast announcement to this squad"
                         >
                           <i className="bi bi-megaphone text-xs"></i>
+                        </button>
+                      )}
+                      {onDelegateLead && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDelegateLead(squad);
+                          }}
+                          className="p-1 rounded-md text-slate-500 hover:text-amber-600 hover:bg-white transition-all cursor-pointer shadow-2xs border border-transparent hover:border-amber-200"
+                          title="Delegate team leadership (Leave coverage)"
+                        >
+                          <i className="bi bi-person-badge text-xs"></i>
                         </button>
                       )}
                       <button
@@ -1132,6 +1168,7 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
         onInitiateUnlink={onInitiateUnlink}
         onUpdateSupervisorCapacity={onUpdateSupervisorCapacity}
         onBroadcastSquad={onBroadcastSquad}
+        onDelegateLead={onDelegateLead}
       />
     </div>
   );

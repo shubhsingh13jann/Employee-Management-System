@@ -13,6 +13,11 @@ export interface HierarchyMappingItem {
   manager_id: number | string;
   manager_name: string;
   department_name?: string;
+  acting_supervisor_id?: number | string | null;
+  acting_supervisor_name?: string | null;
+  delegation_start_date?: string | null;
+  delegation_end_date?: string | null;
+  delegation_reason?: string | null;
 }
 
 export interface UnassignedEmployee {
@@ -31,6 +36,11 @@ export interface TeamLeadGroup {
   managerId?: string | number;
   managerName?: string;
   departmentName?: string;
+  actingSupervisorId?: string | number | null;
+  actingSupervisorName?: string | null;
+  delegationStartDate?: string | null;
+  delegationEndDate?: string | null;
+  delegationReason?: string | null;
   members: HierarchyMappingItem[];
 }
 
@@ -73,6 +83,8 @@ interface HierarchyTableViewProps {
   onToggleSelectStaff?: (id: string | number) => void;
   onClearSelection?: () => void;
   onSelectAllStaff?: (ids: (string | number)[]) => void;
+  onBroadcastSquad?: (squad: any) => void;
+  onDelegateLead?: (lead: any) => void;
 }
 
 export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
@@ -97,6 +109,8 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
   onToggleSelectStaff,
   onClearSelection,
   onSelectAllStaff,
+  onBroadcastSquad,
+  onDelegateLead,
 }) => {
   const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
@@ -139,6 +153,11 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
           managerName: item.manager_name,
           departmentName: item.department_name,
           supervisorMaxCapacity: item.supervisor_max_capacity || 8,
+          actingSupervisorId: item.acting_supervisor_id,
+          actingSupervisorName: item.acting_supervisor_name,
+          delegationStartDate: item.delegation_start_date,
+          delegationEndDate: item.delegation_end_date,
+          delegationReason: item.delegation_reason,
           members: [],
         });
       }
@@ -630,9 +649,17 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                           <span className="font-bold text-slate-900 block truncate text-xs sm:text-[13px]">
                             {lead.supervisorName}
                           </span>
-                          <span className="text-[10px] text-purple-700 font-semibold bg-purple-50 px-1.5 py-0.2 rounded border border-purple-200">
-                            LEAD #{lead.supervisorId}
-                          </span>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-[10px] text-purple-700 font-semibold bg-purple-50 px-1.5 py-0.2 rounded border border-purple-200">
+                              LEAD #{lead.supervisorId}
+                            </span>
+                            {lead.actingSupervisorName && (
+                              <span className="text-[10px] text-amber-800 font-semibold bg-amber-50 px-1.5 py-0.2 rounded border border-amber-300 flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                <span>Acting: {lead.actingSupervisorName}</span>
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -715,6 +742,17 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                           >
                             <i className="bi bi-megaphone text-[10px]"></i>
                             <span>Broadcast</span>
+                          </button>
+                        )}
+                        {onDelegateLead && (
+                          <button
+                            type="button"
+                            onClick={() => onDelegateLead(lead)}
+                            className="px-2 py-1 rounded-md bg-white hover:bg-amber-50 text-amber-800 font-semibold text-xs border border-amber-200 shadow-2xs transition-colors cursor-pointer inline-flex items-center gap-1"
+                            title="Delegate leadership during leave"
+                          >
+                            <i className="bi bi-person-badge text-[10px] text-amber-600"></i>
+                            <span>Delegate</span>
                           </button>
                         )}
                         <button
