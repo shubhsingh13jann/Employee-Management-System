@@ -700,15 +700,33 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
 
                     {/* Actions */}
                     <td className="py-2.5 px-3 text-center whitespace-nowrap">
-                      <button
-                        type="button"
-                        onClick={() => onOpenAssignModal(undefined, lead.supervisorId, lead.managerId)}
-                        className="px-2.5 py-1 rounded-md bg-purple-50 hover:bg-purple-100 text-purple-700 font-semibold text-xs border border-purple-200 shadow-2xs transition-colors cursor-pointer inline-flex items-center gap-1"
-                        title="Add member to this squad"
-                      >
-                        <i className="bi bi-person-plus text-[10px]"></i>
-                        <span>Add</span>
-                      </button>
+                      <div className="inline-flex items-center gap-1.5">
+                        {onBroadcastSquad && (
+                          <button
+                            type="button"
+                            onClick={() => onBroadcastSquad({
+                              supervisorId: lead.supervisorId,
+                              supervisorName: lead.supervisorName,
+                              members: lead.members,
+                              departmentName: lead.departmentName,
+                            })}
+                            className="px-2 py-1 rounded-md bg-white hover:bg-purple-50 text-purple-700 font-semibold text-xs border border-purple-200 shadow-2xs transition-colors cursor-pointer inline-flex items-center gap-1"
+                            title="Broadcast announcement to squad"
+                          >
+                            <i className="bi bi-megaphone text-[10px]"></i>
+                            <span>Broadcast</span>
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => onOpenAssignModal(undefined, lead.supervisorId, lead.managerId)}
+                          className="px-2.5 py-1 rounded-md bg-purple-50 hover:bg-purple-100 text-purple-700 font-semibold text-xs border border-purple-200 shadow-2xs transition-colors cursor-pointer inline-flex items-center gap-1"
+                          title="Add member to this squad"
+                        >
+                          <i className="bi bi-person-plus text-[10px]"></i>
+                          <span>Add</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );

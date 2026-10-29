@@ -14,6 +14,7 @@ export interface SupervisorCapacityDrawerProps {
   onInitiateReassign?: (employee: HierarchyMappingItem) => void;
   onInitiateUnlink?: (employee: HierarchyMappingItem) => void;
   onUpdateSupervisorCapacity?: (supervisorId: string | number, maxCapacity: number) => Promise<void>;
+  onBroadcastSquad?: (squad: SquadGroup) => void;
 }
 
 export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> = ({
@@ -24,6 +25,7 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
   onInitiateReassign,
   onInitiateUnlink,
   onUpdateSupervisorCapacity,
+  onBroadcastSquad,
 }) => {
   const [memberFilter, setMemberFilter] = useState("");
 
@@ -143,14 +145,27 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/80 transition-colors cursor-pointer"
-              title="Close drawer (Esc)"
-            >
-              <i className="bi bi-x-lg text-sm"></i>
-            </button>
+            <div className="flex items-center gap-2">
+              {onBroadcastSquad && (
+                <button
+                  type="button"
+                  onClick={() => onBroadcastSquad(squad)}
+                  className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                  title="Broadcast announcement to this squad"
+                >
+                  <i className="bi bi-megaphone-fill text-indigo-500 text-xs"></i>
+                  <span>Broadcast</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/80 transition-colors cursor-pointer"
+                title="Close drawer (Esc)"
+              >
+                <i className="bi bi-x-lg text-sm"></i>
+              </button>
+            </div>
           </div>
 
           {/* Drawer Scrollable Body */}

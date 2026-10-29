@@ -1131,6 +1131,7 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
         onInitiateReassign={onInitiateReassign}
         onInitiateUnlink={onInitiateUnlink}
         onUpdateSupervisorCapacity={onUpdateSupervisorCapacity}
+        onBroadcastSquad={onBroadcastSquad}
       />
     </div>
   );

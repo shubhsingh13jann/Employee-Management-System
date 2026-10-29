@@ -771,6 +771,7 @@ const HierarchyMapping = () => {
             onBatchUnlink={handleBatchUnlink}
             isPreviewEmptyState={isPreviewEmptyState}
             onExitSimulation={() => setIsPreviewEmptyState(false)}
+            onBroadcastSquad={(squad: any) => setBroadcastSquadTarget(squad)}
           />
         )}
 
