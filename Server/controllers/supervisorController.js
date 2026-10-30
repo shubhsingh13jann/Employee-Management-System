@@ -42,20 +42,86 @@ export const getSupervisorDashboard = async (req, res) => {
 export const getTeamMembers = async (req, res) => {
   try {
     const supervisorId = req.user.id;
+
+    // 1. Fetch direct squad members
     const [members] = await pool.query(
       `SELECT u.id, u.name, u.email, u.phone, u.status, u.image_url,
+              d.name AS department_name,
               th.assigned_at,
               COUNT(t.id) AS total_tasks,
               SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) AS completed_tasks
        FROM team_hierarchy th
        JOIN users u ON th.employee_id = u.id
+       LEFT JOIN departments d ON u.department_id = d.id
        LEFT JOIN tasks t ON u.id = t.assigned_to
        WHERE th.supervisor_id = ?
-       GROUP BY u.id
+       GROUP BY u.id, d.name
        ORDER BY u.name ASC`,
       [supervisorId]
     );
-    return res.json({ status: true, team: members });
+
+    // 2. Fetch supervisor's capacity limit
+    let maxSpanCapacity = 8;
+    try {
+      const [supRows] = await pool.query(
+        "SELECT max_span_capacity FROM users WHERE id = ?",
+        [supervisorId]
+      );
+      if (supRows.length > 0 && supRows[0].max_span_capacity) {
+        maxSpanCapacity = supRows[0].max_span_capacity;
+      }
+    } catch (capErr) {
+      console.warn("Notice reading supervisor capacity:", capErr.message);
+    }
+
+    // 3. Fetch active delegations where supervisor is either the original or acting lead
+    let delegations = [];
+    try {
+      const [delRows] = await pool.query(
+        `SELECT hd.*,
+                orig.name AS original_supervisor_name,
+                act.name AS acting_supervisor_name
+         FROM hierarchy_delegations hd
+         JOIN users orig ON hd.original_supervisor_id = orig.id
+         JOIN users act ON hd.acting_supervisor_id = act.id
+         WHERE (hd.original_supervisor_id = ? OR hd.acting_supervisor_id = ?)
+           AND hd.is_active = TRUE
+           AND CURDATE() BETWEEN hd.start_date AND hd.end_date`,
+        [supervisorId, supervisorId]
+      );
+      delegations = delRows;
+    } catch (delErr) {
+      console.warn("Notice reading delegations:", delErr.message);
+    }
+
+    // 4. Fetch secondary / dotted-line matrix members assigned to this supervisor
+    let matrixMembers = [];
+    try {
+      const [matRows] = await pool.query(
+        `SELECT sth.id AS matrix_id, sth.role_title, sth.assigned_at,
+                u.id, u.name, u.email, u.phone, u.status, u.image_url,
+                d.name AS department_name,
+                p.title AS project_title
+         FROM secondary_team_hierarchy sth
+         JOIN users u ON sth.employee_id = u.id
+         LEFT JOIN departments d ON u.department_id = d.id
+         LEFT JOIN projects p ON sth.project_id = p.id
+         WHERE sth.secondary_supervisor_id = ?
+         ORDER BY u.name ASC`,
+        [supervisorId]
+      );
+      matrixMembers = matRows;
+    } catch (matErr) {
+      console.warn("Notice reading matrix members:", matErr.message);
+    }
+
+    return res.json({
+      status: true,
+      team: members,
+      maxSpanCapacity,
+      delegations,
+      matrixMembers,
+    });
   } catch (err) {
     console.error("Get team members error:", err);
     return res.status(500).json({ status: false, error: "Failed to fetch team members" });
