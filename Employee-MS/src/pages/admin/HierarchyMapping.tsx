@@ -19,6 +19,8 @@ import {
   SquadBroadcastModal,
   SupervisorDelegationModal,
   MatrixAssignModal,
+  ReorgSimulationReviewModal,
+  StagedReorgChange,
   HierarchyEmployeeDossierModal,
   SwapReportingConfirmModal,
 } from "../../Components/admin/hierarchy";
@@ -38,6 +40,9 @@ const HierarchyMapping = () => {
   const [delegationTargetSupervisor, setDelegationTargetSupervisor] = useState<any | null>(null);
   const [matrixReports, setMatrixReports] = useState<any[]>([]);
   const [matrixAssignTargetEmployee, setMatrixAssignTargetEmployee] = useState<any | null>(null);
+  const [isSimulationMode, setIsSimulationMode] = useState<boolean>(false);
+  const [stagedChanges, setStagedChanges] = useState<StagedReorgChange[]>([]);
+  const [isSimulationReviewOpen, setIsSimulationReviewOpen] = useState<boolean>(false);
   const [projects, setProjects] = useState<any[]>([]);
   const [selectedDossierEmployee, setSelectedDossierEmployee] = useState<any | null>(null);
   const [msg, setMsg] = useState({ type: "", text: "" });
@@ -379,6 +384,36 @@ const HierarchyMapping = () => {
     manager_id?: string | number;
     sync_department?: boolean;
   }) => {
+    if (isSimulationMode) {
+      const emp = reassignState.employee;
+      const targetSup = (supervisors as any[]).find((s) => String(s.id) === String(payload.supervisor_id)) || reassignState.targetSupervisor;
+
+      const newStaged: StagedReorgChange = {
+        employee_id: payload.employee_id,
+        employee_name: emp?.employee_name || emp?.name || `Employee #${payload.employee_id}`,
+        employee_email: emp?.employee_email || emp?.email,
+        employee_department: emp?.department_name || emp?.department,
+        current_supervisor_id: emp?.supervisor_id,
+        current_supervisor_name: emp?.supervisor_name,
+        target_supervisor_id: payload.supervisor_id,
+        target_supervisor_name: targetSup?.name || `Supervisor #${payload.supervisor_id}`,
+        target_supervisor_department: targetSup?.department_name || targetSup?.department,
+        sync_department: payload.sync_department ?? true,
+      };
+
+      setStagedChanges((prev) => {
+        const filtered = prev.filter((c) => String(c.employee_id) !== String(payload.employee_id));
+        return [...filtered, newStaged];
+      });
+
+      setReassignState({ isOpen: false, employee: null, targetSupervisor: null, targetManager: null });
+      setMsg({
+        type: "success",
+        text: `Staged reassignment for ${newStaged.employee_name} to ${newStaged.target_supervisor_name} in simulation sandbox!`,
+      });
+      return;
+    }
+
     try {
       setSaving(true);
       setMsg({ type: "", text: "" });
@@ -527,6 +562,27 @@ const HierarchyMapping = () => {
       setSaving(false);
     }
   };
+  const handleApplyReorgPlan = async (changes: StagedReorgChange[], reason: string) => {
+    const payload = {
+      changes: changes.map((c) => ({
+        employee_id: c.employee_id,
+        supervisor_id: c.target_supervisor_id,
+        sync_department: c.sync_department,
+      })),
+      reason,
+    };
+
+    const res = await api.post("/api/admin/hierarchy/apply-reorg-plan", payload);
+    if (res.data?.status) {
+      setMsg({ type: "success", text: res.data.message || "Reorganization plan published successfully!" });
+      setStagedChanges([]);
+      setIsSimulationMode(false);
+      fetchData();
+    } else {
+      throw new Error(res.data?.error || "Failed to apply reorganization plan");
+    }
+  };
+
   const handleUnlinkSecondary = async (secondaryId: string | number) => {
     if (!window.confirm("Are you sure you want to remove this dotted-line reporting link?")) return;
     try {
@@ -975,6 +1031,92 @@ const HierarchyMapping = () => {
           setMsg({ type: "success", text: "Team lead delegation updated successfully!" });
         }}
       />
+      {/* Floating Simulation Sandbox Control Bar */}
+      {isSimulationMode && (
+        <div
+          className="fixed bottom-6 flex justify-center items-center z-[1040] pointer-events-none px-4"
+          style={{ left: "240px", right: "0px" }}
+        >
+          <div className="bg-slate-900/95 backdrop-blur-xl border border-amber-500/50 text-white rounded-2xl shadow-2xl px-4 py-2.5 flex items-center gap-3.5 ring-1 ring-amber-400/20 pointer-events-auto animate-in slide-in-from-bottom-3 duration-200">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
+              <div className="flex flex-col">
+                <span className="text-xs font-bold text-amber-300">
+                  Simulation Sandbox Active
+                </span>
+                <span className="text-[10.5px] text-slate-300">
+                  {stagedChanges.length === 0
+                    ? "Drag & drop or reassign to stage changes"
+                    : `${stagedChanges.length} staged change${stagedChanges.length === 1 ? "" : "s"} ready`}
+                </span>
+              </div>
+            </div>
+
+            <div className="h-6 w-px bg-white/20"></div>
+
+            <div className="flex items-center gap-2">
+              {stagedChanges.length > 0 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setIsSimulationReviewOpen(true)}
+                    className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <i className="bi bi-eye-fill"></i>
+                    <span>Review & Publish ({stagedChanges.length})</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm("Discard all staged reorganization changes?")) {
+                        setStagedChanges([]);
+                      }
+                    }}
+                    className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white text-xs font-medium transition-colors cursor-pointer"
+                    title="Discard all staged changes"
+                  >
+                    Discard
+                  </button>
+                </>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setIsSimulationMode(false)}
+                className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-medium transition-colors cursor-pointer"
+                title="Exit Simulation Mode"
+              >
+                Exit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reorganization Simulation Review Modal */}
+      <ReorgSimulationReviewModal
+        isOpen={isSimulationReviewOpen}
+        onClose={() => setIsSimulationReviewOpen(false)}
+        stagedChanges={stagedChanges}
+        onUpdateChange={(idx, updated) => {
+          setStagedChanges((prev) => {
+            const next = [...prev];
+            next[idx] = updated;
+            return next;
+          });
+        }}
+        onRemoveChange={(idx) => {
+          setStagedChanges((prev) => prev.filter((_, i) => i !== idx));
+        }}
+        onClearAll={() => {
+          if (window.confirm("Discard all staged reorganization changes?")) {
+            setStagedChanges([]);
+          }
+        }}
+        onApplyPlan={handleApplyReorgPlan}
+      />
+
       {/* Secondary / Matrix Assignment Modal */}
       <MatrixAssignModal
         isOpen={Boolean(matrixAssignTargetEmployee)}

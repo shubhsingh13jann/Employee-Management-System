@@ -11,6 +11,10 @@ interface HierarchyHeaderProps {
   onPrint?: () => void;
   onOpenAuditModal?: () => void;
   onOpenAutoAssignWizard?: () => void;
+  isSimulationMode?: boolean;
+  onToggleSimulationMode?: () => void;
+  stagedChangesCount?: number;
+  onOpenSimulationReview?: () => void;
 }
 
 export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
@@ -24,6 +28,10 @@ export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
   onPrint,
   onOpenAuditModal,
   onOpenAutoAssignWizard,
+  isSimulationMode = false,
+  onToggleSimulationMode,
+  stagedChangesCount = 0,
+  onOpenSimulationReview,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -178,6 +186,28 @@ export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
           </button>
         </div>
 
+        {/* Reorganization Simulation / Sandbox Mode Toggle */}
+        {onToggleSimulationMode && (
+          <button
+            type="button"
+            onClick={onToggleSimulationMode}
+            className={`h-8 px-2.5 sm:px-3 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer leading-none border ${
+              isSimulationMode
+                ? "bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold border-amber-300 shadow-md shadow-amber-500/30 ring-2 ring-amber-400/30"
+                : "bg-white/5 hover:bg-white/10 text-amber-300 border-amber-400/30 hover:border-amber-400/50"
+            }`}
+            title="Toggle Reorganization Simulation / Draft Sandbox"
+          >
+            <i className={`bi bi-flask ${isSimulationMode ? "animate-bounce" : ""}`}></i>
+            <span className="hidden sm:inline">Simulation Draft</span>
+            {stagedChangesCount > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-950 text-amber-300 font-extrabold ml-0.5">
+                {stagedChangesCount}
+              </span>
+            )}
+          </button>
+        )}
+
         {/* Enlarged Triple Line Button & Consolidated Dropdown Menu (Matching User Directory standard) */}
         <div className="relative z-50" ref={menuRef}>
           <button
@@ -210,6 +240,45 @@ export const HierarchyHeader: React.FC<HierarchyHeaderProps> = ({
                 <i className="bi bi-person-plus-fill font-bold text-xs shrink-0"></i>
                 <span className="whitespace-nowrap">Assign Team Member</span>
               </button>
+
+              <div className="h-px bg-white/10 my-1.5"></div>
+
+              {onToggleSimulationMode && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onToggleSimulationMode();
+                  }}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer text-left whitespace-nowrap ${
+                    isSimulationMode ? "bg-amber-500/20 text-amber-300 hover:bg-amber-500/30" : "text-slate-200 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  <i className="bi bi-flask text-amber-400 text-sm shrink-0"></i>
+                  <span className="whitespace-nowrap">
+                    {isSimulationMode ? "Exit Simulation Mode" : "Enter Simulation Mode"}
+                  </span>
+                </button>
+              )}
+
+              {stagedChangesCount > 0 && onOpenSimulationReview && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onOpenSimulationReview();
+                  }}
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors cursor-pointer text-left whitespace-nowrap shadow-sm mt-1"
+                >
+                  <div className="flex items-center gap-2">
+                    <i className="bi bi-check-all text-sm shrink-0"></i>
+                    <span>Review Plan</span>
+                  </div>
+                  <span className="px-1.5 py-0.2 rounded-full bg-slate-950 text-amber-300 text-[10px]">
+                    {stagedChangesCount}
+                  </span>
+                </button>
+              )}
 
               <div className="h-px bg-white/10 my-1.5"></div>
 

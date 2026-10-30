@@ -20,3 +20,4 @@ export * from "./HierarchyEmptyStateOnboarding";
 export * from "./SquadBroadcastModal";
 export * from "./SupervisorDelegationModal";
 export * from "./MatrixAssignModal";
+export * from "./ReorgSimulationReviewModal";
