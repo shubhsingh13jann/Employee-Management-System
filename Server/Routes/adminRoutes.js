@@ -39,6 +39,7 @@ import {
   getSecondaryHierarchy,
   assignSecondaryHierarchy,
   unlinkSecondaryHierarchy,
+  applyReorgPlan,
   getAdminProjects,
   createAdminProject,
   updateAdminProjectStatus,
@@ -98,6 +99,7 @@ router.put("/hierarchy/delegations/:id/cancel", revokeHierarchyDelegation);
 router.delete("/hierarchy/delegations/:id", revokeHierarchyDelegation);
 router.get("/hierarchy/secondary", getSecondaryHierarchy);
 router.post("/hierarchy/secondary", assignSecondaryHierarchy);
+router.post("/hierarchy/apply-reorg-plan", applyReorgPlan);
 router.delete("/hierarchy/secondary/:id", unlinkSecondaryHierarchy);
 router.delete("/hierarchy/:employeeId", unlinkHierarchy);
 

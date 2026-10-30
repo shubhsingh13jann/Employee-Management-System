@@ -2563,3 +2563,111 @@ export const unlinkSecondaryHierarchy = async (req, res) => {
     return res.status(500).json({ status: false, error: "Failed to unlink secondary reporting relationship" });
   }
 };
+
+export const applyReorgPlan = async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    const { changes, reason } = req.body;
+    if (!Array.isArray(changes) || changes.length === 0) {
+      return res.status(400).json({ status: false, error: "A non-empty list of changes is required to apply reorganization plan." });
+    }
+
+    await connection.beginTransaction();
+
+    const adminName = req.user?.name || "HR Admin";
+    let updatedCount = 0;
+    const auditDetails = [];
+
+    for (const change of changes) {
+      const { employee_id, supervisor_id, sync_department } = change;
+      let resolvedManagerId = change.manager_id;
+
+      if (!employee_id || !supervisor_id) continue;
+
+      if (!resolvedManagerId) {
+        // Resolve manager from supervisor's department or existing mapping
+        const [existing] = await connection.query(
+          "SELECT manager_id FROM team_hierarchy WHERE employee_id = ?",
+          [employee_id]
+        );
+        if (existing && existing.length > 0 && existing[0].manager_id) {
+          resolvedManagerId = existing[0].manager_id;
+        } else {
+          const [supRows] = await connection.query(
+            "SELECT department_id FROM users WHERE id = ?",
+            [supervisor_id]
+          );
+          if (supRows.length > 0 && supRows[0].department_id) {
+            const [deptMgr] = await connection.query(
+              "SELECT id FROM users WHERE role = 'manager' AND department_id = ? LIMIT 1",
+              [supRows[0].department_id]
+            );
+            if (deptMgr.length > 0) resolvedManagerId = deptMgr[0].id;
+          }
+        }
+      }
+
+      if (!resolvedManagerId) {
+        const [anyMgr] = await connection.query("SELECT id FROM users WHERE role = 'manager' LIMIT 1");
+        if (anyMgr.length > 0) resolvedManagerId = anyMgr[0].id;
+      }
+
+      await connection.query(
+        `INSERT INTO team_hierarchy (employee_id, supervisor_id, manager_id, assigned_at)
+         VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+         ON DUPLICATE KEY UPDATE supervisor_id = VALUES(supervisor_id), manager_id = VALUES(manager_id), assigned_at = CURRENT_TIMESTAMP`,
+        [employee_id, supervisor_id, resolvedManagerId]
+      );
+
+      // Department sync if requested
+      if (sync_department) {
+        const [supDeptRows] = await connection.query(
+          "SELECT department_id FROM users WHERE id = ?",
+          [supervisor_id]
+        );
+        if (supDeptRows.length > 0 && supDeptRows[0].department_id) {
+          await connection.query("UPDATE users SET department_id = ? WHERE id = ?", [
+            supDeptRows[0].department_id,
+            employee_id,
+          ]);
+        }
+      }
+
+      updatedCount++;
+      auditDetails.push({ employee_id, supervisor_id, manager_id: resolvedManagerId, sync_department });
+    }
+
+    // Insert batch reorganization audit log
+    try {
+      await connection.query(
+        `INSERT INTO user_audit_logs (user_id, action_type, field_name, details, performed_by)
+         VALUES (?, 'reorganization_plan_applied', 'team_hierarchy', ?, ?)`,
+        [
+          req.user?.id || 1,
+          JSON.stringify({
+            message: `Applied reorganization simulation plan: updated ${updatedCount} reporting relationships`,
+            changes_count: updatedCount,
+            reason: reason || "Departmental Reorganization Simulation Plan",
+            changes: auditDetails,
+          }),
+          adminName,
+        ]
+      );
+    } catch (auditErr) {
+      console.warn("Reorg audit log notice:", auditErr.message);
+    }
+
+    await connection.commit();
+    return res.json({
+      status: true,
+      message: `Reorganization plan applied successfully! Updated ${updatedCount} reporting relationships.`,
+      count: updatedCount,
+    });
+  } catch (err) {
+    await connection.rollback();
+    console.error("Apply reorganization plan error:", err);
+    return res.status(500).json({ status: false, error: "Failed to apply reorganization plan" });
+  } finally {
+    connection.release();
+  }
+};
