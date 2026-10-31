@@ -649,6 +649,10 @@ const HierarchyMapping = () => {
           onPrint={() => setIsPrintModalOpen(true)}
           onOpenAuditModal={() => setIsAuditModalOpen(true)}
           onOpenAutoAssignWizard={() => setIsAutoAssignWizardOpen(true)}
+          isSimulationMode={isSimulationMode}
+          onToggleSimulationMode={() => setIsSimulationMode((prev) => !prev)}
+          stagedChangesCount={stagedChanges.length}
+          onOpenSimulationReview={() => setIsSimulationReviewOpen(true)}
         />
 
         {/* KPI Stats Grid */}
