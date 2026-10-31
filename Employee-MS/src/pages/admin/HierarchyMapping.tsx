@@ -779,10 +779,6 @@ const HierarchyMapping = () => {
             onViewDossier={(emp) => setSelectedDossierEmployee(emp)}
             isPreviewEmptyState={isPreviewEmptyState}
             onExitSimulation={() => setIsPreviewEmptyState(false)}
-            onUpdateSupervisorCapacity={handleUpdateSupervisorCapacity}
-            onBroadcastSquad={(squad: any) => setBroadcastSquadTarget(squad)}
-            onDelegateLead={handleOpenDelegation}
-            onViewCapacity={(lead) => setCapacityDrawerSquad(lead)}
           />
         ) : viewMode === "squad" ? (
           <HierarchySquadCardsView
@@ -890,6 +886,8 @@ const HierarchyMapping = () => {
             onBroadcastSquad={(squad: any) => setBroadcastSquadTarget(squad)}
             onDelegateLead={handleOpenDelegation}
             onUpdateSupervisorCapacity={handleUpdateSupervisorCapacity}
+            onViewCapacity={(lead) => setCapacityDrawerSquad(lead)}
+            matrixReports={matrixReports}
           />
         )}
 

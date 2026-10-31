@@ -86,6 +86,7 @@ interface HierarchyTableViewProps {
   onBroadcastSquad?: (squad: any) => void;
   onDelegateLead?: (lead: any) => void;
   onViewCapacity?: (squad: any) => void;
+  matrixReports?: any[];
 }
 
 export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
@@ -113,6 +114,7 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
   onBroadcastSquad,
   onDelegateLead,
   onViewCapacity,
+  matrixReports = [],
 }) => {
   const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
@@ -1085,6 +1087,21 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                                   <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1 py-0.2 rounded border border-slate-200">
                                     EMP-{String(item.employee_id).padStart(4, "0")}
                                   </span>
+                                  {(() => {
+                                    const sec = (matrixReports || []).find(
+                                      (r: any) => String(r.employee_id) === String(item.employee_id)
+                                    );
+                                    if (!sec) return null;
+                                    return (
+                                      <span
+                                        className="inline-flex items-center gap-1 text-[9.5px] font-bold text-purple-700 bg-purple-50 border border-purple-200 px-1.5 py-0.2 rounded"
+                                        title={`Dotted-Line Supervisor: ${sec.secondary_supervisor_name} (${sec.role_title || "Matrix Member"})`}
+                                      >
+                                        <i className="bi bi-diagram-2 text-[9px]"></i>
+                                        <span>Matrix: {sec.secondary_supervisor_name}</span>
+                                      </span>
+                                    );
+                                  })()}
                                 </div>
                                 <span className="text-[10px] text-slate-400 block truncate">
                                   {item.employee_email}
