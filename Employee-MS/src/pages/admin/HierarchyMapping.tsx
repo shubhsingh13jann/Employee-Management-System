@@ -18,6 +18,7 @@ import {
   AutoAssignWizardModal,
   SquadBroadcastModal,
   SupervisorDelegationModal,
+  SupervisorCapacityDrawer,
   MatrixAssignModal,
   ReorgSimulationReviewModal,
   StagedReorgChange,
@@ -38,6 +39,7 @@ const HierarchyMapping = () => {
   const [isAutoAssignWizardOpen, setIsAutoAssignWizardOpen] = useState(false);
   const [broadcastSquadTarget, setBroadcastSquadTarget] = useState<any | null>(null);
   const [delegationTargetSupervisor, setDelegationTargetSupervisor] = useState<any | null>(null);
+  const [capacityDrawerSquad, setCapacityDrawerSquad] = useState<any | null>(null);
   const [matrixReports, setMatrixReports] = useState<any[]>([]);
   const [matrixAssignTargetEmployee, setMatrixAssignTargetEmployee] = useState<any | null>(null);
   const [isSimulationMode, setIsSimulationMode] = useState<boolean>(false);
@@ -776,6 +778,7 @@ const HierarchyMapping = () => {
             onUpdateSupervisorCapacity={handleUpdateSupervisorCapacity}
             onBroadcastSquad={(squad: any) => setBroadcastSquadTarget(squad)}
             onDelegateLead={handleOpenDelegation}
+            onViewCapacity={(lead) => setCapacityDrawerSquad(lead)}
           />
         ) : viewMode === "squad" ? (
           <HierarchySquadCardsView
@@ -882,6 +885,7 @@ const HierarchyMapping = () => {
             onExitSimulation={() => setIsPreviewEmptyState(false)}
             onBroadcastSquad={(squad: any) => setBroadcastSquadTarget(squad)}
             onDelegateLead={handleOpenDelegation}
+            onUpdateSupervisorCapacity={handleUpdateSupervisorCapacity}
           />
         )}
 
@@ -1018,6 +1022,43 @@ const HierarchyMapping = () => {
         onClose={() => setBroadcastSquadTarget(null)}
         squad={broadcastSquadTarget}
         onSuccess={(msgText) => setMsg({ type: "success", text: msgText })}
+      />
+
+      {/* Global Supervisor Capacity Drawer */}
+      <SupervisorCapacityDrawer
+        isOpen={Boolean(capacityDrawerSquad)}
+        onClose={() => setCapacityDrawerSquad(null)}
+        squad={capacityDrawerSquad}
+        onOpenAssignModal={(empId, supId, mgrId) => {
+          setCapacityDrawerSquad(null);
+          setForm({ employee_id: empId ? String(empId) : "", supervisor_id: supId ? String(supId) : "", manager_id: mgrId ? String(mgrId) : "" });
+          setShowModal(true);
+        }}
+        onInitiateReassign={(emp) => {
+          setCapacityDrawerSquad(null);
+          setReassignState({
+            isOpen: true,
+            employee: emp,
+            targetSupervisor: null,
+            targetManager: null,
+          });
+        }}
+        onInitiateUnlink={(emp) => {
+          setCapacityDrawerSquad(null);
+          setUnlinkState({
+            isOpen: true,
+            employee: emp,
+          });
+        }}
+        onUpdateSupervisorCapacity={handleUpdateSupervisorCapacity}
+        onBroadcastSquad={(squad) => {
+          setCapacityDrawerSquad(null);
+          setBroadcastSquadTarget(squad);
+        }}
+        onDelegateLead={(squad) => {
+          setCapacityDrawerSquad(null);
+          handleOpenDelegation(squad);
+        }}
       />
 
       {/* Temporary Team Lead Delegation Modal */}

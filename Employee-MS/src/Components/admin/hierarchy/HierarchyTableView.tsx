@@ -85,6 +85,7 @@ interface HierarchyTableViewProps {
   onSelectAllStaff?: (ids: (string | number)[]) => void;
   onBroadcastSquad?: (squad: any) => void;
   onDelegateLead?: (lead: any) => void;
+  onViewCapacity?: (squad: any) => void;
 }
 
 export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
@@ -111,6 +112,7 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
   onSelectAllStaff,
   onBroadcastSquad,
   onDelegateLead,
+  onViewCapacity,
 }) => {
   const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
@@ -708,9 +710,15 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                     <td className="py-2.5 px-3 text-center">
                       <button
                         type="button"
-                        onClick={() => setSelectedSquadLead(lead)}
+                        onClick={() => {
+                          if (onViewCapacity) {
+                            onViewCapacity(lead);
+                          } else {
+                            setSelectedSquadLead(lead);
+                          }
+                        }}
                         className="inline-flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
-                        title="Click to view full squad details"
+                        title="Click to inspect supervisor workload and capacity limits"
                       >
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-purple-100/80 text-purple-800 border border-purple-200">
                           {lead.members.length} {lead.members.length === 1 ? "staff" : "squad members"}
