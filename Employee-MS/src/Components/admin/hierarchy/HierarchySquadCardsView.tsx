@@ -852,10 +852,11 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                             e.stopPropagation();
                             onBroadcastSquad(squad);
                           }}
-                          className="p-1 rounded-md text-slate-500 hover:text-indigo-600 hover:bg-white transition-all cursor-pointer shadow-2xs border border-transparent hover:border-indigo-200"
+                          className="px-2 py-0.5 rounded-lg bg-indigo-50/90 hover:bg-indigo-100 text-indigo-700 font-semibold text-[10.5px] border border-indigo-200 shadow-2xs transition-all cursor-pointer inline-flex items-center gap-1"
                           title="Broadcast announcement to this squad"
                         >
-                          <i className="bi bi-megaphone text-xs"></i>
+                          <i className="bi bi-megaphone-fill text-[10px]"></i>
+                          <span className="hidden sm:inline">Broadcast</span>
                         </button>
                       )}
                       {onDelegateLead && (
@@ -865,10 +866,11 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                             e.stopPropagation();
                             onDelegateLead(squad);
                           }}
-                          className="p-1 rounded-md text-slate-500 hover:text-amber-600 hover:bg-white transition-all cursor-pointer shadow-2xs border border-transparent hover:border-amber-200"
+                          className="px-2 py-0.5 rounded-lg bg-amber-50/90 hover:bg-amber-100 text-amber-800 font-semibold text-[10.5px] border border-amber-200 shadow-2xs transition-all cursor-pointer inline-flex items-center gap-1"
                           title="Delegate team leadership (Leave coverage)"
                         >
-                          <i className="bi bi-person-badge text-xs"></i>
+                          <i className="bi bi-person-badge text-[10px]"></i>
+                          <span className="hidden sm:inline">Delegate</span>
                         </button>
                       )}
                       <button
