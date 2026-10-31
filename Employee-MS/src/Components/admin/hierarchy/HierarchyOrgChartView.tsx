@@ -626,7 +626,9 @@ ${safeStyles}
     managersTree.forEach((m) => {
       const mgrMatch =
         m.name?.toLowerCase().includes(q) ||
-        m.department?.toLowerCase().includes(q);
+        m.department?.toLowerCase().includes(q) ||
+        `mgr-${String(m.id).padStart(4, "0")}`.toLowerCase().includes(q) ||
+        String(m.id).includes(q);
       if (mgrMatch) {
         ids.push(`mgr-${m.id}`);
       }
@@ -634,7 +636,9 @@ ${safeStyles}
       Array.from(m.supervisors.values()).forEach((s) => {
         const supMatch =
           s.name?.toLowerCase().includes(q) ||
-          s.department?.toLowerCase().includes(q);
+          s.department?.toLowerCase().includes(q) ||
+          `sup-${String(s.id).padStart(4, "0")}`.toLowerCase().includes(q) ||
+          String(s.id).includes(q);
         if (supMatch) {
           ids.push(`sup-${s.id}`);
         }
@@ -643,7 +647,9 @@ ${safeStyles}
           const empMatch =
             e.employee_name?.toLowerCase().includes(q) ||
             e.employee_email?.toLowerCase().includes(q) ||
-            e.department_name?.toLowerCase().includes(q);
+            e.department_name?.toLowerCase().includes(q) ||
+            `emp-${String(e.employee_id).padStart(4, "0")}`.toLowerCase().includes(q) ||
+            String(e.employee_id).includes(q);
           if (empMatch) {
             ids.push(`emp-${e.employee_id}`);
           }
