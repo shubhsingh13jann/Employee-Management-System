@@ -306,7 +306,7 @@ export const ReassignConfirmModal: React.FC<ReassignConfirmModalProps> = ({
                   <option value="">Select Supervisor...</option>
                   {supervisors.map((s) => (
                     <option key={s.id} value={s.id}>
-                      {s.name} {s.department ? `(${s.department})` : ""}
+                      {s.name} ({s.department_name || s.department || "General"})
                     </option>
                   ))}
                 </select>
@@ -331,7 +331,7 @@ export const ReassignConfirmModal: React.FC<ReassignConfirmModalProps> = ({
                   <option value="">Auto-resolve from Department / Supervisor</option>
                   {managers.map((m) => (
                     <option key={m.id} value={m.id}>
-                      {m.name} {m.department ? `(${m.department})` : ""}
+                      {m.name} ({m.department_name || m.department || "General"})
                     </option>
                   ))}
                 </select>
