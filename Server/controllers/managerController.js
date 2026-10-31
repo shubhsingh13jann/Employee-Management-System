@@ -157,14 +157,12 @@ export const getSupervisors = async (req, res) => {
     const managerId = req.user.id;
     const deptId = req.user.department_id;
     const query = `
-      SELECT u.id, u.name, u.email, u.phone, u.status, u.image_url, u.max_span_capacity,
-             d.name AS department_name,
+      SELECT u.id, u.name, u.email, u.phone, u.status, u.image_url,
              COUNT(DISTINCT p.id) AS active_projects_count,
              COUNT(DISTINCT th.employee_id) AS team_size,
              COUNT(DISTINCT t.id) AS total_tasks_count,
              SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) AS completed_tasks_count
       FROM users u
-      LEFT JOIN departments d ON u.department_id = d.id
       LEFT JOIN projects p ON u.id = p.lead_supervisor_id AND p.status != 'completed'
       LEFT JOIN team_hierarchy th ON u.id = th.supervisor_id
       LEFT JOIN tasks t ON u.id = t.assigned_by
@@ -175,59 +173,12 @@ export const getSupervisors = async (req, res) => {
           OR u.department_id IS NULL
           OR u.id IN (SELECT lead_supervisor_id FROM projects WHERE (department_id = ? OR created_by = ?) AND lead_supervisor_id IS NOT NULL)
         )
-      GROUP BY u.id, d.name
+      GROUP BY u.id
       ORDER BY u.name ASC
     `;
     const params = [deptId, deptId, deptId, managerId];
 
     const [supervisors] = await pool.query(query, params);
-
-    // Fetch team reports and active delegations for all returned supervisors
-    if (supervisors.length > 0) {
-      const supervisorIds = supervisors.map((s) => s.id);
-
-      // 1. Fetch team members under these supervisors
-      try {
-        const [members] = await pool.query(
-          `SELECT th.supervisor_id, u.id, u.name, u.email, u.phone, u.status, u.image_url,
-                  d.name AS department_name, th.assigned_at
-           FROM team_hierarchy th
-           JOIN users u ON th.employee_id = u.id
-           LEFT JOIN departments d ON u.department_id = d.id
-           WHERE th.supervisor_id IN (?)
-           ORDER BY u.name ASC`,
-          [supervisorIds]
-        );
-
-        // 2. Fetch active delegations for these supervisors
-        let delegations = [];
-        try {
-          const [delRows] = await pool.query(
-            `SELECT hd.*, orig.name AS original_supervisor_name, act.name AS acting_supervisor_name
-             FROM hierarchy_delegations hd
-             JOIN users orig ON hd.original_supervisor_id = orig.id
-             JOIN users act ON hd.acting_supervisor_id = act.id
-             WHERE (hd.original_supervisor_id IN (?) OR hd.acting_supervisor_id IN (?))
-               AND hd.is_active = TRUE
-               AND CURDATE() BETWEEN hd.start_date AND hd.end_date`,
-            [supervisorIds, supervisorIds]
-          );
-          delegations = delRows;
-        } catch (delErr) {
-          console.warn("Notice reading manager delegations:", delErr.message);
-        }
-
-        for (const sup of supervisors) {
-          sup.team_members = members.filter((m) => m.supervisor_id === sup.id);
-          sup.active_delegation = delegations.find(
-            (d) => d.original_supervisor_id === sup.id || d.acting_supervisor_id === sup.id
-          ) || null;
-        }
-      } catch (memErr) {
-        console.warn("Notice reading supervisor squad members:", memErr.message);
-      }
-    }
-
     return res.json({ status: true, supervisors });
   } catch (err) {
     console.error("Get supervisors error:", err);
