@@ -83,12 +83,13 @@ export const SquadBroadcastModal: React.FC<SquadBroadcastModalProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 bg-slate-950/60 backdrop-blur-xs overscroll-contain animate-in fade-in duration-150"
+      className="fixed inset-0 z-[11000] bg-slate-950/60 backdrop-blur-xs overscroll-contain animate-in fade-in duration-150"
       onClick={!sending ? onClose : undefined}
     >
-      <div
-        className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col"
-        onClick={(e) => e.stopPropagation()}
+      <div className="fixed inset-y-0 right-0 left-0 md:left-[240px] flex items-center justify-center p-3 sm:p-5 pointer-events-none">
+        <div
+          className="relative w-full max-w-2xl sm:max-w-[720px] bg-white rounded-3xl shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col pointer-events-auto"
+          onClick={(e) => e.stopPropagation()}
       >
         {/* Header with Fluid Pastel Wave Background */}
         <div className="relative px-5 py-3 sm:py-3.5 bg-white flex items-center justify-between border-b border-slate-200 overflow-hidden shrink-0">
@@ -182,21 +183,21 @@ export const SquadBroadcastModal: React.FC<SquadBroadcastModalProps> = ({
               <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                 Target Squad Roster
               </span>
-              <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-slate-600 select-none">
+              <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 hover:text-indigo-600 select-none group/leadcheck transition-colors">
                 <input
                   type="checkbox"
                   checked={includeLead}
                   onChange={(e) => setIncludeLead(e.target.checked)}
-                  className="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer w-3.5 h-3.5"
+                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer accent-indigo-600 shrink-0 self-center"
                 />
-                <span>Include Team Lead ({squad.supervisorName})</span>
+                <span className="leading-none pt-0.5">Include Team Lead ({squad.supervisorName})</span>
               </label>
             </div>
 
             {/* Members Chip List */}
-            <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-1 bg-white rounded-xl border border-slate-200/60 [scrollbar-width:thin]">
+            <div className="flex items-center gap-1.5 flex-nowrap overflow-x-auto p-1.5 bg-white rounded-xl border border-slate-200/60 [scrollbar-width:none]">
               {includeLead && (
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 text-[11px] font-bold">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 text-[11px] font-bold whitespace-nowrap shrink-0">
                   <i className="bi bi-person-fill text-indigo-500"></i>
                   <span>{squad.supervisorName} (Lead)</span>
                 </span>
@@ -204,7 +205,7 @@ export const SquadBroadcastModal: React.FC<SquadBroadcastModalProps> = ({
               {squad.members.map((m) => (
                 <span
                   key={`recipient-${m.employee_id}`}
-                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 text-[11px] font-medium"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 text-[11px] font-medium whitespace-nowrap shrink-0"
                 >
                   <span className="w-4 h-4 rounded-full bg-slate-300 text-slate-700 text-[9px] font-bold flex items-center justify-center">
                     {m.employee_name.charAt(0)}
@@ -328,6 +329,7 @@ export const SquadBroadcastModal: React.FC<SquadBroadcastModalProps> = ({
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>,
     document.body

@@ -183,11 +183,15 @@ export const SupervisorDelegationModal: React.FC<SupervisorDelegationModalProps>
   ];
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div
-        className="bg-white rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div
+      className="fixed inset-0 z-[11000] bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150"
+      onClick={!submitting && !revoking ? onClose : undefined}
+    >
+      <div className="fixed inset-y-0 right-0 left-0 md:left-[240px] flex items-center justify-center p-3 sm:p-5 pointer-events-none">
+        <div
+          className="bg-white rounded-3xl max-w-2xl sm:max-w-[700px] w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col pointer-events-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Header with Fluid Pastel Amber/Gold Wave Background */}
         <div className="relative px-4 sm:px-5 py-2.5 sm:py-3 bg-white flex items-center justify-between border-b border-slate-200 overflow-hidden shrink-0">
           <div className="absolute top-0 right-0 w-[380px] sm:w-[480px] h-full pointer-events-none overflow-hidden z-0">
@@ -374,7 +378,7 @@ export const SupervisorDelegationModal: React.FC<SupervisorDelegationModalProps>
                 </select>
                 <i className="bi bi-chevron-down absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-xs"></i>
               </div>
-              <p className="text-[10px] text-slate-400 mt-1 mb-0">
+              <p className="text-[10.5px] text-slate-400 mt-1 mb-0 whitespace-nowrap">
                 Acting lead will receive daily task notifications, approval workflows, and sprint updates during this period.
               </p>
             </div>
@@ -467,6 +471,7 @@ export const SupervisorDelegationModal: React.FC<SupervisorDelegationModalProps>
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>,
     document.body

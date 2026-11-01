@@ -110,10 +110,14 @@ export const MatrixAssignModal: React.FC<MatrixAssignModalProps> = ({
   ];
 
   return createPortal(
-    <div className="fixed inset-0 z-[11000] flex items-center justify-center p-3 sm:p-5 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div
-        className="bg-white rounded-3xl max-w-2xl sm:max-w-[680px] w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col"
-        onClick={(e) => e.stopPropagation()}
+    <div
+      className="fixed inset-0 z-[11000] bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150"
+      onClick={onClose}
+    >
+      <div className="fixed inset-y-0 right-0 left-0 md:left-[240px] flex items-center justify-center p-3 sm:p-4 pointer-events-none">
+        <div
+          className="bg-white rounded-3xl max-w-2xl sm:max-w-[680px] w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col pointer-events-auto"
+          onClick={(e) => e.stopPropagation()}
       >
         {/* Header with Fluid Pastel Purple/Violet Wave Background */}
         <div className="relative px-4 sm:px-5 py-2.5 sm:py-3 bg-white flex items-center justify-between border-b border-slate-200 overflow-hidden shrink-0">
@@ -346,6 +350,7 @@ export const MatrixAssignModal: React.FC<MatrixAssignModalProps> = ({
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>,
     document.body
