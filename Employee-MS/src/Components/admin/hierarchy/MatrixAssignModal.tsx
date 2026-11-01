@@ -110,9 +110,9 @@ export const MatrixAssignModal: React.FC<MatrixAssignModalProps> = ({
   ];
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-[11000] flex items-center justify-center p-3 sm:p-5 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150">
       <div
-        className="bg-white rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col"
+        className="bg-white rounded-3xl max-w-2xl sm:max-w-[680px] w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header with Fluid Pastel Purple/Violet Wave Background */}
@@ -179,7 +179,7 @@ export const MatrixAssignModal: React.FC<MatrixAssignModalProps> = ({
               <i className="bi bi-diagram-2"></i>
             </div>
             <div className="min-w-0">
-              <h3 className="font-bold text-sm sm:text-base text-slate-900 tracking-tight leading-normal mb-0">
+              <h3 className="font-bold text-sm sm:text-base text-slate-900 tracking-tight leading-normal mb-0 whitespace-nowrap">
                 Assign Dotted-Line Matrix Reporting
               </h3>
               <p className="text-[11px] sm:text-xs text-slate-400 mb-0 font-normal leading-normal mt-0.5 truncate">
@@ -274,13 +274,13 @@ export const MatrixAssignModal: React.FC<MatrixAssignModalProps> = ({
                 placeholder="e.g. Dotted-Line Member, Technical Mentor..."
                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 font-medium shadow-2xs focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-hidden"
               />
-              <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
+              <div className="flex items-center gap-1.5 flex-nowrap overflow-x-auto [scrollbar-width:none] mt-1.5">
                 {quickRoles.map((role) => (
                   <button
                     key={role}
                     type="button"
                     onClick={() => setRoleTitle(role)}
-                    className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 hover:bg-purple-100 hover:text-purple-900 text-slate-600 transition-colors cursor-pointer"
+                    className="px-2.5 py-1 rounded-full text-[10.5px] font-semibold bg-slate-100 hover:bg-purple-100 hover:text-purple-900 text-slate-700 transition-colors cursor-pointer whitespace-nowrap shrink-0 border border-slate-200/60"
                   >
                     {role}
                   </button>
