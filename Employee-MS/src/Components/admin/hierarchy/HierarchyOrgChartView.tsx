@@ -24,6 +24,7 @@ interface HierarchyOrgChartViewProps {
   selectedStaffIds?: (string | number)[];
   onToggleSelectStaff?: (id: string | number) => void;
   matrixReports?: any[];
+  onOpenMatrixModal?: (employee?: any) => void;
 }
 
 interface TreeNodeManager {
@@ -60,6 +61,7 @@ export const HierarchyOrgChartView: React.FC<HierarchyOrgChartViewProps> = ({
   selectedStaffIds = [],
   onToggleSelectStaff,
   matrixReports = [],
+  onOpenMatrixModal,
 }) => {
   const showCheckboxes = isSelectMode || (selectedStaffIds && selectedStaffIds.length > 0);
   const [showMatrixLinks, setShowMatrixLinks] = useState<boolean>(false);
@@ -1047,6 +1049,42 @@ ${safeStyles}
           💡 Drag & drop staff cards to reallocate reporting lines
         </span>
       </div>
+
+      {/* Interactive Matrix Links HUD Banner */}
+      {showMatrixLinks && (
+        <div className="mb-2.5 p-2.5 rounded-xl bg-gradient-to-r from-purple-50 via-indigo-50/70 to-purple-50 border border-purple-200 shadow-2xs flex flex-wrap items-center justify-between gap-2 animate-in fade-in slide-in-from-top-1 duration-150">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-purple-600 animate-pulse"></span>
+            <span className="text-xs font-bold text-purple-950">
+              Matrix & Dotted-Line Mode Active
+            </span>
+            <span className="text-[11px] text-purple-700">
+              • {matrixReports.length === 0
+                ? 'No secondary matrix links assigned yet. Click any "+ Matrix Link" button below to create one.'
+                : `Showing ${matrixReports.length} cross-functional reporting relationship${matrixReports.length === 1 ? "" : "s"}`}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            {onOpenMatrixModal && (
+              <button
+                type="button"
+                onClick={() => onOpenMatrixModal()}
+                className="px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white shadow-2xs transition-colors cursor-pointer flex items-center gap-1"
+              >
+                <i className="bi bi-plus-circle text-xs"></i>
+                <span>Assign Dotted-Line</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setShowMatrixLinks(false)}
+              className="px-2 py-1 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-800 hover:bg-white/80 transition-colors cursor-pointer"
+            >
+              Exit Matrix Mode
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Unassigned Staff Quick Allocation Tray / Dock */}
       {unassignedStaff && unassignedStaff.length > 0 && (

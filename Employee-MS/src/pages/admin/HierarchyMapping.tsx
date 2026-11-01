@@ -819,6 +819,7 @@ const HierarchyMapping = () => {
               });
             }}
             onViewDossier={(emp) => setSelectedDossierEmployee(emp)}
+            onOpenMatrixModal={(emp) => setMatrixAssignTargetEmployee(emp || employees[0])}
             isPreviewEmptyState={isPreviewEmptyState}
             onExitSimulation={() => setIsPreviewEmptyState(false)}
           />
