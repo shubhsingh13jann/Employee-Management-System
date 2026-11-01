@@ -827,6 +827,10 @@ const HierarchyMapping = () => {
             onViewDossier={(emp) => setSelectedDossierEmployee(emp)}
             isPreviewEmptyState={isPreviewEmptyState}
             onExitSimulation={() => setIsPreviewEmptyState(false)}
+            onBroadcastSquad={(squad) => setBroadcastSquadTarget(squad)}
+            onDelegateLead={handleOpenDelegation}
+            onInspectSquad={(squad) => setCapacityDrawerSquad(squad)}
+            onUpdateSupervisorCapacity={handleUpdateSupervisorCapacity}
           />
         ) : (
           <HierarchyTableView

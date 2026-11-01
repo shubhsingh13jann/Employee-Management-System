@@ -856,7 +856,7 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                           title="Broadcast announcement to this squad"
                         >
                           <i className="bi bi-megaphone-fill text-[10px]"></i>
-                          <span className="hidden sm:inline">Broadcast</span>
+                          <span>Broadcast</span>
                         </button>
                       )}
                       {onDelegateLead && (
@@ -870,7 +870,7 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                           title="Delegate team leadership (Leave coverage)"
                         >
                           <i className="bi bi-person-badge text-[10px]"></i>
-                          <span className="hidden sm:inline">Delegate</span>
+                          <span>Delegate</span>
                         </button>
                       )}
                       <button
