@@ -1079,6 +1079,7 @@ ${safeStyles}
                   key={staff.id}
                   draggable={!showCheckboxes}
                   onDragStart={(e) => {
+                    e.stopPropagation();
                     const dragPayload: HierarchyMappingItem = {
                       id: staff.id,
                       employee_id: staff.id,
@@ -1092,6 +1093,7 @@ ${safeStyles}
                       assigned_at: new Date().toISOString(),
                     };
                     e.dataTransfer.setData("application/json", JSON.stringify(dragPayload));
+                    e.dataTransfer.setData("text/plain", String(staff.id));
                     e.dataTransfer.effectAllowed = "move";
                     setDraggingEmpId(staff.id);
                   }}

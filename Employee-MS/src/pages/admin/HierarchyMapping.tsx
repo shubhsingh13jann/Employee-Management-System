@@ -308,7 +308,49 @@ const HierarchyMapping = () => {
     const timer = setTimeout(() => {
       setMsg({ type: "", text: "" });
     }, 4000);
-    return () => clearTimeout(timer);
+    const handleReassignDrop = (payload: {
+    employee: any;
+    targetSupervisor?: { id: string | number; name: string; department?: string } | null;
+    targetManager?: { id: string | number; name: string; department?: string } | null;
+  }) => {
+    if (isSimulationMode) {
+      const emp = payload.employee;
+      const targetSup = payload.targetSupervisor;
+      if (!targetSup) return;
+      const newStaged: StagedReorgChange = {
+        employee_id: emp.employee_id || emp.id,
+        employee_name: emp.employee_name || emp.name || `Employee #${emp.id}`,
+        employee_email: emp.employee_email || emp.email,
+        employee_department: emp.department_name || emp.department,
+        current_supervisor_id: emp.supervisor_id,
+        current_supervisor_name: emp.supervisor_name,
+        target_supervisor_id: targetSup.id,
+        target_supervisor_name: targetSup.name,
+        target_supervisor_department: targetSup.department,
+        sync_department: true,
+      };
+
+      setStagedChanges((prev) => {
+        const filtered = prev.filter((c) => String(c.employee_id) !== String(newStaged.employee_id));
+        return [...filtered, newStaged];
+      });
+
+      setMsg({
+        type: "success",
+        text: `Staged reassignment: ${newStaged.employee_name} -> ${newStaged.target_supervisor_name} in simulation sandbox!`,
+      });
+      return;
+    }
+
+    setReassignState({
+      isOpen: true,
+      employee: payload.employee,
+      targetSupervisor: payload.targetSupervisor || null,
+      targetManager: payload.targetManager || null,
+    });
+  };
+
+  return () => clearTimeout(timer);
   }, [msg.text]);
 
   const [modalError, setModalError] = useState("");
@@ -831,6 +873,7 @@ const HierarchyMapping = () => {
             onDelegateLead={handleOpenDelegation}
             onInspectSquad={(squad) => setCapacityDrawerSquad(squad)}
             onUpdateSupervisorCapacity={handleUpdateSupervisorCapacity}
+            onReassignDrop={handleReassignDrop}
           />
         ) : (
           <HierarchyTableView

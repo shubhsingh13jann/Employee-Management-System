@@ -43,6 +43,7 @@ export interface HierarchySquadCardsViewProps {
   onUpdateSupervisorCapacity?: (supervisorId: string | number, maxCapacity: number) => Promise<void>;
   onBroadcastSquad?: (squad: SquadGroup) => void;
   onDelegateLead?: (squad: SquadGroup) => void;
+  onReassignDrop?: (payload: { employee: HierarchyMappingItem; targetSupervisor: { id: string | number; name: string; department?: string }; targetManager?: { id: string | number; name: string } }) => void;
 }
 
 export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = ({
@@ -65,6 +66,7 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
   onUpdateSupervisorCapacity,
   onBroadcastSquad,
   onDelegateLead,
+  onReassignDrop,
 }) => {
   const showCheckboxes = isSelectMode || (selectedStaffIds && selectedStaffIds.length > 0);
   const [collapsedSquads, setCollapsedSquads] = useState<Set<string>>(new Set());
@@ -72,6 +74,8 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
   const [sortBy, setSortBy] = useState<"size-desc" | "size-asc" | "name" | "dept">("size-desc");
   const [cardSearches, setCardSearches] = useState<Record<string, string>>({});
   const [inspectingSquad, setInspectingSquad] = useState<SquadGroup | null>(null);
+  const [draggingEmpId, setDraggingEmpId] = useState<string | number | null>(null);
+  const [dropTargetSquadId, setDropTargetSquadId] = useState<string | null>(null);
   const [unassignedSearch, setUnassignedSearch] = useState("");
   const [targetSquadId, setTargetSquadId] = useState<string>("");
   const [selectedUnassignedIds, setSelectedUnassignedIds] = useState<Set<string | number>>(new Set());
@@ -449,6 +453,30 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                 return (
                   <div
                     key={`unassigned-pool-${staff.id}`}
+                    draggable={!showCheckboxes}
+                    onDragStart={(e) => {
+                      e.stopPropagation();
+                      const dragPayload: HierarchyMappingItem = {
+                        id: staff.id,
+                        employee_id: staff.id,
+                        employee_name: staff.name,
+                        employee_email: staff.email,
+                        supervisor_id: "",
+                        supervisor_name: "Unassigned",
+                        manager_id: "",
+                        manager_name: "Unassigned",
+                        department_name: staff.department_name || "General",
+                        assigned_at: new Date().toISOString(),
+                      };
+                      e.dataTransfer.setData("application/json", JSON.stringify(dragPayload));
+                      e.dataTransfer.setData("text/plain", String(staff.id));
+                      e.dataTransfer.effectAllowed = "move";
+                      setDraggingEmpId(staff.id);
+                    }}
+                    onDragEnd={() => {
+                      setDraggingEmpId(null);
+                      setDropTargetSquadId(null);
+                    }}
                     onClick={() => {
                       if (showCheckboxes) {
                         if (onToggleSelectStaff) onToggleSelectStaff(staff.id);
@@ -461,8 +489,8 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                       isSelected
                         ? "border-indigo-500 ring-1 ring-indigo-500/20 bg-indigo-50/20"
                         : "border-amber-200/90 hover:border-amber-300"
-                    } ${showCheckboxes ? "cursor-pointer" : ""}`}
-                    title={showCheckboxes ? "Click to toggle selection" : onViewDossier ? "Click to view Employee Dossier" : undefined}
+                    } ${showCheckboxes ? "cursor-pointer" : "cursor-grab active:cursor-grabbing"}`}
+                    title={showCheckboxes ? "Click to toggle selection" : "Drag onto a squad card to assign, or click to view Dossier"}
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       <input
@@ -780,8 +808,58 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
             return (
               <div
                 key={`squad-${supKey}`}
-                className={`bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-xs transition-all flex flex-col overflow-hidden group ${cardAccentGlow}`}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = "move";
+                  if (dropTargetSquadId !== supKey) {
+                    setDropTargetSquadId(supKey);
+                  }
+                }}
+                onDragLeave={(e) => {
+                  if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+                  if (dropTargetSquadId === supKey) {
+                    setDropTargetSquadId(null);
+                  }
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDropTargetSquadId(null);
+                  try {
+                    const dataStr = e.dataTransfer.getData("application/json");
+                    if (!dataStr) return;
+                    const droppedEmp = JSON.parse(dataStr) as HierarchyMappingItem;
+                    if (String(droppedEmp.supervisor_id) === String(squad.supervisorId)) {
+                      return;
+                    }
+                    if (onReassignDrop) {
+                      onReassignDrop({
+                        employee: droppedEmp,
+                        targetSupervisor: {
+                          id: squad.supervisorId,
+                          name: squad.supervisorName,
+                          department: squad.departmentName,
+                        },
+                        targetManager: squad.managerId
+                          ? { id: squad.managerId, name: squad.managerName || "Manager" }
+                          : undefined,
+                      });
+                    }
+                  } catch (err) {
+                    console.error("Drop error", err);
+                  }
+                }}
+                className={`bg-white rounded-xl border transition-all flex flex-col overflow-hidden group ${
+                  dropTargetSquadId === supKey
+                    ? "border-2 border-dashed border-indigo-600 ring-4 ring-indigo-400/40 bg-indigo-50/40 scale-[1.01] shadow-xl"
+                    : `border-slate-200/90 shadow-2xs hover:shadow-xs ${cardAccentGlow}`
+                }`}
               >
+                {dropTargetSquadId === supKey && (
+                  <div className="bg-indigo-600 text-white text-[11px] font-bold px-3 py-1.5 flex items-center justify-center gap-1.5 animate-pulse shadow-inner z-20">
+                    <i className="bi bi-box-arrow-in-down"></i>
+                    <span>Drop to reassign staff member to ${squad.supervisorName}'s Squad</span>
+                  </div>
+                )}
                 {/* Squad Card Header */}
                 <div
                   className={`p-3 sm:p-3.5 bg-gradient-to-r from-slate-50 to-indigo-50/30 transition-all ${
@@ -1020,6 +1098,18 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                           return (
                             <div
                               key={`member-${member.id}`}
+                              draggable={!showCheckboxes}
+                              onDragStart={(e) => {
+                                e.stopPropagation();
+                                e.dataTransfer.setData("application/json", JSON.stringify(member));
+                                e.dataTransfer.setData("text/plain", String(member.employee_id));
+                                e.dataTransfer.effectAllowed = "move";
+                                setDraggingEmpId(member.employee_id);
+                              }}
+                              onDragEnd={() => {
+                                setDraggingEmpId(null);
+                                setDropTargetSquadId(null);
+                              }}
                               onClick={() => {
                                 if (showCheckboxes) {
                                   onToggleSelectStaff?.(member.employee_id);
@@ -1027,12 +1117,14 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                                   onViewDossier(member);
                                 }
                               }}
-                              className={`flex items-center justify-between p-2 rounded-lg transition-colors group/item ${
+                              className={`flex items-center justify-between p-2 rounded-lg transition-all group/item ${
                                 isSelected
                                   ? "bg-indigo-50/80 border-indigo-300 ring-1 ring-indigo-400/30"
+                                  : draggingEmpId === member.employee_id
+                                  ? "bg-indigo-100/60 border-2 border-dashed border-indigo-500 opacity-60 scale-95"
                                   : "bg-slate-50/70 hover:bg-slate-100/80 border border-slate-200/70"
-                              } ${showCheckboxes ? "cursor-pointer" : ""}`}
-                              title={showCheckboxes ? "Click to toggle selection" : onViewDossier ? "Click to view Employee Dossier" : undefined}
+                              } ${showCheckboxes ? "cursor-pointer" : "cursor-grab active:cursor-grabbing"}`}
+                              title={showCheckboxes ? "Click to toggle selection" : "Drag to reallocate squad, or click to view Dossier"}
                             >
                               <div className="flex items-center gap-2 min-w-0 flex-1">
                                 {showCheckboxes && (
@@ -1051,6 +1143,7 @@ export const HierarchySquadCardsView: React.FC<HierarchySquadCardsViewProps> = (
                                 <div
                                   className={`flex items-center gap-2 min-w-0 flex-1 ${!showCheckboxes && onViewDossier ? "cursor-pointer group/emp" : ""}`}
                                 >
+                                  <i className="bi bi-grip-vertical text-slate-300 group-hover/item:text-slate-500 text-xs shrink-0 select-none"></i>
                                   <div className="w-6 h-6 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[10px] shrink-0 group-hover/item:scale-105 transition-transform">
                                     {member.employee_name.charAt(0)}
                                   </div>
