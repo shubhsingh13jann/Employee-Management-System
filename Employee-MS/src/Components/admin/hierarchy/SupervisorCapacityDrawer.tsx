@@ -269,115 +269,157 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
               </div>
             </div>
 
-            {/* Capacity Assessment HUD */}
-            <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs space-y-3">
-              <div className="flex items-center justify-between">
-                <h5 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-0">
+            {/* Card 2: Workload Telemetry HUD */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs space-y-4">
+              {/* Header */}
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-bold shadow-2xs">
+                  <i className="bi bi-bar-chart-fill"></i>
+                </div>
+                <h4 className="text-sm font-bold text-slate-900 mb-0">
                   Workload Telemetry
-                </h5>
-                <span className={`px-2 py-0.5 rounded-full border text-[10px] font-bold ${healthBadge.bg}`}>
+                </h4>
+                <span className={`px-2.5 py-0.5 rounded-full border text-[11px] font-semibold ${healthBadge.bg}`}>
                   {healthBadge.label}
                 </span>
+                {capacitySavedMsg && (
+                  <span className="text-[11px] text-emerald-600 font-semibold ml-auto flex items-center gap-1 animate-in fade-in">
+                    <i className="bi bi-check-circle-fill text-[10px]"></i>
+                    {capacitySavedMsg}
+                  </span>
+                )}
               </div>
 
-              {/* Metric Counters */}
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-100">
-                  <span className="text-lg font-bold text-slate-900 block leading-tight">
-                    {count}
-                  </span>
-                  <span className="text-[10px] text-slate-500">Active Reports</span>
-                </div>
-                <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-100">
-                  <span className="text-lg font-bold text-slate-900 block leading-tight">
-                    {maxCapacity}
-                  </span>
-                  <span className="text-[10px] text-slate-500">Target Ceiling</span>
-                </div>
-                <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-100">
-                  <span className={`text-lg font-bold block leading-tight ${healthBadge.textColor}`}>
-                    {capacityPercent}%
-                  </span>
-                  <span className="text-[10px] text-slate-500">Span Load</span>
-                </div>
-              </div>
-
-              {/* Capacity Progress Bar */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600">
-                  <span>Capacity Utilization</span>
-                  <span>{count} of {maxCapacity} slots filled</span>
-                </div>
-                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${healthBadge.barColor} transition-all duration-300 rounded-full`}
-                    style={{ width: `${capacityPercent}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Configurable Span Target Control */}
-              <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-3">
-                <div>
-                  <span className="text-[11px] font-bold text-slate-700 block">Supervisor Target Ceiling</span>
-                  <span className="text-[10px] text-slate-400 block">Set max allowable direct reports</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 overflow-hidden shadow-2xs">
-                    <button
-                      type="button"
-                      onClick={() => setCustomCapacity((prev) => Math.max(1, prev - 1))}
-                      className="w-7 h-7 flex items-center justify-center text-slate-600 hover:bg-slate-200 font-bold text-xs cursor-pointer transition-colors"
-                      title="Decrease Ceiling"
-                    >
-                      -
-                    </button>
-                    <span className="w-8 text-center text-xs font-bold text-slate-800 font-mono">
-                      {customCapacity}
+              {/* Metrics & Stepper Row */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                {/* 3 Metric Cards */}
+                <div className="grid grid-cols-3 gap-2.5 flex-1">
+                  {/* Metric 1: Active Reports */}
+                  <div className="bg-slate-50/70 rounded-2xl p-3 border border-slate-200/70 flex flex-col items-center justify-center text-center shadow-2xs">
+                    <i className="bi bi-file-earmark-text text-indigo-600 text-lg mb-0.5"></i>
+                    <span className="text-lg sm:text-xl font-extrabold text-slate-900 leading-tight">
+                      {count}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => setCustomCapacity((prev) => Math.min(50, prev + 1))}
-                      className="w-7 h-7 flex items-center justify-center text-slate-600 hover:bg-slate-200 font-bold text-xs cursor-pointer transition-colors"
-                      title="Increase Ceiling"
-                    >
-                      +
-                    </button>
+                    <span className="text-[11px] text-slate-500 font-medium mt-0.5">
+                      Active Reports
+                    </span>
                   </div>
-                  {customCapacity !== (squad.supervisorMaxCapacity || 8) && (
+
+                  {/* Metric 2: Target Ceiling */}
+                  <div className="bg-purple-50/40 rounded-2xl p-3 border border-purple-100 flex flex-col items-center justify-center text-center shadow-2xs">
+                    <i className="bi bi-bullseye text-purple-600 text-lg mb-0.5"></i>
+                    <span className="text-lg sm:text-xl font-extrabold text-slate-900 leading-tight">
+                      {maxCapacity}
+                    </span>
+                    <span className="text-[11px] text-slate-500 font-medium mt-0.5">
+                      Target Ceiling
+                    </span>
+                  </div>
+
+                  {/* Metric 3: Span Load */}
+                  <div className="bg-emerald-50/40 rounded-2xl p-3 border border-emerald-100 flex flex-col items-center justify-center text-center shadow-2xs">
+                    <i className="bi bi-layers-fill text-emerald-600 text-lg mb-0.5"></i>
+                    <span className="text-lg sm:text-xl font-extrabold text-emerald-600 leading-tight">
+                      {capacityPercent}%
+                    </span>
+                    <span className="text-[11px] text-slate-500 font-medium mt-0.5">
+                      Span Load
+                    </span>
+                  </div>
+                </div>
+
+                {/* Metric 4 (Right): Supervisor Target Ceiling Control */}
+                <div className="sm:w-56 flex flex-col items-start sm:items-end justify-center pl-0 sm:pl-2 shrink-0">
+                  <span className="text-xs font-bold text-slate-900 block leading-tight">
+                    Supervisor Target Ceiling
+                  </span>
+                  <span className="text-[11px] text-slate-400 block mt-0.5">
+                    Set max allowable direct reports
+                  </span>
+
+                  <div className="mt-2 flex items-center justify-between rounded-xl border border-slate-200 bg-white p-1 shadow-2xs w-36">
                     <button
                       type="button"
                       onClick={async () => {
+                        const newCap = Math.max(1, customCapacity - 1);
+                        setCustomCapacity(newCap);
                         if (onUpdateSupervisorCapacity) {
                           try {
                             setIsSavingCapacity(true);
-                            await onUpdateSupervisorCapacity(squad.supervisorId, customCapacity);
-                            setCapacitySavedMsg("Capacity updated!");
-                            setTimeout(() => setCapacitySavedMsg(""), 3000);
+                            await onUpdateSupervisorCapacity(squad.supervisorId, newCap);
+                            setCapacitySavedMsg("Ceiling updated");
+                            setTimeout(() => setCapacitySavedMsg(""), 2000);
+                          } catch {
+                            // ignore
                           } finally {
                             setIsSavingCapacity(false);
                           }
                         }
                       }}
                       disabled={isSavingCapacity}
-                      className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold shadow-2xs transition-all cursor-pointer disabled:opacity-50"
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-bold text-sm cursor-pointer transition-colors disabled:opacity-50"
+                      title="Decrease Ceiling"
                     >
-                      {isSavingCapacity ? "..." : "Save"}
+                      <i className="bi bi-dash text-base"></i>
                     </button>
-                  )}
+                    <span className="font-bold text-sm text-slate-900 font-mono">
+                      {customCapacity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const newCap = Math.min(50, customCapacity + 1);
+                        setCustomCapacity(newCap);
+                        if (onUpdateSupervisorCapacity) {
+                          try {
+                            setIsSavingCapacity(true);
+                            await onUpdateSupervisorCapacity(squad.supervisorId, newCap);
+                            setCapacitySavedMsg("Ceiling updated");
+                            setTimeout(() => setCapacitySavedMsg(""), 2000);
+                          } catch {
+                            // ignore
+                          } finally {
+                            setIsSavingCapacity(false);
+                          }
+                        }
+                      }}
+                      disabled={isSavingCapacity}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-bold text-sm cursor-pointer transition-colors disabled:opacity-50"
+                      title="Increase Ceiling"
+                    >
+                      <i className="bi bi-plus text-base"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
-              {capacitySavedMsg && (
-                <p className="text-[10px] text-emerald-600 font-semibold mb-0 flex items-center gap-1">
-                  <i className="bi bi-check-circle-fill text-[9.5px]"></i> {capacitySavedMsg}
-                </p>
-              )}
 
-              {/* Span Guidance Callout */}
-              <div className={`p-3 rounded-lg border flex items-start gap-2.5 text-xs ${healthBadge.adviceBg}`}>
-                <i className={`bi ${healthBadge.adviceIcon} text-base shrink-0 mt-0.5`}></i>
-                <p className="mb-0 leading-relaxed text-[11px]">
-                  {healthBadge.advice}
+              {/* Capacity Progress Bar Row */}
+              <div className="space-y-1.5 pt-1">
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
+                  <span>Capacity Utilization</span>
+                  <span className="text-slate-500 font-medium">
+                    {count} of {maxCapacity} slots filled ({capacityPercent}%)
+                  </span>
+                </div>
+                <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden p-0.5">
+                  <div
+                    className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 rounded-full transition-all duration-300"
+                    style={{ width: `${capacityPercent}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Guidance Advice Callout Box */}
+              <div className={`p-3.5 rounded-xl border flex items-center gap-3 ${healthBadge.adviceBg || "bg-purple-50/60 border-purple-100/90 text-purple-950"}`}>
+                <i className={`bi ${healthBadge.adviceIcon || "bi-shield-check text-purple-600"} text-lg shrink-0`}></i>
+                <p className="text-xs mb-0 leading-normal">
+                  {count >= 4 && count <= 7 ? (
+                    <>
+                      <span className="font-bold">Optimal squad size.</span> Well-balanced span of control for high-impact 1:1 mentorship and delivery velocity.
+                    </>
+                  ) : (
+                    healthBadge.advice
+                  )}
                 </p>
               </div>
             </div>
