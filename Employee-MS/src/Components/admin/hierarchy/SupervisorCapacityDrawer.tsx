@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { HierarchyMappingItem } from "./HierarchyTableView";
 import { SquadGroup } from "./HierarchySquadCardsView";
 
@@ -118,104 +119,137 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
       )
     : squad.members;
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity cursor-pointer"
-        onClick={onClose}
-        aria-hidden="true"
-      />
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[11000] bg-slate-950/60 backdrop-blur-xs overscroll-contain animate-in fade-in duration-150"
+      onClick={onClose}
+    >
+      <div className="fixed inset-y-0 right-0 left-0 md:left-[240px] flex items-center justify-center p-3 sm:p-5 pointer-events-none">
+        <div
+          className="relative w-full max-w-2xl sm:max-w-[720px] bg-white rounded-3xl shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col pointer-events-auto max-h-[92vh]"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header with Fluid Pastel Purple/Violet Wave Background */}
+          <div className="relative px-5 py-3.5 bg-white flex items-center justify-between border-b border-slate-200/80 overflow-hidden shrink-0">
+            <div className="absolute top-0 right-0 w-[380px] sm:w-[480px] h-full pointer-events-none overflow-hidden z-0">
+              <svg
+                viewBox="0 0 500 74"
+                fill="none"
+                preserveAspectRatio="none"
+                className="w-full h-full"
+              >
+                <defs>
+                  <mask id="squadWaveFadeMask">
+                    <linearGradient id="squadWaveFadeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="black" />
+                      <stop offset="25%" stopColor="white" />
+                      <stop offset="100%" stopColor="white" />
+                    </linearGradient>
+                    <rect width="500" height="74" fill="url(#squadWaveFadeGrad)" />
+                  </mask>
 
-      {/* Slide-out Drawer Panel */}
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md md:max-w-lg bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out border-l border-slate-200">
-          
-          {/* Drawer Header */}
-          <div className="px-5 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-sm shadow-xs font-bold">
+                  <linearGradient id="squadWaveGrad1" x1="0%" y1="0%" x2="100%" y2="70%">
+                    <stop offset="0%" stopColor="#EDE9FE" stopOpacity="0.25" />
+                    <stop offset="30%" stopColor="#DDD6FE" stopOpacity="0.85" />
+                    <stop offset="65%" stopColor="#EDE9FE" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="#FAF5FF" stopOpacity="0.7" />
+                  </linearGradient>
+
+                  <linearGradient id="squadWaveGrad2" x1="15%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#EDE9FE" stopOpacity="0.3" />
+                    <stop offset="30%" stopColor="#C4B5FD" stopOpacity="0.7" />
+                    <stop offset="60%" stopColor="#DDD6FE" stopOpacity="0.85" />
+                    <stop offset="85%" stopColor="#EDE9FE" stopOpacity="0.8" />
+                    <stop offset="100%" stopColor="#FAF5FF" stopOpacity="0.4" />
+                  </linearGradient>
+
+                  <linearGradient id="squadWaveGrad3" x1="30%" y1="10%" x2="95%" y2="100%">
+                    <stop offset="0%" stopColor="#FAF5FF" stopOpacity="0.5" />
+                    <stop offset="45%" stopColor="#DDD6FE" stopOpacity="0.75" />
+                    <stop offset="100%" stopColor="#A78BFA" stopOpacity="0.5" />
+                  </linearGradient>
+                </defs>
+
+                <g mask="url(#squadWaveFadeMask)">
+                  <path
+                    d="M0 26 C60 10 120 8 180 18 C245 28 305 50 370 38 C425 28 465 10 500 20 V0 H0 Z"
+                    fill="url(#squadWaveGrad1)"
+                  />
+                  <path
+                    d="M0 50 C80 34 145 12 215 10 C280 8 330 32 390 44 C445 54 475 38 500 28 V0 H0 Z"
+                    fill="url(#squadWaveGrad2)"
+                  />
+                  <path
+                    d="M130 38 C195 26 260 48 325 56 C385 64 445 50 500 38 V8 C470 20 420 18 370 24 C310 34 235 32 130 38 Z"
+                    fill="url(#squadWaveGrad3)"
+                    opacity="0.75"
+                  />
+                </g>
+              </svg>
+            </div>
+
+            {/* Left Header Title & Icon */}
+            <div className="relative z-10 flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-purple-600 text-white flex items-center justify-center text-xl shadow-md font-bold">
                 <i className="bi bi-people-fill"></i>
               </div>
+              <div className="h-8 w-px bg-slate-200"></div>
               <div>
-                <h3 className="text-sm font-bold text-slate-900 leading-tight mb-0.5">
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight leading-snug">
                   Supervisor Squad Inspector
                 </h3>
-                <p className="text-[11px] text-slate-500 mb-0">
-                  Capacity health & direct report telemetry
+                <p className="text-xs text-slate-500 font-normal leading-none mt-0.5">
+                  Capacity health &amp; direct report telemetry
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              {onBroadcastSquad && (
-                <button
-                  type="button"
-                  onClick={() => onBroadcastSquad(squad)}
-                  className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
-                  title="Broadcast announcement to this squad"
-                >
-                  <i className="bi bi-megaphone-fill text-indigo-500 text-xs"></i>
-                  <span>Broadcast</span>
-                </button>
-              )}
-              {onDelegateLead && (
-                <button
-                  type="button"
-                  onClick={() => onDelegateLead(squad)}
-                  className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
-                  title="Delegate temporary team leadership (Leave coverage)"
-                >
-                  <i className="bi bi-person-badge-fill text-amber-600 text-xs"></i>
-                  <span>Delegate</span>
-                </button>
-              )}
+            {/* Right Close Button */}
+            <div className="relative z-10 flex items-center gap-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/80 transition-colors cursor-pointer"
-                title="Close drawer (Esc)"
+                className="w-8 h-8 rounded-full border border-slate-200/80 bg-white/90 hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center shadow-xs transition-colors cursor-pointer"
+                title="Close modal (Esc)"
               >
-                <i className="bi bi-x-lg text-sm"></i>
+                <i className="bi bi-x-lg text-xs"></i>
               </button>
             </div>
           </div>
 
-          {/* Drawer Scrollable Body */}
-          <div className="flex-1 overflow-y-auto p-5 space-y-4.5 [scrollbar-width:thin]">
+          {/* Modal Scrollable Body */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 bg-slate-50/50 [scrollbar-width:thin]">
             
-            {/* Supervisor Profile Card */}
-            <div className="bg-gradient-to-br from-slate-50 to-indigo-50/40 rounded-xl p-4 border border-slate-200 shadow-2xs">
-              <div className="flex items-start gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white flex items-center justify-center font-bold text-lg shadow-xs border border-emerald-500/20 shrink-0">
+            {/* Card 1: Supervisor Profile Banner */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold text-xl shadow-xs shrink-0">
                   {squad.supervisorName.charAt(0)}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <h4 className="text-base font-bold text-slate-900 truncate mb-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                    <h4 className="text-base font-bold text-slate-900 truncate mb-0 leading-tight">
                       {squad.supervisorName}
                     </h4>
-                    <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                    <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/80">
                       Team Lead
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 mb-2 font-mono">
-                    ID: SUP-{String(squad.supervisorId).padStart(4, "0")}
-                  </p>
 
-                  <div className="flex items-center gap-2 flex-wrap text-xs">
-                    {squad.departmentName && (
-                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-white text-slate-700 font-medium border border-slate-200 shadow-2xs">
-                        <i className="bi bi-building text-slate-500 text-[11px]"></i>
-                        <span>{squad.departmentName}</span>
-                      </span>
-                    )}
-                    {squad.managerName && (
-                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 font-medium border border-indigo-200 shadow-2xs">
-                        <i className="bi bi-person-gear text-indigo-500 text-[11px]"></i>
-                        <span>Manager: {squad.managerName}</span>
-                      </span>
-                    )}
+                  <div className="flex items-center gap-2 text-xs text-slate-500 font-medium flex-wrap">
+                    <span className="font-mono text-slate-600">
+                      ID: SUP-{String(squad.supervisorId).padStart(4, "0")}
+                    </span>
+                    <span className="text-slate-300">|</span>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-white text-slate-700 font-medium border border-slate-200 shadow-2xs">
+                      <i className="bi bi-building text-slate-400 text-xs"></i>
+                      <span>{squad.departmentName || "Accounts"}</span>
+                    </span>
+                    <span className="text-slate-300">|</span>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-purple-50 text-purple-700 font-medium border border-purple-100 shadow-2xs">
+                      <i className="bi bi-person-badge text-purple-500 text-xs"></i>
+                      <span>Manager: {squad.managerName || "Sarah Jenkins"}</span>
+                    </span>
                   </div>
 
                   {squad.actingSupervisorName && (
@@ -493,7 +527,8 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
