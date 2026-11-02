@@ -424,134 +424,158 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
               </div>
             </div>
 
-            {/* Direct Reports Squad Roster */}
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between gap-2">
-                <div>
-                  <h5 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-0.5">
-                    Squad Members ({squad.members.length})
-                  </h5>
-                  <p className="text-[10px] text-slate-400 mb-0">
-                    Personnel assigned to this team lead
-                  </p>
+            {/* Card 3: Direct Reports Squad Roster Table */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs space-y-3.5">
+              {/* Header row with search and add button */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-bold shadow-2xs">
+                    <i className="bi bi-people-fill"></i>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900 mb-0">
+                      Squad Members ({squad.members.length})
+                    </h4>
+                    <p className="text-[11px] text-slate-400 mb-0">
+                      Personnel assigned to this team lead
+                    </p>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => onOpenAssignModal(undefined, squad.supervisorId, squad.managerId)}
-                  className="px-2.5 py-1 rounded-md bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-[11px] border border-indigo-200 transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
-                >
-                  <i className="bi bi-person-plus-fill text-[10px]"></i>
-                  <span>Add Member</span>
-                </button>
+
+                <div className="flex items-center gap-2 flex-1 sm:justify-end">
+                  {/* Member Search Bar */}
+                  <div className="relative flex-1 sm:max-w-xs">
+                    <i className="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input
+                      type="text"
+                      placeholder="Search squad roster..."
+                      value={memberFilter}
+                      onChange={(e) => setMemberFilter(e.target.value)}
+                      className="w-full pl-8 pr-7 py-1.5 rounded-xl text-xs bg-slate-50/70 border border-slate-200 focus:bg-white focus:border-indigo-400 focus:outline-none transition-all placeholder:text-slate-400"
+                    />
+                    {memberFilter && (
+                      <button
+                        type="button"
+                        onClick={() => setMemberFilter("")}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
+                      >
+                        <i className="bi bi-x-circle-fill"></i>
+                      </button>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => onOpenAssignModal(undefined, squad.supervisorId, squad.managerId)}
+                    className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold text-xs shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+                  >
+                    <i className="bi bi-plus-lg text-xs"></i>
+                    <span>Add Member</span>
+                  </button>
+                </div>
               </div>
 
-              {/* Member Search Bar */}
-              {squad.members.length > 2 && (
-                <div className="relative">
-                  <i className="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                  <input
-                    type="text"
-                    placeholder="Search squad roster..."
-                    value={memberFilter}
-                    onChange={(e) => setMemberFilter(e.target.value)}
-                    className="w-full pl-8 pr-7 py-1.5 rounded-lg text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-400 focus:outline-none transition-all placeholder:text-slate-400"
-                  />
-                  {memberFilter && (
-                    <button
-                      type="button"
-                      onClick={() => setMemberFilter("")}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
-                    >
-                      <i className="bi bi-x-circle-fill"></i>
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* Roster List */}
+              {/* Roster Table Layout */}
               {filteredMembers.length === 0 ? (
-                <div className="p-6 text-center rounded-xl bg-slate-50 border border-dashed border-slate-200">
+                <div className="p-8 text-center rounded-2xl bg-slate-50/60 border border-dashed border-slate-200">
                   <p className="text-xs text-slate-500 mb-2">
                     {memberFilter
                       ? `No squad members match "${memberFilter}"`
                       : "No direct reports assigned to this squad yet."}
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => onOpenAssignModal(undefined, squad.supervisorId, squad.managerId)}
-                    className="px-3 py-1 rounded-md bg-indigo-600 text-white font-semibold text-xs hover:bg-indigo-500 cursor-pointer shadow-2xs"
-                  >
-                    Assign First Member
-                  </button>
+                  {!memberFilter && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenAssignModal(undefined, squad.supervisorId, squad.managerId)}
+                      className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold text-xs hover:from-indigo-700 hover:to-purple-700 cursor-pointer shadow-xs"
+                    >
+                      Assign First Member
+                    </button>
+                  )}
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {filteredMembers.map((member) => (
-                    <div
-                      key={`drawer-member-${member.id}`}
-                      className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-slate-300 shadow-2xs transition-all flex items-center justify-between gap-3 group"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0">
-                          {member.employee_name.charAt(0)}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-slate-900 text-xs truncate">
-                              {member.employee_name}
-                            </span>
-                            <span className="text-[9.5px] text-slate-400 font-mono">
-                              EMP-{String(member.employee_id).padStart(4, "0")}
-                            </span>
+                <div className="space-y-1.5">
+                  {/* Table Column Headers */}
+                  <div className="grid grid-cols-12 gap-2 px-3.5 py-2 bg-slate-50/80 rounded-xl text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                    <div className="col-span-4">Member</div>
+                    <div className="col-span-2">Employee ID</div>
+                    <div className="col-span-4">Email</div>
+                    <div className="col-span-2 text-right pr-2">Actions</div>
+                  </div>
+
+                  {/* Table Rows */}
+                  <div className="space-y-1">
+                    {filteredMembers.map((member) => (
+                      <div
+                        key={`drawer-member-${member.id || member.employee_id}`}
+                        className="grid grid-cols-12 gap-2 px-3.5 py-2.5 rounded-xl border border-slate-100 hover:bg-slate-50/70 hover:border-slate-200/80 items-center transition-all group"
+                      >
+                        {/* Member Column */}
+                        <div className="col-span-4 flex items-center gap-2.5 min-w-0">
+                          <div className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                            {member.employee_name.charAt(0)}
                           </div>
-                          <span className="text-[11px] text-slate-500 block truncate">
-                            {member.employee_email}
+                          <span className="font-bold text-slate-900 text-xs truncate">
+                            {member.employee_name}
                           </span>
                         </div>
-                      </div>
 
-                      {/* Member Action Triggers */}
-                      <div className="flex items-center gap-1 shrink-0">
-                        {onInitiateReassign && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              onClose();
-                              onInitiateReassign(member);
-                            }}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all cursor-pointer"
-                            title="Reassign to another supervisor"
-                          >
-                            <i className="bi bi-arrow-left-right text-xs"></i>
-                          </button>
-                        )}
-                        {onInitiateUnlink && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              onClose();
-                              onInitiateUnlink(member);
-                            }}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all cursor-pointer"
-                            title="Unlink from this squad"
-                          >
-                            <i className="bi bi-x-circle text-xs"></i>
-                          </button>
-                        )}
+                        {/* Employee ID Column */}
+                        <div className="col-span-2">
+                          <span className="px-2 py-0.5 rounded bg-slate-100/90 text-slate-600 font-mono text-[11px] font-medium border border-slate-200/60 inline-block">
+                            EMP-{String(member.employee_id).padStart(4, "0")}
+                          </span>
+                        </div>
+
+                        {/* Email Column */}
+                        <div className="col-span-4 flex items-center gap-1.5 min-w-0 text-xs text-slate-600">
+                          <i className="bi bi-envelope text-indigo-500 text-xs shrink-0"></i>
+                          <span className="truncate">{member.employee_email}</span>
+                        </div>
+
+                        {/* Actions Column */}
+                        <div className="col-span-2 flex items-center justify-end gap-1.5 pr-1">
+                          {onInitiateReassign && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onClose();
+                                onInitiateReassign(member);
+                              }}
+                              className="w-7 h-7 rounded-lg border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 flex items-center justify-center transition-colors cursor-pointer"
+                              title="Reassign to another supervisor"
+                            >
+                              <i className="bi bi-arrow-left-right text-xs"></i>
+                            </button>
+                          )}
+                          {onInitiateUnlink && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onClose();
+                                onInitiateUnlink(member);
+                              }}
+                              className="w-7 h-7 rounded-lg border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-300 hover:bg-rose-50 flex items-center justify-center transition-colors cursor-pointer"
+                              title="Unlink from this squad"
+                            >
+                              <i className="bi bi-x-circle text-xs"></i>
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Drawer Sticky Footer */}
-          <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-3">
+          {/* Modal Sticky Footer */}
+          <div className="px-6 py-4 border-t border-slate-200/80 bg-white flex items-center justify-between shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-100 transition-colors cursor-pointer"
+              className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors shadow-2xs cursor-pointer"
             >
               Close
             </button>
@@ -561,9 +585,9 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
                 onClose();
                 onOpenAssignModal(undefined, squad.supervisorId, squad.managerId);
               }}
-              className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold text-xs shadow-sm flex items-center gap-2 transition-all cursor-pointer"
             >
-              <i className="bi bi-plus-lg"></i>
+              <i className="bi bi-plus-lg text-xs"></i>
               <span>Add Member to Squad</span>
             </button>
           </div>
