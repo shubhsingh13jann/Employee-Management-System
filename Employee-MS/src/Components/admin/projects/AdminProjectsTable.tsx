@@ -132,15 +132,15 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
         <table className="w-full text-left text-xs">
           <thead className="bg-slate-50/90 border-b border-slate-200 text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
             <tr>
-              <th className="py-2.5 px-4 text-left min-w-[240px]">Strategic Initiative</th>
-              <th className="py-2.5 px-3 text-left min-w-[140px]">Department</th>
-              <th className="py-2.5 px-3 text-left min-w-[170px]">Lead Supervisor</th>
-              <th className="py-2.5 px-3 text-center min-w-[100px]">Priority</th>
-              <th className="py-2.5 px-3 text-left min-w-[160px]">Task Velocity</th>
-              <th className="py-2.5 px-3 text-left min-w-[130px]">Target Date</th>
-              <th className="py-2.5 px-3 text-center min-w-[110px]">Health</th>
-              <th className="py-2.5 px-3 text-center min-w-[100px]">Status</th>
-              <th className="py-2.5 px-3 text-center w-16">Actions</th>
+              <th className="py-2.5 px-3 text-left min-w-[260px]">Strategic Initiative</th>
+              <th className="py-2.5 px-2.5 text-center whitespace-nowrap w-[100px]">Department</th>
+              <th className="py-2.5 px-2.5 text-left whitespace-nowrap w-[130px]">Lead Supervisor</th>
+              <th className="py-2.5 px-2.5 text-center whitespace-nowrap w-[85px]">Priority</th>
+              <th className="py-2.5 px-2.5 text-center whitespace-nowrap w-[110px]">Task Velocity</th>
+              <th className="py-2.5 px-2.5 text-center whitespace-nowrap w-[110px]">Target Date</th>
+              <th className="py-2.5 px-2.5 text-center whitespace-nowrap w-[90px]">Health</th>
+              <th className="py-2.5 px-2.5 text-center whitespace-nowrap w-[90px]">Status</th>
+              <th className="py-2.5 px-2 text-center w-12 whitespace-nowrap">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -149,23 +149,31 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
 
               return (
                 <tr key={proj.id} className="hover:bg-slate-50/70 transition-colors">
-                  {/* 1. Initiative Title & Details */}
-                  <td className="py-2.5 px-4">
-                    <div className="flex items-center gap-2.5">
+                  {/* 1. Initiative Title & Details (Strictly 2 rows) */}
+                  <td className="py-2.5 px-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
                         <i className="bi bi-kanban"></i>
                       </div>
-                      <div className="min-w-0 max-w-xs">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-bold text-slate-900 truncate text-xs sm:text-[13px]">
+                      <div className="min-w-0 flex-1">
+                        {/* Row 1: Title + PRJ Badge side by side without wrapping */}
+                        <div className="flex items-center gap-1.5 flex-nowrap min-w-0">
+                          <span
+                            className="font-bold text-slate-900 truncate text-xs sm:text-[13px]"
+                            title={proj.title}
+                          >
                             {proj.title}
                           </span>
-                          <span className="text-[10px] font-mono font-semibold text-slate-500 bg-slate-100 px-1 py-0.2 rounded border border-slate-200">
+                          <span className="text-[10px] font-mono font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded border border-slate-200 shrink-0">
                             PRJ-{String(proj.id).padStart(4, "0")}
                           </span>
                         </div>
+                        {/* Row 2: Description */}
                         {proj.description && (
-                          <span className="text-[10px] text-slate-400 block truncate max-w-xs">
+                          <span
+                            className="text-[10px] text-slate-400 block truncate mt-0.5"
+                            title={proj.description}
+                          >
                             {proj.description}
                           </span>
                         )}
@@ -174,21 +182,24 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                   </td>
 
                   {/* 2. Department */}
-                  <td className="py-2.5 px-3">
+                  <td className="py-2.5 px-2.5 text-center whitespace-nowrap">
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
                       {proj.department_name || "General"}
                     </span>
                   </td>
 
                   {/* 3. Lead Supervisor */}
-                  <td className="py-2.5 px-3">
+                  <td className="py-2.5 px-2.5 whitespace-nowrap">
                     {proj.supervisor_name ? (
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <div className="w-6 h-6 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold text-[10px] flex items-center justify-center shrink-0">
+                        <div className="w-5 h-5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold text-[10px] flex items-center justify-center shrink-0">
                           {proj.supervisor_name.charAt(0)}
                         </div>
                         <div className="min-w-0">
-                          <span className="font-semibold text-slate-800 block text-xs truncate max-w-[120px] leading-tight">
+                          <span
+                            className="font-semibold text-slate-800 block text-xs truncate max-w-[105px] leading-tight"
+                            title={proj.supervisor_name}
+                          >
                             {proj.supervisor_name}
                           </span>
                           <span className="text-[9px] text-slate-400 block truncate leading-tight">
@@ -204,16 +215,16 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                   </td>
 
                   {/* 4. Priority */}
-                  <td className="py-2.5 px-3 text-center">
+                  <td className="py-2.5 px-2.5 text-center whitespace-nowrap">
                     {getPriorityBadge(proj.priority)}
                   </td>
 
-                  {/* 5. Task Rollup Velocity Bar */}
-                  <td className="py-2.5 px-3">
-                    <div className="w-full max-w-[150px]">
+                  {/* 5. Task Velocity Bar */}
+                  <td className="py-2.5 px-2.5 text-center whitespace-nowrap">
+                    <div className="inline-block w-20 sm:w-24 text-left">
                       <div className="flex items-center justify-between text-[10px] font-medium mb-1">
                         <span className="text-slate-600">
-                          {proj.completed_tasks}/{proj.total_tasks} tasks
+                          {proj.completed_tasks}/{proj.total_tasks}
                         </span>
                         <span className="font-bold text-slate-800">
                           {proj.progress_percentage}%
@@ -235,10 +246,10 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                   </td>
 
                   {/* 6. Target Date / Countdown */}
-                  <td className="py-2.5 px-3">
+                  <td className="py-2.5 px-2.5 text-center whitespace-nowrap">
                     {proj.target_date ? (
-                      <div>
-                        <span className="text-xs text-slate-700 block font-medium">
+                      <div className="inline-block text-center">
+                        <span className="text-xs text-slate-700 block font-medium leading-tight">
                           {new Date(proj.target_date).toLocaleDateString("en-US", {
                             month: "short",
                             day: "numeric",
@@ -247,7 +258,7 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                         </span>
                         {proj.status !== "completed" && proj.days_left !== null && (
                           <span
-                            className={`text-[9px] font-bold block ${
+                            className={`text-[9px] font-bold block leading-tight mt-0.5 ${
                               proj.days_left < 0
                                 ? "text-rose-600"
                                 : proj.days_left <= 7
@@ -267,17 +278,17 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                   </td>
 
                   {/* 7. Health / Risk */}
-                  <td className="py-2.5 px-3 text-center">
+                  <td className="py-2.5 px-2.5 text-center whitespace-nowrap">
                     {getHealthBadge(proj.health, proj.is_overdue)}
                   </td>
 
                   {/* 8. Status */}
-                  <td className="py-2.5 px-3 text-center">
+                  <td className="py-2.5 px-2.5 text-center whitespace-nowrap">
                     {getStatusBadge(proj.status)}
                   </td>
 
                   {/* 9. Actions Menu */}
-                  <td className={`py-2.5 px-3 text-center whitespace-nowrap ${isMenuOpen ? "relative z-30" : ""}`}>
+                  <td className={`py-2.5 px-2 text-center whitespace-nowrap ${isMenuOpen ? "relative z-30" : ""}`}>
                     <div className="relative inline-flex items-center justify-center">
                       <button
                         type="button"
