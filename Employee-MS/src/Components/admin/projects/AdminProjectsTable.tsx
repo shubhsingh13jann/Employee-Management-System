@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ProjectItem } from "../../../pages/admin/AdminProjects";
 
 interface AdminProjectsTableProps {
@@ -15,6 +15,16 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
   onDeleteProject,
 }) => {
   const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null);
+
+  useEffect(() => {
+    const handleDocumentClick = () => setActiveMenuId(null);
+    if (activeMenuId !== null) {
+      document.addEventListener("click", handleDocumentClick);
+    }
+    return () => {
+      document.removeEventListener("click", handleDocumentClick);
+    };
+  }, [activeMenuId]);
 
   const getPriorityBadge = (priority: string) => {
     switch (priority) {

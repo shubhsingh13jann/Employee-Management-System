@@ -304,6 +304,8 @@ const AdminProjects: React.FC = () => {
           completedCount={kpiStats.completed}
           criticalCount={kpiStats.critical}
           overallVelocity={kpiStats.overallVelocity}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
           onFilterOverdue={() =>
             setStatusFilter((prev) => (prev === "critical" ? "all" : "critical"))
           }
