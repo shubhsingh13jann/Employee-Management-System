@@ -982,22 +982,22 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                     />
                   </th>
                 )}
-                <th className="py-2.5 px-4 text-left min-w-[220px]">
+                <th className="py-2.5 px-4 text-left w-[30%] min-w-[220px]">
                   💼 Employee (Subordinate)
                 </th>
-                <th className="py-2.5 px-3 text-left min-w-[170px]">
+                <th className="py-2.5 px-3 text-center w-[18%] min-w-[160px]">
                   👷 Direct Supervisor
                 </th>
-                <th className="py-2.5 px-3 text-left min-w-[170px]">
+                <th className="py-2.5 px-3 text-center w-[18%] min-w-[160px]">
                   👔 Department Manager
                 </th>
-                <th className="py-2.5 px-3 text-center min-w-[120px]">
+                <th className="py-2.5 px-3 text-center w-[14%] min-w-[130px]">
                   Department
                 </th>
-                <th className="py-2.5 px-4 text-left min-w-[120px]">
+                <th className="py-2.5 px-3 text-center w-[14%] min-w-[120px]">
                   Assigned On
                 </th>
-                <th className="py-2.5 px-3 text-center w-20">
+                <th className="py-2.5 px-3 text-center w-16 min-w-[64px]">
                   Actions
                 </th>
               </tr>
@@ -1111,16 +1111,16 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                           </td>
 
                           {/* Supervisor Cell */}
-                          <td className="py-2.5 px-3">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/90 shadow-2xs">
+                          <td className="py-2.5 px-3 text-center">
+                            <span className="inline-flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/90 shadow-2xs">
                               <i className="bi bi-person-badge-fill text-emerald-600 text-[10px]"></i>
                               <span className="truncate max-w-[130px]">{item.supervisor_name}</span>
                             </span>
                           </td>
 
                           {/* Manager Cell */}
-                          <td className="py-2.5 px-3">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/90 shadow-2xs">
+                          <td className="py-2.5 px-3 text-center">
+                            <span className="inline-flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/90 shadow-2xs">
                               <i className="bi bi-person-gear text-indigo-600 text-[10px]"></i>
                               <span className="truncate max-w-[130px]">{item.manager_name}</span>
                             </span>
@@ -1128,13 +1128,13 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
 
                           {/* Department Cell */}
                           <td className="py-2.5 px-3 text-center">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                            <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
                               {item.department_name || "General"}
                             </span>
                           </td>
 
                           {/* Assigned Date */}
-                          <td className="py-2.5 px-4 text-left text-[11px] text-slate-600 font-medium whitespace-nowrap">
+                          <td className="py-2.5 px-3 text-center text-[11px] text-slate-600 font-medium whitespace-nowrap">
                             {item.assigned_at
                               ? new Date(item.assigned_at).toLocaleDateString("en-US", {
                                   month: "short",
@@ -1306,16 +1306,16 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
                           </td>
 
                           {/* Supervisor Column for Unassigned */}
-                          <td className="py-2.5 px-3">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                          <td className="py-2.5 px-3 text-center">
+                            <span className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
                               <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
                               <span>Unassigned Lead</span>
                             </span>
                           </td>
 
                           {/* Manager Column for Unassigned */}
-                          <td className="py-2.5 px-3">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                          <td className="py-2.5 px-3 text-center">
+                            <span className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
                               <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
                               <span>Unassigned Manager</span>
                             </span>
@@ -1323,13 +1323,13 @@ export const HierarchyTableView: React.FC<HierarchyTableViewProps> = ({
 
                           {/* Department */}
                           <td className="py-2.5 px-3 text-center">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                            <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
                               {staff.department_name || "General"}
                             </span>
                           </td>
 
                           {/* Status / Pending */}
-                          <td className="py-2.5 px-4 text-left text-[11px] font-medium text-amber-600 whitespace-nowrap">
+                          <td className="py-2.5 px-3 text-center text-[11px] font-medium text-amber-600 whitespace-nowrap">
                             Pending Setup
                           </td>
 
