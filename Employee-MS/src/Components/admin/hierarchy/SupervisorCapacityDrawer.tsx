@@ -126,7 +126,7 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
     >
       <div className="fixed inset-y-0 right-0 left-0 md:left-[240px] flex items-center justify-center p-2 sm:p-3 pointer-events-none">
         <div
-          className="relative w-full max-w-xl sm:max-w-[620px] bg-white rounded-2xl shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col pointer-events-auto max-h-[90vh]"
+          className="relative w-full max-w-2xl sm:max-w-[750px] bg-white rounded-2xl shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col pointer-events-auto max-h-[90vh]"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header with Fluid Pastel Purple/Violet Wave Background */}
@@ -297,41 +297,41 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
                   {/* 3 Metric Cards Row with Icons on the Left spanning both rows */}
                   <div className="grid grid-cols-3 gap-2">
                     {/* Metric 1: Active Reports */}
-                    <div className="bg-slate-50/80 rounded-xl p-2 sm:p-2.5 border border-slate-200/70 flex items-center gap-2 sm:gap-2.5 shadow-2xs">
-                      <i className="bi bi-file-earmark-text text-indigo-600 text-xl sm:text-2xl shrink-0"></i>
-                      <div className="min-w-0">
-                        <div className="text-sm sm:text-base font-extrabold text-slate-900 leading-none">
+                    <div className="bg-slate-50/80 rounded-xl p-2.5 border border-slate-200/70 flex items-center gap-2.5 sm:gap-3 shadow-2xs">
+                      <i className="bi bi-file-earmark-text text-indigo-600 text-[32px] sm:text-[34px] leading-none shrink-0 flex items-center justify-center"></i>
+                      <div className="min-w-0 flex flex-col justify-center">
+                        <span className="text-sm sm:text-base font-extrabold text-slate-900 leading-none">
                           {count}
-                        </div>
-                        <div className="text-[9.5px] sm:text-[10px] text-slate-500 font-medium leading-none mt-1 truncate">
+                        </span>
+                        <span className="text-[10px] sm:text-[10.5px] text-slate-500 font-medium leading-none mt-1 whitespace-nowrap">
                           Active Reports
-                        </div>
+                        </span>
                       </div>
                     </div>
 
                     {/* Metric 2: Target Ceiling */}
-                    <div className="bg-purple-50/50 rounded-xl p-2 sm:p-2.5 border border-purple-100 flex items-center gap-2 sm:gap-2.5 shadow-2xs">
-                      <i className="bi bi-bullseye text-purple-600 text-xl sm:text-2xl shrink-0"></i>
-                      <div className="min-w-0">
-                        <div className="text-sm sm:text-base font-extrabold text-slate-900 leading-none">
+                    <div className="bg-purple-50/50 rounded-xl p-2.5 border border-purple-100 flex items-center gap-2.5 sm:gap-3 shadow-2xs">
+                      <i className="bi bi-bullseye text-purple-600 text-[32px] sm:text-[34px] leading-none shrink-0 flex items-center justify-center"></i>
+                      <div className="min-w-0 flex flex-col justify-center">
+                        <span className="text-sm sm:text-base font-extrabold text-slate-900 leading-none">
                           {maxCapacity}
-                        </div>
-                        <div className="text-[9.5px] sm:text-[10px] text-slate-500 font-medium leading-none mt-1 truncate">
+                        </span>
+                        <span className="text-[10px] sm:text-[10.5px] text-slate-500 font-medium leading-none mt-1 whitespace-nowrap">
                           Target Ceiling
-                        </div>
+                        </span>
                       </div>
                     </div>
 
                     {/* Metric 3: Span Load */}
-                    <div className="bg-emerald-50/50 rounded-xl p-2 sm:p-2.5 border border-emerald-100 flex items-center gap-2 sm:gap-2.5 shadow-2xs">
-                      <i className="bi bi-layers-fill text-emerald-600 text-xl sm:text-2xl shrink-0"></i>
-                      <div className="min-w-0">
-                        <div className="text-sm sm:text-base font-extrabold text-emerald-600 leading-none">
+                    <div className="bg-emerald-50/50 rounded-xl p-2.5 border border-emerald-100 flex items-center gap-2.5 sm:gap-3 shadow-2xs">
+                      <i className="bi bi-layers-fill text-emerald-600 text-[32px] sm:text-[34px] leading-none shrink-0 flex items-center justify-center"></i>
+                      <div className="min-w-0 flex flex-col justify-center">
+                        <span className="text-sm sm:text-base font-extrabold text-emerald-600 leading-none">
                           {capacityPercent}%
-                        </div>
-                        <div className="text-[9.5px] sm:text-[10px] text-slate-500 font-medium leading-none mt-1 truncate">
+                        </span>
+                        <span className="text-[10px] sm:text-[10.5px] text-slate-500 font-medium leading-none mt-1 whitespace-nowrap">
                           Span Load
-                        </div>
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -506,9 +506,9 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
                 <div className="space-y-1">
                   {/* Table Column Headers */}
                   <div className="grid grid-cols-12 gap-2 px-3 py-1 bg-slate-50/80 rounded-lg text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
-                    <div className="col-span-4">Member</div>
+                    <div className="col-span-3">Member</div>
                     <div className="col-span-2">Employee ID</div>
-                    <div className="col-span-4">Email</div>
+                    <div className="col-span-5">Email</div>
                     <div className="col-span-2 text-right pr-1">Actions</div>
                   </div>
 
@@ -520,7 +520,7 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
                         className="grid grid-cols-12 gap-2 px-3 py-1.5 rounded-lg border border-slate-100 hover:bg-slate-50/70 hover:border-slate-200/80 items-center transition-all group"
                       >
                         {/* Member Column */}
-                        <div className="col-span-4 flex items-center gap-2 min-w-0">
+                        <div className="col-span-3 flex items-center gap-2 min-w-0">
                           <div className="w-6 h-6 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[10px] shrink-0 shadow-2xs">
                             {member.employee_name.charAt(0)}
                           </div>
@@ -537,7 +537,7 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
                         </div>
 
                         {/* Email Column */}
-                        <div className="col-span-4 flex items-center gap-1.5 min-w-0 text-[11px] text-slate-600">
+                        <div className="col-span-5 flex items-center gap-1.5 min-w-0 text-[11px] text-slate-600">
                           <i className="bi bi-envelope text-indigo-500 text-[11px] shrink-0"></i>
                           <span className="truncate">{member.employee_email}</span>
                         </div>
