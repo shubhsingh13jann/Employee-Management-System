@@ -132,15 +132,15 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
         <table className="w-full text-left text-xs">
           <thead className="bg-slate-50/90 border-b border-slate-200 text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
             <tr>
-              <th className="py-2.5 px-3 text-left min-w-[260px]">Strategic Initiative</th>
-              <th className="py-2.5 px-2.5 text-center whitespace-nowrap w-[100px]">Department</th>
-              <th className="py-2.5 px-2.5 text-left whitespace-nowrap w-[130px]">Lead Supervisor</th>
-              <th className="py-2.5 px-2.5 text-center whitespace-nowrap w-[85px]">Priority</th>
-              <th className="py-2.5 px-2.5 text-center whitespace-nowrap w-[110px]">Task Velocity</th>
-              <th className="py-2.5 px-2.5 text-center whitespace-nowrap w-[110px]">Target Date</th>
-              <th className="py-2.5 px-2.5 text-center whitespace-nowrap w-[90px]">Health</th>
-              <th className="py-2.5 px-2.5 text-center whitespace-nowrap w-[90px]">Status</th>
-              <th className="py-2.5 px-2 text-center w-12 whitespace-nowrap">Actions</th>
+              <th className="py-2.5 pl-4.5 pr-3.5 text-left min-w-[250px]">Strategic Initiative</th>
+              <th className="py-2.5 px-3.5 text-center whitespace-nowrap w-[105px]">Department</th>
+              <th className="py-2.5 px-3.5 text-left whitespace-nowrap w-[135px]">Lead Supervisor</th>
+              <th className="py-2.5 px-3.5 text-center whitespace-nowrap w-[90px]">Priority</th>
+              <th className="py-2.5 px-3.5 text-center whitespace-nowrap w-[115px]">Task Velocity</th>
+              <th className="py-2.5 px-3.5 text-center whitespace-nowrap w-[115px]">Target Date</th>
+              <th className="py-2.5 px-3.5 text-center whitespace-nowrap w-[95px]">Health</th>
+              <th className="py-2.5 px-3.5 text-center whitespace-nowrap w-[95px]">Status</th>
+              <th className="py-2.5 pl-3.5 pr-4.5 text-center w-14 whitespace-nowrap">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -150,7 +150,7 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
               return (
                 <tr key={proj.id} className="hover:bg-slate-50/70 transition-colors">
                   {/* 1. Initiative Title & Details (Strictly 2 rows) */}
-                  <td className="py-2.5 px-3">
+                  <td className="py-2.5 pl-4.5 pr-3.5">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
                         <i className="bi bi-kanban"></i>
@@ -182,14 +182,14 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                   </td>
 
                   {/* 2. Department */}
-                  <td className="py-2.5 px-2.5 text-center whitespace-nowrap">
+                  <td className="py-2.5 px-3.5 text-center whitespace-nowrap">
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
                       {proj.department_name || "General"}
                     </span>
                   </td>
 
                   {/* 3. Lead Supervisor */}
-                  <td className="py-2.5 px-2.5 whitespace-nowrap">
+                  <td className="py-2.5 px-3.5 whitespace-nowrap">
                     {proj.supervisor_name ? (
                       <div className="flex items-center gap-1.5 min-w-0">
                         <div className="w-5 h-5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold text-[10px] flex items-center justify-center shrink-0">
@@ -215,12 +215,12 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                   </td>
 
                   {/* 4. Priority */}
-                  <td className="py-2.5 px-2.5 text-center whitespace-nowrap">
+                  <td className="py-2.5 px-3.5 text-center whitespace-nowrap">
                     {getPriorityBadge(proj.priority)}
                   </td>
 
                   {/* 5. Task Velocity Bar */}
-                  <td className="py-2.5 px-2.5 text-center whitespace-nowrap">
+                  <td className="py-2.5 px-3.5 text-center whitespace-nowrap">
                     <div className="inline-block w-20 sm:w-24 text-left">
                       <div className="flex items-center justify-between text-[10px] font-medium mb-1">
                         <span className="text-slate-600">
@@ -246,7 +246,7 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                   </td>
 
                   {/* 6. Target Date / Countdown */}
-                  <td className="py-2.5 px-2.5 text-center whitespace-nowrap">
+                  <td className="py-2.5 px-3.5 text-center whitespace-nowrap">
                     {proj.target_date ? (
                       <div className="inline-block text-center">
                         <span className="text-xs text-slate-700 block font-medium leading-tight">
@@ -278,17 +278,17 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                   </td>
 
                   {/* 7. Health / Risk */}
-                  <td className="py-2.5 px-2.5 text-center whitespace-nowrap">
+                  <td className="py-2.5 px-3.5 text-center whitespace-nowrap">
                     {getHealthBadge(proj.health, proj.is_overdue)}
                   </td>
 
                   {/* 8. Status */}
-                  <td className="py-2.5 px-2.5 text-center whitespace-nowrap">
+                  <td className="py-2.5 px-3.5 text-center whitespace-nowrap">
                     {getStatusBadge(proj.status)}
                   </td>
 
                   {/* 9. Actions Menu */}
-                  <td className={`py-2.5 px-2 text-center whitespace-nowrap ${isMenuOpen ? "relative z-30" : ""}`}>
+                  <td className={`py-2.5 pl-3.5 pr-4.5 text-center whitespace-nowrap ${isMenuOpen ? "relative z-30" : ""}`}>
                     <div className="relative inline-flex items-center justify-center">
                       <button
                         type="button"
