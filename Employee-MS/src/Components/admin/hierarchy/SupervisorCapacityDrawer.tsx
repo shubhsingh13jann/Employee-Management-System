@@ -124,14 +124,14 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
       className="fixed inset-0 z-[11000] bg-slate-950/60 backdrop-blur-xs overscroll-contain animate-in fade-in duration-150"
       onClick={onClose}
     >
-      <div className="fixed inset-y-0 right-0 left-0 md:left-[240px] flex items-center justify-center p-2.5 sm:p-4 pointer-events-none">
+      <div className="fixed inset-y-0 right-0 left-0 md:left-[240px] flex items-center justify-center p-2 sm:p-3 pointer-events-none">
         <div
-          className="relative w-full max-w-xl sm:max-w-[660px] bg-white rounded-2xl shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col pointer-events-auto max-h-[90vh]"
+          className="relative w-full max-w-xl sm:max-w-[620px] bg-white rounded-2xl shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col pointer-events-auto max-h-[90vh]"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header with Fluid Pastel Purple/Violet Wave Background */}
-          <div className="relative px-4 py-2.5 sm:px-5 sm:py-2.5 bg-white flex items-center justify-between border-b border-slate-200/80 overflow-hidden shrink-0">
-            <div className="absolute top-0 right-0 w-[320px] sm:w-[420px] h-full pointer-events-none overflow-hidden z-0">
+          <div className="relative px-3.5 py-2 sm:px-4 sm:py-2 bg-white flex items-center justify-between border-b border-slate-200/80 overflow-hidden shrink-0">
+            <div className="absolute top-0 right-0 w-[300px] sm:w-[380px] h-full pointer-events-none overflow-hidden z-0">
               <svg
                 viewBox="0 0 500 74"
                 fill="none"
@@ -189,16 +189,16 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
             </div>
 
             {/* Left Header Title & Icon */}
-            <div className="relative z-10 flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-purple-600 text-white flex items-center justify-center text-base shadow-xs font-bold">
+            <div className="relative z-10 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 via-indigo-600 to-purple-600 text-white flex items-center justify-center text-sm shadow-xs font-bold">
                 <i className="bi bi-people-fill"></i>
               </div>
-              <div className="h-6 w-px bg-slate-200"></div>
+              <div className="h-5 w-px bg-slate-200"></div>
               <div>
-                <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight leading-snug mb-0">
+                <h3 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight leading-snug mb-0">
                   Supervisor Squad Inspector
                 </h3>
-                <p className="text-[11px] text-slate-500 font-normal leading-none mt-0.5 mb-0">
+                <p className="text-[10px] text-slate-500 font-normal leading-none mt-0.5 mb-0">
                   Capacity health &amp; direct report telemetry
                 </p>
               </div>
@@ -209,56 +209,56 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
               <button
                 type="button"
                 onClick={onClose}
-                className="w-7 h-7 rounded-full border border-slate-200/80 bg-white/90 hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center shadow-2xs transition-colors cursor-pointer"
+                className="w-6 h-6 rounded-full border border-slate-200/80 bg-white/90 hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center shadow-2xs transition-colors cursor-pointer"
                 title="Close modal (Esc)"
               >
-                <i className="bi bi-x-lg text-[10px]"></i>
+                <i className="bi bi-x-lg text-[9px]"></i>
               </button>
             </div>
           </div>
 
           {/* Modal Scrollable Body */}
-          <div className="flex-1 overflow-y-auto p-3.5 space-y-2.5 bg-slate-50/50 [scrollbar-width:thin]">
+          <div className="flex-1 overflow-y-auto px-2 sm:px-2.5 pt-1.5 pb-2 space-y-1.5 bg-slate-50/50 [scrollbar-width:thin]">
             
             {/* Card 1: Supervisor Profile Banner */}
-            <div className="bg-white rounded-xl border border-slate-200/80 p-3 shadow-2xs">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-base shadow-xs shrink-0">
+            <div className="bg-white rounded-xl border border-slate-200/80 p-2.5 px-3 shadow-2xs">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
                   {squad.supervisorName.charAt(0)}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <h4 className="text-sm font-bold text-slate-900 truncate mb-0 leading-tight">
+                  <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate mb-0 leading-tight">
                       {squad.supervisorName}
                     </h4>
-                    <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/80">
+                    <span className="text-[9.5px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/80">
                       Team Lead
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium flex-wrap">
+                  <div className="flex items-center gap-1.5 text-[10.5px] text-slate-500 font-medium flex-wrap">
                     <span className="font-mono text-slate-600">
                       ID: SUP-{String(squad.supervisorId).padStart(4, "0")}
                     </span>
                     <span className="text-slate-300">|</span>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white text-slate-700 font-medium border border-slate-200 shadow-2xs">
-                      <i className="bi bi-building text-slate-400 text-[10px]"></i>
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white text-slate-700 font-medium border border-slate-200 shadow-2xs">
+                      <i className="bi bi-building text-slate-400 text-[9.5px]"></i>
                       <span>{squad.departmentName || "Accounts"}</span>
                     </span>
                     <span className="text-slate-300">|</span>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-purple-50 text-purple-700 font-medium border border-purple-100 shadow-2xs">
-                      <i className="bi bi-person-badge text-purple-500 text-[10px]"></i>
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 font-medium border border-purple-100 shadow-2xs">
+                      <i className="bi bi-person-badge text-purple-500 text-[9.5px]"></i>
                       <span>Manager: {squad.managerName || "Sarah Jenkins"}</span>
                     </span>
                   </div>
 
                   {squad.actingSupervisorName && (
-                    <div className="mt-2 p-1.5 rounded-lg bg-amber-50 border border-amber-200/90 flex items-center gap-2 shadow-2xs">
+                    <div className="mt-1.5 p-1 rounded-lg bg-amber-50 border border-amber-200/90 flex items-center gap-2 shadow-2xs">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                      <div className="text-[10px] text-amber-900 leading-tight">
+                      <div className="text-[9.5px] text-amber-900 leading-tight">
                         <span className="font-bold">Acting Lead:</span> {squad.actingSupervisorName}{" "}
                         {squad.delegationStartDate && squad.delegationEndDate && (
-                          <span className="text-[9.5px] text-amber-700">
+                          <span className="text-[9px] text-amber-700">
                             ({squad.delegationStartDate.slice(0, 10)} to {squad.delegationEndDate.slice(0, 10)})
                           </span>
                         )}
@@ -425,9 +425,9 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
             </div>
 
             {/* Card 3: Direct Reports Squad Roster Table */}
-            <div className="bg-white rounded-xl border border-slate-200/90 p-3 sm:p-3.5 shadow-2xs space-y-2.5">
+            <div className="bg-white rounded-xl border border-slate-200/90 p-2.5 sm:p-3 shadow-2xs space-y-2">
               {/* Header row with search and add button */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-md bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-bold shadow-2xs">
                     <i className="bi bi-people-fill"></i>
@@ -571,11 +571,11 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
           </div>
 
           {/* Modal Sticky Footer */}
-          <div className="px-5 py-2.5 border-t border-slate-200/80 bg-white flex items-center justify-between shrink-0">
+          <div className="px-4 py-2 border-t border-slate-200/80 bg-white flex items-center justify-between shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors shadow-2xs cursor-pointer"
+              className="px-3.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors shadow-2xs cursor-pointer"
             >
               Close
             </button>
@@ -585,7 +585,7 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
                 onClose();
                 onOpenAssignModal(undefined, squad.supervisorId, squad.managerId);
               }}
-              className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold text-xs shadow-2xs flex items-center gap-1.5 transition-all cursor-pointer"
+              className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold text-xs shadow-2xs flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <i className="bi bi-plus text-xs"></i>
               <span>Add Member to Squad</span>
