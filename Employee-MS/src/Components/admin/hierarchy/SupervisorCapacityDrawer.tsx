@@ -290,46 +290,71 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
                 )}
               </div>
 
-              {/* Metrics & Stepper Row */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-0.5">
-                {/* 3 Metric Cards */}
-                <div className="grid grid-cols-3 gap-2 flex-1">
-                  {/* Metric 1: Active Reports */}
-                  <div className="bg-slate-50/70 rounded-xl p-2 border border-slate-200/70 flex flex-col items-center justify-center text-center shadow-2xs">
-                    <i className="bi bi-file-earmark-text text-indigo-600 text-sm mb-0.5"></i>
-                    <span className="text-base font-bold text-slate-900 leading-tight">
-                      {count}
-                    </span>
-                    <span className="text-[10px] text-slate-500 font-medium mt-0.5">
-                      Active Reports
-                    </span>
+              {/* Row with Metrics + Capacity Bar on the Left, and Supervisor Target Ceiling on the Right */}
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pt-0.5">
+                {/* Left Column: 3 Metric Cards + Capacity Utilization Progress Bar (covers till Span Load area) */}
+                <div className="flex-1 min-w-0 space-y-2">
+                  {/* 3 Metric Cards Row with Icons on the Left spanning both rows */}
+                  <div className="grid grid-cols-3 gap-2">
+                    {/* Metric 1: Active Reports */}
+                    <div className="bg-slate-50/80 rounded-xl p-2 sm:p-2.5 border border-slate-200/70 flex items-center gap-2 sm:gap-2.5 shadow-2xs">
+                      <i className="bi bi-file-earmark-text text-indigo-600 text-xl sm:text-2xl shrink-0"></i>
+                      <div className="min-w-0">
+                        <div className="text-sm sm:text-base font-extrabold text-slate-900 leading-none">
+                          {count}
+                        </div>
+                        <div className="text-[9.5px] sm:text-[10px] text-slate-500 font-medium leading-none mt-1 truncate">
+                          Active Reports
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Metric 2: Target Ceiling */}
+                    <div className="bg-purple-50/50 rounded-xl p-2 sm:p-2.5 border border-purple-100 flex items-center gap-2 sm:gap-2.5 shadow-2xs">
+                      <i className="bi bi-bullseye text-purple-600 text-xl sm:text-2xl shrink-0"></i>
+                      <div className="min-w-0">
+                        <div className="text-sm sm:text-base font-extrabold text-slate-900 leading-none">
+                          {maxCapacity}
+                        </div>
+                        <div className="text-[9.5px] sm:text-[10px] text-slate-500 font-medium leading-none mt-1 truncate">
+                          Target Ceiling
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Metric 3: Span Load */}
+                    <div className="bg-emerald-50/50 rounded-xl p-2 sm:p-2.5 border border-emerald-100 flex items-center gap-2 sm:gap-2.5 shadow-2xs">
+                      <i className="bi bi-layers-fill text-emerald-600 text-xl sm:text-2xl shrink-0"></i>
+                      <div className="min-w-0">
+                        <div className="text-sm sm:text-base font-extrabold text-emerald-600 leading-none">
+                          {capacityPercent}%
+                        </div>
+                        <div className="text-[9.5px] sm:text-[10px] text-slate-500 font-medium leading-none mt-1 truncate">
+                          Span Load
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Metric 2: Target Ceiling */}
-                  <div className="bg-purple-50/40 rounded-xl p-2 border border-purple-100 flex flex-col items-center justify-center text-center shadow-2xs">
-                    <i className="bi bi-bullseye text-purple-600 text-sm mb-0.5"></i>
-                    <span className="text-base font-bold text-slate-900 leading-tight">
-                      {maxCapacity}
-                    </span>
-                    <span className="text-[10px] text-slate-500 font-medium mt-0.5">
-                      Target Ceiling
-                    </span>
-                  </div>
-
-                  {/* Metric 3: Span Load */}
-                  <div className="bg-emerald-50/40 rounded-xl p-2 border border-emerald-100 flex flex-col items-center justify-center text-center shadow-2xs">
-                    <i className="bi bi-layers-fill text-emerald-600 text-sm mb-0.5"></i>
-                    <span className="text-base font-bold text-emerald-600 leading-tight">
-                      {capacityPercent}%
-                    </span>
-                    <span className="text-[10px] text-slate-500 font-medium mt-0.5">
-                      Span Load
-                    </span>
+                  {/* Capacity Utilization Progress Bar - Stretches ONLY across the 3 metric cards (till Span Load area) */}
+                  <div className="space-y-1 pt-0.5">
+                    <div className="flex items-center justify-between text-[10.5px] font-semibold text-slate-700">
+                      <span>Capacity Utilization</span>
+                      <span className="text-slate-500 font-medium">
+                        {count} of {maxCapacity} slots filled ({capacityPercent}%)
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden p-0.5">
+                      <div
+                        className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 rounded-full transition-all duration-300"
+                        style={{ width: `${capacityPercent}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
 
-                {/* Metric 4 (Right): Supervisor Target Ceiling Control */}
-                <div className="sm:w-48 flex flex-col items-start sm:items-end justify-center pl-0 sm:pl-1 shrink-0">
+                {/* Right Column: Supervisor Target Ceiling Control */}
+                <div className="sm:w-44 flex flex-col items-start sm:items-end justify-center pl-0 sm:pl-2 shrink-0 pt-0.5">
                   <span className="text-[11px] font-bold text-slate-900 block leading-tight">
                     Supervisor Target Ceiling
                   </span>
@@ -337,7 +362,7 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
                     Set max allowable direct reports
                   </span>
 
-                  <div className="mt-1.5 flex items-center justify-between rounded-lg border border-slate-200 bg-white p-0.5 shadow-2xs w-32">
+                  <div className="mt-2 flex items-center justify-between rounded-lg border border-slate-200 bg-white p-0.5 shadow-2xs w-32">
                     <button
                       type="button"
                       onClick={async () => {
@@ -390,22 +415,6 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
                       <i className="bi bi-plus"></i>
                     </button>
                   </div>
-                </div>
-              </div>
-
-              {/* Capacity Progress Bar Row */}
-              <div className="space-y-1 pt-0.5">
-                <div className="flex items-center justify-between text-[11px] font-semibold text-slate-700">
-                  <span>Capacity Utilization</span>
-                  <span className="text-slate-500 font-medium">
-                    {count} of {maxCapacity} slots filled ({capacityPercent}%)
-                  </span>
-                </div>
-                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden p-0.5">
-                  <div
-                    className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 rounded-full transition-all duration-300"
-                    style={{ width: `${capacityPercent}%` }}
-                  />
                 </div>
               </div>
 
