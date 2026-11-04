@@ -399,7 +399,7 @@ export const ProjectMilestonesModal: React.FC<ProjectMilestonesModalProps> = ({
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="p-4 sm:p-5 overflow-y-auto flex-1 bg-slate-50/50 space-y-4">
+        <div className="p-3.5 sm:p-4 overflow-y-auto flex-1 bg-slate-50/50 space-y-3">
           {error && (
             <div className="p-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs flex items-center gap-2">
               <i className="bi bi-exclamation-triangle-fill text-rose-500"></i>
@@ -605,7 +605,7 @@ export const ProjectMilestonesModal: React.FC<ProjectMilestonesModalProps> = ({
               </button>
             </div>
           ) : (
-            <div className="space-y-3.5">
+            <div className="space-y-2.5">
               {milestones.map((milestone, idx) => {
                 const isCompleted = milestone.status === "completed";
                 const totalDel = milestone.deliverables?.length || 0;
@@ -623,7 +623,7 @@ export const ProjectMilestonesModal: React.FC<ProjectMilestonesModalProps> = ({
                 return (
                   <div
                     key={milestone.id}
-                    className={`relative rounded-2xl border transition-all overflow-hidden bg-white ${
+                    className={`relative rounded-xl border transition-all overflow-hidden bg-white ${
                       isCompleted
                         ? "border-emerald-200/90 shadow-2xs"
                         : isOverdue
@@ -633,7 +633,7 @@ export const ProjectMilestonesModal: React.FC<ProjectMilestonesModalProps> = ({
                   >
                     {/* Top Status Banner Strip */}
                     <div
-                      className={`h-1.5 w-full ${
+                      className={`h-1 w-full ${
                         isCompleted
                           ? "bg-emerald-500"
                           : milestone.status === "in_progress"
@@ -642,9 +642,9 @@ export const ProjectMilestonesModal: React.FC<ProjectMilestonesModalProps> = ({
                       }`}
                     ></div>
 
-                    <div className="p-4 sm:p-4.5">
+                    <div className="p-3 sm:p-3.5">
                       {/* Milestone Header Row */}
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5 mb-2.5">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
                         <div className="flex items-start gap-3 min-w-0">
                           {/* Large Checkbox for 1-Click Milestone Completion */}
                           <button
@@ -759,8 +759,8 @@ export const ProjectMilestonesModal: React.FC<ProjectMilestonesModalProps> = ({
                       </div>
 
                       {/* Deliverables Checklist Box */}
-                      <div className="mt-3 pt-3 border-t border-slate-100 rounded-xl bg-slate-50/70 p-3">
-                        <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="mt-2.5 pt-2 border-t border-slate-100 rounded-xl bg-slate-50/70 p-2.5">
+                        <div className="flex items-center justify-between gap-2 mb-1.5">
                           <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
                             <i className="bi bi-check2-circle text-indigo-500"></i>
                             <span>
@@ -774,11 +774,11 @@ export const ProjectMilestonesModal: React.FC<ProjectMilestonesModalProps> = ({
                         </div>
 
                         {/* Deliverables List */}
-                        <div className="space-y-1.5 mb-2.5">
+                        <div className="space-y-1 mb-2">
                           {milestone.deliverables?.map((del) => (
                             <div
                               key={del.id}
-                              className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg border transition-all ${
+                              className={`flex items-center justify-between px-2.5 py-1 rounded-lg border transition-all ${
                                 del.completed
                                   ? "bg-emerald-50/60 border-emerald-200/80"
                                   : "bg-white border-slate-200/80 hover:border-slate-300"
@@ -869,3 +869,4 @@ export const ProjectMilestonesModal: React.FC<ProjectMilestonesModalProps> = ({
     </div>
   );
 };
+

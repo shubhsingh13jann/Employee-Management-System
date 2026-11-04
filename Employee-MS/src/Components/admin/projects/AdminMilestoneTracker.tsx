@@ -161,9 +161,9 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
     if (items.length === 0) return null;
 
     return (
-      <div className="mb-5 last:mb-0">
-        <div className="flex items-center gap-2 mb-2.5">
-          <span className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold ${badgeColor}`}>
+      <div className="mb-3.5 last:mb-0">
+        <div className="flex items-center gap-2 mb-2">
+          <span className={`w-5 h-5 sm:w-6 sm:h-6 rounded-md flex items-center justify-center text-xs font-bold ${badgeColor}`}>
             <i className={`bi ${icon}`}></i>
           </span>
           <h4 className="text-xs sm:text-sm font-bold text-slate-900 mb-0">
@@ -171,7 +171,7 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
           </h4>
         </div>
 
-        <div className="relative pl-4 sm:pl-6 border-l-2 border-slate-200 space-y-3.5 ml-3">
+        <div className="relative pl-4 sm:pl-6 border-l-2 border-slate-200 space-y-2 sm:space-y-2.5 ml-3">
           {items.map((proj) => {
             const isCritical = proj.is_overdue || proj.health === "critical";
             const projId = String(proj.id);
@@ -182,11 +182,11 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
             return (
               <div
                 key={proj.id}
-                className="relative bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-xs transition-all p-3.5 sm:p-4"
+                className="relative bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-xs transition-all px-3 py-2.5 sm:px-3.5 sm:py-2.5"
               >
                 {/* Timeline node dot */}
                 <div
-                  className={`absolute -left-[23px] sm:-left-[31px] top-4 w-3.5 h-3.5 rounded-full border-2 border-white shadow-2xs ${
+                  className={`absolute -left-[23px] sm:-left-[31px] top-3 w-3.5 h-3.5 rounded-full border-2 border-white shadow-2xs ${
                     proj.status === "completed"
                       ? "bg-emerald-500"
                       : isCritical
@@ -196,7 +196,7 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                 ></div>
 
                 {/* Main Card Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-1.5">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-bold text-xs sm:text-sm text-slate-900">
                       {proj.title}
@@ -241,13 +241,13 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                 </div>
 
                 {proj.description && (
-                  <p className="text-[11px] text-slate-500 mb-2.5 line-clamp-1">
+                  <p className="text-[11px] text-slate-500 mb-1.5 line-clamp-1">
                     {proj.description}
                   </p>
                 )}
 
                 {/* Bottom Row: Lead Supervisor, Progress Bar, Sub-Milestone Toggle, Controls */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2.5 border-t border-slate-100 text-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
                   <div className="flex items-center gap-2">
                     <div className="w-5 h-5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-bold flex items-center justify-center shrink-0">
                       {proj.supervisor_name ? proj.supervisor_name.charAt(0) : "U"}
@@ -258,7 +258,7 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                   </div>
 
                   {/* Right side actions */}
-                  <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                     {/* Overall Task Velocity */}
                     <div className="flex items-center gap-1.5 mr-1">
                       <div className="w-16 sm:w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
@@ -282,7 +282,7 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                     <button
                       type="button"
                       onClick={() => handleToggleExpand(proj)}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[10.5px] sm:text-[11px] font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
                         isExpanded
                           ? "bg-indigo-600 text-white shadow-xs"
                           : "bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200"
@@ -306,7 +306,7 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                       <button
                         type="button"
                         onClick={() => onOpenMilestonesModal(proj)}
-                        className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
+                        className="px-2 py-0.5 sm:py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10.5px] sm:text-[11px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
                         title="Open Deliverable Checklist Tracker Modal"
                       >
                         <i className="bi bi-list-check"></i>
@@ -318,7 +318,7 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                       <button
                         type="button"
                         onClick={() => onUpdateStatus(proj.id, "completed")}
-                        className="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-semibold transition-colors cursor-pointer"
+                        className="px-2 py-0.5 sm:py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10.5px] sm:text-[11px] font-semibold transition-colors cursor-pointer"
                         title="Mark Project Complete"
                       >
                         Done
@@ -329,7 +329,7 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                       <button
                         type="button"
                         onClick={() => onOpenEditModal(proj)}
-                        className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-semibold transition-colors cursor-pointer"
+                        className="px-2 py-0.5 sm:py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10.5px] sm:text-[11px] font-semibold transition-colors cursor-pointer"
                       >
                         Edit
                       </button>
@@ -339,8 +339,8 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
 
                 {/* EXPANDABLE NESTED SUB-MILESTONES & DELIVERABLES TRAY */}
                 {isExpanded && (
-                  <div className="mt-3.5 pt-3 border-t border-slate-100 bg-slate-50/70 rounded-xl p-3 animate-in fade-in duration-150">
-                    <div className="flex items-center justify-between mb-2.5">
+                  <div className="mt-2.5 pt-2 border-t border-slate-100 bg-slate-50/70 rounded-xl p-2.5 sm:p-3 animate-in fade-in duration-150">
+                    <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
                         <h5 className="text-xs font-bold text-slate-900 mb-0">
@@ -361,12 +361,12 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                     </div>
 
                     {isLoadingSub ? (
-                      <div className="py-4 text-center text-xs text-slate-400">
+                      <div className="py-3 text-center text-xs text-slate-400">
                         <i className="bi bi-arrow-clockwise animate-spin mr-1"></i>
                         Loading sub-milestones...
                       </div>
                     ) : subMilestones.length === 0 ? (
-                      <div className="py-3 px-4 text-center bg-white rounded-lg border border-slate-200 text-xs text-slate-500">
+                      <div className="py-2.5 px-3 text-center bg-white rounded-lg border border-slate-200 text-xs text-slate-500">
                         <span>No sub-milestones yet for this initiative. </span>
                         {onOpenMilestonesModal && (
                           <button
@@ -379,7 +379,7 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                         )}
                       </div>
                     ) : (
-                      <div className="space-y-2.5">
+                      <div className="space-y-1.5 sm:space-y-2">
                         {subMilestones.map((milestone, idx) => {
                           const isDone = milestone.status === "completed";
                           const totalD = milestone.deliverables?.length || 0;
@@ -388,19 +388,19 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                           return (
                             <div
                               key={milestone.id}
-                              className={`p-3 rounded-xl border bg-white transition-all ${
+                              className={`p-2 sm:p-2.5 rounded-lg border bg-white transition-all ${
                                 isDone
                                   ? "border-emerald-200/80 shadow-2xs"
                                   : "border-slate-200/90 shadow-2xs"
                               }`}
                             >
-                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-1.5">
                                 <div className="flex items-center gap-2 flex-wrap">
                                   {/* Quick Status Checkbox */}
                                   <button
                                     type="button"
                                     onClick={() => handleToggleMilestoneStatus(proj.id, milestone)}
-                                    className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors cursor-pointer ${
+                                    className={`w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-md border flex items-center justify-center transition-colors cursor-pointer ${
                                       isDone
                                         ? "bg-emerald-500 border-emerald-600 text-white"
                                         : "bg-white border-slate-300 text-transparent hover:text-slate-300"
@@ -423,14 +423,14 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                                   </span>
                                 </div>
 
-                                <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                                <div className="flex items-center gap-1.5 self-start sm:self-auto shrink-0">
                                   {milestone.due_date && (
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
                                       Due: {new Date(milestone.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                                     </span>
                                   )}
                                   {milestone.owner_name && (
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
                                       👤 {milestone.owner_name}
                                     </span>
                                   )}
@@ -439,18 +439,18 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
 
                               {/* Deliverables Checklist Chips */}
                               {totalD > 0 && (
-                                <div className="pl-7 space-y-1 pt-1 border-t border-slate-100">
+                                <div className="pl-6 space-y-1 pt-1.5 border-t border-slate-100">
                                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center justify-between">
                                     <span>Deliverables ({doneD}/{totalD})</span>
                                     <span className="text-indigo-600 font-bold">
                                       {Math.round((doneD / totalD) * 100)}%
                                     </span>
                                   </div>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                                     {milestone.deliverables.map((del) => (
                                       <label
                                         key={del.id}
-                                        className={`flex items-center gap-2 px-2 py-1 rounded-md text-[11px] border cursor-pointer select-none transition-colors ${
+                                        className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10.5px] border cursor-pointer select-none transition-colors ${
                                           del.completed
                                             ? "bg-emerald-50/70 border-emerald-200 text-emerald-800 line-through opacity-80"
                                             : "bg-slate-50 hover:bg-white border-slate-200 text-slate-700"
@@ -491,8 +491,8 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-4 sm:p-5 mb-3">
-      <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-3.5 sm:p-4 mb-3">
+      <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-100">
         <div>
           <h3 className="font-bold text-xs sm:text-sm text-slate-900 mb-0.5 flex items-center gap-2">
             <i className="bi bi-calendar2-range-fill text-indigo-600"></i>

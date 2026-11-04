@@ -41,13 +41,13 @@ export const UnlinkConfirmModal: React.FC<UnlinkConfirmModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150">
       <div
-        className="bg-white rounded-3xl max-w-4xl lg:max-w-[960px] w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col"
+        className="bg-white rounded-3xl max-w-3xl lg:max-w-[780px] w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header with Fluid Pastel Rose Wave Background matching reference */}
         <div className="relative px-4 sm:px-5 py-2.5 sm:py-3 bg-white flex items-center justify-between border-b border-slate-200 overflow-hidden shrink-0">
           {/* Top-Right Fluid Pastel Wave Background in Soft Rose Tones */}
-          <div className="absolute top-0 right-0 w-[440px] sm:w-[560px] h-full pointer-events-none overflow-hidden z-0">
+          <div className="absolute top-0 right-0 w-[380px] sm:w-[480px] h-full pointer-events-none overflow-hidden z-0">
             <svg
               viewBox="0 0 500 74"
               fill="none"
@@ -189,10 +189,10 @@ export const UnlinkConfirmModal: React.FC<UnlinkConfirmModalProps> = ({
             {/* Right Card: Severed Link Hierarchy Diagram Card */}
             <div className="py-2.5 px-3.5 rounded-2xl bg-[#fff7f8] border border-rose-200/80 flex items-center justify-between relative overflow-hidden">
               {/* Connecting Red Dashed Line */}
-              <div className="absolute left-[70px] right-[70px] top-1/2 -translate-y-1/2 border-t-2 border-dashed border-rose-300 pointer-events-none z-0"></div>
+              <div className="absolute left-[50px] right-[50px] top-1/2 -translate-y-1/2 border-t-2 border-dashed border-rose-300 pointer-events-none z-0"></div>
 
               {/* Box 1: Team Lead / Supervisor */}
-              <div className="w-[125px] sm:w-[135px] bg-white border border-slate-200/80 rounded-2xl p-2.5 flex flex-col items-center text-center shadow-xs z-10 shrink-0">
+              <div className="w-[120px] sm:w-[130px] bg-white border border-slate-200/80 rounded-2xl p-2.5 flex flex-col items-center text-center shadow-xs z-10 shrink-0">
                 <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm mb-1.5 shadow-2xs">
                   <i className="bi bi-person-fill"></i>
                 </div>
@@ -215,7 +215,7 @@ export const UnlinkConfirmModal: React.FC<UnlinkConfirmModalProps> = ({
               </div>
 
               {/* Box 2: Employee */}
-              <div className="w-[125px] sm:w-[135px] bg-white border border-slate-200/80 rounded-2xl p-2.5 flex flex-col items-center text-center shadow-xs z-10 shrink-0">
+              <div className="w-[120px] sm:w-[130px] bg-white border border-slate-200/80 rounded-2xl p-2.5 flex flex-col items-center text-center shadow-xs z-10 shrink-0">
                 <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center text-sm mb-1.5 shadow-2xs">
                   <i className="bi bi-person-fill"></i>
                 </div>
