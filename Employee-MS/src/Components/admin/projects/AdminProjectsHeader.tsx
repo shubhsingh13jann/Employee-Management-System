@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 interface AdminProjectsHeaderProps {
   totalCount: number;
@@ -21,8 +21,29 @@ export const AdminProjectsHeader: React.FC<AdminProjectsHeaderProps> = ({
   viewMode,
   onViewModeChange,
 }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
   return (
-    <div className="relative px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl bg-gradient-to-r from-[#070d28] via-[#0d164d] to-[#1c1252] border border-indigo-500/30 shadow-xl text-white flex flex-col md:flex-row md:items-center justify-between gap-3 shrink-0 select-none">
+    <div
+      className={`relative px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl bg-gradient-to-r from-[#070d28] via-[#0d164d] to-[#1c1252] border border-indigo-500/30 shadow-xl text-white flex flex-col md:flex-row md:items-center justify-between gap-3 shrink-0 select-none ${
+        isMenuOpen ? "z-40" : "z-20"
+      }`}
+    >
       {/* Micro-Lightning Wave Effect Background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl z-0">
         <svg
@@ -112,8 +133,8 @@ export const AdminProjectsHeader: React.FC<AdminProjectsHeaderProps> = ({
         </div>
       </div>
 
-      {/* Right Side: View Switcher & Action Controls */}
-      <div className="relative z-10 flex items-center gap-1.5 sm:gap-2 shrink-0 self-end md:self-center flex-wrap">
+      {/* Right Side: View Switcher & Triple-Line Actions Menu */}
+      <div className="relative z-10 flex items-center gap-2 shrink-0 self-end md:self-center">
         {/* Segmented View Mode Switcher */}
         <div className="h-9 p-0.5 rounded-xl bg-white/10 border border-white/20 flex items-center gap-1 backdrop-blur-xs box-border shadow-xs">
           <button
@@ -157,48 +178,100 @@ export const AdminProjectsHeader: React.FC<AdminProjectsHeaderProps> = ({
           </button>
         </div>
 
-        {/* Supervisor Capacity Heatmap Trigger */}
-        <button
-          type="button"
-          onClick={onOpenCapacityDrawer}
-          className="h-8 px-2.5 sm:px-3 rounded-lg bg-white/10 hover:bg-white/15 text-slate-200 border border-white/20 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs backdrop-blur-xs"
-          title="Inspect Cross-Department Supervisor Workload Heatmap"
-        >
-          <i className="bi bi-fire text-amber-400 text-xs"></i>
-          <span className="hidden sm:inline">Capacity</span>
-        </button>
+        {/* Triple Line Menu Button & Consolidated Dropdown Menu (Matching Team Hierarchy standard) */}
+        <div className="relative z-50" ref={menuRef}>
+          <button
+            type="button"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer shadow-xs ${
+              isMenuOpen
+                ? "bg-indigo-600 text-white border border-indigo-400/50 shadow-indigo-500/30 ring-2 ring-indigo-400/30"
+                : "bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-xs"
+            }`}
+            title="Projects Management & Actions Menu"
+            aria-label="Toggle Actions Menu"
+          >
+            <svg
+              className="w-5 h-5 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.4}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"
+              />
+            </svg>
+          </button>
 
-        {/* CSV Export Button */}
-        <button
-          type="button"
-          onClick={onExportCSV}
-          className="h-8 px-2.5 sm:px-3 rounded-lg bg-white/10 hover:bg-white/15 text-slate-200 border border-white/20 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs backdrop-blur-xs"
-          title="Export Projects to CSV"
-        >
-          <i className="bi bi-download text-xs text-slate-300"></i>
-          <span className="hidden sm:inline">Export</span>
-        </button>
+          {/* Floating Dropdown Menu */}
+          {isMenuOpen && (
+            <div className="absolute right-0 top-full mt-2 w-56 sm:w-60 min-w-[210px] rounded-xl bg-slate-900 border border-indigo-500/50 shadow-2xl shadow-black/80 p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 text-white">
+              {/* 1. New Initiative CTA */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  onOpenCreateModal();
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer shadow-sm text-left whitespace-nowrap"
+              >
+                <i className="bi bi-plus-lg font-bold text-xs shrink-0"></i>
+                <span className="whitespace-nowrap">New Initiative</span>
+              </button>
 
-        {/* Refresh Button */}
-        <button
-          type="button"
-          onClick={onRefresh}
-          disabled={isRefreshing}
-          className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white border border-white/20 text-xs flex items-center justify-center transition-colors cursor-pointer disabled:opacity-50 backdrop-blur-xs"
-          title="Refresh Initiative Data"
-        >
-          <i className={`bi bi-arrow-clockwise ${isRefreshing ? "animate-spin text-indigo-400" : ""}`}></i>
-        </button>
+              <div className="h-px bg-white/10 my-1.5"></div>
 
-        {/* Create Strategic Initiative CTA */}
-        <button
-          type="button"
-          onClick={onOpenCreateModal}
-          className="h-8 px-3 sm:px-3.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all shadow-sm hover:shadow-indigo-500/20 flex items-center gap-1.5 cursor-pointer active:scale-95 shrink-0"
-        >
-          <i className="bi bi-plus-lg text-xs"></i>
-          <span>New Initiative</span>
-        </button>
+              {/* 2. Capacity Heatmap Drawer */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  onOpenCapacityDrawer();
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left whitespace-nowrap"
+              >
+                <i className="bi bi-fire text-amber-400 text-sm shrink-0"></i>
+                <span className="whitespace-nowrap">Supervisor Capacity</span>
+              </button>
+
+              {/* 3. CSV Export */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  onExportCSV();
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left whitespace-nowrap"
+              >
+                <i className="bi bi-file-earmark-spreadsheet text-emerald-400 text-sm shrink-0"></i>
+                <span className="whitespace-nowrap">Export Projects CSV</span>
+              </button>
+
+              <div className="h-px bg-white/10 my-1.5"></div>
+
+              {/* 4. Refresh Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  onRefresh();
+                }}
+                disabled={isRefreshing}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer disabled:opacity-50 text-left whitespace-nowrap"
+              >
+                <i
+                  className={`bi bi-arrow-clockwise text-indigo-400 text-sm shrink-0 ${
+                    isRefreshing ? "animate-spin" : ""
+                  }`}
+                ></i>
+                <span className="whitespace-nowrap">Refresh Initiatives</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

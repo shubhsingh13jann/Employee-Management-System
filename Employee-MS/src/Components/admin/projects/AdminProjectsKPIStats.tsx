@@ -7,6 +7,8 @@ interface AdminProjectsKPIStatsProps {
   completedCount: number;
   criticalCount: number;
   overallVelocity: number;
+  activeKpiFilter?: string | null;
+  onToggleKpi?: (key: string) => void;
   statusFilter?: string;
   onStatusFilterChange?: (status: string) => void;
   onFilterOverdue?: () => void;
@@ -20,36 +22,50 @@ export const AdminProjectsKPIStats: React.FC<AdminProjectsKPIStatsProps> = ({
   completedCount,
   criticalCount,
   overallVelocity,
+  activeKpiFilter = null,
+  onToggleKpi,
   statusFilter = "all",
   onStatusFilterChange,
   onFilterOverdue,
   isOverdueFilterActive,
 }) => {
-  const handleFilter = (targetStatus: string) => {
-    if (onStatusFilterChange) {
-      if (targetStatus === "all") {
-        onStatusFilterChange("all");
+  const handleCardClick = (key: string) => {
+    if (onToggleKpi) {
+      onToggleKpi(key);
+    } else if (onStatusFilterChange) {
+      if (key === "total") {
+        onStatusFilterChange(isTotalActive ? "all" : "all");
       } else {
-        onStatusFilterChange(statusFilter === targetStatus ? "all" : targetStatus);
+        onStatusFilterChange(statusFilter === key ? "all" : key);
       }
-    } else if (targetStatus === "critical" && onFilterOverdue) {
+    } else if (key === "critical" && onFilterOverdue) {
       onFilterOverdue();
     }
   };
 
-  const isCriticalActive = isOverdueFilterActive ?? (statusFilter === "critical");
+  const handleSubFilter = (status: string) => {
+    if (onStatusFilterChange) {
+      onStatusFilterChange(statusFilter === status ? "all" : status);
+    }
+  };
+
+  // Card is selected ONLY when explicitly active in activeKpiFilter
+  const isTotalActive = activeKpiFilter === "total";
+  const isActiveActive = activeKpiFilter === "active" || (!activeKpiFilter && statusFilter === "active");
+  const isCriticalActive = activeKpiFilter === "critical" || Boolean(isOverdueFilterActive) || (!activeKpiFilter && statusFilter === "critical");
+  const isCompletedActive = activeKpiFilter === "completed" || (!activeKpiFilter && statusFilter === "completed");
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
       {/* 1. Total Initiatives */}
       <div
-        onClick={() => handleFilter("all")}
+        onClick={() => handleCardClick("total")}
         className={`relative overflow-hidden rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 border transition-all flex items-center justify-between cursor-pointer select-none ${
-          statusFilter === "all"
+          isTotalActive
             ? "bg-gradient-to-br from-blue-100/90 via-blue-50 to-indigo-100/80 border-blue-400 ring-2 ring-blue-400/40 shadow-xs"
             : "bg-gradient-to-br from-white via-white to-blue-50/40 border-slate-200/90 hover:border-blue-400 shadow-2xs hover:shadow-xs"
         }`}
-        title="Click to view all strategic initiatives"
+        title="Click to toggle all initiatives filter"
       >
         {/* Left: Icon & 3-line Text with Equal Spacing */}
         <div className="relative z-10 flex items-center gap-2.5 sm:gap-3 min-w-0">
@@ -76,7 +92,7 @@ export const AdminProjectsKPIStats: React.FC<AdminProjectsKPIStatsProps> = ({
               <span
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleFilter("planning");
+                  handleSubFilter("planning");
                 }}
                 className={`hover:underline cursor-pointer ${
                   statusFilter === "planning" ? "text-indigo-600 underline font-bold" : ""
@@ -89,7 +105,7 @@ export const AdminProjectsKPIStats: React.FC<AdminProjectsKPIStatsProps> = ({
               <span
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleFilter("active");
+                  handleSubFilter("active");
                 }}
                 className={`hover:underline cursor-pointer ${
                   statusFilter === "active" ? "text-emerald-600 underline font-bold" : ""
@@ -156,9 +172,9 @@ export const AdminProjectsKPIStats: React.FC<AdminProjectsKPIStatsProps> = ({
 
       {/* 2. In-Flight Active Execution */}
       <div
-        onClick={() => handleFilter("active")}
+        onClick={() => handleCardClick("active")}
         className={`relative overflow-hidden rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 border transition-all flex items-center justify-between cursor-pointer select-none ${
-          statusFilter === "active"
+          isActiveActive
             ? "bg-gradient-to-br from-emerald-100/90 via-emerald-50 to-teal-100/80 border-emerald-400 ring-2 ring-emerald-400/40 shadow-xs"
             : "bg-gradient-to-br from-white via-white to-emerald-50/40 border-slate-200/90 hover:border-emerald-400 shadow-2xs hover:shadow-xs"
         }`}
@@ -246,7 +262,7 @@ export const AdminProjectsKPIStats: React.FC<AdminProjectsKPIStatsProps> = ({
 
       {/* 3. Critical Overdue / At Risk */}
       <div
-        onClick={() => handleFilter("critical")}
+        onClick={() => handleCardClick("critical")}
         className={`relative overflow-hidden rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 border transition-all flex items-center justify-between cursor-pointer select-none ${
           isCriticalActive
             ? "bg-gradient-to-br from-rose-100/90 via-rose-50 to-orange-100/80 border-rose-400 ring-2 ring-rose-400/40 shadow-xs"
@@ -352,9 +368,9 @@ export const AdminProjectsKPIStats: React.FC<AdminProjectsKPIStatsProps> = ({
 
       {/* 4. Aggregate Task Velocity & Delivered */}
       <div
-        onClick={() => handleFilter("completed")}
+        onClick={() => handleCardClick("completed")}
         className={`relative overflow-hidden rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 border transition-all flex items-center justify-between cursor-pointer select-none ${
-          statusFilter === "completed"
+          isCompletedActive
             ? "bg-gradient-to-br from-purple-100/90 via-purple-50 to-violet-100/80 border-purple-400 ring-2 ring-purple-400/40 shadow-xs"
             : "bg-gradient-to-br from-white via-white to-purple-50/40 border-slate-200/90 hover:border-purple-400 shadow-2xs hover:shadow-xs"
         }`}

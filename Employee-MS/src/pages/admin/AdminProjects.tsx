@@ -53,6 +53,7 @@ const AdminProjects: React.FC = () => {
   const [selectedSupervisor, setSelectedSupervisor] = useState<string>("all");
   const [selectedPriority, setSelectedPriority] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [activeKpiFilter, setActiveKpiFilter] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "grid" | "milestones">("table");
 
   // Modals / Drawers State (Wired in Commits 4 & 5)
@@ -167,12 +168,38 @@ const AdminProjects: React.FC = () => {
     return { total, active, planning, completed, critical, overallVelocity };
   }, [projects]);
 
+  const handleToggleKpiCard = (key: string) => {
+    if (activeKpiFilter === key) {
+      setActiveKpiFilter(null);
+      setStatusFilter("all");
+    } else {
+      setActiveKpiFilter(key);
+      if (key === "total") {
+        setStatusFilter("all");
+      } else {
+        setStatusFilter(key);
+      }
+    }
+  };
+
+  const handleStatusFilterChange = (status: string) => {
+    setStatusFilter(status);
+    if (status === "all") {
+      setActiveKpiFilter(null);
+    } else if (status === "active" || status === "critical" || status === "completed") {
+      setActiveKpiFilter(status);
+    } else {
+      setActiveKpiFilter(null);
+    }
+  };
+
   const handleResetFilters = () => {
     setSearchTerm("");
     setSelectedDepartment("all");
     setSelectedSupervisor("all");
     setSelectedPriority("all");
     setStatusFilter("all");
+    setActiveKpiFilter(null);
   };
 
   const handleUpdateStatus = async (projectId: number | string, newStatus: string) => {
@@ -304,12 +331,12 @@ const AdminProjects: React.FC = () => {
           completedCount={kpiStats.completed}
           criticalCount={kpiStats.critical}
           overallVelocity={kpiStats.overallVelocity}
+          activeKpiFilter={activeKpiFilter}
+          onToggleKpi={handleToggleKpiCard}
           statusFilter={statusFilter}
-          onStatusFilterChange={setStatusFilter}
-          onFilterOverdue={() =>
-            setStatusFilter((prev) => (prev === "critical" ? "all" : "critical"))
-          }
-          isOverdueFilterActive={statusFilter === "critical"}
+          onStatusFilterChange={handleStatusFilterChange}
+          onFilterOverdue={() => handleToggleKpiCard("critical")}
+          isOverdueFilterActive={activeKpiFilter === "critical"}
         />
 
         {/* Omnibox Search and Department Filter Toolbar */}
@@ -325,7 +352,7 @@ const AdminProjects: React.FC = () => {
           selectedPriority={selectedPriority}
           onPriorityChange={setSelectedPriority}
           statusFilter={statusFilter}
-          onStatusFilterChange={setStatusFilter}
+          onStatusFilterChange={handleStatusFilterChange}
           totalFiltered={filteredProjects.length}
           totalCount={projects.length}
           onResetFilters={handleResetFilters}
