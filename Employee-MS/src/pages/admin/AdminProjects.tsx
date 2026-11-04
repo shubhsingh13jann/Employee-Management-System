@@ -254,7 +254,7 @@ const AdminProjects: React.FC = () => {
   };
 
   return (
-    <div className="w-full space-y-3 sm:space-y-3.5">
+    <div className="w-full space-y-2.5 sm:space-y-3 pb-6">
       {/* Alert Notification */}
         {msg.text && (
           <div
@@ -333,14 +333,14 @@ const AdminProjects: React.FC = () => {
 
         {/* Dynamic View Rendering: Table vs Grid vs Milestones */}
         {loading ? (
-          <div className="p-12 text-center bg-white rounded-xl border border-slate-200">
+          <div className="p-10 sm:p-12 text-center bg-white/90 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-2xs">
             <div className="inline-flex items-center gap-2 text-slate-500 text-xs font-medium">
               <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
               <span>Loading enterprise initiatives...</span>
             </div>
           </div>
         ) : filteredProjects.length === 0 ? (
-          <div className="p-12 text-center bg-white rounded-xl border border-slate-200">
+          <div className="p-10 sm:p-12 text-center bg-white/90 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-2xs">
             <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-lg mx-auto mb-2">
               <i className="bi bi-kanban"></i>
             </div>
@@ -349,7 +349,7 @@ const AdminProjects: React.FC = () => {
             <button
               type="button"
               onClick={handleResetFilters}
-              className="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 font-semibold text-xs border border-indigo-200 cursor-pointer"
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-xs shadow-md shadow-indigo-500/20 hover:from-blue-700 hover:to-indigo-700 transition-all cursor-pointer"
             >
               Reset Filters
             </button>
