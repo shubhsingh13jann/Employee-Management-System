@@ -80,7 +80,7 @@ export const AdminProjectsFilters: React.FC<AdminProjectsFiltersProps> = ({
   ];
 
   return (
-    <div className="relative overflow-hidden bg-white/90 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-2xs p-3 sm:p-4 mb-3">
+    <div className="relative overflow-hidden bg-white/90 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-2xs p-3 sm:p-4">
       {/* Silky Wave Background Ribbon Effects matching Hierarchy reference */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 rounded-2xl">
         <div className="absolute -bottom-8 -right-8 w-80 h-32 bg-gradient-to-tl from-indigo-200/30 via-purple-100/20 to-transparent blur-xl"></div>

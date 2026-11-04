@@ -22,7 +22,7 @@ export const AdminProjectsHeader: React.FC<AdminProjectsHeaderProps> = ({
   onViewModeChange,
 }) => {
   return (
-    <div className="relative px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl bg-gradient-to-r from-[#070d28] via-[#0d164d] to-[#1c1252] border border-indigo-500/30 shadow-xl text-white flex flex-col md:flex-row md:items-center justify-between gap-3 shrink-0 select-none mb-3">
+    <div className="relative px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl bg-gradient-to-r from-[#070d28] via-[#0d164d] to-[#1c1252] border border-indigo-500/30 shadow-xl text-white flex flex-col md:flex-row md:items-center justify-between gap-3 shrink-0 select-none">
       {/* Micro-Lightning Wave Effect Background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl z-0">
         <svg
@@ -161,7 +161,7 @@ export const AdminProjectsHeader: React.FC<AdminProjectsHeaderProps> = ({
         <button
           type="button"
           onClick={onOpenCapacityDrawer}
-          className="h-9 px-2.5 sm:px-3 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 border border-white/20 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs backdrop-blur-xs"
+          className="h-8 px-2.5 sm:px-3 rounded-lg bg-white/10 hover:bg-white/15 text-slate-200 border border-white/20 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs backdrop-blur-xs"
           title="Inspect Cross-Department Supervisor Workload Heatmap"
         >
           <i className="bi bi-fire text-amber-400 text-xs"></i>
@@ -172,7 +172,7 @@ export const AdminProjectsHeader: React.FC<AdminProjectsHeaderProps> = ({
         <button
           type="button"
           onClick={onExportCSV}
-          className="h-9 px-2.5 sm:px-3 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 border border-white/20 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs backdrop-blur-xs"
+          className="h-8 px-2.5 sm:px-3 rounded-lg bg-white/10 hover:bg-white/15 text-slate-200 border border-white/20 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs backdrop-blur-xs"
           title="Export Projects to CSV"
         >
           <i className="bi bi-download text-xs text-slate-300"></i>
@@ -184,7 +184,7 @@ export const AdminProjectsHeader: React.FC<AdminProjectsHeaderProps> = ({
           type="button"
           onClick={onRefresh}
           disabled={isRefreshing}
-          className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white border border-white/20 text-xs flex items-center justify-center transition-colors cursor-pointer disabled:opacity-50 backdrop-blur-xs"
+          className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white border border-white/20 text-xs flex items-center justify-center transition-colors cursor-pointer disabled:opacity-50 backdrop-blur-xs"
           title="Refresh Initiative Data"
         >
           <i className={`bi bi-arrow-clockwise ${isRefreshing ? "animate-spin text-indigo-400" : ""}`}></i>
@@ -194,7 +194,7 @@ export const AdminProjectsHeader: React.FC<AdminProjectsHeaderProps> = ({
         <button
           type="button"
           onClick={onOpenCreateModal}
-          className="h-9 px-3 sm:px-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all shadow-sm hover:shadow-indigo-500/20 flex items-center gap-1.5 cursor-pointer active:scale-95 shrink-0"
+          className="h-8 px-3 sm:px-3.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all shadow-sm hover:shadow-indigo-500/20 flex items-center gap-1.5 cursor-pointer active:scale-95 shrink-0"
         >
           <i className="bi bi-plus-lg text-xs"></i>
           <span>New Initiative</span>

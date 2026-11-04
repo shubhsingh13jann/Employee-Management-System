@@ -40,7 +40,7 @@ export const AdminProjectsKPIStats: React.FC<AdminProjectsKPIStatsProps> = ({
   const isCriticalActive = isOverdueFilterActive ?? (statusFilter === "critical");
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 mb-3">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
       {/* 1. Total Initiatives */}
       <div
         onClick={() => handleFilter("all")}
