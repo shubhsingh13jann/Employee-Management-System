@@ -67,7 +67,7 @@ export const AdminProjectsKPIStats: React.FC<AdminProjectsKPIStatsProps> = ({
               <span className="text-base sm:text-lg font-black text-slate-900 leading-none m-0 p-0">
                 {totalCount}
               </span>
-              <span className="text-[9px] sm:text-[9.5px] font-semibold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200 leading-none">
+              <span className="text-[9px] sm:text-[9.5px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 leading-none">
                 {completedCount} Done
               </span>
             </div>
@@ -270,7 +270,7 @@ export const AdminProjectsKPIStats: React.FC<AdminProjectsKPIStatsProps> = ({
 
           <div className="flex flex-col justify-center min-w-0 py-0.5">
             {/* Line 1: Title */}
-            <p className="text-[10px] sm:text-[10.5px] font-bold text-rose-800 uppercase tracking-wider leading-tight m-0 p-0 truncate flex items-center gap-1.5">
+            <p className="text-[10px] sm:text-[10.5px] font-bold text-slate-500 uppercase tracking-wider leading-tight m-0 p-0 truncate flex items-center gap-1.5">
               <span>Critical / Overdue</span>
               {criticalCount > 0 && (
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>
