@@ -2671,3 +2671,278 @@ export const applyReorgPlan = async (req, res) => {
     connection.release();
   }
 };
+
+// ==========================================
+// Sub-Milestones & Deliverables Endpoints
+// ==========================================
+
+export const getProjectMilestones = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [milestones] = await pool.query(
+      `SELECT pm.*, 
+              u.name AS owner_name, u.email AS owner_email, u.image_url AS owner_image, u.role AS owner_role
+       FROM project_milestones pm
+       LEFT JOIN users u ON pm.owner_id = u.id
+       WHERE pm.project_id = ?
+       ORDER BY pm.order_index ASC, pm.due_date ASC`,
+      [id]
+    );
+
+    const formatted = milestones.map((m) => {
+      let deliverables = [];
+      try {
+        deliverables = typeof m.deliverables === "string" ? JSON.parse(m.deliverables) : (m.deliverables || []);
+      } catch (e) {
+        deliverables = [];
+      }
+
+      const totalDel = deliverables.length;
+      const completedDel = deliverables.filter((d) => d.completed).length;
+
+      return {
+        ...m,
+        deliverables,
+        total_deliverables: totalDel,
+        completed_deliverables: completedDel,
+        progress_percentage: totalDel > 0 ? Math.round((completedDel / totalDel) * 100) : (m.status === "completed" ? 100 : 0),
+      };
+    });
+
+    return res.json({ status: true, milestones: formatted });
+  } catch (err) {
+    console.error("getProjectMilestones error:", err);
+    return res.status(500).json({ status: false, error: "Failed to fetch project milestones" });
+  }
+};
+
+export const createProjectMilestone = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      title,
+      description = "",
+      due_date = null,
+      owner_id = null,
+      status = "pending",
+      order_index = 0,
+      deliverables = [],
+    } = req.body;
+
+    if (!title || !title.trim()) {
+      return res.status(400).json({ status: false, error: "Milestone title is required" });
+    }
+
+    const deliverablesJson = JSON.stringify(deliverables);
+
+    const [result] = await pool.query(
+      `INSERT INTO project_milestones (project_id, title, description, due_date, owner_id, status, order_index, deliverables)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, title.trim(), description.trim(), due_date || null, owner_id || null, status, order_index, deliverablesJson]
+    );
+
+    const [newMilestone] = await pool.query(
+      `SELECT pm.*, u.name AS owner_name, u.email AS owner_email, u.image_url AS owner_image, u.role AS owner_role
+       FROM project_milestones pm
+       LEFT JOIN users u ON pm.owner_id = u.id
+       WHERE pm.id = ?`,
+      [result.insertId]
+    );
+
+    let parsedDeliverables = [];
+    try {
+      parsedDeliverables = typeof newMilestone[0].deliverables === "string" ? JSON.parse(newMilestone[0].deliverables) : (newMilestone[0].deliverables || []);
+    } catch {
+      parsedDeliverables = [];
+    }
+
+    return res.json({
+      status: true,
+      message: "Milestone phase created successfully",
+      milestone: {
+        ...newMilestone[0],
+        deliverables: parsedDeliverables,
+        total_deliverables: parsedDeliverables.length,
+        completed_deliverables: parsedDeliverables.filter((d) => d.completed).length,
+      },
+    });
+  } catch (err) {
+    console.error("createProjectMilestone error:", err);
+    return res.status(500).json({ status: false, error: "Failed to create milestone" });
+  }
+};
+
+export const updateProjectMilestone = async (req, res) => {
+  try {
+    const { milestoneId } = req.params;
+    const {
+      title,
+      description,
+      due_date,
+      owner_id,
+      status,
+      order_index,
+      deliverables,
+    } = req.body;
+
+    const [existing] = await pool.query("SELECT * FROM project_milestones WHERE id = ?", [milestoneId]);
+    if (existing.length === 0) {
+      return res.status(404).json({ status: false, error: "Milestone not found" });
+    }
+
+    const current = existing[0];
+    const newDeliverables = deliverables !== undefined ? JSON.stringify(deliverables) : current.deliverables;
+
+    await pool.query(
+      `UPDATE project_milestones
+       SET title = ?, description = ?, due_date = ?, owner_id = ?, status = ?, order_index = ?, deliverables = ?
+       WHERE id = ?`,
+      [
+        title !== undefined ? title.trim() : current.title,
+        description !== undefined ? description.trim() : current.description,
+        due_date !== undefined ? (due_date || null) : current.due_date,
+        owner_id !== undefined ? (owner_id || null) : current.owner_id,
+        status !== undefined ? status : current.status,
+        order_index !== undefined ? order_index : current.order_index,
+        newDeliverables,
+        milestoneId,
+      ]
+    );
+
+    const [updated] = await pool.query(
+      `SELECT pm.*, u.name AS owner_name, u.email AS owner_email, u.image_url AS owner_image, u.role AS owner_role
+       FROM project_milestones pm
+       LEFT JOIN users u ON pm.owner_id = u.id
+       WHERE pm.id = ?`,
+      [milestoneId]
+    );
+
+    let parsedDeliverables = [];
+    try {
+      parsedDeliverables = typeof updated[0].deliverables === "string" ? JSON.parse(updated[0].deliverables) : (updated[0].deliverables || []);
+    } catch {
+      parsedDeliverables = [];
+    }
+
+    return res.json({
+      status: true,
+      message: "Milestone updated successfully",
+      milestone: {
+        ...updated[0],
+        deliverables: parsedDeliverables,
+        total_deliverables: parsedDeliverables.length,
+        completed_deliverables: parsedDeliverables.filter((d) => d.completed).length,
+      },
+    });
+  } catch (err) {
+    console.error("updateProjectMilestone error:", err);
+    return res.status(500).json({ status: false, error: "Failed to update milestone" });
+  }
+};
+
+export const toggleMilestoneStatus = async (req, res) => {
+  try {
+    const { milestoneId } = req.params;
+    const { status } = req.body;
+
+    const [existing] = await pool.query("SELECT * FROM project_milestones WHERE id = ?", [milestoneId]);
+    if (existing.length === 0) {
+      return res.status(404).json({ status: false, error: "Milestone not found" });
+    }
+
+    const current = existing[0];
+    const newStatus = status || (current.status === "completed" ? "in_progress" : "completed");
+
+    let deliverables = [];
+    try {
+      deliverables = typeof current.deliverables === "string" ? JSON.parse(current.deliverables) : (current.deliverables || []);
+    } catch {
+      deliverables = [];
+    }
+
+    // If marked completed, set all checklist items to completed
+    if (newStatus === "completed" && deliverables.length > 0) {
+      deliverables = deliverables.map((d) => ({ ...d, completed: true }));
+    }
+
+    await pool.query(
+      `UPDATE project_milestones SET status = ?, deliverables = ? WHERE id = ?`,
+      [newStatus, JSON.stringify(deliverables), milestoneId]
+    );
+
+    return res.json({
+      status: true,
+      message: `Milestone status set to ${newStatus}`,
+      milestone_id: milestoneId,
+      status_val: newStatus,
+      deliverables,
+    });
+  } catch (err) {
+    console.error("toggleMilestoneStatus error:", err);
+    return res.status(500).json({ status: false, error: "Failed to toggle milestone status" });
+  }
+};
+
+export const toggleDeliverableItem = async (req, res) => {
+  try {
+    const { milestoneId } = req.params;
+    const { deliverableId, completed } = req.body;
+
+    const [existing] = await pool.query("SELECT * FROM project_milestones WHERE id = ?", [milestoneId]);
+    if (existing.length === 0) {
+      return res.status(404).json({ status: false, error: "Milestone not found" });
+    }
+
+    let deliverables = [];
+    try {
+      deliverables = typeof existing[0].deliverables === "string" ? JSON.parse(existing[0].deliverables) : (existing[0].deliverables || []);
+    } catch {
+      deliverables = [];
+    }
+
+    deliverables = deliverables.map((item) => {
+      if (item.id === deliverableId) {
+        return { ...item, completed: completed !== undefined ? completed : !item.completed };
+      }
+      return item;
+    });
+
+    const allCompleted = deliverables.length > 0 && deliverables.every((d) => d.completed);
+    const anyCompleted = deliverables.some((d) => d.completed);
+    let newStatus = existing[0].status;
+    if (allCompleted) {
+      newStatus = "completed";
+    } else if (anyCompleted && newStatus === "pending") {
+      newStatus = "in_progress";
+    } else if (!anyCompleted && newStatus === "completed") {
+      newStatus = "in_progress";
+    }
+
+    await pool.query(
+      `UPDATE project_milestones SET deliverables = ?, status = ? WHERE id = ?`,
+      [JSON.stringify(deliverables), newStatus, milestoneId]
+    );
+
+    return res.json({
+      status: true,
+      message: "Deliverable item updated",
+      milestone_id: milestoneId,
+      deliverables,
+      milestone_status: newStatus,
+    });
+  } catch (err) {
+    console.error("toggleDeliverableItem error:", err);
+    return res.status(500).json({ status: false, error: "Failed to toggle deliverable item" });
+  }
+};
+
+export const deleteProjectMilestone = async (req, res) => {
+  try {
+    const { milestoneId } = req.params;
+    await pool.query("DELETE FROM project_milestones WHERE id = ?", [milestoneId]);
+    return res.json({ status: true, message: "Milestone deleted successfully" });
+  } catch (err) {
+    console.error("deleteProjectMilestone error:", err);
+    return res.status(500).json({ status: false, error: "Failed to delete milestone" });
+  }
+};

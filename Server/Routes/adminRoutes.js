@@ -46,6 +46,12 @@ import {
   updateAdminProject,
   deleteAdminProject,
   getAdminSupervisorsCapacity,
+  getProjectMilestones,
+  createProjectMilestone,
+  updateProjectMilestone,
+  toggleMilestoneStatus,
+  toggleDeliverableItem,
+  deleteProjectMilestone,
 } from "../controllers/adminController.js";
 import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
 
@@ -110,5 +116,14 @@ router.put("/projects/:id/status", updateAdminProjectStatus);
 router.put("/projects/:id", updateAdminProject);
 router.delete("/projects/:id", deleteAdminProject);
 router.get("/projects/supervisors-capacity", getAdminSupervisorsCapacity);
+
+
+// Interactive Sub-Milestones & Deliverables Tracker Routes
+router.get("/projects/:id/milestones", getProjectMilestones);
+router.post("/projects/:id/milestones", createProjectMilestone);
+router.put("/projects/milestones/:milestoneId", updateProjectMilestone);
+router.put("/projects/milestones/:milestoneId/status", toggleMilestoneStatus);
+router.put("/projects/milestones/:milestoneId/deliverable-toggle", toggleDeliverableItem);
+router.delete("/projects/milestones/:milestoneId", deleteProjectMilestone);
 
 export { router as adminRouter };
