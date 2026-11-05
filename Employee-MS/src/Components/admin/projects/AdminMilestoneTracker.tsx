@@ -444,18 +444,18 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
 
                               {/* Deliverables Checklist Chips */}
                               {totalD > 0 && (
-                                <div className="pl-5 space-y-1 pt-1 border-t border-slate-100">
-                                  <div className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 flex items-center justify-between">
+                                <div className="pl-5 space-y-1 pt-1.5 border-t border-slate-100">
+                                  <div className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center justify-between">
                                     <span>Deliverables ({doneD}/{totalD})</span>
                                     <span className="text-indigo-600 font-bold">
                                       {Math.round((doneD / totalD) * 100)}%
                                     </span>
                                   </div>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                                     {milestone.deliverables.map((del) => (
                                       <label
                                         key={del.id}
-                                        className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] border cursor-pointer select-none transition-colors ${
+                                        className={`flex items-center gap-1.5 px-2 py-1 rounded text-[10.5px] border cursor-pointer select-none transition-colors ${
                                           del.completed
                                             ? "bg-emerald-50/70 border-emerald-200 text-emerald-800 line-through opacity-80"
                                             : "bg-slate-50 hover:bg-white border-slate-200 text-slate-700"
@@ -472,7 +472,7 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                                               del.completed
                                             )
                                           }
-                                          className="w-2.5 h-2.5 rounded text-indigo-600 accent-indigo-600"
+                                          className="w-3.5 h-3.5 rounded text-indigo-600 accent-indigo-600 shrink-0 cursor-pointer mr-1.5"
                                         />
                                         <span className="truncate">{del.title}</span>
                                       </label>
