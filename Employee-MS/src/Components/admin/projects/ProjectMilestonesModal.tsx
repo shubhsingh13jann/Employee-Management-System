@@ -784,19 +784,20 @@ export const ProjectMilestonesModal: React.FC<ProjectMilestonesModalProps> = ({
                                   : "bg-white border-slate-200/80 hover:border-slate-300"
                               }`}
                             >
-                              <label className="flex items-center gap-1.5 cursor-pointer select-none flex-1 min-w-0">
+                              <label className="flex items-center cursor-pointer select-none flex-1 min-w-0">
                                 <input
                                   type="checkbox"
                                   checked={del.completed}
                                   onChange={() =>
                                     handleToggleDeliverable(milestone.id, del.id, del.completed)
                                   }
-                                  className="w-3.5 h-3.5 rounded text-indigo-600 focus:ring-0 cursor-pointer accent-indigo-600 shrink-0 mr-1.5"
+                                  className="w-3.5 h-3.5 rounded text-indigo-600 focus:ring-0 cursor-pointer accent-indigo-600 shrink-0"
                                 />
                                 <span
                                   className={`text-xs font-medium truncate ${
                                     del.completed ? "text-emerald-800 line-through opacity-75" : "text-slate-800"
                                   }`}
+                                  style={{ marginLeft: "6px" }}
                                 >
                                   {del.title}
                                 </span>

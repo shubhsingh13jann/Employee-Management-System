@@ -179,6 +179,36 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
             const subMilestones = milestonesCache[projId] || [];
             const isLoadingSub = Boolean(loadingMilestones[projId]);
 
+            // Dynamically calculate project velocity and milestone completion counts from loaded sub-milestones
+            const currentProgress = (() => {
+              if (subMilestones.length > 0) {
+                const totalDel = subMilestones.reduce((acc, m) => acc + (m.deliverables?.length || 0), 0);
+                const completedDel = subMilestones.reduce(
+                  (acc, m) => acc + (m.deliverables?.filter((d) => d.completed).length || 0),
+                  0
+                );
+                if (totalDel > 0) {
+                  return Math.round((completedDel / totalDel) * 100);
+                }
+                const completedMilestones = subMilestones.filter((m) => m.status === "completed").length;
+                return Math.round((completedMilestones / subMilestones.length) * 100);
+              }
+              return proj.progress_percentage ?? 0;
+            })();
+
+            const milestoneCounts = (() => {
+              if (subMilestones.length > 0) {
+                return {
+                  total: subMilestones.length,
+                  completed: subMilestones.filter((m) => m.status === "completed").length,
+                };
+              }
+              return {
+                total: proj.total_milestones ?? 0,
+                completed: proj.completed_milestones ?? 0,
+              };
+            })();
+
             return (
               <div
                 key={proj.id}
@@ -268,18 +298,18 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                     <div className="flex items-center gap-1 mr-1">
                       <div className="w-14 sm:w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
                         <div
-                          className={`h-full rounded-full ${
-                            proj.progress_percentage >= 80
+                          className={`h-full rounded-full transition-all duration-300 ${
+                            currentProgress >= 80
                               ? "bg-emerald-500"
-                              : proj.progress_percentage >= 40
+                              : currentProgress >= 40
                               ? "bg-indigo-500"
                               : "bg-amber-500"
                           }`}
-                          style={{ width: `${proj.progress_percentage}%` }}
+                          style={{ width: `${currentProgress}%` }}
                         ></div>
                       </div>
                       <span className="text-[10px] font-bold text-slate-700">
-                        {proj.progress_percentage}%
+                        {currentProgress}%
                       </span>
                     </div>
 
@@ -297,9 +327,9 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                       <i className="bi bi-diagram-3-fill text-[9px]"></i>
                       <span>
                         Sub-Milestones
-                        {(proj.total_milestones ?? 0) > 0 && (
+                        {milestoneCounts.total > 0 && (
                           <strong className="ml-1">
-                            ({proj.completed_milestones || 0}/{proj.total_milestones})
+                            ({milestoneCounts.completed}/{milestoneCounts.total})
                           </strong>
                         )}
                       </span>
@@ -451,11 +481,11 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                                       {Math.round((doneD / totalD) * 100)}%
                                     </span>
                                   </div>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                                     {milestone.deliverables.map((del) => (
                                       <label
                                         key={del.id}
-                                        className={`flex items-center gap-1.5 px-2 py-1 rounded text-[10.5px] border cursor-pointer select-none transition-colors ${
+                                        className={`flex items-center px-1.5 py-0.5 rounded text-[10px] border cursor-pointer select-none transition-colors ${
                                           del.completed
                                             ? "bg-emerald-50/70 border-emerald-200 text-emerald-800 line-through opacity-80"
                                             : "bg-slate-50 hover:bg-white border-slate-200 text-slate-700"
@@ -472,9 +502,11 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                                               del.completed
                                             )
                                           }
-                                          className="w-3.5 h-3.5 rounded text-indigo-600 accent-indigo-600 shrink-0 cursor-pointer mr-1.5"
+                                          className="w-2.5 h-2.5 rounded text-indigo-600 accent-indigo-600 shrink-0 cursor-pointer"
                                         />
-                                        <span className="truncate">{del.title}</span>
+                                        <span className="truncate" style={{ marginLeft: "6px" }}>
+                                          {del.title}
+                                        </span>
                                       </label>
                                     ))}
                                   </div>

@@ -1968,13 +1968,59 @@ export const getAdminProjects = async (req, res) => {
 
     const [projects] = await pool.query(query, params);
 
+    // Fetch milestones summary per project to calculate milestone & deliverable-based velocity
+    let milestonesByProject = {};
+    try {
+      const [allMilestones] = await pool.query(
+        "SELECT project_id, status, deliverables FROM project_milestones"
+      );
+      for (const m of allMilestones) {
+        if (!milestonesByProject[m.project_id]) {
+          milestonesByProject[m.project_id] = [];
+        }
+        let del = [];
+        try {
+          del = typeof m.deliverables === "string" ? JSON.parse(m.deliverables) : (m.deliverables || []);
+        } catch {
+          del = [];
+        }
+        milestonesByProject[m.project_id].push({
+          status: m.status,
+          deliverables: del,
+        });
+      }
+    } catch (mErr) {
+      console.warn("Could not query project_milestones for velocity:", mErr.message);
+    }
+
     const formatted = projects.map((p) => {
       const total = Number(p.total_tasks) || 0;
       const completed = Number(p.completed_tasks) || 0;
       const overdue = Number(p.overdue_tasks) || 0;
+
+      const projMilestones = milestonesByProject[p.id] || [];
+      const totalMilestones = projMilestones.length;
+      const completedMilestones = projMilestones.filter((m) => m.status === "completed").length;
+
+      let milestoneProgress = 0;
+      if (totalMilestones > 0) {
+        const totalDel = projMilestones.reduce((acc, m) => acc + (m.deliverables?.length || 0), 0);
+        const completedDel = projMilestones.reduce(
+          (acc, m) => acc + (m.deliverables?.filter((d) => d.completed).length || 0),
+          0
+        );
+        if (totalDel > 0) {
+          milestoneProgress = Math.round((completedDel / totalDel) * 100);
+        } else {
+          milestoneProgress = Math.round((completedMilestones / totalMilestones) * 100);
+        }
+      }
+
       const progress =
         total > 0
           ? Math.round((completed / total) * 100)
+          : totalMilestones > 0
+          ? milestoneProgress
           : p.status === "completed"
           ? 100
           : 0;
@@ -2004,6 +2050,8 @@ export const getAdminProjects = async (req, res) => {
         completed_tasks: completed,
         overdue_tasks: overdue,
         in_progress_tasks: Number(p.in_progress_tasks) || 0,
+        total_milestones: totalMilestones,
+        completed_milestones: completedMilestones,
         progress_percentage: progress,
         days_left: daysLeft,
         is_overdue: isOverdue,
