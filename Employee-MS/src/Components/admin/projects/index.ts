@@ -6,3 +6,4 @@ export * from "./AdminProjectsGrid";
 export * from "./CreateProjectModal";
 export * from "./AdminMilestoneTracker";
 export * from "./SupervisorCapacityDrawer";
+export * from "./ProjectMilestonesModal";
