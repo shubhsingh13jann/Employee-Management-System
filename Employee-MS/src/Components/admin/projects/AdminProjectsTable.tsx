@@ -6,6 +6,7 @@ interface AdminProjectsTableProps {
   onOpenEditModal?: (project: ProjectItem) => void;
   onUpdateStatus?: (projectId: number | string, newStatus: string) => void;
   onDeleteProject?: (projectId: number | string) => void;
+  onOpenMilestonesModal?: (project: ProjectItem) => void;
 }
 
 export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
@@ -13,6 +14,7 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
   onOpenEditModal,
   onUpdateStatus,
   onDeleteProject,
+  onOpenMilestonesModal,
 }) => {
   const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null);
 
@@ -152,9 +154,14 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                   {/* 1. Initiative Title & Details (Strictly 2 rows) */}
                   <td className="py-2.5 pl-4.5 pr-3.5">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                      <button
+                        type="button"
+                        onClick={() => onOpenMilestonesModal?.(proj)}
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs cursor-pointer transition-colors"
+                        title="Manage Sub-Milestones & Deliverables"
+                      >
                         <i className="bi bi-kanban"></i>
-                      </div>
+                      </button>
                       <div className="min-w-0 flex-1">
                         {/* Row 1: Title + PRJ Badge side by side without wrapping */}
                         <div className="flex items-center gap-1.5 flex-nowrap min-w-0">
@@ -357,6 +364,20 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                           )}
 
                           <div className="my-1 border-t border-slate-100"></div>
+
+                          {onOpenMilestonesModal && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveMenuId(null);
+                                onOpenMilestonesModal(proj);
+                              }}
+                              className="w-full px-2 py-1 text-[11px] text-indigo-700 hover:bg-indigo-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                            >
+                              <i className="bi bi-flag-fill text-indigo-600 text-[10px]"></i>
+                              <span>Sub-Milestones</span>
+                            </button>
+                          )}
 
                           {onOpenEditModal && (
                             <button

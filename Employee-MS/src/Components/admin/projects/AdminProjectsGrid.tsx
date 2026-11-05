@@ -6,6 +6,7 @@ interface AdminProjectsGridProps {
   onOpenEditModal?: (project: ProjectItem) => void;
   onUpdateStatus?: (projectId: number | string, newStatus: string) => void;
   onDeleteProject?: (projectId: number | string) => void;
+  onOpenMilestonesModal?: (project: ProjectItem) => void;
 }
 
 export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
@@ -13,6 +14,7 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
   onOpenEditModal,
   onUpdateStatus,
   onDeleteProject,
+  onOpenMilestonesModal,
 }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
@@ -176,6 +178,17 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
               </div>
 
               <div className="flex items-center gap-1">
+                {onOpenMilestonesModal && (
+                  <button
+                    type="button"
+                    onClick={() => onOpenMilestonesModal(proj)}
+                    className="px-2 py-0.5 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/80 text-[10px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
+                    title="Manage Sub-Milestones & Deliverable Checklists"
+                  >
+                    <i className="bi bi-flag-fill text-[9px] text-indigo-600"></i>
+                    <span>Milestones</span>
+                  </button>
+                )}
                 {onUpdateStatus && proj.status !== "active" && proj.status !== "completed" && (
                   <button
                     type="button"

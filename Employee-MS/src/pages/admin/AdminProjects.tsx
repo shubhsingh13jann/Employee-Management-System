@@ -9,6 +9,7 @@ import {
   CreateProjectModal,
   AdminMilestoneTracker,
   SupervisorCapacityDrawer,
+  ProjectMilestonesModal,
 } from "../../Components/admin/projects";
 
 export interface ProjectItem {
@@ -59,6 +60,7 @@ const AdminProjects: React.FC = () => {
   // Modals / Drawers State (Wired in Commits 4 & 5)
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [editingProject, setEditingProject] = useState<ProjectItem | null>(null);
+  const [selectedMilestoneProject, setSelectedMilestoneProject] = useState<ProjectItem | null>(null);
   const [showCapacityDrawer, setShowCapacityDrawer] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
 
@@ -389,6 +391,7 @@ const AdminProjects: React.FC = () => {
               setShowCreateModal(true);
             }}
             onUpdateStatus={handleUpdateStatus}
+            onOpenMilestonesModal={(proj) => setSelectedMilestoneProject(proj)}
           />
         ) : viewMode === "grid" ? (
           <AdminProjectsGrid
@@ -399,6 +402,7 @@ const AdminProjects: React.FC = () => {
             }}
             onUpdateStatus={handleUpdateStatus}
             onDeleteProject={handleDeleteProject}
+            onOpenMilestonesModal={(proj) => setSelectedMilestoneProject(proj)}
           />
         ) : (
           <AdminProjectsTable
@@ -409,6 +413,7 @@ const AdminProjects: React.FC = () => {
             }}
             onUpdateStatus={handleUpdateStatus}
             onDeleteProject={handleDeleteProject}
+            onOpenMilestonesModal={(proj) => setSelectedMilestoneProject(proj)}
           />
         )}
 
@@ -424,6 +429,15 @@ const AdminProjects: React.FC = () => {
           departments={departments}
           supervisors={supervisors}
           saving={saving}
+        />
+
+        {/* Interactive Sub-Milestones & Deliverables Modal */}
+        <ProjectMilestonesModal
+          isOpen={Boolean(selectedMilestoneProject)}
+          onClose={() => setSelectedMilestoneProject(null)}
+          project={selectedMilestoneProject}
+          supervisors={supervisors}
+          onMilestonesChanged={fetchData}
         />
 
         {/* Supervisor Capacity Heatmap Drawer */}
