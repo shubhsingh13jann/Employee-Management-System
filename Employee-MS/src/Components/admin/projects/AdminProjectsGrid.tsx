@@ -8,6 +8,7 @@ interface AdminProjectsGridProps {
   onDeleteProject?: (projectId: number | string) => void;
   onOpenMilestonesModal?: (project: ProjectItem) => void;
   onOpenDossierModal?: (project: ProjectItem) => void;
+  onOpenSquadDrawer?: (project: ProjectItem) => void;
 }
 
 export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
@@ -17,6 +18,7 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
   onDeleteProject,
   onOpenMilestonesModal,
   onOpenDossierModal,
+  onOpenSquadDrawer,
 }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
@@ -185,6 +187,17 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
               </div>
 
               <div className="flex items-center gap-1">
+                {onOpenSquadDrawer && (
+                  <button
+                    type="button"
+                    onClick={() => onOpenSquadDrawer(proj)}
+                    className="px-2 py-0.5 rounded bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200/80 text-[10px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
+                    title="Manage Project Squad Roster"
+                  >
+                    <i className="bi bi-people-fill text-purple-600 text-[9px]"></i>
+                    <span>Squad</span>
+                  </button>
+                )}
                 {onOpenDossierModal && (
                   <button
                     type="button"

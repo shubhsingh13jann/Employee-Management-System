@@ -8,6 +8,7 @@ interface AdminProjectsTableProps {
   onDeleteProject?: (projectId: number | string) => void;
   onOpenMilestonesModal?: (project: ProjectItem) => void;
   onOpenDossierModal?: (project: ProjectItem) => void;
+  onOpenSquadDrawer?: (project: ProjectItem) => void;
 }
 
 export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
@@ -17,6 +18,7 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
   onDeleteProject,
   onOpenMilestonesModal,
   onOpenDossierModal,
+  onOpenSquadDrawer,
 }) => {
   const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null);
 
@@ -222,11 +224,33 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                             Lead Supervisor
                           </span>
                         </div>
+                        {onOpenSquadDrawer && (
+                          <button
+                            type="button"
+                            onClick={() => onOpenSquadDrawer(proj)}
+                            className="ml-auto w-5 h-5 rounded hover:bg-slate-200 text-slate-400 hover:text-indigo-600 flex items-center justify-center transition-colors cursor-pointer"
+                            title="Manage Project Squad Roster"
+                          >
+                            <i className="bi bi-people-fill text-[10px]"></i>
+                          </button>
+                        )}
                       </div>
                     ) : (
-                      <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                        Unassigned Lead
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                          Unassigned Lead
+                        </span>
+                        {onOpenSquadDrawer && (
+                          <button
+                            type="button"
+                            onClick={() => onOpenSquadDrawer(proj)}
+                            className="w-5 h-5 rounded hover:bg-slate-200 text-slate-400 hover:text-indigo-600 flex items-center justify-center transition-colors cursor-pointer"
+                            title="Assign Squad"
+                          >
+                            <i className="bi bi-person-plus text-[10px]"></i>
+                          </button>
+                        )}
+                      </div>
                     )}
                   </td>
 
@@ -387,6 +411,20 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                           )}
 
                           <div className="my-1 border-t border-slate-100"></div>
+
+                          {onOpenSquadDrawer && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveMenuId(null);
+                                onOpenSquadDrawer(proj);
+                              }}
+                              className="w-full px-2 py-1 text-[11px] text-purple-700 hover:bg-purple-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                            >
+                              <i className="bi bi-people-fill text-purple-600 text-[10px]"></i>
+                              <span>Squad Roster</span>
+                            </button>
+                          )}
 
                           {onOpenMilestonesModal && (
                             <button

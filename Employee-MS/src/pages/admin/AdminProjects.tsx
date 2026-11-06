@@ -11,6 +11,7 @@ import {
   SupervisorCapacityDrawer,
   ProjectMilestonesModal,
   ProjectDetailDossierModal,
+  ProjectSquadDrawer,
 } from "../../Components/admin/projects";
 
 export interface ProjectItem {
@@ -63,6 +64,7 @@ const AdminProjects: React.FC = () => {
   const [editingProject, setEditingProject] = useState<ProjectItem | null>(null);
   const [selectedMilestoneProject, setSelectedMilestoneProject] = useState<ProjectItem | null>(null);
   const [selectedDossierProject, setSelectedDossierProject] = useState<ProjectItem | null>(null);
+  const [selectedSquadProject, setSelectedSquadProject] = useState<ProjectItem | null>(null);
   const [showCapacityDrawer, setShowCapacityDrawer] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
 
@@ -407,6 +409,7 @@ const AdminProjects: React.FC = () => {
             onDeleteProject={handleDeleteProject}
             onOpenMilestonesModal={(proj) => setSelectedMilestoneProject(proj)}
             onOpenDossierModal={(proj) => setSelectedDossierProject(proj)}
+            onOpenSquadDrawer={(proj) => setSelectedSquadProject(proj)}
           />
         ) : (
           <AdminProjectsTable
@@ -419,6 +422,7 @@ const AdminProjects: React.FC = () => {
             onDeleteProject={handleDeleteProject}
             onOpenMilestonesModal={(proj) => setSelectedMilestoneProject(proj)}
             onOpenDossierModal={(proj) => setSelectedDossierProject(proj)}
+            onOpenSquadDrawer={(proj) => setSelectedSquadProject(proj)}
           />
         )}
 
@@ -454,6 +458,14 @@ const AdminProjects: React.FC = () => {
             setSelectedDossierProject(null);
             setSelectedMilestoneProject(proj);
           }}
+        />
+
+        {/* Project Squad & Resource Allocation Drawer */}
+        <ProjectSquadDrawer
+          isOpen={Boolean(selectedSquadProject)}
+          onClose={() => setSelectedSquadProject(null)}
+          project={selectedSquadProject}
+          onSquadChanged={fetchData}
         />
 
         {/* Supervisor Capacity Heatmap Drawer */}
