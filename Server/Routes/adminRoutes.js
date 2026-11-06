@@ -52,6 +52,7 @@ import {
   toggleMilestoneStatus,
   toggleDeliverableItem,
   deleteProjectMilestone,
+  getProjectDossier,
 } from "../controllers/adminController.js";
 import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
 
@@ -119,6 +120,7 @@ router.get("/projects/supervisors-capacity", getAdminSupervisorsCapacity);
 
 
 // Interactive Sub-Milestones & Deliverables Tracker Routes
+router.get("/projects/:id/dossier", getProjectDossier);
 router.get("/projects/:id/milestones", getProjectMilestones);
 router.post("/projects/:id/milestones", createProjectMilestone);
 router.put("/projects/milestones/:milestoneId", updateProjectMilestone);

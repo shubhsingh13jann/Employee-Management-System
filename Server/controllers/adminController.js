@@ -2994,3 +2994,177 @@ export const deleteProjectMilestone = async (req, res) => {
     return res.status(500).json({ status: false, error: "Failed to delete milestone" });
   }
 };
+
+
+export const getProjectDossier = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1. Project details with department, supervisor, creator
+    const [projects] = await pool.query(
+      `SELECT p.*,
+              d.name AS department_name, d.code AS department_code,
+              s.name AS supervisor_name, s.email AS supervisor_email, s.image_url AS supervisor_image,
+              creator.name AS creator_name
+       FROM projects p
+       LEFT JOIN departments d ON p.department_id = d.id
+       LEFT JOIN users s ON p.lead_supervisor_id = s.id
+       LEFT JOIN users creator ON p.created_by = creator.id
+       WHERE p.id = ?`,
+      [id]
+    );
+
+    if (projects.length === 0) {
+      return res.status(404).json({ status: false, error: "Project not found" });
+    }
+
+    const project = projects[0];
+
+    // 2. Tasks linked to project
+    const [tasks] = await pool.query(
+      `SELECT t.*,
+              u.name AS assignee_name, u.email AS assignee_email, u.image_url AS assignee_image, u.role AS assignee_role,
+              assigner.name AS assigner_name
+       FROM tasks t
+       LEFT JOIN users u ON t.assigned_to = u.id
+       LEFT JOIN users assigner ON t.assigned_by = assigner.id
+       WHERE t.project_id = ?
+       ORDER BY t.created_at DESC`,
+      [id]
+    );
+
+    // 3. Sub-milestones & deliverables
+    const [rawMilestones] = await pool.query(
+      `SELECT m.*,
+              u.name AS owner_name, u.email AS owner_email, u.image_url AS owner_image
+       FROM project_milestones m
+       LEFT JOIN users u ON m.owner_id = u.id
+       WHERE m.project_id = ?
+       ORDER BY m.order_index ASC, m.id ASC`,
+      [id]
+    );
+
+    const milestones = rawMilestones.map((m) => {
+      let deliverables = [];
+      try {
+        deliverables = typeof m.deliverables === "string" ? JSON.parse(m.deliverables) : (m.deliverables || []);
+      } catch {
+        deliverables = [];
+      }
+      const totalDel = deliverables.length;
+      const completedDel = deliverables.filter((d) => d.completed).length;
+      const progress = totalDel > 0 ? Math.round((completedDel / totalDel) * 100) : m.status === "completed" ? 100 : 0;
+      return {
+        ...m,
+        deliverables,
+        total_deliverables: totalDel,
+        completed_deliverables: completedDel,
+        progress_percentage: progress,
+      };
+    });
+
+    // 4. Assigned Squad Roster
+    const [squad] = await pool.query(
+      `SELECT DISTINCT u.id, u.name, u.email, u.role, u.image_url, d.name AS department_name,
+              CASE WHEN u.id = ? THEN 'Lead Supervisor'
+                   WHEN u.role = 'supervisor' THEN 'Supervisor'
+                   WHEN u.role = 'manager' THEN 'Department Manager'
+                   ELSE 'Squad Contributor'
+              END AS squad_role,
+              (SELECT COUNT(*) FROM tasks WHERE project_id = ? AND assigned_to = u.id) AS assigned_tasks_count,
+              (SELECT COUNT(*) FROM tasks WHERE project_id = ? AND assigned_to = u.id AND status = 'completed') AS completed_tasks_count
+       FROM users u
+       LEFT JOIN departments d ON u.department_id = d.id
+       WHERE u.id = ?
+          OR u.id IN (SELECT assigned_to FROM tasks WHERE project_id = ? AND assigned_to IS NOT NULL)
+          OR (u.department_id = ? AND u.role IN ('employee', 'supervisor'))
+       ORDER BY (u.id = ?) DESC, assigned_tasks_count DESC, u.name ASC`,
+      [
+        project.lead_supervisor_id || 0,
+        project.id,
+        project.id,
+        project.lead_supervisor_id || 0,
+        project.id,
+        project.department_id || 0,
+        project.lead_supervisor_id || 0,
+      ]
+    );
+
+    // 5. Audit history ledger
+    const [auditLogs] = await pool.query(
+      `SELECT a.*,
+              u.name AS actor_name, u.email AS actor_email, u.role AS actor_role
+       FROM user_audit_logs a
+       LEFT JOIN users u ON a.user_id = u.id
+       WHERE a.details LIKE ?
+          OR a.details LIKE ?
+          OR (a.field_name = 'projects' AND (a.new_value = ? OR a.old_value = ?))
+       ORDER BY a.created_at DESC
+       LIMIT 50`,
+      [`%#${project.id}%`, `%${project.title}%`, project.title, project.title]
+    );
+
+    // 6. Telemetry calculations
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter((t) => t.status === "completed").length;
+    const inProgressTasks = tasks.filter((t) => t.status === "in_progress").length;
+    const overdueTasks = tasks.filter((t) => t.status !== "completed" && t.due_date && new Date(t.due_date) < new Date()).length;
+    const velocityPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+    const totalMilestones = milestones.length;
+    const completedMilestones = milestones.filter((m) => m.status === "completed").length;
+    const milestonesPercentage = totalMilestones > 0 ? Math.round((completedMilestones / totalMilestones) * 100) : 0;
+
+    let daysLeft = null;
+    let isOverdue = false;
+    if (project.target_date) {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      const target = new Date(project.target_date);
+      target.setHours(0, 0, 0, 0);
+      daysLeft = Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      isOverdue = daysLeft < 0 && project.status !== "completed";
+    }
+
+    let health = "healthy";
+    if (project.status === "completed") {
+      health = "completed";
+    } else if (isOverdue || overdueTasks > 0 || project.priority === "critical") {
+      health = isOverdue ? "critical" : "at_risk";
+    }
+
+    return res.json({
+      status: true,
+      dossier: {
+        project: {
+          ...project,
+          days_left: daysLeft,
+          is_overdue: isOverdue,
+          health,
+        },
+        telemetry: {
+          total_tasks: totalTasks,
+          completed_tasks: completedTasks,
+          in_progress_tasks: inProgressTasks,
+          overdue_tasks: overdueTasks,
+          task_velocity: velocityPercentage,
+          total_milestones: totalMilestones,
+          completed_milestones: completedMilestones,
+          milestones_progress: milestonesPercentage,
+          budget_allocated: Number(project.budget || 0),
+          budget_spent: Math.round(Number(project.budget || 0) * (velocityPercentage / 100)),
+          days_left: daysLeft,
+          is_overdue: isOverdue,
+          health,
+        },
+        squad,
+        milestones,
+        tasks,
+        audit_logs: auditLogs,
+      },
+    });
+  } catch (err) {
+    console.error("getProjectDossier error:", err);
+    return res.status(500).json({ status: false, error: "Failed to retrieve project 360 dossier" });
+  }
+};
