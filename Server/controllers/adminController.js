@@ -3168,3 +3168,183 @@ export const getProjectDossier = async (req, res) => {
     return res.status(500).json({ status: false, error: "Failed to retrieve project 360 dossier" });
   }
 };
+
+
+export const getProjectMembers = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check project exists
+    const [[project]] = await pool.query(
+      `SELECT p.id, p.title, p.department_id, p.lead_supervisor_id, d.name AS department_name
+       FROM projects p
+       LEFT JOIN departments d ON p.department_id = d.id
+       WHERE p.id = ?`,
+      [id]
+    );
+
+    if (!project) {
+      return res.status(404).json({ status: false, error: "Project not found" });
+    }
+
+    // 1. Fetch allocated squad members
+    const [members] = await pool.query(
+      `SELECT pm.id AS membership_id, pm.project_id, pm.user_id, pm.role_tag, pm.allocation_percentage, pm.assigned_at,
+              u.name, u.email, u.role, u.image_url,
+              d.name AS department_name, d.code AS department_code,
+              (SELECT COUNT(*) FROM tasks WHERE project_id = pm.project_id AND assigned_to = pm.user_id) AS project_tasks_count,
+              (SELECT COUNT(*) FROM tasks WHERE project_id = pm.project_id AND assigned_to = pm.user_id AND status = 'completed') AS completed_project_tasks_count,
+              (SELECT COUNT(*) FROM tasks WHERE assigned_to = pm.user_id AND status != 'completed') AS total_active_tasks,
+              (SELECT COUNT(DISTINCT project_id) FROM project_members WHERE user_id = pm.user_id) AS total_active_projects
+       FROM project_members pm
+       JOIN users u ON pm.user_id = u.id
+       LEFT JOIN departments d ON u.department_id = d.id
+       WHERE pm.project_id = ?
+       ORDER BY pm.assigned_at ASC`,
+      [id]
+    );
+
+    // 2. Fetch available personnel who are not yet in the squad
+    const memberUserIds = members.map((m) => m.user_id);
+    const excludePlaceholders = memberUserIds.length > 0 ? memberUserIds.map(() => "?").join(",") : "0";
+
+    const [availableUsers] = await pool.query(
+      `SELECT u.id, u.name, u.email, u.role, u.image_url, u.department_id,
+              d.name AS department_name, d.code AS department_code,
+              (SELECT COUNT(*) FROM tasks WHERE assigned_to = u.id AND status != 'completed') AS total_active_tasks,
+              (SELECT COUNT(DISTINCT project_id) FROM project_members WHERE user_id = u.id) AS total_active_projects
+       FROM users u
+       LEFT JOIN departments d ON u.department_id = d.id
+       WHERE u.role IN ('employee', 'supervisor')
+         AND u.id NOT IN (${excludePlaceholders})
+       ORDER BY (u.department_id = ?) DESC, u.name ASC`,
+      [...memberUserIds, project.department_id || 0]
+    );
+
+    // Format capacity conflict warnings
+    const membersWithCapacity = members.map((m) => {
+      const isOverloaded = m.total_active_tasks >= 5 || m.total_active_projects >= 3 || m.allocation_percentage > 100;
+      const isNearCapacity = !isOverloaded && (m.total_active_tasks >= 3 || m.total_active_projects >= 2);
+      return {
+        ...m,
+        capacity_status: isOverloaded ? "overloaded" : isNearCapacity ? "near_capacity" : "optimal",
+        capacity_warning: isOverloaded
+          ? `High Workload: ${m.total_active_tasks} active tasks across ${m.total_active_projects} initiatives (${m.allocation_percentage}% allocated)`
+          : isNearCapacity
+          ? `Moderate: ${m.total_active_tasks} active tasks across ${m.total_active_projects} initiatives`
+          : null,
+      };
+    });
+
+    const candidatesWithCapacity = availableUsers.map((u) => {
+      const isOverloaded = u.total_active_tasks >= 5 || u.total_active_projects >= 3;
+      const isNearCapacity = !isOverloaded && (u.total_active_tasks >= 3 || u.total_active_projects >= 2);
+      return {
+        ...u,
+        capacity_status: isOverloaded ? "overloaded" : isNearCapacity ? "near_capacity" : "optimal",
+        capacity_warning: isOverloaded
+          ? `High Workload: ${u.total_active_tasks} active tasks across ${u.total_active_projects} initiatives`
+          : isNearCapacity
+          ? `Moderate: ${u.total_active_tasks} active tasks`
+          : null,
+      };
+    });
+
+    return res.json({
+      status: true,
+      project,
+      members: membersWithCapacity,
+      available_users: candidatesWithCapacity,
+    });
+  } catch (err) {
+    console.error("getProjectMembers error:", err);
+    return res.status(500).json({ status: false, error: "Failed to fetch project squad members" });
+  }
+};
+
+export const addProjectMember = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { user_id, role_tag = "Contributor", allocation_percentage = 100 } = req.body;
+
+    if (!user_id) {
+      return res.status(400).json({ status: false, error: "User ID is required" });
+    }
+
+    const [[existing]] = await pool.query(
+      "SELECT id FROM project_members WHERE project_id = ? AND user_id = ?",
+      [id, user_id]
+    );
+
+    if (existing) {
+      return res.status(400).json({ status: false, error: "User is already allocated to this project squad" });
+    }
+
+    const [result] = await pool.query(
+      `INSERT INTO project_members (project_id, user_id, role_tag, allocation_percentage)
+       VALUES (?, ?, ?, ?)`,
+      [id, user_id, role_tag.trim(), Number(allocation_percentage) || 100]
+    );
+
+    // Fetch user & project names for audit logging
+    const [[user]] = await pool.query("SELECT name FROM users WHERE id = ?", [user_id]);
+    const [[project]] = await pool.query("SELECT title FROM projects WHERE id = ?", [id]);
+
+    await pool.query(
+      `INSERT INTO user_audit_logs (user_id, action_type, field_name, new_value, details, performed_by)
+       VALUES (?, 'Project Squad Member Added', 'project_members', ?, ?, ?)`,
+      [
+        req.user?.id || 1,
+        role_tag,
+        `Assigned ${user?.name || "User #" + user_id} as ${role_tag} (${allocation_percentage}% allocation) to initiative #${id} (${project?.title})`,
+        String(req.user?.id || 1),
+      ]
+    );
+
+    return res.json({
+      status: true,
+      message: "Member successfully allocated to project squad",
+      membership_id: result.insertId,
+    });
+  } catch (err) {
+    console.error("addProjectMember error:", err);
+    return res.status(500).json({ status: false, error: "Failed to add project squad member" });
+  }
+};
+
+export const removeProjectMember = async (req, res) => {
+  try {
+    const { id, memberId } = req.params;
+
+    const [[membership]] = await pool.query(
+      `SELECT pm.*, u.name AS user_name, p.title AS project_title
+       FROM project_members pm
+       JOIN users u ON pm.user_id = u.id
+       JOIN projects p ON pm.project_id = p.id
+       WHERE pm.id = ? AND pm.project_id = ?`,
+      [memberId, id]
+    );
+
+    if (!membership) {
+      return res.status(404).json({ status: false, error: "Squad membership record not found" });
+    }
+
+    await pool.query("DELETE FROM project_members WHERE id = ?", [memberId]);
+
+    await pool.query(
+      `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, details, performed_by)
+       VALUES (?, 'Project Squad Member Removed', 'project_members', ?, ?, ?)`,
+      [
+        req.user?.id || 1,
+        membership.role_tag,
+        `Unassigned ${membership.user_name} (${membership.role_tag}) from initiative #${id} (${membership.project_title})`,
+        String(req.user?.id || 1),
+      ]
+    );
+
+    return res.json({ status: true, message: "Member unassigned from project squad" });
+  } catch (err) {
+    console.error("removeProjectMember error:", err);
+    return res.status(500).json({ status: false, error: "Failed to remove squad member" });
+  }
+};

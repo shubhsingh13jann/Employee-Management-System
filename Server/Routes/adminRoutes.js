@@ -53,6 +53,9 @@ import {
   toggleDeliverableItem,
   deleteProjectMilestone,
   getProjectDossier,
+  getProjectMembers,
+  addProjectMember,
+  removeProjectMember,
 } from "../controllers/adminController.js";
 import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
 
@@ -127,5 +130,11 @@ router.put("/projects/milestones/:milestoneId", updateProjectMilestone);
 router.put("/projects/milestones/:milestoneId/status", toggleMilestoneStatus);
 router.put("/projects/milestones/:milestoneId/deliverable-toggle", toggleDeliverableItem);
 router.delete("/projects/milestones/:milestoneId", deleteProjectMilestone);
+
+
+// Project Squad & Resource Allocation Routes
+router.get("/projects/:id/members", getProjectMembers);
+router.post("/projects/:id/members", addProjectMember);
+router.delete("/projects/:id/members/:memberId", removeProjectMember);
 
 export { router as adminRouter };
