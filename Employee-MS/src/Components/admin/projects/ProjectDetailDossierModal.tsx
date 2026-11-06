@@ -151,6 +151,21 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
       fetchDossier();
       setActiveTab("overview");
       setTaskFilter("all");
+
+      // Handle ESC key to dismiss modal
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") {
+          onClose();
+        }
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+        document.body.style.overflow = originalOverflow;
+      };
     } else {
       setData(null);
     }
@@ -250,11 +265,25 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
   });
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
+    <div
+      className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto animate-in fade-in duration-200"
+      onClick={onClose}
+    >
       <div
-        className="bg-slate-50 w-full max-w-5xl rounded-2xl border border-slate-200/90 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden my-auto"
+        className="bg-slate-50 w-full max-w-5xl rounded-2xl border border-slate-200/90 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden my-auto animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Dedicated Print Stylesheet */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          @media print {
+            body { overflow: visible !important; background: white !important; }
+            .fixed { position: static !important; inset: auto !important; background: transparent !important; padding: 0 !important; }
+            .max-h-\\[92vh\\] { max-height: none !important; overflow: visible !important; box-shadow: none !important; border: none !important; }
+            .overflow-y-auto { overflow: visible !important; }
+            button { display: none !important; }
+          }
+        `}} />
+
         {/* Top Header */}
         <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white px-4 sm:px-6 py-4 flex items-center justify-between gap-3 shrink-0 border-b border-indigo-900/40">
           <div className="min-w-0">
