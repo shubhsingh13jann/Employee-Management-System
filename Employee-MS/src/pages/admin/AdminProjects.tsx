@@ -10,6 +10,7 @@ import {
   AdminMilestoneTracker,
   SupervisorCapacityDrawer,
   ProjectMilestonesModal,
+  ProjectDetailDossierModal,
 } from "../../Components/admin/projects";
 
 export interface ProjectItem {
@@ -61,6 +62,7 @@ const AdminProjects: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [editingProject, setEditingProject] = useState<ProjectItem | null>(null);
   const [selectedMilestoneProject, setSelectedMilestoneProject] = useState<ProjectItem | null>(null);
+  const [selectedDossierProject, setSelectedDossierProject] = useState<ProjectItem | null>(null);
   const [showCapacityDrawer, setShowCapacityDrawer] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
 
@@ -392,6 +394,7 @@ const AdminProjects: React.FC = () => {
             }}
             onUpdateStatus={handleUpdateStatus}
             onOpenMilestonesModal={(proj) => setSelectedMilestoneProject(proj)}
+            onOpenDossierModal={(proj) => setSelectedDossierProject(proj)}
           />
         ) : viewMode === "grid" ? (
           <AdminProjectsGrid
@@ -403,6 +406,7 @@ const AdminProjects: React.FC = () => {
             onUpdateStatus={handleUpdateStatus}
             onDeleteProject={handleDeleteProject}
             onOpenMilestonesModal={(proj) => setSelectedMilestoneProject(proj)}
+            onOpenDossierModal={(proj) => setSelectedDossierProject(proj)}
           />
         ) : (
           <AdminProjectsTable
@@ -414,6 +418,7 @@ const AdminProjects: React.FC = () => {
             onUpdateStatus={handleUpdateStatus}
             onDeleteProject={handleDeleteProject}
             onOpenMilestonesModal={(proj) => setSelectedMilestoneProject(proj)}
+            onOpenDossierModal={(proj) => setSelectedDossierProject(proj)}
           />
         )}
 
@@ -438,6 +443,17 @@ const AdminProjects: React.FC = () => {
           project={selectedMilestoneProject}
           supervisors={supervisors}
           onMilestonesChanged={fetchData}
+        />
+
+        {/* Project 360° Inspection Dossier Modal */}
+        <ProjectDetailDossierModal
+          isOpen={Boolean(selectedDossierProject)}
+          onClose={() => setSelectedDossierProject(null)}
+          projectId={selectedDossierProject?.id || null}
+          onOpenMilestonesModal={(proj) => {
+            setSelectedDossierProject(null);
+            setSelectedMilestoneProject(proj);
+          }}
         />
 
         {/* Supervisor Capacity Heatmap Drawer */}

@@ -7,6 +7,7 @@ interface AdminProjectsGridProps {
   onUpdateStatus?: (projectId: number | string, newStatus: string) => void;
   onDeleteProject?: (projectId: number | string) => void;
   onOpenMilestonesModal?: (project: ProjectItem) => void;
+  onOpenDossierModal?: (project: ProjectItem) => void;
 }
 
 export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
@@ -15,6 +16,7 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
   onUpdateStatus,
   onDeleteProject,
   onOpenMilestonesModal,
+  onOpenDossierModal,
 }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
@@ -75,9 +77,14 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
               {/* Title & Description */}
               <div className="mb-2.5">
                 <div className="flex items-center gap-1.5 mb-1">
-                  <h4 className="font-bold text-xs sm:text-sm text-slate-900 mb-0 line-clamp-1">
+                  <button
+                    type="button"
+                    onClick={() => onOpenDossierModal?.(proj)}
+                    className="font-bold text-xs sm:text-sm text-slate-900 hover:text-indigo-600 mb-0 line-clamp-1 text-left cursor-pointer transition-colors"
+                    title="Open 360° Inspection Dossier"
+                  >
                     {proj.title}
-                  </h4>
+                  </button>
                   <span className="text-[9px] font-mono font-semibold text-slate-400 bg-slate-50 px-1 py-0.2 rounded border border-slate-200 shrink-0">
                     PRJ-{String(proj.id).padStart(4, "0")}
                   </span>
@@ -178,6 +185,17 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
               </div>
 
               <div className="flex items-center gap-1">
+                {onOpenDossierModal && (
+                  <button
+                    type="button"
+                    onClick={() => onOpenDossierModal(proj)}
+                    className="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-bold transition-colors cursor-pointer flex items-center gap-1"
+                    title="Open 360° Inspection Dossier"
+                  >
+                    <i className="bi bi-file-earmark-text text-indigo-600 text-[9px]"></i>
+                    <span>Dossier</span>
+                  </button>
+                )}
                 {onOpenMilestonesModal && (
                   <button
                     type="button"

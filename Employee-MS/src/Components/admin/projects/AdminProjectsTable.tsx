@@ -7,6 +7,7 @@ interface AdminProjectsTableProps {
   onUpdateStatus?: (projectId: number | string, newStatus: string) => void;
   onDeleteProject?: (projectId: number | string) => void;
   onOpenMilestonesModal?: (project: ProjectItem) => void;
+  onOpenDossierModal?: (project: ProjectItem) => void;
 }
 
 export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
@@ -15,6 +16,7 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
   onUpdateStatus,
   onDeleteProject,
   onOpenMilestonesModal,
+  onOpenDossierModal,
 }) => {
   const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null);
 
@@ -165,15 +167,22 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                       <div className="min-w-0 flex-1">
                         {/* Row 1: Title + PRJ Badge side by side without wrapping */}
                         <div className="flex items-center gap-1.5 flex-nowrap min-w-0">
-                          <span
-                            className="font-bold text-slate-900 truncate text-xs sm:text-[13px]"
-                            title={proj.title}
+                          <button
+                            type="button"
+                            onClick={() => onOpenDossierModal?.(proj)}
+                            className="font-bold text-slate-900 hover:text-indigo-600 truncate text-xs sm:text-[13px] text-left cursor-pointer transition-colors"
+                            title="Open Project 360° Inspection Dossier"
                           >
                             {proj.title}
-                          </span>
-                          <span className="text-[10px] font-mono font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded border border-slate-200 shrink-0">
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onOpenDossierModal?.(proj)}
+                            className="text-[10px] font-mono font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200 px-1.5 py-0.2 rounded border border-slate-200 shrink-0 cursor-pointer transition-colors"
+                            title="Open 360° Dossier"
+                          >
                             PRJ-{String(proj.id).padStart(4, "0")}
-                          </span>
+                          </button>
                         </div>
                         {/* Row 2: Description */}
                         {proj.description && (
@@ -323,8 +332,22 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                           onClick={(e) => e.stopPropagation()}
                         >
                           <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-0.5">
-                            Status Lifecycle
+                            Initiative Actions
                           </div>
+
+                          {onOpenDossierModal && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveMenuId(null);
+                                onOpenDossierModal(proj);
+                              }}
+                              className="w-full px-2 py-1 text-[11px] text-slate-800 hover:bg-indigo-50 hover:text-indigo-700 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-bold mb-0.5"
+                            >
+                              <i className="bi bi-file-earmark-text-fill text-indigo-600 text-[10px]"></i>
+                              <span>360° Dossier</span>
+                            </button>
+                          )}
                           {onUpdateStatus && (
                             <>
                               <button
