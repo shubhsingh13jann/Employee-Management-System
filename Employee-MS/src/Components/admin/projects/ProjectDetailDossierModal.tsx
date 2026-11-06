@@ -117,7 +117,7 @@ interface ProjectDetailDossierModalProps {
   isOpen: boolean;
   onClose: () => void;
   projectId: number | string | null;
-  onOpenMilestonesModal?: (projectId: number | string) => void;
+  onOpenMilestonesModal?: (project: any) => void;
 }
 
 export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps> = ({
@@ -150,15 +150,104 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
     if (isOpen && projectId) {
       fetchDossier();
       setActiveTab("overview");
+      setTaskFilter("all");
     } else {
       setData(null);
     }
   }, [isOpen, projectId]);
 
+  // Toggle deliverable checkbox directly from dossier
+  const handleToggleDeliverable = async (
+    milestoneId: number | string,
+    deliverableId: string,
+    currentVal: boolean
+  ) => {
+    if (!data) return;
+    const nextVal = !currentVal;
+
+    setData((prev) => {
+      if (!prev) return prev;
+      const updatedMilestones = prev.milestones.map((m) => {
+        if (m.id === milestoneId) {
+          const nextDel = m.deliverables.map((d) =>
+            d.id === deliverableId ? { ...d, completed: nextVal } : d
+          );
+          const allDone = nextDel.length > 0 && nextDel.every((d) => d.completed);
+          const anyDone = nextDel.some((d) => d.completed);
+          const newStatus = allDone ? "completed" : anyDone ? "in_progress" : m.status;
+
+          return {
+            ...m,
+            deliverables: nextDel,
+            status: newStatus as any,
+            completed_deliverables: nextDel.filter((d) => d.completed).length,
+            progress_percentage: Math.round(
+              (nextDel.filter((d) => d.completed).length / nextDel.length) * 100
+            ),
+          };
+        }
+        return m;
+      });
+      return { ...prev, milestones: updatedMilestones };
+    });
+
+    try {
+      await api.put(`/api/admin/projects/milestones/${milestoneId}/deliverable-toggle`, {
+        deliverableId,
+        completed: nextVal,
+      });
+    } catch (err) {
+      console.error("Dossier deliverable toggle failed:", err);
+    }
+  };
+
+  // Toggle milestone status directly from dossier
+  const handleToggleMilestone = async (milestone: DossierMilestone) => {
+    if (!data) return;
+    const nextStatus = milestone.status === "completed" ? "in_progress" : "completed";
+
+    setData((prev) => {
+      if (!prev) return prev;
+      const updatedMilestones = prev.milestones.map((m) => {
+        if (m.id === milestone.id) {
+          const nextDel =
+            nextStatus === "completed"
+              ? m.deliverables.map((d) => ({ ...d, completed: true }))
+              : m.deliverables;
+          return {
+            ...m,
+            status: nextStatus as any,
+            deliverables: nextDel,
+            completed_deliverables: nextDel.filter((d) => d.completed).length,
+            progress_percentage: nextStatus === "completed" ? 100 : m.progress_percentage,
+          };
+        }
+        return m;
+      });
+      return { ...prev, milestones: updatedMilestones };
+    });
+
+    try {
+      await api.put(`/api/admin/projects/milestones/${milestone.id}/status`, {
+        status: nextStatus,
+      });
+    } catch (err) {
+      console.error("Dossier milestone toggle failed:", err);
+    }
+  };
+
   if (!isOpen) return null;
 
   const project = data?.project;
   const telemetry = data?.telemetry;
+
+  const filteredTasks = (data?.tasks || []).filter((task) => {
+    if (taskFilter === "all") return true;
+    if (taskFilter === "overdue") {
+      return task.status !== "completed" && task.due_date && new Date(task.due_date) < new Date();
+    }
+    return task.status === taskFilter;
+  });
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
@@ -576,11 +665,348 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
                 ))}
               </div>
             </div>
+          ) : activeTab === "milestones" ? (
+            /* TAB 3: DELIVERABLE MILESTONES */
+            <div className="space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 mb-0">Deliverable Milestones & Phases</h4>
+                  <p className="text-[11px] text-slate-500 mb-0">
+                    Sequenced delivery roadmap, owners, and checklist verification
+                  </p>
+                </div>
+                {onOpenMilestonesModal && project && (
+                  <button
+                    type="button"
+                    onClick={() => onOpenMilestonesModal(project)}
+                    className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-[11px] border border-indigo-200 transition-colors cursor-pointer flex items-center gap-1.5"
+                  >
+                    <i className="bi bi-gear-wide-connected"></i>
+                    <span>Manage Milestones</span>
+                  </button>
+                )}
+              </div>
+
+              {data.milestones.length === 0 ? (
+                <div className="p-8 text-center bg-white rounded-xl border border-slate-200">
+                  <div className="w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2 text-base">
+                    <i className="bi bi-flag"></i>
+                  </div>
+                  <p className="text-xs font-bold text-slate-700 mb-0.5">No Sub-Milestones Established</p>
+                  <p className="text-[11px] text-slate-400 mb-3">Break down this initiative into deliverable phases and checklists.</p>
+                  {onOpenMilestonesModal && project && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenMilestonesModal(project)}
+                      className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors cursor-pointer"
+                    >
+                      + Create First Milestone
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {data.milestones.map((m, idx) => (
+                    <div
+                      key={m.id}
+                      className={`p-3.5 rounded-xl border transition-all ${
+                        m.status === "completed"
+                          ? "bg-emerald-50/40 border-emerald-200/80"
+                          : "bg-white border-slate-200/90 shadow-2xs"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <div className="flex items-start gap-2.5 min-w-0">
+                          <input
+                            type="checkbox"
+                            checked={m.status === "completed"}
+                            onChange={() => handleToggleMilestone(m)}
+                            className="mt-0.5 w-4 h-4 rounded text-emerald-600 accent-emerald-600 cursor-pointer"
+                            title="Toggle milestone status"
+                          />
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-[10px] font-mono font-bold text-slate-400 bg-slate-100 px-1.5 py-0.2 rounded border border-slate-200">
+                                Phase {idx + 1}
+                              </span>
+                              <h5
+                                className={`text-xs sm:text-sm font-bold truncate mb-0 ${
+                                  m.status === "completed"
+                                    ? "text-emerald-950 line-through opacity-85"
+                                    : "text-slate-900"
+                                }`}
+                              >
+                                {m.title}
+                              </h5>
+                              <span
+                                className={`px-2 py-0.2 rounded-full text-[9px] font-bold ${
+                                  m.status === "completed"
+                                    ? "bg-emerald-100 text-emerald-800"
+                                    : m.status === "in_progress"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : "bg-slate-100 text-slate-600"
+                                }`}
+                              >
+                                {m.status.toUpperCase()}
+                              </span>
+                            </div>
+                            {m.description && (
+                              <p className="text-[11px] text-slate-500 mt-0.5 mb-0">
+                                {m.description}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          {m.due_date && (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                              Due: {new Date(m.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                            </span>
+                          )}
+                          {m.owner_name && (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+                              👤 {m.owner_name}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Deliverables List */}
+                      {m.deliverables && m.deliverables.length > 0 && (
+                        <div className="pl-6 pt-2 border-t border-slate-100 space-y-1.5">
+                          <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                            <span>Checklist ({m.completed_deliverables}/{m.total_deliverables})</span>
+                            <span className="text-indigo-600">{m.progress_percentage}%</span>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                            {m.deliverables.map((del) => (
+                              <label
+                                key={del.id}
+                                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs border cursor-pointer select-none transition-all ${
+                                  del.completed
+                                    ? "bg-emerald-50/70 border-emerald-200 text-emerald-800 line-through opacity-80"
+                                    : "bg-slate-50 hover:bg-white border-slate-200 text-slate-700"
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={del.completed}
+                                  onChange={() => handleToggleDeliverable(m.id, del.id, del.completed)}
+                                  className="w-3.5 h-3.5 rounded text-indigo-600 accent-indigo-600"
+                                />
+                                <span className="truncate">{del.title}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : activeTab === "tasks" ? (
+            /* TAB 4: TASK BREAKDOWN */
+            <div className="space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200 flex-wrap gap-2">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 mb-0">Project Task Breakdown</h4>
+                  <p className="text-[11px] text-slate-500 mb-0">
+                    Granular execution tasks linked to this initiative
+                  </p>
+                </div>
+
+                {/* Filter Pills */}
+                <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg text-[10px] font-semibold">
+                  {["all", "in_progress", "pending", "completed", "overdue"].map((f) => (
+                    <button
+                      key={f}
+                      type="button"
+                      onClick={() => setTaskFilter(f)}
+                      className={`px-2 py-0.5 rounded-md transition-all capitalize cursor-pointer ${
+                        taskFilter === f
+                          ? "bg-white text-indigo-700 shadow-2xs font-bold"
+                          : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      {f.replace("_", " ")}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {filteredTasks.length === 0 ? (
+                <div className="p-8 text-center bg-white rounded-xl border border-slate-200">
+                  <div className="w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2 text-base">
+                    <i className="bi bi-card-checklist"></i>
+                  </div>
+                  <p className="text-xs font-bold text-slate-700 mb-0.5">No Tasks Found</p>
+                  <p className="text-[11px] text-slate-400 mb-0">
+                    {taskFilter !== "all"
+                      ? `No tasks currently match the "${taskFilter.replace("_", " ")}" filter.`
+                      : "No operational tasks have been assigned to this initiative yet."}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {filteredTasks.map((t) => (
+                    <div
+                      key={t.id}
+                      className="p-3 rounded-xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-xs transition-all flex items-center justify-between gap-3"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div
+                          className={`w-2 h-8 rounded-full shrink-0 ${
+                            t.status === "completed"
+                              ? "bg-emerald-500"
+                              : t.priority === "critical"
+                              ? "bg-rose-500"
+                              : t.priority === "high"
+                              ? "bg-amber-500"
+                              : "bg-blue-500"
+                          }`}
+                        ></div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="font-bold text-xs text-slate-900 truncate">
+                              {t.title}
+                            </span>
+                            <span
+                              className={`px-1.5 py-0.2 rounded text-[9px] font-bold uppercase ${
+                                t.priority === "critical"
+                                  ? "bg-rose-50 text-rose-700 border border-rose-200"
+                                  : t.priority === "high"
+                                  ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                  : "bg-slate-100 text-slate-600"
+                              }`}
+                            >
+                              {t.priority}
+                            </span>
+                          </div>
+                          {t.description && (
+                            <p className="text-[10px] text-slate-400 truncate mb-0">
+                              {t.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 shrink-0">
+                        <div className="text-right">
+                          <span className="text-[11px] font-semibold text-slate-700 block">
+                            👤 {t.assignee_name || "Unassigned"}
+                          </span>
+                          {t.due_date && (
+                            <span className="text-[9px] text-slate-400 block">
+                              Due: {new Date(t.due_date).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            t.status === "completed"
+                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                              : t.status === "in_progress"
+                              ? "bg-blue-50 text-blue-700 border border-blue-200"
+                              : "bg-slate-100 text-slate-600 border border-slate-200"
+                          }`}
+                        >
+                          {t.status.replace("_", " ").toUpperCase()}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           ) : (
-            /* PLACEHOLDER FOR TABS 3, 4, 5 (Fleshed out in Commit 3) */
-            <div className="py-10 text-center text-slate-400">
-              <i className="bi bi-hourglass-split text-2xl mb-1 block text-indigo-500"></i>
-              <p className="text-xs font-medium">Tab content active</p>
+            /* TAB 5: AUDIT HISTORY */
+            <div className="space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 mb-0">Initiative Change Ledger & Audit Trail</h4>
+                  <p className="text-[11px] text-slate-500 mb-0">
+                    Immutable history of updates, status changes, and administrative actions
+                  </p>
+                </div>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
+                  {data.audit_logs.length} Logged Events
+                </span>
+              </div>
+
+              {data.audit_logs.length === 0 ? (
+                <div className="p-8 text-center bg-white rounded-xl border border-slate-200">
+                  <div className="w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2 text-base">
+                    <i className="bi bi-clock-history"></i>
+                  </div>
+                  <p className="text-xs font-bold text-slate-700 mb-0.5">No Historical Audit Logs</p>
+                  <p className="text-[11px] text-slate-400 mb-0">Activity records will record automatically as changes occur.</p>
+                </div>
+              ) : (
+                <div className="relative pl-6 space-y-4 before:content-[''] before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+                  {data.audit_logs.map((log) => (
+                    <div key={log.id} className="relative">
+                      {/* Timeline Dot */}
+                      <div className="absolute -left-6 top-1 w-3 h-3 rounded-full bg-white border-2 border-indigo-600 shadow-xs"></div>
+
+                      <div className="p-3 rounded-xl bg-white border border-slate-200/90 shadow-2xs">
+                        <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-xs text-indigo-700">
+                              {log.action_type}
+                            </span>
+                            {log.field_name && (
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-slate-100 text-slate-600 border border-slate-200">
+                                {log.field_name}
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[10px] text-slate-400">
+                            {new Date(log.created_at).toLocaleString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        </div>
+
+                        {log.details && (
+                          <p className="text-xs text-slate-700 mb-1.5">
+                            {log.details}
+                          </p>
+                        )}
+
+                        {/* Value Diff (Old -> New) */}
+                        {(log.old_value || log.new_value) && (
+                          <div className="flex items-center gap-1.5 text-[10px] bg-slate-50 p-1.5 rounded-lg border border-slate-200/60 mb-1">
+                            {log.old_value && (
+                              <span className="text-rose-700 line-through font-mono">
+                                {log.old_value}
+                              </span>
+                            )}
+                            {log.old_value && log.new_value && (
+                              <span className="text-slate-400">➔</span>
+                            )}
+                            {log.new_value && (
+                              <span className="text-emerald-700 font-bold font-mono">
+                                {log.new_value}
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="text-[10px] text-slate-400 flex items-center gap-1">
+                          <i className="bi bi-person-check text-slate-500"></i>
+                          <span>Executed by {log.actor_name || "System Admin"}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
