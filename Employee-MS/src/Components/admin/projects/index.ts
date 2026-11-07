@@ -10,3 +10,4 @@ export * from "./ProjectMilestonesModal";
 export * from "./ProjectDetailDossierModal";
 export * from "./ProjectSquadDrawer";
 export * from "./QuickAddTaskModal";
+export * from "./ProjectTasksTrayModal";
