@@ -12,6 +12,8 @@ import {
   ProjectMilestonesModal,
   ProjectDetailDossierModal,
   ProjectSquadDrawer,
+  QuickAddTaskModal,
+  ProjectTasksTrayModal,
 } from "../../Components/admin/projects";
 
 export interface ProjectItem {
@@ -67,6 +69,8 @@ const AdminProjects: React.FC = () => {
   const [selectedMilestoneProject, setSelectedMilestoneProject] = useState<ProjectItem | null>(null);
   const [selectedDossierProject, setSelectedDossierProject] = useState<ProjectItem | null>(null);
   const [selectedSquadProject, setSelectedSquadProject] = useState<ProjectItem | null>(null);
+  const [selectedTasksProject, setSelectedTasksProject] = useState<ProjectItem | null>(null);
+  const [quickAddTaskProject, setQuickAddTaskProject] = useState<ProjectItem | null>(null);
   const [showCapacityDrawer, setShowCapacityDrawer] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
 
@@ -412,6 +416,8 @@ const AdminProjects: React.FC = () => {
             onOpenMilestonesModal={(proj) => setSelectedMilestoneProject(proj)}
             onOpenDossierModal={(proj) => setSelectedDossierProject(proj)}
             onOpenSquadDrawer={(proj) => setSelectedSquadProject(proj)}
+            onOpenTasksTray={(proj) => setSelectedTasksProject(proj)}
+            onQuickAddTask={(proj) => setQuickAddTaskProject(proj)}
           />
         ) : (
           <AdminProjectsTable
@@ -468,6 +474,23 @@ const AdminProjects: React.FC = () => {
           onClose={() => setSelectedSquadProject(null)}
           project={selectedSquadProject}
           onSquadChanged={fetchData}
+        />
+
+        {/* In-View Project Tasks Breakdown Tray Modal */}
+        <ProjectTasksTrayModal
+          isOpen={Boolean(selectedTasksProject)}
+          onClose={() => setSelectedTasksProject(null)}
+          project={selectedTasksProject}
+          onOpenQuickAddTask={(proj) => setQuickAddTaskProject(proj)}
+          onTasksChanged={fetchData}
+        />
+
+        {/* Quick Add Project Task Modal */}
+        <QuickAddTaskModal
+          isOpen={Boolean(quickAddTaskProject)}
+          onClose={() => setQuickAddTaskProject(null)}
+          project={quickAddTaskProject}
+          onTaskCreated={fetchData}
         />
 
         {/* Supervisor Capacity Heatmap Drawer */}

@@ -9,6 +9,8 @@ interface AdminProjectsGridProps {
   onOpenMilestonesModal?: (project: ProjectItem) => void;
   onOpenDossierModal?: (project: ProjectItem) => void;
   onOpenSquadDrawer?: (project: ProjectItem) => void;
+  onOpenTasksTray?: (project: ProjectItem) => void;
+  onQuickAddTask?: (project: ProjectItem) => void;
 }
 
 export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
@@ -19,6 +21,8 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
   onOpenMilestonesModal,
   onOpenDossierModal,
   onOpenSquadDrawer,
+  onOpenTasksTray,
+  onQuickAddTask,
 }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
@@ -214,6 +218,27 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
                         <span>Squad</span>
                       </>
                     )}
+                  </button>
+                )}
+                {onOpenTasksTray && (
+                  <button
+                    type="button"
+                    onClick={() => onOpenTasksTray(proj)}
+                    className="px-2 py-0.5 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200/80 text-[10px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
+                    title="Open In-View Project Tasks Breakdown"
+                  >
+                    <i className="bi bi-list-task text-blue-600 text-[9px]"></i>
+                    <span>Tasks ({proj.completed_tasks}/{proj.total_tasks})</span>
+                  </button>
+                )}
+                {onQuickAddTask && (
+                  <button
+                    type="button"
+                    onClick={() => onQuickAddTask(proj)}
+                    className="w-5 h-5 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 text-[10px] font-bold transition-colors cursor-pointer flex items-center justify-center"
+                    title="Quick Add Task"
+                  >
+                    <i className="bi bi-plus text-xs"></i>
                   </button>
                 )}
                 {onOpenDossierModal && (

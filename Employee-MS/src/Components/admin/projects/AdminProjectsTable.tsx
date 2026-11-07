@@ -9,6 +9,8 @@ interface AdminProjectsTableProps {
   onOpenMilestonesModal?: (project: ProjectItem) => void;
   onOpenDossierModal?: (project: ProjectItem) => void;
   onOpenSquadDrawer?: (project: ProjectItem) => void;
+  onOpenTasksTray?: (project: ProjectItem) => void;
+  onQuickAddTask?: (project: ProjectItem) => void;
 }
 
 export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
@@ -19,6 +21,8 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
   onOpenMilestonesModal,
   onOpenDossierModal,
   onOpenSquadDrawer,
+  onOpenTasksTray,
+  onQuickAddTask,
 }) => {
   const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null);
 
@@ -307,14 +311,19 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                     {getPriorityBadge(proj.priority)}
                   </td>
 
-                  {/* 5. Task Velocity Bar */}
-                  <td className="py-2.5 px-3.5 text-center whitespace-nowrap">
+                  {/* 5. Task Velocity Bar (Clickable to open Tasks Tray) */}
+                  <td
+                    className="py-2.5 px-3.5 text-center whitespace-nowrap cursor-pointer hover:bg-slate-50/80 transition-colors group"
+                    onClick={() => onOpenTasksTray && onOpenTasksTray(proj)}
+                    title="Click to inspect task breakdown & quick dispatch"
+                  >
                     <div className="inline-block w-20 sm:w-24 text-left">
                       <div className="flex items-center justify-between text-[10px] font-medium mb-1">
-                        <span className="text-slate-600">
+                        <span className="text-slate-600 group-hover:text-indigo-600 font-semibold flex items-center gap-1 transition-colors">
+                          <i className="bi bi-list-task text-[9px]"></i>
                           {proj.completed_tasks}/{proj.total_tasks}
                         </span>
-                        <span className="font-bold text-slate-800">
+                        <span className="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">
                           {proj.progress_percentage}%
                         </span>
                       </div>
@@ -471,6 +480,34 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                             >
                               <i className="bi bi-people-fill text-purple-600 text-[10px]"></i>
                               <span>Squad Roster</span>
+                            </button>
+                          )}
+
+                          {onOpenTasksTray && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveMenuId(null);
+                                onOpenTasksTray(proj);
+                              }}
+                              className="w-full px-2 py-1 text-[11px] text-blue-700 hover:bg-blue-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                            >
+                              <i className="bi bi-list-task text-blue-600 text-[10px]"></i>
+                              <span>In-View Tasks</span>
+                            </button>
+                          )}
+
+                          {onQuickAddTask && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveMenuId(null);
+                                onQuickAddTask(proj);
+                              }}
+                              className="w-full px-2 py-1 text-[11px] text-emerald-700 hover:bg-emerald-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                            >
+                              <i className="bi bi-plus-circle text-emerald-600 text-[10px]"></i>
+                              <span>+ Quick Task</span>
                             </button>
                           )}
 
