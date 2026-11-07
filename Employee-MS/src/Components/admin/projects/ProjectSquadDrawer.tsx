@@ -44,13 +44,21 @@ interface ProjectSquadDrawerProps {
     id: number | string;
     title: string;
     department_name?: string;
+    department_id?: number | string;
     lead_supervisor_id?: number | string;
     supervisor_name?: string;
   } | null;
   onSquadChanged?: () => void;
 }
 
-const ROLE_TAGS = ["Tech Lead", "Frontend", "Backend", "QA", "SME", "Contributor"];
+const ROLE_TAGS = [
+  { name: "Tech Lead", icon: "bi-star-fill", color: "text-purple-600 bg-purple-50 border-purple-200" },
+  { name: "Frontend", icon: "bi-layout-text-window", color: "text-blue-600 bg-blue-50 border-blue-200" },
+  { name: "Backend", icon: "bi-hdd-network-fill", color: "text-indigo-600 bg-indigo-50 border-indigo-200" },
+  { name: "QA", icon: "bi-bug-fill", color: "text-amber-600 bg-amber-50 border-amber-200" },
+  { name: "SME", icon: "bi-lightbulb-fill", color: "text-rose-600 bg-rose-50 border-rose-200" },
+  { name: "Contributor", icon: "bi-person-badge-fill", color: "text-emerald-600 bg-emerald-50 border-emerald-200" },
+];
 
 export const ProjectSquadDrawer: React.FC<ProjectSquadDrawerProps> = ({
   isOpen,
@@ -65,7 +73,8 @@ export const ProjectSquadDrawer: React.FC<ProjectSquadDrawerProps> = ({
   const [removingId, setRemovingId] = useState<number | string | null>(null);
   const [msg, setMsg] = useState<{ type: string; text: string }>({ type: "", text: "" });
 
-  // Form State
+  // Filtering & Allocation Form State
+  const [filterDepartmentOnly, setFilterDepartmentOnly] = useState<boolean>(false);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [selectedRoleTag, setSelectedRoleTag] = useState<string>("Contributor");
   const [allocationPct, setAllocationPct] = useState<number>(100);
@@ -77,9 +86,10 @@ export const ProjectSquadDrawer: React.FC<ProjectSquadDrawerProps> = ({
       const res = await api.get(`/api/admin/projects/${project.id}/members`);
       if (res.data.status) {
         setMembers(res.data.members || []);
-        setAvailableCandidates(res.data.available_users || []);
-        if (res.data.available_users?.length > 0) {
-          setSelectedUserId(String(res.data.available_users[0].id));
+        const candidates: CandidateUser[] = res.data.available_users || [];
+        setAvailableCandidates(candidates);
+        if (candidates.length > 0) {
+          setSelectedUserId(String(candidates[0].id));
         } else {
           setSelectedUserId("");
         }
@@ -107,7 +117,17 @@ export const ProjectSquadDrawer: React.FC<ProjectSquadDrawerProps> = ({
 
   if (!isOpen || !project) return null;
 
+  // Filter available candidates if department-only toggle is active
+  const filteredCandidates = filterDepartmentOnly && project.department_name
+    ? availableCandidates.filter((c) => c.department_name === project.department_name)
+    : availableCandidates;
+
   const selectedCandidate = availableCandidates.find((c) => String(c.id) === String(selectedUserId));
+
+  // Compute roster telemetry metrics
+  const totalAllocatedPct = members.reduce((sum, m) => sum + (m.allocation_percentage || 0), 0);
+  const overloadedCount = members.filter((m) => m.capacity_status === "overloaded").length;
+  const nearCapacityCount = members.filter((m) => m.capacity_status === "near_capacity").length;
 
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -201,6 +221,30 @@ export const ProjectSquadDrawer: React.FC<ProjectSquadDrawerProps> = ({
           </button>
         </div>
 
+        {/* Telemetry Quick Bar */}
+        <div className="px-5 py-2.5 bg-indigo-50/60 border-b border-indigo-100 flex items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-3">
+            <span className="text-slate-600 font-medium">
+              Capacity: <strong className="text-indigo-900">{totalAllocatedPct}% Total Cap</strong>
+            </span>
+            {overloadedCount > 0 && (
+              <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-bold text-[10px] flex items-center gap-1 border border-rose-200">
+                <i className="bi bi-exclamation-octagon-fill"></i>
+                {overloadedCount} Overloaded
+              </span>
+            )}
+            {nearCapacityCount > 0 && (
+              <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold text-[10px] flex items-center gap-1 border border-amber-200">
+                <i className="bi bi-exclamation-triangle-fill"></i>
+                {nearCapacityCount} Near Limit
+              </span>
+            )}
+          </div>
+          <span className="text-[11px] text-slate-500">
+            Lead: <strong>{project.supervisor_name || "Unassigned"}</strong>
+          </span>
+        </div>
+
         {/* Alert Notifications */}
         {msg.text && (
           <div
@@ -232,10 +276,25 @@ export const ProjectSquadDrawer: React.FC<ProjectSquadDrawerProps> = ({
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
           {/* Section 1: Allocate New Member Form */}
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 shadow-2xs">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 mb-2.5 flex items-center gap-1.5">
-              <i className="bi bi-person-plus-fill text-indigo-600"></i>
-              <span>Allocate Personnel to Squad</span>
-            </h4>
+            <div className="flex items-center justify-between mb-2.5">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 mb-0 flex items-center gap-1.5">
+                <i className="bi bi-person-plus-fill text-indigo-600"></i>
+                <span>Allocate Personnel to Squad</span>
+              </h4>
+              {project.department_name && (
+                <button
+                  type="button"
+                  onClick={() => setFilterDepartmentOnly(!filterDepartmentOnly)}
+                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border transition-all cursor-pointer ${
+                    filterDepartmentOnly
+                      ? "bg-indigo-600 text-white border-indigo-600"
+                      : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
+                  }`}
+                >
+                  {filterDepartmentOnly ? `✓ ${project.department_name} Only` : `All Departments`}
+                </button>
+              )}
+            </div>
 
             <form onSubmit={handleAddMember} className="space-y-3">
               {/* Select Candidate */}
@@ -243,9 +302,9 @@ export const ProjectSquadDrawer: React.FC<ProjectSquadDrawerProps> = ({
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
                   Select Team Member
                 </label>
-                {availableCandidates.length === 0 ? (
+                {filteredCandidates.length === 0 ? (
                   <p className="text-xs text-slate-400 bg-white p-2.5 rounded-lg border border-slate-200">
-                    All department personnel are currently allocated to this squad.
+                    No candidates available for this filter.
                   </p>
                 ) : (
                   <select
@@ -253,9 +312,9 @@ export const ProjectSquadDrawer: React.FC<ProjectSquadDrawerProps> = ({
                     onChange={(e) => setSelectedUserId(e.target.value)}
                     className="w-full text-xs font-medium px-3 py-2 rounded-lg bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
                   >
-                    {availableCandidates.map((c) => (
+                    {filteredCandidates.map((c) => (
                       <option key={c.id} value={c.id}>
-                        {c.name} ({c.role}) — {c.total_active_tasks} active tasks {c.capacity_status === "overloaded" ? "⚠️ Overloaded" : ""}
+                        {c.name} ({c.role} • {c.department_name || "General"}) — {c.total_active_tasks} tasks {c.capacity_status === "overloaded" ? "⚠️ Overloaded" : ""}
                       </option>
                     ))}
                   </select>
@@ -285,49 +344,55 @@ export const ProjectSquadDrawer: React.FC<ProjectSquadDrawerProps> = ({
                 </div>
               )}
 
-              {/* Role Tagging Selection */}
+              {/* Role Tagging Selection with visual chips */}
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1.5">
                   Initiative Role Tag
                 </label>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="grid grid-cols-3 gap-1.5">
                   {ROLE_TAGS.map((tag) => (
                     <button
-                      key={tag}
+                      key={tag.name}
                       type="button"
-                      onClick={() => setSelectedRoleTag(tag)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                        selectedRoleTag === tag
+                      onClick={() => setSelectedRoleTag(tag.name)}
+                      className={`px-2 py-1.5 rounded-lg text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                        selectedRoleTag === tag.name
                           ? "bg-indigo-600 text-white border-indigo-600 shadow-2xs"
                           : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
                       }`}
                     >
-                      {tag}
+                      <i className={`bi ${tag.icon} text-[11px]`}></i>
+                      <span>{tag.name}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Allocation Percentage */}
+              {/* Allocation Percentage Slider & Indicator */}
               <div>
                 <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600 mb-1">
                   <span>Workload Allocation</span>
-                  <span className="font-bold text-indigo-700">{allocationPct}% Cap</span>
+                  <span className="font-bold text-indigo-700">{allocationPct}% Capacity</span>
                 </div>
                 <input
                   type="range"
-                  min="20"
+                  min="10"
                   max="100"
                   step="10"
                   value={allocationPct}
                   onChange={(e) => setAllocationPct(Number(e.target.value))}
                   className="w-full accent-indigo-600 cursor-pointer"
                 />
+                <div className="flex justify-between text-[9px] text-slate-400 mt-0.5">
+                  <span>10% (Part-time)</span>
+                  <span>50% (Half-time)</span>
+                  <span>100% (Dedicated)</span>
+                </div>
               </div>
 
               <button
                 type="submit"
-                disabled={allocating || availableCandidates.length === 0}
+                disabled={allocating || filteredCandidates.length === 0}
                 className="w-full py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-xs transition-all shadow-md shadow-indigo-500/20 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-1.5"
               >
                 {allocating ? (
@@ -348,11 +413,14 @@ export const ProjectSquadDrawer: React.FC<ProjectSquadDrawerProps> = ({
           {/* Section 2: Current Squad Roster */}
           <div>
             <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-200">
-              <h4 className="text-xs font-bold text-slate-800 mb-0">
-                Assigned Squad Roster ({members.length})
+              <h4 className="text-xs font-bold text-slate-800 mb-0 flex items-center gap-1.5">
+                <span>Assigned Squad Roster</span>
+                <span className="px-2 py-0.2 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold">
+                  {members.length}
+                </span>
               </h4>
               <span className="text-[11px] text-slate-400">
-                Ordered by allocation date
+                Sorted by assignment date
               </span>
             </div>
 
@@ -369,91 +437,95 @@ export const ProjectSquadDrawer: React.FC<ProjectSquadDrawerProps> = ({
               </div>
             ) : (
               <div className="space-y-2.5">
-                {members.map((m) => (
-                  <div
-                    key={m.membership_id}
-                    className="p-3.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-xs transition-all"
-                  >
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200 shrink-0">
-                          {m.name.charAt(0)}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <h5 className="font-bold text-xs text-slate-900 truncate mb-0">
-                              {m.name}
-                            </h5>
-                            <span
-                              className={`px-2 py-0.2 rounded-full text-[9px] font-bold ${
-                                m.role_tag === "Tech Lead"
-                                  ? "bg-purple-50 text-purple-700 border border-purple-200"
-                                  : m.role_tag === "Frontend"
-                                  ? "bg-blue-50 text-blue-700 border border-blue-200"
-                                  : m.role_tag === "Backend"
-                                  ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
-                                  : m.role_tag === "QA"
-                                  ? "bg-amber-50 text-amber-700 border border-amber-200"
-                                  : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                              }`}
-                            >
-                              {m.role_tag}
-                            </span>
+                {members.map((m) => {
+                  const roleConfig = ROLE_TAGS.find((r) => r.name === m.role_tag) || {
+                    icon: "bi-person-badge",
+                    color: "text-slate-700 bg-slate-100 border-slate-200",
+                  };
+
+                  return (
+                    <div
+                      key={m.membership_id}
+                      className="p-3.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-xs transition-all"
+                    >
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          {m.image_url ? (
+                            <img
+                              src={`http://localhost:5000/images/${m.image_url}`}
+                              alt={m.name}
+                              className="w-8 h-8 rounded-full object-cover border border-slate-200 shrink-0"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                              {m.name.charAt(0)}
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <h5 className="font-bold text-xs text-slate-900 truncate mb-0">
+                                {m.name}
+                              </h5>
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-[9px] font-bold border flex items-center gap-1 ${roleConfig.color}`}
+                              >
+                                <i className={`bi ${roleConfig.icon}`}></i>
+                                <span>{m.role_tag}</span>
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-slate-400 truncate mb-0">
+                              {m.email} • {m.department_name || "General"}
+                            </p>
                           </div>
-                          <p className="text-[10px] text-slate-400 truncate mb-0">
-                            {m.email} • {m.department_name || "General"}
-                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveMember(m.membership_id, m.name)}
+                          disabled={removingId === m.membership_id}
+                          className="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors flex items-center justify-center cursor-pointer shrink-0"
+                          title="Unassign member from squad"
+                        >
+                          {removingId === m.membership_id ? (
+                            <div className="w-3.5 h-3.5 border-2 border-rose-600 border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            <i className="bi bi-trash3 text-xs"></i>
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Capacity progress meter */}
+                      <div className="mt-2 space-y-1">
+                        <div className="flex items-center justify-between text-[10px]">
+                          <span className="text-slate-500">
+                            Workload: <strong className="text-slate-800">{m.completed_project_tasks_count}/{m.project_tasks_count} tasks</strong>
+                          </span>
+                          <span className="font-bold text-slate-700">{m.allocation_percentage}% Allocation</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full transition-all duration-300 rounded-full ${
+                              m.capacity_status === "overloaded"
+                                ? "bg-rose-500"
+                                : m.capacity_status === "near_capacity"
+                                ? "bg-amber-500"
+                                : "bg-emerald-500"
+                            }`}
+                            style={{ width: `${Math.min(m.allocation_percentage, 100)}%` }}
+                          ></div>
                         </div>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveMember(m.membership_id, m.name)}
-                        disabled={removingId === m.membership_id}
-                        className="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors flex items-center justify-center cursor-pointer shrink-0"
-                        title="Unassign member from squad"
-                      >
-                        {removingId === m.membership_id ? (
-                          <div className="w-3.5 h-3.5 border-2 border-rose-600 border-t-transparent rounded-full animate-spin"></div>
-                        ) : (
-                          <i className="bi bi-trash3 text-xs"></i>
-                        )}
-                      </button>
+                      {/* Workload Warning message if overloaded */}
+                      {m.capacity_warning && (
+                        <div className="mt-2 text-[9.5px] text-rose-700 bg-rose-50 px-2 py-1 rounded-lg border border-rose-200/60 flex items-center gap-1.5">
+                          <i className="bi bi-exclamation-octagon-fill shrink-0"></i>
+                          <span>{m.capacity_warning}</span>
+                        </div>
+                      )}
                     </div>
-
-                    {/* Allocation & Workload Bar */}
-                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
-                      <span>
-                        Tasks in Initiative: <strong className="text-slate-800">{m.completed_project_tasks_count}/{m.project_tasks_count}</strong>
-                      </span>
-                      <span>
-                        Allocation: <strong className="text-indigo-600">{m.allocation_percentage}%</strong>
-                      </span>
-                      <span
-                        className={`font-semibold ${
-                          m.capacity_status === "overloaded"
-                            ? "text-rose-600"
-                            : m.capacity_status === "near_capacity"
-                            ? "text-amber-600"
-                            : "text-emerald-600"
-                        }`}
-                      >
-                        {m.capacity_status === "overloaded"
-                          ? "⚠️ Overloaded"
-                          : m.capacity_status === "near_capacity"
-                          ? "Moderate"
-                          : "Optimal"}
-                      </span>
-                    </div>
-
-                    {/* Workload Warning message if overloaded */}
-                    {m.capacity_warning && (
-                      <div className="mt-1.5 text-[9.5px] text-rose-700 bg-rose-50/80 px-2 py-0.5 rounded border border-rose-200/60">
-                        {m.capacity_warning}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
