@@ -1969,6 +1969,22 @@ export const getAdminProjects = async (req, res) => {
     const [projects] = await pool.query(query, params);
 
     // Fetch milestones summary per project to calculate milestone & deliverable-based velocity
+    let squadByProject = {};
+    try {
+      const [squadRows] = await pool.query(
+        `SELECT pm.project_id, pm.role_tag, u.id, u.name, u.image_url 
+         FROM project_members pm
+         JOIN users u ON pm.user_id = u.id
+         ORDER BY pm.assigned_at ASC`
+      );
+      for (const s of squadRows) {
+        if (!squadByProject[s.project_id]) squadByProject[s.project_id] = [];
+        squadByProject[s.project_id].push(s);
+      }
+    } catch (sErr) {
+      console.warn('Could not query project_members:', sErr.message);
+    }
+
     let milestonesByProject = {};
     try {
       const [allMilestones] = await pool.query(
@@ -2056,6 +2072,8 @@ export const getAdminProjects = async (req, res) => {
         days_left: daysLeft,
         is_overdue: isOverdue,
         health,
+        squad: squadByProject[p.id] || [],
+        squad_members_count: (squadByProject[p.id] || []).length,
       };
     });
 

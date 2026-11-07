@@ -191,11 +191,29 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
                   <button
                     type="button"
                     onClick={() => onOpenSquadDrawer(proj)}
-                    className="px-2 py-0.5 rounded bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200/80 text-[10px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
+                    className="px-2 py-0.5 rounded bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200/80 text-[10px] font-semibold transition-colors cursor-pointer flex items-center gap-1.5"
                     title="Manage Project Squad Roster"
                   >
-                    <i className="bi bi-people-fill text-purple-600 text-[9px]"></i>
-                    <span>Squad</span>
+                    {proj.squad && proj.squad.length > 0 ? (
+                      <>
+                        <div className="flex items-center -space-x-1">
+                          {proj.squad.slice(0, 2).map((m: any, idx: number) => (
+                            <div
+                              key={idx}
+                              className="w-3.5 h-3.5 rounded-full bg-indigo-600 text-white text-[7px] font-bold flex items-center justify-center border border-white"
+                            >
+                              {m.name.charAt(0)}
+                            </div>
+                          ))}
+                        </div>
+                        <span>Squad ({proj.squad.length})</span>
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-people-fill text-purple-600 text-[9px]"></i>
+                        <span>Squad</span>
+                      </>
+                    )}
                   </button>
                 )}
                 {onOpenDossierModal && (

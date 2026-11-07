@@ -40,6 +40,8 @@ export interface ProjectItem {
   days_left?: number | null;
   is_overdue?: boolean;
   health: "healthy" | "at_risk" | "critical" | "completed";
+  squad?: Array<{ id: number | string; name: string; image_url?: string; role_tag?: string }>;
+  squad_members_count?: number;
 }
 
 const AdminProjects: React.FC = () => {

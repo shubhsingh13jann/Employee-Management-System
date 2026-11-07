@@ -208,50 +208,98 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
 
                   {/* 3. Lead Supervisor */}
                   <td className="py-2.5 px-3.5 whitespace-nowrap">
-                    {proj.supervisor_name ? (
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <div className="w-5 h-5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold text-[10px] flex items-center justify-center shrink-0">
-                          {proj.supervisor_name.charAt(0)}
+                    <div className="space-y-1">
+                      {proj.supervisor_name ? (
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <div className="w-5 h-5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold text-[10px] flex items-center justify-center shrink-0">
+                            {proj.supervisor_name.charAt(0)}
+                          </div>
+                          <div className="min-w-0">
+                            <span
+                              className="font-semibold text-slate-800 block text-xs truncate max-w-[105px] leading-tight"
+                              title={proj.supervisor_name}
+                            >
+                              {proj.supervisor_name}
+                            </span>
+                            <span className="text-[9px] text-slate-400 block truncate leading-tight">
+                              Lead Supervisor
+                            </span>
+                          </div>
+                          {onOpenSquadDrawer && (
+                            <button
+                              type="button"
+                              onClick={() => onOpenSquadDrawer(proj)}
+                              className="ml-auto w-5 h-5 rounded hover:bg-slate-200 text-slate-400 hover:text-indigo-600 flex items-center justify-center transition-colors cursor-pointer"
+                              title="Manage Project Squad Roster"
+                            >
+                              <i className="bi bi-people-fill text-[10px]"></i>
+                            </button>
+                          )}
                         </div>
-                        <div className="min-w-0">
-                          <span
-                            className="font-semibold text-slate-800 block text-xs truncate max-w-[105px] leading-tight"
-                            title={proj.supervisor_name}
-                          >
-                            {proj.supervisor_name}
+                      ) : (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                            Unassigned Lead
                           </span>
-                          <span className="text-[9px] text-slate-400 block truncate leading-tight">
-                            Lead Supervisor
+                          {onOpenSquadDrawer && (
+                            <button
+                              type="button"
+                              onClick={() => onOpenSquadDrawer(proj)}
+                              className="w-5 h-5 rounded hover:bg-slate-200 text-slate-400 hover:text-indigo-600 flex items-center justify-center transition-colors cursor-pointer"
+                              title="Assign Squad"
+                            >
+                              <i className="bi bi-person-plus text-[10px]"></i>
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Squad Avatar Cluster */}
+                      {proj.squad && proj.squad.length > 0 ? (
+                        <div
+                          onClick={() => onOpenSquadDrawer && onOpenSquadDrawer(proj)}
+                          className="flex items-center -space-x-1 cursor-pointer hover:opacity-85 transition-opacity"
+                          title={`${proj.squad.length} Squad Members (Click to manage)`}
+                        >
+                          {proj.squad.slice(0, 3).map((m: any, idx: number) => (
+                            m.image_url ? (
+                              <img
+                                key={idx}
+                                src={`http://localhost:5000/images/${m.image_url}`}
+                                alt={m.name}
+                                className="w-4 h-4 rounded-full object-cover border border-white shadow-2xs"
+                              />
+                            ) : (
+                              <div
+                                key={idx}
+                                className="w-4 h-4 rounded-full bg-indigo-600 text-white font-bold text-[8px] flex items-center justify-center border border-white shadow-2xs"
+                              >
+                                {m.name.charAt(0)}
+                              </div>
+                            )
+                          ))}
+                          {proj.squad.length > 3 && (
+                            <div className="w-4 h-4 rounded-full bg-slate-200 text-slate-700 font-bold text-[8px] flex items-center justify-center border border-white">
+                              +{proj.squad.length - 3}
+                            </div>
+                          )}
+                          <span className="text-[9px] text-indigo-600 font-medium ml-1.5 hover:underline">
+                            {proj.squad.length} squad
                           </span>
                         </div>
-                        {onOpenSquadDrawer && (
+                      ) : (
+                        onOpenSquadDrawer && (
                           <button
                             type="button"
                             onClick={() => onOpenSquadDrawer(proj)}
-                            className="ml-auto w-5 h-5 rounded hover:bg-slate-200 text-slate-400 hover:text-indigo-600 flex items-center justify-center transition-colors cursor-pointer"
-                            title="Manage Project Squad Roster"
+                            className="text-[9px] text-slate-400 hover:text-indigo-600 font-medium flex items-center gap-1 cursor-pointer transition-colors"
                           >
-                            <i className="bi bi-people-fill text-[10px]"></i>
+                            <i className="bi bi-people"></i>
+                            <span>+ Assign Squad</span>
                           </button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                          Unassigned Lead
-                        </span>
-                        {onOpenSquadDrawer && (
-                          <button
-                            type="button"
-                            onClick={() => onOpenSquadDrawer(proj)}
-                            className="w-5 h-5 rounded hover:bg-slate-200 text-slate-400 hover:text-indigo-600 flex items-center justify-center transition-colors cursor-pointer"
-                            title="Assign Squad"
-                          >
-                            <i className="bi bi-person-plus text-[10px]"></i>
-                          </button>
-                        )}
-                      </div>
-                    )}
+                        )
+                      )}
+                    </div>
                   </td>
 
                   {/* 4. Priority */}
