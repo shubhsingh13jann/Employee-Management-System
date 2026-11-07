@@ -56,6 +56,10 @@ import {
   getProjectMembers,
   addProjectMember,
   removeProjectMember,
+  getProjectTasks,
+  createProjectTask,
+  updateProjectTaskStatus,
+  deleteProjectTask,
 } from "../controllers/adminController.js";
 import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
 
@@ -121,7 +125,6 @@ router.put("/projects/:id", updateAdminProject);
 router.delete("/projects/:id", deleteAdminProject);
 router.get("/projects/supervisors-capacity", getAdminSupervisorsCapacity);
 
-
 // Interactive Sub-Milestones & Deliverables Tracker Routes
 router.get("/projects/:id/dossier", getProjectDossier);
 router.get("/projects/:id/milestones", getProjectMilestones);
@@ -131,10 +134,15 @@ router.put("/projects/milestones/:milestoneId/status", toggleMilestoneStatus);
 router.put("/projects/milestones/:milestoneId/deliverable-toggle", toggleDeliverableItem);
 router.delete("/projects/milestones/:milestoneId", deleteProjectMilestone);
 
-
 // Project Squad & Resource Allocation Routes
 router.get("/projects/:id/members", getProjectMembers);
 router.post("/projects/:id/members", addProjectMember);
 router.delete("/projects/:id/members/:memberId", removeProjectMember);
+
+// Project Tasks Breakdown & Inline Dispatch Routes
+router.get("/projects/:id/tasks", getProjectTasks);
+router.post("/projects/:id/tasks", createProjectTask);
+router.put("/projects/tasks/:taskId/status", updateProjectTaskStatus);
+router.delete("/projects/tasks/:taskId", deleteProjectTask);
 
 export { router as adminRouter };

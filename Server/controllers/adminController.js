@@ -3348,3 +3348,214 @@ export const removeProjectMember = async (req, res) => {
     return res.status(500).json({ status: false, error: "Failed to remove squad member" });
   }
 };
+
+
+export const getProjectTasks = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [[project]] = await pool.query(
+      `SELECT p.id, p.title, p.project_code, p.status, p.priority, p.target_date
+       FROM projects p WHERE p.id = ?`,
+      [id]
+    );
+
+    if (!project) {
+      return res.status(404).json({ status: false, error: "Project not found" });
+    }
+
+    const [tasks] = await pool.query(
+      `SELECT t.*,
+              assignee.name AS assignee_name,
+              assignee.email AS assignee_email,
+              assignee.role AS assignee_role,
+              assignee.image_url AS assignee_image_url,
+              pm.role_tag AS assignee_squad_role,
+              assigner.name AS assigner_name,
+              assigner.email AS assigner_email
+       FROM tasks t
+       LEFT JOIN users assignee ON t.assigned_to = assignee.id
+       LEFT JOIN project_members pm ON (pm.project_id = t.project_id AND pm.user_id = t.assigned_to)
+       LEFT JOIN users assigner ON t.assigned_by = assigner.id
+       WHERE t.project_id = ?
+       ORDER BY 
+         CASE WHEN t.status = 'completed' THEN 2 ELSE 1 END,
+         CASE WHEN t.due_date IS NULL THEN '9999-12-31' ELSE t.due_date END ASC,
+         t.created_at DESC`,
+      [id]
+    );
+
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter((t) => t.status === "completed").length;
+    const inProgressTasks = tasks.filter((t) => t.status === "in_progress").length;
+    const pendingTasks = tasks.filter((t) => t.status === "pending").length;
+    const nowStr = new Date().toISOString().split("T")[0];
+    const overdueTasks = tasks.filter((t) => t.status !== "completed" && t.due_date && t.due_date < nowStr).length;
+
+    return res.json({
+      status: true,
+      project,
+      tasks,
+      metrics: {
+        total: totalTasks,
+        completed: completedTasks,
+        in_progress: inProgressTasks,
+        pending: pendingTasks,
+        overdue: overdueTasks,
+        velocity_pct: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
+      },
+    });
+  } catch (err) {
+    console.error("getProjectTasks error:", err);
+    return res.status(500).json({ status: false, error: "Failed to fetch project tasks" });
+  }
+};
+
+export const createProjectTask = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      title,
+      description = "",
+      assigned_to = null,
+      priority = "medium",
+      due_date = null,
+    } = req.body;
+
+    if (!title || !title.trim()) {
+      return res.status(400).json({ status: false, error: "Task title is required" });
+    }
+
+    const [[project]] = await pool.query("SELECT id, title, project_code FROM projects WHERE id = ?", [id]);
+    if (!project) {
+      return res.status(404).json({ status: false, error: "Project not found" });
+    }
+
+    const assignedById = req.user?.id || 1;
+    const normalizedPriority = ["low", "medium", "high", "urgent"].includes(priority?.toLowerCase())
+      ? priority.toLowerCase()
+      : "medium";
+
+    const [result] = await pool.query(
+      `INSERT INTO tasks (project_id, title, description, assigned_by, assigned_to, priority, status, due_date)
+       VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)`,
+      [
+        id,
+        title.trim(),
+        description ? description.trim() : null,
+        assignedById,
+        assigned_to ? Number(assigned_to) : null,
+        normalizedPriority,
+        due_date || null,
+      ]
+    );
+
+    let assigneeName = "Unassigned";
+    if (assigned_to) {
+      const [[assignee]] = await pool.query("SELECT name FROM users WHERE id = ?", [assigned_to]);
+      if (assignee) assigneeName = assignee.name;
+    }
+
+    await pool.query(
+      `INSERT INTO user_audit_logs (user_id, action_type, field_name, new_value, details, performed_by)
+       VALUES (?, 'Project Task Created', 'tasks', ?, ?, ?)`,
+      [
+        assignedById,
+        title.trim(),
+        `Created task "${title.trim()}" (Priority: ${normalizedPriority}, Assignee: ${assigneeName}) for project #${id} (${project.title})`,
+        String(assignedById),
+      ]
+    );
+
+    return res.json({
+      status: true,
+      message: "Task created successfully",
+      task_id: result.insertId,
+    });
+  } catch (err) {
+    console.error("createProjectTask error:", err);
+    return res.status(500).json({ status: false, error: "Failed to create project task" });
+  }
+};
+
+export const updateProjectTaskStatus = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = ["pending", "in_progress", "under_review", "completed"];
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({ status: false, error: `Invalid status. Must be one of: ${validStatuses.join(", ")}` });
+    }
+
+    const [[task]] = await pool.query(
+      `SELECT t.*, p.title AS project_title FROM tasks t
+       LEFT JOIN projects p ON t.project_id = p.id
+       WHERE t.id = ?`,
+      [taskId]
+    );
+
+    if (!task) {
+      return res.status(404).json({ status: false, error: "Task not found" });
+    }
+
+    await pool.query("UPDATE tasks SET status = ? WHERE id = ?", [status, taskId]);
+
+    await pool.query(
+      `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+       VALUES (?, 'Project Task Status Updated', 'tasks.status', ?, ?, ?, ?)`,
+      [
+        req.user?.id || 1,
+        task.status,
+        status,
+        `Task #${taskId} "${task.title}" status changed from "${task.status}" to "${status}" in project #${task.project_id}`,
+        String(req.user?.id || 1),
+      ]
+    );
+
+    return res.json({
+      status: true,
+      message: "Task status updated successfully",
+      task_id: Number(taskId),
+      new_status: status,
+    });
+  } catch (err) {
+    console.error("updateProjectTaskStatus error:", err);
+    return res.status(500).json({ status: false, error: "Failed to update task status" });
+  }
+};
+
+export const deleteProjectTask = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+
+    const [[task]] = await pool.query(
+      `SELECT t.*, p.title AS project_title FROM tasks t
+       LEFT JOIN projects p ON t.project_id = p.id
+       WHERE t.id = ?`,
+      [taskId]
+    );
+
+    if (!task) {
+      return res.status(404).json({ status: false, error: "Task not found" });
+    }
+
+    await pool.query("DELETE FROM tasks WHERE id = ?", [taskId]);
+
+    await pool.query(
+      `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, details, performed_by)
+       VALUES (?, 'Project Task Deleted', 'tasks', ?, ?, ?)`,
+      [
+        req.user?.id || 1,
+        task.title,
+        `Deleted task #${taskId} "${task.title}" from project #${task.project_id} (${task.project_title || "N/A"})`,
+        String(req.user?.id || 1),
+      ]
+    );
+
+    return res.json({ status: true, message: "Task deleted successfully" });
+  } catch (err) {
+    console.error("deleteProjectTask error:", err);
+    return res.status(500).json({ status: false, error: "Failed to delete task" });
+  }
+};
