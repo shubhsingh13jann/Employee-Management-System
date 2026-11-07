@@ -1968,7 +1968,7 @@ export const getAdminProjects = async (req, res) => {
 
     const [projects] = await pool.query(query, params);
 
-    // Fetch milestones summary per project to calculate milestone & deliverable-based velocity
+    // Fetch squad members per project
     let squadByProject = {};
     try {
       const [squadRows] = await pool.query(
@@ -1985,6 +1985,7 @@ export const getAdminProjects = async (req, res) => {
       console.warn('Could not query project_members:', sErr.message);
     }
 
+    // Fetch milestones summary per project to calculate milestone & deliverable-based velocity
     let milestonesByProject = {};
     try {
       const [allMilestones] = await pool.query(
@@ -3373,7 +3374,7 @@ export const getProjectTasks = async (req, res) => {
     const { id } = req.params;
 
     const [[project]] = await pool.query(
-      `SELECT p.id, p.title, p.project_code, p.status, p.priority, p.target_date
+      `SELECT p.id, p.title, p.status, p.priority, p.target_date
        FROM projects p WHERE p.id = ?`,
       [id]
     );
@@ -3444,7 +3445,7 @@ export const createProjectTask = async (req, res) => {
       return res.status(400).json({ status: false, error: "Task title is required" });
     }
 
-    const [[project]] = await pool.query("SELECT id, title, project_code FROM projects WHERE id = ?", [id]);
+    const [[project]] = await pool.query("SELECT id, title FROM projects WHERE id = ?", [id]);
     if (!project) {
       return res.status(404).json({ status: false, error: "Project not found" });
     }

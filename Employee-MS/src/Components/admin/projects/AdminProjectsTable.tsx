@@ -258,51 +258,56 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                         </div>
                       )}
 
-                      {/* Squad Avatar Cluster */}
-                      {proj.squad && proj.squad.length > 0 ? (
-                        <div
-                          onClick={() => onOpenSquadDrawer && onOpenSquadDrawer(proj)}
-                          className="flex items-center -space-x-1 cursor-pointer hover:opacity-85 transition-opacity"
-                          title={`${proj.squad.length} Squad Members (Click to manage)`}
-                        >
-                          {proj.squad.slice(0, 3).map((m: any, idx: number) => (
-                            m.image_url ? (
-                              <img
-                                key={idx}
-                                src={`http://localhost:5000/images/${m.image_url}`}
-                                alt={m.name}
-                                className="w-4 h-4 rounded-full object-cover border border-white shadow-2xs"
-                              />
-                            ) : (
-                              <div
-                                key={idx}
-                                className="w-4 h-4 rounded-full bg-indigo-600 text-white font-bold text-[8px] flex items-center justify-center border border-white shadow-2xs"
-                              >
-                                {m.name.charAt(0)}
-                              </div>
-                            )
-                          ))}
-                          {proj.squad.length > 3 && (
-                            <div className="w-4 h-4 rounded-full bg-slate-200 text-slate-700 font-bold text-[8px] flex items-center justify-center border border-white">
-                              +{proj.squad.length - 3}
-                            </div>
-                          )}
-                          <span className="text-[9px] text-indigo-600 font-medium ml-1.5 hover:underline">
-                            {proj.squad.length} squad
-                          </span>
-                        </div>
-                      ) : (
-                        onOpenSquadDrawer && (
+                      {/* Squad Avatar Cluster / Allocation Badge */}
+                      <div className="mt-1">
+                        {proj.squad && proj.squad.length > 0 ? (
                           <button
                             type="button"
-                            onClick={() => onOpenSquadDrawer(proj)}
-                            className="text-[9px] text-slate-400 hover:text-indigo-600 font-medium flex items-center gap-1 cursor-pointer transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onOpenSquadDrawer && onOpenSquadDrawer(proj);
+                            }}
+                            className="px-2 py-0.5 rounded-md bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200/80 text-[10px] font-semibold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                            title={`${proj.squad.length} Squad Members Allocated (Click to manage roster)`}
                           >
-                            <i className="bi bi-people"></i>
-                            <span>+ Assign Squad</span>
+                            <div className="flex items-center -space-x-1">
+                              {proj.squad.slice(0, 3).map((m: any, idx: number) => (
+                                m.image_url ? (
+                                  <img
+                                    key={idx}
+                                    src={`http://localhost:5000/images/${m.image_url}`}
+                                    alt={m.name}
+                                    className="w-3.5 h-3.5 rounded-full object-cover border border-white"
+                                  />
+                                ) : (
+                                  <div
+                                    key={idx}
+                                    className="w-3.5 h-3.5 rounded-full bg-indigo-600 text-white font-bold text-[7px] flex items-center justify-center border border-white"
+                                  >
+                                    {m.name.charAt(0)}
+                                  </div>
+                                )
+                              ))}
+                            </div>
+                            <span>Squad ({proj.squad.length})</span>
                           </button>
-                        )
-                      )}
+                        ) : (
+                          onOpenSquadDrawer && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onOpenSquadDrawer(proj);
+                              }}
+                              className="px-2 py-0.5 rounded-md bg-slate-50 hover:bg-purple-50 text-slate-500 hover:text-purple-700 border border-slate-200 hover:border-purple-300 text-[10px] font-semibold transition-all cursor-pointer flex items-center gap-1"
+                              title="Allocate technical staff to this initiative squad"
+                            >
+                              <i className="bi bi-people text-purple-600 text-[9px]"></i>
+                              <span>+ Squad</span>
+                            </button>
+                          )
+                        )}
+                      </div>
                     </div>
                   </td>
 
@@ -313,21 +318,21 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
 
                   {/* 5. Task Velocity Bar (Clickable to open Tasks Tray) */}
                   <td
-                    className="py-2.5 px-3.5 text-center whitespace-nowrap cursor-pointer hover:bg-slate-50/80 transition-colors group"
+                    className="py-2.5 px-3.5 text-center whitespace-nowrap cursor-pointer hover:bg-indigo-50/40 transition-colors group"
                     onClick={() => onOpenTasksTray && onOpenTasksTray(proj)}
                     title="Click to inspect task breakdown & quick dispatch"
                   >
-                    <div className="inline-block w-20 sm:w-24 text-left">
+                    <div className="inline-block w-22 sm:w-26 text-left">
                       <div className="flex items-center justify-between text-[10px] font-medium mb-1">
                         <span className="text-slate-600 group-hover:text-indigo-600 font-semibold flex items-center gap-1 transition-colors">
-                          <i className="bi bi-list-task text-[9px]"></i>
+                          <i className="bi bi-list-task text-[9px] text-blue-600"></i>
                           {proj.completed_tasks}/{proj.total_tasks}
                         </span>
                         <span className="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">
                           {proj.progress_percentage}%
                         </span>
                       </div>
-                      <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
+                      <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60 mb-1">
                         <div
                           className={`h-full rounded-full transition-all duration-300 ${
                             proj.progress_percentage >= 80
@@ -338,6 +343,24 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                           }`}
                           style={{ width: `${proj.progress_percentage}%` }}
                         ></div>
+                      </div>
+                      <div className="flex items-center justify-between text-[9px]">
+                        <span className="text-indigo-600 font-medium group-hover:underline flex items-center gap-0.5">
+                          <i className="bi bi-eye text-[8px]"></i>
+                          <span>Tasks</span>
+                        </span>
+                        {onQuickAddTask && (
+                          <span
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onQuickAddTask(proj);
+                            }}
+                            className="text-emerald-700 font-bold hover:text-emerald-800 hover:bg-emerald-100 px-1 py-0.2 rounded transition-colors"
+                            title="Quick add task"
+                          >
+                            + Add
+                          </span>
+                        )}
                       </div>
                     </div>
                   </td>

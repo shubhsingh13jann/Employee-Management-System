@@ -540,3 +540,4 @@ export const ProjectTasksTrayModal: React.FC<ProjectTasksTrayModalProps> = ({
     </div>
   );
 };
+
