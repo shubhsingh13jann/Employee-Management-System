@@ -9,3 +9,4 @@ export * from "./SupervisorCapacityDrawer";
 export * from "./ProjectMilestonesModal";
 export * from "./ProjectDetailDossierModal";
 export * from "./ProjectSquadDrawer";
+export * from "./QuickAddTaskModal";
