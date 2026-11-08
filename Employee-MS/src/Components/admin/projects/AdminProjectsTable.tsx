@@ -410,20 +410,6 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                   {/* 9. Actions Menu */}
                   <td className={`py-2.5 pl-3.5 pr-4.5 text-center whitespace-nowrap ${isMenuOpen ? "relative z-30" : ""}`}>
                     <div className="relative inline-flex items-center justify-center gap-1.5">
-                      {onQuickAddTask && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onQuickAddTask(proj);
-                          }}
-                          className="h-6 px-1.5 rounded-md border border-emerald-200/90 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-[10px] transition-all inline-flex items-center gap-0.5 cursor-pointer shadow-2xs"
-                          title="Quick Add Task directly to this initiative"
-                        >
-                          <i className="bi bi-plus-lg text-[9px]"></i>
-                          <span>Task</span>
-                        </button>
-                      )}
 
                       <button
                         type="button"
