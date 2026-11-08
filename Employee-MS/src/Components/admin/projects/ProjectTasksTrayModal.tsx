@@ -101,11 +101,23 @@ export const ProjectTasksTrayModal: React.FC<ProjectTasksTrayModalProps> = ({
         ? "in_progress"
         : "completed";
 
-    // Optimistic UI update
+    // Optimistic UI update for tasks and telemetry
     const previousTasks = [...tasks];
-    setTasks((prev) =>
-      prev.map((t) => (t.id === task.id ? { ...t, status: nextStatus } : t))
-    );
+    const previousMetrics = { ...metrics };
+    const updatedTasks = tasks.map((t) => (t.id === task.id ? { ...t, status: nextStatus } : t));
+    setTasks(updatedTasks);
+
+    const completed = updatedTasks.filter((t) => t.status === "completed").length;
+    const in_progress = updatedTasks.filter((t) => t.status === "in_progress").length;
+    const pending = updatedTasks.filter((t) => t.status === "pending").length;
+    const velocity_pct = updatedTasks.length > 0 ? Math.round((completed / updatedTasks.length) * 100) : 0;
+    setMetrics({
+      ...metrics,
+      completed,
+      in_progress,
+      pending,
+      velocity_pct,
+    });
 
     try {
       setTogglingId(task.id);
@@ -118,6 +130,7 @@ export const ProjectTasksTrayModal: React.FC<ProjectTasksTrayModalProps> = ({
       }
     } catch (err: any) {
       setTasks(previousTasks);
+      setMetrics(previousMetrics);
       setMsg({
         type: "danger",
         text: err.response?.data?.error || "Failed to update task status",
