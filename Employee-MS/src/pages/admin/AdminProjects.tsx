@@ -492,7 +492,12 @@ const AdminProjects: React.FC = () => {
           isOpen={Boolean(quickAddTaskProject)}
           onClose={() => setQuickAddTaskProject(null)}
           project={quickAddTaskProject}
-          onTaskCreated={fetchData}
+          onTaskCreated={() => {
+            fetchData();
+            if (selectedTasksProject) {
+              setSelectedTasksProject({ ...selectedTasksProject });
+            }
+          }}
         />
 
         {/* Supervisor Capacity Heatmap Drawer */}

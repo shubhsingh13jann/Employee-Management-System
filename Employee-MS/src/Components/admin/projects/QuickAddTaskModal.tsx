@@ -118,7 +118,7 @@ export const QuickAddTaskModal: React.FC<QuickAddTaskModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-[60] overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
@@ -221,21 +221,34 @@ export const QuickAddTaskModal: React.FC<QuickAddTaskModalProps> = ({
           </div>
 
           {/* Priority & Due Date in 2 columns */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
                 Priority
               </label>
-              <select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value as any)}
-                className="w-full text-xs px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-              >
-                <option value="low">🟢 Low</option>
-                <option value="medium">🔵 Medium</option>
-                <option value="high">🟠 High</option>
-                <option value="urgent">🔴 Urgent / Critical</option>
-              </select>
+              <div className="grid grid-cols-4 gap-1 p-0.5 bg-slate-100 rounded-xl border border-slate-200">
+                {(
+                  [
+                    { id: "low", label: "Low", color: "text-emerald-700", active: "bg-emerald-600 text-white shadow-xs font-bold" },
+                    { id: "medium", label: "Med", color: "text-blue-700", active: "bg-blue-600 text-white shadow-xs font-bold" },
+                    { id: "high", label: "High", color: "text-amber-700", active: "bg-amber-600 text-white shadow-xs font-bold" },
+                    { id: "urgent", label: "Urgent", color: "text-rose-700", active: "bg-rose-600 text-white shadow-xs font-bold" },
+                  ] as const
+                ).map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setPriority(p.id)}
+                    className={`py-1.5 rounded-lg text-[10px] transition-all cursor-pointer text-center leading-none ${
+                      priority === p.id
+                        ? p.active
+                        : `${p.color} hover:bg-white/80 font-medium`
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div>
@@ -246,7 +259,7 @@ export const QuickAddTaskModal: React.FC<QuickAddTaskModalProps> = ({
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full text-xs px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                className="w-full text-xs px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer h-[32px]"
               />
             </div>
           </div>
