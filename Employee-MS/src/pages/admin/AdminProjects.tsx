@@ -431,6 +431,8 @@ const AdminProjects: React.FC = () => {
             onOpenMilestonesModal={(proj) => setSelectedMilestoneProject(proj)}
             onOpenDossierModal={(proj) => setSelectedDossierProject(proj)}
             onOpenSquadDrawer={(proj) => setSelectedSquadProject(proj)}
+            onOpenTasksTray={(proj) => setSelectedTasksProject(proj)}
+            onQuickAddTask={(proj) => setQuickAddTaskProject(proj)}
           />
         )}
 
