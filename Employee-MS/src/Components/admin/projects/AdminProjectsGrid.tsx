@@ -24,18 +24,29 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
   onOpenTasksTray,
   onQuickAddTask,
 }) => {
+  const [activeMenuId, setActiveMenuId] = React.useState<number | string | null>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = () => setActiveMenuId(null);
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, []);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
       {projects.map((proj) => {
         const isOverdue = proj.is_overdue || (proj.health === "critical" && proj.status !== "completed");
+        const isMenuOpen = activeMenuId === proj.id;
 
         return (
           <div
             key={proj.id}
-            className="bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-xs transition-all p-3.5 flex flex-col justify-between"
+            className={`bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-xs transition-all p-3.5 flex flex-col justify-between ${
+              isMenuOpen ? "relative z-30" : "relative"
+            }`}
           >
             <div>
-              {/* Card Header: Dept & Priority */}
+              {/* Card Header: Dept, Priority, Status Capsule, and Triple-dot Menu */}
               <div className="flex items-center justify-between gap-2 mb-2">
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
                   🏢 {proj.department_name || "General"}
@@ -77,6 +88,180 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
                   >
                     {proj.status.toUpperCase()}
                   </span>
+
+                  {/* Triple dot actions dropdown positioned right next to status capsule */}
+                  <div className="relative inline-flex items-center">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveMenuId((prev) => (prev === proj.id ? null : proj.id));
+                      }}
+                      className={`w-6 h-6 rounded-md border transition-all inline-flex items-center justify-center cursor-pointer ${
+                        isMenuOpen
+                          ? "bg-slate-100 text-slate-900 border-slate-300 shadow-2xs"
+                          : "border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 shadow-2xs"
+                      }`}
+                      title="Initiative Actions"
+                    >
+                      <i className="bi bi-three-dots text-[10px]"></i>
+                    </button>
+
+                    {isMenuOpen && (
+                      <div
+                        className="absolute right-0 top-full mt-1 w-44 rounded-xl bg-white border border-slate-200/90 shadow-xl p-1 z-50 text-left animate-in fade-in zoom-in-95 duration-100"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-0.5">
+                          Initiative Actions
+                        </div>
+
+                        {onOpenDossierModal && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveMenuId(null);
+                              onOpenDossierModal(proj);
+                            }}
+                            className="w-full px-2 py-1 text-[11px] text-slate-800 hover:bg-indigo-50 hover:text-indigo-700 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-bold mb-0.5"
+                          >
+                            <i className="bi bi-file-earmark-text-fill text-indigo-600 text-[10px]"></i>
+                            <span>360° Dossier</span>
+                          </button>
+                        )}
+
+                        {onUpdateStatus && (
+                          <>
+                            {proj.status !== "active" && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setActiveMenuId(null);
+                                  onUpdateStatus(proj.id, "active");
+                                }}
+                                className="w-full px-2 py-1 text-[11px] text-emerald-700 hover:bg-emerald-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                              >
+                                <i className="bi bi-play-circle text-emerald-600 text-[10px]"></i>
+                                <span>Mark Active</span>
+                              </button>
+                            )}
+                            {proj.status !== "completed" && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setActiveMenuId(null);
+                                  onUpdateStatus(proj.id, "completed");
+                                }}
+                                className="w-full px-2 py-1 text-[11px] text-blue-700 hover:bg-blue-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                              >
+                                <i className="bi bi-check2-circle text-blue-600 text-[10px]"></i>
+                                <span>Mark Completed</span>
+                              </button>
+                            )}
+                            {proj.status !== "on_hold" && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setActiveMenuId(null);
+                                  onUpdateStatus(proj.id, "on_hold");
+                                }}
+                                className="w-full px-2 py-1 text-[11px] text-amber-700 hover:bg-amber-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                              >
+                                <i className="bi bi-pause-circle text-amber-600 text-[10px]"></i>
+                                <span>Place On Hold</span>
+                              </button>
+                            )}
+                          </>
+                        )}
+
+                        <div className="my-1 border-t border-slate-100"></div>
+
+                        {onOpenSquadDrawer && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveMenuId(null);
+                              onOpenSquadDrawer(proj);
+                            }}
+                            className="w-full px-2 py-1 text-[11px] text-purple-700 hover:bg-purple-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                          >
+                            <i className="bi bi-people-fill text-purple-600 text-[10px]"></i>
+                            <span>Squad Roster {proj.squad && proj.squad.length > 0 ? `(${proj.squad.length})` : ""}</span>
+                          </button>
+                        )}
+
+                        {onOpenTasksTray && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveMenuId(null);
+                              onOpenTasksTray(proj);
+                            }}
+                            className="w-full px-2 py-1 text-[11px] text-blue-700 hover:bg-blue-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                          >
+                            <i className="bi bi-list-task text-blue-600 text-[10px]"></i>
+                            <span>In-View Tasks ({proj.completed_tasks}/{proj.total_tasks})</span>
+                          </button>
+                        )}
+
+                        {onQuickAddTask && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveMenuId(null);
+                              onQuickAddTask(proj);
+                            }}
+                            className="w-full px-2 py-1 text-[11px] text-emerald-700 hover:bg-emerald-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                          >
+                            <i className="bi bi-plus-circle text-emerald-600 text-[10px]"></i>
+                            <span>+ Quick Task</span>
+                          </button>
+                        )}
+
+                        {onOpenMilestonesModal && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveMenuId(null);
+                              onOpenMilestonesModal(proj);
+                            }}
+                            className="w-full px-2 py-1 text-[11px] text-indigo-700 hover:bg-indigo-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                          >
+                            <i className="bi bi-flag-fill text-indigo-600 text-[10px]"></i>
+                            <span>Sub-Milestones</span>
+                          </button>
+                        )}
+
+                        {onOpenEditModal && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveMenuId(null);
+                              onOpenEditModal(proj);
+                            }}
+                            className="w-full px-2 py-1 text-[11px] text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                          >
+                            <i className="bi bi-pencil-square text-indigo-500 text-[10px]"></i>
+                            <span>Edit Initiative</span>
+                          </button>
+                        )}
+
+                        {onDeleteProject && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveMenuId(null);
+                              onDeleteProject(proj.id);
+                            }}
+                            className="w-full px-2 py-1 text-[11px] text-rose-600 hover:bg-rose-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                          >
+                            <i className="bi bi-trash3 text-rose-500 text-[10px]"></i>
+                            <span>Archive / Delete</span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -164,8 +349,8 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
               </div>
             </div>
 
-            {/* Bottom Footer Actions */}
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 mt-1">
+            {/* Bottom Footer: Health Badge & Compact Squad Stack */}
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 mt-auto">
               <div className="flex items-center gap-1">
                 {isOverdue ? (
                   <span className="text-[10px] font-bold text-rose-600 flex items-center gap-1">
@@ -190,108 +375,28 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
                 )}
               </div>
 
-              <div className="flex items-center gap-1">
-                {onOpenSquadDrawer && (
-                  <button
-                    type="button"
-                    onClick={() => onOpenSquadDrawer(proj)}
-                    className="px-2 py-0.5 rounded bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200/80 text-[10px] font-semibold transition-colors cursor-pointer flex items-center gap-1.5"
-                    title="Manage Project Squad Roster"
-                  >
-                    {proj.squad && proj.squad.length > 0 ? (
-                      <>
-                        <div className="flex items-center -space-x-1">
-                          {proj.squad.slice(0, 2).map((m: any, idx: number) => (
-                            <div
-                              key={idx}
-                              className="w-3.5 h-3.5 rounded-full bg-indigo-600 text-white text-[7px] font-bold flex items-center justify-center border border-white"
-                            >
-                              {m.name.charAt(0)}
-                            </div>
-                          ))}
-                        </div>
-                        <span>Squad ({proj.squad.length})</span>
-                      </>
-                    ) : (
-                      <>
-                        <i className="bi bi-people-fill text-purple-600 text-[9px]"></i>
-                        <span>Squad</span>
-                      </>
-                    )}
-                  </button>
-                )}
-                {onOpenTasksTray && (
-                  <button
-                    type="button"
-                    onClick={() => onOpenTasksTray(proj)}
-                    className="px-2 py-0.5 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200/80 text-[10px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
-                    title="Open In-View Project Tasks Breakdown"
-                  >
-                    <i className="bi bi-list-task text-blue-600 text-[9px]"></i>
-                    <span>Tasks ({proj.completed_tasks}/{proj.total_tasks})</span>
-                  </button>
-                )}
-                {onQuickAddTask && (
-                  <button
-                    type="button"
-                    onClick={() => onQuickAddTask(proj)}
-                    className="w-5 h-5 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 text-[10px] font-bold transition-colors cursor-pointer flex items-center justify-center"
-                    title="Quick Add Task"
-                  >
-                    <i className="bi bi-plus text-xs"></i>
-                  </button>
-                )}
-                {onOpenDossierModal && (
-                  <button
-                    type="button"
-                    onClick={() => onOpenDossierModal(proj)}
-                    className="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-bold transition-colors cursor-pointer flex items-center gap-1"
-                    title="Open 360° Inspection Dossier"
-                  >
-                    <i className="bi bi-file-earmark-text text-indigo-600 text-[9px]"></i>
-                    <span>Dossier</span>
-                  </button>
-                )}
-                {onOpenMilestonesModal && (
-                  <button
-                    type="button"
-                    onClick={() => onOpenMilestonesModal(proj)}
-                    className="px-2 py-0.5 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/80 text-[10px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
-                    title="Manage Sub-Milestones & Deliverable Checklists"
-                  >
-                    <i className="bi bi-flag-fill text-[9px] text-indigo-600"></i>
-                    <span>Milestones</span>
-                  </button>
-                )}
-                {onUpdateStatus && proj.status !== "active" && proj.status !== "completed" && (
-                  <button
-                    type="button"
-                    onClick={() => onUpdateStatus(proj.id, "active")}
-                    className="px-2 py-0.5 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-semibold transition-colors cursor-pointer"
-                  >
-                    Start
-                  </button>
-                )}
-                {onOpenEditModal && (
-                  <button
-                    type="button"
-                    onClick={() => onOpenEditModal(proj)}
-                    className="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-semibold transition-colors cursor-pointer"
-                  >
-                    Edit
-                  </button>
-                )}
-                {onDeleteProject && (
-                  <button
-                    type="button"
-                    onClick={() => onDeleteProject(proj.id)}
-                    className="w-5 h-5 rounded flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 text-[10px] transition-colors cursor-pointer"
-                    title="Delete Initiative"
-                  >
-                    <i className="bi bi-trash3"></i>
-                  </button>
-                )}
-              </div>
+              {proj.squad && proj.squad.length > 0 && onOpenSquadDrawer && (
+                <button
+                  type="button"
+                  onClick={() => onOpenSquadDrawer(proj)}
+                  className="flex items-center -space-x-1 hover:opacity-80 transition-opacity cursor-pointer"
+                  title={`Squad (${proj.squad.length}): ${proj.squad.map((m: any) => m.name).join(", ")}`}
+                >
+                  {proj.squad.slice(0, 3).map((m: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className="w-4.5 h-4.5 rounded-full bg-indigo-600 text-white text-[7px] font-bold flex items-center justify-center border border-white shadow-2xs"
+                    >
+                      {m.name.charAt(0)}
+                    </div>
+                  ))}
+                  {proj.squad.length > 3 && (
+                    <div className="w-4.5 h-4.5 rounded-full bg-slate-100 text-slate-600 text-[7px] font-bold flex items-center justify-center border border-white shadow-2xs">
+                      +{proj.squad.length - 3}
+                    </div>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         );
