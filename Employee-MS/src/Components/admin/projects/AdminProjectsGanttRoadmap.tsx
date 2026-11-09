@@ -159,6 +159,84 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
     return Math.max(0, Math.min(100, pct));
   }, [timelineHorizon]);
 
+  // Compute bar coordinates and formatting
+  const getProjectBarLayout = (p: ProjectItem) => {
+    const today = new Date();
+    const pStart = p.start_date
+      ? new Date(p.start_date).getTime()
+      : new Date(p.created_at || today).getTime();
+    let pTarget = p.target_date
+      ? new Date(p.target_date).getTime()
+      : pStart + 45 * 24 * 60 * 60 * 1000;
+
+    if (pTarget <= pStart) {
+      pTarget = pStart + 7 * 24 * 60 * 60 * 1000;
+    }
+
+    const tStart = timelineHorizon.start.getTime();
+    const tTotal = timelineHorizon.totalDurationMs;
+
+    const leftPct = Math.max(0, ((pStart - tStart) / tTotal) * 100);
+    const widthPct = Math.max(3.8, ((pTarget - pStart) / tTotal) * 100);
+
+    return {
+      leftPct,
+      widthPct: Math.min(100 - leftPct, widthPct),
+      pStart,
+      pTarget,
+      startDateStr: new Date(pStart).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      targetDateStr: new Date(pTarget).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+    };
+  };
+
+  const getBarColorStyle = (p: ProjectItem) => {
+    if (p.status === "completed") {
+      return {
+        bar: "bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 border-emerald-300 text-white shadow-emerald-500/20",
+        fill: "bg-emerald-300/35",
+        badge: "bg-emerald-950/40 text-emerald-100 border-emerald-400/40",
+      };
+    }
+    if (p.health === "critical" || p.is_overdue) {
+      return {
+        bar: "bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 border-rose-300 text-white shadow-rose-500/30",
+        fill: "bg-rose-300/35",
+        badge: "bg-rose-950/40 text-rose-100 border-rose-400/40",
+      };
+    }
+    if (p.health === "at_risk") {
+      return {
+        bar: "bg-gradient-to-r from-amber-600 via-orange-600 to-amber-500 border-amber-300 text-white shadow-amber-500/20",
+        fill: "bg-amber-300/35",
+        badge: "bg-amber-950/40 text-amber-100 border-amber-400/40",
+      };
+    }
+    if (p.status === "planning") {
+      return {
+        bar: "bg-gradient-to-r from-slate-600 via-slate-700 to-indigo-700 border-slate-300 text-white shadow-slate-500/20",
+        fill: "bg-indigo-300/25",
+        badge: "bg-slate-900/40 text-slate-100 border-slate-400/40",
+      };
+    }
+    if (p.status === "on_hold") {
+      return {
+        bar: "bg-gradient-to-r from-slate-500 to-zinc-600 border-slate-300 text-white opacity-85",
+        fill: "bg-white/15",
+        badge: "bg-black/40 text-slate-200 border-white/20",
+      };
+    }
+    // Default active healthy
+    return {
+      bar: "bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-600 border-blue-300 text-white shadow-indigo-500/25",
+      fill: "bg-white/25",
+      badge: "bg-indigo-950/40 text-indigo-100 border-indigo-300/40",
+    };
+  };
+
   // Center scroll on "Today" marker on initial load
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -412,20 +490,69 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
               <div className="w-[2px] h-full bg-rose-500 shadow-sm shadow-rose-500/50"></div>
             </div>
 
-            {/* Project Tracks Placeholder (Will be filled in Commit 2) */}
+            {/* Project Tracks with Horizontal Timeline Bars */}
             <div className="divide-y divide-slate-100 relative">
               {filteredProjects.map((p) => {
                 const isHovered = hoveredProjectId === p.id;
+                const layout = getProjectBarLayout(p);
+                const colors = getBarColorStyle(p);
+                const pct = Math.min(100, Math.max(0, p.progress_percentage || 0));
+
                 return (
                   <div
                     key={`gantt-track-${p.id}`}
                     onMouseEnter={() => setHoveredProjectId(p.id)}
                     onMouseLeave={() => setHoveredProjectId(null)}
-                    className={`h-[68px] relative flex items-center px-2 transition-colors ${
+                    className={`h-[68px] relative flex items-center px-1 transition-colors ${
                       isHovered ? "bg-indigo-50/30" : ""
                     }`}
                   >
-                    {/* Placeholder for bar */}
+                    {/* The Visual Gantt Bar */}
+                    <div
+                      onClick={() => onOpenDossierModal && onOpenDossierModal(p)}
+                      style={{
+                        left: `${layout.leftPct}%`,
+                        width: `${layout.widthPct}%`,
+                      }}
+                      className={`absolute h-[38px] rounded-xl border shadow-sm transition-all cursor-pointer flex items-center overflow-hidden z-10 group hover:shadow-md hover:scale-[1.008] ${
+                        colors.bar
+                      } ${isHovered ? "ring-2 ring-indigo-400 ring-offset-1" : ""}`}
+                      title={`${p.title} (${layout.startDateStr} → ${layout.targetDateStr}) • ${pct}% Complete`}
+                    >
+                      {/* Internal Velocity Fill Track */}
+                      <div
+                        style={{ width: `${pct}%` }}
+                        className={`absolute left-0 top-0 bottom-0 pointer-events-none transition-all duration-300 border-r border-white/40 ${colors.fill}`}
+                      ></div>
+
+                      {/* Bar Content */}
+                      <div className="relative z-10 px-3 w-full flex items-center justify-between gap-2 text-white min-w-0">
+                        {/* Left: Code & Title */}
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="text-[10px] font-mono font-black opacity-95 shrink-0 bg-black/20 px-1 py-0.2 rounded border border-white/20">
+                            PRJ-{String(p.id).padStart(4, "0")}
+                          </span>
+                          <span className="text-xs font-bold truncate max-w-[200px]">
+                            {p.title}
+                          </span>
+                        </div>
+
+                        {/* Right: Progress & Health Indicator */}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded border backdrop-blur-xs ${colors.badge}`}>
+                            {pct}%
+                          </span>
+
+                          {p.days_left !== null && p.days_left !== undefined && p.status !== "completed" && (
+                            <span className="hidden sm:inline-block text-[9.5px] font-medium opacity-90 bg-black/25 px-1.5 py-0.2 rounded border border-white/10">
+                              {p.days_left < 0
+                                ? `${Math.abs(p.days_left)}d overdue`
+                                : `${p.days_left}d left`}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 );
               })}
