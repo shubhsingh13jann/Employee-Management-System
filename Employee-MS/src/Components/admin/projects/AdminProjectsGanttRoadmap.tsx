@@ -159,6 +159,32 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
     return Math.max(0, Math.min(100, pct));
   }, [timelineHorizon]);
 
+  // Fetch milestones for all rendered projects in the background
+  useEffect(() => {
+    filteredProjects.forEach((p) => {
+      const projId = String(p.id);
+      if (!milestonesCache[projId] && !loadingMilestones[projId]) {
+        setLoadingMilestones((prev) => ({ ...prev, [projId]: true }));
+        api
+          .get(`/api/admin/projects/${p.id}/milestones`)
+          .then((res) => {
+            if (res.data.status) {
+              setMilestonesCache((prev) => ({
+                ...prev,
+                [projId]: res.data.milestones || [],
+              }));
+            }
+          })
+          .catch((err) => {
+            console.warn(`Could not load milestones for project ${p.id}:`, err);
+          })
+          .finally(() => {
+            setLoadingMilestones((prev) => ({ ...prev, [projId]: false }));
+          });
+      }
+    });
+  }, [filteredProjects]);
+
   // Compute bar coordinates and formatting
   const getProjectBarLayout = (p: ProjectItem) => {
     const today = new Date();
@@ -293,6 +319,34 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
             </select>
           )}
 
+          {/* Pan Navigation */}
+          <div className="flex items-center bg-white/10 rounded-lg p-0.5 border border-white/15">
+            <button
+              type="button"
+              onClick={() => {
+                if (scrollContainerRef.current) {
+                  scrollContainerRef.current.scrollBy({ left: -monthColumnWidthPx * 2, behavior: "smooth" });
+                }
+              }}
+              className="w-7 h-7 flex items-center justify-center rounded text-white hover:bg-white/15 transition-colors cursor-pointer text-xs"
+              title="Pan Left (Earlier Months)"
+            >
+              <i className="bi bi-chevron-left"></i>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (scrollContainerRef.current) {
+                  scrollContainerRef.current.scrollBy({ left: monthColumnWidthPx * 2, behavior: "smooth" });
+                }
+              }}
+              className="w-7 h-7 flex items-center justify-center rounded text-white hover:bg-white/15 transition-colors cursor-pointer text-xs"
+              title="Pan Right (Future Months)"
+            >
+              <i className="bi bi-chevron-right"></i>
+            </button>
+          </div>
+
           {/* Jump to Today */}
           <button
             type="button"
@@ -338,6 +392,39 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
               Quarterly
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Legend Bar */}
+      <div className="px-5 py-2 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between gap-4 flex-wrap text-[11px] text-slate-600">
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="font-bold text-slate-700 uppercase tracking-wider text-[10px]">
+            Roadmap Legend:
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-r from-blue-600 to-indigo-600"></span>
+            <span>Healthy / Active</span>
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-r from-amber-500 to-orange-500"></span>
+            <span>At Risk</span>
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-r from-rose-600 to-red-600"></span>
+            <span>Critical / Overdue</span>
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-r from-emerald-600 to-teal-600"></span>
+            <span>Completed</span>
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rotate-45 bg-cyan-300 border border-white"></span>
+            <span>Sub-Milestone Flag</span>
+          </span>
+        </div>
+
+        <div className="text-[10px] text-slate-400">
+          Tip: Click any bar to open 360° Dossier, or hover diamond markers for deliverable checklist status.
         </div>
       </div>
 
@@ -553,6 +640,57 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
                         </div>
                       </div>
                     </div>
+                    {/* Milestone Diamond Markers for this Project */}
+                    {(milestonesCache[String(p.id)] || []).map((m, mIdx) => {
+                      if (!m.due_date) return null;
+                      const mTime = new Date(m.due_date).getTime();
+                      const tStart = timelineHorizon.start.getTime();
+                      const tTotal = timelineHorizon.totalDurationMs;
+                      if (tTotal <= 0) return null;
+                      const mLeftPct = Math.max(0, Math.min(100, ((mTime - tStart) / tTotal) * 100));
+
+                      const isCompleted = m.status === "completed";
+                      const isDelayed = m.status === "delayed";
+                      const isInProgress = m.status === "in_progress";
+
+                      return (
+                        <div
+                          key={`ms-marker-${p.id}-${m.id || mIdx}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onOpenMilestonesModal) onOpenMilestonesModal(p);
+                          }}
+                          onMouseEnter={(e) => {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            setHoveredMilestone({
+                              milestone: m,
+                              project: p,
+                              x: rect.left + rect.width / 2,
+                              y: rect.top,
+                            });
+                          }}
+                          onMouseLeave={() => setHoveredMilestone(null)}
+                          style={{ left: `${mLeftPct}%` }}
+                          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 cursor-pointer transition-transform hover:scale-130"
+                        >
+                          <div
+                            className={`w-4 h-4 rotate-45 rounded-[3px] border shadow-md flex items-center justify-center ${
+                              isCompleted
+                                ? "bg-emerald-400 border-white text-emerald-950"
+                                : isDelayed
+                                ? "bg-rose-500 border-white text-white animate-pulse"
+                                : isInProgress
+                                ? "bg-cyan-300 border-white text-cyan-950 shadow-cyan-400/50"
+                                : "bg-white border-slate-400 text-slate-800"
+                            }`}
+                          >
+                            <div className="-rotate-45 text-[8px] font-bold">
+                              {isCompleted ? "✓" : isDelayed ? "!" : mIdx + 1}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 );
               })}
@@ -560,6 +698,69 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
           </div>
         </div>
       </div>
+
+      {/* Floating Milestone Tooltip Card */}
+      {hoveredMilestone && (
+        <div
+          style={{
+            position: "fixed",
+            left: `${Math.min(window.innerWidth - 260, Math.max(10, hoveredMilestone.x - 120))}px`,
+            top: `${Math.max(10, hoveredMilestone.y - 140)}px`,
+          }}
+          className="z-50 w-60 rounded-xl bg-slate-900/95 backdrop-blur-md border border-indigo-500/40 shadow-2xl p-3 text-white pointer-events-none animate-in fade-in zoom-in-95 duration-150"
+        >
+          <div className="flex items-center justify-between gap-1 mb-1 border-b border-white/10 pb-1">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-300">
+              Deliverable Milestone
+            </span>
+            <span
+              className={`px-1.5 py-0.2 rounded text-[9px] font-bold capitalize ${
+                hoveredMilestone.milestone.status === "completed"
+                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                  : hoveredMilestone.milestone.status === "delayed"
+                  ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                  : "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+              }`}
+            >
+              {hoveredMilestone.milestone.status.replace("_", " ")}
+            </span>
+          </div>
+
+          <h5 className="text-xs font-bold text-white mb-1 leading-snug">
+            {hoveredMilestone.milestone.title}
+          </h5>
+
+          <div className="space-y-0.5 text-[10px] text-slate-300">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400">Target Date:</span>
+              <span className="font-semibold text-slate-200">
+                {new Date(hoveredMilestone.milestone.due_date).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </span>
+            </div>
+            {hoveredMilestone.milestone.owner_name && (
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400">Owner:</span>
+                <span className="font-semibold text-slate-200">
+                  {hoveredMilestone.milestone.owner_name}
+                </span>
+              </div>
+            )}
+            {hoveredMilestone.milestone.deliverables && hoveredMilestone.milestone.deliverables.length > 0 && (
+              <div className="flex items-center justify-between pt-1 border-t border-white/10 text-emerald-400">
+                <span>Deliverables:</span>
+                <span className="font-bold">
+                  {hoveredMilestone.milestone.deliverables.filter((d) => d.completed).length} /{" "}
+                  {hoveredMilestone.milestone.deliverables.length} Done
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
