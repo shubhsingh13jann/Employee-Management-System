@@ -14,6 +14,7 @@ import {
   ProjectSquadDrawer,
   QuickAddTaskModal,
   ProjectTasksTrayModal,
+  AdminProjectsGanttRoadmap,
 } from "../../Components/admin/projects";
 
 export interface ProjectItem {
@@ -61,7 +62,7 @@ const AdminProjects: React.FC = () => {
   const [selectedPriority, setSelectedPriority] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [activeKpiFilter, setActiveKpiFilter] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"table" | "grid" | "milestones">("table");
+  const [viewMode, setViewMode] = useState<"table" | "grid" | "milestones" | "gantt">("table");
 
   // Modals / Drawers State (Wired in Commits 4 & 5)
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
@@ -393,6 +394,20 @@ const AdminProjects: React.FC = () => {
               Reset Filters
             </button>
           </div>
+        ) : viewMode === "gantt" ? (
+          <AdminProjectsGanttRoadmap
+            projects={filteredProjects}
+            onOpenEditModal={(proj) => {
+              setEditingProject(proj);
+              setShowCreateModal(true);
+            }}
+            onUpdateStatus={handleUpdateStatus}
+            onOpenMilestonesModal={(proj) => setSelectedMilestoneProject(proj)}
+            onOpenDossierModal={(proj) => setSelectedDossierProject(proj)}
+            onOpenSquadDrawer={(proj) => setSelectedSquadProject(proj)}
+            onOpenTasksTray={(proj) => setSelectedTasksProject(proj)}
+            onQuickAddTask={(proj) => setQuickAddTaskProject(proj)}
+          />
         ) : viewMode === "milestones" ? (
           <AdminMilestoneTracker
             projects={filteredProjects}

@@ -7,8 +7,8 @@ interface AdminProjectsHeaderProps {
   onExportCSV: () => void;
   onRefresh: () => void;
   isRefreshing: boolean;
-  viewMode: "table" | "grid" | "milestones";
-  onViewModeChange: (mode: "table" | "grid" | "milestones") => void;
+  viewMode: "table" | "grid" | "milestones" | "gantt";
+  onViewModeChange: (mode: "table" | "grid" | "milestones" | "gantt") => void;
 }
 
 export const AdminProjectsHeader: React.FC<AdminProjectsHeaderProps> = ({
@@ -175,6 +175,19 @@ export const AdminProjectsHeader: React.FC<AdminProjectsHeaderProps> = ({
           >
             <i className="bi bi-calendar-range-fill text-xs"></i>
             <span className="hidden sm:inline">Milestones</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onViewModeChange("gantt")}
+            className={`h-8 px-2.5 sm:px-3 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer leading-none ${
+              viewMode === "gantt"
+                ? "bg-indigo-600 text-white shadow-xs"
+                : "text-slate-300 hover:text-white"
+            }`}
+            title="Interactive Gantt Roadmap View"
+          >
+            <i className="bi bi-bar-chart-steps text-xs"></i>
+            <span className="hidden sm:inline">Roadmap</span>
           </button>
         </div>
 
