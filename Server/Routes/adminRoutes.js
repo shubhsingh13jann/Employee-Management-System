@@ -60,6 +60,9 @@ import {
   createProjectTask,
   updateProjectTaskStatus,
   deleteProjectTask,
+  getProjectExpenses,
+  createProjectExpense,
+  deleteProjectExpense,
 } from "../controllers/adminController.js";
 import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
 
@@ -144,5 +147,10 @@ router.get("/projects/:id/tasks", getProjectTasks);
 router.post("/projects/:id/tasks", createProjectTask);
 router.put("/projects/tasks/:taskId/status", updateProjectTaskStatus);
 router.delete("/projects/tasks/:taskId", deleteProjectTask);
+
+// Project Budget & Expenditure Burn Rate HUD Routes
+router.get("/projects/:id/expenses", getProjectExpenses);
+router.post("/projects/:id/expenses", createProjectExpense);
+router.delete("/projects/expenses/:expenseId", deleteProjectExpense);
 
 export { router as adminRouter };

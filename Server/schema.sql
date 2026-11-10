@@ -236,3 +236,22 @@ CREATE TABLE IF NOT EXISTS secondary_team_hierarchy (
     INDEX idx_matrix_emp (employee_id),
     INDEX idx_matrix_sup (secondary_supervisor_id)
 );
+
+-- 17. Project Expenditures & Budget Burn Rate HUD
+CREATE TABLE IF NOT EXISTS project_expenses (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    project_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    category ENUM('software', 'contractor', 'infra', 'hardware', 'travel', 'other') DEFAULT 'software',
+    amount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    expense_date DATE NOT NULL,
+    logged_by INT NULL,
+    vendor_recipient VARCHAR(255) NULL,
+    receipt_url VARCHAR(255) NULL,
+    notes TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+    FOREIGN KEY (logged_by) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_exp_proj (project_id),
+    INDEX idx_exp_date (expense_date)
+);

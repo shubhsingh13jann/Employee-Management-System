@@ -2010,6 +2010,22 @@ export const getAdminProjects = async (req, res) => {
       console.warn("Could not query project_milestones for velocity:", mErr.message);
     }
 
+    // Fetch expenses summary per project for Budget Burn Rate HUD
+    let expensesByProject = {};
+    try {
+      const [expenseRows] = await pool.query(
+        "SELECT project_id, SUM(amount) AS total_spent, COUNT(id) AS expense_count FROM project_expenses GROUP BY project_id"
+      );
+      for (const e of expenseRows) {
+        expensesByProject[e.project_id] = {
+          total_spent: Number(e.total_spent || 0),
+          expense_count: Number(e.expense_count || 0),
+        };
+      }
+    } catch (eErr) {
+      console.warn("Could not query project_expenses for budget burn:", eErr.message);
+    }
+
     const formatted = projects.map((p) => {
       const total = Number(p.total_tasks) || 0;
       const completed = Number(p.completed_tasks) || 0;
@@ -2075,6 +2091,14 @@ export const getAdminProjects = async (req, res) => {
         health,
         squad: squadByProject[p.id] || [],
         squad_members_count: (squadByProject[p.id] || []).length,
+        budget: Number(p.budget) || 0,
+        budget_allocated: Number(p.budget) || 0,
+        total_expenses: (expensesByProject[p.id]?.total_spent) || 0,
+        runway_remaining: Math.max(0, (Number(p.budget) || 0) - ((expensesByProject[p.id]?.total_spent) || 0)),
+        budget_burn_pct: (Number(p.budget) || 0) > 0 ? Math.round((((expensesByProject[p.id]?.total_spent) || 0) / (Number(p.budget) || 0)) * 100) : 0,
+        is_over_budget: ((expensesByProject[p.id]?.total_spent) || 0) > (Number(p.budget) || 0) && (Number(p.budget) || 0) > 0,
+        is_critical_burn: ((Number(p.budget) || 0) > 0 ? Math.round((((expensesByProject[p.id]?.total_spent) || 0) / (Number(p.budget) || 0)) * 100) : 0) >= 90,
+        expense_count: (expensesByProject[p.id]?.expense_count) || 0,
       };
     });
 
@@ -3578,3 +3602,197 @@ export const deleteProjectTask = async (req, res) => {
     return res.status(500).json({ status: false, error: "Failed to delete task" });
   }
 };
+
+// ============================================================================
+// 💰 PROJECT BUDGET ALLOCATION & EXPENDITURE BURN RATE HUD
+// ============================================================================
+
+export const getProjectExpenses = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [[project]] = await pool.query(
+      `SELECT p.id, p.title, p.budget, p.status, p.priority, p.start_date, p.target_date,
+              d.name AS department_name, s.name AS supervisor_name
+       FROM projects p
+       LEFT JOIN departments d ON p.department_id = d.id
+       LEFT JOIN users s ON p.lead_supervisor_id = s.id
+       WHERE p.id = ?`,
+      [id]
+    );
+
+    if (!project) {
+      return res.status(404).json({ status: false, error: "Project not found" });
+    }
+
+    const [expenses] = await pool.query(
+      `SELECT e.*, u.name AS logged_by_name, u.image_url AS logged_by_image
+       FROM project_expenses e
+       LEFT JOIN users u ON e.logged_by = u.id
+       WHERE e.project_id = ?
+       ORDER BY e.expense_date DESC, e.created_at DESC`,
+      [id]
+    );
+
+    const budgetAllocated = Number(project.budget || 0);
+    let totalSpent = 0;
+    const categoryTotals = {
+      software: 0,
+      contractor: 0,
+      infra: 0,
+      hardware: 0,
+      travel: 0,
+      other: 0,
+    };
+
+    expenses.forEach((e) => {
+      const amt = Number(e.amount || 0);
+      totalSpent += amt;
+      const cat = e.category || "other";
+      if (categoryTotals[cat] !== undefined) {
+        categoryTotals[cat] += amt;
+      } else {
+        categoryTotals.other += amt;
+      }
+    });
+
+    const runwayRemaining = Math.max(0, budgetAllocated - totalSpent);
+    const burnRatePct = budgetAllocated > 0 ? Math.round((totalSpent / budgetAllocated) * 100) : 0;
+    const isOverBudget = totalSpent > budgetAllocated && budgetAllocated > 0;
+    const isCriticalBurn = burnRatePct >= 90;
+
+    let burnStatus = "healthy";
+    if (isOverBudget) {
+      burnStatus = "over_budget";
+    } else if (isCriticalBurn) {
+      burnStatus = "warning_90";
+    } else if (burnRatePct >= 75) {
+      burnStatus = "caution";
+    }
+
+    return res.json({
+      status: true,
+      project: {
+        id: project.id,
+        title: project.title,
+        department_name: project.department_name,
+        supervisor_name: project.supervisor_name,
+        status: project.status,
+      },
+      summary: {
+        budget_allocated: budgetAllocated,
+        total_spent: totalSpent,
+        runway_remaining: runwayRemaining,
+        burn_rate_pct: burnRatePct,
+        is_critical_burn: isCriticalBurn,
+        is_over_budget: isOverBudget,
+        burn_status: burnStatus,
+        expense_count: expenses.length,
+      },
+      category_breakdown: categoryTotals,
+      expenses,
+    });
+  } catch (err) {
+    console.error("getProjectExpenses error:", err);
+    return res.status(500).json({ status: false, error: "Failed to fetch project expenditures" });
+  }
+};
+
+export const createProjectExpense = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, category, amount, expense_date, vendor_recipient, notes } = req.body;
+
+    if (!title || !title.trim()) {
+      return res.status(400).json({ status: false, error: "Expenditure title is required" });
+    }
+
+    const numAmount = Number(amount);
+    if (isNaN(numAmount) || numAmount <= 0) {
+      return res.status(400).json({ status: false, error: "Please provide a valid expenditure amount greater than 0" });
+    }
+
+    const [[project]] = await pool.query("SELECT id, title, budget FROM projects WHERE id = ?", [id]);
+    if (!project) {
+      return res.status(404).json({ status: false, error: "Project not found" });
+    }
+
+    const validCategories = ["software", "contractor", "infra", "hardware", "travel", "other"];
+    const chosenCategory = validCategories.includes(category) ? category : "software";
+    const chosenDate = expense_date || new Date().toISOString().split("T")[0];
+    const loggedBy = req.user?.id || 1;
+
+    const [result] = await pool.query(
+      `INSERT INTO project_expenses (project_id, title, category, amount, expense_date, logged_by, vendor_recipient, notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id,
+        title.trim(),
+        chosenCategory,
+        numAmount,
+        chosenDate,
+        loggedBy,
+        vendor_recipient ? vendor_recipient.trim() : null,
+        notes ? notes.trim() : null,
+      ]
+    );
+
+    // Audit log
+    await pool.query(
+      `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, details, performed_by)
+       VALUES (?, 'Project Expenditure Logged', 'project_expenses', '0.00', ?, ?)`,
+      [
+        loggedBy,
+        `Logged $${numAmount.toLocaleString()} (${chosenCategory}) for initiative #${id} "${project.title}": ${title.trim()}`,
+        String(loggedBy),
+      ]
+    );
+
+    return res.status(201).json({
+      status: true,
+      message: "Expenditure successfully logged to initiative budget",
+      expense_id: result.insertId,
+    });
+  } catch (err) {
+    console.error("createProjectExpense error:", err);
+    return res.status(500).json({ status: false, error: "Failed to log project expenditure" });
+  }
+};
+
+export const deleteProjectExpense = async (req, res) => {
+  try {
+    const { expenseId } = req.params;
+
+    const [[expense]] = await pool.query(
+      `SELECT e.*, p.title AS project_title 
+       FROM project_expenses e
+       LEFT JOIN projects p ON e.project_id = p.id
+       WHERE e.id = ?`,
+      [expenseId]
+    );
+
+    if (!expense) {
+      return res.status(404).json({ status: false, error: "Expenditure record not found" });
+    }
+
+    await pool.query("DELETE FROM project_expenses WHERE id = ?", [expenseId]);
+
+    const loggedBy = req.user?.id || 1;
+    await pool.query(
+      `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, details, performed_by)
+       VALUES (?, 'Project Expenditure Deleted', 'project_expenses', ?, ?, ?)`,
+      [
+        loggedBy,
+        `$${Number(expense.amount).toLocaleString()}`,
+        `Deleted expense #${expenseId} "${expense.title}" from project #${expense.project_id} (${expense.project_title || "N/A"})`,
+        String(loggedBy),
+      ]
+    );
+
+    return res.json({ status: true, message: "Expenditure record successfully deleted" });
+  } catch (err) {
+    console.error("deleteProjectExpense error:", err);
+    return res.status(500).json({ status: false, error: "Failed to delete expenditure record" });
+  }
+};
+
