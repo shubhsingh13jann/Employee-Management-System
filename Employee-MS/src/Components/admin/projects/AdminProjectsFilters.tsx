@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 interface DepartmentOption {
   id: number | string;
@@ -9,6 +9,32 @@ interface SupervisorOption {
   id: number | string;
   name: string;
 }
+
+export interface ColumnVisibility {
+  initiative: boolean;
+  department: boolean;
+  supervisor: boolean;
+  priority: boolean;
+  velocity: boolean;
+  budget: boolean;
+  target_date: boolean;
+  health: boolean;
+  status: boolean;
+  actions: boolean;
+}
+
+export const DEFAULT_COLUMN_VISIBILITY: ColumnVisibility = {
+  initiative: true,
+  department: true,
+  supervisor: true,
+  priority: true,
+  velocity: true,
+  budget: true,
+  target_date: true,
+  health: true,
+  status: true,
+  actions: true,
+};
 
 interface AdminProjectsFiltersProps {
   searchTerm: string;
@@ -26,7 +52,23 @@ interface AdminProjectsFiltersProps {
   totalFiltered: number;
   totalCount: number;
   onResetFilters: () => void;
+  visibleColumns?: ColumnVisibility;
+  onToggleColumn?: (key: keyof ColumnVisibility) => void;
+  onResetColumns?: () => void;
 }
+
+const COLUMN_OPTIONS: { key: keyof ColumnVisibility; label: string; icon: string }[] = [
+  { key: "initiative", label: "Strategic Initiative", icon: "bi-kanban" },
+  { key: "department", label: "Department", icon: "bi-building" },
+  { key: "supervisor", label: "Lead Supervisor", icon: "bi-person-badge" },
+  { key: "priority", label: "Priority", icon: "bi-lightning-charge" },
+  { key: "velocity", label: "Task Velocity", icon: "bi-speedometer2" },
+  { key: "budget", label: "Budget & Burn", icon: "bi-cash-stack" },
+  { key: "target_date", label: "Target Date", icon: "bi-calendar-event" },
+  { key: "health", label: "Health", icon: "bi-heart-pulse" },
+  { key: "status", label: "Status", icon: "bi-check2-circle" },
+  { key: "actions", label: "Actions", icon: "bi-three-dots" },
+];
 
 export const AdminProjectsFilters: React.FC<AdminProjectsFiltersProps> = ({
   searchTerm,
@@ -44,8 +86,13 @@ export const AdminProjectsFilters: React.FC<AdminProjectsFiltersProps> = ({
   totalFiltered,
   totalCount,
   onResetFilters,
+  visibleColumns = DEFAULT_COLUMN_VISIBILITY,
+  onToggleColumn,
+  onResetColumns,
 }) => {
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [isColumnDropdownOpen, setIsColumnDropdownOpen] = useState(false);
+  const columnDropdownRef = useRef<HTMLDivElement>(null);
 
   // Keyboard shortcut: '/' focuses search input
   useEffect(() => {
@@ -63,12 +110,34 @@ export const AdminProjectsFilters: React.FC<AdminProjectsFiltersProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Click outside to close column visibility dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        columnDropdownRef.current &&
+        !columnDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsColumnDropdownOpen(false);
+      }
+    };
+    if (isColumnDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isColumnDropdownOpen]);
+
   const isFiltered =
     searchTerm.trim() !== "" ||
     selectedDepartment !== "all" ||
     selectedSupervisor !== "all" ||
     selectedPriority !== "all" ||
     statusFilter !== "all";
+
+  const totalColumnsCount = COLUMN_OPTIONS.length;
+  const visibleColumnsCount = Object.values(visibleColumns).filter(Boolean).length;
+  const hiddenColumnsCount = totalColumnsCount - visibleColumnsCount;
 
   const statusOptions = [
     { key: "all", label: "All Statuses" },
@@ -112,10 +181,10 @@ export const AdminProjectsFilters: React.FC<AdminProjectsFiltersProps> = ({
         </svg>
       </div>
 
-      {/* Main Toolbar Grid: Omnibox Search and Filter Dropdowns */}
-      <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-2.5 mb-3">
+      {/* Main Toolbar Grid: Omnibox Search, Filter Dropdowns, and Columns Filter */}
+      <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-2.5 mb-3">
         {/* Omnibox Search Bar */}
-        <div className="md:col-span-5 relative">
+        <div className="sm:col-span-2 md:col-span-4 relative">
           <div className="relative flex items-center h-10 rounded-xl bg-white border border-indigo-200/90 hover:border-indigo-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 shadow-sm transition-all px-3">
             <i className="bi bi-search text-indigo-500 text-sm mr-2.5 shrink-0"></i>
             <input
@@ -145,7 +214,7 @@ export const AdminProjectsFilters: React.FC<AdminProjectsFiltersProps> = ({
         </div>
 
         {/* Department Filter */}
-        <div className="md:col-span-3">
+        <div className="sm:col-span-1 md:col-span-2">
           <select
             value={selectedDepartment}
             onChange={(e) => onDepartmentChange(e.target.value)}
@@ -161,7 +230,7 @@ export const AdminProjectsFilters: React.FC<AdminProjectsFiltersProps> = ({
         </div>
 
         {/* Lead Supervisor Filter */}
-        <div className="md:col-span-2">
+        <div className="sm:col-span-1 md:col-span-2">
           <select
             value={selectedSupervisor}
             onChange={(e) => onSupervisorChange(e.target.value)}
@@ -177,7 +246,7 @@ export const AdminProjectsFilters: React.FC<AdminProjectsFiltersProps> = ({
         </div>
 
         {/* Priority Filter */}
-        <div className="md:col-span-2">
+        <div className="sm:col-span-1 md:col-span-2">
           <select
             value={selectedPriority}
             onChange={(e) => onPriorityChange(e.target.value)}
@@ -189,6 +258,99 @@ export const AdminProjectsFilters: React.FC<AdminProjectsFiltersProps> = ({
             <option value="medium">🟡 Medium</option>
             <option value="low">🟢 Low</option>
           </select>
+        </div>
+
+        {/* Column Visibility Filter (Placed right next to All Priorities) */}
+        <div className="sm:col-span-1 md:col-span-2 relative" ref={columnDropdownRef}>
+          <button
+            type="button"
+            onClick={() => setIsColumnDropdownOpen((prev) => !prev)}
+            className={`w-full h-10 px-3 text-xs rounded-xl border transition-all shadow-2xs font-medium cursor-pointer flex items-center justify-between gap-1.5 ${
+              isColumnDropdownOpen || hiddenColumnsCount > 0
+                ? "bg-indigo-50/90 border-indigo-300 text-indigo-700 font-semibold"
+                : "border-slate-200/90 bg-white hover:border-indigo-300 text-slate-700"
+            }`}
+            title="Customize visible table columns"
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <i className="bi bi-layout-three-columns text-indigo-500 text-xs"></i>
+              <span className="truncate">Columns</span>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              {hiddenColumnsCount > 0 ? (
+                <span className="px-1.5 py-0.2 rounded-full bg-indigo-600 text-white text-[9px] font-bold">
+                  {visibleColumnsCount}
+                </span>
+              ) : (
+                <span className="text-[10px] text-slate-400 font-semibold">
+                  {visibleColumnsCount}/{totalColumnsCount}
+                </span>
+              )}
+              <i
+                className={`bi bi-chevron-down text-[10px] transition-transform ${
+                  isColumnDropdownOpen ? "rotate-180" : ""
+                }`}
+              ></i>
+            </div>
+          </button>
+
+          {isColumnDropdownOpen && (
+            <div
+              className="absolute right-0 top-full mt-1.5 w-60 rounded-xl bg-white border border-slate-200/90 shadow-xl p-2 z-50 text-left animate-in fade-in zoom-in-95 duration-100"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-100 px-1">
+                <div>
+                  <span className="text-[11px] font-bold text-slate-800 block">Table Columns</span>
+                  <span className="text-[9px] text-slate-400 block">
+                    {visibleColumnsCount} of {totalColumnsCount} visible
+                  </span>
+                </div>
+                {hiddenColumnsCount > 0 && onResetColumns && (
+                  <button
+                    type="button"
+                    onClick={onResetColumns}
+                    className="text-[10px] text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer hover:underline"
+                  >
+                    Show All
+                  </button>
+                )}
+              </div>
+
+              <div className="space-y-0.5 max-h-64 overflow-y-auto custom-scrollbar pr-0.5">
+                {COLUMN_OPTIONS.map((col) => {
+                  const isChecked = visibleColumns[col.key];
+                  return (
+                    <label
+                      key={col.key}
+                      className="flex items-center justify-between px-2 py-1.5 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors text-xs select-none"
+                    >
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => onToggleColumn && onToggleColumn(col.key)}
+                          className="w-3.5 h-3.5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer"
+                        />
+                        <span
+                          className={`text-[11px] ${
+                            isChecked ? "text-slate-800 font-medium" : "text-slate-400"
+                          }`}
+                        >
+                          {col.label}
+                        </span>
+                      </div>
+                      <i
+                        className={`bi ${col.icon} text-[10px] ${
+                          isChecked ? "text-indigo-500" : "text-slate-300"
+                        }`}
+                      ></i>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

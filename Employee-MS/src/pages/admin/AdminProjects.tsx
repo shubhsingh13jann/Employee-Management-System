@@ -16,6 +16,8 @@ import {
   ProjectTasksTrayModal,
   AdminProjectsGanttRoadmap,
   ProjectBudgetBurnHUDModal,
+  ColumnVisibility,
+  DEFAULT_COLUMN_VISIBILITY,
 } from "../../Components/admin/projects";
 
 export interface ProjectItem {
@@ -71,6 +73,44 @@ const AdminProjects: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [activeKpiFilter, setActiveKpiFilter] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "grid" | "milestones" | "gantt">("table");
+
+  // Table Column Visibility State (Persisted in localStorage)
+  const [visibleColumns, setVisibleColumns] = useState<ColumnVisibility>(() => {
+    try {
+      const saved = localStorage.getItem("admin_projects_visible_columns");
+      if (saved) {
+        return { ...DEFAULT_COLUMN_VISIBILITY, ...JSON.parse(saved) };
+      }
+    } catch (e) {
+      // fallback
+    }
+    return DEFAULT_COLUMN_VISIBILITY;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("admin_projects_visible_columns", JSON.stringify(visibleColumns));
+    } catch (e) {}
+  }, [visibleColumns]);
+
+  const handleToggleColumn = (columnKey: keyof ColumnVisibility) => {
+    setVisibleColumns((prev) => {
+      const isCurrentlyVisible = prev[columnKey];
+      if (isCurrentlyVisible) {
+        // Prevent hiding the last visible column
+        const visibleCount = Object.values(prev).filter(Boolean).length;
+        if (visibleCount <= 1) return prev;
+      }
+      return {
+        ...prev,
+        [columnKey]: !isCurrentlyVisible,
+      };
+    });
+  };
+
+  const handleResetColumns = () => {
+    setVisibleColumns(DEFAULT_COLUMN_VISIBILITY);
+  };
 
   // Modals / Drawers State (Wired in Commits 4 & 5)
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
@@ -378,6 +418,9 @@ const AdminProjects: React.FC = () => {
           totalFiltered={filteredProjects.length}
           totalCount={projects.length}
           onResetFilters={handleResetFilters}
+          visibleColumns={visibleColumns}
+          onToggleColumn={handleToggleColumn}
+          onResetColumns={handleResetColumns}
         />
 
         {/* Dynamic View Rendering: Table vs Grid vs Milestones */}
@@ -448,6 +491,7 @@ const AdminProjects: React.FC = () => {
         ) : (
           <AdminProjectsTable
             projects={filteredProjects}
+            visibleColumns={visibleColumns}
             onOpenEditModal={(proj) => {
               setEditingProject(proj);
               setShowCreateModal(true);
