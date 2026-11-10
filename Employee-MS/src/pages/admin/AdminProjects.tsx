@@ -416,6 +416,7 @@ const AdminProjects: React.FC = () => {
             onOpenSquadDrawer={(proj) => setSelectedSquadProject(proj)}
             onOpenTasksTray={(proj) => setSelectedTasksProject(proj)}
             onQuickAddTask={(proj) => setQuickAddTaskProject(proj)}
+            onOpenBudgetHUD={(proj) => setSelectedBudgetProject(proj)}
           />
         ) : viewMode === "milestones" ? (
           <AdminMilestoneTracker
@@ -493,6 +494,10 @@ const AdminProjects: React.FC = () => {
           onOpenMilestonesModal={(proj) => {
             setSelectedDossierProject(null);
             setSelectedMilestoneProject(proj);
+          }}
+          onOpenBudgetHUD={(proj) => {
+            setSelectedDossierProject(null);
+            setSelectedBudgetProject(proj);
           }}
         />
 

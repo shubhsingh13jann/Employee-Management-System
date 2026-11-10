@@ -118,6 +118,7 @@ interface ProjectDetailDossierModalProps {
   onClose: () => void;
   projectId: number | string | null;
   onOpenMilestonesModal?: (project: any) => void;
+  onOpenBudgetHUD?: (project: any) => void;
 }
 
 export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps> = ({
@@ -125,6 +126,7 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
   onClose,
   projectId,
   onOpenMilestonesModal,
+  onOpenBudgetHUD,
 }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState<DossierPayload | null>(null);
@@ -396,18 +398,36 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
             </div>
 
             {/* 4. Budget Telemetry */}
-            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70">
+            <div
+              onClick={() => onOpenBudgetHUD && onOpenBudgetHUD(project)}
+              className={`p-2.5 rounded-xl border transition-all ${
+                onOpenBudgetHUD
+                  ? "bg-slate-50 hover:bg-emerald-50/70 border-slate-200/70 hover:border-emerald-300 cursor-pointer group"
+                  : "bg-slate-50 border-slate-200/70"
+              }`}
+              title={onOpenBudgetHUD ? "Click to open Budget Allocation & Burn Rate HUD" : undefined}
+            >
               <div className="flex items-center justify-between text-[10px] font-semibold text-slate-500 mb-0.5">
-                <span>Budget Telemetry</span>
+                <span className="flex items-center gap-1">
+                  <i className="bi bi-cash-stack text-emerald-600"></i>
+                  <span>Budget Telemetry</span>
+                </span>
                 <span className="font-bold text-emerald-700">
                   ${telemetry.budget_allocated.toLocaleString()}
                 </span>
               </div>
-              <div className="text-xs font-bold text-slate-800">
-                ${telemetry.budget_spent.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">spent</span>
+              <div className="text-xs font-bold text-slate-800 flex items-center justify-between">
+                <span>
+                  ${telemetry.budget_spent.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">spent</span>
+                </span>
+                {onOpenBudgetHUD && (
+                  <span className="text-[9px] font-bold text-emerald-600 group-hover:underline">
+                    Manage HUD →
+                  </span>
+                )}
               </div>
               <div className="text-[10px] text-slate-400 truncate mt-0.5">
-                ${(telemetry.budget_allocated - telemetry.budget_spent).toLocaleString()} runway available
+                ${Math.max(0, telemetry.budget_allocated - telemetry.budget_spent).toLocaleString()} runway available
               </div>
             </div>
           </div>

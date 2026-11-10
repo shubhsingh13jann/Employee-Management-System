@@ -12,6 +12,7 @@ export interface AdminProjectsGanttRoadmapProps {
   onOpenSquadDrawer?: (project: ProjectItem) => void;
   onOpenTasksTray?: (project: ProjectItem) => void;
   onQuickAddTask?: (project: ProjectItem) => void;
+  onOpenBudgetHUD?: (project: ProjectItem) => void;
 }
 
 export type GanttTimescaleZoom = "month" | "quarter";
@@ -35,6 +36,7 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
   onOpenSquadDrawer,
   onOpenTasksTray,
   onQuickAddTask,
+  onOpenBudgetHUD,
 }) => {
   const [zoomMode, setZoomMode] = useState<GanttTimescaleZoom>("month");
   const [filterDepartment, setFilterDepartment] = useState<string>("all");
@@ -489,6 +491,20 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
                         title="Quick Add Task"
                       >
                         <i className="bi bi-plus-lg"></i>
+                      </button>
+                    )}
+                    {onOpenBudgetHUD && (
+                      <button
+                        type="button"
+                        onClick={() => onOpenBudgetHUD(p)}
+                        className={`w-6 h-6 rounded-md border flex items-center justify-center text-[10px] transition-all cursor-pointer shadow-2xs ${
+                          p.is_critical_burn
+                            ? "bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-300 animate-pulse"
+                            : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
+                        }`}
+                        title={`Financial HUD: $${Number(p.budget || 0).toLocaleString()} • ${p.budget_burn_pct || 0}% Burn`}
+                      >
+                        <i className="bi bi-cash-stack"></i>
                       </button>
                     )}
                     {onOpenTasksTray && (
