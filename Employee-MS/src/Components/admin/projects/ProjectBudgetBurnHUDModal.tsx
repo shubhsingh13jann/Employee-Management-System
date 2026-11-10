@@ -81,6 +81,17 @@ export const ProjectBudgetBurnHUDModal: React.FC<ProjectBudgetBurnHUDModalProps>
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("all");
   const [msg, setMsg] = useState<{ type: string; text: string }>({ type: "", text: "" });
 
+  // Logging Expenditure Form State
+  const [showLogForm, setShowLogForm] = useState<boolean>(false);
+  const [formTitle, setFormTitle] = useState<string>("");
+  const [formAmount, setFormAmount] = useState<string>("");
+  const [formCategory, setFormCategory] = useState<"software" | "contractor" | "infra" | "hardware" | "travel" | "other">("software");
+  const [formDate, setFormDate] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [formVendor, setFormVendor] = useState<string>("");
+  const [formNotes, setFormNotes] = useState<string>("");
+  const [submittingExpense, setSubmittingExpense] = useState<boolean>(false);
+  const [deletingExpenseId, setDeletingExpenseId] = useState<number | string | null>(null);
+
   const fetchExpenses = async () => {
     if (!project?.id) return;
     try {
@@ -96,6 +107,65 @@ export const ProjectBudgetBurnHUDModal: React.FC<ProjectBudgetBurnHUDModalProps>
       setMsg({ type: "danger", text: "Failed to load budget and expenditure data" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLogExpense = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!project?.id) return;
+    if (!formTitle.trim()) {
+      setMsg({ type: "danger", text: "Please provide an expenditure title" });
+      return;
+    }
+    const numAmt = parseFloat(formAmount);
+    if (isNaN(numAmt) || numAmt <= 0) {
+      setMsg({ type: "danger", text: "Please enter a valid amount greater than $0" });
+      return;
+    }
+
+    try {
+      setSubmittingExpense(true);
+      const res = await api.post(`/api/admin/projects/${project.id}/expenses`, {
+        title: formTitle.trim(),
+        amount: numAmt,
+        category: formCategory,
+        expense_date: formDate,
+        vendor_recipient: formVendor.trim() || null,
+        notes: formNotes.trim() || null,
+      });
+
+      if (res.data.status) {
+        setMsg({ type: "success", text: "Expenditure logged successfully!" });
+        setFormTitle("");
+        setFormAmount("");
+        setFormVendor("");
+        setFormNotes("");
+        setShowLogForm(false);
+        await fetchExpenses();
+        if (onBudgetUpdated) onBudgetUpdated();
+      }
+    } catch (err: any) {
+      setMsg({ type: "danger", text: err.response?.data?.error || "Failed to log expenditure" });
+    } finally {
+      setSubmittingExpense(false);
+    }
+  };
+
+  const handleDeleteExpense = async (exp: ExpenseItem) => {
+    if (!window.confirm(`Delete expenditure "${exp.title}" (${formatCurrency(exp.amount)})?`)) return;
+
+    try {
+      setDeletingExpenseId(exp.id);
+      const res = await api.delete(`/api/admin/projects/expenses/${exp.id}`);
+      if (res.data.status) {
+        setMsg({ type: "success", text: "Expenditure record deleted" });
+        await fetchExpenses();
+        if (onBudgetUpdated) onBudgetUpdated();
+      }
+    } catch (err: any) {
+      setMsg({ type: "danger", text: err.response?.data?.error || "Failed to delete expenditure" });
+    } finally {
+      setDeletingExpenseId(null);
     }
   };
 
@@ -206,6 +276,14 @@ export const ProjectBudgetBurnHUDModal: React.FC<ProjectBudgetBurnHUDModalProps>
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
+              onClick={() => setShowLogForm((prev) => !prev)}
+              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold text-xs transition-all shadow-md shadow-emerald-500/20 flex items-center gap-1.5 cursor-pointer"
+            >
+              <i className={`bi ${showLogForm ? "bi-dash-lg" : "bi-plus-lg"}`}></i>
+              <span>{showLogForm ? "Hide Form" : "+ Log Expenditure"}</span>
+            </button>
+            <button
+              type="button"
               onClick={onClose}
               className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer"
               title="Close modal"
@@ -214,6 +292,152 @@ export const ProjectBudgetBurnHUDModal: React.FC<ProjectBudgetBurnHUDModalProps>
             </button>
           </div>
         </div>
+
+        {/* 1.5 Collapsible Log Expenditure Drawer / Form */}
+        {showLogForm && (
+          <form
+            onSubmit={handleLogExpense}
+            className="p-5 bg-gradient-to-b from-emerald-50/90 to-slate-50 border-b border-emerald-200/80 animate-in slide-in-from-top-2 duration-150 shrink-0"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs">
+                  <i className="bi bi-plus-lg"></i>
+                </span>
+                <h4 className="text-xs font-bold text-slate-900 mb-0">
+                  Log New Project Expenditure
+                </h4>
+              </div>
+              <span className="text-[11px] text-slate-500">
+                Expenditure will automatically adjust live budget burn metrics.
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+              {/* Title */}
+              <div className="sm:col-span-2">
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Expenditure Title / Deliverable <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formTitle}
+                  onChange={(e) => setFormTitle(e.target.value)}
+                  placeholder="e.g. Datadog Production APM License"
+                  className="w-full text-xs px-3 py-1.5 rounded-xl bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              {/* Amount */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Amount ($ USD) <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">$</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="1"
+                    required
+                    value={formAmount}
+                    onChange={(e) => setFormAmount(e.target.value)}
+                    placeholder="4500.00"
+                    className="w-full text-xs pl-7 pr-3 py-1.5 rounded-xl bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold"
+                  />
+                </div>
+              </div>
+
+              {/* Category */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Category
+                </label>
+                <select
+                  value={formCategory}
+                  onChange={(e) => setFormCategory(e.target.value as any)}
+                  className="w-full text-xs px-3 py-1.5 rounded-xl bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                >
+                  <option value="software">💻 Software License</option>
+                  <option value="contractor">👥 External Contractor</option>
+                  <option value="infra">☁️ Cloud Infra (AWS/GCP)</option>
+                  <option value="hardware">🖥️ Hardware & Equipment</option>
+                  <option value="travel">✈️ Travel & Offsite</option>
+                  <option value="other">📦 Other Operations</option>
+                </select>
+              </div>
+
+              {/* Expense Date */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Expense Date
+                </label>
+                <input
+                  type="date"
+                  value={formDate}
+                  onChange={(e) => setFormDate(e.target.value)}
+                  className="w-full text-xs px-3 py-1.5 rounded-xl bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                />
+              </div>
+
+              {/* Vendor / Recipient */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Vendor / Contractor
+                </label>
+                <input
+                  type="text"
+                  value={formVendor}
+                  onChange={(e) => setFormVendor(e.target.value)}
+                  placeholder="e.g. Amazon Web Services"
+                  className="w-full text-xs px-3 py-1.5 rounded-xl bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              {/* Notes */}
+              <div className="sm:col-span-2">
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Receipt Memo / PO Notes
+                </label>
+                <input
+                  type="text"
+                  value={formNotes}
+                  onChange={(e) => setFormNotes(e.target.value)}
+                  placeholder="e.g. Approved via PO #9281, includes 10 engineering seats"
+                  className="w-full text-xs px-3 py-1.5 rounded-xl bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-emerald-200/60">
+              <button
+                type="button"
+                onClick={() => setShowLogForm(false)}
+                className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-600 font-semibold text-xs border border-slate-200 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={submittingExpense || !formTitle.trim() || !formAmount}
+                className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+              >
+                {submittingExpense ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Recording...</span>
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-check2-circle text-xs"></i>
+                    <span>Log Expenditure</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        )}
 
         {/* 2. Critical >90% Budget Alert Warning Banner */}
         {summary.is_critical_burn && (
@@ -482,11 +706,21 @@ export const ProjectBudgetBurnHUDModal: React.FC<ProjectBudgetBurnHUDModalProps>
               <p className="font-bold text-slate-800 text-sm mb-0.5">
                 No Expenditures Found
               </p>
-              <p className="text-xs text-slate-400 mb-0">
+              <p className="text-xs text-slate-400 mb-3">
                 {searchTerm || selectedCategoryFilter !== "all"
                   ? "Try adjusting your search criteria or category filter."
                   : "No expenses have been logged for this initiative yet."}
               </p>
+              {!showLogForm && (
+                <button
+                  type="button"
+                  onClick={() => setShowLogForm(true)}
+                  className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
+                >
+                  <i className="bi bi-plus-lg"></i>
+                  <span>Log First Expenditure</span>
+                </button>
+              )}
             </div>
           ) : (
             <div className="border border-slate-200/90 rounded-xl overflow-hidden shadow-2xs">
@@ -498,6 +732,7 @@ export const ProjectBudgetBurnHUDModal: React.FC<ProjectBudgetBurnHUDModalProps>
                     <th className="py-2.5 px-3 text-center">Category</th>
                     <th className="py-2.5 px-3">Vendor / Recipient</th>
                     <th className="py-2.5 px-3 text-right">Amount</th>
+                    <th className="py-2.5 px-3 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -535,6 +770,21 @@ export const ProjectBudgetBurnHUDModal: React.FC<ProjectBudgetBurnHUDModalProps>
                       </td>
                       <td className="py-2.5 px-3 text-right font-black text-slate-900 whitespace-nowrap">
                         {formatCurrency(exp.amount)}
+                      </td>
+                      <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteExpense(exp)}
+                          disabled={deletingExpenseId === exp.id}
+                          className="w-6 h-6 rounded-md hover:bg-rose-50 text-slate-400 hover:text-rose-600 inline-flex items-center justify-center transition-colors cursor-pointer"
+                          title="Delete expenditure record"
+                        >
+                          {deletingExpenseId === exp.id ? (
+                            <div className="w-3 h-3 border-2 border-rose-600 border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            <i className="bi bi-trash text-xs"></i>
+                          )}
+                        </button>
                       </td>
                     </tr>
                   ))}
