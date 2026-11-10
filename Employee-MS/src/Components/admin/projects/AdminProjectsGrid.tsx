@@ -11,6 +11,7 @@ interface AdminProjectsGridProps {
   onOpenSquadDrawer?: (project: ProjectItem) => void;
   onOpenTasksTray?: (project: ProjectItem) => void;
   onQuickAddTask?: (project: ProjectItem) => void;
+  onOpenBudgetHUD?: (project: ProjectItem) => void;
 }
 
 export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
@@ -23,6 +24,7 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
   onOpenSquadDrawer,
   onOpenTasksTray,
   onQuickAddTask,
+  onOpenBudgetHUD,
 }) => {
   const [activeMenuId, setActiveMenuId] = React.useState<number | string | null>(null);
 
@@ -218,6 +220,20 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
                           </button>
                         )}
 
+                        {onOpenBudgetHUD && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveMenuId(null);
+                              onOpenBudgetHUD(proj);
+                            }}
+                            className="w-full px-2 py-1 text-[11px] text-emerald-700 hover:bg-emerald-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                          >
+                            <i className="bi bi-cash-stack text-emerald-600 text-[10px]"></i>
+                            <span>Budget & Burn HUD</span>
+                          </button>
+                        )}
+
                         {onOpenMilestonesModal && (
                           <button
                             type="button"
@@ -351,6 +367,25 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
 
             {/* Bottom Footer: Health Badge & Compact Squad Stack */}
             <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 mt-auto">
+              <div className="flex items-center gap-1.5">
+                {Boolean(proj.budget) && (
+                  <button
+                    type="button"
+                    onClick={() => onOpenBudgetHUD?.(proj)}
+                    className={`px-1.5 py-0.5 rounded text-[9.5px] font-bold border transition-colors cursor-pointer flex items-center gap-1 ${
+                      proj.is_critical_burn
+                        ? "bg-rose-50 text-rose-700 border-rose-200 animate-pulse"
+                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                    }`}
+                    title="Click to inspect Financial Runway HUD"
+                  >
+                    <i className="bi bi-cash-stack text-[9px] text-emerald-600"></i>
+                    <span>${Math.round(Number(proj.budget || 0) / 1000)}k</span>
+                    <span className="text-slate-400">•</span>
+                    <span>{proj.budget_burn_pct || 0}%</span>
+                  </button>
+                )}
+              </div>
               <div className="flex items-center gap-1">
                 {isOverdue ? (
                   <span className="text-[10px] font-bold text-rose-600 flex items-center gap-1">

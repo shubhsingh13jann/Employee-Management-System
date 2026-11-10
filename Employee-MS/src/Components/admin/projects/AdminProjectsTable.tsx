@@ -11,6 +11,7 @@ interface AdminProjectsTableProps {
   onOpenSquadDrawer?: (project: ProjectItem) => void;
   onOpenTasksTray?: (project: ProjectItem) => void;
   onQuickAddTask?: (project: ProjectItem) => void;
+  onOpenBudgetHUD?: (project: ProjectItem) => void;
 }
 
 export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
@@ -23,6 +24,7 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
   onOpenSquadDrawer,
   onOpenTasksTray,
   onQuickAddTask,
+  onOpenBudgetHUD,
 }) => {
   const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null);
 
@@ -147,6 +149,7 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
               <th className="py-2.5 px-3.5 text-left whitespace-nowrap w-[135px]">Lead Supervisor</th>
               <th className="py-2.5 px-3.5 text-center whitespace-nowrap w-[90px]">Priority</th>
               <th className="py-2.5 px-3.5 text-center whitespace-nowrap w-[115px]">Task Velocity</th>
+              <th className="py-2.5 px-3.5 text-center whitespace-nowrap w-[110px]">Budget & Burn</th>
               <th className="py-2.5 px-3.5 text-center whitespace-nowrap w-[115px]">Target Date</th>
               <th className="py-2.5 px-3.5 text-center whitespace-nowrap w-[95px]">Health</th>
               <th className="py-2.5 px-3.5 text-center whitespace-nowrap w-[95px]">Status</th>
@@ -365,6 +368,41 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                     </div>
                   </td>
 
+                  {/* 5.5 Budget & Expenditure Burn Rate HUD */}
+                  <td className="py-2.5 px-3.5 text-center whitespace-nowrap">
+                    <button
+                      type="button"
+                      onClick={() => onOpenBudgetHUD?.(proj)}
+                      className={`inline-flex flex-col items-center justify-center p-1.5 rounded-lg border transition-all cursor-pointer group ${
+                        proj.is_critical_burn
+                          ? "bg-rose-50/80 border-rose-300 hover:bg-rose-100"
+                          : (proj.budget_burn_pct || 0) >= 75
+                          ? "bg-amber-50/80 border-amber-300 hover:bg-amber-100"
+                          : "bg-slate-50 border-slate-200/90 hover:bg-slate-100"
+                      }`}
+                      title="Inspect Financial Burn Rate HUD"
+                    >
+                      <span className="text-[11px] font-bold text-slate-800 leading-none">
+                        ${Number(proj.budget || 0).toLocaleString()}
+                      </span>
+                      <div className="flex items-center gap-1 mt-1">
+                        <span
+                          className={`text-[9.5px] font-bold px-1.5 py-0.2 rounded ${
+                            proj.is_over_budget
+                              ? "bg-rose-600 text-white"
+                              : proj.is_critical_burn
+                              ? "bg-rose-600 text-white animate-pulse"
+                              : (proj.budget_burn_pct || 0) >= 75
+                              ? "bg-amber-100 text-amber-800"
+                              : "bg-emerald-100 text-emerald-800"
+                          }`}
+                        >
+                          {proj.is_over_budget ? "Deficit" : `${proj.budget_burn_pct || 0}% Burn`}
+                        </span>
+                      </div>
+                    </button>
+                  </td>
+
                   {/* 6. Target Date / Countdown */}
                   <td className="py-2.5 px-3.5 text-center whitespace-nowrap">
                     {proj.target_date ? (
@@ -532,6 +570,20 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                             >
                               <i className="bi bi-plus-circle text-emerald-600 text-[10px]"></i>
                               <span>+ Quick Task</span>
+                            </button>
+                          )}
+
+                          {onOpenBudgetHUD && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveMenuId(null);
+                                onOpenBudgetHUD(proj);
+                              }}
+                              className="w-full px-2 py-1 text-[11px] text-emerald-700 hover:bg-emerald-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                            >
+                              <i className="bi bi-cash-stack text-emerald-600 text-[10px]"></i>
+                              <span>Budget & Burn HUD</span>
                             </button>
                           )}
 

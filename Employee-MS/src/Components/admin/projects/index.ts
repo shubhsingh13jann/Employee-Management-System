@@ -12,3 +12,4 @@ export * from "./ProjectSquadDrawer";
 export * from "./QuickAddTaskModal";
 export * from "./ProjectTasksTrayModal";
 export * from "./AdminProjectsGanttRoadmap";
+export * from "./ProjectBudgetBurnHUDModal";

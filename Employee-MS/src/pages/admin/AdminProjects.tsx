@@ -15,6 +15,7 @@ import {
   QuickAddTaskModal,
   ProjectTasksTrayModal,
   AdminProjectsGanttRoadmap,
+  ProjectBudgetBurnHUDModal,
 } from "../../Components/admin/projects";
 
 export interface ProjectItem {
@@ -45,6 +46,13 @@ export interface ProjectItem {
   health: "healthy" | "at_risk" | "critical" | "completed";
   squad?: Array<{ id: number | string; name: string; image_url?: string; role_tag?: string }>;
   squad_members_count?: number;
+  budget_allocated?: number;
+  total_expenses?: number;
+  runway_remaining?: number;
+  budget_burn_pct?: number;
+  is_over_budget?: boolean;
+  is_critical_burn?: boolean;
+  expense_count?: number;
 }
 
 const AdminProjects: React.FC = () => {
@@ -73,6 +81,7 @@ const AdminProjects: React.FC = () => {
   const [selectedTasksProject, setSelectedTasksProject] = useState<ProjectItem | null>(null);
   const [quickAddTaskProject, setQuickAddTaskProject] = useState<ProjectItem | null>(null);
   const [showCapacityDrawer, setShowCapacityDrawer] = useState<boolean>(false);
+  const [selectedBudgetProject, setSelectedBudgetProject] = useState<ProjectItem | null>(null);
   const [saving, setSaving] = useState<boolean>(false);
 
   const handleSaveProject = async (formData: any) => {
@@ -433,6 +442,7 @@ const AdminProjects: React.FC = () => {
             onOpenSquadDrawer={(proj) => setSelectedSquadProject(proj)}
             onOpenTasksTray={(proj) => setSelectedTasksProject(proj)}
             onQuickAddTask={(proj) => setQuickAddTaskProject(proj)}
+            onOpenBudgetHUD={(proj) => setSelectedBudgetProject(proj)}
           />
         ) : (
           <AdminProjectsTable
@@ -448,6 +458,7 @@ const AdminProjects: React.FC = () => {
             onOpenSquadDrawer={(proj) => setSelectedSquadProject(proj)}
             onOpenTasksTray={(proj) => setSelectedTasksProject(proj)}
             onQuickAddTask={(proj) => setQuickAddTaskProject(proj)}
+            onOpenBudgetHUD={(proj) => setSelectedBudgetProject(proj)}
           />
         )}
 
@@ -513,6 +524,14 @@ const AdminProjects: React.FC = () => {
               setSelectedTasksProject({ ...selectedTasksProject });
             }
           }}
+        />
+
+        {/* Project Budget & Expenditure Burn Rate HUD Modal */}
+        <ProjectBudgetBurnHUDModal
+          isOpen={Boolean(selectedBudgetProject)}
+          onClose={() => setSelectedBudgetProject(null)}
+          project={selectedBudgetProject}
+          onBudgetUpdated={fetchData}
         />
 
         {/* Supervisor Capacity Heatmap Drawer */}
