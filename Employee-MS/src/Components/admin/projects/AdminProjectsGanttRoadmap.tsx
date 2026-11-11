@@ -285,19 +285,19 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
   return (
     <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden select-none animate-in fade-in duration-200">
       {/* 1. Gantt Control & Telemetry Bar */}
-      <div className="px-5 py-3 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex flex-wrap items-center justify-between gap-3 border-b border-indigo-500/20">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300">
-            <i className="bi bi-bar-chart-steps text-sm"></i>
+      <div className="px-4 py-2.5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex flex-wrap items-center justify-between gap-2.5 border-b border-indigo-500/20">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 shrink-0">
+            <i className="bi bi-bar-chart-steps text-xs"></i>
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-white mb-0">Strategic Gantt Roadmap</h3>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">
+              <h3 className="text-xs sm:text-sm font-bold text-white mb-0 leading-tight">Strategic Gantt Roadmap</h3>
+              <span className="px-1.5 py-0.2 rounded-full text-[9.5px] font-bold bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">
                 {filteredProjects.length} Initiatives
               </span>
             </div>
-            <p className="text-[11px] text-slate-300/80 mb-0">
+            <p className="text-[10.5px] text-slate-300/80 mb-0 leading-tight mt-0.5">
               Cross-initiative milestone delivery scheduler with real-time velocity tracking.
             </p>
           </div>
@@ -398,9 +398,9 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
       </div>
 
       {/* Legend Bar */}
-      <div className="px-5 py-2 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between gap-4 flex-wrap text-[11px] text-slate-600">
-        <div className="flex items-center gap-3 flex-wrap">
-          <span className="font-bold text-slate-700 uppercase tracking-wider text-[10px]">
+      <div className="px-4 py-1.5 bg-slate-50/90 border-b border-slate-200/80 flex items-center justify-between gap-3 flex-wrap text-[11px] text-slate-600">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <span className="font-bold text-slate-700 uppercase tracking-wider text-[9.5px]">
             Roadmap Legend:
           </span>
           <span className="inline-flex items-center gap-1.5">
@@ -435,12 +435,18 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
         {/* Left Frozen Column: Project Index & Metadata */}
         <div className="w-[280px] sm:w-[320px] shrink-0 border-r border-slate-200 bg-slate-50/70 z-20 flex flex-col">
           {/* Header Row */}
-          <div className="h-[73px] px-4 border-b border-slate-200 bg-slate-100/90 flex flex-col justify-center">
-            <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-              Strategic Initiatives ({filteredProjects.length})
-            </span>
-            <span className="text-[10px] text-slate-500">
-              Department • Supervisor • Velocity %
+          <div className="h-[73px] px-3.5 border-b border-slate-200 bg-slate-100/95 flex flex-col justify-center">
+            <div className="flex items-center gap-1.5">
+              <i className="bi bi-kanban text-indigo-600 text-xs"></i>
+              <span className="text-xs sm:text-[13px] font-bold text-slate-800 tracking-tight">
+                Strategic Initiatives
+              </span>
+              <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-indigo-100 text-indigo-700 border border-indigo-200">
+                {filteredProjects.length}
+              </span>
+            </div>
+            <span className="text-[10px] text-slate-500 font-medium mt-0.5">
+              Department • Lead Supervisor • Velocity %
             </span>
           </div>
 
@@ -453,13 +459,13 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
                   key={`gantt-proj-meta-${p.id}`}
                   onMouseEnter={() => setHoveredProjectId(p.id)}
                   onMouseLeave={() => setHoveredProjectId(null)}
-                  className={`h-[68px] px-3.5 py-2.5 flex items-center justify-between gap-2.5 transition-colors cursor-pointer ${
+                  className={`h-[68px] px-3.5 py-2 flex items-center justify-between gap-2.5 border-b border-slate-200/90 transition-colors cursor-pointer ${
                     isHovered ? "bg-indigo-50/70" : "bg-white hover:bg-slate-50"
                   }`}
                   onClick={() => onOpenDossierModal && onOpenDossierModal(p)}
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 mb-1">
+                    <div className="flex items-center gap-1.5 mb-0.5">
                       <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
                         PRJ-{String(p.id).padStart(4, "0")}
                       </span>
@@ -469,9 +475,13 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
                         </span>
                       )}
                     </div>
-                    <h4 className="text-xs font-bold text-slate-900 truncate mb-0" title={p.title}>
+                    <div
+                      className="text-[11.5px] font-bold text-slate-900 truncate leading-snug"
+                      style={{ fontSize: "11.5px" }}
+                      title={p.title}
+                    >
                       {p.title}
-                    </h4>
+                    </div>
                     <div className="flex items-center gap-2 mt-0.5 text-[10px] text-slate-500">
                       <span>{p.lead_supervisor_name || "Unassigned"}</span>
                       <span>•</span>
@@ -606,7 +616,7 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
                     key={`gantt-track-${p.id}`}
                     onMouseEnter={() => setHoveredProjectId(p.id)}
                     onMouseLeave={() => setHoveredProjectId(null)}
-                    className={`h-[68px] relative flex items-center px-1 transition-colors ${
+                    className={`h-[68px] relative flex items-center px-1 border-b border-slate-200/90 transition-colors ${
                       isHovered ? "bg-indigo-50/30" : ""
                     }`}
                   >
