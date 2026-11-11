@@ -697,10 +697,11 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
                           }}
                           onMouseLeave={() => setHoveredMilestone(null)}
                           style={{ left: `${mLeftPct}%` }}
-                          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 cursor-pointer transition-transform hover:scale-130"
+                          className="absolute top-1 -translate-x-1/2 z-20 cursor-pointer flex flex-col items-center group/ms transition-transform hover:scale-125"
+                          title={`Milestone ${mIdx + 1}: ${m.title} (Due: ${new Date(m.due_date).toLocaleDateString()})`}
                         >
                           <div
-                            className={`w-4 h-4 rotate-45 rounded-[3px] border shadow-md flex items-center justify-center ${
+                            className={`w-3.5 h-3.5 rotate-45 rounded-[2.5px] border shadow-sm flex items-center justify-center transition-all ${
                               isCompleted
                                 ? "bg-emerald-400 border-white text-emerald-950"
                                 : isDelayed
@@ -710,10 +711,22 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
                                 : "bg-white border-slate-400 text-slate-800"
                             }`}
                           >
-                            <div className="-rotate-45 text-[8px] font-bold">
+                            <div className="-rotate-45 text-[7.5px] font-bold leading-none select-none">
                               {isCompleted ? "✓" : isDelayed ? "!" : mIdx + 1}
                             </div>
                           </div>
+                          {/* Milestone Guide Pin to Gantt Bar */}
+                          <div
+                            className={`w-[1.5px] h-3.5 mt-0.5 rounded-full ${
+                              isCompleted
+                                ? "bg-emerald-400/80"
+                                : isDelayed
+                                ? "bg-rose-400/80"
+                                : isInProgress
+                                ? "bg-cyan-400/80"
+                                : "bg-slate-300"
+                            }`}
+                          ></div>
                         </div>
                       );
                     })}
