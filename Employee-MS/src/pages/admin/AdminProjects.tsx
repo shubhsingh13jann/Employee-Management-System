@@ -17,6 +17,7 @@ import {
   AdminProjectsGanttRoadmap,
   ProjectBudgetBurnHUDModal,
   FloatingBatchActionBar,
+  BatchOperationConfirmModal,
   ColumnVisibility,
   DEFAULT_COLUMN_VISIBILITY,
 } from "../../Components/admin/projects";
@@ -116,6 +117,13 @@ const AdminProjects: React.FC = () => {
   // Multi-Select & Batch Operation Suite State
   const [selectedProjectIds, setSelectedProjectIds] = useState<(number | string)[]>([]);
   const [isBatchProcessing, setIsBatchProcessing] = useState<boolean>(false);
+  const [batchConfirmModal, setBatchConfirmModal] = useState<{
+    isOpen: boolean;
+    mode: "archive" | "delete";
+  }>({
+    isOpen: false,
+    mode: "delete",
+  });
 
   const handleToggleSelectProject = (projectId: number | string) => {
     setSelectedProjectIds((prev) =>
@@ -313,6 +321,47 @@ const AdminProjects: React.FC = () => {
       });
     } finally {
       setIsBatchProcessing(false);
+    }
+  };
+
+  const handleOpenBatchArchive = () => {
+    if (selectedProjectIds.length === 0) return;
+    setBatchConfirmModal({ isOpen: true, mode: "archive" });
+  };
+
+  const handleOpenBatchDelete = () => {
+    if (selectedProjectIds.length === 0) return;
+    setBatchConfirmModal({ isOpen: true, mode: "delete" });
+  };
+
+  const handleExecuteBatchConfirm = async () => {
+    if (batchConfirmModal.mode === "archive") {
+      await handleBatchStatusChange("archived");
+      setBatchConfirmModal({ isOpen: false, mode: "archive" });
+    } else {
+      try {
+        setIsBatchProcessing(true);
+        const res = await api.post("/api/admin/projects/bulk-delete", {
+          ids: selectedProjectIds,
+        });
+        if (res.data.status) {
+          setMsg({
+            type: "success",
+            text: `Successfully deleted ${res.data.deletedCount || selectedProjectIds.length} strategic initiative(s)`,
+          });
+          setProjects((prev) => prev.filter((p) => !selectedProjectIds.includes(p.id)));
+          setSelectedProjectIds([]);
+          setBatchConfirmModal({ isOpen: false, mode: "delete" });
+          fetchData();
+        }
+      } catch (err: any) {
+        setMsg({
+          type: "danger",
+          text: err.response?.data?.error || "Failed to batch delete projects",
+        });
+      } finally {
+        setIsBatchProcessing(false);
+      }
     }
   };
 
@@ -640,12 +689,18 @@ const AdminProjects: React.FC = () => {
           onDeselectAll={handleDeselectAllProjects}
           onBatchStatusChange={handleBatchStatusChange}
           onBatchExportCSV={handleBatchExportCSV}
-          onBatchArchive={() => {
-            console.log("Batch archive");
-          }}
-          onBatchDelete={() => {
-            console.log("Batch delete");
-          }}
+          onBatchArchive={handleOpenBatchArchive}
+          onBatchDelete={handleOpenBatchDelete}
+          isProcessing={isBatchProcessing}
+        />
+
+        {/* Batch Operation Confirmation Dialog (Archive & Delete) */}
+        <BatchOperationConfirmModal
+          isOpen={batchConfirmModal.isOpen}
+          onClose={() => setBatchConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+          onConfirm={handleExecuteBatchConfirm}
+          mode={batchConfirmModal.mode}
+          selectedProjects={projects.filter((p) => selectedProjectIds.includes(p.id))}
           isProcessing={isBatchProcessing}
         />
 
