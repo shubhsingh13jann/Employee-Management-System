@@ -2303,6 +2303,141 @@ export const deleteAdminProject = async (req, res) => {
   }
 };
 
+export const bulkUpdateAdminProjectsStatus = async (req, res) => {
+  try {
+    const { ids, status } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ status: false, error: "Please provide an array of initiative IDs" });
+    }
+
+    if (!["planning", "active", "on_hold", "completed", "archived"].includes(status)) {
+      return res.status(400).json({ status: false, error: "Invalid status lifecycle value" });
+    }
+
+    const validIds = ids.map((id) => Number(id)).filter((id) => !isNaN(id) && id > 0);
+    if (validIds.length === 0) {
+      return res.status(400).json({ status: false, error: "No valid initiative IDs provided" });
+    }
+
+    const [existing] = await pool.query(
+      "SELECT id, title, status FROM projects WHERE id IN (?)",
+      [validIds]
+    );
+
+    if (existing.length === 0) {
+      return res.status(404).json({ status: false, error: "None of the specified initiatives were found" });
+    }
+
+    const foundIds = existing.map((p) => p.id);
+    await pool.query(
+      "UPDATE projects SET status = ? WHERE id IN (?)",
+      [status, foundIds]
+    );
+
+    const performedBy = req.user?.id || 1;
+    for (const proj of existing) {
+      await pool.query(
+        `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+         VALUES (?, 'Batch Project Lifecycle Updated', 'status', ?, ?, ?, ?)`,
+        [
+          performedBy,
+          proj.status,
+          status,
+          `Batch updated initiative #${proj.id} (${proj.title}) status from ${proj.status} to ${status}`,
+          performedBy,
+        ]
+      );
+    }
+
+    return res.json({
+      status: true,
+      message: `Successfully transitioned ${foundIds.length} initiative(s) to ${status}`,
+      updatedCount: foundIds.length,
+      updatedIds: foundIds,
+    });
+  } catch (err) {
+    console.error("bulkUpdateAdminProjectsStatus error:", err);
+    return res.status(500).json({ status: false, error: "Failed to batch update project status" });
+  }
+};
+
+export const bulkDeleteAdminProjects = async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ status: false, error: "Please provide an array of initiative IDs to delete" });
+    }
+
+    const validIds = ids.map((id) => Number(id)).filter((id) => !isNaN(id) && id > 0);
+    if (validIds.length === 0) {
+      return res.status(400).json({ status: false, error: "No valid initiative IDs provided" });
+    }
+
+    const [existing] = await pool.query(
+      "SELECT id, title FROM projects WHERE id IN (?)",
+      [validIds]
+    );
+
+    if (existing.length === 0) {
+      return res.status(404).json({ status: false, error: "None of the specified initiatives were found" });
+    }
+
+    const foundIds = existing.map((p) => p.id);
+
+    try {
+      await pool.query("DELETE FROM tasks WHERE project_id IN (?)", [foundIds]);
+    } catch (e) {
+      console.warn("Could not batch delete tasks:", e.message);
+    }
+
+    try {
+      await pool.query("DELETE FROM project_milestones WHERE project_id IN (?)", [foundIds]);
+    } catch (e) {
+      console.warn("Could not batch delete project_milestones:", e.message);
+    }
+
+    try {
+      await pool.query("DELETE FROM project_members WHERE project_id IN (?)", [foundIds]);
+    } catch (e) {
+      console.warn("Could not batch delete project_members:", e.message);
+    }
+
+    try {
+      await pool.query("DELETE FROM project_expenses WHERE project_id IN (?)", [foundIds]);
+    } catch (e) {
+      console.warn("Could not batch delete project_expenses:", e.message);
+    }
+
+    await pool.query("DELETE FROM projects WHERE id IN (?)", [foundIds]);
+
+    const performedBy = req.user?.id || 1;
+    for (const proj of existing) {
+      await pool.query(
+        `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+         VALUES (?, 'Batch Project Deleted', 'projects', ?, NULL, ?, ?)`,
+        [
+          performedBy,
+          proj.title,
+          `Batch deleted strategic initiative #${proj.id} (${proj.title}) and associated entities`,
+          performedBy,
+        ]
+      );
+    }
+
+    return res.json({
+      status: true,
+      message: `Successfully deleted ${foundIds.length} strategic initiative(s)`,
+      deletedCount: foundIds.length,
+      deletedIds: foundIds,
+    });
+  } catch (err) {
+    console.error("bulkDeleteAdminProjects error:", err);
+    return res.status(500).json({ status: false, error: "Failed to batch delete projects" });
+  }
+};
+
 export const getAdminSupervisorsCapacity = async (req, res) => {
   try {
     const [supervisors] = await pool.query(`

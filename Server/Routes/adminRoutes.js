@@ -45,6 +45,8 @@ import {
   updateAdminProjectStatus,
   updateAdminProject,
   deleteAdminProject,
+  bulkUpdateAdminProjectsStatus,
+  bulkDeleteAdminProjects,
   getAdminSupervisorsCapacity,
   getProjectMilestones,
   createProjectMilestone,
@@ -123,6 +125,10 @@ router.delete("/hierarchy/:employeeId", unlinkHierarchy);
 // Enterprise Projects & Strategic Milestones Routes (Section 5)
 router.get("/projects", getAdminProjects);
 router.post("/projects", createAdminProject);
+router.put("/projects/bulk-status", bulkUpdateAdminProjectsStatus);
+router.post("/projects/bulk-status", bulkUpdateAdminProjectsStatus);
+router.delete("/projects/bulk", bulkDeleteAdminProjects);
+router.post("/projects/bulk-delete", bulkDeleteAdminProjects);
 router.put("/projects/:id/status", updateAdminProjectStatus);
 router.put("/projects/:id", updateAdminProject);
 router.delete("/projects/:id", deleteAdminProject);
