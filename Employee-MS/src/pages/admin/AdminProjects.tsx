@@ -284,6 +284,103 @@ const AdminProjects: React.FC = () => {
     setActiveKpiFilter(null);
   };
 
+  const handleBatchStatusChange = async (newStatus: string) => {
+    if (selectedProjectIds.length === 0) return;
+    try {
+      setIsBatchProcessing(true);
+      const res = await api.put("/api/admin/projects/bulk-status", {
+        ids: selectedProjectIds,
+        status: newStatus,
+      });
+      if (res.data.status) {
+        setMsg({
+          type: "success",
+          text: `Successfully transitioned ${res.data.updatedCount || selectedProjectIds.length} initiatives to ${newStatus.toUpperCase()}`,
+        });
+        // Optimistic update
+        setProjects((prev) =>
+          prev.map((p) =>
+            selectedProjectIds.includes(p.id) ? { ...p, status: newStatus as any } : p
+          )
+        );
+        setSelectedProjectIds([]);
+        fetchData();
+      }
+    } catch (err: any) {
+      setMsg({
+        type: "danger",
+        text: err.response?.data?.error || "Failed to batch update project status",
+      });
+    } finally {
+      setIsBatchProcessing(false);
+    }
+  };
+
+  const handleBatchExportCSV = () => {
+    if (selectedProjectIds.length === 0) return;
+    const selectedProjects = projects.filter((p) => selectedProjectIds.includes(p.id));
+    if (selectedProjects.length === 0) return;
+
+    const headers = [
+      "ID",
+      "PRJ Code",
+      "Title",
+      "Department",
+      "Lead Supervisor",
+      "Status",
+      "Priority",
+      "Total Tasks",
+      "Completed Tasks",
+      "Velocity %",
+      "Budget (INR)",
+      "Actual Spent (INR)",
+      "Burn Rate %",
+      "Remaining Budget (INR)",
+      "Health",
+      "Start Date",
+      "Target Date",
+    ];
+
+    const rows = selectedProjects.map((p) => [
+      p.id,
+      `"PRJ-${String(p.id).padStart(4, "0")}"`,
+      `"${p.title.replace(/"/g, '""')}"`,
+      `"${p.department_name || "General"}"`,
+      `"${p.supervisor_name || "Unassigned"}"`,
+      p.status,
+      p.priority,
+      p.total_tasks || 0,
+      p.completed_tasks || 0,
+      `${p.progress_percentage || 0}%`,
+      p.budget || 0,
+      p.spent_amount || 0,
+      `${p.burn_rate_pct || 0}%`,
+      p.remaining_budget !== undefined ? p.remaining_budget : ((p.budget || 0) - (p.spent_amount || 0)),
+      p.health || "healthy",
+      p.start_date ? p.start_date.split("T")[0] : "",
+      p.target_date ? p.target_date.split("T")[0] : "",
+    ]);
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute(
+      "download",
+      `Selected_Initiatives_Batch_Export_${selectedProjects.length}_Items_${new Date().toISOString().split("T")[0]}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setMsg({
+      type: "success",
+      text: `Successfully exported ${selectedProjects.length} selected initiative(s) to CSV`,
+    });
+  };
+
   const handleUpdateStatus = async (projectId: number | string, newStatus: string) => {
     try {
       const res = await api.put(`/api/admin/projects/${projectId}/status`, { status: newStatus });
@@ -541,12 +638,8 @@ const AdminProjects: React.FC = () => {
           }
           onSelectAll={handleSelectAllProjects}
           onDeselectAll={handleDeselectAllProjects}
-          onBatchStatusChange={(newStatus) => {
-            console.log("Batch status change:", newStatus);
-          }}
-          onBatchExportCSV={() => {
-            console.log("Batch export CSV");
-          }}
+          onBatchStatusChange={handleBatchStatusChange}
+          onBatchExportCSV={handleBatchExportCSV}
           onBatchArchive={() => {
             console.log("Batch archive");
           }}
