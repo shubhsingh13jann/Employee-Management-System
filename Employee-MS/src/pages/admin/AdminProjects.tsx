@@ -16,6 +16,7 @@ import {
   ProjectTasksTrayModal,
   AdminProjectsGanttRoadmap,
   ProjectBudgetBurnHUDModal,
+  FloatingBatchActionBar,
   ColumnVisibility,
   DEFAULT_COLUMN_VISIBILITY,
 } from "../../Components/admin/projects";
@@ -110,6 +111,25 @@ const AdminProjects: React.FC = () => {
 
   const handleResetColumns = () => {
     setVisibleColumns(DEFAULT_COLUMN_VISIBILITY);
+  };
+
+  // Multi-Select & Batch Operation Suite State
+  const [selectedProjectIds, setSelectedProjectIds] = useState<(number | string)[]>([]);
+  const [isBatchProcessing, setIsBatchProcessing] = useState<boolean>(false);
+
+  const handleToggleSelectProject = (projectId: number | string) => {
+    setSelectedProjectIds((prev) =>
+      prev.includes(projectId) ? prev.filter((id) => id !== projectId) : [...prev, projectId]
+    );
+  };
+
+  const handleSelectAllProjects = () => {
+    const visibleIds = filteredProjects.map((p) => p.id);
+    setSelectedProjectIds(visibleIds);
+  };
+
+  const handleDeselectAllProjects = () => {
+    setSelectedProjectIds([]);
   };
 
   // Modals / Drawers State (Wired in Commits 4 & 5)
@@ -492,6 +512,10 @@ const AdminProjects: React.FC = () => {
           <AdminProjectsTable
             projects={filteredProjects}
             visibleColumns={visibleColumns}
+            selectedProjectIds={selectedProjectIds}
+            onToggleSelectProject={handleToggleSelectProject}
+            onSelectAllProjects={handleSelectAllProjects}
+            onDeselectAllProjects={handleDeselectAllProjects}
             onOpenEditModal={(proj) => {
               setEditingProject(proj);
               setShowCreateModal(true);
@@ -506,6 +530,31 @@ const AdminProjects: React.FC = () => {
             onOpenBudgetHUD={(proj) => setSelectedBudgetProject(proj)}
           />
         )}
+
+        {/* Floating Bottom Action Bar for Multi-Select Batch Operations */}
+        <FloatingBatchActionBar
+          selectedCount={selectedProjectIds.length}
+          totalFilteredCount={filteredProjects.length}
+          isAllSelected={
+            filteredProjects.length > 0 &&
+            filteredProjects.every((p) => selectedProjectIds.includes(p.id))
+          }
+          onSelectAll={handleSelectAllProjects}
+          onDeselectAll={handleDeselectAllProjects}
+          onBatchStatusChange={(newStatus) => {
+            console.log("Batch status change:", newStatus);
+          }}
+          onBatchExportCSV={() => {
+            console.log("Batch export CSV");
+          }}
+          onBatchArchive={() => {
+            console.log("Batch archive");
+          }}
+          onBatchDelete={() => {
+            console.log("Batch delete");
+          }}
+          isProcessing={isBatchProcessing}
+        />
 
         {/* Create / Edit Strategic Initiative Modal */}
         <CreateProjectModal

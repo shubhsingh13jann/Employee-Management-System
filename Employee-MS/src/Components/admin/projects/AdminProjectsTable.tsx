@@ -14,6 +14,10 @@ interface AdminProjectsTableProps {
   onQuickAddTask?: (project: ProjectItem) => void;
   onOpenBudgetHUD?: (project: ProjectItem) => void;
   visibleColumns?: ColumnVisibility;
+  selectedProjectIds?: (number | string)[];
+  onToggleSelectProject?: (projectId: number | string) => void;
+  onSelectAllProjects?: () => void;
+  onDeselectAllProjects?: () => void;
 }
 
 export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
@@ -28,8 +32,22 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
   onQuickAddTask,
   onOpenBudgetHUD,
   visibleColumns = DEFAULT_COLUMN_VISIBILITY,
+  selectedProjectIds = [],
+  onToggleSelectProject,
+  onSelectAllProjects,
+  onDeselectAllProjects,
 }) => {
   const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null);
+  const headerCheckboxRef = React.useRef<HTMLInputElement>(null);
+
+  const isAllSelected = projects.length > 0 && projects.every((p) => selectedProjectIds.includes(p.id));
+  const isSomeSelected = projects.some((p) => selectedProjectIds.includes(p.id)) && !isAllSelected;
+
+  useEffect(() => {
+    if (headerCheckboxRef.current) {
+      headerCheckboxRef.current.indeterminate = isSomeSelected;
+    }
+  }, [isSomeSelected]);
 
   useEffect(() => {
     const handleDocumentClick = () => setActiveMenuId(null);
@@ -145,7 +163,7 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
 
   // Calculate dynamic table min-width so that remaining columns automatically adjust gaps and width
   const calculateTableMinWidth = () => {
-    let min = 0;
+    let min = 40; // Selection checkbox column
     if (activeColumns.initiative) min += 220;
     if (activeColumns.department) min += 95;
     if (activeColumns.supervisor) min += 125;
@@ -171,6 +189,23 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
         >
           <thead className="bg-slate-50/90 border-b border-slate-200 text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
             <tr>
+              {/* Multi-Select Select-All Checkbox Column */}
+              <th className="py-2.5 pl-4 pr-1 text-center w-10 min-w-[40px]">
+                <input
+                  ref={headerCheckboxRef}
+                  type="checkbox"
+                  checked={isAllSelected}
+                  onChange={() => {
+                    if (isAllSelected) {
+                      onDeselectAllProjects?.();
+                    } else {
+                      onSelectAllProjects?.();
+                    }
+                  }}
+                  className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600 transition-all"
+                  title={isAllSelected ? "Deselect all initiatives" : "Select all visible initiatives"}
+                />
+              </th>
               {activeColumns.initiative && (
                 <th className="py-2.5 pl-4.5 pr-3.5 text-left min-w-[200px]">Strategic Initiative</th>
               )}
@@ -208,7 +243,7 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
           <tbody className="divide-y divide-slate-100">
             {!hasVisibleColumns ? (
               <tr>
-                <td colSpan={10} className="py-12 text-center text-slate-400 text-xs">
+                <td colSpan={11} className="py-12 text-center text-slate-400 text-xs">
                   <i className="bi bi-layout-three-columns text-xl block mb-1 text-slate-300"></i>
                   No columns selected. Please enable at least one column from the filter dropdown.
                 </td>
@@ -217,8 +252,30 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
               projects.map((proj, idx, arr) => {
                 const isMenuOpen = activeMenuId === proj.id;
 
+                const isSelected = selectedProjectIds.includes(proj.id);
+
                 return (
-                  <tr key={proj.id} className="hover:bg-slate-50/70 transition-colors">
+                  <tr
+                    key={proj.id}
+                    className={`transition-colors ${
+                      isSelected
+                        ? "bg-indigo-50/75 hover:bg-indigo-50/90 border-l-2 border-l-indigo-600"
+                        : "hover:bg-slate-50/70"
+                    }`}
+                  >
+                    {/* Row Multi-Select Checkbox */}
+                    <td className="py-2.5 pl-4 pr-1 text-center w-10 min-w-[40px]">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          onToggleSelectProject?.(proj.id);
+                        }}
+                        className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600 transition-all"
+                        title={`Select initiative PRJ-${String(proj.id).padStart(4, "0")}`}
+                      />
+                    </td>
                     {/* 1. Initiative Title & Details (Strictly 2 rows) */}
                     {activeColumns.initiative && (
                       <td className="py-2.5 pl-4.5 pr-3.5">

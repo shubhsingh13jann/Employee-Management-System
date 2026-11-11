@@ -13,3 +13,4 @@ export * from "./QuickAddTaskModal";
 export * from "./ProjectTasksTrayModal";
 export * from "./AdminProjectsGanttRoadmap";
 export * from "./ProjectBudgetBurnHUDModal";
+export * from "./FloatingBatchActionBar";
