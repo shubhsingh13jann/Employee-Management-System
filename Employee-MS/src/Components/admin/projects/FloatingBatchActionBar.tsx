@@ -9,8 +9,6 @@ export interface FloatingBatchActionBarProps {
   onBatchStatusChange: (status: string) => void;
   onBatchExportCSV: () => void;
   onBatchArchive: () => void;
-  onBatchUnarchive?: () => void;
-  hasArchived?: boolean;
   onBatchDelete: () => void;
   isProcessing?: boolean;
 }
@@ -24,8 +22,6 @@ export const FloatingBatchActionBar: React.FC<FloatingBatchActionBarProps> = ({
   onBatchStatusChange,
   onBatchExportCSV,
   onBatchArchive,
-  onBatchUnarchive,
-  hasArchived = false,
   onBatchDelete,
   isProcessing = false,
 }) => {
@@ -58,8 +54,11 @@ export const FloatingBatchActionBar: React.FC<FloatingBatchActionBarProps> = ({
   ];
 
   return (
-    <div className="fixed bottom-6 left-0 right-0 md:left-[240px] z-50 flex justify-center pointer-events-none px-4 animate-in fade-in slide-in-from-bottom-5 duration-200">
-      <div className="pointer-events-auto flex items-center gap-2 sm:gap-3 bg-slate-900/95 backdrop-blur-md text-white px-3 sm:px-5 py-2.5 sm:py-3 rounded-2xl shadow-2xl border border-slate-700/80 shadow-slate-950/40 max-w-full overflow-x-auto">
+    <div
+      className="fixed bottom-6 flex justify-center items-center z-50 pointer-events-none px-4"
+      style={{ left: "240px", right: "0px" }}
+    >
+      <div className="flex items-center gap-2 sm:gap-3 bg-slate-900/95 backdrop-blur-md text-white px-3 sm:px-5 py-2.5 sm:py-3 rounded-2xl shadow-2xl border border-slate-700/80 shadow-slate-950/40 pointer-events-auto animate-in fade-in slide-in-from-bottom-5 duration-200">
         {/* Selection Badge & Count */}
         <div className="flex items-center gap-2 border-r border-slate-700/80 pr-3 sm:pr-4">
           <div className="w-6 h-6 rounded-lg bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-400 text-xs font-bold">
@@ -150,31 +149,17 @@ export const FloatingBatchActionBar: React.FC<FloatingBatchActionBarProps> = ({
             <span className="sm:hidden">CSV</span>
           </button>
 
-          {/* 3. Batch Archive / Unarchive */}
-          {hasArchived && onBatchUnarchive ? (
-            <button
-              type="button"
-              onClick={onBatchUnarchive}
-              disabled={isProcessing}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-400/80 text-xs font-semibold transition-all shadow-xs cursor-pointer disabled:opacity-50"
-              title="Restore selected archived initiatives back to Active"
-            >
-              <i className="bi bi-arrow-counterclockwise text-xs"></i>
-              <span className="hidden sm:inline">Unarchive</span>
-              <span className="sm:hidden">Restore</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={onBatchArchive}
-              disabled={isProcessing}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700/90 text-slate-100 border border-slate-600/80 text-xs font-medium transition-all shadow-xs cursor-pointer disabled:opacity-50"
-              title="Move selected initiatives to Archive"
-            >
-              <i className="bi bi-archive text-amber-400 text-xs"></i>
-              <span className="hidden sm:inline">Archive</span>
-            </button>
-          )}
+          {/* 3. Batch Archive */}
+          <button
+            type="button"
+            onClick={onBatchArchive}
+            disabled={isProcessing}
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700/90 text-slate-100 border border-slate-600/80 text-xs font-medium transition-all shadow-xs cursor-pointer disabled:opacity-50"
+            title="Move selected initiatives to Archive"
+          >
+            <i className="bi bi-archive text-amber-400 text-xs"></i>
+            <span className="hidden sm:inline">Archive</span>
+          </button>
 
           {/* 4. Batch Delete */}
           <button
