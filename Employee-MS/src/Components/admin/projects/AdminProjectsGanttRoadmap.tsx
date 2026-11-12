@@ -13,6 +13,10 @@ export interface AdminProjectsGanttRoadmapProps {
   onOpenTasksTray?: (project: ProjectItem) => void;
   onQuickAddTask?: (project: ProjectItem) => void;
   onOpenBudgetHUD?: (project: ProjectItem) => void;
+  selectedProjectIds?: (number | string)[];
+  onToggleSelectProject?: (projectId: number | string) => void;
+  onSelectAllProjects?: () => void;
+  onDeselectAllProjects?: () => void;
 }
 
 export type GanttTimescaleZoom = "month" | "quarter";
@@ -37,8 +41,22 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
   onOpenTasksTray,
   onQuickAddTask,
   onOpenBudgetHUD,
+  selectedProjectIds = [],
+  onToggleSelectProject,
+  onSelectAllProjects,
+  onDeselectAllProjects,
 }) => {
   const [zoomMode, setZoomMode] = useState<GanttTimescaleZoom>("month");
+  const selectAllCheckboxRef = useRef<HTMLInputElement>(null);
+
+  const isAllSelected = projects.length > 0 && projects.every((p) => selectedProjectIds.includes(p.id));
+  const isSomeSelected = projects.some((p) => selectedProjectIds.includes(p.id)) && !isAllSelected;
+
+  useEffect(() => {
+    if (selectAllCheckboxRef.current) {
+      selectAllCheckboxRef.current.indeterminate = isSomeSelected;
+    }
+  }, [isSomeSelected]);
   const [filterDepartment, setFilterDepartment] = useState<string>("all");
   const [hoveredProjectId, setHoveredProjectId] = useState<number | string | null>(null);
   const [milestonesCache, setMilestonesCache] = useState<{ [projectId: string]: ProjectMilestoneItem[] }>({});
@@ -436,16 +454,32 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
         <div className="w-[280px] sm:w-[320px] shrink-0 border-r border-slate-200 bg-slate-50/70 z-20 flex flex-col">
           {/* Header Row */}
           <div className="h-[73px] px-3.5 border-b border-slate-200 bg-slate-100/95 flex flex-col justify-center">
-            <div className="flex items-center gap-1.5">
-              <i className="bi bi-kanban text-indigo-600 text-xs"></i>
-              <span className="text-xs sm:text-[13px] font-bold text-slate-800 tracking-tight">
-                Strategic Initiatives
-              </span>
-              <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-indigo-100 text-indigo-700 border border-indigo-200">
+            <div className="flex items-center justify-between gap-1.5">
+              <div className="flex items-center gap-2">
+                <input
+                  ref={selectAllCheckboxRef}
+                  type="checkbox"
+                  checked={isAllSelected}
+                  onChange={() => {
+                    if (isAllSelected) {
+                      onDeselectAllProjects?.();
+                    } else {
+                      onSelectAllProjects?.();
+                    }
+                  }}
+                  className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600 transition-all shrink-0"
+                  title={isAllSelected ? "Deselect all visible initiatives" : "Select all visible initiatives"}
+                />
+                <span className="text-xs sm:text-[13px] font-bold text-slate-800 tracking-tight flex items-center gap-1.5">
+                  <i className="bi bi-kanban text-indigo-600 text-xs"></i>
+                  Strategic Initiatives
+                </span>
+              </div>
+              <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-indigo-100 text-indigo-700 border border-indigo-200 shrink-0">
                 {filteredProjects.length}
               </span>
             </div>
-            <span className="text-[10px] text-slate-500 font-medium mt-0.5">
+            <span className="text-[10px] text-slate-500 font-medium mt-0.5 ml-6">
               Department • Lead Supervisor • Velocity %
             </span>
           </div>
@@ -454,16 +488,36 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
           <div className="divide-y divide-slate-100 flex-1">
             {filteredProjects.map((p) => {
               const isHovered = hoveredProjectId === p.id;
+              const isSelected = selectedProjectIds.includes(p.id);
+
               return (
                 <div
                   key={`gantt-proj-meta-${p.id}`}
                   onMouseEnter={() => setHoveredProjectId(p.id)}
                   onMouseLeave={() => setHoveredProjectId(null)}
-                  className={`h-[68px] px-3.5 py-2 flex items-center justify-between gap-2.5 border-b border-slate-200/90 transition-colors cursor-pointer ${
-                    isHovered ? "bg-indigo-50/70" : "bg-white hover:bg-slate-50"
+                  className={`h-[68px] px-3.5 py-2 flex items-center justify-between gap-2 border-b border-slate-200/90 transition-colors cursor-pointer ${
+                    isSelected
+                      ? "bg-indigo-50/85 border-l-4 border-l-indigo-600"
+                      : isHovered
+                      ? "bg-indigo-50/50"
+                      : "bg-white hover:bg-slate-50"
                   }`}
                   onClick={() => onOpenDossierModal && onOpenDossierModal(p)}
                 >
+                  {/* Multi-Select Checkbox */}
+                  <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        onToggleSelectProject?.(p.id);
+                      }}
+                      className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600 transition-all"
+                      title={`Select PRJ-${String(p.id).padStart(4, "0")}`}
+                    />
+                  </div>
+
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 mb-0.5">
                       <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">

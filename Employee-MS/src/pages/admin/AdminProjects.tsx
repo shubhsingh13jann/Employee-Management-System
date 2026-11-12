@@ -620,6 +620,10 @@ const AdminProjects: React.FC = () => {
         ) : viewMode === "gantt" ? (
           <AdminProjectsGanttRoadmap
             projects={filteredProjects}
+            selectedProjectIds={selectedProjectIds}
+            onToggleSelectProject={handleToggleSelectProject}
+            onSelectAllProjects={handleSelectAllProjects}
+            onDeselectAllProjects={handleDeselectAllProjects}
             onOpenEditModal={(proj) => {
               setEditingProject(proj);
               setShowCreateModal(true);
