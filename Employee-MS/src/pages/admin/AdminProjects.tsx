@@ -635,6 +635,10 @@ const AdminProjects: React.FC = () => {
         ) : viewMode === "milestones" ? (
           <AdminMilestoneTracker
             projects={filteredProjects}
+            selectedProjectIds={selectedProjectIds}
+            onToggleSelectProject={handleToggleSelectProject}
+            onSelectAllProjects={handleSelectAllProjects}
+            onDeselectAllProjects={handleDeselectAllProjects}
             onOpenEditModal={(proj) => {
               setEditingProject(proj);
               setShowCreateModal(true);
@@ -646,6 +650,10 @@ const AdminProjects: React.FC = () => {
         ) : viewMode === "grid" ? (
           <AdminProjectsGrid
             projects={filteredProjects}
+            selectedProjectIds={selectedProjectIds}
+            onToggleSelectProject={handleToggleSelectProject}
+            onSelectAllProjects={handleSelectAllProjects}
+            onDeselectAllProjects={handleDeselectAllProjects}
             onOpenEditModal={(proj) => {
               setEditingProject(proj);
               setShowCreateModal(true);

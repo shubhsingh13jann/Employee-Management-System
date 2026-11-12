@@ -12,6 +12,10 @@ interface AdminProjectsGridProps {
   onOpenTasksTray?: (project: ProjectItem) => void;
   onQuickAddTask?: (project: ProjectItem) => void;
   onOpenBudgetHUD?: (project: ProjectItem) => void;
+  selectedProjectIds?: (number | string)[];
+  onToggleSelectProject?: (projectId: number | string) => void;
+  onSelectAllProjects?: () => void;
+  onDeselectAllProjects?: () => void;
 }
 
 export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
@@ -25,8 +29,22 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
   onOpenTasksTray,
   onQuickAddTask,
   onOpenBudgetHUD,
+  selectedProjectIds = [],
+  onToggleSelectProject,
+  onSelectAllProjects,
+  onDeselectAllProjects,
 }) => {
   const [activeMenuId, setActiveMenuId] = React.useState<number | string | null>(null);
+  const selectAllCheckboxRef = React.useRef<HTMLInputElement>(null);
+
+  const isAllSelected = projects.length > 0 && projects.every((p) => selectedProjectIds.includes(p.id));
+  const isSomeSelected = projects.some((p) => selectedProjectIds.includes(p.id)) && !isAllSelected;
+
+  React.useEffect(() => {
+    if (selectAllCheckboxRef.current) {
+      selectAllCheckboxRef.current.indeterminate = isSomeSelected;
+    }
+  }, [isSomeSelected]);
 
   React.useEffect(() => {
     const handleClickOutside = () => setActiveMenuId(null);
@@ -35,24 +53,70 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
   }, []);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
-      {projects.map((proj) => {
+    <div className="space-y-2 mb-3">
+      {/* Cards Selection Toolbar */}
+      {projects.length > 0 && (
+        <div className="bg-slate-50 border border-slate-200/90 rounded-xl px-3 py-2 flex items-center justify-between text-xs">
+          <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+            <input
+              ref={selectAllCheckboxRef}
+              type="checkbox"
+              checked={isAllSelected}
+              onChange={() => {
+                if (isAllSelected) {
+                  onDeselectAllProjects?.();
+                } else {
+                  onSelectAllProjects?.();
+                }
+              }}
+              className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600 transition-all"
+            />
+            <span className="font-semibold text-slate-700 text-xs">
+              {isAllSelected ? "Deselect All Cards" : "Select All Cards"} ({projects.length})
+            </span>
+          </label>
+          {selectedProjectIds.length > 0 && (
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-lg shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+              {selectedProjectIds.length} card{selectedProjectIds.length > 1 ? "s" : ""} selected
+            </span>
+          )}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {projects.map((proj) => {
+          const isSelected = selectedProjectIds.includes(proj.id);
         const isOverdue = proj.is_overdue || (proj.health === "critical" && proj.status !== "completed");
         const isMenuOpen = activeMenuId === proj.id;
 
         return (
           <div
             key={proj.id}
-            className={`bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-xs transition-all p-3.5 flex flex-col justify-between ${
-              isMenuOpen ? "relative z-30" : "relative"
-            }`}
+            className={`bg-white rounded-xl border shadow-2xs hover:shadow-xs transition-all p-3.5 flex flex-col justify-between ${
+              isSelected
+                ? "border-indigo-500 ring-2 ring-indigo-500/20 bg-indigo-50/15"
+                : "border-slate-200/90"
+            } ${isMenuOpen ? "relative z-30" : "relative"}`}
           >
             <div>
               {/* Card Header: Dept, Priority, Status Capsule, and Triple-dot Menu */}
               <div className="flex items-center justify-between gap-2 mb-2">
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                  🏢 {proj.department_name || "General"}
-                </span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      onToggleSelectProject?.(proj.id);
+                    }}
+                    className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600 transition-all shrink-0"
+                    title={`Select initiative PRJ-${String(proj.id).padStart(4, "0")}`}
+                  />
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 truncate">
+                    🏢 {proj.department_name || "General"}
+                  </span>
+                </div>
 
                 <div className="flex items-center gap-1.5">
                   {proj.priority === "critical" && (
@@ -467,6 +531,7 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
           </div>
         );
       })}
+      </div>
     </div>
   );
 };
