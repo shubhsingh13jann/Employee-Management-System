@@ -329,6 +329,11 @@ const AdminProjects: React.FC = () => {
     setBatchConfirmModal({ isOpen: true, mode: "archive" });
   };
 
+  const handleBatchUnarchive = async () => {
+    if (selectedProjectIds.length === 0) return;
+    await handleBatchStatusChange("active");
+  };
+
   const handleOpenBatchDelete = () => {
     if (selectedProjectIds.length === 0) return;
     setBatchConfirmModal({ isOpen: true, mode: "delete" });
@@ -690,6 +695,10 @@ const AdminProjects: React.FC = () => {
           onBatchStatusChange={handleBatchStatusChange}
           onBatchExportCSV={handleBatchExportCSV}
           onBatchArchive={handleOpenBatchArchive}
+          onBatchUnarchive={handleBatchUnarchive}
+          hasArchived={projects
+            .filter((p) => selectedProjectIds.includes(p.id))
+            .some((p) => p.status === "archived")}
           onBatchDelete={handleOpenBatchDelete}
           isProcessing={isBatchProcessing}
         />

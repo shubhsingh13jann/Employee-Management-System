@@ -316,6 +316,26 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {project?.status === "archived" && (
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const res = await api.put(`/api/admin/projects/${project.id}/status`, { status: "active" });
+                    if (res.data.status) {
+                      setData((prev: any) => (prev ? { ...prev, project: { ...prev.project, status: "active" } } : prev));
+                    }
+                  } catch (e) {
+                    console.error("Failed to unarchive from dossier:", e);
+                  }
+                }}
+                className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold border border-emerald-400/30 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                title="Restore this archived initiative to Active status"
+              >
+                <i className="bi bi-arrow-counterclockwise"></i>
+                <span>Unarchive / Restore</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => window.print()}

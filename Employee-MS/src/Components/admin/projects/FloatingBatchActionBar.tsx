@@ -9,6 +9,8 @@ export interface FloatingBatchActionBarProps {
   onBatchStatusChange: (status: string) => void;
   onBatchExportCSV: () => void;
   onBatchArchive: () => void;
+  onBatchUnarchive?: () => void;
+  hasArchived?: boolean;
   onBatchDelete: () => void;
   isProcessing?: boolean;
 }
@@ -22,6 +24,8 @@ export const FloatingBatchActionBar: React.FC<FloatingBatchActionBarProps> = ({
   onBatchStatusChange,
   onBatchExportCSV,
   onBatchArchive,
+  onBatchUnarchive,
+  hasArchived = false,
   onBatchDelete,
   isProcessing = false,
 }) => {
@@ -146,17 +150,31 @@ export const FloatingBatchActionBar: React.FC<FloatingBatchActionBarProps> = ({
             <span className="sm:hidden">CSV</span>
           </button>
 
-          {/* 3. Batch Archive */}
-          <button
-            type="button"
-            onClick={onBatchArchive}
-            disabled={isProcessing}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700/90 text-slate-100 border border-slate-600/80 text-xs font-medium transition-all shadow-xs cursor-pointer disabled:opacity-50"
-            title="Move selected initiatives to Archive"
-          >
-            <i className="bi bi-archive text-amber-400 text-xs"></i>
-            <span className="hidden sm:inline">Archive</span>
-          </button>
+          {/* 3. Batch Archive / Unarchive */}
+          {hasArchived && onBatchUnarchive ? (
+            <button
+              type="button"
+              onClick={onBatchUnarchive}
+              disabled={isProcessing}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-400/80 text-xs font-semibold transition-all shadow-xs cursor-pointer disabled:opacity-50"
+              title="Restore selected archived initiatives back to Active"
+            >
+              <i className="bi bi-arrow-counterclockwise text-xs"></i>
+              <span className="hidden sm:inline">Unarchive</span>
+              <span className="sm:hidden">Restore</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onBatchArchive}
+              disabled={isProcessing}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700/90 text-slate-100 border border-slate-600/80 text-xs font-medium transition-all shadow-xs cursor-pointer disabled:opacity-50"
+              title="Move selected initiatives to Archive"
+            >
+              <i className="bi bi-archive text-amber-400 text-xs"></i>
+              <span className="hidden sm:inline">Archive</span>
+            </button>
+          )}
 
           {/* 4. Batch Delete */}
           <button

@@ -146,6 +146,7 @@ export const AdminProjectsFilters: React.FC<AdminProjectsFiltersProps> = ({
     { key: "on_hold", label: "On Hold" },
     { key: "completed", label: "Completed" },
     { key: "critical", label: "Overdue / At Risk" },
+    { key: "archived", label: "Archived" },
   ];
 
   return (

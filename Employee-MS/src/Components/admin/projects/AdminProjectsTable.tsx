@@ -117,6 +117,13 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
             Completed
           </span>
         );
+      case "archived":
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700 border border-slate-300">
+            <i className="bi bi-archive-fill text-slate-500 text-[9px]"></i>
+            Archived
+          </span>
+        );
       default:
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
@@ -573,7 +580,20 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                     {/* 8. Status */}
                     {activeColumns.status && (
                       <td className="py-2.5 px-3.5 text-center whitespace-nowrap">
-                        {getStatusBadge(proj.status)}
+                        <div className="inline-flex flex-col items-center gap-0.5">
+                          {getStatusBadge(proj.status)}
+                          {proj.status === "archived" && onUpdateStatus && (
+                            <button
+                              type="button"
+                              onClick={() => onUpdateStatus(proj.id, "active")}
+                              className="text-[9px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer flex items-center gap-0.5 transition-colors mt-0.5"
+                              title="Click to unarchive and restore this initiative to Active"
+                            >
+                              <i className="bi bi-arrow-counterclockwise text-[8.5px]"></i>
+                              Restore
+                            </button>
+                          )}
+                        </div>
                       </td>
                     )}
 
@@ -629,39 +649,74 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                               )}
                               {onUpdateStatus && (
                                 <>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setActiveMenuId(null);
-                                      onUpdateStatus(proj.id, "active");
-                                    }}
-                                    className="w-full px-2 py-1 text-[11px] text-emerald-700 hover:bg-emerald-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
-                                  >
-                                    <i className="bi bi-play-circle text-emerald-600 text-[10px]"></i>
-                                    <span>Mark Active</span>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setActiveMenuId(null);
-                                      onUpdateStatus(proj.id, "completed");
-                                    }}
-                                    className="w-full px-2 py-1 text-[11px] text-blue-700 hover:bg-blue-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
-                                  >
-                                    <i className="bi bi-check2-circle text-blue-600 text-[10px]"></i>
-                                    <span>Mark Completed</span>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setActiveMenuId(null);
-                                      onUpdateStatus(proj.id, "on_hold");
-                                    }}
-                                    className="w-full px-2 py-1 text-[11px] text-amber-700 hover:bg-amber-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
-                                  >
-                                    <i className="bi bi-pause-circle text-amber-600 text-[10px]"></i>
-                                    <span>Place On Hold</span>
-                                  </button>
+                                  {proj.status === "archived" ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setActiveMenuId(null);
+                                        onUpdateStatus(proj.id, "active");
+                                      }}
+                                      className="w-full px-2 py-1.5 text-[11px] text-emerald-800 hover:bg-emerald-100 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-bold bg-emerald-50/80 border border-emerald-200"
+                                      title="Restore this initiative back to Active status"
+                                    >
+                                      <i className="bi bi-arrow-counterclockwise text-emerald-600 text-xs"></i>
+                                      <span>Unarchive / Restore</span>
+                                    </button>
+                                  ) : (
+                                    <>
+                                      {proj.status !== "active" && (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setActiveMenuId(null);
+                                            onUpdateStatus(proj.id, "active");
+                                          }}
+                                          className="w-full px-2 py-1 text-[11px] text-emerald-700 hover:bg-emerald-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                                        >
+                                          <i className="bi bi-play-circle text-emerald-600 text-[10px]"></i>
+                                          <span>Mark Active</span>
+                                        </button>
+                                      )}
+                                      {proj.status !== "completed" && (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setActiveMenuId(null);
+                                            onUpdateStatus(proj.id, "completed");
+                                          }}
+                                          className="w-full px-2 py-1 text-[11px] text-blue-700 hover:bg-blue-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                                        >
+                                          <i className="bi bi-check2-circle text-blue-600 text-[10px]"></i>
+                                          <span>Mark Completed</span>
+                                        </button>
+                                      )}
+                                      {proj.status !== "on_hold" && (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setActiveMenuId(null);
+                                            onUpdateStatus(proj.id, "on_hold");
+                                          }}
+                                          className="w-full px-2 py-1 text-[11px] text-amber-700 hover:bg-amber-50 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                                        >
+                                          <i className="bi bi-pause-circle text-amber-600 text-[10px]"></i>
+                                          <span>Place On Hold</span>
+                                        </button>
+                                      )}
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setActiveMenuId(null);
+                                          onUpdateStatus(proj.id, "archived");
+                                        }}
+                                        className="w-full px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-100 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                                        title="Move initiative to archive"
+                                      >
+                                        <i className="bi bi-archive text-slate-500 text-[10px]"></i>
+                                        <span>Archive Initiative</span>
+                                      </button>
+                                    </>
+                                  )}
                                 </>
                               )}
 
