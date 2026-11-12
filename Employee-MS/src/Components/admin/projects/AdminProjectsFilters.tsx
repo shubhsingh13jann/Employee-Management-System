@@ -92,10 +92,14 @@ export const AdminProjectsFilters: React.FC<AdminProjectsFiltersProps> = ({
   visibleColumns = DEFAULT_COLUMN_VISIBILITY,
   onToggleColumn,
   onResetColumns,
+  isSelectMode = false,
+  onToggleSelectMode,
+  selectedCount = 0,
 }) => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [isColumnDropdownOpen, setIsColumnDropdownOpen] = useState(false);
   const columnDropdownRef = useRef<HTMLDivElement>(null);
+  const showCheckboxes = Boolean(isSelectMode || selectedCount > 0);
 
   // Keyboard shortcut: '/' focuses search input
   useEffect(() => {
