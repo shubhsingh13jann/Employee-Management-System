@@ -54,8 +54,8 @@ export const FloatingBatchActionBar: React.FC<FloatingBatchActionBarProps> = ({
   ];
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-5 duration-200">
-      <div className="flex items-center gap-2 sm:gap-3 bg-slate-900/95 backdrop-blur-md text-white px-3 sm:px-5 py-2.5 sm:py-3 rounded-2xl shadow-2xl border border-slate-700/80 shadow-slate-950/40">
+    <div className="fixed bottom-6 left-0 right-0 md:left-[240px] z-50 flex justify-center pointer-events-none px-4 animate-in fade-in slide-in-from-bottom-5 duration-200">
+      <div className="pointer-events-auto flex items-center gap-2 sm:gap-3 bg-slate-900/95 backdrop-blur-md text-white px-3 sm:px-5 py-2.5 sm:py-3 rounded-2xl shadow-2xl border border-slate-700/80 shadow-slate-950/40 max-w-full overflow-x-auto">
         {/* Selection Badge & Count */}
         <div className="flex items-center gap-2 border-r border-slate-700/80 pr-3 sm:pr-4">
           <div className="w-6 h-6 rounded-lg bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-400 text-xs font-bold">
