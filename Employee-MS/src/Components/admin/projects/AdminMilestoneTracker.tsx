@@ -13,6 +13,7 @@ interface AdminMilestoneTrackerProps {
   onToggleSelectProject?: (projectId: number | string) => void;
   onSelectAllProjects?: () => void;
   onDeselectAllProjects?: () => void;
+  showCheckboxes?: boolean;
 }
 
 export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
@@ -25,6 +26,7 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
   onToggleSelectProject,
   onSelectAllProjects,
   onDeselectAllProjects,
+  showCheckboxes = false,
 }) => {
   const selectAllCheckboxRef = React.useRef<HTMLInputElement>(null);
   const isAllSelected = projects.length > 0 && projects.every((p) => selectedProjectIds.includes(p.id));
@@ -247,16 +249,18 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                 {/* Line 1: Title, Code, Dept & Target Date Pill */}
                 <div className="flex items-center justify-between gap-1.5 flex-wrap">
                   <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        onToggleSelectProject?.(proj.id);
-                      }}
-                      className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600 transition-all shrink-0 mr-1"
-                      title={`Select initiative PRJ-${String(proj.id).padStart(4, "0")}`}
-                    />
+                    {showCheckboxes && (
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          onToggleSelectProject?.(proj.id);
+                        }}
+                        className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600 transition-all shrink-0 mr-1"
+                        title={`Select initiative PRJ-${String(proj.id).padStart(4, "0")}`}
+                      />
+                    )}
                     <button
                       type="button"
                       onClick={() => onOpenDossierModal?.(proj)}

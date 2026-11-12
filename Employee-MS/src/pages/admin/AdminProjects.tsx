@@ -114,9 +114,28 @@ const AdminProjects: React.FC = () => {
     setVisibleColumns(DEFAULT_COLUMN_VISIBILITY);
   };
 
-  // Multi-Select & Batch Operation Suite State
+  // Multi-Select & Batch Operation Suite State (matching User Directory & Team Hierarchy)
   const [selectedProjectIds, setSelectedProjectIds] = useState<(number | string)[]>([]);
+  const [isSelectMode, setIsSelectMode] = useState<boolean>(false);
   const [isBatchProcessing, setIsBatchProcessing] = useState<boolean>(false);
+
+  const showCheckboxes = isSelectMode || selectedProjectIds.length > 0;
+
+  const handleToggleSelectMode = () => {
+    if (showCheckboxes) {
+      setIsSelectMode(false);
+      setSelectedProjectIds([]);
+    } else {
+      setIsSelectMode(true);
+    }
+  };
+
+  const handleSelectInitiativeFromMenu = (id: number | string) => {
+    setIsSelectMode(true);
+    setSelectedProjectIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
   const [batchConfirmModal, setBatchConfirmModal] = useState<{
     isOpen: boolean;
     mode: "archive" | "delete";
@@ -138,6 +157,7 @@ const AdminProjects: React.FC = () => {
 
   const handleDeselectAllProjects = () => {
     setSelectedProjectIds([]);
+    setIsSelectMode(false);
   };
 
   // Modals / Drawers State (Wired in Commits 4 & 5)
@@ -592,6 +612,9 @@ const AdminProjects: React.FC = () => {
           visibleColumns={visibleColumns}
           onToggleColumn={handleToggleColumn}
           onResetColumns={handleResetColumns}
+          isSelectMode={isSelectMode}
+          onToggleSelectMode={handleToggleSelectMode}
+          selectedCount={selectedProjectIds.length}
         />
 
         {/* Dynamic View Rendering: Table vs Grid vs Milestones */}
@@ -620,6 +643,7 @@ const AdminProjects: React.FC = () => {
         ) : viewMode === "gantt" ? (
           <AdminProjectsGanttRoadmap
             projects={filteredProjects}
+            showCheckboxes={showCheckboxes}
             selectedProjectIds={selectedProjectIds}
             onToggleSelectProject={handleToggleSelectProject}
             onSelectAllProjects={handleSelectAllProjects}
@@ -639,6 +663,7 @@ const AdminProjects: React.FC = () => {
         ) : viewMode === "milestones" ? (
           <AdminMilestoneTracker
             projects={filteredProjects}
+            showCheckboxes={showCheckboxes}
             selectedProjectIds={selectedProjectIds}
             onToggleSelectProject={handleToggleSelectProject}
             onSelectAllProjects={handleSelectAllProjects}
@@ -654,10 +679,12 @@ const AdminProjects: React.FC = () => {
         ) : viewMode === "grid" ? (
           <AdminProjectsGrid
             projects={filteredProjects}
+            showCheckboxes={showCheckboxes}
             selectedProjectIds={selectedProjectIds}
             onToggleSelectProject={handleToggleSelectProject}
             onSelectAllProjects={handleSelectAllProjects}
             onDeselectAllProjects={handleDeselectAllProjects}
+            onSelectInitiative={handleSelectInitiativeFromMenu}
             onOpenEditModal={(proj) => {
               setEditingProject(proj);
               setShowCreateModal(true);
@@ -675,10 +702,12 @@ const AdminProjects: React.FC = () => {
           <AdminProjectsTable
             projects={filteredProjects}
             visibleColumns={visibleColumns}
+            showCheckboxes={showCheckboxes}
             selectedProjectIds={selectedProjectIds}
             onToggleSelectProject={handleToggleSelectProject}
             onSelectAllProjects={handleSelectAllProjects}
             onDeselectAllProjects={handleDeselectAllProjects}
+            onSelectInitiative={handleSelectInitiativeFromMenu}
             onOpenEditModal={(proj) => {
               setEditingProject(proj);
               setShowCreateModal(true);

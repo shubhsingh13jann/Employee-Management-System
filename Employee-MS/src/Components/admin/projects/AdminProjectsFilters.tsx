@@ -55,6 +55,9 @@ interface AdminProjectsFiltersProps {
   visibleColumns?: ColumnVisibility;
   onToggleColumn?: (key: keyof ColumnVisibility) => void;
   onResetColumns?: () => void;
+  isSelectMode?: boolean;
+  onToggleSelectMode?: () => void;
+  selectedCount?: number;
 }
 
 const COLUMN_OPTIONS: { key: keyof ColumnVisibility; label: string; icon: string }[] = [
@@ -379,7 +382,7 @@ export const AdminProjectsFilters: React.FC<AdminProjectsFiltersProps> = ({
         </div>
 
         {/* Results Counter & Reset Filter */}
-        <div className="flex items-center gap-2 self-start sm:self-auto shrink-0 text-xs text-slate-500 font-medium">
+        <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0 text-xs text-slate-500 font-medium">
           <span>
             Showing <strong className="text-indigo-600 font-bold">{totalFiltered}</strong> of{" "}
             <strong className="text-indigo-600 font-bold">{totalCount}</strong> initiatives
@@ -393,6 +396,23 @@ export const AdminProjectsFilters: React.FC<AdminProjectsFiltersProps> = ({
             >
               <i className="bi bi-x-circle-fill text-[11px]"></i>
               <span>Reset Filters</span>
+            </button>
+          )}
+
+          {/* Square Select Tab matching User Directory and Team Hierarchy exactly */}
+          {onToggleSelectMode && (
+            <button
+              type="button"
+              onClick={onToggleSelectMode}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-2xs ${
+                showCheckboxes
+                  ? "bg-indigo-600 text-white border-indigo-500 shadow-indigo-500/20 ring-1 ring-indigo-400/40"
+                  : "bg-white hover:bg-indigo-50/60 text-slate-700 hover:text-indigo-600 border-slate-200/90 hover:border-indigo-300"
+              }`}
+              title={showCheckboxes ? "Exit Multi-Select Mode" : "Enable Multi-Select Mode"}
+            >
+              <i className={`bi ${showCheckboxes ? "bi-check2-all text-white font-bold" : "bi-check2-square text-indigo-500"} text-xs`}></i>
+              <span>{showCheckboxes ? `Done (${selectedCount})` : "Select"}</span>
             </button>
           )}
         </div>

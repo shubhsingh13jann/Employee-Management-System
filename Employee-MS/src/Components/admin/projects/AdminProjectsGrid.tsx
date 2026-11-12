@@ -16,6 +16,8 @@ interface AdminProjectsGridProps {
   onToggleSelectProject?: (projectId: number | string) => void;
   onSelectAllProjects?: () => void;
   onDeselectAllProjects?: () => void;
+  showCheckboxes?: boolean;
+  onSelectInitiative?: (id: number | string) => void;
 }
 
 export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
@@ -33,6 +35,8 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
   onToggleSelectProject,
   onSelectAllProjects,
   onDeselectAllProjects,
+  showCheckboxes = false,
+  onSelectInitiative,
 }) => {
   const [activeMenuId, setActiveMenuId] = React.useState<number | string | null>(null);
   const selectAllCheckboxRef = React.useRef<HTMLInputElement>(null);
@@ -55,7 +59,7 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
   return (
     <div className="space-y-2 mb-3">
       {/* Cards Selection Toolbar */}
-      {projects.length > 0 && (
+      {showCheckboxes && projects.length > 0 && (
         <div className="bg-slate-50 border border-slate-200/90 rounded-xl px-3 py-2 flex items-center justify-between text-xs">
           <label className="inline-flex items-center gap-2 cursor-pointer select-none">
             <input
@@ -103,16 +107,18 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
               {/* Card Header: Dept, Priority, Status Capsule, and Triple-dot Menu */}
               <div className="flex items-center justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      onToggleSelectProject?.(proj.id);
-                    }}
-                    className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600 transition-all shrink-0"
-                    title={`Select initiative PRJ-${String(proj.id).padStart(4, "0")}`}
-                  />
+                  {showCheckboxes && (
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        onToggleSelectProject?.(proj.id);
+                      }}
+                      className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600 transition-all shrink-0"
+                      title={`Select initiative PRJ-${String(proj.id).padStart(4, "0")}`}
+                    />
+                  )}
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 truncate">
                     🏢 {proj.department_name || "General"}
                   </span>
