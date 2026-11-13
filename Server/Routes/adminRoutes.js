@@ -47,6 +47,7 @@ import {
   deleteAdminProject,
   bulkUpdateAdminProjectsStatus,
   bulkDeleteAdminProjects,
+  updateAdminProjectBlocker,
   getAdminSupervisorsCapacity,
   getProjectMilestones,
   createProjectMilestone,
@@ -130,6 +131,7 @@ router.post("/projects/bulk-status", bulkUpdateAdminProjectsStatus);
 router.delete("/projects/bulk", bulkDeleteAdminProjects);
 router.post("/projects/bulk-delete", bulkDeleteAdminProjects);
 router.put("/projects/:id/status", updateAdminProjectStatus);
+router.put("/projects/:id/blocker", updateAdminProjectBlocker);
 router.put("/projects/:id", updateAdminProject);
 router.delete("/projects/:id", deleteAdminProject);
 router.get("/projects/supervisors-capacity", getAdminSupervisorsCapacity);

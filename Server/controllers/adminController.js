@@ -1938,6 +1938,7 @@ export const getAdminProjects = async (req, res) => {
              d.name AS department_name, d.code AS department_code,
              s.name AS supervisor_name, s.email AS supervisor_email, s.image_url AS supervisor_image,
              creator.name AS creator_name,
+             blocker_user.name AS blocker_flagged_by_name,
              COUNT(t.id) AS total_tasks,
              SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) AS completed_tasks,
              SUM(CASE WHEN t.status != 'completed' AND t.due_date < CURDATE() THEN 1 ELSE 0 END) AS overdue_tasks,
@@ -1946,6 +1947,7 @@ export const getAdminProjects = async (req, res) => {
       LEFT JOIN departments d ON p.department_id = d.id
       LEFT JOIN users s ON p.lead_supervisor_id = s.id
       LEFT JOIN users creator ON p.created_by = creator.id
+      LEFT JOIN users blocker_user ON p.blocker_flagged_by = blocker_user.id
       LEFT JOIN tasks t ON p.id = t.project_id
       WHERE 1=1
     `;
@@ -2068,9 +2070,13 @@ export const getAdminProjects = async (req, res) => {
         }
       }
 
+      const isBlocked = Boolean(p.is_blocked) && p.blocker_status && p.blocker_status !== "none";
+
       let health = "healthy";
       if (p.status === "completed") {
         health = "completed";
+      } else if (isBlocked) {
+        health = "critical"; // Promoted to critical executive blocker
       } else if (isOverdue || overdue > 0) {
         health = "critical";
       } else if (daysLeft !== null && daysLeft <= 7 && progress < 70) {
@@ -2089,6 +2095,12 @@ export const getAdminProjects = async (req, res) => {
         days_left: daysLeft,
         is_overdue: isOverdue,
         health,
+        is_blocked: isBlocked,
+        blocker_status: p.blocker_status || "none",
+        blocker_notes: p.blocker_notes || "",
+        blocker_escalated_at: p.blocker_escalated_at || null,
+        blocker_flagged_by: p.blocker_flagged_by || null,
+        blocker_flagged_by_name: p.blocker_flagged_by_name || null,
         squad: squadByProject[p.id] || [],
         squad_members_count: (squadByProject[p.id] || []).length,
         budget: Number(p.budget) || 0,
@@ -2435,6 +2447,67 @@ export const bulkDeleteAdminProjects = async (req, res) => {
   } catch (err) {
     console.error("bulkDeleteAdminProjects error:", err);
     return res.status(500).json({ status: false, error: "Failed to batch delete projects" });
+  }
+};
+
+export const updateAdminProjectBlocker = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { is_blocked, blocker_status = "none", blocker_notes = "" } = req.body;
+
+    const [existing] = await pool.query("SELECT * FROM projects WHERE id = ?", [id]);
+    if (existing.length === 0) {
+      return res.status(404).json({ status: false, error: "Project not found" });
+    }
+
+    const proj = existing[0];
+    const shouldBlock = Boolean(is_blocked) && blocker_status && blocker_status !== "none";
+    const statusVal = shouldBlock ? blocker_status : "none";
+    const notesVal = blocker_notes?.trim() || (shouldBlock ? "Executive blocker flagged" : "");
+    const escalatedAt = shouldBlock ? new Date() : null;
+    const flaggedBy = shouldBlock ? (req.user?.id || 1) : null;
+
+    await pool.query(
+      `UPDATE projects 
+       SET is_blocked = ?, blocker_status = ?, blocker_notes = ?, blocker_escalated_at = ?, blocker_flagged_by = ? 
+       WHERE id = ?`,
+      [shouldBlock ? 1 : 0, statusVal, notesVal, escalatedAt, flaggedBy, id]
+    );
+
+    // Audit log
+    const performedBy = req.user?.id || 1;
+    const actionType = shouldBlock ? "Executive Blocker Flagged" : "Executive Blocker Cleared";
+    const details = shouldBlock
+      ? `Flagged initiative #${id} (${proj.title}) as BLOCKED [${statusVal}]: ${notesVal}`
+      : `Cleared executive blocker on initiative #${id} (${proj.title})`;
+
+    await pool.query(
+      `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+       VALUES (?, ?, 'is_blocked', ?, ?, ?, ?)`,
+      [
+        performedBy,
+        actionType,
+        proj.blocker_status || "none",
+        statusVal,
+        details,
+        performedBy,
+      ]
+    );
+
+    return res.json({
+      status: true,
+      message: shouldBlock
+        ? `Initiative flagged with executive blocker (${statusVal})`
+        : "Initiative blocker cleared successfully",
+      is_blocked: shouldBlock,
+      blocker_status: statusVal,
+      blocker_notes: notesVal,
+      blocker_escalated_at: escalatedAt,
+      blocker_flagged_by: flaggedBy,
+    });
+  } catch (err) {
+    console.error("updateAdminProjectBlocker error:", err);
+    return res.status(500).json({ status: false, error: "Failed to update initiative blocker status" });
   }
 };
 

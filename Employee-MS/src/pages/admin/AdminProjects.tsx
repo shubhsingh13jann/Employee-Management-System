@@ -48,6 +48,12 @@ export interface ProjectItem {
   days_left?: number | null;
   is_overdue?: boolean;
   health: "healthy" | "at_risk" | "critical" | "completed";
+  is_blocked?: boolean;
+  blocker_status?: "legal" | "vendor_dependency" | "staff_shortage" | "tech_debt" | "other" | "none" | string;
+  blocker_notes?: string;
+  blocker_escalated_at?: string | null;
+  blocker_flagged_by?: number | string | null;
+  blocker_flagged_by_name?: string | null;
   squad?: Array<{ id: number | string; name: string; image_url?: string; role_tag?: string }>;
   squad_members_count?: number;
   budget_allocated?: number;

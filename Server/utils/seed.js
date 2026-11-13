@@ -150,6 +150,37 @@ export async function seedDatabase() {
     console.warn('Migration note (user_audit_logs):', err.message);
   }
 
+  // Migration checks for projects: blocker & risk flagging columns
+  try {
+    const [cols] = await pool.query("SHOW COLUMNS FROM projects LIKE 'is_blocked'");
+    if (cols.length === 0) {
+      await pool.query("ALTER TABLE projects ADD COLUMN is_blocked TINYINT(1) DEFAULT 0");
+      console.log('✓ Migrated projects table: added is_blocked column');
+    }
+    const [cols2] = await pool.query("SHOW COLUMNS FROM projects LIKE 'blocker_status'");
+    if (cols2.length === 0) {
+      await pool.query("ALTER TABLE projects ADD COLUMN blocker_status VARCHAR(50) DEFAULT 'none'");
+      console.log('✓ Migrated projects table: added blocker_status column');
+    }
+    const [cols3] = await pool.query("SHOW COLUMNS FROM projects LIKE 'blocker_notes'");
+    if (cols3.length === 0) {
+      await pool.query("ALTER TABLE projects ADD COLUMN blocker_notes TEXT NULL");
+      console.log('✓ Migrated projects table: added blocker_notes column');
+    }
+    const [cols4] = await pool.query("SHOW COLUMNS FROM projects LIKE 'blocker_escalated_at'");
+    if (cols4.length === 0) {
+      await pool.query("ALTER TABLE projects ADD COLUMN blocker_escalated_at TIMESTAMP NULL");
+      console.log('✓ Migrated projects table: added blocker_escalated_at column');
+    }
+    const [cols5] = await pool.query("SHOW COLUMNS FROM projects LIKE 'blocker_flagged_by'");
+    if (cols5.length === 0) {
+      await pool.query("ALTER TABLE projects ADD COLUMN blocker_flagged_by INT NULL");
+      console.log('✓ Migrated projects table: added blocker_flagged_by column');
+    }
+  } catch (err) {
+    console.warn('Migration note (projects blocker columns):', err.message);
+  }
+
   // Check if database is already seeded
   const [existing] = await pool.query("SELECT id FROM users LIMIT 1");
   if (existing.length > 0) {
