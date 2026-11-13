@@ -181,6 +181,24 @@ export async function seedDatabase() {
     console.warn('Migration note (projects blocker columns):', err.message);
   }
 
+  // Ensure sample executive blocker on initiative #2 if present
+  try {
+    const [proj2] = await pool.query("SELECT id, is_blocked FROM projects WHERE id = 2");
+    if (proj2.length > 0 && !proj2[0].is_blocked) {
+      await pool.query(
+        `UPDATE projects 
+         SET is_blocked = 1, blocker_status = 'vendor_dependency',
+             blocker_notes = 'External biometric scanner and payment gateway vendor SLA delayed under revised security compliance audit.',
+             blocker_escalated_at = DATE_SUB(NOW(), INTERVAL 2 DAY),
+             blocker_flagged_by = 1 
+         WHERE id = 2`
+      );
+      console.log('✓ Verified sample executive blocker on initiative #2.');
+    }
+  } catch (err) {
+    console.warn('Migration note (sample blocker):', err.message);
+  }
+
   // Check if database is already seeded
   const [existing] = await pool.query("SELECT id FROM users LIMIT 1");
   if (existing.length > 0) {
