@@ -3256,11 +3256,13 @@ export const getProjectDossier = async (req, res) => {
       `SELECT p.*,
               d.name AS department_name, d.code AS department_code,
               s.name AS supervisor_name, s.email AS supervisor_email, s.image_url AS supervisor_image,
-              creator.name AS creator_name
+              creator.name AS creator_name,
+              blocker_user.name AS blocker_flagged_by_name
        FROM projects p
        LEFT JOIN departments d ON p.department_id = d.id
        LEFT JOIN users s ON p.lead_supervisor_id = s.id
        LEFT JOIN users creator ON p.created_by = creator.id
+       LEFT JOIN users blocker_user ON p.blocker_flagged_by = blocker_user.id
        WHERE p.id = ?`,
       [id]
     );

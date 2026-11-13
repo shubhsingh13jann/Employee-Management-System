@@ -6,6 +6,7 @@ interface AdminProjectsKPIStatsProps {
   planningCount: number;
   completedCount: number;
   criticalCount: number;
+  blockedCount?: number;
   overallVelocity: number;
   activeKpiFilter?: string | null;
   onToggleKpi?: (key: string) => void;
@@ -21,6 +22,7 @@ export const AdminProjectsKPIStats: React.FC<AdminProjectsKPIStatsProps> = ({
   planningCount,
   completedCount,
   criticalCount,
+  blockedCount = 0,
   overallVelocity,
   activeKpiFilter = null,
   onToggleKpi,
@@ -288,16 +290,20 @@ export const AdminProjectsKPIStats: React.FC<AdminProjectsKPIStatsProps> = ({
             {/* Line 1: Title */}
             <p className="text-[10px] sm:text-[10.5px] font-bold text-slate-500 uppercase tracking-wider leading-tight m-0 p-0 truncate flex items-center gap-1.5">
               <span>Critical / Overdue</span>
-              {criticalCount > 0 && (
+              {(criticalCount > 0 || blockedCount > 0) && (
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>
               )}
             </p>
             {/* Line 2: Value + Badge */}
             <div className="flex items-center gap-1.5 my-0.5 leading-none">
-              <span className={`text-base sm:text-lg font-black leading-none m-0 p-0 ${criticalCount > 0 ? "text-rose-900" : "text-slate-900"}`}>
+              <span className={`text-base sm:text-lg font-black leading-none m-0 p-0 ${criticalCount > 0 || blockedCount > 0 ? "text-rose-900" : "text-slate-900"}`}>
                 {criticalCount}
               </span>
-              {criticalCount > 0 ? (
+              {blockedCount > 0 ? (
+                <span className="text-[9px] sm:text-[9.5px] font-black text-rose-800 bg-rose-200/90 px-1.5 py-0.5 rounded border border-rose-400 leading-none animate-pulse">
+                  🚫 {blockedCount} Blocked
+                </span>
+              ) : criticalCount > 0 ? (
                 <span className="text-[9px] sm:text-[9.5px] font-bold text-rose-700 bg-rose-100 px-1.5 py-0.5 rounded border border-rose-300 leading-none">
                   Action Required
                 </span>
@@ -309,7 +315,15 @@ export const AdminProjectsKPIStats: React.FC<AdminProjectsKPIStatsProps> = ({
             </div>
             {/* Line 3: Subtitle */}
             <p className="text-[10px] sm:text-[10.5px] text-slate-500 font-medium leading-normal m-0 p-0 block truncate">
-              {criticalCount > 0 ? "Past target milestone date" : "Zero delivery bottlenecks"}
+              {blockedCount > 0 ? (
+                <span className="text-rose-700 font-bold">
+                  {blockedCount} Executive blocker{blockedCount > 1 ? "s" : ""}
+                </span>
+              ) : criticalCount > 0 ? (
+                "Past target milestone date"
+              ) : (
+                "Zero delivery bottlenecks"
+              )}
             </p>
           </div>
         </div>

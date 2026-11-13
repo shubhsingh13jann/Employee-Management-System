@@ -105,6 +105,11 @@ export interface DossierPayload {
     days_left: number | null;
     is_overdue: boolean;
     health: "healthy" | "at_risk" | "critical" | "completed";
+    is_blocked?: boolean;
+    blocker_status?: string;
+    blocker_notes?: string;
+    blocker_escalated_at?: string | null;
+    blocker_flagged_by_name?: string | null;
   };
   telemetry: DossierTelemetry;
   squad: SquadMember[];
@@ -119,6 +124,7 @@ interface ProjectDetailDossierModalProps {
   projectId: number | string | null;
   onOpenMilestonesModal?: (project: any) => void;
   onOpenBudgetHUD?: (project: any) => void;
+  onOpenBlockerModal?: (project: any) => void;
 }
 
 export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps> = ({
@@ -127,6 +133,7 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
   projectId,
   onOpenMilestonesModal,
   onOpenBudgetHUD,
+  onOpenBlockerModal,
 }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState<DossierPayload | null>(null);
@@ -556,6 +563,53 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
           ) : activeTab === "overview" ? (
             /* TAB 1: OVERVIEW & SCOPE */
             <div className="space-y-4">
+              {/* Executive Blocker Alert Banner (If Active) */}
+              {data?.project?.is_blocked && data?.project?.blocker_status && data?.project?.blocker_status !== "none" && (
+                <div className="p-4 rounded-xl bg-gradient-to-r from-rose-50 via-rose-100/60 to-orange-50 border-2 border-rose-300 shadow-xs animate-pulse">
+                  <div className="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-rose-600 text-white flex items-center justify-center text-base shrink-0 shadow-xs">
+                        <i className="bi bi-shield-slash-fill"></i>
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs font-black uppercase tracking-wider text-rose-900 bg-rose-200/90 px-2.5 py-0.5 rounded-md border border-rose-300">
+                            🚫 Active Blocker: {data.project.blocker_status.replace(/_/g, " ")}
+                          </span>
+                          {data.project.blocker_escalated_at && (
+                            <span className="text-[11px] font-bold text-rose-700">
+                              Escalated on {new Date(data.project.blocker_escalated_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                            </span>
+                          )}
+                          {data.project.blocker_flagged_by_name && (
+                            <span className="text-[11px] text-slate-500">
+                              by {data.project.blocker_flagged_by_name}
+                            </span>
+                          )}
+                        </div>
+                        {data.project.blocker_notes && (
+                          <p className="text-xs text-rose-950 font-medium mt-2 mb-0 leading-relaxed bg-white/80 p-2.5 rounded-lg border border-rose-200/90 shadow-2xs">
+                            "{data.project.blocker_notes}"
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    {onOpenBlockerModal && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onOpenBlockerModal(data.project);
+                        }}
+                        className="px-3 py-1.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-xs transition-colors shrink-0 cursor-pointer flex items-center gap-1.5"
+                      >
+                        <i className="bi bi-sliders"></i>
+                        <span>Manage Blocker</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Scope Card */}
               <div className="p-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">

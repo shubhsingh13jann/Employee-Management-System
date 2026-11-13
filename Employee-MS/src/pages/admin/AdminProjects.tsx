@@ -288,7 +288,9 @@ const AdminProjects: React.FC = () => {
       // Status Filter
       if (statusFilter !== "all") {
         if (statusFilter === "critical") {
-          if (p.health !== "critical" && !p.is_overdue) return false;
+          if (p.health !== "critical" && !p.is_overdue && !p.is_blocked) return false;
+        } else if (statusFilter === "blocked") {
+          if (!p.is_blocked || p.blocker_status === "none") return false;
         } else if (p.status !== statusFilter) {
           return false;
         }
@@ -312,12 +314,13 @@ const AdminProjects: React.FC = () => {
     const active = projects.filter((p) => p.status === "active").length;
     const planning = projects.filter((p) => p.status === "planning").length;
     const completed = projects.filter((p) => p.status === "completed").length;
-    const critical = projects.filter((p) => p.health === "critical" || p.is_overdue).length;
+    const blockedCount = projects.filter((p) => p.is_blocked && p.blocker_status !== "none").length;
+    const critical = projects.filter((p) => p.health === "critical" || p.is_overdue || p.is_blocked).length;
 
     const totalProgress = projects.reduce((sum, p) => sum + (p.progress_percentage || 0), 0);
     const overallVelocity = total > 0 ? Math.round(totalProgress / total) : 0;
 
-    return { total, active, planning, completed, critical, overallVelocity };
+    return { total, active, planning, completed, critical, blockedCount, overallVelocity };
   }, [projects]);
 
   const handleToggleKpiCard = (key: string) => {
@@ -625,6 +628,7 @@ const AdminProjects: React.FC = () => {
           planningCount={kpiStats.planning}
           completedCount={kpiStats.completed}
           criticalCount={kpiStats.critical}
+          blockedCount={kpiStats.blockedCount}
           overallVelocity={kpiStats.overallVelocity}
           activeKpiFilter={activeKpiFilter}
           onToggleKpi={handleToggleKpiCard}
@@ -701,6 +705,7 @@ const AdminProjects: React.FC = () => {
             onOpenTasksTray={(proj) => setSelectedTasksProject(proj)}
             onQuickAddTask={(proj) => setQuickAddTaskProject(proj)}
             onOpenBudgetHUD={(proj) => setSelectedBudgetProject(proj)}
+            onOpenBlockerModal={(proj) => setSelectedBlockerProject(proj)}
           />
         ) : viewMode === "milestones" ? (
           <AdminMilestoneTracker
@@ -833,6 +838,10 @@ const AdminProjects: React.FC = () => {
           onOpenBudgetHUD={(proj) => {
             setSelectedDossierProject(null);
             setSelectedBudgetProject(proj);
+          }}
+          onOpenBlockerModal={(proj) => {
+            setSelectedDossierProject(null);
+            setSelectedBlockerProject(proj);
           }}
         />
 

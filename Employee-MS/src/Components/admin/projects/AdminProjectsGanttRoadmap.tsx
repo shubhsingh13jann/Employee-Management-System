@@ -13,6 +13,7 @@ export interface AdminProjectsGanttRoadmapProps {
   onOpenTasksTray?: (project: ProjectItem) => void;
   onQuickAddTask?: (project: ProjectItem) => void;
   onOpenBudgetHUD?: (project: ProjectItem) => void;
+  onOpenBlockerModal?: (project: ProjectItem) => void;
   selectedProjectIds?: (number | string)[];
   onToggleSelectProject?: (projectId: number | string) => void;
   onSelectAllProjects?: () => void;
@@ -42,6 +43,7 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
   onOpenTasksTray,
   onQuickAddTask,
   onOpenBudgetHUD,
+  onOpenBlockerModal,
   selectedProjectIds = [],
   onToggleSelectProject,
   onSelectAllProjects,
@@ -525,12 +527,21 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
                   )}
 
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 mb-0.5">
+                    <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
                       <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
                         PRJ-{String(p.id).padStart(4, "0")}
                       </span>
+                      {p.is_blocked && p.blocker_status && p.blocker_status !== "none" && (
+                        <span
+                          onClick={() => onOpenBlockerModal?.(p)}
+                          className="px-1.5 py-0.2 rounded text-[8.5px] font-black uppercase bg-rose-600 text-white cursor-pointer hover:bg-rose-700 animate-pulse shadow-2xs"
+                          title={`Executive Blocker: ${p.blocker_status}. Click to manage.`}
+                        >
+                          🚫 Blocked
+                        </span>
+                      )}
                       {p.department_name && (
-                        <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-slate-100 text-slate-600 truncate max-w-[90px]">
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-slate-100 text-slate-600 truncate max-w-[85px]">
                           {p.department_name}
                         </span>
                       )}
@@ -585,6 +596,20 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
                         title="View Project Tasks"
                       >
                         <i className="bi bi-list-task"></i>
+                      </button>
+                    )}
+                    {onOpenBlockerModal && (
+                      <button
+                        type="button"
+                        onClick={() => onOpenBlockerModal(p)}
+                        className={`w-6 h-6 rounded-md border flex items-center justify-center text-[10px] transition-all cursor-pointer shadow-2xs ${
+                          p.is_blocked
+                            ? "bg-rose-600 text-white border-rose-700 animate-pulse"
+                            : "bg-slate-50 hover:bg-rose-50 text-slate-500 hover:text-rose-700 border-slate-200"
+                        }`}
+                        title={p.is_blocked ? `Blocked: ${p.blocker_status}. Click to manage.` : "Flag Executive Blocker"}
+                      >
+                        <i className="bi bi-shield-slash-fill"></i>
                       </button>
                     )}
                   </div>
@@ -712,6 +737,13 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
 
                         {/* Right: Progress & Health Indicator */}
                         <div className="flex items-center gap-1.5 shrink-0">
+                          {p.is_blocked && p.blocker_status && p.blocker_status !== "none" && (
+                            <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider bg-rose-700/90 text-white px-1.5 py-0.5 rounded shadow-xs border border-white/40 animate-pulse">
+                              <i className="bi bi-shield-slash-fill text-[8px]"></i>
+                              <span>BLOCKED</span>
+                            </span>
+                          )}
+
                           <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded border backdrop-blur-xs ${colors.badge}`}>
                             {pct}%
                           </span>
