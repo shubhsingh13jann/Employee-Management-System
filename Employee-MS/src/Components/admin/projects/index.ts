@@ -15,3 +15,4 @@ export * from "./AdminProjectsGanttRoadmap";
 export * from "./ProjectBudgetBurnHUDModal";
 export * from "./FloatingBatchActionBar";
 export * from "./BatchOperationConfirmModal";
+export * from "./ProjectBlockerModal";
