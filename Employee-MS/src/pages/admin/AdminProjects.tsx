@@ -18,6 +18,7 @@ import {
   ProjectBudgetBurnHUDModal,
   FloatingBatchActionBar,
   BatchOperationConfirmModal,
+  ProjectBlockerModal,
   ColumnVisibility,
   DEFAULT_COLUMN_VISIBILITY,
 } from "../../Components/admin/projects";
@@ -176,7 +177,42 @@ const AdminProjects: React.FC = () => {
   const [quickAddTaskProject, setQuickAddTaskProject] = useState<ProjectItem | null>(null);
   const [showCapacityDrawer, setShowCapacityDrawer] = useState<boolean>(false);
   const [selectedBudgetProject, setSelectedBudgetProject] = useState<ProjectItem | null>(null);
+  const [selectedBlockerProject, setSelectedBlockerProject] = useState<ProjectItem | null>(null);
   const [saving, setSaving] = useState<boolean>(false);
+
+  const handleSaveBlocker = async (
+    projectId: number | string,
+    isBlocked: boolean,
+    blockerStatus: string,
+    blockerNotes: string
+  ) => {
+    try {
+      setSaving(true);
+      const res = await api.put(`/api/admin/projects/${projectId}/blocker`, {
+        is_blocked: isBlocked,
+        blocker_status: blockerStatus,
+        blocker_notes: blockerNotes,
+      });
+      if (res.data.status) {
+        setMsg({
+          type: "success",
+          text: isBlocked
+            ? "Strategic initiative escalated with executive blocker!"
+            : "Executive blocker resolved successfully!",
+        });
+        setSelectedBlockerProject(null);
+        fetchData();
+      }
+    } catch (err: any) {
+      setMsg({
+        type: "danger",
+        text: err.response?.data?.error || "Failed to update blocker status",
+      });
+      throw err;
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleSaveProject = async (formData: any) => {
     try {
@@ -703,6 +739,7 @@ const AdminProjects: React.FC = () => {
             onOpenTasksTray={(proj) => setSelectedTasksProject(proj)}
             onQuickAddTask={(proj) => setQuickAddTaskProject(proj)}
             onOpenBudgetHUD={(proj) => setSelectedBudgetProject(proj)}
+            onOpenBlockerModal={(proj) => setSelectedBlockerProject(proj)}
           />
         ) : (
           <AdminProjectsTable
@@ -726,6 +763,7 @@ const AdminProjects: React.FC = () => {
             onOpenTasksTray={(proj) => setSelectedTasksProject(proj)}
             onQuickAddTask={(proj) => setQuickAddTaskProject(proj)}
             onOpenBudgetHUD={(proj) => setSelectedBudgetProject(proj)}
+            onOpenBlockerModal={(proj) => setSelectedBlockerProject(proj)}
           />
         )}
 
@@ -834,6 +872,15 @@ const AdminProjects: React.FC = () => {
           onClose={() => setSelectedBudgetProject(null)}
           project={selectedBudgetProject}
           onBudgetUpdated={fetchData}
+        />
+
+        {/* Executive Blocker & Risk Escalation Modal */}
+        <ProjectBlockerModal
+          isOpen={Boolean(selectedBlockerProject)}
+          onClose={() => setSelectedBlockerProject(null)}
+          project={selectedBlockerProject}
+          onSaveBlocker={handleSaveBlocker}
+          saving={saving}
         />
 
         {/* Supervisor Capacity Heatmap Drawer */}

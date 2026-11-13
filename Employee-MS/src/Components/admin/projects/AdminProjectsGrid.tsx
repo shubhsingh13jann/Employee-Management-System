@@ -12,6 +12,7 @@ interface AdminProjectsGridProps {
   onOpenTasksTray?: (project: ProjectItem) => void;
   onQuickAddTask?: (project: ProjectItem) => void;
   onOpenBudgetHUD?: (project: ProjectItem) => void;
+  onOpenBlockerModal?: (project: ProjectItem) => void;
   selectedProjectIds?: (number | string)[];
   onToggleSelectProject?: (projectId: number | string) => void;
   onSelectAllProjects?: () => void;
@@ -31,6 +32,7 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
   onOpenTasksTray,
   onQuickAddTask,
   onOpenBudgetHUD,
+  onOpenBlockerModal,
   selectedProjectIds = [],
   onToggleSelectProject,
   onSelectAllProjects,
@@ -91,21 +93,43 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {projects.map((proj) => {
           const isSelected = selectedProjectIds.includes(proj.id);
-        const isOverdue = proj.is_overdue || (proj.health === "critical" && proj.status !== "completed");
-        const isMenuOpen = activeMenuId === proj.id;
+          const isOverdue = proj.is_overdue || (proj.health === "critical" && proj.status !== "completed");
+          const isBlocked = Boolean(proj.is_blocked && proj.blocker_status && proj.blocker_status !== "none");
+          const isMenuOpen = activeMenuId === proj.id;
 
-        return (
-          <div
-            key={proj.id}
-            className={`bg-white rounded-xl border shadow-2xs hover:shadow-xs transition-all p-3.5 flex flex-col justify-between ${
-              isSelected
-                ? "border-indigo-500 ring-2 ring-indigo-500/20 bg-indigo-50/15"
-                : "border-slate-200/90"
-            } ${isMenuOpen ? "relative z-30" : "relative"}`}
-          >
-            <div>
-              {/* Card Header: Dept, Priority, Status Capsule, and Triple-dot Menu */}
-              <div className="flex items-center justify-between gap-2 mb-2">
+          return (
+            <div
+              key={proj.id}
+              className={`bg-white rounded-xl border shadow-2xs hover:shadow-xs transition-all p-3.5 flex flex-col justify-between ${
+                isSelected
+                  ? "border-indigo-500 ring-2 ring-indigo-500/20 bg-indigo-50/15"
+                  : isBlocked
+                  ? "border-rose-300 ring-2 ring-rose-500/30 shadow-rose-100"
+                  : "border-slate-200/90"
+              } ${isMenuOpen ? "relative z-30" : "relative"}`}
+            >
+              <div>
+                {/* High-visibility Pulsing Blocker Ribbon on Card Top */}
+                {isBlocked && (
+                  <div
+                    onClick={() => onOpenBlockerModal?.(proj)}
+                    className="mb-2 -mx-3.5 -mt-3.5 px-3 py-1.5 bg-gradient-to-r from-rose-600 via-amber-600 to-rose-600 text-white rounded-t-xl flex items-center justify-between gap-2 shadow-xs cursor-pointer hover:brightness-105 transition-all animate-pulse"
+                    title={`Executive Blocker Active: ${proj.blocker_status?.replace(/_/g, " ")}. Click to manage.`}
+                  >
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <i className="bi bi-shield-slash-fill text-xs shrink-0"></i>
+                      <span className="text-[10px] font-black uppercase tracking-wider truncate">
+                        BLOCKED: {proj.blocker_status?.replace(/_/g, " ")}
+                      </span>
+                    </div>
+                    <span className="text-[9px] font-bold bg-black/25 hover:bg-black/35 px-1.5 py-0.5 rounded text-white shrink-0">
+                      Manage ⚙️
+                    </span>
+                  </div>
+                )}
+
+                {/* Card Header: Dept, Priority, Status Capsule, and Triple-dot Menu */}
+                <div className="flex items-center justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2 min-w-0">
                   {showCheckboxes && (
                     <input
@@ -346,6 +370,25 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
                           >
                             <i className="bi bi-flag-fill text-indigo-600 text-[10px]"></i>
                             <span>Sub-Milestones</span>
+                          </button>
+                        )}
+
+                        {onOpenBlockerModal && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveMenuId(null);
+                              onOpenBlockerModal(proj);
+                            }}
+                            className={`w-full px-2 py-1 text-[11px] rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-semibold ${
+                              isBlocked
+                                ? "text-rose-700 hover:bg-rose-50 bg-rose-50/70"
+                                : "text-slate-700 hover:bg-rose-50 hover:text-rose-700"
+                            }`}
+                            title="Flag or manage executive blockers and operational risks"
+                          >
+                            <i className={`bi ${isBlocked ? "bi-shield-slash-fill text-rose-600" : "bi-shield-exclamation text-amber-500"} text-[10px]`}></i>
+                            <span>{isBlocked ? "Manage Blocker" : "Flag Blocker / Risk"}</span>
                           </button>
                         )}
 

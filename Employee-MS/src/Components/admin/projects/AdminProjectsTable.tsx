@@ -13,6 +13,7 @@ interface AdminProjectsTableProps {
   onOpenTasksTray?: (project: ProjectItem) => void;
   onQuickAddTask?: (project: ProjectItem) => void;
   onOpenBudgetHUD?: (project: ProjectItem) => void;
+  onOpenBlockerModal?: (project: ProjectItem) => void;
   visibleColumns?: ColumnVisibility;
   selectedProjectIds?: (number | string)[];
   onToggleSelectProject?: (projectId: number | string) => void;
@@ -33,6 +34,7 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
   onOpenTasksTray,
   onQuickAddTask,
   onOpenBudgetHUD,
+  onOpenBlockerModal,
   visibleColumns = DEFAULT_COLUMN_VISIBILITY,
   selectedProjectIds = [],
   onToggleSelectProject,
@@ -137,7 +139,21 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
     }
   };
 
-  const getHealthBadge = (health: string, isOverdue: boolean) => {
+  const getHealthBadge = (health: string, isOverdue: boolean, proj?: ProjectItem) => {
+    if (proj?.is_blocked && proj.blocker_status && proj.blocker_status !== "none") {
+      return (
+        <button
+          type="button"
+          onClick={() => onOpenBlockerModal?.(proj)}
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-300 shadow-2xs hover:bg-rose-200 transition-all cursor-pointer animate-pulse"
+          title={`Executive Blocker: ${proj.blocker_status?.replace(/_/g, " ")}. Click to manage.`}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-ping"></span>
+          <i className="bi bi-shield-slash-fill text-[9px] text-rose-600"></i>
+          <span>Blocked</span>
+        </button>
+      );
+    }
     if (isOverdue || health === "critical") {
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
@@ -265,8 +281,8 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
             ) : (
               projects.map((proj, idx, arr) => {
                 const isMenuOpen = activeMenuId === proj.id;
-
                 const isSelected = selectedProjectIds.includes(proj.id);
+                const isBlocked = Boolean(proj.is_blocked && proj.blocker_status && proj.blocker_status !== "none");
 
                 return (
                   <tr
@@ -274,6 +290,8 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                     className={`transition-colors ${
                       isSelected
                         ? "bg-indigo-50/75 hover:bg-indigo-50/90 border-l-2 border-l-indigo-600"
+                        : isBlocked
+                        ? "bg-rose-50/30 hover:bg-rose-50/60 border-l-3 border-l-rose-600"
                         : "hover:bg-slate-50/70"
                     }`}
                   >
@@ -295,6 +313,28 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                     {/* 1. Initiative Title & Details (Strictly 2 rows) */}
                     {activeColumns.initiative && (
                       <td className="py-2.5 pl-4.5 pr-3.5">
+                        {/* High-visibility Pulsing Blocker Banner */}
+                        {isBlocked && (
+                          <div className="flex items-center gap-1.5 mb-1.5 animate-pulse">
+                            <button
+                              type="button"
+                              onClick={() => onOpenBlockerModal?.(proj)}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9.5px] font-black uppercase tracking-wider bg-rose-600 hover:bg-rose-700 text-white shadow-2xs cursor-pointer transition-colors shrink-0"
+                              title="Click to view, update, or resolve this executive blocker"
+                            >
+                              <i className="bi bi-shield-slash-fill text-[9px]"></i>
+                              <span>🚫 BLOCKED: {proj.blocker_status?.replace(/_/g, " ")}</span>
+                            </button>
+                            {proj.blocker_notes && (
+                              <span
+                                className="text-[10px] font-medium text-rose-700 truncate max-w-[240px] hidden sm:inline-block italic"
+                                title={proj.blocker_notes}
+                              >
+                                "{proj.blocker_notes}"
+                              </span>
+                            )}
+                          </div>
+                        )}
                         <div className="flex items-center gap-2.5 min-w-0">
                           <button
                             type="button"
@@ -582,7 +622,7 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                     {/* 7. Health / Risk */}
                     {activeColumns.health && (
                       <td className="py-2.5 px-3.5 text-center whitespace-nowrap">
-                        {getHealthBadge(proj.health, proj.is_overdue)}
+                        {getHealthBadge(proj.health, proj.is_overdue, proj)}
                       </td>
                     )}
 
@@ -817,6 +857,25 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                                 >
                                   <i className="bi bi-flag-fill text-indigo-600 text-[10px]"></i>
                                   <span>Sub-Milestones</span>
+                                </button>
+                              )}
+
+                              {onOpenBlockerModal && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setActiveMenuId(null);
+                                    onOpenBlockerModal(proj);
+                                  }}
+                                  className={`w-full px-2 py-1 text-[11px] rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-semibold ${
+                                    isBlocked
+                                      ? "text-rose-700 hover:bg-rose-50 bg-rose-50/70"
+                                      : "text-slate-700 hover:bg-rose-50 hover:text-rose-700"
+                                  }`}
+                                  title="Flag or manage executive blockers and operational risks"
+                                >
+                                  <i className={`bi ${isBlocked ? "bi-shield-slash-fill text-rose-600" : "bi-shield-exclamation text-amber-500"} text-[10px]`}></i>
+                                  <span>{isBlocked ? "Manage Blocker" : "Flag Blocker / Risk"}</span>
                                 </button>
                               )}
 
