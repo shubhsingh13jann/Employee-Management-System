@@ -454,4 +454,31 @@ sequenceDiagram
    > *"Through a normalized relational mapping table `team_hierarchy(manager_id, supervisor_id, employee_id)` with foreign key cascades. When a user queries their dashboard, SQL inner joins dynamically filter records strictly within their authorized departmental and team scope."*
 
 ---
+
+## 📜 8. Enterprise Projects Governance & Audit Trail Architecture
+
+The Projects & Strategic Milestones management suite incorporates an immutable audit ledger designed for enterprise compliance (SOC-2, ISO-27001):
+
+### Audit Trail Data Flow & Change Ledger
+```mermaid
+flowchart TD
+    A["Project Modification Event (PUT /projects/:id)"] --> B{"Evaluate Field Changes"}
+    B -->|"Status Change"| C["Log: 'Project Lifecycle Updated' (old_status ➔ new_status)"]
+    B -->|"Target Date Changed"| D["Log: 'Deadline Extended' (old_date ➔ new_date)"]
+    B -->|"Budget Adjusted"| E["Log: 'Budget Adjusted' (old_budget ➔ new_budget)"]
+    B -->|"Supervisor Reassigned"| F["Log: 'Supervisor Reassigned' (old_sup ➔ new_sup)"]
+    B -->|"Executive Blocker"| G["Log: 'Executive Blocker Flagged / Cleared'"]
+    C & D & E & F & G --> H[("user_audit_logs (Immutable DB Ledger)")]
+    H --> I["GET /api/admin/projects/:id/audit-trail"]
+    I --> J["ProjectAuditTrailDrawer (React Component)"]
+    J --> K["Telemetry Stats & Category Chips (Status, Deadlines, Budget, Supervisor, Blockers)"]
+    J --> L["Vertical Chronological Track with Diff Cards (Red Previous ➔ Green New)"]
+    J --> M["Export Audit Ledger to CSV"]
+```
+
+- **Database Table**: `user_audit_logs` records `id`, `user_id`, `action_type`, `field_name`, `old_value`, `new_value`, `details`, `performed_by`, and `created_at`.
+- **Differential Tracking**: Captures before-and-after values for monetary budgets, ISO deadlines, and staff assignments.
+- **Drawer Component**: `ProjectAuditTrailDrawer.tsx` provides multi-category filtering, keyword search, relative timestamps, performer role avatars, and one-click CSV export.
+
+---
 *Enterprise Employee Management System Blueprint — 4-Tier Architecture.*
