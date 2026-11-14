@@ -199,6 +199,27 @@ export async function seedDatabase() {
     console.warn('Migration note (sample blocker):', err.message);
   }
 
+  // Ensure sample change history audit logs exist for projects (PRJ-0001, PRJ-0002)
+  try {
+    const [auditCount] = await pool.query(
+      "SELECT COUNT(*) AS cnt FROM user_audit_logs WHERE action_type IN ('Deadline Extended', 'Budget Adjusted', 'Supervisor Reassigned')"
+    );
+    if (auditCount[0].cnt === 0) {
+      await pool.query(`
+        INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by, created_at)
+        VALUES
+          (1, 'Budget Adjusted', 'budget', '$120,000', '$150,000', 'Adjusted budget for initiative #1 (Core Platform Redesign 2026) from $120,000 to $150,000 for additional cloud infrastructure', '1', DATE_SUB(NOW(), INTERVAL 5 DAY)),
+          (1, 'Deadline Extended', 'target_date', '2026-10-31', '2026-12-15', 'Extended target deadline for initiative #1 (Core Platform Redesign 2026) from 2026-10-31 to 2026-12-15 due to architectural refactoring', '1', DATE_SUB(NOW(), INTERVAL 4 DAY)),
+          (1, 'Supervisor Reassigned', 'lead_supervisor_id', 'Sarah Jenkins', 'David Miller', 'Reassigned lead supervisor for initiative #1 (Core Platform Redesign 2026) from Sarah Jenkins to David Miller', '1', DATE_SUB(NOW(), INTERVAL 3 DAY)),
+          (1, 'Deadline Extended', 'target_date', '2026-11-01', '2026-11-20', 'Extended target deadline for initiative #2 (Employee MS Upgradation) from 2026-11-01 to 2026-11-20 pending biometric scanner driver testing', '1', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+          (1, 'Budget Adjusted', 'budget', '$85,000', '$95,000', 'Adjusted budget for initiative #2 (Employee MS Upgradation) from $85,000 to $95,000 to cover vendor expedite fees', '1', DATE_SUB(NOW(), INTERVAL 1 DAY))
+      `);
+      console.log('✓ Seeded realistic project audit trail change history entries.');
+    }
+  } catch (err) {
+    console.warn('Migration note (project audit trail seed):', err.message);
+  }
+
   // Check if database is already seeded
   const [existing] = await pool.query("SELECT id FROM users LIMIT 1");
   if (existing.length > 0) {

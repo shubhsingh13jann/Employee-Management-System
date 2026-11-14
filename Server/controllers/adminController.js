@@ -2246,6 +2246,82 @@ export const updateAdminProject = async (req, res) => {
       return res.status(404).json({ status: false, error: "Project not found" });
     }
 
+    const current = existing[0];
+    const actorId = req.user?.id || 1;
+
+    // Granular Audit Logging: Track individual field diffs
+    // 1. Budget adjustment
+    if (budget !== undefined && Number(budget) !== Number(current.budget)) {
+      await pool.query(
+        `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+         VALUES (?, 'Budget Adjusted', 'budget', ?, ?, ?, ?)`,
+        [
+          actorId,
+          `$${Number(current.budget).toLocaleString()}`,
+          `$${Number(budget).toLocaleString()}`,
+          `Adjusted budget for initiative #${id} (${current.title}) from $${Number(current.budget).toLocaleString()} to $${Number(budget).toLocaleString()}`,
+          String(actorId),
+        ]
+      );
+    }
+
+    // 2. Deadline extension / target date adjustment
+    if (target_date && current.target_date) {
+      const curDateStr = new Date(current.target_date).toISOString().split("T")[0];
+      const newDateStr = new Date(target_date).toISOString().split("T")[0];
+      if (curDateStr !== newDateStr) {
+        const isExtension = new Date(target_date) > new Date(current.target_date);
+        await pool.query(
+          `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+           VALUES (?, ?, 'target_date', ?, ?, ?, ?)`,
+          [
+            actorId,
+            isExtension ? "Deadline Extended" : "Target Date Adjusted",
+            curDateStr,
+            newDateStr,
+            `${isExtension ? "Extended" : "Adjusted"} target deadline for initiative #${id} (${current.title}) from ${curDateStr} to ${newDateStr}`,
+            String(actorId),
+          ]
+        );
+      }
+    }
+
+    // 3. Supervisor reassignment
+    if (lead_supervisor_id !== undefined && Number(lead_supervisor_id) !== Number(current.lead_supervisor_id)) {
+      const [sups] = await pool.query(
+        "SELECT id, name FROM users WHERE id IN (?, ?)",
+        [current.lead_supervisor_id || 0, lead_supervisor_id || 0]
+      );
+      const oldSup = sups.find((s) => s.id === Number(current.lead_supervisor_id))?.name || "Unassigned";
+      const newSup = sups.find((s) => s.id === Number(lead_supervisor_id))?.name || "Unassigned";
+      await pool.query(
+        `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+         VALUES (?, 'Supervisor Reassigned', 'lead_supervisor_id', ?, ?, ?, ?)`,
+        [
+          actorId,
+          oldSup,
+          newSup,
+          `Reassigned lead supervisor for initiative #${id} (${current.title}) from ${oldSup} to ${newSup}`,
+          String(actorId),
+        ]
+      );
+    }
+
+    // 4. Priority change
+    if (priority && priority !== current.priority) {
+      await pool.query(
+        `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
+         VALUES (?, 'Priority Adjusted', 'priority', ?, ?, ?, ?)`,
+        [
+          actorId,
+          current.priority,
+          priority,
+          `Changed priority level for initiative #${id} (${current.title}) from ${current.priority} to ${priority}`,
+          String(actorId),
+        ]
+      );
+    }
+
     await pool.query(
       `UPDATE projects 
        SET title = ?, description = ?, department_id = ?, lead_supervisor_id = ?, priority = ?, budget = ?, start_date = ?, target_date = ?
@@ -2268,11 +2344,11 @@ export const updateAdminProject = async (req, res) => {
       `INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by)
        VALUES (?, 'Project Details Updated', 'projects', ?, ?, ?, ?)`,
       [
-        req.user?.id || 1,
+        actorId,
         existing[0].title,
         title || existing[0].title,
         `Updated strategic initiative #${id} metadata and parameters`,
-        req.user?.id || 1,
+        String(actorId),
       ]
     );
 
@@ -3346,9 +3422,12 @@ export const getProjectDossier = async (req, res) => {
     // 5. Audit history ledger
     const [auditLogs] = await pool.query(
       `SELECT a.*,
-              u.name AS actor_name, u.email AS actor_email, u.role AS actor_role
+              COALESCE(u_perf.name, u_user.name, a.performed_by, 'System Administrator') AS actor_name,
+              COALESCE(u_perf.email, u_user.email, 'admin@company.com') AS actor_email,
+              COALESCE(u_perf.role, u_user.role, 'admin') AS actor_role
        FROM user_audit_logs a
-       LEFT JOIN users u ON a.user_id = u.id
+       LEFT JOIN users u_perf ON (a.performed_by REGEXP '^[0-9]+$' AND u_perf.id = CAST(a.performed_by AS UNSIGNED))
+       LEFT JOIN users u_user ON a.user_id = u_user.id
        WHERE a.details LIKE ?
           OR a.details LIKE ?
           OR (a.field_name = 'projects' AND (a.new_value = ? OR a.old_value = ?))
@@ -4005,4 +4084,65 @@ export const deleteProjectExpense = async (req, res) => {
     return res.status(500).json({ status: false, error: "Failed to delete expenditure record" });
   }
 };
+
+export const getProjectAuditTrail = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [projectRows] = await pool.query(
+      `SELECT p.*, d.name as department_name, u.name as supervisor_name
+       FROM projects p
+       LEFT JOIN departments d ON p.department_id = d.id
+       LEFT JOIN users u ON p.lead_supervisor_id = u.id
+       WHERE p.id = ?`,
+      [id]
+    );
+
+    if (projectRows.length === 0) {
+      return res.status(404).json({ status: false, error: "Project not found" });
+    }
+
+    const prj = projectRows[0];
+
+    const [auditLogs] = await pool.query(
+      `SELECT a.*,
+              COALESCE(u_perf.name, u_user.name, a.performed_by, 'System Administrator') AS performer_name,
+              COALESCE(u_perf.email, u_user.email, 'admin@company.com') AS performer_email,
+              COALESCE(u_perf.role, u_user.role, 'admin') AS performer_role,
+              COALESCE(u_perf.image_url, u_user.image_url) AS performer_image
+       FROM user_audit_logs a
+       LEFT JOIN users u_perf ON (a.performed_by REGEXP '^[0-9]+$' AND u_perf.id = CAST(a.performed_by AS UNSIGNED))
+       LEFT JOIN users u_user ON a.user_id = u_user.id
+       WHERE a.details LIKE ?
+          OR a.details LIKE ?
+          OR (a.field_name = 'projects' AND (a.new_value = ? OR a.old_value = ?))
+       ORDER BY a.created_at DESC`,
+      [`%#${prj.id}%`, `%${prj.title}%`, prj.title, prj.title]
+    );
+
+    return res.json({
+      status: true,
+      project: {
+        id: prj.id,
+        project_code: prj.project_code || `PRJ-${String(prj.id).padStart(4, "0")}`,
+        title: prj.title,
+        status: prj.status,
+        priority: prj.priority,
+        budget: prj.budget,
+        start_date: prj.start_date,
+        target_date: prj.target_date,
+        department_name: prj.department_name,
+        supervisor_name: prj.supervisor_name,
+        is_blocked: prj.is_blocked,
+        blocker_status: prj.blocker_status,
+        blocker_notes: prj.blocker_notes,
+      },
+      audit_trail: auditLogs,
+      total_changes: auditLogs.length,
+    });
+  } catch (err) {
+    console.error("getProjectAuditTrail error:", err);
+    return res.status(500).json({ status: false, error: "Failed to fetch project audit trail" });
+  }
+};
+
 
