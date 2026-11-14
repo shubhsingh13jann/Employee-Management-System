@@ -16,3 +16,4 @@ export * from "./ProjectBudgetBurnHUDModal";
 export * from "./FloatingBatchActionBar";
 export * from "./BatchOperationConfirmModal";
 export * from "./ProjectBlockerModal";
+export * from "./ProjectAuditTrailDrawer";
