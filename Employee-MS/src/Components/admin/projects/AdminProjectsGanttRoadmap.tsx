@@ -14,6 +14,7 @@ export interface AdminProjectsGanttRoadmapProps {
   onQuickAddTask?: (project: ProjectItem) => void;
   onOpenBudgetHUD?: (project: ProjectItem) => void;
   onOpenBlockerModal?: (project: ProjectItem) => void;
+  onOpenAuditDrawer?: (project: ProjectItem) => void;
   selectedProjectIds?: (number | string)[];
   onToggleSelectProject?: (projectId: number | string) => void;
   onSelectAllProjects?: () => void;
@@ -44,6 +45,7 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
   onQuickAddTask,
   onOpenBudgetHUD,
   onOpenBlockerModal,
+  onOpenAuditDrawer,
   selectedProjectIds = [],
   onToggleSelectProject,
   onSelectAllProjects,
@@ -610,6 +612,16 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
                         title={p.is_blocked ? `Blocked: ${p.blocker_status}. Click to manage.` : "Flag Executive Blocker"}
                       >
                         <i className="bi bi-shield-slash-fill"></i>
+                      </button>
+                    )}
+                    {onOpenAuditDrawer && (
+                      <button
+                        type="button"
+                        onClick={() => onOpenAuditDrawer(p)}
+                        className="w-6 h-6 rounded-md bg-slate-50 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 border border-slate-200 flex items-center justify-center text-[10px] transition-all cursor-pointer shadow-2xs"
+                        title="View Project Audit History & Change Ledger"
+                      >
+                        <i className="bi bi-clock-history"></i>
                       </button>
                     )}
                   </div>

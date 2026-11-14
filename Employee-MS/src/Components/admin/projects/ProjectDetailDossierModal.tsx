@@ -125,6 +125,7 @@ interface ProjectDetailDossierModalProps {
   onOpenMilestonesModal?: (project: any) => void;
   onOpenBudgetHUD?: (project: any) => void;
   onOpenBlockerModal?: (project: any) => void;
+  onOpenAuditDrawer?: (project: any) => void;
 }
 
 export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps> = ({
@@ -134,6 +135,7 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
   onOpenMilestonesModal,
   onOpenBudgetHUD,
   onOpenBlockerModal,
+  onOpenAuditDrawer,
 }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState<DossierPayload | null>(null);
@@ -1054,9 +1056,22 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
                     Immutable history of updates, status changes, and administrative actions
                   </p>
                 </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
-                  {data.audit_logs.length} Logged Events
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
+                    {data.audit_logs.length} Logged Events
+                  </span>
+                  {onOpenAuditDrawer && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenAuditDrawer(data.project)}
+                      className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
+                      title="Open full slide-out audit trail drawer with filters & CSV export"
+                    >
+                      <i className="bi bi-layout-sidebar-inset-reverse"></i>
+                      <span>Open Full Ledger</span>
+                    </button>
+                  )}
+                </div>
               </div>
 
               {data.audit_logs.length === 0 ? (

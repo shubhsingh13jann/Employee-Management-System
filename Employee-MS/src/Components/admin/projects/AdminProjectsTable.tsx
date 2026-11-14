@@ -14,6 +14,7 @@ interface AdminProjectsTableProps {
   onQuickAddTask?: (project: ProjectItem) => void;
   onOpenBudgetHUD?: (project: ProjectItem) => void;
   onOpenBlockerModal?: (project: ProjectItem) => void;
+  onOpenAuditDrawer?: (project: ProjectItem) => void;
   visibleColumns?: ColumnVisibility;
   selectedProjectIds?: (number | string)[];
   onToggleSelectProject?: (projectId: number | string) => void;
@@ -35,6 +36,7 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
   onQuickAddTask,
   onOpenBudgetHUD,
   onOpenBlockerModal,
+  onOpenAuditDrawer,
   visibleColumns = DEFAULT_COLUMN_VISIBILITY,
   selectedProjectIds = [],
   onToggleSelectProject,
@@ -876,6 +878,21 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                                 >
                                   <i className={`bi ${isBlocked ? "bi-shield-slash-fill text-rose-600" : "bi-shield-exclamation text-amber-500"} text-[10px]`}></i>
                                   <span>{isBlocked ? "Manage Blocker" : "Flag Blocker / Risk"}</span>
+                                </button>
+                              )}
+
+                              {onOpenAuditDrawer && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setActiveMenuId(null);
+                                    onOpenAuditDrawer(proj);
+                                  }}
+                                  className="w-full px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-100 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                                  title="View immutable change ledger & before/after differential audit"
+                                >
+                                  <i className="bi bi-clock-history text-indigo-500 text-[10px]"></i>
+                                  <span>Audit History</span>
                                 </button>
                               )}
 

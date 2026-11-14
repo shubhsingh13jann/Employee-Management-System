@@ -19,6 +19,7 @@ import {
   FloatingBatchActionBar,
   BatchOperationConfirmModal,
   ProjectBlockerModal,
+  ProjectAuditTrailDrawer,
   ColumnVisibility,
   DEFAULT_COLUMN_VISIBILITY,
 } from "../../Components/admin/projects";
@@ -178,6 +179,7 @@ const AdminProjects: React.FC = () => {
   const [showCapacityDrawer, setShowCapacityDrawer] = useState<boolean>(false);
   const [selectedBudgetProject, setSelectedBudgetProject] = useState<ProjectItem | null>(null);
   const [selectedBlockerProject, setSelectedBlockerProject] = useState<ProjectItem | null>(null);
+  const [selectedAuditProject, setSelectedAuditProject] = useState<ProjectItem | null>(null);
   const [saving, setSaving] = useState<boolean>(false);
 
   const handleSaveBlocker = async (
@@ -706,6 +708,7 @@ const AdminProjects: React.FC = () => {
             onQuickAddTask={(proj) => setQuickAddTaskProject(proj)}
             onOpenBudgetHUD={(proj) => setSelectedBudgetProject(proj)}
             onOpenBlockerModal={(proj) => setSelectedBlockerProject(proj)}
+            onOpenAuditDrawer={(proj) => setSelectedAuditProject(proj)}
           />
         ) : viewMode === "milestones" ? (
           <AdminMilestoneTracker
@@ -745,6 +748,7 @@ const AdminProjects: React.FC = () => {
             onQuickAddTask={(proj) => setQuickAddTaskProject(proj)}
             onOpenBudgetHUD={(proj) => setSelectedBudgetProject(proj)}
             onOpenBlockerModal={(proj) => setSelectedBlockerProject(proj)}
+            onOpenAuditDrawer={(proj) => setSelectedAuditProject(proj)}
           />
         ) : (
           <AdminProjectsTable
@@ -769,6 +773,7 @@ const AdminProjects: React.FC = () => {
             onQuickAddTask={(proj) => setQuickAddTaskProject(proj)}
             onOpenBudgetHUD={(proj) => setSelectedBudgetProject(proj)}
             onOpenBlockerModal={(proj) => setSelectedBlockerProject(proj)}
+            onOpenAuditDrawer={(proj) => setSelectedAuditProject(proj)}
           />
         )}
 
@@ -843,6 +848,9 @@ const AdminProjects: React.FC = () => {
             setSelectedDossierProject(null);
             setSelectedBlockerProject(proj);
           }}
+          onOpenAuditDrawer={(proj) => {
+            setSelectedAuditProject(proj);
+          }}
         />
 
         {/* Project Squad & Resource Allocation Drawer */}
@@ -897,6 +905,13 @@ const AdminProjects: React.FC = () => {
           isOpen={showCapacityDrawer}
           onClose={() => setShowCapacityDrawer(false)}
           onSelectSupervisorFilter={(supId) => setSelectedSupervisor(supId)}
+        />
+
+        {/* Project Audit Trail & Change History Drawer */}
+        <ProjectAuditTrailDrawer
+          isOpen={Boolean(selectedAuditProject)}
+          onClose={() => setSelectedAuditProject(null)}
+          project={selectedAuditProject}
         />
     </div>
   );
