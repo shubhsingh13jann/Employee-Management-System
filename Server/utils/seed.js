@@ -220,6 +220,25 @@ export async function seedDatabase() {
     console.warn('Migration note (project audit trail seed):', err.message);
   }
 
+  // Ensure sample change history audit logs exist for PRJ-0006 (Jarvis 2.0)
+  try {
+    const [prj6Count] = await pool.query(
+      "SELECT COUNT(*) AS cnt FROM user_audit_logs WHERE details LIKE '%#6%' AND action_type IN ('Deadline Extended', 'Budget Adjusted', 'Supervisor Reassigned')"
+    );
+    if (prj6Count[0].cnt === 0) {
+      await pool.query(`
+        INSERT INTO user_audit_logs (user_id, action_type, field_name, old_value, new_value, details, performed_by, created_at)
+        VALUES
+          (1, 'Budget Adjusted', 'budget', '$50,000', '$75,000', 'Adjusted budget for initiative #6 (Jarvis 2.0) from $50,000 to $75,000 for specialized AI inference GPU compute', '1', DATE_SUB(NOW(), INTERVAL 3 DAY)),
+          (1, 'Deadline Extended', 'target_date', '2026-11-15', '2026-12-20', 'Extended target deadline for initiative #6 (Jarvis 2.0) from 2026-11-15 to 2026-12-20 for neural engine pipeline integration', '1', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+          (1, 'Supervisor Reassigned', 'lead_supervisor_id', 'Unassigned', 'David Miller', 'Reassigned lead supervisor for initiative #6 (Jarvis 2.0) from Unassigned to David Miller', '1', DATE_SUB(NOW(), INTERVAL 1 DAY))
+      `);
+      console.log('✓ Seeded realistic project audit trail change history entries for PRJ-0006.');
+    }
+  } catch (err) {
+    console.warn('Migration note (PRJ-0006 audit trail seed):', err.message);
+  }
+
   // Check if database is already seeded
   const [existing] = await pool.query("SELECT id FROM users LIMIT 1");
   if (existing.length > 0) {
