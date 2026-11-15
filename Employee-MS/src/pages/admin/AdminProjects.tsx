@@ -272,6 +272,16 @@ const AdminProjects: React.FC = () => {
     fetchData();
   }, []);
 
+  // Auto-dismiss notification popup message after 4 seconds
+  useEffect(() => {
+    if (msg.text) {
+      const timer = setTimeout(() => {
+        setMsg({ type: "", text: "" });
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [msg]);
+
   // Filtered initiatives calculation
   const filteredProjects = useMemo(() => {
     return projects.filter((p) => {

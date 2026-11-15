@@ -269,9 +269,14 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                     >
                       {proj.title}
                     </button>
-                    <span className="text-[10px] font-mono text-slate-400 bg-slate-100 px-1.5 py-0.2 rounded border border-slate-200">
+                    <button
+                      type="button"
+                      onClick={() => onOpenDossierModal?.(proj)}
+                      className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 transition-colors cursor-pointer shrink-0"
+                      title="Open 360° Inspection Dossier"
+                    >
                       PRJ-{String(proj.id).padStart(4, "0")}
-                    </span>
+                    </button>
                     <span className="text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">
                       🏢 {proj.department_name || "General"}
                     </span>

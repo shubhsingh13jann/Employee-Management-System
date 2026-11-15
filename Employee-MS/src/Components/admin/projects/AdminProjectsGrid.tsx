@@ -453,9 +453,14 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
                   >
                     {proj.title}
                   </button>
-                  <span className="text-[9px] font-mono font-semibold text-slate-400 bg-slate-50 px-1 py-0.2 rounded border border-slate-200 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => onOpenDossierModal?.(proj)}
+                    className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 transition-colors cursor-pointer shrink-0"
+                    title="Open 360° Inspection Dossier"
+                  >
                     PRJ-{String(proj.id).padStart(4, "0")}
-                  </span>
+                  </button>
                 </div>
                 {proj.description && (
                   <p className="text-[11px] text-slate-500 line-clamp-2 mb-0">

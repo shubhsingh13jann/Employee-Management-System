@@ -530,9 +530,14 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
-                      <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                      <button
+                        type="button"
+                        onClick={() => onOpenDossierModal?.(p)}
+                        className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-800 border border-indigo-200 transition-colors cursor-pointer"
+                        title="Open 360° Inspection Dossier"
+                      >
                         PRJ-{String(p.id).padStart(4, "0")}
-                      </span>
+                      </button>
                       {p.is_blocked && p.blocker_status && p.blocker_status !== "none" && (
                         <span
                           onClick={() => onOpenBlockerModal?.(p)}
