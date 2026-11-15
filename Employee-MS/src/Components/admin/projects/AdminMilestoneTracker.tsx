@@ -9,6 +9,7 @@ interface AdminMilestoneTrackerProps {
   onUpdateStatus?: (projectId: number | string, newStatus: string) => void;
   onOpenMilestonesModal?: (project: ProjectItem) => void;
   onOpenDossierModal?: (project: ProjectItem) => void;
+  onOpenAuditDrawer?: (project: ProjectItem) => void;
   selectedProjectIds?: (number | string)[];
   onToggleSelectProject?: (projectId: number | string) => void;
   onSelectAllProjects?: () => void;
@@ -22,6 +23,7 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
   onUpdateStatus,
   onOpenMilestonesModal,
   onOpenDossierModal,
+  onOpenAuditDrawer,
   selectedProjectIds = [],
   onToggleSelectProject,
   onSelectAllProjects,
@@ -389,6 +391,19 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                       >
                         <i className="bi bi-file-earmark-text text-indigo-600 text-[9px]"></i>
                         <span className="hidden sm:inline">Dossier</span>
+                      </button>
+                    )}
+
+                    {/* Audit History Drawer Trigger */}
+                    {onOpenAuditDrawer && (
+                      <button
+                        type="button"
+                        onClick={() => onOpenAuditDrawer(proj)}
+                        className="px-2 py-0.5 rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 text-[10.5px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
+                        title="View Audit History & Change Ledger"
+                      >
+                        <i className="bi bi-clock-history text-indigo-600 text-[9px]"></i>
+                        <span className="hidden sm:inline">Audit</span>
                       </button>
                     )}
 

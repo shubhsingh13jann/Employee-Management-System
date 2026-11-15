@@ -735,6 +735,7 @@ const AdminProjects: React.FC = () => {
             onUpdateStatus={handleUpdateStatus}
             onOpenMilestonesModal={(proj) => setSelectedMilestoneProject(proj)}
             onOpenDossierModal={(proj) => setSelectedDossierProject(proj)}
+            onOpenAuditDrawer={(proj) => setSelectedAuditProject(proj)}
           />
         ) : viewMode === "grid" ? (
           <AdminProjectsGrid

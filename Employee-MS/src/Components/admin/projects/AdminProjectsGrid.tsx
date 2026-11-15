@@ -190,7 +190,20 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
                   </span>
 
                   {/* Triple dot actions dropdown positioned right next to status capsule */}
-                  <div className="relative inline-flex items-center">
+                  <div className="relative inline-flex items-center gap-1">
+                    {onOpenAuditDrawer && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenAuditDrawer(proj);
+                        }}
+                        className="w-6 h-6 rounded-md border border-slate-200 bg-white hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 transition-all inline-flex items-center justify-center cursor-pointer shadow-2xs"
+                        title="View Audit History & Change Ledger Drawer"
+                      >
+                        <i className="bi bi-clock-history text-[10px]"></i>
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={(e) => {
