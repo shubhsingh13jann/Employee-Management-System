@@ -141,6 +141,86 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
   const [data, setData] = useState<DossierPayload | null>(null);
   const [activeTab, setActiveTab] = useState<"overview" | "squad" | "milestones" | "tasks" | "audit">("overview");
   const [taskFilter, setTaskFilter] = useState<string>("all");
+  const [auditCategory, setAuditCategory] = useState<"all" | "status" | "deadline" | "budget" | "supervisor" | "blocker">("all");
+  const [auditSearch, setAuditSearch] = useState<string>("");
+
+  const categorizeDossierLog = (log: DossierAuditLog): "all" | "status" | "deadline" | "budget" | "supervisor" | "blocker" => {
+    const act = (log.action_type || "").toLowerCase();
+    const fld = (log.field_name || "").toLowerCase();
+    const det = (log.details || "").toLowerCase();
+
+    if (act.includes("budget") || fld.includes("budget") || act.includes("expense") || det.includes("expenditure")) {
+      return "budget";
+    }
+    if (act.includes("deadline") || act.includes("target date") || fld.includes("target_date") || det.includes("deadline")) {
+      return "deadline";
+    }
+    if (act.includes("supervisor") || fld.includes("lead_supervisor") || act.includes("squad") || det.includes("supervisor")) {
+      return "supervisor";
+    }
+    if (act.includes("blocker") || fld.includes("is_blocked") || det.includes("blocked") || det.includes("escalat")) {
+      return "blocker";
+    }
+    if (act.includes("status") || act.includes("lifecycle") || fld.includes("status")) {
+      return "status";
+    }
+    return "all";
+  };
+
+  const auditCategoryCounts = useMemo(() => {
+    const counts = { all: data?.audit_logs?.length || 0, status: 0, deadline: 0, budget: 0, supervisor: 0, blocker: 0 };
+    (data?.audit_logs || []).forEach((log) => {
+      const cat = categorizeDossierLog(log);
+      if (cat !== "all") {
+        counts[cat] = (counts[cat] || 0) + 1;
+      }
+    });
+    return counts;
+  }, [data?.audit_logs]);
+
+  const filteredAuditLogs = useMemo(() => {
+    const logs = data?.audit_logs || [];
+    return logs.filter((log) => {
+      if (auditCategory !== "all" && categorizeDossierLog(log) !== auditCategory) {
+        return false;
+      }
+      if (auditSearch.trim()) {
+        const q = auditSearch.toLowerCase();
+        const matchAct = (log.action_type || "").toLowerCase().includes(q);
+        const matchDet = (log.details || "").toLowerCase().includes(q);
+        const matchActr = (log.actor_name || "").toLowerCase().includes(q);
+        const matchFld = (log.field_name || "").toLowerCase().includes(q);
+        const matchOld = (log.old_value || "").toLowerCase().includes(q);
+        const matchNew = (log.new_value || "").toLowerCase().includes(q);
+        return matchAct || matchDet || matchActr || matchFld || matchOld || matchNew;
+      }
+      return true;
+    });
+  }, [data?.audit_logs, auditCategory, auditSearch]);
+
+  const handleExportAuditCSV = () => {
+    if (!data?.audit_logs || !data?.project) return;
+    const headers = ["Log ID", "Date", "Action Type", "Field", "Previous Value", "New Value", "Details", "Executed By", "Role"];
+    const rows = data.audit_logs.map((l) => [
+      l.id,
+      new Date(l.created_at).toISOString(),
+      `"${(l.action_type || "").replace(/"/g, '""')}"`,
+      `"${(l.field_name || "").replace(/"/g, '""')}"`,
+      `"${(l.old_value || "").replace(/"/g, '""')}"`,
+      `"${(l.new_value || "").replace(/"/g, '""')}"`,
+      `"${(l.details || "").replace(/"/g, '""')}"`,
+      `"${(l.actor_name || "System Admin").replace(/"/g, '""')}"`,
+      `"${(l.actor_role || "admin").replace(/"/g, '""')}"`,
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `project_audit_PRJ-${String(data.project.id).padStart(4, "0")}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const fetchDossier = async () => {
     if (!projectId) return;
@@ -1048,18 +1128,29 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
             </div>
           ) : (
             /* TAB 5: AUDIT HISTORY */
-            <div className="space-y-3">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+            <div className="space-y-3.5">
+              {/* Header with Counter, CSV Download & Full Drawer Link */}
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200 gap-2 flex-wrap">
                 <div>
                   <h4 className="text-xs font-bold text-slate-900 mb-0">Initiative Change Ledger & Audit Trail</h4>
                   <p className="text-[11px] text-slate-500 mb-0">
                     Immutable history of updates, status changes, and administrative actions
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
                     {data.audit_logs.length} Logged Events
                   </span>
+                  <button
+                    type="button"
+                    onClick={handleExportAuditCSV}
+                    disabled={!data.audit_logs?.length}
+                    className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 flex items-center gap-1 transition-all cursor-pointer shadow-2xs disabled:opacity-40"
+                    title="Export audit logs to CSV"
+                  >
+                    <i className="bi bi-file-earmark-spreadsheet"></i>
+                    <span>Export CSV</span>
+                  </button>
                   {onOpenAuditDrawer && (
                     <button
                       type="button"
@@ -1074,75 +1165,229 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
                 </div>
               </div>
 
-              {data.audit_logs.length === 0 ? (
+              {/* Telemetry Quick Strip (4 Cards) */}
+              <div className="grid grid-cols-4 gap-2 text-center">
+                <div className="p-2 bg-slate-50 rounded-lg border border-slate-200 shadow-2xs">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Total Events</span>
+                  <span className="text-sm font-extrabold text-slate-800">{auditCategoryCounts.all}</span>
+                </div>
+                <div className="p-2 bg-indigo-50/50 rounded-lg border border-indigo-100 shadow-2xs">
+                  <span className="text-[10px] uppercase font-bold text-indigo-500 block tracking-wider">Status Shifts</span>
+                  <span className="text-sm font-extrabold text-indigo-700">{auditCategoryCounts.status}</span>
+                </div>
+                <div className="p-2 bg-amber-50/50 rounded-lg border border-amber-100 shadow-2xs">
+                  <span className="text-[10px] uppercase font-bold text-amber-600 block tracking-wider">Deadlines</span>
+                  <span className="text-sm font-extrabold text-amber-700">{auditCategoryCounts.deadline}</span>
+                </div>
+                <div className="p-2 bg-emerald-50/50 rounded-lg border border-emerald-100 shadow-2xs">
+                  <span className="text-[10px] uppercase font-bold text-emerald-600 block tracking-wider">Budget Diffs</span>
+                  <span className="text-sm font-extrabold text-emerald-700">{auditCategoryCounts.budget}</span>
+                </div>
+              </div>
+
+              {/* Search & Category Filter Chips */}
+              <div className="space-y-2 pt-0.5">
+                <div className="relative">
+                  <i className="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                  <input
+                    type="text"
+                    value={auditSearch}
+                    onChange={(e) => setAuditSearch(e.target.value)}
+                    placeholder="Search audit events by action, performer, values, or details..."
+                    className="w-full pl-8 pr-7 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  />
+                  {auditSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setAuditSearch("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
+                    >
+                      <i className="bi bi-x"></i>
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                  <button
+                    type="button"
+                    onClick={() => setAuditCategory("all")}
+                    className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                      auditCategory === "all"
+                        ? "bg-indigo-600 text-white shadow-xs"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    All Events ({auditCategoryCounts.all})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAuditCategory("status")}
+                    className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1 ${
+                      auditCategory === "status"
+                        ? "bg-indigo-600 text-white shadow-xs"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    <i className="bi bi-arrow-repeat"></i>
+                    Status ({auditCategoryCounts.status})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAuditCategory("deadline")}
+                    className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1 ${
+                      auditCategory === "deadline"
+                        ? "bg-amber-600 text-white shadow-xs"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    <i className="bi bi-calendar-event"></i>
+                    Deadlines ({auditCategoryCounts.deadline})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAuditCategory("budget")}
+                    className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1 ${
+                      auditCategory === "budget"
+                        ? "bg-emerald-600 text-white shadow-xs"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    <i className="bi bi-cash-stack"></i>
+                    Budget ({auditCategoryCounts.budget})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAuditCategory("supervisor")}
+                    className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1 ${
+                      auditCategory === "supervisor"
+                        ? "bg-purple-600 text-white shadow-xs"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    <i className="bi bi-person-badge"></i>
+                    Supervisor ({auditCategoryCounts.supervisor})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAuditCategory("blocker")}
+                    className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1 ${
+                      auditCategory === "blocker"
+                        ? "bg-rose-600 text-white shadow-xs"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    <i className="bi bi-shield-slash"></i>
+                    Blockers ({auditCategoryCounts.blocker})
+                  </button>
+                </div>
+              </div>
+
+              {filteredAuditLogs.length === 0 ? (
                 <div className="p-8 text-center bg-white rounded-xl border border-slate-200">
                   <div className="w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2 text-base">
                     <i className="bi bi-clock-history"></i>
                   </div>
-                  <p className="text-xs font-bold text-slate-700 mb-0.5">No Historical Audit Logs</p>
-                  <p className="text-[11px] text-slate-400 mb-0">Activity records will record automatically as changes occur.</p>
+                  <p className="text-xs font-bold text-slate-700 mb-0.5">No Historical Audit Logs Matching Criteria</p>
+                  <p className="text-[11px] text-slate-400 mb-0">Try clearing your search query or switching categories.</p>
+                  {(auditSearch || auditCategory !== "all") && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuditSearch("");
+                        setAuditCategory("all");
+                      }}
+                      className="mt-2.5 px-3 py-1 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-all cursor-pointer"
+                    >
+                      Reset Filters
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="relative pl-6 space-y-4 before:content-[''] before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
-                  {data.audit_logs.map((log) => (
-                    <div key={log.id} className="relative">
-                      {/* Timeline Dot */}
-                      <div className="absolute -left-6 top-1 w-3 h-3 rounded-full bg-white border-2 border-indigo-600 shadow-xs"></div>
+                  {filteredAuditLogs.map((log) => {
+                    const hasDiff = (log.old_value !== null && log.old_value !== undefined && log.old_value !== "") ||
+                                    (log.new_value !== null && log.new_value !== undefined && log.new_value !== "");
+                    return (
+                      <div key={log.id} className="relative">
+                        {/* Timeline Dot */}
+                        <div className="absolute -left-6 top-1.5 w-3 h-3 rounded-full bg-white border-2 border-indigo-600 shadow-xs"></div>
 
-                      <div className="p-3 rounded-xl bg-white border border-slate-200/90 shadow-2xs">
-                        <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-xs text-indigo-700">
-                              {log.action_type}
+                        <div className="p-3.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-xs transition-shadow">
+                          <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-bold text-xs text-indigo-700">
+                                {log.action_type}
+                              </span>
+                              {log.field_name && (
+                                <span className="px-1.5 py-0.2 rounded text-[9.5px] font-mono bg-slate-100 text-slate-600 border border-slate-200">
+                                  {log.field_name}
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-[10px] text-slate-400">
+                              {new Date(log.created_at).toLocaleString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
                             </span>
-                            {log.field_name && (
-                              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-slate-100 text-slate-600 border border-slate-200">
-                                {log.field_name}
+                          </div>
+
+                          {log.details && (
+                            <p className="text-xs text-slate-700 mb-2 leading-relaxed">
+                              {log.details}
+                            </p>
+                          )}
+
+                          {/* Value Diff (Old -> New) */}
+                          {hasDiff && (
+                            <div className="my-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200/90 space-y-1">
+                              <div className="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                                <i className="bi bi-arrow-left-right"></i>
+                                <span>Modification Difference</span>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div className="p-1.5 rounded bg-rose-50 border border-rose-200 text-rose-900">
+                                  <span className="text-[9px] font-bold text-rose-500 uppercase tracking-wider block mb-0.5 flex items-center gap-1">
+                                    <i className="bi bi-dash-circle-fill"></i> Previous
+                                  </span>
+                                  <div className="font-mono text-[11px] font-semibold truncate" title={log.old_value || "None"}>
+                                    {log.old_value || <span className="italic text-slate-400">None</span>}
+                                  </div>
+                                </div>
+                                <div className="p-1.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-900">
+                                  <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider block mb-0.5 flex items-center gap-1">
+                                    <i className="bi bi-plus-circle-fill"></i> New
+                                  </span>
+                                  <div className="font-mono text-[11px] font-semibold truncate" title={log.new_value || "None"}>
+                                    {log.new_value || <span className="italic text-slate-400">None</span>}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+                            <div className="flex items-center gap-1.5">
+                              <i className="bi bi-person-check text-slate-500"></i>
+                              <span>Executed by <strong className="text-slate-700">{log.actor_name || "System Admin"}</strong></span>
+                              {log.actor_role && (
+                                <span className="px-1 py-0.1 rounded text-[8.5px] font-bold uppercase bg-slate-100 text-slate-600 border border-slate-200">
+                                  {log.actor_role}
+                                </span>
+                              )}
+                            </div>
+                            {log.actor_email && (
+                              <span className="text-slate-400 truncate max-w-[180px]" title={log.actor_email}>
+                                {log.actor_email}
                               </span>
                             )}
                           </div>
-                          <span className="text-[10px] text-slate-400">
-                            {new Date(log.created_at).toLocaleString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
-                        </div>
-
-                        {log.details && (
-                          <p className="text-xs text-slate-700 mb-1.5">
-                            {log.details}
-                          </p>
-                        )}
-
-                        {/* Value Diff (Old -> New) */}
-                        {(log.old_value || log.new_value) && (
-                          <div className="flex items-center gap-1.5 text-[10px] bg-slate-50 p-1.5 rounded-lg border border-slate-200/60 mb-1">
-                            {log.old_value && (
-                              <span className="text-rose-700 line-through font-mono">
-                                {log.old_value}
-                              </span>
-                            )}
-                            {log.old_value && log.new_value && (
-                              <span className="text-slate-400">➔</span>
-                            )}
-                            {log.new_value && (
-                              <span className="text-emerald-700 font-bold font-mono">
-                                {log.new_value}
-                              </span>
-                            )}
-                          </div>
-                        )}
-
-                        <div className="text-[10px] text-slate-400 flex items-center gap-1">
-                          <i className="bi bi-person-check text-slate-500"></i>
-                          <span>Executed by {log.actor_name || "System Admin"}</span>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
