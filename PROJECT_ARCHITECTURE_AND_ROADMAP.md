@@ -481,4 +481,40 @@ flowchart TD
 - **Drawer Component**: `ProjectAuditTrailDrawer.tsx` provides multi-category filtering, keyword search, relative timestamps, performer role avatars, and one-click CSV export.
 
 ---
+
+## 🖨️ 9. Executive Initiative Dossier & Printable PDF Summary Architecture
+
+Feature #20 introduces a standard A4 print-optimized executive briefing view designed for high-level governance, executive board reviews, and PDF exports:
+
+### Executive Briefing Architecture & Print Workflow
+```mermaid
+flowchart TD
+    A["User Action: Click 'Print Briefing / PDF' (Table, Card, Dossier Modal, Header, or Gantt)"] --> B["Open ProjectPrintDossier (React Component)"]
+    B --> C["Fetch Full 360° Dossier Telemetry (/api/admin/projects/:id/dossier)"]
+    C --> D["Render On-Screen A4 Canvas Preview with Sticky Action Toolbar"]
+    D --> E["User Clicks 'Print / Save as PDF' or Presses Ctrl+P"]
+    E --> F["Invoke window.print()"]
+    F --> G["printDossier.css Applies @media print Sizing & Overrides"]
+    G --> H["Isolate .printable-dossier-root, Suppress All Chrome/Buttons/Sidebars"]
+    H --> I["Format Standard A4 Margins (10mm 10mm 12mm 10mm) & Exact Colors"]
+    I --> J["Generate Clean Executive Briefing PDF / Physical A4 Print"]
+```
+
+- **A4 Print Engine (`printDossier.css`)**:
+  - `@page { size: A4 portrait; margin: 10mm 10mm 12mm 10mm; }`
+  - `-webkit-print-color-adjust: exact !important` forces background colors, borders, and progress tracks to render accurately.
+  - Complete suppression of non-printable chrome (`nav`, `header`, `aside`, `.sidebar`, `.preview-toolbar`, `button`).
+  - `page-break-inside: avoid` protects key metric cards, signature rows, and tables from awkward splits across pages.
+- **Executive Dossier Sections (`ProjectPrintDossier.tsx`)**:
+  1. Corporate Letterhead & Classification Badge (`CONFIDENTIAL • LEVEL-1 CLEARANCE`).
+  2. Initiative Strategic Objective & Core Identity (`PRJ-XXXX`, Department, Priority, Status).
+  3. Executive Blocker Alert (high-visibility red callout when active with escalation timestamp).
+  4. Financial Telemetry & Capital Burn Rate HUD (Allocated Budget, Cumulative Expenses, Runway Remaining, Burn %).
+  5. Phased Deliverable Milestones Table with checklist completion counts.
+  6. Squad Resource Allocation Roster (Member, Role Tag, Task counts).
+  7. High-Priority Action Items Breakdown.
+  8. Immutable Governance Ledger (Recent Audit Trail with diffs).
+  9. Formal 3-Signatory Executive Sign-Off (Executive Sponsor, Department Head, Lead Supervisor).
+
+---
 *Enterprise Employee Management System Blueprint — 4-Tier Architecture.*
