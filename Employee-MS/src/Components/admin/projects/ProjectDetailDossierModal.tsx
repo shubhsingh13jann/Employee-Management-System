@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import api from "../../../api/axios";
+import { ProjectPrintDossier } from "./ProjectPrintDossier";
 
 export interface SquadMember {
   id: number | string;
@@ -143,6 +144,7 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
   const [taskFilter, setTaskFilter] = useState<string>("all");
   const [auditCategory, setAuditCategory] = useState<"all" | "status" | "deadline" | "budget" | "supervisor" | "blocker">("all");
   const [auditSearch, setAuditSearch] = useState<string>("");
+  const [showPrintDossier, setShowPrintDossier] = useState<boolean>(false);
 
   const categorizeDossierLog = (log: DossierAuditLog): "all" | "status" | "deadline" | "budget" | "supervisor" | "blocker" => {
     const act = (log.action_type || "").toLowerCase();
@@ -427,12 +429,12 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
             )}
             <button
               type="button"
-              onClick={() => window.print()}
-              className="px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/15 transition-all flex items-center gap-1.5 cursor-pointer"
-              title="Print Dossier Document"
+              onClick={() => setShowPrintDossier(true)}
+              className="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold border border-indigo-400/40 shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+              title="Open Printable Executive Initiative Dossier / PDF Summary View"
             >
-              <i className="bi bi-printer"></i>
-              <span className="hidden sm:inline">Print Dossier</span>
+              <i className="bi bi-printer-fill"></i>
+              <span className="hidden sm:inline">Print Briefing / PDF</span>
             </button>
             <button
               type="button"
@@ -1399,15 +1401,39 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
           <div className="text-[11px] text-slate-500">
             Strategic Initiative Dossier • Governance & Audit Certified
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs transition-colors cursor-pointer"
-          >
-            Close Dossier
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowPrintDossier(true)}
+              className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs border border-indigo-200 transition-colors cursor-pointer flex items-center gap-1.5"
+            >
+              <i className="bi bi-printer text-xs"></i>
+              <span>Print Executive Summary</span>
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs transition-colors cursor-pointer"
+            >
+              Close Dossier
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Printable Executive Initiative Dossier / PDF Summary View */}
+      {showPrintDossier && data?.project && (
+        <ProjectPrintDossier
+          project={data.project}
+          milestones={data.milestones}
+          squad={data.squad}
+          tasks={data.tasks}
+          audit_logs={data.audit_logs}
+          telemetry={data.telemetry}
+          isOpen={showPrintDossier}
+          onClose={() => setShowPrintDossier(false)}
+        />
+      )}
     </div>
   );
 };
