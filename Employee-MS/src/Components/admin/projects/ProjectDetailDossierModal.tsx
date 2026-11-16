@@ -245,10 +245,13 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
       setActiveTab("overview");
       setTaskFilter("all");
 
-      // Handle ESC key to dismiss modal
+      // Handle ESC key to dismiss modal and Ctrl+P / Cmd+P to open Executive Print Dossier
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === "Escape") {
           onClose();
+        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p") {
+          e.preventDefault();
+          setShowPrintDossier(true);
         }
       };
       window.addEventListener("keydown", handleKeyDown);

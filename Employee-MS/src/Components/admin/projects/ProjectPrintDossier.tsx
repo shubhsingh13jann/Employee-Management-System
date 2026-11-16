@@ -103,11 +103,14 @@ export const ProjectPrintDossier: React.FC<PrintDossierProps> = ({
     }
   }, [isOpen, autoPrintOnOpen, loading]);
 
-  // Escape key to close
+  // Escape key to close and Ctrl+P / Cmd+P to invoke print
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
         onClose();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p" && isOpen) {
+        e.preventDefault();
+        window.print();
       }
     };
     if (isOpen) {
