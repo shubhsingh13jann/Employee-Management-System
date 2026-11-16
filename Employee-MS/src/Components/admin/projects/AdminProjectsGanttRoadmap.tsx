@@ -15,6 +15,7 @@ export interface AdminProjectsGanttRoadmapProps {
   onOpenBudgetHUD?: (project: ProjectItem) => void;
   onOpenBlockerModal?: (project: ProjectItem) => void;
   onOpenAuditDrawer?: (project: ProjectItem) => void;
+  onOpenPrintDossier?: (project: ProjectItem) => void;
   selectedProjectIds?: (number | string)[];
   onToggleSelectProject?: (projectId: number | string) => void;
   onSelectAllProjects?: () => void;
@@ -46,6 +47,7 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
   onOpenBudgetHUD,
   onOpenBlockerModal,
   onOpenAuditDrawer,
+  onOpenPrintDossier,
   selectedProjectIds = [],
   onToggleSelectProject,
   onSelectAllProjects,
@@ -627,6 +629,16 @@ export const AdminProjectsGanttRoadmap: React.FC<AdminProjectsGanttRoadmapProps>
                         title="View Project Audit History & Change Ledger"
                       >
                         <i className="bi bi-clock-history"></i>
+                      </button>
+                    )}
+                    {onOpenPrintDossier && (
+                      <button
+                        type="button"
+                        onClick={() => onOpenPrintDossier(p)}
+                        className="w-6 h-6 rounded-md bg-slate-50 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 border border-slate-200 flex items-center justify-center text-[10px] transition-all cursor-pointer shadow-2xs"
+                        title="Print Executive Dossier / Export PDF Summary View"
+                      >
+                        <i className="bi bi-printer"></i>
                       </button>
                     )}
                   </div>

@@ -14,6 +14,7 @@ interface AdminProjectsGridProps {
   onOpenBudgetHUD?: (project: ProjectItem) => void;
   onOpenBlockerModal?: (project: ProjectItem) => void;
   onOpenAuditDrawer?: (project: ProjectItem) => void;
+  onOpenPrintDossier?: (project: ProjectItem) => void;
   selectedProjectIds?: (number | string)[];
   onToggleSelectProject?: (projectId: number | string) => void;
   onSelectAllProjects?: () => void;
@@ -35,6 +36,7 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
   onOpenBudgetHUD,
   onOpenBlockerModal,
   onOpenAuditDrawer,
+  onOpenPrintDossier,
   selectedProjectIds = [],
   onToggleSelectProject,
   onSelectAllProjects,
@@ -202,6 +204,19 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
                         title="View Audit History & Change Ledger Drawer"
                       >
                         <i className="bi bi-clock-history text-[10px]"></i>
+                      </button>
+                    )}
+                    {onOpenPrintDossier && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenPrintDossier(proj);
+                        }}
+                        className="w-6 h-6 rounded-md border border-slate-200 bg-white hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 transition-all inline-flex items-center justify-center cursor-pointer shadow-2xs"
+                        title="Print Executive Dossier / Export PDF Summary View"
+                      >
+                        <i className="bi bi-printer text-[10px]"></i>
                       </button>
                     )}
                     <button
@@ -419,6 +434,21 @@ export const AdminProjectsGrid: React.FC<AdminProjectsGridProps> = ({
                           >
                             <i className="bi bi-clock-history text-indigo-500 text-[10px]"></i>
                             <span>Audit History</span>
+                          </button>
+                        )}
+
+                        {onOpenPrintDossier && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveMenuId(null);
+                              onOpenPrintDossier(proj);
+                            }}
+                            className="w-full px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-100 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer font-medium"
+                            title="Print Executive Dossier / Export PDF Summary View"
+                          >
+                            <i className="bi bi-printer text-indigo-500 text-[10px]"></i>
+                            <span>Print Dossier / PDF</span>
                           </button>
                         )}
 

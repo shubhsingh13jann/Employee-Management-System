@@ -9,6 +9,7 @@ interface AdminProjectsHeaderProps {
   isRefreshing: boolean;
   viewMode: "table" | "grid" | "milestones" | "gantt";
   onViewModeChange: (mode: "table" | "grid" | "milestones" | "gantt") => void;
+  onOpenPrintSummary?: () => void;
 }
 
 export const AdminProjectsHeader: React.FC<AdminProjectsHeaderProps> = ({
@@ -20,6 +21,7 @@ export const AdminProjectsHeader: React.FC<AdminProjectsHeaderProps> = ({
   isRefreshing,
   viewMode,
   onViewModeChange,
+  onOpenPrintSummary,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -262,6 +264,21 @@ export const AdminProjectsHeader: React.FC<AdminProjectsHeaderProps> = ({
                 <i className="bi bi-file-earmark-spreadsheet text-emerald-400 text-sm shrink-0"></i>
                 <span className="whitespace-nowrap">Export Projects CSV</span>
               </button>
+
+              {/* 3b. Print Executive Briefing Summary */}
+              {onOpenPrintSummary && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onOpenPrintSummary();
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left whitespace-nowrap"
+                >
+                  <i className="bi bi-printer text-indigo-400 text-sm shrink-0"></i>
+                  <span className="whitespace-nowrap">Print Executive Dossier</span>
+                </button>
+              )}
 
               <div className="h-px bg-white/10 my-1.5"></div>
 

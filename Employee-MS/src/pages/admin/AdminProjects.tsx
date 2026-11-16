@@ -20,6 +20,7 @@ import {
   BatchOperationConfirmModal,
   ProjectBlockerModal,
   ProjectAuditTrailDrawer,
+  ProjectPrintDossier,
   ColumnVisibility,
   DEFAULT_COLUMN_VISIBILITY,
 } from "../../Components/admin/projects";
@@ -180,6 +181,7 @@ const AdminProjects: React.FC = () => {
   const [selectedBudgetProject, setSelectedBudgetProject] = useState<ProjectItem | null>(null);
   const [selectedBlockerProject, setSelectedBlockerProject] = useState<ProjectItem | null>(null);
   const [selectedAuditProject, setSelectedAuditProject] = useState<ProjectItem | null>(null);
+  const [selectedPrintProject, setSelectedPrintProject] = useState<ProjectItem | null>(null);
   const [saving, setSaving] = useState<boolean>(false);
 
   const handleSaveBlocker = async (
@@ -631,6 +633,13 @@ const AdminProjects: React.FC = () => {
           isRefreshing={refreshing}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
+          onOpenPrintSummary={() => {
+            if (filteredProjects.length > 0) {
+              setSelectedPrintProject(filteredProjects[0]);
+            } else if (projects.length > 0) {
+              setSelectedPrintProject(projects[0]);
+            }
+          }}
         />
 
         {/* 4 Executive KPI Cards */}
@@ -719,6 +728,7 @@ const AdminProjects: React.FC = () => {
             onOpenBudgetHUD={(proj) => setSelectedBudgetProject(proj)}
             onOpenBlockerModal={(proj) => setSelectedBlockerProject(proj)}
             onOpenAuditDrawer={(proj) => setSelectedAuditProject(proj)}
+            onOpenPrintDossier={(proj) => setSelectedPrintProject(proj)}
           />
         ) : viewMode === "milestones" ? (
           <AdminMilestoneTracker
@@ -760,6 +770,7 @@ const AdminProjects: React.FC = () => {
             onOpenBudgetHUD={(proj) => setSelectedBudgetProject(proj)}
             onOpenBlockerModal={(proj) => setSelectedBlockerProject(proj)}
             onOpenAuditDrawer={(proj) => setSelectedAuditProject(proj)}
+            onOpenPrintDossier={(proj) => setSelectedPrintProject(proj)}
           />
         ) : (
           <AdminProjectsTable
@@ -785,6 +796,7 @@ const AdminProjects: React.FC = () => {
             onOpenBudgetHUD={(proj) => setSelectedBudgetProject(proj)}
             onOpenBlockerModal={(proj) => setSelectedBlockerProject(proj)}
             onOpenAuditDrawer={(proj) => setSelectedAuditProject(proj)}
+            onOpenPrintDossier={(proj) => setSelectedPrintProject(proj)}
           />
         )}
 
@@ -923,6 +935,13 @@ const AdminProjects: React.FC = () => {
           isOpen={Boolean(selectedAuditProject)}
           onClose={() => setSelectedAuditProject(null)}
           project={selectedAuditProject}
+        />
+
+        {/* Printable Executive Initiative Dossier / PDF Summary View */}
+        <ProjectPrintDossier
+          isOpen={Boolean(selectedPrintProject)}
+          onClose={() => setSelectedPrintProject(null)}
+          project={selectedPrintProject}
         />
     </div>
   );
