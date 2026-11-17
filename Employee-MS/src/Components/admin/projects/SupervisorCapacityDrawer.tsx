@@ -448,19 +448,38 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
                           fill="none"
                           d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                         />
-                        <path
-                          className="text-indigo-600"
-                          strokeDasharray={`${teamMetrics.total > 0 ? (teamMetrics.normal / teamMetrics.total) * 100 : 0}, 100`}
-                          strokeWidth="3.5"
-                          strokeLinecap="round"
-                          stroke="currentColor"
-                          fill="none"
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        />
-                        {teamMetrics.burnout > 0 && (
+                        {/* Normal Segment */}
+                        {teamMetrics.normal > 0 && teamMetrics.total > 0 && (
+                          <path
+                            className="text-emerald-500"
+                            strokeDasharray={`${(teamMetrics.normal / teamMetrics.total) * 100}, 100`}
+                            strokeDashoffset="0"
+                            strokeWidth="3.5"
+                            strokeLinecap="round"
+                            stroke="currentColor"
+                            fill="none"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                          />
+                        )}
+                        {/* Burnout Segment */}
+                        {teamMetrics.burnout > 0 && teamMetrics.total > 0 && (
                           <path
                             className="text-rose-500"
                             strokeDasharray={`${(teamMetrics.burnout / teamMetrics.total) * 100}, 100`}
+                            strokeDashoffset={`-${(teamMetrics.normal / teamMetrics.total) * 100}`}
+                            strokeWidth="3.5"
+                            strokeLinecap="round"
+                            stroke="currentColor"
+                            fill="none"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                          />
+                        )}
+                        {/* Low Segment */}
+                        {teamMetrics.low > 0 && teamMetrics.total > 0 && (
+                          <path
+                            className="text-blue-500"
+                            strokeDasharray={`${(teamMetrics.low / teamMetrics.total) * 100}, 100`}
+                            strokeDashoffset={`-${((teamMetrics.normal + teamMetrics.burnout) / teamMetrics.total) * 100}`}
                             strokeWidth="3.5"
                             strokeLinecap="round"
                             stroke="currentColor"
@@ -578,6 +597,11 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
                         </span>
                       </div>
                     </div>
+
+                    <div className="pt-2 border-t border-slate-100 flex items-center gap-1.5 text-[10px] text-slate-400">
+                      <i className="bi bi-info-circle text-slate-400"></i>
+                      <span>This shows current workload allocation based on department initiatives.</span>
+                    </div>
                   </div>
                 )}
               </div>
@@ -598,17 +622,32 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
 
           <div className="flex items-center gap-2">
             {selectedSupervisor && (
-              <button
-                type="button"
-                onClick={() => {
-                  onSelectSupervisorFilter(String(selectedSupervisor.id));
-                  onClose();
-                }}
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs shadow-md shadow-indigo-500/25 transition-all cursor-pointer flex items-center gap-2"
-              >
-                <i className="bi bi-funnel-fill text-xs"></i>
-                <span>Filter Initiatives for {selectedSupervisor.name.split(" ")[0]}</span>
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const text = `Supervisor: ${selectedSupervisor.name}\nEmail: ${selectedSupervisor.email}\nDepartment: ${selectedSupervisor.department_name}\nActive Tasks: ${selectedSupervisor.active_tasks_count}\nOverdue Tasks: ${selectedSupervisor.overdue_tasks_count}`;
+                    navigator.clipboard.writeText(text);
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200 shadow-2xs transition-colors cursor-pointer flex items-center gap-1.5"
+                  title="Copy supervisor details to clipboard"
+                >
+                  <i className="bi bi-clipboard"></i>
+                  <span>Copy Details</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSelectSupervisorFilter(String(selectedSupervisor.id));
+                    onClose();
+                  }}
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs shadow-md shadow-indigo-500/25 transition-all cursor-pointer flex items-center gap-2"
+                >
+                  <i className="bi bi-funnel-fill text-xs"></i>
+                  <span>Filter Initiatives for {selectedSupervisor.name.split(" ")[0]}</span>
+                </button>
+              </>
             )}
           </div>
         </div>
