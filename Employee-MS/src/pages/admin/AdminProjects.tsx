@@ -48,6 +48,8 @@ export interface ProjectItem {
   overdue_tasks: number;
   in_progress_tasks: number;
   progress_percentage: number;
+  total_milestones?: number;
+  completed_milestones?: number;
   days_left?: number | null;
   is_overdue?: boolean;
   health: "healthy" | "at_risk" | "critical" | "completed";
@@ -746,6 +748,7 @@ const AdminProjects: React.FC = () => {
             onOpenMilestonesModal={(proj) => setSelectedMilestoneProject(proj)}
             onOpenDossierModal={(proj) => setSelectedDossierProject(proj)}
             onOpenAuditDrawer={(proj) => setSelectedAuditProject(proj)}
+            onOpenPrintDossier={(proj) => setSelectedPrintProject(proj)}
           />
         ) : viewMode === "grid" ? (
           <AdminProjectsGrid

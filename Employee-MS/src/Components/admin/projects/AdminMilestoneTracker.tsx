@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import api from "../../../api/axios";
 import { ProjectItem } from "../../../pages/admin/AdminProjects";
 import { ProjectMilestoneItem } from "./ProjectMilestonesModal";
@@ -10,6 +10,7 @@ interface AdminMilestoneTrackerProps {
   onOpenMilestonesModal?: (project: ProjectItem) => void;
   onOpenDossierModal?: (project: ProjectItem) => void;
   onOpenAuditDrawer?: (project: ProjectItem) => void;
+  onOpenPrintDossier?: (project: ProjectItem) => void;
   selectedProjectIds?: (number | string)[];
   onToggleSelectProject?: (projectId: number | string) => void;
   onSelectAllProjects?: () => void;
@@ -24,17 +25,18 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
   onOpenMilestonesModal,
   onOpenDossierModal,
   onOpenAuditDrawer,
+  onOpenPrintDossier,
   selectedProjectIds = [],
   onToggleSelectProject,
   onSelectAllProjects,
   onDeselectAllProjects,
   showCheckboxes = false,
 }) => {
-  const selectAllCheckboxRef = React.useRef<HTMLInputElement>(null);
+  const selectAllCheckboxRef = useRef<HTMLInputElement>(null);
   const isAllSelected = projects.length > 0 && projects.every((p) => selectedProjectIds.includes(p.id));
   const isSomeSelected = projects.some((p) => selectedProjectIds.includes(p.id)) && !isAllSelected;
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (selectAllCheckboxRef.current) {
       selectAllCheckboxRef.current.indeterminate = isSomeSelected;
     }
@@ -168,10 +170,10 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
 
   const overdue = sortedProjects.filter((p) => p.is_overdue && p.status !== "completed");
   const upcoming = sortedProjects.filter(
-    (p) => !p.is_overdue && p.status !== "completed" && p.days_left !== null && p.days_left <= 30
+    (p) => !p.is_overdue && p.status !== "completed" && p.days_left !== null && p.days_left !== undefined && p.days_left <= 30
   );
   const future = sortedProjects.filter(
-    (p) => !p.is_overdue && p.status !== "completed" && (p.days_left === null || p.days_left > 30)
+    (p) => !p.is_overdue && p.status !== "completed" && (p.days_left === null || p.days_left === undefined || p.days_left > 30)
   );
   const completed = sortedProjects.filter((p) => p.status === "completed");
 
@@ -291,7 +293,7 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                         className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
                           isCritical
                             ? "bg-rose-50 text-rose-700 border-rose-300"
-                            : proj.days_left !== null && proj.days_left <= 7
+                            : proj.days_left !== null && proj.days_left !== undefined && proj.days_left <= 7
                             ? "bg-amber-50 text-amber-700 border-amber-300"
                             : "bg-indigo-50 text-indigo-700 border-indigo-200"
                         }`}
@@ -303,7 +305,7 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                           day: "numeric",
                           year: "numeric",
                         })}
-                        {proj.days_left !== null && (
+                        {proj.days_left !== null && proj.days_left !== undefined && (
                           <span className="ml-1">
                             ({proj.days_left < 0 ? `${Math.abs(proj.days_left)}d overdue` : `${proj.days_left}d left`})
                           </span>
@@ -404,6 +406,19 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                       >
                         <i className="bi bi-clock-history text-indigo-600 text-[9px]"></i>
                         <span className="hidden sm:inline">Audit</span>
+                      </button>
+                    )}
+
+                    {/* Print Executive Dossier Trigger */}
+                    {onOpenPrintDossier && (
+                      <button
+                        type="button"
+                        onClick={() => onOpenPrintDossier(proj)}
+                        className="px-2 py-0.5 rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 text-[10.5px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
+                        title="Print Executive Dossier / Export PDF Briefing"
+                      >
+                        <i className="bi bi-printer text-indigo-600 text-[9px]"></i>
+                        <span className="hidden sm:inline">Print</span>
                       </button>
                     )}
 
@@ -516,7 +531,7 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
                                     <i className="bi bi-check-lg text-[10px] font-bold"></i>
                                   </button>
 
-                                  <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold uppercase bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                  <span className="px-1.5 py-0.5 rounded text-[9.5px] font-bold uppercase bg-indigo-50 text-indigo-700 border border-indigo-200">
                                     Phase {idx + 1}
                                   </span>
 
@@ -531,12 +546,12 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
 
                                 <div className="flex items-center gap-1.5 self-start sm:self-auto shrink-0">
                                   {milestone.due_date && (
-                                    <span className="px-1.5 py-0.2 rounded text-[9.5px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                                    <span className="px-1.5 py-0.5 rounded text-[9.5px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
                                       Due: {new Date(milestone.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                                     </span>
                                   )}
                                   {milestone.owner_name && (
-                                    <span className="px-1.5 py-0.2 rounded text-[9.5px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                    <span className="px-1.5 py-0.5 rounded text-[9.5px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
                                       👤 {milestone.owner_name}
                                     </span>
                                   )}
@@ -600,15 +615,33 @@ export const AdminMilestoneTracker: React.FC<AdminMilestoneTrackerProps> = ({
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-3 sm:p-3.5 mb-2.5">
-      <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-slate-100">
-        <div>
-          <h3 className="font-bold text-xs sm:text-sm text-slate-900 mb-0.5 flex items-center gap-2">
-            <i className="bi bi-calendar2-range-fill text-indigo-600"></i>
-            <span>Enterprise Deliverables & Milestone Schedule</span>
-          </h3>
-          <p className="text-[11px] text-slate-500 mb-0">
-            Timeline sequenced by target milestone dates, nested sub-milestone phases, and deliverable checklists.
-          </p>
+      <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-slate-100 flex-wrap gap-2">
+        <div className="flex items-center gap-2.5">
+          {showCheckboxes && (
+            <input
+              type="checkbox"
+              ref={selectAllCheckboxRef}
+              checked={isAllSelected}
+              onChange={() => {
+                if (isAllSelected) {
+                  onDeselectAllProjects?.();
+                } else {
+                  onSelectAllProjects?.();
+                }
+              }}
+              className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600 transition-all shrink-0"
+              title="Select / Deselect all initiatives in timeline schedule"
+            />
+          )}
+          <div>
+            <h3 className="font-bold text-xs sm:text-sm text-slate-900 mb-0.5 flex items-center gap-2">
+              <i className="bi bi-calendar2-range-fill text-indigo-600"></i>
+              <span>Enterprise Deliverables & Milestone Schedule</span>
+            </h3>
+            <p className="text-[11px] text-slate-500 mb-0">
+              Timeline sequenced by target milestone dates, nested sub-milestone phases, and deliverable checklists.
+            </p>
+          </div>
         </div>
       </div>
 
