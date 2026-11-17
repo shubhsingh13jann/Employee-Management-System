@@ -30,6 +30,8 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
   const [selectedSupervisorId, setSelectedSupervisorId] = useState<number | string | null>(null);
   const [periodFilter, setPeriodFilter] = useState<string>("Current Period");
   const [isPeriodOpen, setIsPeriodOpen] = useState<boolean>(false);
+  const [statusFilter, setStatusFilter] = useState<"all" | "burnout" | "normal" | "low">("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   useEffect(() => {
     if (!isOpen) return;
@@ -90,6 +92,30 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
       low,
     };
   }, [supervisors]);
+
+  // Filtered supervisors
+  const filteredSupervisors = useMemo(() => {
+    return supervisors.filter((sup) => {
+      const active = Number(sup.active_tasks_count) || 0;
+      const overdue = Number(sup.overdue_tasks_count) || 0;
+      const isBurnout = overdue > 0 || active > 6;
+      const isLow = active === 0;
+      const isNormal = !isBurnout && !isLow;
+
+      if (statusFilter === "burnout" && !isBurnout) return false;
+      if (statusFilter === "normal" && !isNormal) return false;
+      if (statusFilter === "low" && !isLow) return false;
+
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchName = sup.name.toLowerCase().includes(q);
+        const matchDept = (sup.department_name || "").toLowerCase().includes(q);
+        const matchEmail = (sup.email || "").toLowerCase().includes(q);
+        return matchName || matchDept || matchEmail;
+      }
+      return true;
+    });
+  }, [supervisors, statusFilter, searchQuery]);
 
   if (!isOpen) return null;
 
@@ -209,130 +235,195 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
               {/* Left Column: Horizontal Supervisor Cards */}
               <div className="lg:col-span-8 space-y-3.5">
-                {supervisors.map((sup) => {
-                  const activeTasks = Number(sup.active_tasks_count) || 0;
-                  const overdueTasks = Number(sup.overdue_tasks_count) || 0;
-                  const activeProjects = Number(sup.active_projects_count) || 0;
-                  const isSelected = sup.id === selectedSupervisorId;
-
-                  // Workload load status calculation
-                  let loadLabel = "Normal Load";
-                  let loadBg = "bg-emerald-50 text-emerald-700 border-emerald-200";
-                  let loadIcon = "●";
-                  let leftAccentColor = "border-l-emerald-500";
-                  let meterPercent = Math.min(100, Math.round((activeTasks / 8) * 100));
-
-                  if (activeTasks > 6 || overdueTasks > 0) {
-                    loadLabel = "Burnout Risk";
-                    loadBg = "bg-rose-50 text-rose-700 border-rose-200";
-                    loadIcon = "🔥";
-                    leftAccentColor = "border-l-rose-500";
-                  } else if (activeTasks === 0) {
-                    loadLabel = "Low Load";
-                    loadBg = "bg-blue-50 text-blue-700 border-blue-200";
-                    loadIcon = "●";
-                    leftAccentColor = "border-l-blue-500";
-                  }
-
-                  return (
-                    <div
-                      key={sup.id}
-                      onClick={() => setSelectedSupervisorId(sup.id)}
-                      className={`relative bg-white rounded-2xl border transition-all p-4 cursor-pointer border-l-4 ${leftAccentColor} ${
-                        isSelected
-                          ? "border-indigo-400/80 shadow-md ring-2 ring-indigo-500/10"
-                          : "border-slate-200/80 hover:border-slate-300 shadow-2xs hover:shadow-xs"
+                {/* Filter Chips and Search Bar */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-0.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => setStatusFilter("all")}
+                      className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                        statusFilter === "all"
+                          ? "bg-indigo-600 text-white shadow-xs"
+                          : "bg-white hover:bg-slate-100 text-slate-600 border border-slate-200"
                       }`}
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        {/* Supervisor Identity */}
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-xs">
-                            {sup.name ? sup.name.charAt(0).toUpperCase() : "S"}
+                      All ({supervisors.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStatusFilter("burnout")}
+                      className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 ${
+                        statusFilter === "burnout"
+                          ? "bg-rose-600 text-white shadow-xs"
+                          : "bg-white hover:bg-rose-50 text-rose-700 border border-slate-200"
+                      }`}
+                    >
+                      <span>🔥 Burnout Risk</span>
+                      <span className="text-[10px] opacity-80">({teamMetrics.burnout})</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStatusFilter("normal")}
+                      className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 ${
+                        statusFilter === "normal"
+                          ? "bg-emerald-600 text-white shadow-xs"
+                          : "bg-white hover:bg-emerald-50 text-emerald-700 border border-slate-200"
+                      }`}
+                    >
+                      <span>● Normal Load</span>
+                      <span className="text-[10px] opacity-80">({teamMetrics.normal})</span>
+                    </button>
+                  </div>
+
+                  <div className="relative min-w-[190px]">
+                    <i className="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input
+                      type="text"
+                      placeholder="Search supervisor..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-7 pr-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs"
+                    />
+                  </div>
+                </div>
+
+                {filteredSupervisors.length === 0 ? (
+                  <div className="py-12 bg-white rounded-2xl border border-dashed border-slate-300 text-center text-xs text-slate-400">
+                    No supervisors match the current filter criteria.
+                  </div>
+                ) : (
+                  filteredSupervisors.map((sup) => {
+                    const activeTasks = Number(sup.active_tasks_count) || 0;
+                    const overdueTasks = Number(sup.overdue_tasks_count) || 0;
+                    const activeProjects = Number(sup.active_projects_count) || 0;
+                    const isSelected = sup.id === selectedSupervisorId;
+
+                    // Workload load status calculation
+                    let loadLabel = "Normal Load";
+                    let loadBg = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                    let loadIcon = "●";
+                    let leftAccentColor = "border-l-emerald-500";
+                    let avatarBg = "bg-gradient-to-br from-emerald-500 to-teal-600";
+                    let meterPercent = Math.min(100, Math.round((activeTasks / 8) * 100));
+
+                    if (activeTasks > 6 || overdueTasks > 0) {
+                      loadLabel = "Burnout Risk";
+                      loadBg = "bg-rose-50 text-rose-700 border-rose-200";
+                      loadIcon = "🔥";
+                      leftAccentColor = "border-l-rose-500";
+                      avatarBg = "bg-gradient-to-br from-indigo-500 to-purple-600";
+                    } else if (activeTasks === 0) {
+                      loadLabel = "Low Load";
+                      loadBg = "bg-blue-50 text-blue-700 border-blue-200";
+                      loadIcon = "●";
+                      leftAccentColor = "border-l-blue-500";
+                      avatarBg = "bg-gradient-to-br from-blue-500 to-indigo-600";
+                    }
+
+                    return (
+                      <div
+                        key={sup.id}
+                        onClick={() => setSelectedSupervisorId(sup.id)}
+                        className={`relative bg-white rounded-2xl border transition-all p-4 cursor-pointer border-l-4 ${leftAccentColor} ${
+                          isSelected
+                            ? "border-indigo-400/90 shadow-md ring-2 ring-indigo-500/10"
+                            : "border-slate-200/80 hover:border-slate-300 shadow-2xs hover:shadow-xs"
+                        }`}
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          {/* Supervisor Identity */}
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className={`w-10 h-10 rounded-2xl ${avatarBg} text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-xs`}>
+                              {sup.name ? sup.name.charAt(0).toUpperCase() : "S"}
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="font-bold text-sm sm:text-base text-slate-900 mb-0.5 truncate">
+                                {sup.name}
+                              </h4>
+                              <div className="flex items-center gap-2 text-xs text-slate-500">
+                                <span className="flex items-center gap-1 font-medium text-slate-600 truncate">
+                                  💼 {sup.department_name || "General"}
+                                </span>
+                              </div>
+                              <div className="mt-1">
+                                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${loadBg}`}>
+                                  <span>{loadIcon}</span>
+                                  <span>{loadLabel}</span>
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                          <div className="min-w-0">
-                            <h4 className="font-bold text-sm text-slate-900 mb-0.5 truncate">
-                              {sup.name}
-                            </h4>
-                            <div className="flex items-center gap-2 text-xs text-slate-500">
-                              <span className="flex items-center gap-1 font-medium text-slate-600 truncate">
-                                💼 {sup.department_name || "General"}
-                              </span>
+
+                          {/* Middle Metric Chips */}
+                          <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+                            <div className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2 text-center min-w-[70px]">
+                              <span className="text-indigo-600 text-xs">🚀</span>
+                              <div>
+                                <strong className="block text-slate-800 text-xs font-bold leading-none">{activeProjects}</strong>
+                                <span className="text-[9px] text-slate-400 font-medium">Initiatives</span>
+                              </div>
                             </div>
-                            <div className="mt-1">
-                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${loadBg}`}>
-                                <span>{loadIcon}</span>
-                                <span>{loadLabel}</span>
-                              </span>
+
+                            <div className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2 text-center min-w-[70px]">
+                              <span className="text-emerald-600 text-xs">✓</span>
+                              <div>
+                                <strong className="block text-slate-800 text-xs font-bold leading-none">{activeTasks}</strong>
+                                <span className="text-[9px] text-slate-400 font-medium">Active Tasks</span>
+                              </div>
                             </div>
+
+                            <div className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2 text-center min-w-[70px]">
+                              <span className="text-rose-500 text-xs">⏱️</span>
+                              <div>
+                                <strong className={`block text-xs font-bold leading-none ${overdueTasks > 0 ? "text-rose-600" : "text-slate-800"}`}>
+                                  {overdueTasks}
+                                </strong>
+                                <span className="text-[9px] text-slate-400 font-medium">Overdue</span>
+                              </div>
+                            </div>
+
+                            {/* View Details CTA */}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedSupervisorId(sup.id);
+                              }}
+                              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
+                                isSelected
+                                  ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+                                  : "bg-white hover:bg-indigo-50 text-indigo-700 border-indigo-200/90 shadow-2xs"
+                              }`}
+                            >
+                              <span>View Details</span>
+                              <i className="bi bi-arrow-right text-[10px]"></i>
+                            </button>
                           </div>
                         </div>
 
-                        {/* Middle Metric Chips */}
-                        <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
-                          <div className="px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2 text-center">
-                            <span className="text-indigo-600 text-xs">🚀</span>
-                            <div>
-                              <strong className="block text-slate-800 text-xs font-bold leading-none">{activeProjects}</strong>
-                              <span className="text-[9px] text-slate-400 font-medium">Initiatives</span>
-                            </div>
+                        {/* Workload Saturation Progress Bar */}
+                        <div className="mt-3 pt-2.5 border-t border-slate-100">
+                          <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 mb-1">
+                            <span>Workload Saturation</span>
+                            <span className="text-slate-800 font-bold">{meterPercent}%</span>
                           </div>
-
-                          <div className="px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2 text-center">
-                            <span className="text-emerald-600 text-xs">✓</span>
-                            <div>
-                              <strong className="block text-slate-800 text-xs font-bold leading-none">{activeTasks}</strong>
-                              <span className="text-[9px] text-slate-400 font-medium">Active Tasks</span>
-                            </div>
+                          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/80">
+                            <div
+                              className={`h-full rounded-full transition-all duration-300 ${
+                                meterPercent > 75
+                                  ? "bg-gradient-to-r from-rose-500 to-rose-600"
+                                  : meterPercent >= 40
+                                  ? "bg-gradient-to-r from-emerald-400 to-emerald-500"
+                                  : "bg-gradient-to-r from-blue-400 to-indigo-500"
+                              }`}
+                              style={{ width: `${meterPercent}%` }}
+                            ></div>
                           </div>
-
-                          <div className="px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2 text-center">
-                            <span className="text-rose-500 text-xs">⏱️</span>
-                            <div>
-                              <strong className={`block text-xs font-bold leading-none ${overdueTasks > 0 ? "text-rose-600" : "text-slate-800"}`}>
-                                {overdueTasks}
-                              </strong>
-                              <span className="text-[9px] text-slate-400 font-medium">Overdue</span>
-                            </div>
-                          </div>
-
-                          {/* View Details CTA */}
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedSupervisorId(sup.id);
-                            }}
-                            className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold border border-indigo-200/80 transition-colors cursor-pointer flex items-center gap-1 shrink-0"
-                          >
-                            <span>View Details</span>
-                            <i className="bi bi-arrow-right text-[10px]"></i>
-                          </button>
                         </div>
                       </div>
-
-                      {/* Workload Saturation Progress Bar */}
-                      <div className="mt-3 pt-2.5 border-t border-slate-100">
-                        <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 mb-1">
-                          <span>Workload Saturation</span>
-                          <span className="text-slate-800 font-bold">{meterPercent}%</span>
-                        </div>
-                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/80">
-                          <div
-                            className={`h-full rounded-full transition-all duration-300 ${
-                              meterPercent > 75
-                                ? "bg-gradient-to-r from-rose-500 to-rose-600"
-                                : meterPercent >= 40
-                                ? "bg-gradient-to-r from-emerald-400 to-emerald-500"
-                                : "bg-gradient-to-r from-blue-400 to-indigo-500"
-                            }`}
-                            style={{ width: `${meterPercent}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </div>
 
               {/* Right Column: Widgets Stack */}
