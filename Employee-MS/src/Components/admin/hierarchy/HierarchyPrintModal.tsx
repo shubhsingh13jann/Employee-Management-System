@@ -1,5 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
+import React, { useState } from "react";
+import {
+  UniversalPrintStudio,
+  PrintScopeOption,
+  PrintSectionToggle,
+} from "../../custom/print";
 
 export interface HierarchyPrintModalProps {
   isOpen: boolean;
@@ -15,108 +19,6 @@ export interface HierarchyPrintModalProps {
   unassignedCount: number;
 }
 
-const PAGE_SIZE_OPTIONS = [
-  { value: "a4", label: "A4 (210 × 297 mm)" },
-  { value: "letter", label: "Letter (8.5 × 11 in)" },
-  { value: "legal", label: "Legal (8.5 × 14 in)" },
-];
-
-const ORIENTATION_OPTIONS = [
-  { value: "portrait", label: "Portrait" },
-  { value: "landscape", label: "Landscape" },
-];
-
-const MARGINS_OPTIONS = [
-  { value: "standard", label: "Standard" },
-  { value: "narrow", label: "Narrow" },
-  { value: "wide", label: "Wide" },
-];
-
-const HEADER_STYLE_OPTIONS = [
-  { value: "default", label: "Default" },
-  { value: "minimal", label: "Minimal" },
-  { value: "executive", label: "Executive" },
-];
-
-interface CustomFormatDropdownProps {
-  label: string;
-  value: string;
-  options: { value: string; label: string }[];
-  onChange: (val: any) => void;
-  icon: string;
-  isOpen: boolean;
-  onToggle: () => void;
-}
-
-const CustomFormatDropdown: React.FC<CustomFormatDropdownProps> = ({
-  label,
-  value,
-  options,
-  onChange,
-  icon,
-  isOpen,
-  onToggle,
-}) => {
-  const selected = options.find((o) => o.value === value);
-
-  return (
-    <div className={`relative ${isOpen ? "z-40" : "z-10"}`} data-format-dropdown>
-      <label className="text-[10px] font-bold text-slate-700 mb-1 block">
-        {label}
-      </label>
-      <button
-        type="button"
-        onClick={onToggle}
-        className={`w-full relative border rounded-xl bg-white p-1.5 flex items-center gap-1.5 shadow-2xs text-left cursor-pointer transition-all ${
-          isOpen
-            ? "border-indigo-500 ring-2 ring-indigo-100 shadow-xs"
-            : "border-slate-200/90 hover:border-slate-300"
-        }`}
-      >
-        <div className="w-5.5 h-5.5 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shrink-0">
-          <i className={icon}></i>
-        </div>
-        <span className="text-xs font-semibold text-slate-800 w-full truncate pr-4">
-          {selected?.label || value}
-        </span>
-        <i
-          className={`bi bi-chevron-down text-slate-400 text-[10px] absolute right-2 transition-transform duration-200 pointer-events-none ${
-            isOpen ? "rotate-180 text-indigo-600" : ""
-          }`}
-        ></i>
-      </button>
-
-      {/* Floating Menu Popover (Matching UserManagement / UserFormModal standard) */}
-      {isOpen && (
-        <div className="absolute top-full left-0 mt-1.5 w-full min-w-[140px] bg-white rounded-xl border border-slate-200/90 shadow-2xl z-50 py-1 overflow-hidden ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-150">
-          <div className="max-h-48 overflow-y-auto [scrollbar-width:thin] p-1 space-y-0.5">
-            {options.map((opt) => {
-              const isSelected = value === opt.value;
-              return (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => onChange(opt.value)}
-                  className={`w-full px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between text-left cursor-pointer transition-all duration-150 ${
-                    isSelected
-                      ? "bg-indigo-50 text-[#4f46e5] font-semibold"
-                      : "text-slate-700 hover:bg-slate-50 hover:text-indigo-600 font-medium"
-                  }`}
-                >
-                  <span className="truncate">{opt.label}</span>
-                  {isSelected && (
-                    <i className="bi bi-check2 text-sm text-[#4f46e5] font-bold ml-1 shrink-0"></i>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
 export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
   isOpen,
   onClose,
@@ -130,49 +32,51 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
   uniqueManagersCount,
   unassignedCount,
 }) => {
-  const [scope, setScope] = useState<"filtered" | "all">("filtered");
-  const [includeSquadsSummary, setIncludeSquadsSummary] = useState(true);
-  const [includeUnassigned, setIncludeUnassigned] = useState(true);
-
-  // Page Format state for Step 3
-  const [pageSize, setPageSize] = useState<"a4" | "letter" | "legal">("a4");
-  const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
-  const [margins, setMargins] = useState<"standard" | "narrow" | "wide">("standard");
-  const [headerStyle, setHeaderStyle] = useState<"default" | "minimal" | "executive">("default");
-  const [openDropdown, setOpenDropdown] = useState<"pageSize" | "orientation" | "margins" | "headerStyle" | null>(null);
-
-  // Document Preview interactive controls
-  const [zoom, setZoom] = useState<number>(80);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [isFitWidth, setIsFitWidth] = useState<boolean>(false);
-
-  // Close custom dropdown on click outside or Escape key
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement | null;
-      if (target && !target.closest("[data-format-dropdown]")) {
-        setOpenDropdown(null);
-      }
-    };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setOpenDropdown(null);
-      }
-    };
-    if (openDropdown) {
-      document.addEventListener("mousedown", handleClickOutside);
-      document.addEventListener("keydown", handleKeyDown);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [openDropdown]);
+  const [scope, setScope] = useState<string>("filtered");
+  const [activeSections, setActiveSections] = useState<Record<string, boolean>>({
+    squads: true,
+    unassigned: true,
+  });
 
   if (!isOpen) return null;
 
+  const scopes: PrintScopeOption[] = [
+    {
+      id: "filtered",
+      label: "Filtered View",
+      count: filteredHierarchy.length,
+      icon: "bi bi-funnel",
+    },
+    {
+      id: "all",
+      label: "All Workforce",
+      count: hierarchy.length,
+      icon: "bi bi-database",
+    },
+  ];
+
+  const currentUnassigned = scope === "filtered" ? filteredUnassigned : unassignedStaff;
+
+  const sections: PrintSectionToggle[] = [
+    {
+      id: "squads",
+      label: "Squads Summary",
+      description: "Include supervisor squad roster and capacity summary",
+      icon: "bi bi-people-fill",
+      defaultChecked: true,
+    },
+    {
+      id: "unassigned",
+      label: "Unassigned Staff",
+      description: "Include staff who are not assigned to any supervisor",
+      icon: "bi bi-person-fill",
+      count: currentUnassigned.length,
+      defaultChecked: true,
+    },
+  ];
+
   const activeMappings = scope === "filtered" ? filteredHierarchy : hierarchy;
-  const activeUnassigned = scope === "filtered" ? filteredUnassigned : unassignedStaff;
+  const activeUnassigned = currentUnassigned;
 
   // Build squad breakdown
   const squadMap = new Map<
@@ -200,974 +104,399 @@ export const HierarchyPrintModal: React.FC<HierarchyPrintModalProps> = ({
   });
 
   const squadsList = Array.from(squadMap.values());
-  const currentDate = new Date().toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-  const currentTime = new Date().toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 
-  const pageMinHeight =
-    orientation === "landscape"
-      ? pageSize === "legal"
-        ? "600px"
-        : pageSize === "letter"
-        ? "640px"
-        : "620px"
-      : pageSize === "legal"
-      ? "1186px"
-      : pageSize === "letter"
-      ? "958px"
-      : "1018px";
+  return (
+    <UniversalPrintStudio
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Print Hierarchy Dossier & Roster"
+      subtitle="Executive print layout formatted for paper records, physical audits, and PDF export"
+      icon="bi bi-printer-fill"
+      scopes={scopes}
+      activeScope={scope}
+      onScopeChange={(s) => setScope(s)}
+      sections={sections}
+      activeSections={activeSections}
+      onToggleSection={(secId, enabled) =>
+        setActiveSections((prev) => ({ ...prev, [secId]: enabled }))
+      }
+      defaultPageSize="a4"
+      defaultOrientation="portrait"
+      defaultMargins="standard"
+      defaultHeaderStyle="default"
+      renderContent={({
+        pageSize,
+        orientation,
+        margins,
+        headerStyle,
+        currentDate,
+        currentTime,
+      }) => (
+        <div className="space-y-4">
+          {/* Header Style Renderer */}
+          {headerStyle === "executive" ? (
+            <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-3.5 rounded-xl shadow-sm border border-slate-800 flex items-start justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-5.5 h-5.5 rounded-md bg-amber-400 text-slate-950 flex items-center justify-center font-black text-[11px] shadow-sm shrink-0">
+                    <i className="bi bi-shield-check"></i>
+                  </div>
+                  <div
+                    style={{ fontSize: "14px", letterSpacing: "0.06em" }}
+                    className="font-black text-amber-300 uppercase whitespace-nowrap"
+                  >
+                    EMS Enterprise Workforce
+                  </div>
+                  <span className="text-[9px] px-1.5 py-0.2 rounded font-bold bg-amber-400/20 text-amber-300 border border-amber-400/40 uppercase tracking-widest">
+                    Executive Dossier
+                  </span>
+                </div>
+                <div
+                  style={{ fontSize: "12.6px" }}
+                  className="font-bold text-white whitespace-nowrap"
+                >
+                  Workforce Team Hierarchy & Reporting Lines Dossier
+                </div>
+                <div
+                  style={{ fontSize: "10px" }}
+                  className="text-slate-300 mb-0 mt-0.5 whitespace-nowrap"
+                >
+                  Official Organizational Chain of Command Audit Record
+                </div>
+              </div>
 
-  const dossierMaxWidth = isFitWidth
-    ? "100%"
-    : orientation === "landscape"
-    ? pageSize === "legal"
-      ? "1220px"
-      : pageSize === "letter"
-      ? "1020px"
-      : "1050px"
-    : pageSize === "legal"
-    ? "790px"
-    : pageSize === "letter"
-    ? "780px"
-    : "750px";
+              <div
+                style={{ fontSize: "10px" }}
+                className="text-right text-slate-300 space-y-0.5 shrink-0"
+              >
+                <div
+                  style={{ fontSize: "10.5px" }}
+                  className="font-bold text-amber-300 tracking-wider uppercase mb-0.5"
+                >
+                  CONFIDENTIAL BRIEFING
+                </div>
+                <p className="mb-0">Date: <strong className="text-white">{currentDate}</strong></p>
+                <p className="mb-0">Time: <span className="text-slate-200">{currentTime}</span></p>
+                <p className="mb-0">Scope: <strong className="capitalize text-white">{scope === "filtered" ? "Filtered View" : "All Workforce"}</strong></p>
+                <p className="mb-0">Format: <strong className="uppercase text-amber-300">{pageSize} • {orientation}</strong></p>
+              </div>
+            </div>
+          ) : headerStyle === "minimal" ? (
+            <div className="border-b border-slate-200 pb-2.5 flex items-start justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="text-blue-600 font-bold text-xs uppercase tracking-wider">
+                    EMS Workforce
+                  </span>
+                  <span className="text-slate-300">•</span>
+                  <span className="text-xs font-semibold text-slate-700">Hierarchy Dossier</span>
+                </div>
+                <div style={{ fontSize: "10px" }} className="text-slate-400 mb-0">
+                  Official reporting lines audit record
+                </div>
+              </div>
 
-  const handlePrint = () => {
-    window.print();
-  };
+              <div
+                style={{ fontSize: "9.5px" }}
+                className="text-right text-slate-500 flex items-center gap-3 shrink-0"
+              >
+                <div>Date: <strong className="text-slate-700">{currentDate}</strong></div>
+                <div>Scope: <strong className="capitalize text-slate-700">{scope === "filtered" ? "Filtered" : "All"}</strong></div>
+                <div>Format: <strong className="uppercase text-slate-700">{pageSize}</strong></div>
+              </div>
+            </div>
+          ) : (
+            /* Corporate Default Header */
+            <div className="border-b-2 border-slate-900 pb-2.5 sm:pb-3 flex items-start justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-5.5 h-5.5 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-[10.5px] shadow-2xs shrink-0">
+                    <i className="bi bi-bar-chart-fill"></i>
+                  </div>
+                  <div
+                    style={{ fontSize: "13.75px", lineHeight: "1.2", letterSpacing: "0.05em" }}
+                    className="font-bold text-slate-900 uppercase whitespace-nowrap"
+                  >
+                    EMS Enterprise Workforce
+                  </div>
+                </div>
+                <div
+                  style={{ fontSize: "12.6px", lineHeight: "1.3" }}
+                  className="font-semibold text-slate-800 whitespace-nowrap"
+                >
+                  Workforce Team Hierarchy & Reporting Lines Dossier
+                </div>
+                <div
+                  style={{ fontSize: "10px", lineHeight: "1.2" }}
+                  className="text-slate-500 mb-0 mt-0.5 whitespace-nowrap"
+                >
+                  Official Organizational Chain of Command Audit Record
+                </div>
+              </div>
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[10000] flex items-center justify-center p-2 sm:p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150"
-      onClick={onClose}
-    >
-      <div
-        className={`bg-white rounded-3xl border border-slate-200/90 shadow-2xl w-full ${
-          orientation === "landscape" ? "w-[96vw] max-w-[1400px]" : "max-w-[1010px]"
-        } h-[92vh] max-h-[92vh] flex flex-col overflow-hidden relative transition-all duration-300`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Modal Header with Fluid Pastel Wave Accent */}
-        <div className="relative pl-6 pr-4 sm:pr-5 py-2.5 bg-white flex items-center justify-between border-b border-slate-100 overflow-hidden shrink-0 no-print">
-          {/* Top-Right Fluid Pastel Wave Background matching reference design */}
-          <div className="absolute top-0 right-0 w-[440px] sm:w-[500px] h-full pointer-events-none overflow-hidden z-0">
-            <svg
-              viewBox="0 0 500 74"
-              fill="none"
-              preserveAspectRatio="none"
-              className="w-full h-full"
-            >
-              <defs>
-                {/* Left fade mask to seamlessly blend into pure white */}
-                <mask id="printModalWaveFadeMask">
-                  <linearGradient id="printModalWaveFadeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="black" />
-                    <stop offset="18%" stopColor="white" />
-                    <stop offset="100%" stopColor="white" />
-                  </linearGradient>
-                  <rect width="500" height="74" fill="url(#printModalWaveFadeGrad)" />
-                </mask>
+              <div
+                style={{ fontSize: "10px", lineHeight: "1.3" }}
+                className="text-right text-slate-600 space-y-0.5 shrink-0"
+              >
+                <div
+                  style={{ fontSize: "10.5px" }}
+                  className="font-bold text-slate-900 tracking-wider uppercase mb-0.5"
+                >
+                  CONFIDENTIAL REPORT
+                </div>
+                <p className="mb-0">Date: <strong className="text-slate-800">{currentDate}</strong></p>
+                <p className="mb-0">Time: <span className="text-slate-700">{currentTime}</span></p>
+                <p className="mb-0">Scope: <strong className="capitalize text-slate-800">{scope === "filtered" ? "Filtered View" : "All Workforce"}</strong></p>
+                <p className="mb-0">Page Size: <strong className="uppercase text-slate-800">{pageSize.toUpperCase()}</strong></p>
+                <p className="mb-0">Orientation: <strong className="capitalize text-slate-800">{orientation}</strong></p>
+                {activeFiltersDesc && (
+                  <p style={{ fontSize: "9.5px" }} className="text-indigo-700 max-w-[200px] truncate mb-0">
+                    {activeFiltersDesc}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
-                {/* Wave 1: Soft Sky-Blue / Periwinkle Gradient */}
-                <linearGradient id="printModalWaveGrad1" x1="0%" y1="0%" x2="100%" y2="70%">
-                  <stop offset="0%" stopColor="#E0E7FF" stopOpacity="0.2" />
-                  <stop offset="30%" stopColor="#D7E0FC" stopOpacity="0.85" />
-                  <stop offset="65%" stopColor="#E0E7FE" stopOpacity="0.9" />
-                  <stop offset="100%" stopColor="#EDE9FE" stopOpacity="0.7" />
-                </linearGradient>
-
-                {/* Wave 2: Richer Lavender / Violet Sweep */}
-                <linearGradient id="printModalWaveGrad2" x1="15%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#D8E2FB" stopOpacity="0.3" />
-                  <stop offset="30%" stopColor="#C7D2FE" stopOpacity="0.85" />
-                  <stop offset="60%" stopColor="#DDD6FE" stopOpacity="0.9" />
-                  <stop offset="85%" stopColor="#E9D5FF" stopOpacity="0.85" />
-                  <stop offset="100%" stopColor="#F3E8FF" stopOpacity="0.4" />
-                </linearGradient>
-
-                {/* Wave 3: Subtle Pastel Ribbon Glow */}
-                <linearGradient id="printModalWaveGrad3" x1="30%" y1="10%" x2="95%" y2="100%">
-                  <stop offset="0%" stopColor="#E0F2FE" stopOpacity="0.5" />
-                  <stop offset="45%" stopColor="#DDD6FE" stopOpacity="0.75" />
-                  <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0.7" />
-                </linearGradient>
-              </defs>
-
-              <g mask="url(#printModalWaveFadeMask)">
-                {/* Layer 1: Broad soft background crest flowing from upper left towards upper right */}
-                <path
-                  d="M0 26 C60 10 120 8 180 18 C245 28 305 50 370 38 C425 28 465 10 500 20 V0 H0 Z"
-                  fill="url(#printModalWaveGrad1)"
-                />
-
-                {/* Layer 2: Main organic curved ribbon flowing across center-right */}
-                <path
-                  d="M0 50 C80 34 145 12 215 10 C280 8 330 32 390 44 C445 54 475 38 500 28 V0 H0 Z"
-                  fill="url(#printModalWaveGrad2)"
-                />
-
-                {/* Layer 3: Soft swoop ribbon sweeping under badge and close button */}
-                <path
-                  d="M130 38 C195 26 260 48 325 56 C385 64 445 50 500 38 V8 C470 20 420 18 370 24 C310 34 235 32 130 38 Z"
-                  fill="url(#printModalWaveGrad3)"
-                  opacity="0.75"
-                />
-              </g>
-            </svg>
-          </div>
-
-          <div className="flex items-center gap-2.5 relative z-10">
-            {/* Printer Squircle Icon */}
-            <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100/90 shadow-2xs flex items-center justify-center text-indigo-600 text-xs font-bold shrink-0">
-              <i className="bi bi-printer-fill"></i>
+          {/* Executive KPI Summary Bar */}
+          <div className="grid grid-cols-4 gap-2 text-center py-2 px-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
+            <div className="border-r border-slate-100 pr-2">
+              <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
+                Mapped Personnel
+              </span>
+              <span className="text-sm sm:text-base font-bold text-blue-600 block mt-0.5">
+                {activeMappings.length}
+              </span>
+            </div>
+            <div className="border-r border-slate-100 pr-2">
+              <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
+                Team Lead Squads
+              </span>
+              <span className="text-sm sm:text-base font-bold text-purple-600 block mt-0.5">
+                {squadsList.length}
+              </span>
+            </div>
+            <div className="border-r border-slate-100 pr-2">
+              <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
+                Dept Managers
+              </span>
+              <span className="text-sm sm:text-base font-bold text-emerald-600 block mt-0.5">
+                {uniqueManagersCount}
+              </span>
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <div style={{ fontSize: "14px" }} className="font-bold text-slate-900 leading-tight tracking-tight mb-0">
-                  Print Hierarchy Dossier & Roster
+              <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
+                Unallocated Staff
+              </span>
+              <span className="text-sm sm:text-base font-bold text-amber-600 block mt-0.5">
+                {activeUnassigned.length}
+              </span>
+            </div>
+          </div>
+
+          {/* Section 1: Detailed Workforce Reporting Matrix */}
+          <div>
+            <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-200">
+              <div
+                style={{ fontSize: "11.6px", lineHeight: "1.2", letterSpacing: "0.04em" }}
+                className="font-bold text-slate-900 uppercase flex items-center gap-1.5 whitespace-nowrap"
+              >
+                <i className="bi bi-diagram-3 text-blue-600" style={{ fontSize: "12.6px" }}></i>
+                <span>1. Detailed Workforce Reporting Relationships ({activeMappings.length})</span>
+              </div>
+              <span
+                style={{ fontSize: "9.5px" }}
+                className="text-slate-400 font-normal whitespace-nowrap shrink-0"
+              >
+                Ordered by Department & Supervisor
+              </span>
+            </div>
+
+            {activeMappings.length === 0 ? (
+              <p className="text-center py-4 text-xs text-slate-400 italic">
+                No reporting relationships match the selected scope.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-[11px] border-collapse border border-slate-200">
+                  <thead>
+                    <tr className="bg-slate-50 text-slate-600 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200">
+                      <th className="px-2.5 py-1.5 border-r border-slate-200">Employee ID & Name</th>
+                      <th className="px-2.5 py-1.5 border-r border-slate-200">Department</th>
+                      <th className="px-2.5 py-1.5 border-r border-slate-200">Direct Team Lead (Supervisor)</th>
+                      <th className="px-2.5 py-1.5 border-r border-slate-200">Department Manager</th>
+                      <th className="px-2.5 py-1.5 text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {activeMappings.map((item, idx) => (
+                      <tr
+                        key={`print-row-${item.id || idx}`}
+                        className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"}
+                      >
+                        <td className="px-2.5 py-1.5 border-r border-slate-200">
+                          <span className="font-bold text-slate-900 block leading-tight">
+                            {item.employee_name}
+                          </span>
+                          <span className="text-[9.5px] text-slate-400 block font-mono">
+                            EMP-{String(item.employee_id).padStart(4, "0")} • {item.employee_email}
+                          </span>
+                        </td>
+                        <td className="px-2.5 py-1.5 border-r border-slate-200 font-medium text-slate-800">
+                          {item.department_name || "General"}
+                        </td>
+                        <td className="px-2.5 py-1.5 border-r border-slate-200">
+                          <span className="font-semibold text-purple-700 block leading-tight">
+                            {item.supervisor_name}
+                          </span>
+                          <span className="text-[9.5px] text-slate-400 font-mono">
+                            SUP-{String(item.supervisor_id).padStart(4, "0")}
+                          </span>
+                        </td>
+                        <td className="px-2.5 py-1.5 border-r border-slate-200">
+                          <span className="font-semibold text-emerald-700 block leading-tight">
+                            {item.manager_name}
+                          </span>
+                          <span className="text-[9.5px] text-slate-400 font-mono">
+                            MGR-{String(item.manager_id).padStart(4, "0")}
+                          </span>
+                        </td>
+                        <td className="px-2.5 py-1.5 text-center">
+                          <span className="inline-block px-2 py-0.5 rounded text-[9.5px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            Active Chain
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Section 2: Supervisor Squad Breakdown */}
+          {activeSections.squads && (
+            <div className="pt-2">
+              <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-200">
+                <div
+                  style={{ fontSize: "11.6px", lineHeight: "1.2", letterSpacing: "0.04em" }}
+                  className="font-bold text-slate-900 uppercase flex items-center gap-1.5 whitespace-nowrap"
+                >
+                  <i className="bi bi-people-fill text-purple-600" style={{ fontSize: "12.6px" }}></i>
+                  <span>2. Operational Squad Rosters & Capacity Summary ({squadsList.length})</span>
                 </div>
-                <span className="text-[9.5px] px-2 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200/70 shrink-0">
-                  {pageSize.toUpperCase()} • {orientation.charAt(0).toUpperCase() + orientation.slice(1)}
+                <span
+                  style={{ fontSize: "9.5px" }}
+                  className="text-slate-400 font-normal whitespace-nowrap shrink-0"
+                >
+                  Team Lead direct reports
                 </span>
               </div>
-              <p style={{ fontSize: "11px" }} className="text-slate-500 mb-0 mt-0.5 leading-tight">
-                Executive print layout formatted for paper records, physical audits, and PDF export
-              </p>
-            </div>
-          </div>
 
-          {/* Circular Close Button */}
-          <div className="relative z-10">
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-8 h-8 rounded-full bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 border border-slate-100 shadow-2xs flex items-center justify-center transition-all cursor-pointer"
-              aria-label="Close"
-            >
-              <i className="bi bi-x-lg text-xs"></i>
-            </button>
-          </div>
-        </div>
-
-        {/* Main Body: Two-Column Split Layout */}
-        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
-          {/* Left Column: Configuration Controls (Steps 1, 2, 3) */}
-          <div className="w-full lg:w-[340px] shrink-0 border-r border-slate-100 pl-6 pr-2 pt-3.5 pb-8 space-y-3.5 overflow-y-auto bg-white no-print [scrollbar-width:thin]">
-            {/* Step 1: Report Scope */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-6.5 h-6.5 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-indigo-700 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
-                  1
-                </div>
-                <div>
-                  <div style={{ fontSize: "12.6px" }} className="font-bold text-slate-900 leading-tight mb-0">
-                    Report Scope
-                  </div>
-                  <p style={{ fontSize: "10.5px" }} className="text-slate-500 mb-0 mt-1 leading-normal">
-                    Choose the data scope to include in the report.
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                {/* Filtered View Card */}
-                <button
-                  type="button"
-                  onClick={() => setScope("filtered")}
-                  className={`px-2 py-1.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-1.5 ${
-                    scope === "filtered"
-                      ? "border-2 border-blue-500 bg-gradient-to-br from-blue-50/70 to-indigo-50/40 shadow-xs"
-                      : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300"
-                  }`}
-                >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                {squadsList.map((sq) => (
                   <div
-                    className={`w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 ${
-                      scope === "filtered"
-                        ? "border-2 border-blue-600 bg-white"
-                        : "border-2 border-slate-300 bg-white"
-                    }`}
+                    key={`squad-print-${sq.supervisorId}`}
+                    className="border border-slate-200 rounded-lg p-2.5 bg-slate-50/50 break-inside-avoid"
                   >
-                    {scope === "filtered" && (
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
-                    )}
-                  </div>
-                  <div className="text-blue-600 text-sm shrink-0 flex items-center justify-center">
-                    <i className="bi bi-funnel"></i>
-                  </div>
-                  <span className="font-bold text-[10.5px] sm:text-[11px] text-slate-900 leading-tight whitespace-nowrap">
-                    Filtered View ({filteredHierarchy.length})
-                  </span>
-                </button>
-
-                {/* All Workforce Card */}
-                <button
-                  type="button"
-                  onClick={() => setScope("all")}
-                  className={`px-2 py-1.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-1.5 ${
-                    scope === "all"
-                      ? "border-2 border-blue-500 bg-gradient-to-br from-blue-50/70 to-indigo-50/40 shadow-xs"
-                      : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300"
-                  }`}
-                >
-                  <div
-                    className={`w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 ${
-                      scope === "all"
-                        ? "border-2 border-blue-600 bg-white"
-                        : "border-2 border-slate-300 bg-white"
-                    }`}
-                  >
-                    {scope === "all" && (
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
-                    )}
-                  </div>
-                  <div className="text-blue-600 text-sm shrink-0 flex items-center justify-center">
-                    <i className="bi bi-database"></i>
-                  </div>
-                  <span className="font-bold text-[10.5px] sm:text-[11px] text-slate-900 leading-tight whitespace-nowrap">
-                    All Workforce ({hierarchy.length})
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            {/* Step 2: Additional Sections */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-6.5 h-6.5 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-indigo-700 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
-                  2
-                </div>
-                <div>
-                  <div style={{ fontSize: "12.6px" }} className="font-bold text-slate-900 leading-tight mb-0">
-                    Additional Sections
-                  </div>
-                  <p style={{ fontSize: "10.5px" }} className="text-slate-500 mb-0 mt-1 leading-normal">
-                    Select the sections to include in the print layout.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                {/* Squads Summary Card */}
-                <button
-                  type="button"
-                  onClick={() => setIncludeSquadsSummary(!includeSquadsSummary)}
-                  className={`w-full px-2.5 py-1.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2 ${
-                    includeSquadsSummary
-                      ? "border-slate-200/90 bg-white hover:bg-slate-50/80 shadow-2xs"
-                      : "border-slate-200 bg-slate-50/50 hover:bg-slate-100/60 opacity-75"
-                  }`}
-                >
-                  <div
-                    className={`w-4 h-4 rounded flex items-center justify-center shrink-0 transition-colors ${
-                      includeSquadsSummary
-                        ? "bg-blue-600 text-white shadow-2xs"
-                        : "border-2 border-slate-300 bg-white"
-                    }`}
-                  >
-                    {includeSquadsSummary && <i className="bi bi-check text-xs font-black"></i>}
-                  </div>
-
-                  <div className="w-6.5 h-6.5 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs shrink-0">
-                    <i className="bi bi-people-fill"></i>
-                  </div>
-
-                  <div className="min-w-0 flex-1 flex flex-col gap-1">
-                    <span className="font-bold block text-xs text-slate-900 leading-normal">
-                      Squads Summary
-                    </span>
-                    <span className="text-[10px] text-slate-500 block leading-normal truncate">
-                      Include supervisor squad roster and capacity summary
-                    </span>
-                  </div>
-                </button>
-
-                {/* Unassigned Staff Card */}
-                <button
-                  type="button"
-                  onClick={() => setIncludeUnassigned(!includeUnassigned)}
-                  className={`w-full px-2.5 py-1.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2 ${
-                    includeUnassigned
-                      ? "border-slate-200/90 bg-white hover:bg-slate-50/80 shadow-2xs"
-                      : "border-slate-200 bg-slate-50/50 hover:bg-slate-100/60 opacity-75"
-                  }`}
-                >
-                  <div
-                    className={`w-4 h-4 rounded flex items-center justify-center shrink-0 transition-colors ${
-                      includeUnassigned
-                        ? "bg-blue-600 text-white shadow-2xs"
-                        : "border-2 border-slate-300 bg-white"
-                    }`}
-                  >
-                    {includeUnassigned && <i className="bi bi-check text-xs font-black"></i>}
-                  </div>
-
-                  <div className="w-6.5 h-6.5 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs shrink-0">
-                    <i className="bi bi-person-fill"></i>
-                  </div>
-
-                  <div className="min-w-0 flex-1 flex flex-col gap-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-bold text-xs text-slate-900 block leading-normal">
-                        Unassigned Staff
-                      </span>
-                      {activeUnassigned.length > 0 && (
-                        <span className="text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-amber-100 text-amber-700">
-                          {activeUnassigned.length}
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-[10px] text-slate-500 block leading-normal truncate">
-                      Include staff who are not assigned to any supervisor
-                    </span>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            {/* Step 3: Page Format */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-6.5 h-6.5 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-indigo-700 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
-                  3
-                </div>
-                <div>
-                  <div style={{ fontSize: "12.6px" }} className="font-bold text-slate-900 leading-tight mb-0">
-                    Page Format
-                  </div>
-                  <p style={{ fontSize: "10.5px" }} className="text-slate-500 mb-0 mt-1 leading-normal">
-                    Configure page layout and appearance.
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <CustomFormatDropdown
-                  label="Page Size"
-                  value={pageSize}
-                  options={PAGE_SIZE_OPTIONS}
-                  onChange={(val) => {
-                    setPageSize(val);
-                    setOpenDropdown(null);
-                  }}
-                  icon="bi bi-file-earmark-text"
-                  isOpen={openDropdown === "pageSize"}
-                  onToggle={() => setOpenDropdown(openDropdown === "pageSize" ? null : "pageSize")}
-                />
-
-                <CustomFormatDropdown
-                  label="Orientation"
-                  value={orientation}
-                  options={ORIENTATION_OPTIONS}
-                  onChange={(val) => {
-                    setOrientation(val);
-                    setOpenDropdown(null);
-                  }}
-                  icon="bi bi-phone"
-                  isOpen={openDropdown === "orientation"}
-                  onToggle={() => setOpenDropdown(openDropdown === "orientation" ? null : "orientation")}
-                />
-
-                <CustomFormatDropdown
-                  label="Margins"
-                  value={margins}
-                  options={MARGINS_OPTIONS}
-                  onChange={(val) => {
-                    setMargins(val);
-                    setOpenDropdown(null);
-                  }}
-                  icon="bi bi-bounding-box"
-                  isOpen={openDropdown === "margins"}
-                  onToggle={() => setOpenDropdown(openDropdown === "margins" ? null : "margins")}
-                />
-
-                <CustomFormatDropdown
-                  label="Header Style"
-                  value={headerStyle}
-                  options={HEADER_STYLE_OPTIONS}
-                  onChange={(val) => {
-                    setHeaderStyle(val);
-                    setOpenDropdown(null);
-                  }}
-                  icon="bi bi-layout-text-window-reverse"
-                  isOpen={openDropdown === "headerStyle"}
-                  onToggle={() => setOpenDropdown(openDropdown === "headerStyle" ? null : "headerStyle")}
-                />
-              </div>
-            </div>
-
-            {/* Tip Callout Banner */}
-            <div className="bg-gradient-to-r from-amber-50/70 via-indigo-50/30 to-purple-50/20 border border-amber-200/70 rounded-xl p-2.5 flex items-start gap-2 shadow-2xs">
-              <div className="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs shrink-0 mt-0.5">
-                <i className="bi bi-lightbulb-fill"></i>
-              </div>
-              <p className="text-[10.5px] text-slate-600 leading-relaxed mb-0">
-                <strong className="text-slate-800">Tip:</strong> In the browser print dialog, choose{" "}
-                <span className="font-semibold text-indigo-700">&quot;Save as PDF&quot;</span> to export.
-              </p>
-            </div>
-          </div>
-
-          {/* Right Column: Document Preview Area */}
-          <div className="flex-1 bg-slate-100 flex flex-col overflow-hidden min-w-0">
-            {/* Top Preview Toolbar: Positioned outside the scroll container with solid background so scrolled content never bleeds behind it */}
-            <div className="shrink-0 z-20 w-full flex justify-center px-2.5 sm:px-3.5 py-1.5 bg-slate-100 border-b border-slate-200/80 no-print">
-              <div className={`w-full ${isFitWidth ? "max-w-none" : orientation === "landscape" ? "max-w-5xl" : "max-w-3xl"} bg-white rounded-2xl border border-slate-200/90 shadow-2xs px-3.5 py-2 flex items-center justify-between gap-3`}>
-                {/* Left: Page Navigation with Arrows and Current Tab Number Cube */}
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage <= 1}
-                    className="w-7 h-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-35 disabled:hover:bg-white text-slate-600 flex items-center justify-center transition-all cursor-pointer text-xs"
-                    title="Previous Page"
-                    aria-label="Previous Page"
-                  >
-                    <i className="bi bi-arrow-left"></i>
-                  </button>
-                  <div className="w-7 h-7 rounded-lg bg-slate-50 border border-slate-200/80 text-xs font-bold text-slate-700 font-mono flex items-center justify-center shadow-2xs">
-                    {currentPage}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setCurrentPage((p) => Math.min(1, p + 1))}
-                    disabled={currentPage >= 1}
-                    className="w-7 h-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-35 disabled:hover:bg-white text-slate-600 flex items-center justify-center transition-all cursor-pointer text-xs"
-                    title="Next Page"
-                    aria-label="Next Page"
-                  >
-                    <i className="bi bi-arrow-right"></i>
-                  </button>
-                </div>
-
-                {/* Center: Zoom Controls */}
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => setZoom((z) => Math.max(50, z - 10))}
-                    className="w-7 h-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center transition-all cursor-pointer text-xs font-bold"
-                    title="Zoom Out"
-                    aria-label="Zoom Out"
-                  >
-                    <i className="bi bi-dash"></i>
-                  </button>
-                  <div className="px-3 py-0.5 rounded-lg bg-slate-50 border border-slate-200/80 text-xs font-bold text-slate-700 font-mono min-w-[52px] text-center">
-                    {zoom}%
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setZoom((z) => Math.min(150, z + 10))}
-                    className="w-7 h-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center transition-all cursor-pointer text-xs font-bold"
-                    title="Zoom In"
-                    aria-label="Zoom In"
-                  >
-                    <i className="bi bi-plus"></i>
-                  </button>
-                </div>
-
-                {/* Right: Quick Action Tools */}
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => {}}
-                    className="w-7.5 h-7.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-all cursor-pointer"
-                    title="Search Dossier"
-                    aria-label="Search Dossier"
-                  >
-                    <i className="bi bi-search text-xs"></i>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsFitWidth(!isFitWidth)}
-                    className={`w-7.5 h-7.5 rounded-lg border text-xs flex items-center justify-center transition-all cursor-pointer ${
-                      isFitWidth
-                        ? "border-indigo-400 bg-indigo-50 text-indigo-700"
-                        : "border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800"
-                    }`}
-                    title={isFitWidth ? "Original Width" : "Fit to Width"}
-                    aria-label="Fit to Width"
-                  >
-                    <i className="bi bi-arrows-fullscreen text-xs"></i>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handlePrint}
-                    className="w-7.5 h-7.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-all cursor-pointer"
-                    title="Download / Print PDF"
-                    aria-label="Download / Print PDF"
-                  >
-                    <i className="bi bi-download text-xs"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Scrollable Document Canvas */}
-            <div className="flex-1 overflow-y-auto [scrollbar-width:thin] px-2.5 sm:px-3.5 pt-1.5 pb-6">
-              <div className="flex flex-col items-center w-full min-h-full">
-                {/* Printable Document Sheet */}
-                <div
-                  id="printable-hierarchy-dossier"
-                  style={{
-                    transform: !isFitWidth ? `scale(${zoom / 100})` : undefined,
-                    transformOrigin: "top center",
-                    transition: "all 0.2s ease-out",
-                    maxWidth: dossierMaxWidth,
-                    minHeight: pageMinHeight,
-                  }}
-                  className={`bg-white rounded-xl border border-slate-300 shadow-md transition-all space-y-4 text-slate-900 mb-6 w-full ${
-                    margins === "narrow"
-                      ? "p-2.5 sm:p-3.5"
-                      : margins === "wide"
-                      ? "p-6 sm:p-8"
-                      : "p-4 sm:p-5.5"
-                  }`}
-                >
-                      {/* Document Header (Responding dynamically to Header Style: default | minimal | executive) */}
-                      {headerStyle === "executive" ? (
-                        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-3.5 rounded-xl shadow-sm border border-slate-800 flex items-start justify-between gap-4">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <div className="w-5.5 h-5.5 rounded-md bg-amber-400 text-slate-950 flex items-center justify-center font-black text-[11px] shadow-sm shrink-0">
-                                <i className="bi bi-shield-check"></i>
-                              </div>
-                              <div
-                                style={{ fontSize: "14px", letterSpacing: "0.06em" }}
-                                className="font-black text-amber-300 uppercase whitespace-nowrap"
-                              >
-                                EMS Enterprise Workforce
-                              </div>
-                              <span className="text-[9px] px-1.5 py-0.2 rounded font-bold bg-amber-400/20 text-amber-300 border border-amber-400/40 uppercase tracking-widest">
-                                Executive Dossier
-                              </span>
-                            </div>
-                            <div
-                              style={{ fontSize: "12.6px" }}
-                              className="font-bold text-white whitespace-nowrap"
-                            >
-                              Workforce Team Hierarchy & Reporting Lines Dossier
-                            </div>
-                            <div
-                              style={{ fontSize: "10px" }}
-                              className="text-slate-300 mb-0 mt-0.5 whitespace-nowrap"
-                            >
-                              Official Organizational Chain of Command Audit Record
-                            </div>
-                          </div>
-
-                          <div
-                            style={{ fontSize: "10px" }}
-                            className="text-right text-slate-300 space-y-0.5 shrink-0"
-                          >
-                            <div
-                              style={{ fontSize: "10.5px" }}
-                              className="font-bold text-amber-300 tracking-wider uppercase mb-0.5"
-                            >
-                              CONFIDENTIAL BRIEFING
-                            </div>
-                            <p className="mb-0">Date: <strong className="text-white">{currentDate}</strong></p>
-                            <p className="mb-0">Time: <span className="text-slate-200">{currentTime}</span></p>
-                            <p className="mb-0">Scope: <strong className="capitalize text-white">{scope === "filtered" ? "Filtered View" : "All Workforce"}</strong></p>
-                            <p className="mb-0">Format: <strong className="uppercase text-amber-300">{pageSize} • {orientation}</strong></p>
-                          </div>
-                        </div>
-                      ) : headerStyle === "minimal" ? (
-                        <div className="border-b border-slate-200 pb-2.5 flex items-start justify-between gap-4">
-                          <div>
-                            <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className="text-blue-600 font-bold text-xs uppercase tracking-wider">
-                                EMS Workforce
-                              </span>
-                              <span className="text-slate-300">•</span>
-                              <span className="text-xs font-semibold text-slate-700">Hierarchy Dossier</span>
-                            </div>
-                            <div style={{ fontSize: "10px" }} className="text-slate-400 mb-0">
-                              Official reporting lines audit record
-                            </div>
-                          </div>
-
-                          <div
-                            style={{ fontSize: "9.5px" }}
-                            className="text-right text-slate-500 flex items-center gap-3 shrink-0"
-                          >
-                            <div>Date: <strong className="text-slate-700">{currentDate}</strong></div>
-                            <div>Scope: <strong className="capitalize text-slate-700">{scope === "filtered" ? "Filtered" : "All"}</strong></div>
-                            <div>Format: <strong className="uppercase text-slate-700">{pageSize}</strong></div>
-                          </div>
-                        </div>
-                      ) : (
-                        /* Corporate Default Header */
-                        <div className="border-b-2 border-slate-900 pb-2.5 sm:pb-3 flex items-start justify-between gap-4">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <div className="w-5.5 h-5.5 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-[10.5px] shadow-2xs shrink-0">
-                                <i className="bi bi-bar-chart-fill"></i>
-                              </div>
-                              <div
-                                style={{ fontSize: "13.75px", lineHeight: "1.2", letterSpacing: "0.05em" }}
-                                className="font-bold text-slate-900 uppercase whitespace-nowrap"
-                              >
-                                EMS Enterprise Workforce
-                              </div>
-                            </div>
-                            <div
-                              style={{ fontSize: "12.6px", lineHeight: "1.3" }}
-                              className="font-semibold text-slate-800 whitespace-nowrap"
-                            >
-                              Workforce Team Hierarchy & Reporting Lines Dossier
-                            </div>
-                            <div
-                              style={{ fontSize: "10px", lineHeight: "1.2" }}
-                              className="text-slate-500 mb-0 mt-0.5 whitespace-nowrap"
-                            >
-                              Official Organizational Chain of Command Audit Record
-                            </div>
-                          </div>
-
-                          <div
-                            style={{ fontSize: "10px", lineHeight: "1.3" }}
-                            className="text-right text-slate-600 space-y-0.5 shrink-0"
-                          >
-                            <div
-                              style={{ fontSize: "10.5px" }}
-                              className="font-bold text-slate-900 tracking-wider uppercase mb-0.5"
-                            >
-                              CONFIDENTIAL REPORT
-                            </div>
-                            <p className="mb-0">Date: <strong className="text-slate-800">{currentDate}</strong></p>
-                            <p className="mb-0">Time: <span className="text-slate-700">{currentTime}</span></p>
-                            <p className="mb-0">Scope: <strong className="capitalize text-slate-800">{scope === "filtered" ? "Filtered View" : "All Workforce"}</strong></p>
-                            <p className="mb-0">Page Size: <strong className="uppercase text-slate-800">{pageSize} ({pageSize === "a4" ? "210 × 297mm" : pageSize === "letter" ? "8.5 × 11in" : "8.5 × 14in"})</strong></p>
-                            <p className="mb-0">Orientation: <strong className="capitalize text-slate-800">{orientation}</strong></p>
-                            <p className="mb-0">Margins: <strong className="capitalize text-slate-800">{margins} ({margins === "narrow" ? "10mm" : margins === "wide" ? "25mm" : "15mm"})</strong></p>
-                            {activeFiltersDesc && (
-                              <p style={{ fontSize: "9.5px" }} className="text-indigo-700 max-w-[200px] truncate mb-0">
-                                {activeFiltersDesc}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Executive KPI Summary Bar */}
-                      <div className="grid grid-cols-4 gap-2 text-center py-2 px-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
-                        <div className="border-r border-slate-100 pr-2">
-                          <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
-                            Mapped Personnel
-                          </span>
-                          <span className="text-sm sm:text-base font-bold text-blue-600 block mt-0.5">
-                            {activeMappings.length}
-                          </span>
-                        </div>
-                        <div className="border-r border-slate-100 pr-2">
-                          <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
-                            Team Lead Squads
-                          </span>
-                          <span className="text-sm sm:text-base font-bold text-purple-600 block mt-0.5">
-                            {squadsList.length}
-                          </span>
-                        </div>
-                        <div className="border-r border-slate-100 pr-2">
-                          <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
-                            Dept Managers
-                          </span>
-                          <span className="text-sm sm:text-base font-bold text-emerald-600 block mt-0.5">
-                            {uniqueManagersCount}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-[8.5px] sm:text-[9px] text-slate-400 uppercase font-semibold tracking-wider block">
-                            Unallocated Staff
-                          </span>
-                          <span className="text-sm sm:text-base font-bold text-amber-600 block mt-0.5">
-                            {activeUnassigned.length}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Section 1: Detailed Workforce Reporting Matrix */}
+                    <div className="flex items-start justify-between gap-2 mb-1.5 pb-1 border-b border-slate-200">
                       <div>
-                        <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-200">
-                          <div
-                            style={{ fontSize: "11.6px", lineHeight: "1.2", letterSpacing: "0.04em" }}
-                            className="font-bold text-slate-900 uppercase flex items-center gap-1.5 whitespace-nowrap"
-                          >
-                            <i className="bi bi-diagram-3 text-blue-600" style={{ fontSize: "12.6px" }}></i>
-                            <span>1. Detailed Workforce Reporting Relationships ({activeMappings.length})</span>
-                          </div>
-                          <span
-                            style={{ fontSize: "9.5px" }}
-                            className="text-slate-400 font-normal whitespace-nowrap shrink-0"
-                          >
-                            Ordered by Department & Supervisor
+                        <div className="font-bold text-xs text-slate-900 leading-tight">
+                          {sq.supervisorName}
+                        </div>
+                        <div className="text-[9.5px] text-slate-500 font-medium mt-0.5">
+                          {sq.departmentName} • Reports to:{" "}
+                          <strong className="text-slate-700">{sq.managerName}</strong>
+                        </div>
+                      </div>
+                      <span className="px-1.5 py-0.5 rounded text-[9.5px] font-bold bg-purple-100 text-purple-800 shrink-0">
+                        {sq.members.length} member{sq.members.length !== 1 ? "s" : ""}
+                      </span>
+                    </div>
+
+                    <ul className="space-y-1 mb-0 pl-0 list-none">
+                      {sq.members.map((mem) => (
+                        <li
+                          key={`squad-member-${mem.id || mem.employee_id}`}
+                          className="flex items-center justify-between text-[10.5px] py-0.5"
+                        >
+                          <span className="font-medium text-slate-800 truncate pr-2">
+                            • {mem.employee_name}
                           </span>
-                        </div>
-
-                        {activeMappings.length === 0 ? (
-                          <p className="text-center py-4 text-xs text-slate-400 italic">
-                            No reporting relationships match the selected scope.
-                          </p>
-                        ) : (
-                          <div className="overflow-x-auto">
-                            <table className="w-full text-left text-[11px] border-collapse border border-slate-200">
-                              <thead>
-                                <tr className="bg-slate-50 text-slate-600 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200">
-                                  <th className="px-2.5 py-1.5 border-r border-slate-200">Employee ID & Name</th>
-                                  <th className="px-2.5 py-1.5 border-r border-slate-200">Department</th>
-                                  <th className="px-2.5 py-1.5 border-r border-slate-200">Direct Team Lead (Supervisor)</th>
-                                  <th className="px-2.5 py-1.5 border-r border-slate-200">Department Manager</th>
-                                  <th className="px-2.5 py-1.5 text-center">Status</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-slate-200">
-                                {activeMappings.map((item, idx) => (
-                                  <tr
-                                    key={`print-row-${item.id || idx}`}
-                                    className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"}
-                                  >
-                                    <td className="px-2.5 py-1.5 border-r border-slate-200">
-                                      <span className="font-bold text-slate-900 block leading-tight">
-                                        {item.employee_name}
-                                      </span>
-                                      <span className="text-[9.5px] text-slate-400 block font-mono">
-                                        EMP-{String(item.employee_id).padStart(4, "0")} • {item.employee_email}
-                                      </span>
-                                    </td>
-                                    <td className="px-2.5 py-1.5 border-r border-slate-200 font-medium text-slate-800">
-                                      {item.department_name || "General"}
-                                    </td>
-                                    <td className="px-2.5 py-1.5 border-r border-slate-200">
-                                      <span className="font-semibold text-purple-700 block leading-tight">
-                                        {item.supervisor_name}
-                                      </span>
-                                      <span className="text-[9.5px] text-slate-400 font-mono">
-                                        SUP-{String(item.supervisor_id).padStart(4, "0")}
-                                      </span>
-                                    </td>
-                                    <td className="px-2.5 py-1.5 border-r border-slate-200">
-                                      <span className="font-semibold text-slate-800 block leading-tight">
-                                        {item.manager_name}
-                                      </span>
-                                      <span className="text-[9.5px] text-slate-400 font-mono">
-                                        MGR-{String(item.manager_id).padStart(4, "0")}
-                                      </span>
-                                    </td>
-                                    <td className="px-2.5 py-1.5 text-center">
-                                      <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-                                        Active
-                                      </span>
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Section 2: Supervisor Squads & Capacity Overview */}
-                      {includeSquadsSummary && squadsList.length > 0 && (
-                        <div className="pt-2">
-                          <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-200">
-                            <div
-                              style={{ fontSize: "11.6px", lineHeight: "1.2", letterSpacing: "0.04em" }}
-                              className="font-bold text-slate-900 uppercase flex items-center gap-1.5 whitespace-nowrap"
-                            >
-                              <i className="bi bi-people-fill text-purple-600" style={{ fontSize: "12.6px" }}></i>
-                              <span>2. Supervisor Squad Roster & Capacity Summary ({squadsList.length} Squads)</span>
-                            </div>
-                          </div>
-
-                          <div className="overflow-x-auto">
-                            <table className="w-full text-left text-[11px] border-collapse border border-slate-200">
-                              <thead>
-                                <tr className="bg-slate-50 text-slate-600 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200">
-                                  <th className="px-2.5 py-1.5 border-r border-slate-200">Team Lead (Supervisor)</th>
-                                  <th className="px-2.5 py-1.5 border-r border-slate-200">Division / Manager</th>
-                                  <th className="px-2.5 py-1.5 border-r border-slate-200 text-center">Direct Reports</th>
-                                  <th className="px-2.5 py-1.5 border-r border-slate-200 text-center">Capacity Load</th>
-                                  <th className="px-2.5 py-1.5">Assigned Staff Members</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-slate-200">
-                                {squadsList.map((sq, idx) => {
-                                  const count = sq.members.length;
-                                  const cap = Math.min(100, Math.round((count / 8) * 100));
-                                  return (
-                                    <tr
-                                      key={`squad-print-${sq.supervisorId}`}
-                                      className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"}
-                                    >
-                                      <td className="px-2.5 py-1.5 border-r border-slate-200 font-bold text-slate-900">
-                                        {sq.supervisorName}
-                                        <span className="block text-[9.5px] font-normal text-slate-400 font-mono">
-                                          SUP-{String(sq.supervisorId).padStart(4, "0")}
-                                        </span>
-                                      </td>
-                                      <td className="px-2.5 py-1.5 border-r border-slate-200">
-                                        <span className="font-semibold text-slate-800">{sq.departmentName}</span>
-                                        <span className="block text-[9.5px] text-slate-400">Mgr: {sq.managerName}</span>
-                                      </td>
-                                      <td className="px-2.5 py-1.5 border-r border-slate-200 text-center font-bold text-slate-900">
-                                        {count} / 8
-                                      </td>
-                                      <td className="px-2.5 py-1.5 border-r border-slate-200 text-center">
-                                        <span
-                                          className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                                            count >= 8
-                                              ? "bg-amber-50 text-amber-700 border border-amber-200"
-                                              : count >= 4
-                                              ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
-                                              : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                          }`}
-                                        >
-                                          {cap}% • {count >= 8 ? "High Span" : count >= 4 ? "Optimal" : "Light"}
-                                        </span>
-                                      </td>
-                                      <td className="px-2.5 py-1.5 text-[10px] text-slate-700">
-                                        {sq.members.map((m) => m.employee_name).join(", ")}
-                                      </td>
-                                    </tr>
-                                  );
-                                })}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Section 3: Unassigned / Orphaned Personnel */}
-                      {includeUnassigned && activeUnassigned.length > 0 && (
-                        <div className="pt-2">
-                          <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-200">
-                            <div
-                              style={{ fontSize: "11.6px", lineHeight: "1.2", letterSpacing: "0.04em" }}
-                              className="font-bold text-amber-900 uppercase flex items-center gap-1.5 whitespace-nowrap"
-                            >
-                              <i className="bi bi-exclamation-triangle-fill text-amber-600" style={{ fontSize: "12.6px" }}></i>
-                              <span>3. Unallocated Personnel Awaiting Squad Assignment ({activeUnassigned.length})</span>
-                            </div>
-                          </div>
-
-                          <div className="overflow-x-auto">
-                            <table className="w-full text-left text-[11px] border-collapse border border-amber-200 bg-amber-50/20">
-                              <thead>
-                                <tr className="bg-amber-100/70 text-amber-900 text-[10px] font-bold uppercase tracking-wider border-b border-amber-200">
-                                  <th className="px-2.5 py-1.5 border-r border-amber-200">Employee ID & Name</th>
-                                  <th className="px-2.5 py-1.5 border-r border-amber-200">Email Address</th>
-                                  <th className="px-2.5 py-1.5 border-r border-amber-200">Department</th>
-                                  <th className="px-2.5 py-1.5">Recommended Next Action</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-amber-200">
-                                {activeUnassigned.map((staff) => (
-                                  <tr key={`unassigned-print-${staff.id}`}>
-                                    <td className="px-2.5 py-1.5 border-r border-amber-200 font-bold text-slate-900">
-                                      {staff.name}
-                                      <span className="block text-[9.5px] font-normal text-slate-500">
-                                        EMP-{String(staff.id).padStart(4, "0")}
-                                      </span>
-                                    </td>
-                                    <td className="px-2.5 py-1.5 border-r border-amber-200 text-slate-700">
-                                      {staff.email}
-                                    </td>
-                                    <td className="px-2.5 py-1.5 border-r border-amber-200 font-medium text-slate-800">
-                                      {staff.department_name || staff.department || "Unallocated"}
-                                    </td>
-                                    <td className="px-2.5 py-1.5 text-amber-800 font-semibold text-[10px]">
-                                      Assign to active Team Lead squad via Onboarding Tray
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Corporate Audit Footer */}
-                      <div className="border-t border-slate-300 pt-4 mt-6 flex items-center justify-between text-[9px] text-slate-400">
-                        <p className="mb-0">
-                          EMS HR Governance • Workforce Hierarchy Management Module • Section 4.11 Compliance
-                        </p>
-                        <p className="mb-0 font-mono">
-                          Generated {currentDate} • Confidential Internal Document
-                        </p>
-                      </div>
-                </div>
+                          <span className="text-[9px] text-slate-400 font-mono shrink-0">
+                            EMP-{String(mem.employee_id).padStart(4, "0")}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </div>
             </div>
+          )}
+
+          {/* Section 3: Unassigned Personnel */}
+          {activeSections.unassigned && activeUnassigned.length > 0 && (
+            <div className="pt-2">
+              <div className="flex items-center justify-between mb-2 pb-1 border-b border-amber-300">
+                <div
+                  style={{ fontSize: "11.6px", lineHeight: "1.2", letterSpacing: "0.04em" }}
+                  className="font-bold text-amber-900 uppercase flex items-center gap-1.5 whitespace-nowrap"
+                >
+                  <i className="bi bi-exclamation-triangle-fill text-amber-600" style={{ fontSize: "12.6px" }}></i>
+                  <span>3. Unallocated Personnel Awaiting Squad Assignment ({activeUnassigned.length})</span>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-[11px] border-collapse border border-amber-200 bg-amber-50/20">
+                  <thead>
+                    <tr className="bg-amber-100/70 text-amber-900 text-[10px] font-bold uppercase tracking-wider border-b border-amber-200">
+                      <th className="px-2.5 py-1.5 border-r border-amber-200">Employee ID & Name</th>
+                      <th className="px-2.5 py-1.5 border-r border-amber-200">Email Address</th>
+                      <th className="px-2.5 py-1.5 border-r border-amber-200">Department</th>
+                      <th className="px-2.5 py-1.5">Recommended Next Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-amber-200">
+                    {activeUnassigned.map((staff) => (
+                      <tr key={`unassigned-print-${staff.id}`}>
+                        <td className="px-2.5 py-1.5 border-r border-amber-200 font-bold text-slate-900">
+                          {staff.name}
+                          <span className="block text-[9.5px] font-normal text-slate-500">
+                            EMP-{String(staff.id).padStart(4, "0")}
+                          </span>
+                        </td>
+                        <td className="px-2.5 py-1.5 border-r border-amber-200 text-slate-700">
+                          {staff.email}
+                        </td>
+                        <td className="px-2.5 py-1.5 border-r border-amber-200 font-medium text-slate-800">
+                          {staff.department_name || staff.department || "Unallocated"}
+                        </td>
+                        <td className="px-2.5 py-1.5 text-amber-800 font-semibold text-[10px]">
+                          Assign to active Team Lead squad via Onboarding Tray
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Corporate Audit Footer */}
+          <div className="border-t border-slate-300 pt-4 mt-6 flex items-center justify-between text-[9px] text-slate-400">
+            <p className="mb-0">
+              EMS HR Governance • Workforce Hierarchy Management Module • Section 4.11 Compliance
+            </p>
+            <p className="mb-0 font-mono">
+              Generated {currentDate} • Confidential Internal Document
+            </p>
           </div>
         </div>
-
-        {/* Modal Footer (No Print) */}
-        <div className="pl-6 pr-5 sm:pr-6 py-3 sm:py-3.5 bg-white border-t border-slate-100 flex items-center justify-between gap-3 shrink-0 no-print">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 shadow-2xs transition-all cursor-pointer"
-          >
-            Close Preview
-          </button>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handlePrint}
-              className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 shadow-md shadow-indigo-600/25 transition-all cursor-pointer flex items-center gap-2"
-            >
-              <i className="bi bi-printer-fill text-sm"></i>
-              <span>Print Dossier / Export to PDF</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Dynamic Print Stylesheet responding to Step 3 controls */}
-        <style>{`
-          #printable-hierarchy-dossier h1,
-          #printable-hierarchy-dossier h2,
-          #printable-hierarchy-dossier h3,
-          #printable-hierarchy-dossier h4,
-          #printable-hierarchy-dossier p {
-            margin-top: 0 !important;
-            margin-bottom: 0 !important;
-          }
-          @media print {
-            body * {
-              visibility: hidden;
-            }
-            #printable-hierarchy-dossier, #printable-hierarchy-dossier * {
-              visibility: visible;
-            }
-            #printable-hierarchy-dossier {
-              position: absolute;
-              left: 0;
-              top: 0;
-              width: 100% !important;
-              max-width: 100% !important;
-              margin: 0 !important;
-              padding: ${margins === "narrow" ? "4mm" : margins === "wide" ? "14mm" : "8mm"} !important;
-              box-shadow: none !important;
-              border: none !important;
-              transform: none !important;
-            }
-            .no-print {
-              display: none !important;
-            }
-            @page {
-              size: ${pageSize === 'a4' ? 'A4' : pageSize === 'letter' ? 'letter' : 'legal'} ${orientation};
-              margin: ${margins === "narrow" ? "10mm" : margins === "wide" ? "25mm" : "15mm"};
-            }
-          }
-        `}</style>
-      </div>
-    </div>,
-    document.body
+      )}
+    />
   );
 };
 
 export default HierarchyPrintModal;
-
