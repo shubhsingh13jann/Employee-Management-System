@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import api from "../../../api/axios";
-import "./printDossier.css";
+import {
+  UniversalPrintStudio,
+  PrintScopeOption,
+  PrintSectionToggle,
+  PrintDossierHeader,
+  PrintDossierFooter,
+} from "../../custom/print";
 
 export interface PrintDossierProps {
   project: any;
@@ -26,6 +32,15 @@ export const ProjectPrintDossier: React.FC<PrintDossierProps> = ({
   autoPrintOnOpen = false,
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
+  const [scope, setScope] = useState<string>("all");
+  const [activeSections, setActiveSections] = useState<Record<string, boolean>>({
+    financials: true,
+    milestones: true,
+    squad: true,
+    tasks: true,
+    audit: true,
+  });
+
   const [dossierData, setDossierData] = useState<{
     project: any;
     milestones: any[];
@@ -103,30 +118,26 @@ export const ProjectPrintDossier: React.FC<PrintDossierProps> = ({
     }
   }, [isOpen, autoPrintOnOpen, loading]);
 
-  // Escape key to close and Ctrl+P / Cmd+P to invoke print
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
-        onClose();
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p" && isOpen) {
-        e.preventDefault();
-        window.print();
-      }
-    };
-    if (isOpen) {
-      window.addEventListener("keydown", handleKeyDown);
-      return () => window.removeEventListener("keydown", handleKeyDown);
-    }
-  }, [isOpen, onClose]);
-
   if (!isOpen) return null;
 
   const currentProject = dossierData.project || project || {};
   const currentTelemetry = dossierData.telemetry;
-  const currentMilestones = dossierData.milestones || [];
-  const currentSquad = dossierData.squad || [];
-  const currentTasks = dossierData.tasks || [];
-  const currentAuditLogs = dossierData.audit_logs || [];
+  const rawMilestones = dossierData.milestones || [];
+  const rawSquad = dossierData.squad || [];
+  const rawTasks = dossierData.tasks || [];
+  const rawAuditLogs = dossierData.audit_logs || [];
+
+  // Filter tasks and milestones based on selected scope
+  const currentTasks = scope === "active"
+    ? rawTasks.filter((t: any) => t.status !== "completed")
+    : rawTasks;
+
+  const currentMilestones = scope === "active"
+    ? rawMilestones.filter((m: any) => m.status !== "completed")
+    : rawMilestones;
+
+  const currentSquad = rawSquad;
+  const currentAuditLogs = rawAuditLogs;
 
   // Formatter helpers
   const formatCurrency = (val: number | string | undefined | null) => {
@@ -174,242 +185,252 @@ export const ProjectPrintDossier: React.FC<PrintDossierProps> = ({
   const isOverBudget = expenses > budget && budget > 0;
 
   const prjCode = `PRJ-${String(currentProject.id || "0").padStart(4, "0")}`;
-  const printDocDate = new Date().toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
+
+  const scopes: PrintScopeOption[] = [
+    {
+      id: "all",
+      label: "Full Dossier",
+      icon: "bi bi-journal-text",
+      count: rawMilestones.length + rawTasks.length,
+    },
+    {
+      id: "active",
+      label: "Active Focus",
+      icon: "bi bi-funnel",
+      count: rawTasks.filter((t: any) => t.status !== "completed").length,
+    },
+  ];
+
+  const sections: PrintSectionToggle[] = [
+    {
+      id: "financials",
+      label: "Financial Telemetry & Burn",
+      description: "Allocated budget, expenditures, burn rate, and capital runway",
+      icon: "bi bi-cash-stack",
+      defaultChecked: true,
+    },
+    {
+      id: "milestones",
+      label: "Phased Execution Milestones",
+      description: "Deliverables roadmap and phase progress percentages",
+      icon: "bi bi-flag-fill",
+      count: rawMilestones.length,
+      defaultChecked: true,
+    },
+    {
+      id: "squad",
+      label: "Squad Allocation Roster",
+      description: "Assigned personnel, squad roles, and workload",
+      icon: "bi bi-people-fill",
+      count: rawSquad.length,
+      defaultChecked: true,
+    },
+    {
+      id: "tasks",
+      label: "Work Breakdown Tasks",
+      description: "Action items with assignees, priorities, and deadlines",
+      icon: "bi bi-list-check",
+      count: rawTasks.length,
+      defaultChecked: true,
+    },
+    {
+      id: "audit",
+      label: "Governance Audit Ledger",
+      description: "Chronological ledger of project modifications and diffs",
+      icon: "bi bi-clock-history",
+      count: rawAuditLogs.length,
+      defaultChecked: true,
+    },
+  ];
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm p-3 sm:p-6 flex flex-col items-center">
-      {/* Top Floating Action & Preview Toolbar (Hidden in Print) */}
-      <div className="preview-toolbar no-print w-full max-w-[210mm] mb-4 bg-slate-900 border border-indigo-500/40 rounded-xl p-3 sm:p-4 text-white shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-indigo-600/30 border border-indigo-400/40 flex items-center justify-center text-indigo-300 text-lg">
-            🖨️
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30">
-                {prjCode}
+    <UniversalPrintStudio
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Executive Initiative Dossier"
+      subtitle="Print-formatted briefing view • Optimized for A4 paper & PDF export"
+      icon="bi bi-printer-fill"
+      documentId={prjCode}
+      scopes={scopes}
+      activeScope={scope}
+      onScopeChange={(s) => setScope(s)}
+      sections={sections}
+      activeSections={activeSections}
+      onToggleSection={(secId, enabled) =>
+        setActiveSections((prev) => ({ ...prev, [secId]: enabled }))
+      }
+      defaultPageSize="a4"
+      defaultOrientation="portrait"
+      defaultMargins="standard"
+      defaultHeaderStyle="default"
+      loading={loading}
+      loadingMessage="Assembling executive briefing telemetry..."
+      renderContent={({
+        pageSize,
+        orientation,
+        margins,
+        headerStyle,
+        currentDate,
+        currentTime,
+      }) => (
+        <div className="space-y-6">
+          {/* 1. Header (Corporate / Minimal / Executive) */}
+          <PrintDossierHeader
+            headerStyle={headerStyle}
+            systemTitle="Enterprise Management System"
+            documentTitle="Strategic Initiative Executive Dossier & Briefing Memorandum"
+            documentSubtitle={`${currentProject.department_name || "Enterprise"} • Priority: ${currentProject.priority || "Medium"}`}
+            documentId={prjCode}
+            classification="CONFIDENTIAL BRIEFING"
+            scopeDesc={scope === "active" ? "Active Focus" : "Full Initiative Dossier"}
+            pageSize={pageSize.toUpperCase()}
+            orientation={orientation.charAt(0).toUpperCase() + orientation.slice(1)}
+            currentDate={currentDate}
+            currentTime={currentTime}
+            metadataItems={[
+              { label: "Status", value: currentProject.status || "Active", isHighlight: true },
+              { label: "Health", value: currentProject.health ? currentProject.health.replace("_", " ") : "Healthy" },
+            ]}
+          />
+
+          {/* 2. INITIATIVE TITLE & STRATEGIC OBJECTIVE */}
+          <div className="print-avoid-break">
+            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+              <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-800 border border-slate-300 uppercase tracking-wide">
+                🏢 {currentProject.department_name || "General Department"}
               </span>
-              <h2 className="text-sm sm:text-base font-bold text-white mb-0">
-                Executive Initiative Dossier
-              </h2>
+              <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 uppercase tracking-wide">
+                Priority: {currentProject.priority || "Medium"}
+              </span>
+              <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wide">
+                Status: {currentProject.status || "Active"}
+              </span>
+              {currentProject.health && (
+                <span
+                  className={`px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wide border ${
+                    currentProject.health === "healthy"
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                      : currentProject.health === "at_risk"
+                      ? "bg-amber-50 text-amber-800 border-amber-200"
+                      : "bg-rose-50 text-rose-800 border-rose-200"
+                  }`}
+                >
+                  Health: {currentProject.health.replace("_", " ")}
+                </span>
+              )}
             </div>
-            <p className="text-xs text-slate-400 mb-0">
-              Print-formatted briefing view • Optimized for A4 paper & PDF export
+
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-2 mb-2 leading-tight">
+              {currentProject.title || "Strategic Initiative"}
+            </h2>
+
+            <p className="text-xs text-slate-700 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-200 mb-0">
+              {currentProject.description || "No strategic scope narrative specified."}
             </p>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-          <button
-            type="button"
-            onClick={() => window.print()}
-            className="flex-1 sm:flex-initial px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-bold border border-indigo-400/30 shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <i className="bi bi-printer-fill text-sm"></i>
-            <span>Print / Save as PDF</span>
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-3.5 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/15 transition-all cursor-pointer flex items-center gap-1.5"
-          >
-            <i className="bi bi-x-lg text-xs"></i>
-            <span>Close</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Helpful Print Tip Card (Hidden in Print) */}
-      <div className="no-print w-full max-w-[210mm] mb-4 p-2.5 rounded-lg bg-indigo-950/60 border border-indigo-800/60 text-indigo-200 text-xs flex items-center gap-2">
-        <i className="bi bi-info-circle-fill text-indigo-400 text-sm shrink-0"></i>
-        <span>
-          <strong>PDF Export Tip:</strong> In your browser print dialog, select Destination: <em>Save as PDF</em>, Layout: <em>Portrait</em>, and enable <em>Background graphics</em> for crisp executive styling.
-        </span>
-      </div>
-
-      {/* Printable Paper Canvas (The actual A4 page container) */}
-      <div className="printable-dossier-root a4-paper-preview rounded-xl p-8 sm:p-10 font-sans text-slate-900 leading-normal">
-        {loading ? (
-          <div className="py-24 text-center">
-            <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-            <p className="text-slate-500 font-medium text-sm">
-              Assembling executive briefing telemetry...
-            </p>
-          </div>
-        ) : (
-          <>
-            {/* 1. CORPORATE LETTERHEAD & MEMORANDUM CLASSIFICATION */}
-            <div className="border-b-2 border-slate-900 pb-4 mb-6">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-slate-900 text-white font-black text-xl flex items-center justify-center tracking-wider shadow-sm">
-                    EMS
-                  </div>
-                  <div>
-                    <h1 className="text-base font-black tracking-wider uppercase text-slate-900 m-0 leading-tight">
-                      Enterprise Management System
-                    </h1>
-                    <div className="text-[11px] font-bold text-slate-600 tracking-wide uppercase mt-0.5">
-                      Strategic Initiative Executive Dossier & Briefing Memorandum
-                    </div>
-                  </div>
+          {/* 3. EXECUTIVE BLOCKER ALERT (IF ACTIVE) */}
+          {currentProject.is_blocked ? (
+            <div className="p-4 rounded-xl bg-rose-50 border-2 border-rose-500 text-rose-950 print-avoid-break">
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
+                  <h3 className="text-xs font-black uppercase tracking-wider text-rose-900 m-0">
+                    Active Executive Blocker Escalation
+                  </h3>
                 </div>
-
-                <div className="text-right shrink-0">
-                  <div className="inline-block px-3 py-1 bg-slate-900 text-white font-mono font-bold text-xs rounded tracking-widest uppercase">
-                    {prjCode}
-                  </div>
-                  <div className="text-[10px] font-bold text-rose-700 tracking-wider uppercase mt-1">
-                    CLASSIFICATION: STRICTLY CONFIDENTIAL
-                  </div>
-                  <div className="text-[10px] text-slate-500 mt-0.5">
-                    Date: {printDocDate}
-                  </div>
-                </div>
+                <span className="px-2 py-0.5 rounded bg-rose-600 text-white text-[10px] font-bold uppercase tracking-wider">
+                  {currentProject.blocker_status
+                    ? currentProject.blocker_status.replace("_", " ")
+                    : "Critical Blocker"}
+                </span>
               </div>
-            </div>
-
-            {/* 2. INITIATIVE TITLE & STRATEGIC OBJECTIVE */}
-            <div className="mb-6 print-avoid-break">
-              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-800 border border-slate-300 uppercase tracking-wide">
-                  🏢 {currentProject.department_name || "General Department"}
+              <p className="text-xs text-rose-900 font-medium mb-2 leading-relaxed">
+                {currentProject.blocker_notes || "Executive intervention required to clear milestone path."}
+              </p>
+              <div className="flex items-center gap-4 text-[10px] text-rose-700 font-semibold border-t border-rose-200 pt-1.5">
+                <span>
+                  Escalated: {formatDateTime(currentProject.blocker_escalated_at)}
                 </span>
-                <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 uppercase tracking-wide">
-                  Priority: {currentProject.priority || "Medium"}
-                </span>
-                <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wide">
-                  Status: {currentProject.status || "Active"}
-                </span>
-                {currentProject.health && (
-                  <span
-                    className={`px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wide border ${
-                      currentProject.health === "healthy"
-                        ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                        : currentProject.health === "at_risk"
-                        ? "bg-amber-50 text-amber-800 border-amber-200"
-                        : "bg-rose-50 text-rose-800 border-rose-200"
-                    }`}
-                  >
-                    Health: {currentProject.health.replace("_", " ")}
+                {currentProject.blocker_flagged_by_name && (
+                  <span>
+                    Flagged By: {currentProject.blocker_flagged_by_name}
                   </span>
                 )}
               </div>
-
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-2 mb-2 leading-tight">
-                {currentProject.title || "Strategic Initiative"}
-              </h2>
-
-              <p className="text-xs text-slate-700 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-200 mb-0">
-                {currentProject.description || "No strategic scope narrative specified."}
-              </p>
             </div>
-
-            {/* 3. EXECUTIVE BLOCKER ALERT (IF ACTIVE) */}
-            {currentProject.is_blocked ? (
-              <div className="mb-6 p-4 rounded-xl bg-rose-50 border-2 border-rose-500 text-rose-950 print-avoid-break">
-                <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
-                    <h3 className="text-xs font-black uppercase tracking-wider text-rose-900 m-0">
-                      Active Executive Blocker Escalation
-                    </h3>
-                  </div>
-                  <span className="px-2 py-0.5 rounded bg-rose-600 text-white text-[10px] font-bold uppercase tracking-wider">
-                    {currentProject.blocker_status
-                      ? currentProject.blocker_status.replace("_", " ")
-                      : "Critical Blocker"}
-                  </span>
-                </div>
-                <p className="text-xs text-rose-900 font-medium mb-2 leading-relaxed">
-                  {currentProject.blocker_notes || "Executive intervention required to clear milestone path."}
-                </p>
-                <div className="flex items-center gap-4 text-[10px] text-rose-700 font-semibold border-t border-rose-200 pt-1.5">
-                  <span>
-                    Escalated: {formatDateTime(currentProject.blocker_escalated_at)}
-                  </span>
-                  {currentProject.blocker_flagged_by_name && (
-                    <span>
-                      Flagged By: {currentProject.blocker_flagged_by_name}
-                    </span>
-                  )}
-                </div>
+          ) : (
+            <div className="p-2.5 rounded-lg bg-emerald-50/70 border border-emerald-300 text-emerald-900 flex items-center justify-between print-avoid-break text-xs">
+              <div className="flex items-center gap-2 font-semibold">
+                <i className="bi bi-shield-check text-emerald-600 text-sm"></i>
+                <span>Nominal Operational Health — No Active Blockers Recorded</span>
               </div>
-            ) : (
-              <div className="mb-6 p-2.5 rounded-lg bg-emerald-50/70 border border-emerald-300 text-emerald-900 flex items-center justify-between print-avoid-break text-xs">
-                <div className="flex items-center gap-2 font-semibold">
-                  <i className="bi bi-shield-check text-emerald-600 text-sm"></i>
-                  <span>Nominal Operational Health — No Active Blockers Recorded</span>
-                </div>
-                <span className="text-[10px] text-emerald-700 font-mono font-bold uppercase">
-                  Schedule Clear
-                </span>
-              </div>
-            )}
+              <span className="text-[10px] text-emerald-700 font-mono font-bold uppercase">
+                Schedule Clear
+              </span>
+            </div>
+          )}
 
-            {/* 4. EXECUTIVE METADATA 4-COLUMN MATRIX */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 print-avoid-break">
-              <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/60">
-                <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">
-                  Lead Supervisor
-                </div>
-                <div className="text-xs font-bold text-slate-900 truncate">
-                  {currentProject.supervisor_name || "Unassigned"}
-                </div>
-                <div className="text-[10px] text-slate-500 truncate">
-                  {currentProject.supervisor_email || "N/A"}
-                </div>
+          {/* 4. EXECUTIVE METADATA 4-COLUMN MATRIX */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 print-avoid-break">
+            <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/60">
+              <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">
+                Lead Supervisor
               </div>
-
-              <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/60">
-                <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">
-                  Timeline / Start Date
-                </div>
-                <div className="text-xs font-bold text-slate-900">
-                  {formatDate(currentProject.start_date || currentProject.created_at)}
-                </div>
-                <div className="text-[10px] text-slate-500">
-                  Target: {formatDate(currentProject.target_date)}
-                </div>
+              <div className="text-xs font-bold text-slate-900 truncate">
+                {currentProject.supervisor_name || "Unassigned"}
               </div>
-
-              <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/60">
-                <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">
-                  Runway Remaining
-                </div>
-                <div className="text-xs font-bold text-slate-900">
-                  {currentProject.days_left !== undefined && currentProject.days_left !== null
-                    ? `${currentProject.days_left} Days`
-                    : "No Target Date"}
-                </div>
-                <div className="text-[10px] font-semibold text-slate-500">
-                  {currentProject.is_overdue ? (
-                    <span className="text-rose-600 font-bold">Schedule Overdue</span>
-                  ) : (
-                    <span className="text-emerald-600">On Schedule</span>
-                  )}
-                </div>
-              </div>
-
-              <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/60">
-                <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">
-                  Task Execution Velocity
-                </div>
-                <div className="text-xs font-bold text-slate-900">
-                  {currentProject.completed_tasks || 0} of {currentProject.total_tasks || 0} Closed
-                </div>
-                <div className="text-[10px] font-semibold text-indigo-700">
-                  {currentProject.progress_percentage || 0}% Completion
-                </div>
+              <div className="text-[10px] text-slate-500 truncate">
+                {currentProject.supervisor_email || "N/A"}
               </div>
             </div>
 
-            {/* 5. FINANCIAL TELEMETRY & CAPITAL BURN RATE HUD */}
-            <div className="mb-6 p-4 rounded-xl border border-slate-200 bg-slate-50 print-avoid-break">
+            <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/60">
+              <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">
+                Timeline / Start Date
+              </div>
+              <div className="text-xs font-bold text-slate-900">
+                {formatDate(currentProject.start_date || currentProject.created_at)}
+              </div>
+              <div className="text-[10px] text-slate-500">
+                Target: {formatDate(currentProject.target_date)}
+              </div>
+            </div>
+
+            <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/60">
+              <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">
+                Runway Remaining
+              </div>
+              <div className="text-xs font-bold text-slate-900">
+                {currentProject.days_left !== undefined && currentProject.days_left !== null
+                  ? `${currentProject.days_left} Days`
+                  : "No Target Date"}
+              </div>
+              <div className="text-[10px] font-semibold text-slate-500">
+                {currentProject.is_overdue ? (
+                  <span className="text-rose-600 font-bold">Schedule Overdue</span>
+                ) : (
+                  <span className="text-emerald-600">On Schedule</span>
+                )}
+              </div>
+            </div>
+
+            <div className="p-3 rounded-lg border border-slate-200 bg-slate-50/60">
+              <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">
+                Task Execution Velocity
+              </div>
+              <div className="text-xs font-bold text-slate-900">
+                {currentProject.completed_tasks || 0} of {currentProject.total_tasks || 0} Closed
+              </div>
+              <div className="text-[10px] font-semibold text-indigo-700">
+                {currentProject.progress_percentage || 0}% Completion
+              </div>
+            </div>
+          </div>
+
+          {/* 5. FINANCIAL TELEMETRY & CAPITAL BURN RATE HUD */}
+          {activeSections.financials && (
+            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 print-avoid-break">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 m-0 flex items-center gap-2">
                   <span>💰 Financial Telemetry & Capital Deployment</span>
@@ -460,9 +481,11 @@ export const ProjectPrintDossier: React.FC<PrintDossierProps> = ({
                 ></div>
               </div>
             </div>
+          )}
 
-            {/* 6. DELIVERABLE MILESTONES & PHASED EXECUTION TABLE */}
-            <div className="mb-6 print-avoid-break">
+          {/* 6. DELIVERABLE MILESTONES & PHASED EXECUTION TABLE */}
+          {activeSections.milestones && (
+            <div className="print-avoid-break">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 m-0">
                   🚩 Phased Execution & Deliverable Milestones ({currentMilestones.length})
@@ -474,7 +497,7 @@ export const ProjectPrintDossier: React.FC<PrintDossierProps> = ({
                   No execution milestones scheduled for this initiative.
                 </div>
               ) : (
-                <table className="print-table w-full text-left text-xs border border-slate-300">
+                <table className="w-full text-left text-xs border border-slate-300 border-collapse">
                   <thead>
                     <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300">
                       <th className="p-2 border-r border-slate-300 w-12 text-center">#</th>
@@ -540,9 +563,11 @@ export const ProjectPrintDossier: React.FC<PrintDossierProps> = ({
                 </table>
               )}
             </div>
+          )}
 
-            {/* 7. SQUAD RESOURCE ALLOCATION & ROSTER */}
-            <div className="mb-6 print-avoid-break">
+          {/* 7. SQUAD RESOURCE ALLOCATION & ROSTER */}
+          {activeSections.squad && (
+            <div className="print-avoid-break">
               <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 mb-2">
                 👥 Squad Resource Allocation & Key Personnel ({currentSquad.length})
               </h3>
@@ -577,150 +602,131 @@ export const ProjectPrintDossier: React.FC<PrintDossierProps> = ({
                 </div>
               )}
             </div>
+          )}
 
-            {/* 8. CRITICAL & UPCOMING TASKS (Top 5-8 tasks) */}
-            {currentTasks.length > 0 && (
-              <div className="mb-6 print-avoid-break">
-                <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 mb-2">
-                  📌 Active Action Items & High-Priority Tasks
-                </h3>
-                <table className="print-table w-full text-left text-xs border border-slate-300">
+          {/* 8. CRITICAL & UPCOMING TASKS */}
+          {activeSections.tasks && currentTasks.length > 0 && (
+            <div className="print-avoid-break">
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 mb-2">
+                📌 Active Action Items & High-Priority Tasks
+              </h3>
+              <table className="w-full text-left text-xs border border-slate-300 border-collapse">
+                <thead>
+                  <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300">
+                    <th className="p-2 border-r border-slate-300">Task Title</th>
+                    <th className="p-2 border-r border-slate-300 w-28">Assignee</th>
+                    <th className="p-2 border-r border-slate-300 w-24">Priority</th>
+                    <th className="p-2 border-r border-slate-300 w-24 text-center">Status</th>
+                    <th className="p-2 w-28 text-right">Due Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentTasks.slice(0, 8).map((task, idx) => (
+                    <tr key={task.id || idx} className="border-b border-slate-200">
+                      <td className="p-2 border-r border-slate-200 font-medium text-slate-900">
+                        {task.title}
+                      </td>
+                      <td className="p-2 border-r border-slate-200 text-slate-700 truncate">
+                        {task.assignee_name || "Unassigned"}
+                      </td>
+                      <td className="p-2 border-r border-slate-200 uppercase text-[10px] font-bold">
+                        <span
+                          className={
+                            task.priority === "critical"
+                              ? "text-rose-600 font-black"
+                              : task.priority === "high"
+                              ? "text-amber-600 font-bold"
+                              : "text-slate-600"
+                          }
+                        >
+                          {task.priority || "Medium"}
+                        </span>
+                      </td>
+                      <td className="p-2 border-r border-slate-200 text-center uppercase text-[9px] font-bold">
+                        <span
+                          className={`px-1.5 py-0.5 rounded ${
+                            task.status === "completed"
+                              ? "bg-emerald-100 text-emerald-800"
+                              : task.status === "in_progress"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-slate-100 text-slate-700"
+                          }`}
+                        >
+                          {task.status ? task.status.replace("_", " ") : "Pending"}
+                        </span>
+                      </td>
+                      <td className="p-2 text-right text-slate-600 whitespace-nowrap">
+                        {formatDate(task.due_date)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* 9. RECENT AUDIT TRAIL & GOVERNANCE LEDGER */}
+          {activeSections.audit && currentAuditLogs.length > 0 && (
+            <div className="print-avoid-break">
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 mb-2">
+                📜 Governance Ledger & Recent Change Log (Audit History)
+              </h3>
+              <div className="border border-slate-200 rounded-lg overflow-hidden">
+                <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300">
-                      <th className="p-2 border-r border-slate-300">Task Title</th>
-                      <th className="p-2 border-r border-slate-300 w-28">Assignee</th>
-                      <th className="p-2 border-r border-slate-300 w-24">Priority</th>
-                      <th className="p-2 border-r border-slate-300 w-24 text-center">Status</th>
-                      <th className="p-2 w-28 text-right">Due Date</th>
+                    <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                      <th className="p-1.5 border-r border-slate-200 w-32">Timestamp</th>
+                      <th className="p-1.5 border-r border-slate-200 w-32">Performer</th>
+                      <th className="p-1.5 border-r border-slate-200 w-28">Action</th>
+                      <th className="p-1.5">Change Summary / Details</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {currentTasks.slice(0, 8).map((task, idx) => (
-                      <tr key={task.id || idx} className="border-b border-slate-200">
-                        <td className="p-2 border-r border-slate-200 font-medium text-slate-900">
-                          {task.title}
+                    {currentAuditLogs.slice(0, 5).map((log, idx) => (
+                      <tr key={log.id || idx} className="border-b border-slate-200">
+                        <td className="p-1.5 border-r border-slate-200 text-[10px] text-slate-500 whitespace-nowrap">
+                          {formatDateTime(log.created_at)}
                         </td>
-                        <td className="p-2 border-r border-slate-200 text-slate-700 truncate">
-                          {task.assignee_name || "Unassigned"}
+                        <td className="p-1.5 border-r border-slate-200 font-medium text-slate-800 truncate">
+                          {log.actor_name || log.performed_by || "System"}
                         </td>
-                        <td className="p-2 border-r border-slate-200 uppercase text-[10px] font-bold">
-                          <span
-                            className={
-                              task.priority === "critical"
-                                ? "text-rose-600 font-black"
-                                : task.priority === "high"
-                                ? "text-amber-600 font-bold"
-                                : "text-slate-600"
-                            }
-                          >
-                            {task.priority || "Medium"}
-                          </span>
+                        <td className="p-1.5 border-r border-slate-200 uppercase font-mono text-[9px] font-bold text-indigo-700">
+                          {log.action_type || "MODIFIED"}
                         </td>
-                        <td className="p-2 border-r border-slate-200 text-center uppercase text-[9px] font-bold">
-                          <span
-                            className={`px-1.5 py-0.5 rounded ${
-                              task.status === "completed"
-                                ? "bg-emerald-100 text-emerald-800"
-                                : task.status === "in_progress"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-slate-100 text-slate-700"
-                            }`}
-                          >
-                            {task.status ? task.status.replace("_", " ") : "Pending"}
-                          </span>
-                        </td>
-                        <td className="p-2 text-right text-slate-600 whitespace-nowrap">
-                          {formatDate(task.due_date)}
+                        <td className="p-1.5 text-slate-700 text-[10px]">
+                          {log.details || `Updated ${log.field_name || "project record"}`}
+                          {log.old_value && log.new_value && (
+                            <span className="text-slate-500 ml-1">
+                              ({log.old_value} → {log.new_value})
+                            </span>
+                          )}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-            )}
-
-            {/* 9. RECENT AUDIT TRAIL & GOVERNANCE LEDGER (Last 5 events) */}
-            {currentAuditLogs.length > 0 && (
-              <div className="mb-6 print-avoid-break">
-                <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 mb-2">
-                  📜 Governance Ledger & Recent Change Log (Audit History)
-                </h3>
-                <div className="border border-slate-200 rounded-lg overflow-hidden">
-                  <table className="print-table w-full text-left text-xs">
-                    <thead>
-                      <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
-                        <th className="p-1.5 border-r border-slate-200 w-32">Timestamp</th>
-                        <th className="p-1.5 border-r border-slate-200 w-32">Performer</th>
-                        <th className="p-1.5 border-r border-slate-200 w-28">Action</th>
-                        <th className="p-1.5">Change Summary / Details</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentAuditLogs.slice(0, 5).map((log, idx) => (
-                        <tr key={log.id || idx} className="border-b border-slate-200">
-                          <td className="p-1.5 border-r border-slate-200 text-[10px] text-slate-500 whitespace-nowrap">
-                            {formatDateTime(log.created_at)}
-                          </td>
-                          <td className="p-1.5 border-r border-slate-200 font-medium text-slate-800 truncate">
-                            {log.actor_name || log.performed_by || "System"}
-                          </td>
-                          <td className="p-1.5 border-r border-slate-200 uppercase font-mono text-[9px] font-bold text-indigo-700">
-                            {log.action_type || "MODIFIED"}
-                          </td>
-                          <td className="p-1.5 text-slate-700 text-[10px]">
-                            {log.details || `Updated ${log.field_name || "project record"}`}
-                            {log.old_value && log.new_value && (
-                              <span className="text-slate-500 ml-1">
-                                ({log.old_value} → {log.new_value})
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {/* 10. FORMAL EXECUTIVE SIGN-OFF BLOCK */}
-            <div className="border-t-2 border-slate-900 pt-4 mt-8 print-avoid-break">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-6 text-center">
-                Executive Review & Governance Authorization
-              </div>
-              <div className="grid grid-cols-3 gap-6 text-center">
-                <div className="border-t border-slate-400 pt-2">
-                  <div className="text-xs font-bold text-slate-900">Executive Sponsor</div>
-                  <div className="text-[10px] text-slate-500">Corporate Strategy / VP</div>
-                  <div className="text-[9px] text-slate-400 mt-4">Signature & Date: ___________________</div>
-                </div>
-
-                <div className="border-t border-slate-400 pt-2">
-                  <div className="text-xs font-bold text-slate-900">
-                    {currentProject.department_name ? `${currentProject.department_name} Head` : "Department Head"}
-                  </div>
-                  <div className="text-[10px] text-slate-500">Division Operations Director</div>
-                  <div className="text-[9px] text-slate-400 mt-4">Signature & Date: ___________________</div>
-                </div>
-
-                <div className="border-t border-slate-400 pt-2">
-                  <div className="text-xs font-bold text-slate-900">
-                    {currentProject.supervisor_name || "Lead Supervisor"}
-                  </div>
-                  <div className="text-[10px] text-slate-500">Initiative Technical Lead</div>
-                  <div className="text-[9px] text-slate-400 mt-4">Signature & Date: ___________________</div>
-                </div>
-              </div>
-
-              {/* Security Footer Notice */}
-              <div className="text-center text-[9px] text-slate-400 mt-6 border-t border-slate-200 pt-3">
-                Employee Management System Enterprise Edition • PRJ Internal Ledger Document • Generated on {printDocDate}
-              </div>
             </div>
-          </>
-        )}
-      </div>
-    </div>
+          )}
+
+          {/* 10. FORMAL EXECUTIVE SIGN-OFF & AUDIT FOOTER */}
+          <PrintDossierFooter
+            showSignatures={true}
+            complianceText="Employee Management System Enterprise Edition • Strategic Initiatives Governance Module"
+            confidentialNotice="Internal Executive Memorandum"
+            documentDate={currentDate}
+            signatures={{
+              preparer: currentProject.supervisor_name || "Lead Supervisor",
+              preparerTitle: "Initiative Technical Lead",
+              reviewer: currentProject.department_name ? `${currentProject.department_name} Head` : "Department Head",
+              reviewerTitle: "Division Operations Director",
+              approver: "Executive Sponsor",
+              approverTitle: "Managing Director / Corporate VP",
+            }}
+          />
+        </div>
+      )}
+    />
   );
 };
 
