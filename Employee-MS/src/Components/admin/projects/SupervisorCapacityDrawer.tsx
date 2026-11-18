@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import api from "../../../api/axios";
 
 interface SupervisorCapacityItem {
@@ -128,15 +129,17 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[10000] bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-150"
+      className="fixed inset-0 z-[10000] bg-slate-950/60 backdrop-blur-xs overscroll-contain animate-in fade-in duration-150"
       onClick={onClose}
     >
-      <div
-        className="w-full max-w-[840px] bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden my-auto animate-in zoom-in-95 duration-150"
-        onClick={(e) => e.stopPropagation()}
-      >
+      {/* Centered strictly within the right-side content portion (offsetting sidebar on md+) */}
+      <div className="fixed inset-y-0 right-0 left-0 md:left-[240px] flex items-center justify-center p-3 sm:p-4 pointer-events-none">
+        <div
+          className="w-full max-w-[840px] max-h-[92vh] bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 pointer-events-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Header with Fluid Pastel Wave Background matching Reference Modal */}
         <div className="relative px-3.5 sm:px-4 py-3 sm:py-3.5 bg-white flex items-center justify-between border-b border-slate-200 overflow-hidden shrink-0">
           {/* Top-Right Fluid Pastel Wave Background */}
@@ -718,7 +721,9 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
             )}
           </div>
         </div>
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
