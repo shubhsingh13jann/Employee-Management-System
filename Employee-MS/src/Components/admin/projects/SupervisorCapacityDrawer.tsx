@@ -60,16 +60,21 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
     const fetchCapacity = async () => {
       try {
         setLoading(true);
-        const res = await api.get("/api/admin/projects/supervisors-capacity");
+        const res = await api.get("/api/admin/projects/supervisors-capacity", {
+          params: { period: periodFilter },
+        });
         if (res.data.status) {
           const list: SupervisorCapacityItem[] = res.data.supervisors || [];
           setSupervisors(list);
-          // Default select the first supervisor or one with burnout risk
+          // Retain current selection if valid, else pick first or burnout
           if (list.length > 0) {
-            const burnout = list.find(
-              (s) => Number(s.overdue_tasks_count) > 0 || Number(s.active_tasks_count) > 6
-            );
-            setSelectedSupervisorId(burnout ? burnout.id : list[0].id);
+            setSelectedSupervisorId((prev) => {
+              if (prev && list.some((s) => s.id === prev)) return prev;
+              const burnout = list.find(
+                (s) => Number(s.overdue_tasks_count) > 0 || Number(s.active_tasks_count) > 6
+              );
+              return burnout ? burnout.id : list[0].id;
+            });
           }
         }
       } catch (err) {
@@ -80,7 +85,7 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
     };
 
     fetchCapacity();
-  }, [isOpen]);
+  }, [isOpen, periodFilter]);
 
   // Selected supervisor object
   const selectedSupervisor = useMemo(() => {
@@ -366,7 +371,9 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
                     const activeTasks = Number(sup.active_tasks_count) || 0;
                     const overdueTasks = Number(sup.overdue_tasks_count) || 0;
                     const activeProjects = Number(sup.active_projects_count) || 0;
+                    const totalTasks = Number(sup.total_assigned_tasks) || 0;
                     const isSelected = sup.id === selectedSupervisorId;
+                    const isAllTime = periodFilter === "All-Time Overview";
 
                     // Workload load status calculation
                     let loadLabel = "Normal Load";
@@ -438,8 +445,12 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
                             <div className="px-2 py-1 rounded-lg bg-slate-50 border border-slate-100 flex items-center gap-1.5 text-center min-w-[58px]">
                               <span className="text-emerald-600 text-[10px]">✓</span>
                               <div>
-                                <strong className="block text-slate-800 text-[11px] font-bold leading-none">{activeTasks}</strong>
-                                <span className="text-[8px] text-slate-400 font-medium uppercase tracking-wider">Tasks</span>
+                                <strong className="block text-slate-800 text-[11px] font-bold leading-none">
+                                  {isAllTime ? totalTasks : activeTasks}
+                                </strong>
+                                <span className="text-[8px] text-slate-400 font-medium uppercase tracking-wider">
+                                  {isAllTime ? "Total Tasks" : "Tasks"}
+                                </span>
                               </div>
                             </div>
 

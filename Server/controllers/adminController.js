@@ -2589,17 +2589,33 @@ export const updateAdminProjectBlocker = async (req, res) => {
 
 export const getAdminSupervisorsCapacity = async (req, res) => {
   try {
+    const { period } = req.query;
+
+    let projectJoin = "p.lead_supervisor_id = u.id AND p.status IN ('planning', 'active')";
+    let taskJoin = "(t.assigned_to = u.id OR t.assigned_by = u.id)";
+    let taskOverdueCond = "t.status != 'completed' AND t.due_date < CURDATE()";
+
+    if (period === "Q4 2026 Target" || period === "Q4 Target") {
+      projectJoin = "p.lead_supervisor_id = u.id AND (p.target_date BETWEEN '2026-10-01' AND '2026-12-31' OR p.status IN ('planning', 'active'))";
+      taskJoin = "(t.assigned_to = u.id OR t.assigned_by = u.id) AND (t.due_date BETWEEN '2026-10-01' AND '2026-12-31' OR t.status != 'completed')";
+      taskOverdueCond = "t.status != 'completed' AND t.due_date < CURDATE() AND t.due_date BETWEEN '2026-10-01' AND '2026-12-31'";
+    } else if (period === "All-Time Overview") {
+      projectJoin = "p.lead_supervisor_id = u.id";
+      taskJoin = "(t.assigned_to = u.id OR t.assigned_by = u.id)";
+      taskOverdueCond = "t.status != 'completed' AND t.due_date < CURDATE()";
+    }
+
     const [supervisors] = await pool.query(`
       SELECT u.id, u.name, u.email, u.image_url, u.department_id,
              d.name AS department_name, d.code AS department_code,
              COUNT(DISTINCT p.id) AS active_projects_count,
              COUNT(DISTINCT t.id) AS total_assigned_tasks,
              SUM(CASE WHEN t.status != 'completed' THEN 1 ELSE 0 END) AS active_tasks_count,
-             SUM(CASE WHEN t.status != 'completed' AND t.due_date < CURDATE() THEN 1 ELSE 0 END) AS overdue_tasks_count
+             SUM(CASE WHEN ${taskOverdueCond} THEN 1 ELSE 0 END) AS overdue_tasks_count
       FROM users u
       LEFT JOIN departments d ON u.department_id = d.id
-      LEFT JOIN projects p ON p.lead_supervisor_id = u.id AND p.status IN ('planning', 'active')
-      LEFT JOIN tasks t ON (t.assigned_to = u.id OR t.assigned_by = u.id)
+      LEFT JOIN projects p ON ${projectJoin}
+      LEFT JOIN tasks t ON ${taskJoin}
       WHERE u.role = 'supervisor'
       GROUP BY u.id
       ORDER BY active_projects_count DESC, active_tasks_count DESC
