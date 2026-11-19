@@ -131,42 +131,57 @@ export const PrintDossierHeader: React.FC<PrintDossierHeaderProps> = ({
 
   // Default Style (Corporate Letterhead with EMS Badge)
   return (
-    <div className="border-b-2 border-slate-900 pb-3 mb-4">
+    <div className="border-b-2 border-slate-900 pb-2.5 sm:pb-3 mb-3.5">
       <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-slate-900 text-white font-black text-lg flex items-center justify-center tracking-wider shadow-xs shrink-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-slate-900 text-white font-black text-xs flex items-center justify-center tracking-wider shadow-xs shrink-0">
             EMS
           </div>
           <div className="min-w-0">
-            <h1 className="text-sm sm:text-base font-black tracking-wider uppercase text-slate-900 m-0 leading-tight truncate">
+            <div
+              style={{ fontSize: "13.75px", lineHeight: "1.2", letterSpacing: "0.05em" }}
+              className="font-bold text-slate-900 uppercase whitespace-nowrap truncate"
+            >
               {systemTitle}
-            </h1>
-            <div className="text-[11px] font-bold text-slate-700 tracking-wide mt-0.5 truncate">
+            </div>
+            <div
+              style={{ fontSize: "12.6px", lineHeight: "1.3" }}
+              className="font-semibold text-slate-800 whitespace-nowrap truncate mt-0.5"
+            >
               {documentTitle}
             </div>
             {documentSubtitle && (
-              <div className="text-[9.5px] text-slate-500 mt-0.5 truncate">
+              <div
+                style={{ fontSize: "10px", lineHeight: "1.2" }}
+                className="text-slate-500 mb-0 mt-0.5 whitespace-nowrap truncate"
+              >
                 {documentSubtitle}
               </div>
             )}
           </div>
         </div>
 
-        <div className="text-right shrink-0">
+        <div style={{ fontSize: "10px", lineHeight: "1.3" }} className="text-right text-slate-600 space-y-0.5 shrink-0">
           {documentId && (
-            <div className="inline-block px-2.5 py-0.5 bg-slate-900 text-white font-mono font-bold text-[11px] rounded tracking-wider uppercase mb-1">
+            <div
+              style={{ fontSize: "10px" }}
+              className="inline-block px-2 py-0.5 bg-slate-900 text-white font-mono font-bold rounded tracking-wider uppercase mb-0.5"
+            >
               {documentId}
             </div>
           )}
-          <div className="text-[9.5px] font-bold text-rose-700 tracking-wider uppercase">
+          <div
+            style={{ fontSize: "10.5px" }}
+            className="font-bold text-rose-700 tracking-wider uppercase mb-0.5"
+          >
             {classification}
           </div>
-          <div className="text-[9.5px] text-slate-600 mt-0.5">
-            Date: <strong>{dateStr}</strong>
+          <div style={{ fontSize: "9.5px" }} className="text-slate-600">
+            Date: <strong className="text-slate-800">{dateStr}</strong>
           </div>
           {scopeDesc && (
-            <div className="text-[9.5px] text-slate-500">
-              Scope: <strong>{scopeDesc}</strong>
+            <div style={{ fontSize: "9.5px" }} className="text-slate-500">
+              Scope: <strong className="text-slate-800">{scopeDesc}</strong>
             </div>
           )}
         </div>
