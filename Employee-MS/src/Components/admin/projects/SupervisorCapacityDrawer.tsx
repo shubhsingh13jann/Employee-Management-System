@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import api from "../../../api/axios";
 
@@ -34,6 +34,25 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
   const [statusFilter, setStatusFilter] = useState<"all" | "burnout" | "normal" | "low">("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
+  const periodDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close period dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        periodDropdownRef.current &&
+        !periodDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsPeriodOpen(false);
+      }
+    };
+    if (isPeriodOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isPeriodOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -141,9 +160,9 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
           onClick={(e) => e.stopPropagation()}
         >
         {/* Header with Fluid Pastel Wave Background matching Reference Modal */}
-        <div className="relative px-3.5 sm:px-4 py-3 sm:py-3.5 bg-white flex items-center justify-between border-b border-slate-200 overflow-hidden shrink-0">
+        <div className="relative z-20 px-3.5 sm:px-4 py-3 sm:py-3.5 bg-white flex items-center justify-between border-b border-slate-200 shrink-0">
           {/* Top-Right Fluid Pastel Wave Background */}
-          <div className="absolute top-0 right-0 w-[360px] sm:w-[460px] h-full pointer-events-none overflow-hidden z-0">
+          <div className="absolute top-0 right-0 w-[360px] sm:w-[460px] h-full pointer-events-none overflow-hidden z-0 rounded-tr-2xl sm:rounded-tr-3xl">
             <svg
               viewBox="0 0 500 74"
               fill="none"
@@ -219,7 +238,7 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
           {/* Right: Period Dropdown & Square Close Button */}
           <div className="relative z-10 flex items-center gap-2">
             {/* Period Dropdown */}
-            <div className="relative">
+            <div className="relative" ref={periodDropdownRef}>
               <button
                 type="button"
                 onClick={() => setIsPeriodOpen(!isPeriodOpen)}
@@ -227,11 +246,11 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
               >
                 <i className="bi bi-calendar3 text-indigo-600 text-[10px]"></i>
                 <span>{periodFilter}</span>
-                <i className="bi bi-chevron-down text-[9px] text-slate-400"></i>
+                <i className={`bi bi-chevron-down text-[9px] text-slate-400 transition-transform ${isPeriodOpen ? "rotate-180" : ""}`}></i>
               </button>
 
               {isPeriodOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-40 rounded-xl bg-white border border-slate-200 shadow-xl p-1 z-30 text-[11px]">
+                <div className="absolute right-0 top-full mt-1.5 w-44 rounded-xl bg-white border border-slate-200 shadow-xl p-1 z-50 text-[11px] animate-in fade-in zoom-in-95 duration-100">
                   {["Current Period", "Q4 2026 Target", "All-Time Overview"].map((period) => (
                     <button
                       key={period}
@@ -240,13 +259,16 @@ export const SupervisorCapacityDrawer: React.FC<SupervisorCapacityDrawerProps> =
                         setPeriodFilter(period);
                         setIsPeriodOpen(false);
                       }}
-                      className={`w-full text-left px-2.5 py-1.5 rounded-lg font-medium transition-colors cursor-pointer ${
+                      className={`w-full text-left px-2.5 py-1.5 rounded-lg font-medium transition-colors cursor-pointer flex items-center justify-between ${
                         periodFilter === period
                           ? "bg-indigo-50 text-indigo-700 font-bold"
                           : "text-slate-700 hover:bg-slate-100"
                       }`}
                     >
-                      {period}
+                      <span>{period}</span>
+                      {periodFilter === period && (
+                        <i className="bi bi-check2 text-indigo-600 text-xs"></i>
+                      )}
                     </button>
                   ))}
                 </div>
