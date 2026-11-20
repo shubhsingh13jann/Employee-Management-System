@@ -667,18 +667,20 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id as any)}
-              className={`py-2.5 px-3 text-[11px] sm:text-[11.5px] font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+              className={`py-2.5 px-3 text-[11px] sm:text-[11.5px] font-bold border-b-2 transition-all inline-flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap leading-none ${
                 activeTab === tab.id
                   ? "border-indigo-600 text-indigo-700 bg-indigo-50/50 rounded-t-lg"
                   : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
               }`}
             >
-              <i className={`bi ${tab.icon} text-xs`}></i>
-              <span>{tab.label}</span>
+              <i className={`bi ${tab.icon} text-xs leading-none inline-flex items-center justify-center shrink-0`}></i>
+              <span className="leading-none inline-flex items-center">{tab.label}</span>
               {tab.count !== null && tab.count !== undefined && (
-                <span className={`px-1.5 py-0.2 rounded-full text-[9.5px] font-bold ${
-                  activeTab === tab.id ? "bg-indigo-100 text-indigo-700" : "bg-slate-100 text-slate-600"
-                }`}>
+                <span
+                  className={`h-4 min-w-[16px] px-1.5 inline-flex items-center justify-center rounded-full text-[9px] font-bold leading-none shrink-0 ${
+                    activeTab === tab.id ? "bg-indigo-100 text-indigo-700" : "bg-slate-100 text-slate-600"
+                  }`}
+                >
                   {tab.count}
                 </span>
               )}
@@ -748,118 +750,164 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
                 </div>
               )}
 
-              {/* Strategic Scope Card */}
-              <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white border border-slate-200/80 shadow-2xs">
-                <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-slate-100">
-                  <div className="w-6.5 h-6.5 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs shadow-2xs shrink-0">
-                    <i className="bi bi-file-earmark-text"></i>
-                  </div>
-                  <h4 className="text-[11px] sm:text-[11.5px] font-bold text-slate-800 tracking-tight leading-snug truncate mb-0 uppercase">
-                    Strategic Scope & Initiative Charter
-                  </h4>
-                </div>
-                <p className="text-[11.5px] text-slate-700 leading-relaxed mb-0">
-                  {project?.description || "No detailed scope description provided for this initiative."}
-                </p>
-              </div>
-
-              {/* Grid Metadata */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                {/* Department Info */}
-                <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
-                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block leading-tight mb-1.5">
-                    Department Ownership
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-50/80 text-indigo-700 font-bold text-xs flex items-center justify-center border border-indigo-100 shrink-0 shadow-2xs">
-                      {project?.department_code || "DPT"}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-[11.5px] font-bold text-slate-800 truncate">
-                        {project?.department_name || "General"}
-                      </div>
-                      <div className="text-[9.5px] text-slate-400 font-mono">
-                        DEPT ID: {project?.department_id}
-                      </div>
-                    </div>
-                  </div>
+              {/* Strategic Scope & Initiative Charter Executive Card (Image 2 Style) */}
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs relative overflow-hidden">
+                {/* Top-Right Soft Fluid Pastel Wave Background */}
+                <div className="absolute top-0 right-0 w-[280px] sm:w-[380px] h-[95px] pointer-events-none overflow-hidden z-0 opacity-75">
+                  <svg viewBox="0 0 400 95" fill="none" preserveAspectRatio="none" className="w-full h-full">
+                    <defs>
+                      <linearGradient id="scopeWaveGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#EDE9FE" stopOpacity="0.1" />
+                        <stop offset="40%" stopColor="#DDD6FE" stopOpacity="0.45" />
+                        <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0.75" />
+                      </linearGradient>
+                      <linearGradient id="scopeWaveGrad2" x1="20%" y1="0%" x2="100%" y2="80%">
+                        <stop offset="0%" stopColor="#E0E7FF" stopOpacity="0.2" />
+                        <stop offset="60%" stopColor="#C7D2FE" stopOpacity="0.6" />
+                        <stop offset="100%" stopColor="#E9D5FF" stopOpacity="0.5" />
+                      </linearGradient>
+                    </defs>
+                    <path d="M0,45 C110,15 220,75 400,25 L400,0 L0,0 Z" fill="url(#scopeWaveGrad1)" />
+                    <path d="M40,25 C140,5 260,55 400,10 L400,0 L40,0 Z" fill="url(#scopeWaveGrad2)" opacity="0.6" />
+                  </svg>
                 </div>
 
-                {/* Lead Supervisor */}
-                <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
-                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block leading-tight mb-1.5">
-                    Designated Lead Supervisor
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-800 font-bold text-xs flex items-center justify-center border border-emerald-200 shrink-0 shadow-2xs">
-                      {project?.supervisor_name ? project.supervisor_name.charAt(0) : "U"}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-[11.5px] font-bold text-slate-800 truncate">
-                        {project?.supervisor_name || "Unassigned"}
-                      </div>
-                      <div className="text-[9.5px] text-slate-400 truncate">
-                        {project?.supervisor_email || "No email assigned"}
-                      </div>
-                    </div>
+                {/* Top Header inside Card */}
+                <div className="flex items-start gap-3 relative z-10 mb-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-purple-50 text-indigo-600 border border-purple-100 flex items-center justify-center text-lg shadow-2xs shrink-0">
+                    <i className="bi bi-bullseye text-indigo-600"></i>
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="text-[13.5px] sm:text-[14px] font-bold text-slate-900 tracking-tight leading-tight mb-0.5">
+                      Strategic Scope & Initiative Charter
+                    </h4>
+                    <p className="text-[11px] sm:text-[11.5px] text-slate-500 font-normal leading-normal mb-0">
+                      {project?.description || "Voice Automation System"}
+                    </p>
                   </div>
                 </div>
 
-                {/* Project Lifecycle */}
-                <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
-                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block leading-tight mb-1.5">
-                    Lifecycle Timeline
-                  </span>
-                  <div className="space-y-1 text-[11px]">
-                    <div className="flex items-center justify-between text-slate-600">
-                      <span className="text-[9.5px] text-slate-400">Start Date:</span>
-                      <span className="font-semibold text-slate-700">
-                        {project?.start_date ? new Date(project.start_date).toLocaleDateString() : "Unset"}
+                {/* Row 1: 3 Sub-Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 relative z-10">
+                  {/* 1. Department Ownership */}
+                  <div className="p-3 rounded-xl bg-slate-50/70 border border-slate-200/70 shadow-2xs flex flex-col justify-between">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <div className="w-5.5 h-5.5 rounded-md bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-[10.5px] shrink-0">
+                        <i className="bi bi-building"></i>
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-800">Department Ownership</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-indigo-100/70 text-indigo-700 font-bold text-[10px] flex items-center justify-center border border-indigo-200/60 shrink-0 font-mono">
+                        {project?.department_code || "ENG"}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-[11.5px] font-bold text-slate-800 leading-tight truncate">
+                          {project?.department_name || "Engineering"}
+                        </div>
+                        <div className="text-[9.5px] text-slate-400 font-mono mt-0.5">
+                          ID: {project?.department_id || "1"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 2. Designated Lead Supervisor */}
+                  <div className="p-3 rounded-xl bg-slate-50/70 border border-slate-200/70 shadow-2xs flex flex-col justify-between">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <div className="w-5.5 h-5.5 rounded-md bg-purple-50 border border-purple-100 text-purple-600 flex items-center justify-center text-[10.5px] shrink-0">
+                        <i className="bi bi-person"></i>
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-800">Designated Lead Supervisor</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-100/80 text-emerald-800 font-bold text-[10px] flex items-center justify-center border border-emerald-200/60 shrink-0">
+                        {project?.supervisor_name ? project.supervisor_name.charAt(0).toUpperCase() : "S"}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-[11.5px] font-bold text-slate-800 truncate leading-tight">
+                          {project?.supervisor_name || "Shubh S"}
+                        </div>
+                        <div className="text-[9.5px] text-slate-400 truncate mt-0.5">
+                          {project?.supervisor_email || "shubhsingh.13jann@gmail.com"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3. Lifecycle Timeline */}
+                  <div className="p-3 rounded-xl bg-slate-50/70 border border-slate-200/70 shadow-2xs relative overflow-hidden flex flex-col justify-between">
+                    {/* Clock watermark graphic on right */}
+                    <div className="absolute -right-3 -bottom-3 w-16 h-16 rounded-full border-2 border-indigo-200/30 text-indigo-300/30 flex items-center justify-center text-3xl pointer-events-none select-none">
+                      <i className="bi bi-clock"></i>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 mb-2 relative z-10">
+                      <div className="w-5.5 h-5.5 rounded-md bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-[10.5px] shrink-0">
+                        <i className="bi bi-calendar3"></i>
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-800">Lifecycle Timeline</span>
+                    </div>
+                    <div className="space-y-1 text-[11px] relative z-10">
+                      <div className="flex items-center justify-between text-slate-600">
+                        <span className="text-[9.5px] text-slate-400">Start Date:</span>
+                        <span className="font-semibold text-slate-700">
+                          {project?.start_date ? new Date(project.start_date).toLocaleDateString() : "11/3/2026"}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-slate-600">
+                        <span className="text-[9.5px] text-slate-400">Target Date:</span>
+                        <span className="font-bold text-slate-900">
+                          {project?.target_date ? new Date(project.target_date).toLocaleDateString() : "2/10/2027"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 2: 2 Sub-Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5 relative z-10">
+                  {/* 1. Priority & Governance */}
+                  <div className="p-3 rounded-xl bg-slate-50/70 border border-slate-200/70 shadow-2xs flex flex-col justify-between">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <div className="w-5.5 h-5.5 rounded-md bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-[10.5px] shrink-0">
+                        <i className="bi bi-shield-check"></i>
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-800">Priority & Governance</span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="px-2.5 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-wide bg-rose-100 text-rose-700 border border-rose-200/80 shadow-2xs">
+                        {project?.priority || "Critical"} Priority
+                      </span>
+                      <span className="text-[10px] text-slate-500">
+                        Created by {project?.creator_name || "Shubh Singh"} on{" "}
+                        {project?.created_at ? new Date(project.created_at).toLocaleDateString() : "11/3/2026"}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between text-slate-600">
-                      <span className="text-[9.5px] text-slate-400">Target Date:</span>
-                      <span className="font-bold text-slate-900">
-                        {project?.target_date ? new Date(project.target_date).toLocaleDateString() : "Unset"}
-                      </span>
-                    </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Priority & Financials */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
-                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block leading-tight mb-1.5">
-                    Priority & Governance
-                  </span>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-slate-100 text-slate-800 border border-slate-200">
-                      {project?.priority} Priority
-                    </span>
-                    <span className="text-[10.5px] text-slate-500">
-                      Created by {project?.creator_name || "Admin"} on{" "}
-                      {project?.created_at ? new Date(project.created_at).toLocaleDateString() : "N/A"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
-                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block leading-tight mb-1.5">
-                    Financial Allocation
-                  </span>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-sm font-bold text-slate-900">
-                        ${Number(project?.budget || 0).toLocaleString()}
-                      </span>
-                      <span className="text-[9.5px] text-slate-400 block">Total Budget Cap</span>
+                  {/* 2. Financial Allocation */}
+                  <div className="p-3 rounded-xl bg-slate-50/70 border border-slate-200/70 shadow-2xs flex flex-col justify-between">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <div className="w-5.5 h-5.5 rounded-md bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-[10.5px] shrink-0">
+                        <i className="bi bi-coin"></i>
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-800">Financial Allocation</span>
                     </div>
-                    <div className="text-right">
-                      <span className="text-[10.5px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
-                        Healthy
-                      </span>
-                      <span className="text-[9.5px] text-slate-400 block mt-0.5">Fiscal Assessment</span>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm sm:text-[15px] font-bold text-slate-900 leading-tight">
+                          ${Number(project?.budget || 0).toLocaleString()}
+                        </div>
+                        <span className="text-[9px] text-slate-400 block mt-0.5">Total Budget Cap</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9.5px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200/80 shadow-2xs">
+                          <i className="bi bi-activity text-[9px]"></i>
+                          <span>Healthy</span>
+                        </div>
+                        <span className="text-[9px] text-slate-400 block mt-0.5">Fiscal Assessment</span>
+                      </div>
                     </div>
                   </div>
                 </div>
