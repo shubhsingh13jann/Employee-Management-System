@@ -800,13 +800,46 @@ export const UniversalPrintStudio: React.FC<UniversalPrintStudioProps> = ({
 
         {/* Dynamic Print Stylesheet responding to format controls */}
         <style>{`
-          #universal-printable-dossier h1,
-          #universal-printable-dossier h2,
-          #universal-printable-dossier h3,
-          #universal-printable-dossier h4,
-          #universal-printable-dossier p {
+          #universal-printable-dossier {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+          }
+          #universal-printable-dossier h1 {
+            font-size: 13.75px !important;
+            line-height: 1.25 !important;
             margin-top: 0 !important;
             margin-bottom: 0 !important;
+          }
+          #universal-printable-dossier h2 {
+            font-size: 13px !important;
+            line-height: 1.25 !important;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+          }
+          #universal-printable-dossier h3 {
+            font-size: 11.5px !important;
+            line-height: 1.25 !important;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+          }
+          #universal-printable-dossier h4 {
+            font-size: 11px !important;
+            line-height: 1.25 !important;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+          }
+          #universal-printable-dossier p {
+            font-size: 10.5px !important;
+            line-height: 1.4 !important;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+          }
+          #universal-printable-dossier table {
+            font-size: 10.5px !important;
+          }
+          #universal-printable-dossier th {
+            font-size: 9.5px !important;
           }
           @media print {
             body * {
