@@ -1116,7 +1116,7 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
                             {m.deliverables.map((del) => (
                               <label
                                 key={del.id}
-                                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs border cursor-pointer select-none transition-all ${
+                                className={`flex items-center px-2.5 py-1.5 rounded-lg text-xs border cursor-pointer select-none transition-all ${
                                   del.completed
                                     ? "bg-emerald-50/70 border-emerald-200 text-emerald-800 line-through opacity-80"
                                     : "bg-slate-50 hover:bg-white border-slate-200 text-slate-700"
@@ -1126,9 +1126,9 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
                                   type="checkbox"
                                   checked={del.completed}
                                   onChange={() => handleToggleDeliverable(m.id, del.id, del.completed)}
-                                  className="w-3.5 h-3.5 rounded text-indigo-600 accent-indigo-600"
+                                  className="w-3.5 h-3.5 m-0 rounded text-indigo-600 accent-indigo-600 shrink-0 cursor-pointer translate-y-[1.5px]"
                                 />
-                                <span className="truncate">{del.title}</span>
+                                <span className="truncate ml-2.5 font-medium select-none leading-tight">{del.title}</span>
                               </label>
                             ))}
                           </div>
@@ -1308,21 +1308,21 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
               </div>
 
               {/* Telemetry Quick Strip (4 Cards) */}
-              <div className="grid grid-cols-4 gap-2 text-center">
-                <div className="p-2 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
-                  <span className="text-[9px] uppercase font-bold text-slate-400 block tracking-wider">Total Events</span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="px-2.5 py-1.5 bg-white rounded-xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+                  <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Events</span>
                   <span className="text-xs sm:text-[13px] font-bold text-slate-800">{auditCategoryCounts.all}</span>
                 </div>
-                <div className="p-2 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
-                  <span className="text-[9px] uppercase font-bold text-indigo-500 block tracking-wider">Status Shifts</span>
+                <div className="px-2.5 py-1.5 bg-white rounded-xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+                  <span className="text-[9px] uppercase font-bold text-indigo-500 tracking-wider">Status Shifts</span>
                   <span className="text-xs sm:text-[13px] font-bold text-indigo-700">{auditCategoryCounts.status}</span>
                 </div>
-                <div className="p-2 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
-                  <span className="text-[9px] uppercase font-bold text-amber-600 block tracking-wider">Deadlines</span>
+                <div className="px-2.5 py-1.5 bg-white rounded-xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+                  <span className="text-[9px] uppercase font-bold text-amber-600 tracking-wider">Deadlines</span>
                   <span className="text-xs sm:text-[13px] font-bold text-amber-700">{auditCategoryCounts.deadline}</span>
                 </div>
-                <div className="p-2 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
-                  <span className="text-[9px] uppercase font-bold text-emerald-600 block tracking-wider">Budget Diffs</span>
+                <div className="px-2.5 py-1.5 bg-white rounded-xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+                  <span className="text-[9px] uppercase font-bold text-emerald-600 tracking-wider">Budget Diffs</span>
                   <span className="text-xs sm:text-[13px] font-bold text-emerald-700">{auditCategoryCounts.budget}</span>
                 </div>
               </div>
