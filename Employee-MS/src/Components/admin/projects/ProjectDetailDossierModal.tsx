@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import api from "../../../api/axios";
 import { ProjectPrintDossier } from "./ProjectPrintDossier";
 
@@ -360,15 +361,17 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
     return task.status === taskFilter;
   });
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto animate-in fade-in duration-200"
+      className="fixed inset-0 z-[10000] bg-slate-950/60 backdrop-blur-xs overscroll-contain animate-in fade-in duration-150"
       onClick={onClose}
     >
-      <div
-        className="bg-slate-50 w-full max-w-5xl rounded-2xl border border-slate-200/90 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden my-auto animate-in zoom-in-95 duration-150"
-        onClick={(e) => e.stopPropagation()}
-      >
+      {/* Centered strictly within the right-side content portion (offsetting sidebar on md+) */}
+      <div className="fixed inset-y-0 right-0 left-0 md:left-[240px] flex items-center justify-center p-3 sm:p-4 pointer-events-none">
+        <div
+          className="w-full max-w-[880px] max-h-[92vh] bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 pointer-events-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Dedicated Print Stylesheet */}
         <style dangerouslySetInnerHTML={{ __html: `
           @media print {
@@ -380,36 +383,138 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
           }
         `}} />
 
-        {/* Top Header */}
-        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white px-4 sm:px-6 py-4 flex items-center justify-between gap-3 shrink-0 border-b border-indigo-900/40">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                PRJ-{String(projectId || "0").padStart(4, "0")}
-              </span>
-              {project?.department_name && (
-                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-white/10 text-white/90 border border-white/15">
-                  🏢 {project.department_name}
-                </span>
-              )}
-              {project?.status && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 capitalize">
-                  ● {project.status}
-                </span>
-              )}
-              {telemetry?.is_overdue && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping"></span>
-                  Overdue by {Math.abs(telemetry.days_left || 0)}d
-                </span>
-              )}
-            </div>
-            <h2 className="text-base sm:text-lg font-bold text-white truncate mb-0">
-              {project?.title || "Project 360° Inspection Dossier"}
-            </h2>
+        {/* Header with Fluid Pastel Wave Background matching Hierarchy Dossier Modal */}
+        <div className="relative px-3.5 sm:px-4 py-3 sm:py-3.5 bg-white flex items-center justify-between border-b border-slate-200 overflow-hidden shrink-0">
+          {/* Top-Right Fluid Pastel Wave Background */}
+          <div className="absolute top-0 right-0 w-[360px] sm:w-[460px] h-full pointer-events-none overflow-hidden z-0">
+            <svg
+              viewBox="0 0 500 74"
+              fill="none"
+              preserveAspectRatio="none"
+              className="w-full h-full"
+            >
+              <defs>
+                <mask id="projectDossierWaveFadeMask">
+                  <linearGradient id="projectDossierWaveFadeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="black" />
+                    <stop offset="18%" stopColor="white" />
+                    <stop offset="100%" stopColor="white" />
+                  </linearGradient>
+                  <rect width="500" height="74" fill="url(#projectDossierWaveFadeGrad)" />
+                </mask>
+
+                <linearGradient id="projectDossierWaveGrad1" x1="0%" y1="0%" x2="100%" y2="70%">
+                  <stop offset="0%" stopColor="#E0E7FF" stopOpacity="0.2" />
+                  <stop offset="30%" stopColor="#D7E0FC" stopOpacity="0.85" />
+                  <stop offset="65%" stopColor="#E0E7FE" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="#EDE9FE" stopOpacity="0.7" />
+                </linearGradient>
+
+                <linearGradient id="projectDossierWaveGrad2" x1="15%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#D8E2FB" stopOpacity="0.3" />
+                  <stop offset="30%" stopColor="#C7D2FE" stopOpacity="0.85" />
+                  <stop offset="60%" stopColor="#DDD6FE" stopOpacity="0.9" />
+                  <stop offset="85%" stopColor="#E9D5FF" stopOpacity="0.85" />
+                  <stop offset="100%" stopColor="#F3E8FF" stopOpacity="0.4" />
+                </linearGradient>
+
+                <linearGradient id="projectDossierWaveGrad3" x1="30%" y1="10%" x2="95%" y2="100%">
+                  <stop offset="0%" stopColor="#E0F2FE" stopOpacity="0.5" />
+                  <stop offset="45%" stopColor="#DDD6FE" stopOpacity="0.75" />
+                  <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0.7" />
+                </linearGradient>
+              </defs>
+
+              <g mask="url(#projectDossierWaveFadeMask)">
+                <path
+                  d="M0 26 C60 10 120 8 180 18 C245 28 305 50 370 38 C425 28 465 10 500 20 V0 H0 Z"
+                  fill="url(#projectDossierWaveGrad1)"
+                />
+                <path
+                  d="M0 50 C80 34 145 12 215 10 C280 8 330 32 390 44 C445 54 475 38 500 28 V0 H0 Z"
+                  fill="url(#projectDossierWaveGrad2)"
+                />
+                <path
+                  d="M130 38 C195 26 260 48 325 56 C385 64 445 50 500 38 V8 C470 20 420 18 370 24 C310 34 235 32 130 38 Z"
+                  fill="url(#projectDossierWaveGrad3)"
+                  opacity="0.75"
+                />
+              </g>
+            </svg>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          {/* Left: Electric Gradient Squircle Project Icon + Title & Information Badges */}
+          <div className="flex items-center gap-3 relative z-10 min-w-0">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-700 text-white flex items-center justify-center font-bold text-lg sm:text-xl shadow-md shadow-indigo-500/20 shrink-0 border border-white/20">
+              <i className="bi bi-briefcase-fill text-amber-300"></i>
+            </div>
+
+            <div className="min-w-0">
+              {/* Project Title + PRJ-ID Pill */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-bold text-[13.5px] sm:text-[14.5px] text-slate-900 mb-0 tracking-tight leading-tight truncate">
+                  {project?.title || "Project 360° Inspection Dossier"}
+                </h3>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-2xs">
+                  PRJ-{String(projectId || "0").padStart(4, "0")}
+                </span>
+              </div>
+
+              {/* Subtitle Line with Department, Lead Supervisor, and Timeline */}
+              <div className="text-[10.5px] sm:text-[11px] text-slate-400 mb-1 font-normal leading-tight truncate mt-0.5 flex items-center gap-1.5 flex-wrap">
+                {project?.department_name && (
+                  <span className="flex items-center gap-1 font-medium text-slate-500">
+                    <i className="bi bi-building text-[9.5px] text-indigo-500"></i>
+                    <span>{project.department_name}</span>
+                  </span>
+                )}
+                {project?.supervisor_name && (
+                  <>
+                    <span>•</span>
+                    <span className="flex items-center gap-1 font-medium text-slate-500">
+                      <i className="bi bi-person text-[9.5px] text-emerald-500"></i>
+                      <span>Lead: {project.supervisor_name}</span>
+                    </span>
+                  </>
+                )}
+              </div>
+
+              {/* Meta Pills: Status, Priority, Overdue */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {/* Status Badge */}
+                {project?.status && (
+                  <div className="inline-flex items-center gap-1 px-2 py-0.2 rounded-md text-[9.5px] font-bold capitalize bg-emerald-50/80 text-emerald-700 border border-emerald-200/90 shadow-2xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500/50"></span>
+                    <span>{project.status}</span>
+                  </div>
+                )}
+
+                {/* Priority Badge */}
+                {project?.priority && (
+                  <div className={`inline-flex items-center gap-1 px-2 py-0.2 rounded-md text-[9.5px] font-bold uppercase shadow-2xs border ${
+                    project.priority === "critical"
+                      ? "bg-rose-50/80 text-rose-700 border-rose-200"
+                      : project.priority === "high"
+                      ? "bg-amber-50/80 text-amber-700 border-amber-200"
+                      : "bg-indigo-50/60 text-indigo-700 border-indigo-100"
+                  }`}>
+                    <span>{project.priority} Priority</span>
+                  </div>
+                )}
+
+                {/* Overdue Badge if any */}
+                {telemetry?.is_overdue && (
+                  <div className="inline-flex items-center gap-1 px-2 py-0.2 rounded-md text-[9.5px] font-bold bg-rose-50 text-rose-700 border border-rose-200 shadow-2xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                    <span>Overdue by {Math.abs(telemetry.days_left || 0)}d</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Print PDF Button & Rounded Square Close Button */}
+          <div className="flex items-center gap-2 relative z-10 shrink-0">
             {project?.status === "archived" && (
               <button
                 type="button"
@@ -423,78 +528,80 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
                     console.error("Failed to unarchive from dossier:", e);
                   }
                 }}
-                className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold border border-emerald-400/30 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold border border-emerald-400/30 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 title="Restore this archived initiative to Active status"
               >
-                <i className="bi bi-arrow-counterclockwise"></i>
-                <span>Unarchive / Restore</span>
+                <i className="bi bi-arrow-counterclockwise text-xs"></i>
+                <span>Restore</span>
               </button>
             )}
             <button
               type="button"
               onClick={() => setShowPrintDossier(true)}
-              className="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold border border-indigo-400/40 shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200/90 shadow-2xs text-[11px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer"
               title="Open Printable Executive Initiative Dossier / PDF Summary View"
             >
-              <i className="bi bi-printer-fill"></i>
+              <i className="bi bi-printer text-indigo-600 text-xs"></i>
               <span className="hidden sm:inline">Print Briefing / PDF</span>
             </button>
+
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer"
+              className="w-8 h-8 rounded-xl bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 border border-slate-200/90 shadow-2xs flex items-center justify-center transition-all cursor-pointer text-xs"
               title="Close Modal"
+              aria-label="Close"
             >
-              <i className="bi bi-x-lg"></i>
+              <i className="bi bi-x-lg text-xs"></i>
             </button>
           </div>
         </div>
 
         {/* Executive Metrics HUD / Telemetry Bar */}
         {telemetry && (
-          <div className="bg-white border-b border-slate-200/90 px-4 sm:px-6 py-3 grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 shrink-0">
+          <div className="bg-slate-50/60 border-b border-slate-200/80 px-3.5 sm:px-4 py-2.5 grid grid-cols-2 md:grid-cols-4 gap-2.5 shrink-0">
             {/* 1. Task Velocity */}
-            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70">
-              <div className="flex items-center justify-between text-[10px] font-semibold text-slate-500 mb-1">
+            <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">
                 <span>Task Velocity</span>
-                <span className="font-bold text-slate-900">{telemetry.task_velocity}%</span>
+                <span className="font-bold text-slate-800 text-[11px]">{telemetry.task_velocity}%</span>
               </div>
-              <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden mb-1">
+              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-1 border border-slate-200/60">
                 <div
-                  className="h-full bg-indigo-600 rounded-full transition-all duration-300"
+                  className="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full transition-all duration-300"
                   style={{ width: `${telemetry.task_velocity}%` }}
                 ></div>
               </div>
-              <div className="text-[10px] text-slate-400">
+              <div className="text-[9.5px] text-slate-400">
                 {telemetry.completed_tasks} of {telemetry.total_tasks} tasks delivered
               </div>
             </div>
 
-            {/* 2. Milestones & Deliverables */}
-            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70">
-              <div className="flex items-center justify-between text-[10px] font-semibold text-slate-500 mb-1">
+            {/* 2. Milestones Progress */}
+            <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">
                 <span>Milestones Progress</span>
-                <span className="font-bold text-slate-900">{telemetry.milestones_progress}%</span>
+                <span className="font-bold text-slate-800 text-[11px]">{telemetry.milestones_progress}%</span>
               </div>
-              <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden mb-1">
+              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-1 border border-slate-200/60">
                 <div
-                  className="h-full bg-emerald-600 rounded-full transition-all duration-300"
+                  className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full transition-all duration-300"
                   style={{ width: `${telemetry.milestones_progress}%` }}
                 ></div>
               </div>
-              <div className="text-[10px] text-slate-400">
+              <div className="text-[9.5px] text-slate-400">
                 {telemetry.completed_milestones} of {telemetry.total_milestones} phases completed
               </div>
             </div>
 
-            {/* 3. Target Countdown Clock */}
-            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70">
-              <div className="text-[10px] font-semibold text-slate-500 mb-0.5">
+            {/* 3. Target Countdown */}
+            <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <div className="text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
                 Target Countdown
               </div>
               <div className="flex items-center gap-1.5">
-                <i className={`bi ${telemetry.is_overdue ? "bi-clock-fill text-rose-600" : "bi-stopwatch text-indigo-600"} text-sm`}></i>
-                <span className={`text-xs font-bold ${telemetry.is_overdue ? "text-rose-600" : "text-slate-800"}`}>
+                <i className={`bi ${telemetry.is_overdue ? "bi-clock-fill text-rose-600" : "bi-stopwatch text-indigo-600"} text-xs`}></i>
+                <span className={`text-[11px] font-bold ${telemetry.is_overdue ? "text-rose-600" : "text-slate-800"}`}>
                   {project?.target_date
                     ? telemetry.is_overdue
                       ? `Overdue by ${Math.abs(telemetry.days_left || 0)}d`
@@ -504,7 +611,7 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
                     : "No deadline"}
                 </span>
               </div>
-              <div className="text-[10px] text-slate-400 truncate mt-0.5">
+              <div className="text-[9.5px] text-slate-400 truncate mt-0.5">
                 {project?.target_date
                   ? new Date(project.target_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
                   : "Target date unset"}
@@ -514,25 +621,25 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
             {/* 4. Budget Telemetry */}
             <div
               onClick={() => onOpenBudgetHUD && onOpenBudgetHUD(project)}
-              className={`p-2.5 rounded-xl border transition-all ${
+              className={`p-2 sm:p-2.5 rounded-xl border transition-all ${
                 onOpenBudgetHUD
-                  ? "bg-slate-50 hover:bg-emerald-50/70 border-slate-200/70 hover:border-emerald-300 cursor-pointer group"
-                  : "bg-slate-50 border-slate-200/70"
+                  ? "bg-white hover:bg-emerald-50/50 border-slate-200/80 hover:border-emerald-300 cursor-pointer group shadow-2xs"
+                  : "bg-white border-slate-200/80 shadow-2xs"
               }`}
               title={onOpenBudgetHUD ? "Click to open Budget Allocation & Burn Rate HUD" : undefined}
             >
-              <div className="flex items-center justify-between text-[10px] font-semibold text-slate-500 mb-0.5">
+              <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
                 <span className="flex items-center gap-1">
                   <i className="bi bi-cash-stack text-emerald-600"></i>
                   <span>Budget Telemetry</span>
                 </span>
-                <span className="font-bold text-emerald-700">
+                <span className="font-bold text-emerald-700 text-[11px]">
                   ${telemetry.budget_allocated.toLocaleString()}
                 </span>
               </div>
-              <div className="text-xs font-bold text-slate-800 flex items-center justify-between">
+              <div className="text-[11px] font-bold text-slate-800 flex items-center justify-between">
                 <span>
-                  ${telemetry.budget_spent.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">spent</span>
+                  ${telemetry.budget_spent.toLocaleString()} <span className="text-[9px] font-normal text-slate-400">spent</span>
                 </span>
                 {onOpenBudgetHUD && (
                   <span className="text-[9px] font-bold text-emerald-600 group-hover:underline">
@@ -540,7 +647,7 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
                   </span>
                 )}
               </div>
-              <div className="text-[10px] text-slate-400 truncate mt-0.5">
+              <div className="text-[9.5px] text-slate-400 truncate mt-0.5">
                 ${Math.max(0, telemetry.budget_allocated - telemetry.budget_spent).toLocaleString()} runway available
               </div>
             </div>
@@ -548,99 +655,43 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
         )}
 
         {/* 5-Tabs Navigation Header */}
-        <div className="bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center gap-1 overflow-x-auto no-scrollbar shrink-0">
-          <button
-            type="button"
-            onClick={() => setActiveTab("overview")}
-            className={`py-3 px-3 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-              activeTab === "overview"
-                ? "border-indigo-600 text-indigo-600 bg-indigo-50/50"
-                : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
-            }`}
-          >
-            <i className="bi bi-info-circle"></i>
-            <span>Overview & Scope</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("squad")}
-            className={`py-3 px-3 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-              activeTab === "squad"
-                ? "border-indigo-600 text-indigo-600 bg-indigo-50/50"
-                : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
-            }`}
-          >
-            <i className="bi bi-people"></i>
-            <span>Assigned Squad</span>
-            {data?.squad && (
-              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">
-                {data.squad.length}
-              </span>
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("milestones")}
-            className={`py-3 px-3 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-              activeTab === "milestones"
-                ? "border-indigo-600 text-indigo-600 bg-indigo-50/50"
-                : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
-            }`}
-          >
-            <i className="bi bi-flag"></i>
-            <span>Deliverable Milestones</span>
-            {data?.milestones && (
-              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">
-                {data.milestones.length}
-              </span>
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("tasks")}
-            className={`py-3 px-3 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-              activeTab === "tasks"
-                ? "border-indigo-600 text-indigo-600 bg-indigo-50/50"
-                : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
-            }`}
-          >
-            <i className="bi bi-check2-square"></i>
-            <span>Task Breakdown</span>
-            {data?.tasks && (
-              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">
-                {data.tasks.length}
-              </span>
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("audit")}
-            className={`py-3 px-3 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-              activeTab === "audit"
-                ? "border-indigo-600 text-indigo-600 bg-indigo-50/50"
-                : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
-            }`}
-          >
-            <i className="bi bi-clock-history"></i>
-            <span>Audit History</span>
-            {data?.audit_logs && (
-              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">
-                {data.audit_logs.length}
-              </span>
-            )}
-          </button>
+        <div className="bg-white border-b border-slate-200 px-3.5 sm:px-4 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0">
+          {[
+            { id: "overview", label: "Overview & Scope", icon: "bi-info-circle", count: null },
+            { id: "squad", label: "Assigned Squad", icon: "bi-people", count: data?.squad?.length },
+            { id: "milestones", label: "Deliverable Milestones", icon: "bi-flag", count: data?.milestones?.length },
+            { id: "tasks", label: "Task Breakdown", icon: "bi-check2-square", count: data?.tasks?.length },
+            { id: "audit", label: "Audit History", icon: "bi-clock-history", count: data?.audit_logs?.length },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`py-2.5 px-3 text-[11px] sm:text-[11.5px] font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                activeTab === tab.id
+                  ? "border-indigo-600 text-indigo-700 bg-indigo-50/50 rounded-t-lg"
+                  : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
+              }`}
+            >
+              <i className={`bi ${tab.icon} text-xs`}></i>
+              <span>{tab.label}</span>
+              {tab.count !== null && tab.count !== undefined && (
+                <span className={`px-1.5 py-0.2 rounded-full text-[9.5px] font-bold ${
+                  activeTab === tab.id ? "bg-indigo-100 text-indigo-700" : "bg-slate-100 text-slate-600"
+                }`}>
+                  {tab.count}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
 
         {/* Tab Body (Scrollable) */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 bg-slate-50/40 space-y-3">
           {loading ? (
             <div className="py-16 text-center">
-              <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-              <p className="text-xs text-slate-500 font-medium">Assembling 360° project dossier...</p>
+              <div className="w-7 h-7 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+              <p className="text-[11px] text-slate-500 font-medium">Assembling 360° project dossier...</p>
             </div>
           ) : !data ? (
             <div className="py-16 text-center text-slate-400">
@@ -651,7 +702,7 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
             /* TAB 1: OVERVIEW & SCOPE */
             <div className="space-y-4">
               {/* Executive Blocker Alert Banner (If Active) */}
-              {data?.project?.is_blocked && data?.project?.blocker_status && data?.project?.blocker_status !== "none" && (
+              {Boolean(data?.project?.is_blocked && data?.project?.blocker_status && data?.project?.blocker_status !== "none") && (
                 <div className="p-4 rounded-xl bg-gradient-to-r from-rose-50 via-rose-100/60 to-orange-50 border-2 border-rose-300 shadow-xs animate-pulse">
                   <div className="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
                     <div className="flex items-start gap-3 min-w-0">
@@ -1423,6 +1474,7 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
           </div>
         </div>
       </div>
+        </div>
 
       {/* Printable Executive Initiative Dossier / PDF Summary View */}
       {showPrintDossier && data?.project && (
@@ -1437,6 +1489,7 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
           onClose={() => setShowPrintDossier(false)}
         />
       )}
-    </div>
+    </div>,
+    document.body
   );
 };
