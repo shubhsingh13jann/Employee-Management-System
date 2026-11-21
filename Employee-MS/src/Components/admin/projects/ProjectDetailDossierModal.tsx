@@ -942,9 +942,10 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
                     className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between"
                   >
                     <div>
-                      <div className="flex items-center justify-between gap-2 mb-2">
+                      {/* Top Header: Role Badge on Left, Department and Task Telemetry on Right */}
+                      <div className="flex items-start justify-between gap-2 mb-2">
                         <span
-                          className={`px-2 py-0.2 rounded-md text-[9.5px] font-bold ${
+                          className={`px-2 py-0.5 rounded-md text-[9.5px] font-bold shrink-0 ${
                             member.squad_role === "Lead Supervisor"
                               ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
                               : member.squad_role === "Supervisor"
@@ -954,35 +955,37 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
                         >
                           {member.squad_role}
                         </span>
-                        <span className="text-[9.5px] text-slate-400">
-                          {member.department_name || "General"}
-                        </span>
+
+                        {/* Right: Department Name on Top, Tasks & Done on separate rows below it */}
+                        <div className="text-right shrink-0">
+                          <span className="text-[9.5px] text-slate-400 block leading-tight">
+                            {member.department_name || "General"}
+                          </span>
+                          <div className="text-[9.5px] text-slate-600 mt-1 leading-tight font-medium">
+                            Tasks: <strong className="text-slate-800">{member.assigned_tasks_count}</strong>
+                          </div>
+                          {member.assigned_tasks_count > 0 && (
+                            <div className="text-[9px] text-emerald-700 font-semibold leading-tight mt-0.5">
+                              {member.completed_tasks_count} done
+                            </div>
+                          )}
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-2.5 mb-2">
+                      {/* Member Avatar + Name & Email */}
+                      <div className="flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs border border-white/20 shrink-0">
                           {member.name ? member.name.charAt(0).toUpperCase() : "U"}
                         </div>
                         <div className="min-w-0">
-                          <h5 className="font-bold text-[11.5px] text-slate-900 truncate mb-0">
+                          <h5 className="font-bold text-[11.5px] text-slate-900 truncate mb-0 leading-tight">
                             {member.name}
                           </h5>
-                          <p className="text-[9.5px] text-slate-400 truncate mb-0">
+                          <p className="text-[9.5px] text-slate-400 truncate mb-0 mt-0.5">
                             {member.email}
                           </p>
                         </div>
                       </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[9.5px]">
-                      <span className="text-slate-500">
-                        Tasks: <strong className="text-slate-800">{member.assigned_tasks_count}</strong>
-                      </span>
-                      {member.assigned_tasks_count > 0 && (
-                        <span className="text-emerald-700 font-medium">
-                          {member.completed_tasks_count} done
-                        </span>
-                      )}
                     </div>
                   </div>
                 ))}
