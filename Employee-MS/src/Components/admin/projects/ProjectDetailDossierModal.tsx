@@ -700,33 +700,33 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
             </div>
           ) : activeTab === "overview" ? (
             /* TAB 1: OVERVIEW & SCOPE */
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* Executive Blocker Alert Banner (If Active) */}
               {Boolean(data?.project?.is_blocked && data?.project?.blocker_status && data?.project?.blocker_status !== "none") && (
-                <div className="p-4 rounded-xl bg-gradient-to-r from-rose-50 via-rose-100/60 to-orange-50 border-2 border-rose-300 shadow-xs animate-pulse">
+                <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-rose-50 via-rose-100/60 to-orange-50 border border-rose-200 shadow-2xs">
                   <div className="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
-                    <div className="flex items-start gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-rose-600 text-white flex items-center justify-center text-base shrink-0 shadow-xs">
+                    <div className="flex items-start gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-rose-600 text-white flex items-center justify-center text-sm shrink-0 shadow-2xs">
                         <i className="bi bi-shield-slash-fill"></i>
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-xs font-black uppercase tracking-wider text-rose-900 bg-rose-200/90 px-2.5 py-0.5 rounded-md border border-rose-300">
-                            🚫 Active Blocker: {data.project.blocker_status.replace(/_/g, " ")}
+                          <span className="text-[10px] font-black uppercase tracking-wider text-rose-900 bg-rose-200/90 px-2 py-0.5 rounded-md border border-rose-300">
+                            🚫 Active Blocker: {data?.project?.blocker_status ? data.project.blocker_status.replace(/_/g, " ") : "Critical Blocker"}
                           </span>
-                          {data.project.blocker_escalated_at && (
-                            <span className="text-[11px] font-bold text-rose-700">
+                          {data?.project?.blocker_escalated_at && (
+                            <span className="text-[10.5px] font-bold text-rose-700">
                               Escalated on {new Date(data.project.blocker_escalated_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                             </span>
                           )}
-                          {data.project.blocker_flagged_by_name && (
-                            <span className="text-[11px] text-slate-500">
+                          {data?.project?.blocker_flagged_by_name && (
+                            <span className="text-[10px] text-slate-500">
                               by {data.project.blocker_flagged_by_name}
                             </span>
                           )}
                         </div>
-                        {data.project.blocker_notes && (
-                          <p className="text-xs text-rose-950 font-medium mt-2 mb-0 leading-relaxed bg-white/80 p-2.5 rounded-lg border border-rose-200/90 shadow-2xs">
+                        {data?.project?.blocker_notes && (
+                          <p className="text-[11px] text-rose-950 font-medium mt-1.5 mb-0 leading-relaxed bg-white/80 p-2 rounded-lg border border-rose-200/90 shadow-2xs">
                             "{data.project.blocker_notes}"
                           </p>
                         )}
@@ -736,11 +736,11 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
                       <button
                         type="button"
                         onClick={() => {
-                          onOpenBlockerModal(data.project);
+                          if (data?.project) onOpenBlockerModal(data.project);
                         }}
-                        className="px-3 py-1.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-xs transition-colors shrink-0 cursor-pointer flex items-center gap-1.5"
+                        className="px-2.5 py-1 text-[11px] font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-2xs transition-colors shrink-0 cursor-pointer flex items-center gap-1.5"
                       >
-                        <i className="bi bi-sliders"></i>
+                        <i className="bi bi-sliders text-xs"></i>
                         <span>Manage Blocker</span>
                       </button>
                     )}
@@ -748,72 +748,77 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
                 </div>
               )}
 
-              {/* Scope Card */}
-              <div className="p-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-                  Strategic Scope & Initiative Charter
-                </h4>
-                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed mb-0">
+              {/* Strategic Scope Card */}
+              <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white border border-slate-200/80 shadow-2xs">
+                <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-slate-100">
+                  <div className="w-6.5 h-6.5 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs shadow-2xs shrink-0">
+                    <i className="bi bi-file-earmark-text"></i>
+                  </div>
+                  <h4 className="text-[11px] sm:text-[11.5px] font-bold text-slate-800 tracking-tight leading-snug truncate mb-0 uppercase">
+                    Strategic Scope & Initiative Charter
+                  </h4>
+                </div>
+                <p className="text-[11.5px] text-slate-700 leading-relaxed mb-0">
                   {project?.description || "No detailed scope description provided for this initiative."}
                 </p>
               </div>
 
               {/* Grid Metadata */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                 {/* Department Info */}
-                <div className="p-3.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block leading-tight mb-1.5">
                     Department Ownership
-                  </div>
+                  </span>
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 font-bold text-xs flex items-center justify-center border border-indigo-200">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-50/80 text-indigo-700 font-bold text-xs flex items-center justify-center border border-indigo-100 shrink-0 shadow-2xs">
                       {project?.department_code || "DPT"}
                     </div>
-                    <div>
-                      <div className="text-xs font-bold text-slate-900">
+                    <div className="min-w-0">
+                      <div className="text-[11.5px] font-bold text-slate-800 truncate">
                         {project?.department_name || "General"}
                       </div>
-                      <div className="text-[10px] text-slate-400">
-                        ID: {project?.department_id}
+                      <div className="text-[9.5px] text-slate-400 font-mono">
+                        DEPT ID: {project?.department_id}
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Lead Supervisor */}
-                <div className="p-3.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block leading-tight mb-1.5">
                     Designated Lead Supervisor
-                  </div>
+                  </span>
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center border border-emerald-200">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-800 font-bold text-xs flex items-center justify-center border border-emerald-200 shrink-0 shadow-2xs">
                       {project?.supervisor_name ? project.supervisor_name.charAt(0) : "U"}
                     </div>
                     <div className="min-w-0">
-                      <div className="text-xs font-bold text-slate-900 truncate">
+                      <div className="text-[11.5px] font-bold text-slate-800 truncate">
                         {project?.supervisor_name || "Unassigned"}
                       </div>
-                      <div className="text-[10px] text-slate-400 truncate">
-                        {project?.supervisor_email || "No email"}
+                      <div className="text-[9.5px] text-slate-400 truncate">
+                        {project?.supervisor_email || "No email assigned"}
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Project Lifecycle */}
-                <div className="p-3.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block leading-tight mb-1.5">
                     Lifecycle Timeline
-                  </div>
-                  <div className="space-y-0.5 text-xs">
-                    <div className="flex justify-between text-slate-600">
-                      <span className="text-[10px] text-slate-400">Start Date:</span>
-                      <span className="font-medium">
+                  </span>
+                  <div className="space-y-1 text-[11px]">
+                    <div className="flex items-center justify-between text-slate-600">
+                      <span className="text-[9.5px] text-slate-400">Start Date:</span>
+                      <span className="font-semibold text-slate-700">
                         {project?.start_date ? new Date(project.start_date).toLocaleDateString() : "Unset"}
                       </span>
                     </div>
-                    <div className="flex justify-between text-slate-600">
-                      <span className="text-[10px] text-slate-400">Target Date:</span>
+                    <div className="flex items-center justify-between text-slate-600">
+                      <span className="text-[9.5px] text-slate-400">Target Date:</span>
                       <span className="font-bold text-slate-900">
                         {project?.target_date ? new Date(project.target_date).toLocaleDateString() : "Unset"}
                       </span>
@@ -823,36 +828,38 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
               </div>
 
               {/* Priority & Financials */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="p-3.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block leading-tight mb-1.5">
                     Priority & Governance
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-1 rounded-md text-xs font-bold uppercase bg-slate-100 text-slate-800 border border-slate-200">
+                  </span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-slate-100 text-slate-800 border border-slate-200">
                       {project?.priority} Priority
                     </span>
-                    <span className="text-xs text-slate-500">
+                    <span className="text-[10.5px] text-slate-500">
                       Created by {project?.creator_name || "Admin"} on{" "}
                       {project?.created_at ? new Date(project.created_at).toLocaleDateString() : "N/A"}
                     </span>
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block leading-tight mb-1.5">
                     Financial Allocation
-                  </div>
+                  </span>
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-base font-bold text-slate-900">
+                      <span className="text-sm font-bold text-slate-900">
                         ${Number(project?.budget || 0).toLocaleString()}
                       </span>
-                      <span className="text-[10px] text-slate-400 block">Total Budget Cap</span>
+                      <span className="text-[9.5px] text-slate-400 block">Total Budget Cap</span>
                     </div>
                     <div className="text-right">
-                      <span className="text-xs font-semibold text-emerald-700">Healthy</span>
-                      <span className="text-[10px] text-slate-400 block">Fiscal Assessment</span>
+                      <span className="text-[10.5px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+                        Healthy
+                      </span>
+                      <span className="text-[9.5px] text-slate-400 block mt-0.5">Fiscal Assessment</span>
                     </div>
                   </div>
                 </div>
@@ -862,27 +869,34 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
             /* TAB 2: ASSIGNED SQUAD */
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900 mb-0">Project Squad Roster</h4>
-                  <p className="text-[11px] text-slate-500 mb-0">
-                    Personnel assigned to this initiative and active contributors
-                  </p>
+                <div className="flex items-center gap-2">
+                  <div className="w-6.5 h-6.5 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs shadow-2xs shrink-0">
+                    <i className="bi bi-people-fill"></i>
+                  </div>
+                  <div>
+                    <h4 className="text-[11px] sm:text-[11.5px] font-bold text-slate-800 mb-0 tracking-tight">
+                      Project Squad Roster
+                    </h4>
+                    <p className="text-[9.5px] text-slate-400 mb-0">
+                      Personnel assigned to this initiative and active contributors
+                    </p>
+                  </div>
                 </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                <span className="px-2 py-0.5 rounded-lg text-[9.5px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs">
                   {data.squad.length} Personnel
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                 {data.squad.map((member) => (
                   <div
                     key={member.id}
-                    className="p-3.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between"
+                    className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between"
                   >
                     <div>
                       <div className="flex items-center justify-between gap-2 mb-2">
                         <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          className={`px-2 py-0.2 rounded-md text-[9.5px] font-bold ${
                             member.squad_role === "Lead Supervisor"
                               ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
                               : member.squad_role === "Supervisor"
@@ -892,27 +906,27 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
                         >
                           {member.squad_role}
                         </span>
-                        <span className="text-[10px] text-slate-400">
+                        <span className="text-[9.5px] text-slate-400">
                           {member.department_name || "General"}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-2.5 mb-2">
-                        <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200 shrink-0">
-                          {member.name.charAt(0)}
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs border border-white/20 shrink-0">
+                          {member.name ? member.name.charAt(0).toUpperCase() : "U"}
                         </div>
                         <div className="min-w-0">
-                          <h5 className="font-bold text-xs text-slate-900 truncate mb-0">
+                          <h5 className="font-bold text-[11.5px] text-slate-900 truncate mb-0">
                             {member.name}
                           </h5>
-                          <p className="text-[10px] text-slate-500 truncate mb-0">
+                          <p className="text-[9.5px] text-slate-400 truncate mb-0">
                             {member.email}
                           </p>
                         </div>
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[9.5px]">
                       <span className="text-slate-500">
                         Tasks: <strong className="text-slate-800">{member.assigned_tasks_count}</strong>
                       </span>
@@ -930,19 +944,26 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
             /* TAB 3: DELIVERABLE MILESTONES */
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900 mb-0">Deliverable Milestones & Phases</h4>
-                  <p className="text-[11px] text-slate-500 mb-0">
-                    Sequenced delivery roadmap, owners, and checklist verification
-                  </p>
+                <div className="flex items-center gap-2">
+                  <div className="w-6.5 h-6.5 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs shadow-2xs shrink-0">
+                    <i className="bi bi-flag-fill"></i>
+                  </div>
+                  <div>
+                    <h4 className="text-[11px] sm:text-[11.5px] font-bold text-slate-800 mb-0 tracking-tight">
+                      Deliverable Milestones & Phases
+                    </h4>
+                    <p className="text-[9.5px] text-slate-400 mb-0">
+                      Sequenced delivery roadmap, owners, and checklist verification
+                    </p>
+                  </div>
                 </div>
                 {onOpenMilestonesModal && project && (
                   <button
                     type="button"
                     onClick={() => onOpenMilestonesModal(project)}
-                    className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-[11px] border border-indigo-200 transition-colors cursor-pointer flex items-center gap-1.5"
+                    className="px-2.5 py-1 rounded-xl bg-white hover:bg-slate-50 text-indigo-700 font-semibold text-[11px] border border-slate-200/90 shadow-2xs transition-all cursor-pointer flex items-center gap-1.5"
                   >
-                    <i className="bi bi-gear-wide-connected"></i>
+                    <i className="bi bi-gear-wide-connected text-xs"></i>
                     <span>Manage Milestones</span>
                   </button>
                 )}
@@ -1071,11 +1092,18 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
             /* TAB 4: TASK BREAKDOWN */
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-2 border-b border-slate-200 flex-wrap gap-2">
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900 mb-0">Project Task Breakdown</h4>
-                  <p className="text-[11px] text-slate-500 mb-0">
-                    Granular execution tasks linked to this initiative
-                  </p>
+                <div className="flex items-center gap-2">
+                  <div className="w-6.5 h-6.5 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs shadow-2xs shrink-0">
+                    <i className="bi bi-check2-square"></i>
+                  </div>
+                  <div>
+                    <h4 className="text-[11px] sm:text-[11.5px] font-bold text-slate-800 mb-0 tracking-tight">
+                      Project Task Breakdown
+                    </h4>
+                    <p className="text-[9.5px] text-slate-400 mb-0">
+                      Granular execution tasks linked to this initiative
+                    </p>
+                  </div>
                 </div>
 
                 {/* Filter Pills */}
@@ -1184,37 +1212,44 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
             </div>
           ) : (
             /* TAB 5: AUDIT HISTORY */
-            <div className="space-y-3.5">
+            <div className="space-y-3">
               {/* Header with Counter, CSV Download & Full Drawer Link */}
               <div className="flex items-center justify-between pb-2 border-b border-slate-200 gap-2 flex-wrap">
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900 mb-0">Initiative Change Ledger & Audit Trail</h4>
-                  <p className="text-[11px] text-slate-500 mb-0">
-                    Immutable history of updates, status changes, and administrative actions
-                  </p>
+                <div className="flex items-center gap-2">
+                  <div className="w-6.5 h-6.5 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs shadow-2xs shrink-0">
+                    <i className="bi bi-clock-history"></i>
+                  </div>
+                  <div>
+                    <h4 className="text-[11px] sm:text-[11.5px] font-bold text-slate-800 mb-0 tracking-tight">
+                      Initiative Change Ledger & Audit Trail
+                    </h4>
+                    <p className="text-[9.5px] text-slate-400 mb-0">
+                      Immutable history of updates, status changes, and administrative actions
+                    </p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
+                  <span className="px-2 py-0.5 rounded-lg text-[9.5px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs">
                     {data.audit_logs.length} Logged Events
                   </span>
                   <button
                     type="button"
                     onClick={handleExportAuditCSV}
                     disabled={!data.audit_logs?.length}
-                    className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 flex items-center gap-1 transition-all cursor-pointer shadow-2xs disabled:opacity-40"
+                    className="px-2.5 py-1 rounded-xl text-[11px] font-semibold bg-white text-emerald-700 hover:bg-emerald-50 border border-slate-200/90 shadow-2xs flex items-center gap-1 transition-all cursor-pointer disabled:opacity-40"
                     title="Export audit logs to CSV"
                   >
-                    <i className="bi bi-file-earmark-spreadsheet"></i>
+                    <i className="bi bi-file-earmark-spreadsheet text-xs"></i>
                     <span>Export CSV</span>
                   </button>
                   {onOpenAuditDrawer && (
                     <button
                       type="button"
                       onClick={() => onOpenAuditDrawer(data.project)}
-                      className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
+                      className="px-2.5 py-1 rounded-xl text-[11px] font-semibold bg-white text-indigo-700 hover:bg-indigo-50 border border-slate-200/90 shadow-2xs flex items-center gap-1 transition-all cursor-pointer"
                       title="Open full slide-out audit trail drawer with filters & CSV export"
                     >
-                      <i className="bi bi-layout-sidebar-inset-reverse"></i>
+                      <i className="bi bi-layout-sidebar-inset-reverse text-xs"></i>
                       <span>Open Full Ledger</span>
                     </button>
                   )}
@@ -1223,21 +1258,21 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
 
               {/* Telemetry Quick Strip (4 Cards) */}
               <div className="grid grid-cols-4 gap-2 text-center">
-                <div className="p-2 bg-slate-50 rounded-lg border border-slate-200 shadow-2xs">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Total Events</span>
-                  <span className="text-sm font-extrabold text-slate-800">{auditCategoryCounts.all}</span>
+                <div className="p-2 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
+                  <span className="text-[9px] uppercase font-bold text-slate-400 block tracking-wider">Total Events</span>
+                  <span className="text-xs sm:text-[13px] font-bold text-slate-800">{auditCategoryCounts.all}</span>
                 </div>
-                <div className="p-2 bg-indigo-50/50 rounded-lg border border-indigo-100 shadow-2xs">
-                  <span className="text-[10px] uppercase font-bold text-indigo-500 block tracking-wider">Status Shifts</span>
-                  <span className="text-sm font-extrabold text-indigo-700">{auditCategoryCounts.status}</span>
+                <div className="p-2 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
+                  <span className="text-[9px] uppercase font-bold text-indigo-500 block tracking-wider">Status Shifts</span>
+                  <span className="text-xs sm:text-[13px] font-bold text-indigo-700">{auditCategoryCounts.status}</span>
                 </div>
-                <div className="p-2 bg-amber-50/50 rounded-lg border border-amber-100 shadow-2xs">
-                  <span className="text-[10px] uppercase font-bold text-amber-600 block tracking-wider">Deadlines</span>
-                  <span className="text-sm font-extrabold text-amber-700">{auditCategoryCounts.deadline}</span>
+                <div className="p-2 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
+                  <span className="text-[9px] uppercase font-bold text-amber-600 block tracking-wider">Deadlines</span>
+                  <span className="text-xs sm:text-[13px] font-bold text-amber-700">{auditCategoryCounts.deadline}</span>
                 </div>
-                <div className="p-2 bg-emerald-50/50 rounded-lg border border-emerald-100 shadow-2xs">
-                  <span className="text-[10px] uppercase font-bold text-emerald-600 block tracking-wider">Budget Diffs</span>
-                  <span className="text-sm font-extrabold text-emerald-700">{auditCategoryCounts.budget}</span>
+                <div className="p-2 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
+                  <span className="text-[9px] uppercase font-bold text-emerald-600 block tracking-wider">Budget Diffs</span>
+                  <span className="text-xs sm:text-[13px] font-bold text-emerald-700">{auditCategoryCounts.budget}</span>
                 </div>
               </div>
 
@@ -1450,31 +1485,33 @@ export const ProjectDetailDossierModal: React.FC<ProjectDetailDossierModalProps>
           )}
         </div>
 
-        {/* Modal Footer */}
-        <div className="bg-slate-100 border-t border-slate-200 px-4 sm:px-6 py-3 flex items-center justify-between shrink-0">
-          <div className="text-[11px] text-slate-500">
-            Strategic Initiative Dossier • Governance & Audit Certified
+        {/* Modal Footer Controls matching Hierarchy Dossier Modal */}
+        <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 bg-white border-t border-slate-200 flex items-center justify-between gap-2 shrink-0">
+          <div className="text-[10.5px] text-slate-400 font-medium flex items-center gap-1.5">
+            <i className="bi bi-shield-check text-emerald-600 text-xs"></i>
+            <span>Strategic Initiative Dossier • Governance & Audit Certified</span>
           </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
+              onClick={onClose}
+              className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200/90 shadow-2xs transition-all cursor-pointer flex items-center gap-1.5 active:scale-98"
+            >
+              <i className="bi bi-x-lg text-xs"></i>
+              <span>Close Dossier</span>
+            </button>
+            <button
+              type="button"
               onClick={() => setShowPrintDossier(true)}
-              className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs border border-indigo-200 transition-colors cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-1.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-600/20 transition-all cursor-pointer flex items-center gap-1.5 active:scale-98"
             >
               <i className="bi bi-printer text-xs"></i>
               <span>Print Executive Summary</span>
             </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs transition-colors cursor-pointer"
-            >
-              Close Dossier
-            </button>
           </div>
         </div>
-      </div>
         </div>
+      </div>
 
       {/* Printable Executive Initiative Dossier / PDF Summary View */}
       {showPrintDossier && data?.project && (
