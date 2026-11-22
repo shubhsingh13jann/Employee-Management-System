@@ -54,7 +54,7 @@ export const BatchOperationConfirmModal: React.FC<BatchOperationConfirmModalProp
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150">
       <div
-        className="bg-white rounded-3xl max-w-3xl lg:max-w-[780px] w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col pointer-events-auto"
+        className="bg-white rounded-3xl max-w-3xl lg:max-w-[820px] w-full shadow-2xl border border-slate-200/90 overflow-hidden animate-in zoom-in-95 duration-150 flex flex-col pointer-events-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header with Fluid Pastel Rose Wave Background matching Unlink Reporting Line modal */}
@@ -163,53 +163,53 @@ export const BatchOperationConfirmModal: React.FC<BatchOperationConfirmModalProp
         {/* Modal Body */}
         <div className="px-4 sm:px-5 py-2.5 sm:py-3 space-y-2.5 sm:space-y-3 overflow-y-auto max-h-[70vh]">
           {/* Top Two Cards: Initiative Details (Left) and Severed/Archived Diagram (Right) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-3.5 items-stretch">
             {/* Left Card: Initiative Identity Card */}
-            <div className="py-2.5 px-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 flex flex-col justify-between">
+            <div className="md:col-span-5 py-2.5 px-3 rounded-2xl bg-slate-50/70 border border-slate-200/80 flex flex-col justify-center">
               {/* Profile Row */}
-              <div className="flex items-center gap-3.5">
+              <div className="flex items-center gap-2.5">
                 <div
-                  className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center font-bold text-base sm:text-lg shadow-xs shrink-0 select-none text-white ${
+                  className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center font-bold text-base shadow-xs shrink-0 select-none text-white ${
                     isDelete ? "bg-rose-600" : "bg-indigo-600"
                   }`}
                 >
                   {primaryProject.title ? primaryProject.title.charAt(0).toUpperCase() : "P"}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-bold text-slate-900 text-sm sm:text-base mb-0 tracking-tight truncate" title={primaryProject.title}>
+                  <div className="flex items-center gap-1.5">
+                    <h4 className="font-bold text-slate-900 text-xs sm:text-sm !m-0 tracking-tight truncate" title={primaryProject.title}>
                       {primaryProject.title || "Strategic Initiative"}
                     </h4>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold font-mono bg-slate-200/80 text-slate-600 shrink-0">
+                    <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[9.5px] font-semibold font-mono bg-slate-200/80 text-slate-600 shrink-0">
                       {projectCode}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 mb-0 font-normal mt-0.5 truncate" title={primaryProject.description}>
+                  <p className="text-[11px] text-slate-400 !m-0 font-normal mt-0.5 truncate" title={primaryProject.description}>
                     {primaryProject.description || "Voice Automation System"}
                   </p>
                 </div>
               </div>
 
               {/* Bottom Metadata Pills */}
-              <div className="grid grid-cols-2 gap-2 mt-3 pt-2.5 border-t border-slate-200/70">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs shrink-0">
+              <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-200/70">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs shrink-0">
                     <i className="bi bi-person-fill"></i>
                   </div>
                   <div className="min-w-0">
-                    <span className="text-[10px] text-slate-400 block leading-tight font-medium">Lead Supervisor</span>
-                    <span className="text-xs font-bold text-slate-800 block leading-tight truncate">
+                    <span className="text-[9.5px] text-slate-400 block leading-tight font-medium">Lead Supervisor</span>
+                    <span className="text-[11px] font-bold text-slate-800 block leading-tight truncate">
                       {primaryProject.supervisor_name || "Unassigned"}
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xs shrink-0">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xs shrink-0">
                     <i className="bi bi-building-fill"></i>
                   </div>
                   <div className="min-w-0">
-                    <span className="text-[10px] text-slate-400 block leading-tight font-medium">Department</span>
-                    <span className="text-xs font-bold text-slate-800 block leading-tight truncate">
+                    <span className="text-[9.5px] text-slate-400 block leading-tight font-medium">Department</span>
+                    <span className="text-[11px] font-bold text-slate-800 block leading-tight truncate">
                       {primaryProject.department_name || "General"}
                     </span>
                   </div>
@@ -217,56 +217,70 @@ export const BatchOperationConfirmModal: React.FC<BatchOperationConfirmModalProp
               </div>
             </div>
 
-            {/* Right Card: Severed / Transition Hierarchy Diagram matching Image 1 */}
-            <div className="py-2.5 px-3.5 rounded-2xl bg-[#fff7f8] border border-rose-200/80 flex items-center justify-between relative overflow-hidden">
+            {/* Right Card: Severed / Transition Hierarchy Diagram */}
+            <div className="md:col-span-7 py-2.5 px-3 rounded-2xl bg-[#fff7f8] border border-rose-200/80 flex items-center justify-between relative overflow-hidden">
               {/* Connecting Red Dashed Line */}
-              <div className="absolute left-[50px] right-[50px] top-1/2 -translate-y-1/2 border-t-2 border-dashed border-rose-300 pointer-events-none z-0"></div>
+              <div className="absolute left-[30px] right-[30px] top-1/2 -translate-y-1/2 border-t-2 border-dashed border-rose-300 pointer-events-none z-0"></div>
 
-              {/* Box 1: Active Initiative */}
-              <div className="w-[120px] sm:w-[130px] bg-white border border-slate-200/80 rounded-2xl p-2.5 flex flex-col items-center text-center shadow-xs z-10 shrink-0">
-                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm mb-1.5 shadow-2xs">
+              {/* Box 1: Active Initiative - Logo at Left, 3 texts at Right */}
+              <div className="flex-1 min-w-0 max-w-[175px] bg-white border border-slate-200/90 rounded-2xl p-2 sm:px-2.5 sm:py-2 flex items-center gap-2 shadow-xs z-10">
+                {/* Logo only at the left */}
+                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm shadow-2xs shrink-0">
                   <i className="bi bi-briefcase-fill"></i>
                 </div>
-                <span className="text-xs font-bold text-slate-800 leading-tight truncate max-w-full" title={primaryProject.title}>
-                  {primaryProject.title || "Initiative"}
-                </span>
-                <span className="text-[10px] text-slate-400 font-medium leading-tight mt-0.5 truncate max-w-full">
-                  Active Delivery
-                </span>
-                <span className="mt-1.5 px-2 py-0.5 rounded text-[10px] font-semibold font-mono bg-slate-100 text-slate-600 shrink-0">
-                  {projectCode}
-                </span>
+                {/* The 3 texts at the right */}
+                <div className="min-w-0 flex-1 flex flex-col justify-center">
+                  <span className="text-xs font-bold text-slate-800 leading-tight truncate block" title={primaryProject.title}>
+                    {primaryProject.title || "Initiative"}
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-medium leading-tight mt-0.5 truncate block">
+                    Active Delivery
+                  </span>
+                  <div className="mt-1">
+                    <span className="inline-flex px-1.5 py-0.2 rounded text-[9px] font-semibold font-mono bg-slate-100 text-slate-600 border border-slate-200/60 leading-none">
+                      {projectCode}
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {/* Center Severed / Broken Circle */}
-              <div className="relative z-10 flex items-center justify-center">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-rose-600 text-white flex items-center justify-center text-base shadow-md shadow-rose-600/30 ring-4 ring-rose-100 shrink-0">
-                  <i className={`bi ${isDelete ? "bi-trash3-fill" : "bi-archive-fill"} font-bold text-sm`}></i>
+              <div className="relative z-10 flex items-center justify-center shrink-0 mx-1 sm:mx-1.5">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-rose-600 text-white flex items-center justify-center text-sm shadow-md shadow-rose-600/30 ring-4 ring-rose-100 shrink-0">
+                  <i className={`bi ${isDelete ? "bi-trash3-fill" : "bi-archive-fill"} font-bold text-xs sm:text-sm`}></i>
                 </div>
               </div>
 
-              {/* Box 2: Target Vault / Deletion State */}
-              <div className="w-[120px] sm:w-[130px] bg-white border border-slate-200/80 rounded-2xl p-2.5 flex flex-col items-center text-center shadow-xs z-10 shrink-0">
+              {/* Box 2: Target Vault / Deletion State - Logo at Left, 3 texts at Right */}
+              <div className="flex-1 min-w-0 max-w-[175px] bg-white border border-slate-200/90 rounded-2xl p-2 sm:px-2.5 sm:py-2 flex items-center gap-2 shadow-xs z-10">
+                {/* Logo only at the left */}
                 <div
-                  className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm mb-1.5 shadow-2xs ${
+                  className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm shadow-2xs shrink-0 ${
                     isDelete ? "bg-rose-50 text-rose-500" : "bg-amber-50 text-amber-600"
                   }`}
                 >
                   <i className={`bi ${isDelete ? "bi-slash-circle-fill" : "bi-safe-fill"}`}></i>
                 </div>
-                <span className="text-xs font-bold text-slate-800 leading-tight truncate max-w-full">
-                  {isDelete ? "Purged System" : "Archived Vault"}
-                </span>
-                <span className="text-[10px] text-slate-400 font-medium leading-tight mt-0.5 truncate max-w-full">
-                  {isDelete ? "Permanent Deletion" : "Dormant Record"}
-                </span>
-                <span
-                  className={`mt-1.5 px-2 py-0.5 rounded text-[10px] font-semibold shrink-0 ${
-                    isDelete ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-800"
-                  }`}
-                >
-                  {isDelete ? "DELETED" : "ARCHIVED"}
-                </span>
+                {/* The 3 texts at the right */}
+                <div className="min-w-0 flex-1 flex flex-col justify-center">
+                  <span className="text-xs font-bold text-slate-800 leading-tight truncate block">
+                    {isDelete ? "Purged System" : "Archived Vault"}
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-medium leading-tight mt-0.5 truncate block">
+                    {isDelete ? "Permanent Deletion" : "Dormant Record"}
+                  </span>
+                  <div className="mt-1">
+                    <span
+                      className={`inline-flex px-1.5 py-0.2 rounded text-[9px] font-semibold leading-none ${
+                        isDelete
+                          ? "bg-rose-100 text-rose-700 border border-rose-200/60"
+                          : "bg-amber-100 text-amber-800 border border-amber-200/60"
+                      }`}
+                    >
+                      {isDelete ? "DELETED" : "ARCHIVED"}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
