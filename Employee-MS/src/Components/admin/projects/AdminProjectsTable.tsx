@@ -668,16 +668,6 @@ export const AdminProjectsTable: React.FC<AdminProjectsTableProps> = ({
                               <i className="bi bi-clock-history text-[10px]"></i>
                             </button>
                           )}
-                          {onOpenPrintDossier && (
-                            <button
-                              type="button"
-                              onClick={() => onOpenPrintDossier(proj)}
-                              className="w-6 h-6 rounded-md border border-slate-200 bg-white hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 transition-all inline-flex items-center justify-center cursor-pointer shadow-2xs"
-                              title="Print Executive Dossier / Export PDF Summary View"
-                            >
-                              <i className="bi bi-printer text-[10px]"></i>
-                            </button>
-                          )}
                           <button
                             type="button"
                             onClick={(e) => {
