@@ -302,12 +302,12 @@ export const BatchOperationConfirmModal: React.FC<BatchOperationConfirmModalProp
           )}
 
           {/* Warning Banner */}
-          <div className="p-3 sm:p-3.5 rounded-2xl bg-[#fef8f0] border border-amber-200/80 flex items-center gap-3.5">
-            <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-base shadow-2xs shrink-0">
+          <div className="p-2.5 sm:p-3 rounded-2xl bg-[#fef8f0] border border-amber-200/80 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-sm shadow-2xs shrink-0">
               <i className="bi bi-exclamation-triangle-fill"></i>
             </div>
             <div className="min-w-0">
-              <p className="font-bold text-amber-900 text-xs sm:text-sm mb-0.5 leading-snug">
+              <div className="font-bold text-amber-950 text-xs sm:text-[13px] leading-tight">
                 {isDelete
                   ? count > 1
                     ? `Are you sure you want to permanently delete these ${count} initiatives?`
@@ -315,25 +315,25 @@ export const BatchOperationConfirmModal: React.FC<BatchOperationConfirmModalProp
                   : count > 1
                   ? `Are you sure you want to archive these ${count} initiatives?`
                   : "Are you sure you want to archive this strategic initiative?"}
-              </p>
-              <p className="text-[11px] sm:text-xs text-amber-700 mb-0 font-normal leading-normal">
+              </div>
+              <div className="text-[11px] sm:text-xs text-amber-800 font-normal leading-normal mt-0.5">
                 {isDelete
                   ? "This action is irreversible and permanently cascades to remove all associated deliverables, squad allocations, tasks, and logged budget expenditures."
                   : "Archiving transitions the initiative to dormant status. All historical telemetry, milestones, and audit trails remain preserved and can be restored anytime."}
-              </p>
+              </div>
             </div>
           </div>
 
           {/* Acknowledgement Checkbox for Deletions */}
           {isDelete && (
-            <label className="flex items-center gap-2.5 text-xs text-slate-700 font-medium cursor-pointer p-2.5 rounded-xl bg-rose-50/50 border border-rose-200 select-none">
+            <label className="flex items-center text-xs text-slate-700 font-medium cursor-pointer p-2.5 px-3 rounded-xl bg-rose-50/50 border border-rose-200 select-none transition-colors hover:bg-rose-50/80">
               <input
                 type="checkbox"
                 checked={confirmedCheckbox}
                 onChange={(e) => setConfirmedCheckbox(e.target.checked)}
-                className="w-4 h-4 m-0 rounded border-slate-300 text-rose-600 focus:ring-rose-500 cursor-pointer accent-rose-600 shrink-0"
+                className="w-4 h-4 !mr-2.5 rounded border-slate-300 text-rose-600 focus:ring-rose-500 cursor-pointer accent-rose-600 shrink-0 self-center"
               />
-              <span className="text-[11.5px] leading-snug">
+              <span className="text-[11.5px] text-slate-700 font-medium leading-none select-none">
                 I understand and acknowledge that this strategic initiative removal is permanent and cannot be undone.
               </span>
             </label>
