@@ -150,9 +150,11 @@ const AdminProjects: React.FC = () => {
   const [batchConfirmModal, setBatchConfirmModal] = useState<{
     isOpen: boolean;
     mode: "archive" | "delete";
+    singleProject?: ProjectItem | null;
   }>({
     isOpen: false,
     mode: "delete",
+    singleProject: null,
   });
 
   const handleToggleSelectProject = (projectId: number | string) => {
@@ -421,9 +423,40 @@ const AdminProjects: React.FC = () => {
   };
 
   const handleExecuteBatchConfirm = async () => {
+    if (batchConfirmModal.singleProject) {
+      const targetProj = batchConfirmModal.singleProject;
+      try {
+        setIsBatchProcessing(true);
+        if (batchConfirmModal.mode === "archive") {
+          const res = await api.put(`/api/admin/projects/${targetProj.id}/status`, { status: "archived" });
+          if (res.data.status) {
+            setMsg({ type: "success", text: `Strategic initiative "${targetProj.title}" archived successfully` });
+            setBatchConfirmModal((prev) => ({ ...prev, isOpen: false, singleProject: null }));
+            fetchData();
+          }
+        } else {
+          const res = await api.delete(`/api/admin/projects/${targetProj.id}`);
+          if (res.data.status) {
+            setMsg({ type: "success", text: `Strategic initiative "${targetProj.title}" removed successfully` });
+            setProjects((prev) => prev.filter((p) => String(p.id) !== String(targetProj.id)));
+            setBatchConfirmModal((prev) => ({ ...prev, isOpen: false, singleProject: null }));
+            fetchData();
+          }
+        }
+      } catch (err: any) {
+        setMsg({
+          type: "danger",
+          text: err.response?.data?.error || `Failed to ${batchConfirmModal.mode} project`,
+        });
+      } finally {
+        setIsBatchProcessing(false);
+      }
+      return;
+    }
+
     if (batchConfirmModal.mode === "archive") {
       await handleBatchStatusChange("archived");
-      setBatchConfirmModal({ isOpen: false, mode: "archive" });
+      setBatchConfirmModal({ isOpen: false, mode: "archive", singleProject: null });
     } else {
       try {
         setIsBatchProcessing(true);
@@ -437,7 +470,7 @@ const AdminProjects: React.FC = () => {
           });
           setProjects((prev) => prev.filter((p) => !selectedProjectIds.includes(p.id)));
           setSelectedProjectIds([]);
-          setBatchConfirmModal({ isOpen: false, mode: "delete" });
+          setBatchConfirmModal({ isOpen: false, mode: "delete", singleProject: null });
           fetchData();
         }
       } catch (err: any) {
@@ -517,6 +550,17 @@ const AdminProjects: React.FC = () => {
   };
 
   const handleUpdateStatus = async (projectId: number | string, newStatus: string) => {
+    if (newStatus === "archived") {
+      const proj = projects.find((p) => String(p.id) === String(projectId));
+      if (proj) {
+        setBatchConfirmModal({
+          isOpen: true,
+          mode: "archive",
+          singleProject: proj,
+        });
+        return;
+      }
+    }
     try {
       const res = await api.put(`/api/admin/projects/${projectId}/status`, { status: newStatus });
       if (res.data.status) {
@@ -531,18 +575,13 @@ const AdminProjects: React.FC = () => {
     }
   };
 
-  const handleDeleteProject = async (projectId: number | string) => {
-    if (!window.confirm("Are you sure you want to archive / delete this strategic initiative?")) return;
-    try {
-      const res = await api.delete(`/api/admin/projects/${projectId}`);
-      if (res.data.status) {
-        setMsg({ type: "success", text: "Strategic initiative removed successfully" });
-        fetchData();
-      }
-    } catch (err: any) {
-      setMsg({
-        type: "danger",
-        text: err.response?.data?.error || "Failed to delete project",
+  const handleDeleteProject = (projectId: number | string) => {
+    const proj = projects.find((p) => String(p.id) === String(projectId));
+    if (proj) {
+      setBatchConfirmModal({
+        isOpen: true,
+        mode: "delete",
+        singleProject: proj,
       });
     }
   };
@@ -824,13 +863,17 @@ const AdminProjects: React.FC = () => {
           isProcessing={isBatchProcessing}
         />
 
-        {/* Batch Operation Confirmation Dialog (Archive & Delete) */}
+        {/* Batch & Single Operation Confirmation Dialog (Archive & Delete) */}
         <BatchOperationConfirmModal
           isOpen={batchConfirmModal.isOpen}
-          onClose={() => setBatchConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+          onClose={() => setBatchConfirmModal((prev) => ({ ...prev, isOpen: false, singleProject: null }))}
           onConfirm={handleExecuteBatchConfirm}
           mode={batchConfirmModal.mode}
-          selectedProjects={projects.filter((p) => selectedProjectIds.includes(p.id))}
+          selectedProjects={
+            batchConfirmModal.singleProject
+              ? [batchConfirmModal.singleProject]
+              : projects.filter((p) => selectedProjectIds.includes(p.id))
+          }
           isProcessing={isBatchProcessing}
         />
 
