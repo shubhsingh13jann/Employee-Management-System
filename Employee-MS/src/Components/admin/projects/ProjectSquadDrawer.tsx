@@ -337,28 +337,90 @@ export const ProjectSquadDrawer: React.FC<ProjectSquadDrawerProps> = ({
             </button>
           </div>
 
-          {/* Quick Telemetry Bar */}
-          <div className="px-4 py-2.5 bg-slate-50/80 border-b border-slate-200/80 flex items-center justify-between gap-2 text-xs shrink-0">
-            <div className="flex items-center gap-3">
-              <span className="text-slate-600 font-medium">
-                Capacity: <strong className="text-slate-900 font-bold">{totalAllocatedPct}% Total Cap</strong>
-              </span>
-              {overloadedCount > 0 && (
-                <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-bold text-[9.5px] flex items-center gap-1 border border-rose-200/80 shadow-2xs">
-                  <i className="bi bi-exclamation-octagon-fill text-[9px]"></i>
-                  <span>{overloadedCount} Overloaded</span>
-                </span>
-              )}
-              {nearCapacityCount > 0 && (
-                <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold text-[9.5px] flex items-center gap-1 border border-amber-200/80 shadow-2xs">
-                  <i className="bi bi-exclamation-triangle-fill text-[9px]"></i>
-                  <span>{nearCapacityCount} Near Limit</span>
-                </span>
-              )}
+          {/* Executive Telemetry Bar / HUD Grid matching 360 Dossier Modal */}
+          <div className="bg-slate-50/60 border-b border-slate-200/80 px-3.5 sm:px-4 py-2.5 grid grid-cols-2 md:grid-cols-4 gap-2.5 shrink-0">
+            {/* 1. Capacity Allocation */}
+            <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <span>Total Squad Cap</span>
+                <span className="font-bold text-slate-800 text-[11px]">{totalAllocatedPct}%</span>
+              </div>
+              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-1 border border-slate-200/60">
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    totalAllocatedPct > 100
+                      ? "bg-gradient-to-r from-purple-500 to-indigo-600"
+                      : "bg-gradient-to-r from-indigo-500 to-indigo-600"
+                  }`}
+                  style={{ width: `${Math.min(totalAllocatedPct, 100)}%` }}
+                ></div>
+              </div>
+              <div className="text-[9.5px] text-slate-400">
+                {members.length} personnel allocated
+              </div>
             </div>
-            <span className="text-[11px] text-slate-500 font-medium">
-              Lead: <strong className="text-slate-800 font-semibold">{project.supervisor_name || "Unassigned"}</strong>
-            </span>
+
+            {/* 2. Capacity Governance */}
+            <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <span>Governance Band</span>
+                <span className="font-bold text-slate-800 text-[11px]">
+                  {overloadedCount > 0 ? (
+                    <span className="text-rose-600">{overloadedCount} Alert</span>
+                  ) : nearCapacityCount > 0 ? (
+                    <span className="text-amber-600">{nearCapacityCount} Warning</span>
+                  ) : (
+                    <span className="text-emerald-600">Optimal</span>
+                  )}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 mt-1">
+                {overloadedCount > 0 ? (
+                  <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 font-bold text-[9px] border border-rose-200/80 flex items-center gap-1">
+                    <i className="bi bi-exclamation-octagon-fill text-[8.5px]"></i>
+                    <span>{overloadedCount} Overloaded</span>
+                  </span>
+                ) : nearCapacityCount > 0 ? (
+                  <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 font-bold text-[9px] border border-amber-200/80 flex items-center gap-1">
+                    <i className="bi bi-exclamation-triangle-fill text-[8.5px]"></i>
+                    <span>{nearCapacityCount} Near Limit</span>
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[9px] border border-emerald-200/80 flex items-center gap-1">
+                    <i className="bi bi-check-circle-fill text-[8.5px]"></i>
+                    <span>All Within Band</span>
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* 3. Squad Headcount */}
+            <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
+                <span>Squad Headcount</span>
+                <i className="bi bi-people text-slate-400 text-xs"></i>
+              </div>
+              <div className="text-[11.5px] font-bold text-slate-800">
+                {members.length} Active Staff
+              </div>
+              <div className="text-[9.5px] text-slate-400 mt-0.5">
+                Cross-functional allocation
+              </div>
+            </div>
+
+            {/* 4. Designated Lead Supervisor */}
+            <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
+                <span>Designated Lead</span>
+                <i className="bi bi-person-check text-slate-400 text-xs"></i>
+              </div>
+              <div className="text-[11.5px] font-bold text-slate-800 truncate">
+                {project.supervisor_name || "Unassigned"}
+              </div>
+              <div className="text-[9.5px] text-slate-400 truncate mt-0.5">
+                {project.department_name || "General"}
+              </div>
+            </div>
           </div>
 
           {/* Alert Notifications */}
