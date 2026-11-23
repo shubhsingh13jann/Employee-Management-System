@@ -451,30 +451,52 @@ export const ProjectSquadDrawer: React.FC<ProjectSquadDrawerProps> = ({
           )}
 
           {/* Modal Body (Scrollable) */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/40">
-            {/* Section 1: Allocate New Member Form */}
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs relative overflow-hidden">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-purple-50 text-indigo-600 border border-purple-100 flex items-center justify-center text-sm shadow-2xs shrink-0">
-                    <i className="bi bi-person-plus-fill"></i>
+          <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 bg-slate-50/40 space-y-3.5">
+            {/* Section 1: Allocate Personnel to Squad Executive Card */}
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs relative overflow-hidden">
+              {/* Top-Right Soft Wave Background Accent */}
+              <div className="absolute top-0 right-0 w-[280px] sm:w-[380px] h-[95px] pointer-events-none overflow-hidden z-0 opacity-75">
+                <svg viewBox="0 0 400 95" fill="none" preserveAspectRatio="none" className="w-full h-full">
+                  <defs>
+                    <linearGradient id="allocWaveGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#EDE9FE" stopOpacity="0.1" />
+                      <stop offset="40%" stopColor="#DDD6FE" stopOpacity="0.45" />
+                      <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0.75" />
+                    </linearGradient>
+                    <linearGradient id="allocWaveGrad2" x1="20%" y1="0%" x2="100%" y2="80%">
+                      <stop offset="0%" stopColor="#E0E7FF" stopOpacity="0.2" />
+                      <stop offset="60%" stopColor="#C7D2FE" stopOpacity="0.6" />
+                      <stop offset="100%" stopColor="#E9D5FF" stopOpacity="0.5" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M0,45 C110,15 220,75 400,25 L400,0 L0,0 Z" fill="url(#allocWaveGrad1)" />
+                  <path d="M40,25 C140,5 260,55 400,10 L400,0 L40,0 Z" fill="url(#allocWaveGrad2)" opacity="0.6" />
+                </svg>
+              </div>
+
+              {/* Card Header */}
+              <div className="flex items-center justify-between mb-3 relative z-10">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-purple-50 text-indigo-600 border border-purple-100 flex items-center justify-center text-base sm:text-lg shadow-2xs shrink-0">
+                    <i className="bi bi-person-plus-fill text-indigo-600"></i>
                   </div>
                   <div>
-                    <h4 className="text-[13px] font-bold text-slate-900 mb-0">
+                    <h4 className="text-[13px] sm:text-[14px] font-bold text-slate-900 mb-0 tracking-tight leading-tight">
                       Allocate Personnel to Squad
                     </h4>
-                    <p className="text-[10px] text-slate-400 mb-0">
+                    <p className="text-[10px] sm:text-[11px] text-slate-400 mb-0">
                       Assign team member, specify initiative role tag & set capacity percentage
                     </p>
                   </div>
                 </div>
+
                 {project.department_name && (
                   <button
                     type="button"
                     onClick={() => setFilterDepartmentOnly(!filterDepartmentOnly)}
-                    className={`text-[9.5px] font-bold px-2.5 py-1 rounded-full border transition-all cursor-pointer shadow-2xs shrink-0 ${
+                    className={`text-[10.5px] font-bold px-3 py-1 rounded-full border transition-all cursor-pointer shadow-2xs shrink-0 ${
                       filterDepartmentOnly
-                        ? "bg-indigo-600 text-white border-indigo-600"
+                        ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
                         : "bg-white text-slate-600 border-slate-200/90 hover:bg-slate-50"
                     }`}
                   >
@@ -483,7 +505,7 @@ export const ProjectSquadDrawer: React.FC<ProjectSquadDrawerProps> = ({
                 )}
               </div>
 
-              <form onSubmit={handleAddMember} className="space-y-3">
+              <form onSubmit={handleAddMember} className="space-y-3 relative z-10">
                 {/* Select Candidate */}
                 <div>
                   <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1">
@@ -531,18 +553,18 @@ export const ProjectSquadDrawer: React.FC<ProjectSquadDrawerProps> = ({
                   </div>
                 )}
 
-                {/* Role Tagging Selection */}
+                {/* Role Tagging Selection with visual chips */}
                 <div>
                   <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                     Initiative Role Tag
                   </label>
-                  <div className="grid grid-cols-3 gap-1.5">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-1.5">
                     {ROLE_TAGS.map((tag) => (
                       <button
                         key={tag.name}
                         type="button"
                         onClick={() => setSelectedRoleTag(tag.name)}
-                        className={`px-2 py-1.5 rounded-xl text-[11px] font-semibold border flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                        className={`px-2.5 py-1.5 rounded-xl text-[11px] font-semibold border flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                           selectedRoleTag === tag.name
                             ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
                             : "bg-slate-50/70 text-slate-700 border-slate-200/80 hover:bg-slate-100 hover:border-slate-300"
@@ -555,8 +577,8 @@ export const ProjectSquadDrawer: React.FC<ProjectSquadDrawerProps> = ({
                   </div>
                 </div>
 
-                {/* Allocation Percentage Slider */}
-                <div>
+                {/* Allocation Percentage Slider & Indicator */}
+                <div className="p-3 rounded-xl bg-slate-50/70 border border-slate-200/70">
                   <div className="flex items-center justify-between text-[11px] font-semibold text-slate-700 mb-1">
                     <span>Workload Allocation</span>
                     <span className="font-bold text-indigo-700 text-xs px-2 py-0.5 rounded-full bg-indigo-50 border border-indigo-200/80 shadow-2xs">
@@ -572,7 +594,7 @@ export const ProjectSquadDrawer: React.FC<ProjectSquadDrawerProps> = ({
                     onChange={(e) => setAllocationPct(Number(e.target.value))}
                     className="w-full accent-indigo-600 cursor-pointer"
                   />
-                  <div className="flex justify-between text-[9px] text-slate-400 mt-0.5 font-medium">
+                  <div className="flex justify-between text-[9px] text-slate-400 mt-1 font-medium">
                     <span>10% (Part-time)</span>
                     <span>50% (Half-time)</span>
                     <span>100% (Dedicated)</span>
