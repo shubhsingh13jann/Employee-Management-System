@@ -376,48 +376,75 @@ export const ProjectTasksTrayModal: React.FC<ProjectTasksTrayModalProps> = ({
             </div>
           </div>
 
-          {/* Telemetry Velocity Bar */}
-          <div className="px-6 py-3 bg-slate-50 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-3 shrink-0">
-            <div className="flex items-center gap-4 flex-wrap">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-slate-700">
-                  Velocity:
-                </span>
-                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700">
-                  {metrics.velocity_pct}% Complete
-                </span>
+          {/* Executive Telemetry Bar / HUD Grid matching Squad Roster & Dossier Modals */}
+          <div className="bg-slate-50/60 border-b border-slate-200/80 px-3.5 sm:px-4 py-2.5 grid grid-cols-2 md:grid-cols-4 gap-2.5 shrink-0">
+            {/* 1. Task Velocity */}
+            <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <span>Task Velocity</span>
+                <span className="font-bold text-slate-800 text-[11px]">{metrics.velocity_pct}%</span>
               </div>
-
-              <div className="flex items-center gap-2 text-xs text-slate-600">
-                <span>
-                  Total: <strong>{metrics.total}</strong>
-                </span>
-                <span>•</span>
-                <span className="text-emerald-700 font-semibold">
-                  Done: {metrics.completed}
-                </span>
-                <span>•</span>
-                <span className="text-blue-700 font-semibold">
-                  Active: {metrics.in_progress}
-                </span>
-                {metrics.overdue > 0 && (
-                  <>
-                    <span>•</span>
-                    <span className="text-rose-600 font-bold flex items-center gap-1">
-                      <i className="bi bi-exclamation-circle-fill"></i>
-                      {metrics.overdue} Overdue
-                    </span>
-                  </>
-                )}
+              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-1 border border-slate-200/60">
+                <div
+                  className="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full transition-all duration-300"
+                  style={{ width: `${metrics.velocity_pct}%` }}
+                ></div>
+              </div>
+              <div className="text-[9.5px] text-slate-400">
+                {metrics.completed} of {metrics.total} delivered
               </div>
             </div>
 
-            {/* Mini progress bar */}
-            <div className="w-48 h-2 bg-slate-200 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 transition-all duration-300"
-                style={{ width: `${metrics.velocity_pct}%` }}
-              ></div>
+            {/* 2. Completed Milestones */}
+            <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <span>Completed Tasks</span>
+                <span className="font-bold text-emerald-700 text-[11px]">{metrics.completed} Done</span>
+              </div>
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[9px] border border-emerald-200/80 flex items-center gap-1 shadow-2xs">
+                  <i className="bi bi-check-circle-fill text-[8.5px]"></i>
+                  <span>{metrics.total > 0 ? Math.round((metrics.completed / metrics.total) * 100) : 0}% Closed</span>
+                </span>
+              </div>
+            </div>
+
+            {/* 3. Active Workload */}
+            <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
+                <span>Active Workload</span>
+                <i className="bi bi-play-circle text-blue-500 text-xs"></i>
+              </div>
+              <div className="text-[11.5px] font-bold text-slate-800">
+                {metrics.in_progress} In Progress
+              </div>
+              <div className="text-[9.5px] text-slate-400 mt-0.5">
+                {metrics.pending} pending in backlog
+              </div>
+            </div>
+
+            {/* 4. Schedule / Overdue Telemetry */}
+            <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
+                <span>Deadline Health</span>
+                <i className="bi bi-clock-history text-slate-400 text-xs"></i>
+              </div>
+              <div className="text-[11.5px] font-bold text-slate-800 truncate">
+                {metrics.overdue > 0 ? (
+                  <span className="text-rose-600 flex items-center gap-1">
+                    <i className="bi bi-exclamation-octagon-fill text-[10px]"></i>
+                    <span>{metrics.overdue} Overdue</span>
+                  </span>
+                ) : (
+                  <span className="text-emerald-600 flex items-center gap-1">
+                    <i className="bi bi-shield-check text-[10px]"></i>
+                    <span>On Schedule</span>
+                  </span>
+                )}
+              </div>
+              <div className="text-[9.5px] text-slate-400 truncate mt-0.5">
+                {project.target_date ? `Target: ${project.target_date}` : "Active schedule monitoring"}
+              </div>
             </div>
           </div>
 
