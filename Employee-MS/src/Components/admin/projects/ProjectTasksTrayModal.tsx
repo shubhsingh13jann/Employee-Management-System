@@ -530,14 +530,14 @@ export const ProjectTasksTrayModal: React.FC<ProjectTasksTrayModalProps> = ({
           )}
 
           {/* Task List (Scrollable) */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-2.5">
+          <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-2.5 bg-slate-50/40">
             {loading ? (
               <div className="py-16 text-center text-slate-400">
                 <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
                 <span className="text-xs">Loading initiative tasks...</span>
               </div>
             ) : filteredTasks.length === 0 ? (
-              <div className="p-10 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+              <div className="p-10 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 shadow-2xs">
                 <i className="bi bi-check2-circle text-3xl text-slate-300 mb-2 block"></i>
                 <p className="text-xs font-bold text-slate-700 mb-1">
                   {searchTerm || filterStatus !== "all"
@@ -556,7 +556,7 @@ export const ProjectTasksTrayModal: React.FC<ProjectTasksTrayModalProps> = ({
                       onClose();
                       onOpenQuickAddTask(project);
                     }}
-                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-sm shadow-indigo-600/20"
                   >
                     <i className="bi bi-plus-lg"></i>
                     <span>Add First Task</span>
@@ -571,10 +571,10 @@ export const ProjectTasksTrayModal: React.FC<ProjectTasksTrayModalProps> = ({
                 return (
                   <div
                     key={t.id}
-                    className={`p-3.5 rounded-xl border transition-all flex items-start justify-between gap-3 ${
+                    className={`p-3 sm:p-3.5 rounded-2xl border transition-all flex items-start justify-between gap-3 shadow-2xs ${
                       t.status === "completed"
                         ? "bg-slate-50/70 border-slate-200/60 opacity-80"
-                        : "bg-white border-slate-200/90 shadow-2xs hover:shadow-xs"
+                        : "bg-white border-slate-200/90 hover:border-slate-300 hover:shadow-xs"
                     }`}
                   >
                     {/* Status Checkbox / Action */}
@@ -583,9 +583,9 @@ export const ProjectTasksTrayModal: React.FC<ProjectTasksTrayModalProps> = ({
                         type="button"
                         onClick={() => handleToggleStatus(t)}
                         disabled={togglingId === t.id}
-                        className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all cursor-pointer mt-0.5 shrink-0 ${
+                        className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-all cursor-pointer mt-0.5 shrink-0 shadow-2xs ${
                           t.status === "completed"
-                            ? "bg-emerald-600 border-emerald-600 text-white shadow-2xs"
+                            ? "bg-emerald-600 border-emerald-600 text-white"
                             : t.status === "in_progress"
                             ? "bg-blue-50 border-blue-400 text-blue-600 hover:bg-blue-100"
                             : "bg-white border-slate-300 hover:border-slate-400"
@@ -601,7 +601,7 @@ export const ProjectTasksTrayModal: React.FC<ProjectTasksTrayModalProps> = ({
                         {togglingId === t.id ? (
                           <div className="w-2.5 h-2.5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
                         ) : t.status === "completed" ? (
-                          <i className="bi bi-check-lg text-xs"></i>
+                          <i className="bi bi-check-lg text-xs font-bold"></i>
                         ) : t.status === "in_progress" ? (
                           <div className="w-2 h-2 rounded-full bg-blue-600"></div>
                         ) : null}
@@ -610,26 +610,26 @@ export const ProjectTasksTrayModal: React.FC<ProjectTasksTrayModalProps> = ({
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
                           <span
-                            className={`text-xs font-semibold text-slate-900 ${
+                            className={`text-xs font-bold text-slate-900 ${
                               t.status === "completed" ? "line-through text-slate-400" : ""
                             }`}
                           >
                             {t.title}
                           </span>
                           <span
-                            className={`px-2 py-0.2 rounded-full text-[9px] font-bold border capitalize ${getPriorityBadge(
+                            className={`px-2 py-0.2 rounded-md text-[9px] font-bold border capitalize shadow-2xs ${getPriorityBadge(
                               t.priority
                             )}`}
                           >
                             {t.priority}
                           </span>
                           <span
-                            className={`px-2 py-0.2 rounded-full text-[9px] font-semibold border ${
+                            className={`px-2 py-0.2 rounded-md text-[9px] font-bold border shadow-2xs ${
                               t.status === "completed"
-                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200/80"
                                 : t.status === "in_progress"
-                                ? "bg-blue-50 text-blue-700 border-blue-200"
-                                : "bg-slate-100 text-slate-600 border-slate-200"
+                                ? "bg-blue-50 text-blue-700 border-blue-200/80"
+                                : "bg-slate-100 text-slate-600 border-slate-200/80"
                             }`}
                           >
                             {t.status === "in_progress" ? "In Progress" : t.status}
@@ -637,31 +637,31 @@ export const ProjectTasksTrayModal: React.FC<ProjectTasksTrayModalProps> = ({
                         </div>
 
                         {t.description && (
-                          <p className="text-[11px] text-slate-500 mb-2 line-clamp-2">
+                          <p className="text-[11px] text-slate-500 mb-2 line-clamp-2 leading-relaxed">
                             {t.description}
                           </p>
                         )}
 
                         {/* Meta Footer */}
-                        <div className="flex items-center gap-4 text-[10px] text-slate-500 flex-wrap">
+                        <div className="flex items-center gap-3 text-[10px] text-slate-500 flex-wrap">
                           {/* Assignee */}
                           <div className="flex items-center gap-1.5">
                             {t.assignee_image_url ? (
                               <img
                                 src={`http://localhost:5000/images/${t.assignee_image_url}`}
                                 alt={t.assignee_name}
-                                className="w-4 h-4 rounded-full object-cover border border-slate-200"
+                                className="w-5 h-5 rounded-lg object-cover border border-slate-200 shrink-0 shadow-2xs"
                               />
                             ) : (
-                              <div className="w-4 h-4 rounded-full bg-slate-200 text-slate-700 font-bold text-[8px] flex items-center justify-center">
+                              <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-[8.5px] flex items-center justify-center shrink-0 shadow-2xs border border-white/20">
                                 {t.assignee_name ? t.assignee_name.charAt(0) : "U"}
                               </div>
                             )}
-                            <span className="font-medium text-slate-700">
+                            <span className="font-semibold text-slate-700">
                               {t.assignee_name || "Unassigned"}
                             </span>
                             {t.assignee_squad_role && (
-                              <span className="text-[8.5px] px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-700 font-semibold border border-indigo-100">
+                              <span className="text-[8.5px] px-1.5 py-0.2 rounded-md bg-indigo-50 text-indigo-700 font-bold border border-indigo-200/80 shadow-2xs">
                                 {t.assignee_squad_role}
                               </span>
                             )}
@@ -670,14 +670,14 @@ export const ProjectTasksTrayModal: React.FC<ProjectTasksTrayModalProps> = ({
                           {/* Due Date */}
                           {t.due_date && (
                             <div
-                              className={`flex items-center gap-1 ${
+                              className={`flex items-center gap-1 font-mono text-[9.5px] ${
                                 isOverdue ? "text-rose-600 font-bold" : "text-slate-500"
                               }`}
                             >
-                              <i className="bi bi-calendar-event"></i>
+                              <i className="bi bi-calendar-event text-[9px]"></i>
                               <span>Due: {t.due_date}</span>
                               {isOverdue && (
-                                <span className="px-1.5 py-0.2 rounded bg-rose-50 border border-rose-200 text-[9px] uppercase font-bold">
+                                <span className="px-1.5 py-0.2 rounded-md bg-rose-50 border border-rose-200/80 text-[8.5px] uppercase font-bold text-rose-700 shadow-2xs">
                                   Overdue
                                 </span>
                               )}
@@ -693,7 +693,7 @@ export const ProjectTasksTrayModal: React.FC<ProjectTasksTrayModalProps> = ({
                         type="button"
                         onClick={() => handleDeleteTask(t)}
                         disabled={deletingId === t.id}
-                        className="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors flex items-center justify-center cursor-pointer"
+                        className="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors flex items-center justify-center cursor-pointer shrink-0 border border-transparent hover:border-rose-200"
                         title="Delete Task"
                       >
                         {deletingId === t.id ? (
@@ -709,19 +709,24 @@ export const ProjectTasksTrayModal: React.FC<ProjectTasksTrayModalProps> = ({
             )}
           </div>
 
-          {/* Footer */}
-          <div className="bg-slate-50 border-t border-slate-200 px-6 py-3 flex items-center justify-between shrink-0">
-            <span className="text-xs text-slate-500">
-              Showing <strong>{filteredTasks.length}</strong> of{" "}
-              <strong>{tasks.length}</strong> tasks
-            </span>
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs transition-colors cursor-pointer"
-            >
-              Close Tray
-            </button>
+          {/* Modal Footer matching Squad Roster & Dossier styling */}
+          <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 bg-white border-t border-slate-200 flex items-center justify-between gap-2 shrink-0">
+            <div className="text-[10.5px] text-slate-400 font-medium flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500/50"></span>
+              <span>
+                Showing <strong>{filteredTasks.length}</strong> of{" "}
+                <strong>{tasks.length}</strong> tasks • Governance Certified
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-1.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-600/20 transition-all cursor-pointer flex items-center gap-1.5 active:scale-98"
+              >
+                <span>Done</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
