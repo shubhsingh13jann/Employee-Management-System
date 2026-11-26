@@ -945,6 +945,26 @@ export const ProjectBudgetBurnHUDModal: React.FC<ProjectBudgetBurnHUDModalProps>
               </div>
             )}
           </div>
+
+          {/* Modal Footer matching In-View Tasks & Squad Roster styling */}
+          <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 bg-white border-t border-slate-200 flex items-center justify-between gap-2 shrink-0">
+            <div className="text-[10.5px] text-slate-400 font-medium flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500/50"></span>
+              <span>
+                Showing <strong>{filteredExpenses.length}</strong> of{" "}
+                <strong>{expenses.length}</strong> receipts • Governance Certified
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-1.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-600/20 transition-all cursor-pointer flex items-center gap-1.5 active:scale-98"
+              >
+                <span>Done</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>,
