@@ -844,107 +844,107 @@ export const ProjectBudgetBurnHUDModal: React.FC<ProjectBudgetBurnHUDModalProps>
               </div>
             )}
 
-          {/* Expenses Table */}
-          {loading ? (
-            <div className="p-8 text-center text-slate-500 text-xs font-medium">
-              <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-              <span>Loading project expenditures...</span>
-            </div>
-          ) : filteredExpenses.length === 0 ? (
-            <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200/80">
-              <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-base mx-auto mb-2">
-                <i className="bi bi-receipt"></i>
+            {/* Expenses Table */}
+            {loading ? (
+              <div className="py-14 text-center text-slate-400">
+                <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                <span className="text-xs font-medium">Loading project expenditures...</span>
               </div>
-              <p className="font-bold text-slate-800 text-sm mb-0.5">
-                No Expenditures Found
-              </p>
-              <p className="text-xs text-slate-400 mb-3">
-                {searchTerm || selectedCategoryFilter !== "all"
-                  ? "Try adjusting your search criteria or category filter."
-                  : "No expenses have been logged for this initiative yet."}
-              </p>
-              {!showLogForm && (
-                <button
-                  type="button"
-                  onClick={() => setShowLogForm(true)}
-                  className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
-                >
-                  <i className="bi bi-plus-lg"></i>
-                  <span>Log First Expenditure</span>
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="border border-slate-200/90 rounded-xl overflow-hidden shadow-2xs">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="bg-slate-100/90 border-b border-slate-200 text-slate-600 font-bold text-[10.5px] uppercase tracking-wider">
-                    <th className="py-2.5 px-3">Date</th>
-                    <th className="py-2.5 px-3">Title & Details</th>
-                    <th className="py-2.5 px-3 text-center">Category</th>
-                    <th className="py-2.5 px-3">Vendor / Recipient</th>
-                    <th className="py-2.5 px-3 text-right">Amount</th>
-                    <th className="py-2.5 px-3 text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredExpenses.map((exp) => (
-                    <tr key={exp.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-2.5 px-3 text-slate-500 whitespace-nowrap">
-                        {new Date(exp.expense_date).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </td>
-                      <td className="py-2.5 px-3 min-w-[200px]">
-                        <span className="font-bold text-slate-900 block leading-tight">
-                          {exp.title}
-                        </span>
-                        {exp.notes && (
-                          <span className="text-[10.5px] text-slate-400 block mt-0.5 truncate max-w-xs">
-                            {exp.notes}
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-2.5 px-3 text-center whitespace-nowrap">
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[9.5px] font-bold border inline-flex items-center gap-1 ${getCategoryBadge(
-                            exp.category
-                          )}`}
-                        >
-                          <i className={`bi ${getCategoryIcon(exp.category)}`}></i>
-                          <span className="capitalize">{exp.category}</span>
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-3 text-slate-700 whitespace-nowrap">
-                        {exp.vendor_recipient || "Internal Allocation"}
-                      </td>
-                      <td className="py-2.5 px-3 text-right font-black text-slate-900 whitespace-nowrap">
-                        {formatCurrency(exp.amount)}
-                      </td>
-                      <td className="py-2.5 px-3 text-center whitespace-nowrap">
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteExpense(exp)}
-                          disabled={deletingExpenseId === exp.id}
-                          className="w-6 h-6 rounded-md hover:bg-rose-50 text-slate-400 hover:text-rose-600 inline-flex items-center justify-center transition-colors cursor-pointer"
-                          title="Delete expenditure record"
-                        >
-                          {deletingExpenseId === exp.id ? (
-                            <div className="w-3 h-3 border-2 border-rose-600 border-t-transparent rounded-full animate-spin"></div>
-                          ) : (
-                            <i className="bi bi-trash text-xs"></i>
-                          )}
-                        </button>
-                      </td>
+            ) : filteredExpenses.length === 0 ? (
+              <div className="p-10 text-center bg-white rounded-2xl border border-dashed border-slate-200 shadow-2xs">
+                <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 text-slate-400 flex items-center justify-center text-base mx-auto mb-2.5">
+                  <i className="bi bi-receipt"></i>
+                </div>
+                <p className="font-bold text-slate-800 text-xs mb-1">
+                  No Expenditures Found
+                </p>
+                <p className="text-[11px] text-slate-400 mb-3.5">
+                  {searchTerm || selectedCategoryFilter !== "all"
+                    ? "Try adjusting your search criteria or category filter."
+                    : "No expenses have been logged for this initiative yet."}
+                </p>
+                {!showLogForm && (
+                  <button
+                    type="button"
+                    onClick={() => setShowLogForm(true)}
+                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-sm shadow-indigo-600/20"
+                  >
+                    <i className="bi bi-plus-lg"></i>
+                    <span>Log First Expenditure</span>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50/90 border-b border-slate-200/80 text-slate-500 font-bold text-[9.5px] uppercase tracking-wider">
+                      <th className="py-2.5 px-3.5">Date</th>
+                      <th className="py-2.5 px-3.5">Title & Details</th>
+                      <th className="py-2.5 px-3.5 text-center">Category</th>
+                      <th className="py-2.5 px-3.5">Vendor / Recipient</th>
+                      <th className="py-2.5 px-3.5 text-right">Amount</th>
+                      <th className="py-2.5 px-3.5 text-center">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredExpenses.map((exp) => (
+                      <tr key={exp.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-2.5 px-3.5 text-[11px] font-mono text-slate-500 whitespace-nowrap">
+                          {new Date(exp.expense_date).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </td>
+                        <td className="py-2.5 px-3.5 min-w-[200px]">
+                          <span className="font-bold text-xs text-slate-900 block leading-tight">
+                            {exp.title}
+                          </span>
+                          {exp.notes && (
+                            <span className="text-[10.5px] text-slate-400 block mt-0.5 truncate max-w-xs">
+                              {exp.notes}
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-2.5 px-3.5 text-center whitespace-nowrap">
+                          <span
+                            className={`px-2 py-0.5 rounded-md text-[9px] font-bold border inline-flex items-center gap-1 shadow-2xs ${getCategoryBadge(
+                              exp.category
+                            )}`}
+                          >
+                            <i className={`bi ${getCategoryIcon(exp.category)} text-[8.5px]`}></i>
+                            <span className="capitalize">{exp.category}</span>
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3.5 text-[11.5px] font-medium text-slate-700 whitespace-nowrap">
+                          {exp.vendor_recipient || "Internal Allocation"}
+                        </td>
+                        <td className="py-2.5 px-3.5 text-right font-extrabold text-xs text-slate-900 whitespace-nowrap">
+                          {formatCurrency(exp.amount)}
+                        </td>
+                        <td className="py-2.5 px-3.5 text-center whitespace-nowrap">
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteExpense(exp)}
+                            disabled={deletingExpenseId === exp.id}
+                            className="w-7 h-7 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 inline-flex items-center justify-center transition-colors cursor-pointer border border-transparent hover:border-rose-200"
+                            title="Delete expenditure record"
+                          >
+                            {deletingExpenseId === exp.id ? (
+                              <div className="w-3.5 h-3.5 border-2 border-rose-600 border-t-transparent rounded-full animate-spin"></div>
+                            ) : (
+                              <i className="bi bi-trash3 text-xs"></i>
+                            )}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>,
