@@ -571,98 +571,113 @@ export const ProjectBudgetBurnHUDModal: React.FC<ProjectBudgetBurnHUDModalProps>
             </div>
           )}
 
-        {/* 2. Critical >90% Budget Alert Warning Banner */}
-        {summary.is_critical_burn && (
-          <div
-            className={`px-6 py-2.5 flex items-center justify-between gap-3 text-xs font-semibold shrink-0 animate-pulse ${
-              summary.is_over_budget
-                ? "bg-rose-600 text-white"
-                : "bg-amber-500 text-white"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <i className="bi bi-exclamation-octagon-fill text-base"></i>
-              <span>
-                {summary.is_over_budget
-                  ? `OVER BUDGET ALERT: Expenditure has exceeded allocated capital by ${formatCurrency(
-                      summary.total_spent - summary.budget_allocated
-                    )}!`
-                  : `CRITICAL BURN ALERT: ${summary.burn_rate_pct}% of allocated funds consumed. Only ${formatCurrency(
-                      summary.runway_remaining
-                    )} runway remaining!`}
-              </span>
-            </div>
-            <span className="text-[10px] uppercase tracking-wider bg-black/20 px-2 py-0.5 rounded font-bold">
-              High Risk
-            </span>
-          </div>
-        )}
-
-        {/* 3. Executive Telemetry Bar: 4 Metric Cards */}
-        <div className="p-6 bg-slate-50 border-b border-slate-200/80 shrink-0">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-            {/* Metric 1: Budget Allocated */}
-            <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                Allocated Budget
-              </span>
-              <div className="text-lg font-black text-slate-900 leading-tight">
-                {formatCurrency(summary.budget_allocated)}
+          {/* 2. Critical >90% Budget Alert Warning Banner */}
+          {summary.is_critical_burn && (
+            <div
+              className={`px-3.5 sm:px-4 py-2 flex items-center justify-between gap-3 text-[11px] font-bold shrink-0 border-b ${
+                summary.is_over_budget
+                  ? "bg-rose-600 text-white border-rose-700"
+                  : "bg-amber-500 text-white border-amber-600"
+              }`}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <i className="bi bi-exclamation-octagon-fill text-xs shrink-0"></i>
+                <span className="truncate">
+                  {summary.is_over_budget
+                    ? `OVER BUDGET ALERT: Expenditure exceeded allocated capital by ${formatCurrency(
+                        summary.total_spent - summary.budget_allocated
+                      )}`
+                    : `CRITICAL BURN ALERT: ${summary.burn_rate_pct}% of allocated funds consumed (${formatCurrency(
+                        summary.runway_remaining
+                      )} remaining)`}
+                </span>
               </div>
-              <span className="text-[10px] text-slate-400 font-medium mt-0.5 block">
-                Total approved capital
+              <span className="text-[9px] uppercase tracking-wider bg-black/20 px-2 py-0.5 rounded-md font-bold shrink-0">
+                High Risk
               </span>
             </div>
+          )}
 
-            {/* Metric 2: Actual Expenditure */}
-            <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                Actual Expenditure
-              </span>
-              <div
-                className={`text-lg font-black leading-tight ${
-                  summary.is_critical_burn ? "text-rose-600" : "text-slate-900"
-                }`}
-              >
-                {formatCurrency(summary.total_spent)}
+          {/* 3. Executive Telemetry Bar / HUD Grid matching In-View Tasks & Dossier Modals */}
+          <div className="bg-slate-50/60 border-b border-slate-200/80 px-3.5 sm:px-4 py-2.5 shrink-0 space-y-2.5">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+              {/* Metric 1: Budget Allocated */}
+              <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
+                  <span>Allocated Budget</span>
+                  <i className="bi bi-wallet2 text-indigo-500 text-xs"></i>
+                </div>
+                <div className="text-[13.5px] sm:text-[14.5px] font-extrabold text-slate-900 tracking-tight leading-tight">
+                  {formatCurrency(summary.budget_allocated)}
+                </div>
+                <div className="text-[9.5px] text-slate-400 mt-0.5">
+                  Total approved capital
+                </div>
               </div>
-              <span className="text-[10px] text-slate-500 font-medium mt-0.5 block">
-                {summary.expense_count} logged receipts
-              </span>
-            </div>
 
-            {/* Metric 3: Remaining Runway */}
-            <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                Remaining Runway
-              </span>
-              <div
-                className={`text-lg font-black leading-tight ${
-                  summary.runway_remaining <= 0
-                    ? "text-rose-600"
-                    : summary.runway_remaining < summary.budget_allocated * 0.15
-                    ? "text-amber-600"
-                    : "text-emerald-600"
-                }`}
-              >
-                {formatCurrency(summary.runway_remaining)}
+              {/* Metric 2: Actual Expenditure */}
+              <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
+                  <span>Actual Spend</span>
+                  <i className="bi bi-receipt text-purple-500 text-xs"></i>
+                </div>
+                <div
+                  className={`text-[13.5px] sm:text-[14.5px] font-extrabold tracking-tight leading-tight ${
+                    summary.is_critical_burn ? "text-rose-600" : "text-slate-900"
+                  }`}
+                >
+                  {formatCurrency(summary.total_spent)}
+                </div>
+                <div className="text-[9.5px] text-slate-400 mt-0.5">
+                  {summary.expense_count} logged receipts
+                </div>
               </div>
-              <span className="text-[10px] text-slate-400 font-medium mt-0.5 block">
-                Available uncommitted
-              </span>
-            </div>
 
-            {/* Metric 4: Burn Rate Percentage */}
-            <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                Budget Burn Rate
-              </span>
-              <div className="flex items-center gap-1.5">
-                <span
-                  className={`text-lg font-black leading-tight ${
-                    summary.is_over_budget
+              {/* Metric 3: Remaining Runway */}
+              <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
+                  <span>Remaining Runway</span>
+                  <i className="bi bi-safe2 text-emerald-500 text-xs"></i>
+                </div>
+                <div
+                  className={`text-[13.5px] sm:text-[14.5px] font-extrabold tracking-tight leading-tight ${
+                    summary.runway_remaining <= 0
                       ? "text-rose-600"
-                      : summary.burn_rate_pct >= 90
+                      : summary.runway_remaining < summary.budget_allocated * 0.15
+                      ? "text-amber-600"
+                      : "text-emerald-600"
+                  }`}
+                >
+                  {formatCurrency(summary.runway_remaining)}
+                </div>
+                <div className="text-[9.5px] text-slate-400 mt-0.5">
+                  Available uncommitted
+                </div>
+              </div>
+
+              {/* Metric 4: Burn Rate Percentage */}
+              <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
+                  <span>Budget Burn Rate</span>
+                  <span
+                    className={`text-[9px] font-bold px-1.5 py-0.2 rounded-md border ${
+                      summary.is_over_budget
+                        ? "bg-rose-50 text-rose-700 border-rose-200/80"
+                        : summary.is_critical_burn
+                        ? "bg-amber-50 text-amber-700 border-amber-200/80"
+                        : "bg-emerald-50 text-emerald-700 border-emerald-200/80"
+                    }`}
+                  >
+                    {summary.is_over_budget
+                      ? "Deficit"
+                      : summary.is_critical_burn
+                      ? "High Burn"
+                      : "Optimal"}
+                  </span>
+                </div>
+                <div
+                  className={`text-[13.5px] sm:text-[14.5px] font-extrabold tracking-tight leading-tight ${
+                    summary.is_over_budget || summary.burn_rate_pct >= 90
                       ? "text-rose-600"
                       : summary.burn_rate_pct >= 75
                       ? "text-amber-600"
@@ -670,66 +685,52 @@ export const ProjectBudgetBurnHUDModal: React.FC<ProjectBudgetBurnHUDModalProps>
                   }`}
                 >
                   {summary.burn_rate_pct}%
+                </div>
+                <div className="text-[9.5px] text-slate-400 mt-0.5">
+                  Pacing vs scope
+                </div>
+              </div>
+            </div>
+
+            {/* Visual Budget Burn Progress Meter */}
+            <div className="p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <div className="flex items-center justify-between text-[10px] mb-1.5">
+                <span className="font-bold uppercase tracking-wider text-slate-500 text-[9px]">
+                  Capital Expenditure Progress Meter
                 </span>
-                <span
-                  className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${
-                    summary.is_critical_burn
-                      ? "bg-rose-50 text-rose-700 border-rose-200"
-                      : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                  }`}
-                >
-                  {summary.is_over_budget
-                    ? "Deficit"
-                    : summary.is_critical_burn
-                    ? "High Burn"
-                    : "Optimal"}
+                <span className="font-bold text-slate-700">
+                  {formatCurrency(summary.total_spent)} of {formatCurrency(summary.budget_allocated)} (
+                  <span className="text-indigo-700">{summary.burn_rate_pct}%</span>)
                 </span>
               </div>
-              <span className="text-[10px] text-slate-400 font-medium mt-0.5 block">
-                Pacing vs scope
-              </span>
+              <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden relative border border-slate-200/60">
+                <div
+                  style={{ width: `${Math.min(100, summary.burn_rate_pct)}%` }}
+                  className={`h-full transition-all duration-500 rounded-full ${
+                    summary.is_over_budget
+                      ? "bg-gradient-to-r from-rose-500 to-rose-700"
+                      : summary.burn_rate_pct >= 90
+                      ? "bg-gradient-to-r from-amber-500 to-rose-600"
+                      : summary.burn_rate_pct >= 75
+                      ? "bg-gradient-to-r from-amber-400 to-orange-500"
+                      : "bg-gradient-to-r from-indigo-500 to-indigo-600"
+                  }`}
+                ></div>
+
+                {/* 90% threshold safety guide line */}
+                <div
+                  className="absolute top-0 bottom-0 w-[2px] bg-rose-500 z-10 shadow-xs"
+                  style={{ left: "90%" }}
+                  title="90% Critical Budget Burn Limit"
+                ></div>
+              </div>
+              <div className="flex justify-between items-center text-[9px] text-slate-400 mt-1 font-medium">
+                <span>0% Commenced</span>
+                <span className="text-amber-600 font-semibold">90% Safety Limit</span>
+                <span>100% Allocated Cap</span>
+              </div>
             </div>
           </div>
-
-          {/* Visual Budget Burn Progress Bar */}
-          <div>
-            <div className="flex items-center justify-between text-[11px] mb-1.5">
-              <span className="font-bold text-slate-700">
-                Capital Expenditure Progress Meter
-              </span>
-              <span className="font-semibold text-slate-500">
-                {formatCurrency(summary.total_spent)} of {formatCurrency(summary.budget_allocated)} (
-                {summary.burn_rate_pct}%)
-              </span>
-            </div>
-            <div className="w-full h-3 rounded-full bg-slate-200 overflow-hidden relative shadow-inner">
-              <div
-                style={{ width: `${Math.min(100, summary.burn_rate_pct)}%` }}
-                className={`h-full transition-all duration-500 rounded-full ${
-                  summary.is_over_budget
-                    ? "bg-gradient-to-r from-red-600 to-rose-700"
-                    : summary.burn_rate_pct >= 90
-                    ? "bg-gradient-to-r from-amber-500 to-rose-600"
-                    : summary.burn_rate_pct >= 75
-                    ? "bg-gradient-to-r from-amber-400 to-orange-500"
-                    : "bg-gradient-to-r from-emerald-500 to-teal-600"
-                }`}
-              ></div>
-
-              {/* 90% threshold safety guide line */}
-              <div
-                className="absolute top-0 bottom-0 w-[2px] bg-rose-500 z-10 shadow-xs"
-                style={{ left: "90%" }}
-                title="90% Critical Budget Burn Limit"
-              ></div>
-            </div>
-            <div className="flex justify-between items-center text-[9.5px] text-slate-400 mt-1">
-              <span>0% Commenced</span>
-              <span className="text-amber-600 font-medium">90% Safety Limit</span>
-              <span>100% Allocated Cap</span>
-            </div>
-          </div>
-        </div>
 
         {/* 4. Category Breakdown Distribution Ribbon */}
         <div className="px-6 py-3 bg-white border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-3 shrink-0">
