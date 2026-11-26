@@ -732,98 +732,117 @@ export const ProjectBudgetBurnHUDModal: React.FC<ProjectBudgetBurnHUDModalProps>
             </div>
           </div>
 
-        {/* 4. Category Breakdown Distribution Ribbon */}
-        <div className="px-6 py-3 bg-white border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              Category Distribution:
-            </span>
-            {(
-              [
-                { id: "software", label: "Software", amt: categoryBreakdown.software, color: "bg-indigo-600" },
-                { id: "contractor", label: "Contractor", amt: categoryBreakdown.contractor, color: "bg-purple-600" },
-                { id: "infra", label: "Infra", amt: categoryBreakdown.infra, color: "bg-cyan-600" },
-                { id: "hardware", label: "Hardware", amt: categoryBreakdown.hardware, color: "bg-amber-600" },
-                { id: "other", label: "Other", amt: categoryBreakdown.other + categoryBreakdown.travel, color: "bg-slate-600" },
-              ] as const
-            ).map((cat) => {
-              const pct = summary.total_spent > 0 ? Math.round((cat.amt / summary.total_spent) * 100) : 0;
-              return (
-                <div
-                  key={`cat-dist-${cat.id}`}
-                  className="px-2 py-1 rounded-lg bg-slate-50 border border-slate-200 text-xs flex items-center gap-1.5"
-                >
-                  <span className={`w-2 h-2 rounded-full ${cat.color}`}></span>
-                  <span className="text-slate-700 font-semibold">{cat.label}:</span>
-                  <span className="text-slate-900 font-black">{formatCurrency(cat.amt)}</span>
-                  <span className="text-[10px] text-slate-400 font-medium">({pct}%)</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 5. Logged Expenditures Ledger & Controls */}
-        <div className="p-6 overflow-y-auto flex-1">
-          {msg.text && (
-            <div
-              className={`p-3 rounded-xl border flex items-center justify-between gap-3 text-xs mb-4 ${
-                msg.type === "success"
-                  ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                  : "bg-rose-50 text-rose-800 border-rose-200"
-              }`}
-            >
-              <span>{msg.text}</span>
-              <button
-                type="button"
-                onClick={() => setMsg({ type: "", text: "" })}
-                className="text-slate-400 hover:text-slate-700"
-              >
-                <i className="bi bi-x-lg"></i>
-              </button>
-            </div>
-          )}
-
-          {/* Filter Toolbar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
-            <div className="relative w-full sm:w-64">
-              <i className="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search description, vendor..."
-                className="w-full text-xs pl-8 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-
-            {/* Category Filter Pills */}
-            <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+          {/* 4. Category Breakdown Distribution Ribbon */}
+          <div className="px-3.5 sm:px-4 py-2 bg-white border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-2 shrink-0">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-0.5">
+                Distribution:
+              </span>
               {(
                 [
-                  { id: "all", label: "All Items" },
-                  { id: "software", label: "Software" },
-                  { id: "contractor", label: "Contractor" },
-                  { id: "infra", label: "Infra" },
-                  { id: "hardware", label: "Hardware" },
-                  { id: "other", label: "Other" },
+                  { id: "software", label: "Software", amt: categoryBreakdown.software, color: "bg-indigo-600" },
+                  { id: "contractor", label: "Contractor", amt: categoryBreakdown.contractor, color: "bg-purple-600" },
+                  { id: "infra", label: "Infra", amt: categoryBreakdown.infra, color: "bg-cyan-600" },
+                  { id: "hardware", label: "Hardware", amt: categoryBreakdown.hardware, color: "bg-amber-600" },
+                  { id: "other", label: "Other", amt: categoryBreakdown.other + categoryBreakdown.travel, color: "bg-slate-600" },
+                ] as const
+              ).map((cat) => {
+                const pct = summary.total_spent > 0 ? Math.round((cat.amt / summary.total_spent) * 100) : 0;
+                return (
+                  <div
+                    key={`cat-dist-${cat.id}`}
+                    className="px-2 py-0.5 rounded-lg bg-slate-50/80 border border-slate-200/80 text-[10.5px] flex items-center gap-1.5 shadow-2xs"
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${cat.color}`}></span>
+                    <span className="text-slate-600 font-semibold">{cat.label}:</span>
+                    <span className="text-slate-900 font-bold">{formatCurrency(cat.amt)}</span>
+                    <span className="text-[9.5px] text-slate-400 font-medium">({pct}%)</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 4.5 Filter & Search Toolbar matching In-View Tasks Breakdown */}
+          <div className="px-3.5 sm:px-4 py-2.5 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-2.5 shrink-0 bg-white">
+            {/* Category Filter Pills */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {(
+                [
+                  { id: "all", label: "All Items", count: expenses.length },
+                  { id: "software", label: "Software", count: expenses.filter((e) => e.category === "software").length },
+                  { id: "contractor", label: "Contractor", count: expenses.filter((e) => e.category === "contractor").length },
+                  { id: "infra", label: "Infra", count: expenses.filter((e) => e.category === "infra").length },
+                  { id: "hardware", label: "Hardware", count: expenses.filter((e) => e.category === "hardware").length },
+                  { id: "other", label: "Other", count: expenses.filter((e) => e.category === "other" || e.category === "travel").length },
                 ] as const
               ).map((f) => (
                 <button
                   key={`filter-${f.id}`}
                   type="button"
                   onClick={() => setSelectedCategoryFilter(f.id)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap leading-none ${
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                     selectedCategoryFilter === f.id
-                      ? "bg-indigo-600 text-white shadow-2xs"
-                      : "bg-slate-100 hover:bg-slate-200 text-slate-600"
+                      ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                      : "bg-white text-slate-600 border-slate-200/90 hover:bg-slate-50 hover:text-slate-900"
                   }`}
                 >
-                  {f.label}
+                  <span>{f.label}</span>
+                  <span
+                    className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
+                      selectedCategoryFilter === f.id
+                        ? "bg-white/20 text-white"
+                        : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    {f.count}
+                  </span>
                 </button>
               ))}
             </div>
+
+            {/* Search box */}
+            <div className="relative min-w-[200px] sm:min-w-[230px]">
+              <i className="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search receipts or vendors..."
+                className="w-full text-xs pl-8 pr-3 py-1.5 rounded-xl bg-slate-50/70 border border-slate-200/80 text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs"
+              />
+            </div>
           </div>
+
+          {/* 5. Logged Expenditures Ledger */}
+          <div className="p-3.5 sm:p-4 overflow-y-auto flex-1 bg-slate-50/40 space-y-3">
+            {msg.text && (
+              <div
+                className={`p-3 rounded-xl border flex items-center justify-between gap-3 text-xs animate-in fade-in shadow-2xs ${
+                  msg.type === "success"
+                    ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                    : "bg-rose-50 text-rose-800 border-rose-200"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <i
+                    className={`bi ${
+                      msg.type === "success"
+                        ? "bi-check-circle-fill text-emerald-600"
+                        : "bi-exclamation-triangle-fill text-rose-600"
+                    }`}
+                  ></i>
+                  <span className="font-medium">{msg.text}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMsg({ type: "", text: "" })}
+                  className="text-slate-400 hover:text-slate-700 cursor-pointer text-xs"
+                >
+                  <i className="bi bi-x-lg"></i>
+                </button>
+              </div>
+            )}
 
           {/* Expenses Table */}
           {loading ? (
