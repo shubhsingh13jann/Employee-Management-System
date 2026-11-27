@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import api from "../../../api/axios";
 import { ProjectItem } from "../../../pages/admin/AdminProjects";
 
@@ -81,6 +82,18 @@ export const ProjectMilestonesModal: React.FC<ProjectMilestonesModalProps> = ({
       fetchMilestones();
       setIsEditingMode(false);
       setEditingMilestoneId(null);
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") onClose();
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+        document.body.style.overflow = originalOverflow;
+      };
     }
   }, [isOpen, project]);
 
@@ -328,39 +341,150 @@ export const ProjectMilestonesModal: React.FC<ProjectMilestonesModalProps> = ({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-150">
-      <div className="relative w-full max-w-4xl bg-white rounded-2xl border border-slate-200/90 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
-        {/* Modal Top Header with Project Context & Progress Gauge */}
-        <div className="relative px-5 py-4 bg-gradient-to-r from-[#070d28] via-[#0d164d] to-[#1c1252] text-white border-b border-indigo-500/30 shrink-0">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap mb-1">
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">
-                  PRJ-{String(project.id).padStart(4, "0")}
-                </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  🏢 {project.department_name || "General"}
-                </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-400/30">
-                  👷 {project.supervisor_name || "Unassigned"}
-                </span>
-              </div>
-              <h3 className="text-base sm:text-lg font-bold text-white tracking-tight truncate mb-0.5">
-                {project.title}
-              </h3>
-              <p className="text-xs text-indigo-200/80 mb-0 font-normal">
-                Interactive Sub-Milestones & Deliverable Checklists Tracker
-              </p>
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[10000] bg-slate-950/60 backdrop-blur-xs overscroll-contain animate-in fade-in duration-150"
+      onClick={onClose}
+    >
+      {/* Centered strictly within the right-side content portion (offsetting sidebar on md+) */}
+      <div className="fixed inset-y-0 right-0 left-0 md:left-[240px] flex items-center justify-center p-3 sm:p-4 pointer-events-none">
+        <div
+          className="w-full max-w-[880px] max-h-[92vh] bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 pointer-events-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header with Fluid Pastel Wave Background matching In-View Tasks, Budget HUD & Dossier Modals */}
+          <div className="relative px-3.5 sm:px-4 py-3 sm:py-3.5 bg-white flex items-center justify-between border-b border-slate-200 overflow-hidden shrink-0">
+            {/* Top-Right Fluid Pastel Wave Background */}
+            <div className="absolute top-0 right-0 w-[360px] sm:w-[460px] h-full pointer-events-none overflow-hidden z-0">
+              <svg
+                viewBox="0 0 500 74"
+                fill="none"
+                preserveAspectRatio="none"
+                className="w-full h-full"
+              >
+                <defs>
+                  <mask id="milestonesModalWaveFadeMask">
+                    <linearGradient id="milestonesModalWaveFadeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="black" />
+                      <stop offset="18%" stopColor="white" />
+                      <stop offset="100%" stopColor="white" />
+                    </linearGradient>
+                    <rect width="500" height="74" fill="url(#milestonesModalWaveFadeGrad)" />
+                  </mask>
+
+                  <linearGradient id="milestonesModalWaveGrad1" x1="0%" y1="0%" x2="100%" y2="70%">
+                    <stop offset="0%" stopColor="#E0E7FF" stopOpacity="0.2" />
+                    <stop offset="30%" stopColor="#D7E0FC" stopOpacity="0.85" />
+                    <stop offset="65%" stopColor="#E0E7FE" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="#EDE9FE" stopOpacity="0.7" />
+                  </linearGradient>
+
+                  <linearGradient id="milestonesModalWaveGrad2" x1="15%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#D8E2FB" stopOpacity="0.3" />
+                    <stop offset="30%" stopColor="#C7D2FE" stopOpacity="0.85" />
+                    <stop offset="60%" stopColor="#DDD6FE" stopOpacity="0.9" />
+                    <stop offset="85%" stopColor="#E9D5FF" stopOpacity="0.85" />
+                    <stop offset="100%" stopColor="#F3E8FF" stopOpacity="0.4" />
+                  </linearGradient>
+
+                  <linearGradient id="milestonesModalWaveGrad3" x1="30%" y1="10%" x2="95%" y2="100%">
+                    <stop offset="0%" stopColor="#E0F2FE" stopOpacity="0.5" />
+                    <stop offset="45%" stopColor="#DDD6FE" stopOpacity="0.75" />
+                    <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0.7" />
+                  </linearGradient>
+                </defs>
+
+                <g mask="url(#milestonesModalWaveFadeMask)">
+                  <path
+                    d="M0 26 C60 10 120 8 180 18 C245 28 305 50 370 38 C425 28 465 10 500 20 V0 H0 Z"
+                    fill="url(#milestonesModalWaveGrad1)"
+                  />
+                  <path
+                    d="M0 50 C80 34 145 12 215 10 C280 8 330 32 390 44 C445 54 475 38 500 28 V0 H0 Z"
+                    fill="url(#milestonesModalWaveGrad2)"
+                  />
+                  <path
+                    d="M130 38 C195 26 260 48 325 56 C385 64 445 50 500 38 V8 C470 20 420 18 370 24 C310 34 235 32 130 38 Z"
+                    fill="url(#milestonesModalWaveGrad3)"
+                    opacity="0.75"
+                  />
+                </g>
+              </svg>
             </div>
 
-            {/* Quick Actions & Close Button */}
-            <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
+            {/* Left: Squircle Milestone Icon + Project Information */}
+            <div className="flex items-center gap-3 relative z-10 min-w-0">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-700 text-white flex items-center justify-center font-bold text-lg sm:text-xl shadow-md shadow-indigo-500/20 shrink-0 border border-white/20">
+                <i className="bi bi-flag-fill text-amber-300"></i>
+              </div>
+
+              <div className="min-w-0">
+                {/* Project Title + PRJ-ID Pill */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-bold text-[13.5px] sm:text-[14.5px] text-slate-900 mb-0 tracking-tight leading-tight truncate">
+                    {project.title}
+                  </h3>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-2xs">
+                    PRJ-{String(project.id).padStart(4, "0")}
+                  </span>
+                </div>
+
+                {/* Subtitle Line with Department, Lead Supervisor & Target Date */}
+                <div className="text-[10.5px] sm:text-[11px] text-slate-400 mb-1 font-normal leading-tight truncate mt-0.5 flex items-center gap-1.5 flex-wrap">
+                  <span className="flex items-center gap-1 font-medium text-slate-500">
+                    <i className="bi bi-building text-[9.5px] text-indigo-500"></i>
+                    <span>{project.department_name || "General"}</span>
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1 font-medium text-slate-500">
+                    <i className="bi bi-person text-[9.5px] text-emerald-500"></i>
+                    <span>Lead: {project.supervisor_name || "Unassigned"}</span>
+                  </span>
+                  {project.target_date && (
+                    <>
+                      <span>•</span>
+                      <span className="flex items-center gap-1 font-medium text-slate-500">
+                        <i className="bi bi-calendar-event text-[9.5px] text-amber-500"></i>
+                        <span>Target: {project.target_date}</span>
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                {/* Meta Pills */}
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <div className="inline-flex items-center gap-1 px-2 py-0.2 rounded-md text-[9.5px] font-bold capitalize bg-emerald-50/80 text-emerald-700 border border-emerald-200/90 shadow-2xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500/50"></span>
+                    <span>{project.status || "Active"}</span>
+                  </div>
+                  <div className="inline-flex items-center gap-1 px-2 py-0.2 rounded-md text-[9.5px] font-bold bg-indigo-50/80 text-indigo-700 border border-indigo-200/90 shadow-2xs">
+                    <i className="bi bi-layers text-[9px] text-indigo-600"></i>
+                    <span>Deliverable Milestones Tracker</span>
+                  </div>
+                  {project.priority && (
+                    <div
+                      className={`inline-flex items-center gap-1 px-2 py-0.2 rounded-md text-[9.5px] font-bold uppercase shadow-2xs border ${
+                        project.priority === "critical"
+                          ? "bg-rose-50/80 text-rose-700 border-rose-200"
+                          : project.priority === "high"
+                          ? "bg-amber-50/80 text-amber-700 border-amber-200"
+                          : "bg-indigo-50/60 text-indigo-700 border-indigo-100"
+                      }`}
+                    >
+                      <span>{project.priority}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Add Phase Button + Close Button */}
+            <div className="flex items-center gap-2 shrink-0 relative z-10">
               {!isEditingMode && (
                 <button
                   type="button"
                   onClick={handleOpenAddForm}
-                  className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-500/25 flex items-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                  className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm shadow-indigo-600/20 transition-all cursor-pointer flex items-center gap-1.5 active:scale-98"
                 >
                   <i className="bi bi-plus-lg text-xs"></i>
                   <span>Add Phase</span>
@@ -369,34 +493,35 @@ export const ProjectMilestonesModal: React.FC<ProjectMilestonesModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-sm"
+                className="w-8 h-8 rounded-xl bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 border border-slate-200/90 shadow-2xs flex items-center justify-center transition-all cursor-pointer text-xs shrink-0"
+                title="Close Milestones Tracker"
+                aria-label="Close"
               >
-                <i className="bi bi-x-lg"></i>
+                <i className="bi bi-x-lg text-xs"></i>
               </button>
             </div>
           </div>
 
           {/* Progress Telemetry Ribbon */}
-          <div className="mt-3 pt-3 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <div className="px-4 py-2.5 bg-slate-50/80 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs shrink-0">
             <div className="flex items-center gap-2">
-              <span className="text-slate-300 text-[11px]">Milestone Delivery:</span>
-              <strong className="text-white font-bold text-xs">
+              <span className="text-slate-500 text-[11px] font-medium">Milestone Delivery:</span>
+              <strong className="text-slate-900 font-bold text-xs">
                 {completedMilestones} of {totalMilestones} Phases Completed ({overallMilestonePercent}%)
               </strong>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-slate-300 text-[11px]">
-                Deliverable Checklist: <strong className="text-emerald-400">{completedDeliverablesCount}</strong>/{totalDeliverablesCount} Done
+              <span className="text-slate-500 text-[11px] font-medium">
+                Deliverable Checklist: <strong className="text-emerald-600">{completedDeliverablesCount}</strong>/{totalDeliverablesCount} Done
               </span>
-              <div className="w-28 sm:w-36 h-2 bg-white/20 rounded-full overflow-hidden">
+              <div className="w-28 sm:w-36 h-1.5 bg-slate-200 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full transition-all duration-300"
+                  className="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-full transition-all duration-300"
                   style={{ width: `${overallMilestonePercent}%` }}
                 ></div>
               </div>
             </div>
           </div>
-        </div>
 
         {/* Modal Scrollable Body */}
         <div className="p-3.5 sm:p-4 overflow-y-auto flex-1 bg-slate-50/50 space-y-3">
@@ -866,8 +991,10 @@ export const ProjectMilestonesModal: React.FC<ProjectMilestonesModalProps> = ({
             Close Tracker
           </button>
         </div>
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
