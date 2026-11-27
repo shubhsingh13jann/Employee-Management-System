@@ -102,6 +102,11 @@ export const ProjectMilestonesModal: React.FC<ProjectMilestonesModalProps> = ({
   // Milestone Progress Summary
   const totalMilestones = milestones.length;
   const completedMilestones = milestones.filter((m) => m.status === "completed").length;
+  const inProgressMilestones = milestones.filter((m) => m.status === "in_progress").length;
+  const pendingMilestones = milestones.filter((m) => m.status === "pending").length;
+  const overdueMilestones = milestones.filter(
+    (m) => m.status !== "completed" && m.due_date && new Date(m.due_date).getTime() < Date.now()
+  ).length;
   const totalDeliverablesCount = milestones.reduce((sum, m) => sum + (m.deliverables?.length || 0), 0);
   const completedDeliverablesCount = milestones.reduce(
     (sum, m) => sum + (m.deliverables?.filter((d) => d.completed).length || 0),
@@ -109,6 +114,8 @@ export const ProjectMilestonesModal: React.FC<ProjectMilestonesModalProps> = ({
   );
   const overallMilestonePercent =
     totalMilestones > 0 ? Math.round((completedMilestones / totalMilestones) * 100) : 0;
+  const deliverablePercent =
+    totalDeliverablesCount > 0 ? Math.round((completedDeliverablesCount / totalDeliverablesCount) * 100) : 0;
 
   // Toggle Entire Milestone Status
   const handleToggleMilestone = async (milestone: ProjectMilestoneItem) => {
@@ -502,23 +509,76 @@ export const ProjectMilestonesModal: React.FC<ProjectMilestonesModalProps> = ({
             </div>
           </div>
 
-          {/* Progress Telemetry Ribbon */}
-          <div className="px-4 py-2.5 bg-slate-50/80 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="text-slate-500 text-[11px] font-medium">Milestone Delivery:</span>
-              <strong className="text-slate-900 font-bold text-xs">
-                {completedMilestones} of {totalMilestones} Phases Completed ({overallMilestonePercent}%)
-              </strong>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-slate-500 text-[11px] font-medium">
-                Deliverable Checklist: <strong className="text-emerald-600">{completedDeliverablesCount}</strong>/{totalDeliverablesCount} Done
-              </span>
-              <div className="w-28 sm:w-36 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+          {/* Executive Telemetry HUD Grid matching In-View Tasks, Squad Roster & Dossier Modals */}
+          <div className="bg-slate-50/60 border-b border-slate-200/80 px-3.5 sm:px-4 py-2.5 grid grid-cols-2 md:grid-cols-4 gap-2.5 shrink-0">
+            {/* 1. Milestone Delivery */}
+            <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <span>Milestone Delivery</span>
+                <span className="font-bold text-slate-800 text-[11px]">{overallMilestonePercent}%</span>
+              </div>
+              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-1 border border-slate-200/60">
                 <div
-                  className="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-full transition-all duration-300"
+                  className="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full transition-all duration-300"
                   style={{ width: `${overallMilestonePercent}%` }}
                 ></div>
+              </div>
+              <div className="text-[9.5px] text-slate-400">
+                {completedMilestones} of {totalMilestones} phases completed
+              </div>
+            </div>
+
+            {/* 2. Deliverable Checklist */}
+            <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <span>Deliverables Done</span>
+                <span className="font-bold text-emerald-700 text-[11px]">
+                  {completedDeliverablesCount}/{totalDeliverablesCount}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[9px] border border-emerald-200/80 flex items-center gap-1 shadow-2xs">
+                  <i className="bi bi-check2-circle text-[8.5px]"></i>
+                  <span>{deliverablePercent}% Verified</span>
+                </span>
+              </div>
+            </div>
+
+            {/* 3. Active Execution */}
+            <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
+                <span>Phase Execution</span>
+                <i className="bi bi-layers text-indigo-500 text-xs"></i>
+              </div>
+              <div className="text-[11.5px] font-bold text-slate-800">
+                {inProgressMilestones} In Progress
+              </div>
+              <div className="text-[9.5px] text-slate-400 mt-0.5">
+                {pendingMilestones} queued phases
+              </div>
+            </div>
+
+            {/* 4. Schedule Health */}
+            <div className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
+                <span>Schedule Health</span>
+                <i className="bi bi-clock-history text-slate-400 text-xs"></i>
+              </div>
+              <div className="text-[11.5px] font-bold text-slate-800 truncate">
+                {overdueMilestones > 0 ? (
+                  <span className="text-rose-600 flex items-center gap-1">
+                    <i className="bi bi-exclamation-octagon-fill text-[10px]"></i>
+                    <span>{overdueMilestones} Overdue</span>
+                  </span>
+                ) : (
+                  <span className="text-emerald-600 flex items-center gap-1">
+                    <i className="bi bi-shield-check text-[10px]"></i>
+                    <span>On Schedule</span>
+                  </span>
+                )}
+              </div>
+              <div className="text-[9.5px] text-slate-400 truncate mt-0.5">
+                {project.target_date ? `Target: ${project.target_date}` : "Active milestone pacing"}
               </div>
             </div>
           </div>
