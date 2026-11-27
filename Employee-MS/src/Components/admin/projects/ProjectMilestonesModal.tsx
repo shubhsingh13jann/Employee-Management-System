@@ -823,268 +823,273 @@ export const ProjectMilestonesModal: React.FC<ProjectMilestonesModalProps> = ({
                   <span>Create Phase 1 Milestone</span>
                 </button>
               </div>
-          ) : (
-            <div className="space-y-2.5">
-              {milestones.map((milestone, idx) => {
-                const isCompleted = milestone.status === "completed";
-                const totalDel = milestone.deliverables?.length || 0;
-                const completedDel = milestone.deliverables?.filter((d) => d.completed).length || 0;
-                const percent = totalDel > 0 ? Math.round((completedDel / totalDel) * 100) : isCompleted ? 100 : 0;
+            ) : (
+              <div className="space-y-3">
+                {milestones.map((milestone, idx) => {
+                  const isCompleted = milestone.status === "completed";
+                  const totalDel = milestone.deliverables?.length || 0;
+                  const completedDel = milestone.deliverables?.filter((d) => d.completed).length || 0;
+                  const percent = totalDel > 0 ? Math.round((completedDel / totalDel) * 100) : isCompleted ? 100 : 0;
 
-                let isOverdue = false;
-                let daysLeft = null;
-                if (milestone.due_date) {
-                  const diff = new Date(milestone.due_date).getTime() - Date.now();
-                  daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
-                  if (daysLeft < 0 && !isCompleted) isOverdue = true;
-                }
+                  let isOverdue = false;
+                  let daysLeft = null;
+                  if (milestone.due_date) {
+                    const diff = new Date(milestone.due_date).getTime() - Date.now();
+                    daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                    if (daysLeft < 0 && !isCompleted) isOverdue = true;
+                  }
 
-                return (
-                  <div
-                    key={milestone.id}
-                    className={`relative rounded-xl border transition-all overflow-hidden bg-white ${
-                      isCompleted
-                        ? "border-emerald-200/90 shadow-2xs"
-                        : isOverdue
-                        ? "border-rose-200/90 shadow-2xs ring-1 ring-rose-200"
-                        : "border-slate-200/90 shadow-2xs hover:shadow-xs"
-                    }`}
-                  >
-                    {/* Top Status Banner Strip */}
+                  return (
                     <div
-                      className={`h-1 w-full ${
+                      key={milestone.id}
+                      className={`relative rounded-2xl border transition-all overflow-hidden bg-white shadow-2xs ${
                         isCompleted
-                          ? "bg-emerald-500"
-                          : milestone.status === "in_progress"
-                          ? "bg-indigo-500"
-                          : "bg-slate-300"
+                          ? "border-emerald-200/90"
+                          : isOverdue
+                          ? "border-rose-200/90 ring-1 ring-rose-200/70"
+                          : "border-slate-200/90 hover:border-slate-300"
                       }`}
-                    ></div>
+                    >
+                      {/* Top Status Banner Strip */}
+                      <div
+                        className={`h-1 w-full ${
+                          isCompleted
+                            ? "bg-emerald-500"
+                            : milestone.status === "in_progress"
+                            ? "bg-indigo-600"
+                            : "bg-slate-200"
+                        }`}
+                      ></div>
 
-                    <div className="p-3 sm:p-3.5">
-                      {/* Milestone Header Row */}
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
-                        <div className="flex items-start gap-3 min-w-0">
-                          {/* Large Checkbox for 1-Click Milestone Completion */}
-                          <button
-                            type="button"
-                            onClick={() => handleToggleMilestone(milestone)}
-                            className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all cursor-pointer mt-0.5 shrink-0 ${
-                              isCompleted
-                                ? "bg-emerald-500 border-emerald-600 text-white shadow-xs"
-                                : "bg-white hover:bg-slate-50 border-slate-300 text-transparent hover:text-slate-300"
-                            }`}
-                            title={isCompleted ? "Mark Phase Incomplete" : "Mark Phase Complete"}
-                          >
-                            <i className="bi bi-check-lg text-sm font-black"></i>
-                          </button>
+                      <div className="p-3.5 sm:p-4">
+                        {/* Milestone Header Row */}
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5 mb-2.5">
+                          <div className="flex items-start gap-3 min-w-0">
+                            {/* Checkbox for 1-Click Milestone Completion */}
+                            <button
+                              type="button"
+                              onClick={() => handleToggleMilestone(milestone)}
+                              className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all cursor-pointer mt-0.5 shrink-0 shadow-2xs ${
+                                isCompleted
+                                  ? "bg-emerald-600 border-emerald-600 text-white"
+                                  : "bg-white hover:bg-slate-50 border-slate-300 text-transparent hover:text-slate-300"
+                              }`}
+                              title={isCompleted ? "Mark Phase Incomplete" : "Mark Phase Complete"}
+                            >
+                              <i className="bi bi-check-lg text-sm font-black"></i>
+                            </button>
 
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap mb-1">
-                              <span className="px-2 py-0.2 rounded-md text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                Phase {idx + 1}
-                              </span>
-                              <span
-                                className={`px-2 py-0.2 rounded-md text-[10px] font-semibold border ${
-                                  isCompleted
-                                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                    : milestone.status === "in_progress"
-                                    ? "bg-blue-50 text-blue-700 border-blue-200"
-                                    : "bg-slate-100 text-slate-600 border-slate-200"
-                                }`}
-                              >
-                                {isCompleted
-                                  ? "✅ Completed"
-                                  : milestone.status === "in_progress"
-                                  ? "⚡ In Progress"
-                                  : "⏳ Pending"}
-                              </span>
-
-                              {/* Due Date Indicator */}
-                              {milestone.due_date && (
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                                <span className="px-2 py-0.2 rounded-md text-[9.5px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200/80 shadow-2xs">
+                                  Phase {idx + 1}
+                                </span>
                                 <span
-                                  className={`px-2 py-0.2 rounded-md text-[10px] font-semibold border flex items-center gap-1 ${
-                                    isOverdue
-                                      ? "bg-rose-50 text-rose-700 border-rose-200"
-                                      : daysLeft !== null && daysLeft <= 7
-                                      ? "bg-amber-50 text-amber-700 border-amber-200"
-                                      : "bg-slate-50 text-slate-600 border-slate-200"
+                                  className={`px-2 py-0.2 rounded-md text-[9.5px] font-bold border shadow-2xs ${
+                                    isCompleted
+                                      ? "bg-emerald-50 text-emerald-700 border-emerald-200/80"
+                                      : milestone.status === "in_progress"
+                                      ? "bg-blue-50 text-blue-700 border-blue-200/80"
+                                      : "bg-slate-100 text-slate-600 border-slate-200/80"
                                   }`}
                                 >
-                                  <i className="bi bi-calendar-event text-[9px]"></i>
-                                  <span>
-                                    Due:{" "}
-                                    {new Date(milestone.due_date).toLocaleDateString("en-US", {
-                                      month: "short",
-                                      day: "numeric",
-                                      year: "numeric",
-                                    })}
-                                    {daysLeft !== null && (
-                                      <strong className="ml-1">
-                                        ({daysLeft < 0 ? `${Math.abs(daysLeft)}d overdue` : `${daysLeft}d left`})
-                                      </strong>
-                                    )}
-                                  </span>
+                                  {isCompleted
+                                    ? "✅ Completed"
+                                    : milestone.status === "in_progress"
+                                    ? "⚡ In Progress"
+                                    : "⏳ Pending"}
                                 </span>
+
+                                {/* Due Date Indicator */}
+                                {milestone.due_date && (
+                                  <span
+                                    className={`px-2 py-0.2 rounded-md text-[9.5px] font-semibold border flex items-center gap-1 shadow-2xs font-mono ${
+                                      isOverdue
+                                        ? "bg-rose-50 text-rose-700 border-rose-200/80"
+                                        : daysLeft !== null && daysLeft <= 7
+                                        ? "bg-amber-50 text-amber-700 border-amber-200/80"
+                                        : "bg-slate-50 text-slate-600 border-slate-200/80"
+                                    }`}
+                                  >
+                                    <i className="bi bi-calendar-event text-[9px]"></i>
+                                    <span>
+                                      Due:{" "}
+                                      {new Date(milestone.due_date).toLocaleDateString("en-US", {
+                                        month: "short",
+                                        day: "numeric",
+                                        year: "numeric",
+                                      })}
+                                      {daysLeft !== null && (
+                                        <strong className="ml-1">
+                                          ({daysLeft < 0 ? `${Math.abs(daysLeft)}d overdue` : `${daysLeft}d left`})
+                                        </strong>
+                                      )}
+                                    </span>
+                                  </span>
+                                )}
+                              </div>
+
+                              <h4
+                                className={`text-[13px] sm:text-[13.5px] font-bold mb-0.5 tracking-tight leading-snug ${
+                                  isCompleted ? "text-slate-400 line-through" : "text-slate-900"
+                                }`}
+                              >
+                                {milestone.title}
+                              </h4>
+
+                              {milestone.description && (
+                                <p className="text-[11px] text-slate-500 mb-0 leading-relaxed">
+                                  {milestone.description}
+                                </p>
                               )}
                             </div>
+                          </div>
 
-                            <h4
-                              className={`text-sm sm:text-base font-bold mb-0.5 tracking-tight ${
-                                isCompleted ? "text-slate-500 line-through" : "text-slate-900"
-                              }`}
-                            >
-                              {milestone.title}
-                            </h4>
-
-                            {milestone.description && (
-                              <p className="text-xs text-slate-500 mb-0 leading-relaxed">
-                                {milestone.description}
-                              </p>
+                          {/* Owner Badge & Edit/Delete Actions */}
+                          <div className="flex items-center gap-1.5 self-start sm:self-auto shrink-0">
+                            {milestone.owner_name && (
+                              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50/80 border border-slate-200/80 shadow-2xs text-xs">
+                                <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-[9px] font-bold flex items-center justify-center shrink-0">
+                                  {milestone.owner_name.charAt(0)}
+                                </div>
+                                <span className="text-[11px] font-semibold text-slate-700">
+                                  {milestone.owner_name}
+                                </span>
+                              </div>
                             )}
+
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditForm(milestone)}
+                              className="w-7 h-7 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-indigo-600 border border-slate-200/80 flex items-center justify-center text-xs transition-colors cursor-pointer shadow-2xs"
+                              title="Edit Milestone"
+                            >
+                              <i className="bi bi-pencil-fill text-[10.5px]"></i>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteMilestone(milestone.id)}
+                              className="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 flex items-center justify-center text-xs transition-colors cursor-pointer"
+                              title="Delete Milestone"
+                            >
+                              <i className="bi bi-trash3 text-xs"></i>
+                            </button>
                           </div>
                         </div>
 
-                        {/* Owner Badge & Edit/Delete Actions */}
-                        <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                          {milestone.owner_name && (
-                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                              <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold flex items-center justify-center shrink-0">
-                                {milestone.owner_name.charAt(0)}
-                              </div>
-                              <span className="text-[11px] font-medium text-slate-700">
-                                {milestone.owner_name}
+                        {/* Deliverables Checklist Box */}
+                        <div className="mt-2.5 pt-2.5 border-t border-slate-200/70 rounded-xl bg-slate-50/70 p-2.5 sm:p-3 border border-slate-200/60">
+                          <div className="flex items-center justify-between gap-2 mb-2">
+                            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+                              <i className="bi bi-check2-circle text-indigo-600 text-xs"></i>
+                              <span>
+                                Deliverable Checklist ({completedDel} of {totalDel} Completed)
                               </span>
-                            </div>
-                          )}
-
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEditForm(milestone)}
-                            className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs transition-colors cursor-pointer"
-                            title="Edit Milestone"
-                          >
-                            <i className="bi bi-pencil-fill text-[11px]"></i>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteMilestone(milestone.id)}
-                            className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-rose-100 text-slate-400 hover:text-rose-600 flex items-center justify-center text-xs transition-colors cursor-pointer"
-                            title="Delete Milestone"
-                          >
-                            <i className="bi bi-trash-fill text-[11px]"></i>
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Deliverables Checklist Box */}
-                      <div className="mt-2.5 pt-2 border-t border-slate-100 rounded-xl bg-slate-50/70 p-2.5">
-                        <div className="flex items-center justify-between gap-2 mb-1.5">
-                          <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                            <i className="bi bi-check2-circle text-indigo-500"></i>
-                            <span>
-                              Deliverable Checklist ({completedDel} of {totalDel} Completed)
                             </span>
-                          </span>
 
-                          <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">
-                            {percent}% Velocity
-                          </span>
-                        </div>
+                            <span className="text-[9.5px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200/80 shadow-2xs">
+                              {percent}% Velocity
+                            </span>
+                          </div>
 
-                        {/* Deliverables List */}
-                        <div className="space-y-1 mb-2">
-                          {milestone.deliverables?.map((del) => (
-                            <div
-                              key={del.id}
-                              className={`flex items-center justify-between px-2.5 py-1 rounded-lg border transition-all ${
-                                del.completed
-                                  ? "bg-emerald-50/60 border-emerald-200/80"
-                                  : "bg-white border-slate-200/80 hover:border-slate-300"
-                              }`}
-                            >
-                              <label className="flex items-center cursor-pointer select-none flex-1 min-w-0">
-                                <input
-                                  type="checkbox"
-                                  checked={del.completed}
-                                  onChange={() =>
-                                    handleToggleDeliverable(milestone.id, del.id, del.completed)
-                                  }
-                                  className="w-3.5 h-3.5 rounded text-indigo-600 focus:ring-0 cursor-pointer accent-indigo-600 shrink-0"
-                                />
-                                <span
-                                  className={`text-xs font-medium truncate ${
-                                    del.completed ? "text-emerald-800 line-through opacity-75" : "text-slate-800"
-                                  }`}
-                                  style={{ marginLeft: "6px" }}
-                                >
-                                  {del.title}
-                                </span>
-                              </label>
-
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveDeliverable(milestone, del.id)}
-                                className="text-slate-300 hover:text-rose-500 text-xs cursor-pointer ml-2"
-                                title="Remove checklist item"
+                          {/* Deliverables List */}
+                          <div className="space-y-1.5 mb-2.5">
+                            {milestone.deliverables?.map((del) => (
+                              <div
+                                key={del.id}
+                                className={`flex items-center justify-between px-2.5 py-1.5 rounded-xl border transition-all shadow-2xs ${
+                                  del.completed
+                                    ? "bg-emerald-50/70 border-emerald-200/80"
+                                    : "bg-white border-slate-200/80 hover:border-slate-300"
+                                }`}
                               >
-                                <i className="bi bi-x"></i>
-                              </button>
-                            </div>
-                          ))}
-                        </div>
+                                <label className="flex items-center cursor-pointer select-none flex-1 min-w-0">
+                                  <input
+                                    type="checkbox"
+                                    checked={del.completed}
+                                    onChange={() =>
+                                      handleToggleDeliverable(milestone.id, del.id, del.completed)
+                                    }
+                                    className="w-3.5 h-3.5 rounded text-indigo-600 focus:ring-0 cursor-pointer accent-indigo-600 shrink-0"
+                                  />
+                                  <span
+                                    className={`text-xs font-medium truncate ${
+                                      del.completed ? "text-emerald-800 line-through opacity-75" : "text-slate-800"
+                                    }`}
+                                    style={{ marginLeft: "6px" }}
+                                  >
+                                    {del.title}
+                                  </span>
+                                </label>
 
-                        {/* Inline Deliverable Quick Add */}
-                        <div className="flex items-center gap-1.5">
-                          <input
-                            type="text"
-                            value={newDeliverableInput[String(milestone.id)] || ""}
-                            onChange={(e) =>
-                              setNewDeliverableInput({
-                                ...newDeliverableInput,
-                                [String(milestone.id)]: e.target.value,
-                              })
-                            }
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                e.preventDefault();
-                                handleAddInlineDeliverable(milestone);
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveDeliverable(milestone, del.id)}
+                                  className="text-slate-300 hover:text-rose-500 text-xs cursor-pointer ml-2"
+                                  title="Remove checklist item"
+                                >
+                                  <i className="bi bi-x-lg text-[10px]"></i>
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Inline Deliverable Quick Add */}
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="text"
+                              value={newDeliverableInput[String(milestone.id)] || ""}
+                              onChange={(e) =>
+                                setNewDeliverableInput({
+                                  ...newDeliverableInput,
+                                  [String(milestone.id)]: e.target.value,
+                                })
                               }
-                            }}
-                            placeholder="Add deliverable checklist item (Press Enter)..."
-                            className="flex-1 h-8 px-2.5 text-xs rounded-lg border border-slate-200 bg-white placeholder:text-slate-400 focus:border-indigo-500 outline-none"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => handleAddInlineDeliverable(milestone)}
-                            className="h-8 px-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold cursor-pointer shrink-0 transition-colors"
-                          >
-                            + Add
-                          </button>
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  handleAddInlineDeliverable(milestone);
+                                }
+                              }}
+                              placeholder="Add deliverable checklist item (Press Enter)..."
+                              className="flex-1 h-8.5 px-3 text-xs font-medium rounded-xl border border-slate-200/90 bg-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-2xs transition-all"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleAddInlineDeliverable(milestone)}
+                              className="h-8.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold cursor-pointer shrink-0 transition-all shadow-sm shadow-indigo-600/20 active:scale-98"
+                            >
+                              + Add
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Modal Bottom Footer */}
-        <div className="px-5 py-3 bg-white border-t border-slate-200 flex items-center justify-between shrink-0">
-          <div className="text-xs text-slate-500">
-            Total Sub-Milestones: <strong className="text-slate-800">{totalMilestones}</strong> | Deliverable Items:{" "}
-            <strong className="text-slate-800">{totalDeliverablesCount}</strong>
+                  );
+                })}
+              </div>
+            )}
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors cursor-pointer"
-          >
-            Close Tracker
-          </button>
-        </div>
+
+          {/* Modal Footer matching Squad Roster, In-View Tasks & Budget HUD styling */}
+          <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 bg-white border-t border-slate-200 flex items-center justify-between gap-2 shrink-0">
+            <div className="text-[10.5px] text-slate-400 font-medium flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500/50"></span>
+              <span>
+                Total Phases: <strong className="text-slate-700">{totalMilestones}</strong> | Deliverables:{" "}
+                <strong className="text-slate-700">{totalDeliverablesCount}</strong> • Governance Certified
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-1.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-600/20 transition-all cursor-pointer flex items-center gap-1.5 active:scale-98"
+              >
+                <span>Done</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>,
