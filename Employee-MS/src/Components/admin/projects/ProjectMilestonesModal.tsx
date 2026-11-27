@@ -583,212 +583,246 @@ export const ProjectMilestonesModal: React.FC<ProjectMilestonesModalProps> = ({
             </div>
           </div>
 
-        {/* Modal Scrollable Body */}
-        <div className="p-3.5 sm:p-4 overflow-y-auto flex-1 bg-slate-50/50 space-y-3">
-          {error && (
-            <div className="p-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs flex items-center gap-2">
-              <i className="bi bi-exclamation-triangle-fill text-rose-500"></i>
-              <span>{error}</span>
-            </div>
-          )}
-
-          {/* ADD / EDIT MILESTONE FORM TRAY */}
-          {isEditingMode && (
-            <form
-              onSubmit={handleSaveMilestoneForm}
-              className="p-4 rounded-xl bg-white border border-indigo-200 shadow-sm space-y-3 animate-in fade-in duration-150"
-            >
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <i className="bi bi-flag-fill text-indigo-600"></i>
-                  <span>{editingMilestoneId ? "Edit Milestone Phase" : "Create Sub-Milestone Phase"}</span>
-                </h4>
+          {/* Modal Scrollable Body */}
+          <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 bg-slate-50/40 space-y-3.5">
+            {error && (
+              <div className="p-3 rounded-xl bg-rose-50 text-rose-800 border border-rose-200 text-xs flex items-center justify-between gap-3 animate-in fade-in shadow-2xs">
+                <div className="flex items-center gap-2">
+                  <i className="bi bi-exclamation-triangle-fill text-rose-600"></i>
+                  <span className="font-medium">{error}</span>
+                </div>
                 <button
                   type="button"
-                  onClick={() => setIsEditingMode(false)}
-                  className="text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
+                  onClick={() => setError("")}
+                  className="text-slate-400 hover:text-slate-700 cursor-pointer text-xs"
                 >
-                  Cancel
+                  <i className="bi bi-x-lg"></i>
                 </button>
               </div>
+            )}
 
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-                <div className="md:col-span-8">
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Phase Title *
-                  </label>
-                  <input
-                    type="text"
-                    value={formTitle}
-                    onChange={(e) => setFormTitle(e.target.value)}
-                    placeholder="e.g. Phase 1: MVP Architecture & Schema Setup"
-                    required
-                    className="w-full h-9 px-3 text-xs rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 outline-none"
-                  />
+            {/* ADD / EDIT MILESTONE FORM CARD */}
+            {isEditingMode && (
+              <form
+                onSubmit={handleSaveMilestoneForm}
+                className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs relative overflow-hidden space-y-3.5 animate-in fade-in duration-150"
+              >
+                {/* Subtle Pastel Wave Accent */}
+                <div className="absolute top-0 right-0 w-[260px] h-[85px] pointer-events-none overflow-hidden z-0 opacity-70">
+                  <svg viewBox="0 0 400 95" fill="none" preserveAspectRatio="none" className="w-full h-full">
+                    <defs>
+                      <linearGradient id="milestoneFormWave1" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#EDE9FE" stopOpacity="0.1" />
+                        <stop offset="40%" stopColor="#DDD6FE" stopOpacity="0.45" />
+                        <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0.75" />
+                      </linearGradient>
+                    </defs>
+                    <path d="M0,45 C110,15 220,75 400,25 L400,0 L0,0 Z" fill="url(#milestoneFormWave1)" />
+                  </svg>
                 </div>
 
-                <div className="md:col-span-4">
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Target Due Date
-                  </label>
-                  <input
-                    type="date"
-                    value={formDueDate}
-                    onChange={(e) => setFormDueDate(e.target.value)}
-                    className="w-full h-9 px-3 text-xs rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 outline-none cursor-pointer"
-                  />
-                </div>
-
-                <div className="md:col-span-6">
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Milestone Owner
-                  </label>
-                  <select
-                    value={formOwnerId}
-                    onChange={(e) => setFormOwnerId(e.target.value)}
-                    className="w-full h-9 px-3 text-xs rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 outline-none cursor-pointer"
-                  >
-                    <option value="">Unassigned</option>
-                    {supervisors.map((s) => (
-                      <option key={s.id} value={String(s.id)}>
-                        {s.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="md:col-span-6">
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Lifecycle Status
-                  </label>
-                  <select
-                    value={formStatus}
-                    onChange={(e) => setFormStatus(e.target.value as any)}
-                    className="w-full h-9 px-3 text-xs rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 outline-none cursor-pointer"
-                  >
-                    <option value="pending">⏳ Pending</option>
-                    <option value="in_progress">⚡ In Progress</option>
-                    <option value="completed">✅ Completed</option>
-                  </select>
-                </div>
-
-                <div className="md:col-span-12">
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Phase Scope & Description
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={formDescription}
-                    onChange={(e) => setFormDescription(e.target.value)}
-                    placeholder="Deliverable parameters, verification protocols, architectural requirements..."
-                    className="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 outline-none resize-none"
-                  ></textarea>
-                </div>
-
-                {/* Deliverables Checklist Builder */}
-                <div className="md:col-span-12">
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Deliverable Checklists
-                  </label>
-                  <div className="space-y-1.5 mb-2">
-                    {formDeliverables.map((delText, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs"
-                      >
-                        <div className="flex items-center gap-2">
-                          <i className="bi bi-check2-square text-indigo-500"></i>
-                          <span className="font-medium text-slate-800">{delText}</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormDeliverables((prev) => prev.filter((_, i) => i !== idx))
-                          }
-                          className="text-slate-400 hover:text-rose-600 text-xs cursor-pointer"
-                        >
-                          <i className="bi bi-trash"></i>
-                        </button>
-                      </div>
-                    ))}
+                <div className="flex items-center justify-between border-b border-slate-200/80 pb-2.5 relative z-10">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-purple-50 text-indigo-600 border border-purple-100 flex items-center justify-center text-base shadow-2xs shrink-0">
+                      <i className="bi bi-flag-fill"></i>
+                    </div>
+                    <div>
+                      <h4 className="text-[13px] sm:text-[13.5px] font-bold text-slate-900 mb-0 tracking-tight leading-tight">
+                        {editingMilestoneId ? "Edit Milestone Phase" : "Create Sub-Milestone Phase"}
+                      </h4>
+                      <p className="text-[10px] text-slate-400 mb-0">
+                        Configure phase schedule, ownership, lifecycle status & deliverable checklists
+                      </p>
+                    </div>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingMode(false)}
+                    className="w-7 h-7 rounded-lg bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 border border-slate-200/80 flex items-center justify-center text-xs cursor-pointer shadow-2xs"
+                    title="Close form"
+                  >
+                    <i className="bi bi-x-lg"></i>
+                  </button>
+                </div>
 
-                  {/* Add Checklist Input */}
-                  <div className="flex items-center gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 relative z-10">
+                  <div className="md:col-span-8">
+                    <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Phase Title <span className="text-rose-500">*</span>
+                    </label>
                     <input
                       type="text"
-                      value={newFormDeliverableText}
-                      onChange={(e) => setNewFormDeliverableText(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
+                      value={formTitle}
+                      onChange={(e) => setFormTitle(e.target.value)}
+                      placeholder="e.g. Phase 1: MVP Architecture & Schema Setup"
+                      required
+                      className="w-full h-9 px-3 text-xs font-medium rounded-xl bg-slate-50/70 border border-slate-200/80 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs"
+                    />
+                  </div>
+
+                  <div className="md:col-span-4">
+                    <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Target Due Date
+                    </label>
+                    <input
+                      type="date"
+                      value={formDueDate}
+                      onChange={(e) => setFormDueDate(e.target.value)}
+                      className="w-full h-9 px-3 text-xs font-medium rounded-xl bg-slate-50/70 border border-slate-200/80 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs cursor-pointer"
+                    />
+                  </div>
+
+                  <div className="md:col-span-6">
+                    <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Milestone Owner
+                    </label>
+                    <select
+                      value={formOwnerId}
+                      onChange={(e) => setFormOwnerId(e.target.value)}
+                      className="w-full h-9 px-3 text-xs font-medium rounded-xl bg-slate-50/70 border border-slate-200/80 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs cursor-pointer"
+                    >
+                      <option value="">Unassigned</option>
+                      {supervisors.map((s) => (
+                        <option key={s.id} value={String(s.id)}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="md:col-span-6">
+                    <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Lifecycle Status
+                    </label>
+                    <select
+                      value={formStatus}
+                      onChange={(e) => setFormStatus(e.target.value as any)}
+                      className="w-full h-9 px-3 text-xs font-medium rounded-xl bg-slate-50/70 border border-slate-200/80 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs cursor-pointer"
+                    >
+                      <option value="pending">⏳ Pending</option>
+                      <option value="in_progress">⚡ In Progress</option>
+                      <option value="completed">✅ Completed</option>
+                    </select>
+                  </div>
+
+                  <div className="md:col-span-12">
+                    <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Phase Scope & Description
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={formDescription}
+                      onChange={(e) => setFormDescription(e.target.value)}
+                      placeholder="Deliverable parameters, verification protocols, architectural requirements..."
+                      className="w-full p-2.5 text-xs font-medium rounded-xl bg-slate-50/70 border border-slate-200/80 text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs resize-none"
+                    ></textarea>
+                  </div>
+
+                  {/* Deliverables Checklist Builder */}
+                  <div className="md:col-span-12">
+                    <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Deliverable Checklists
+                    </label>
+                    <div className="space-y-1.5 mb-2">
+                      {formDeliverables.map((delText, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-slate-50/70 border border-slate-200/80 text-xs shadow-2xs"
+                        >
+                          <div className="flex items-center gap-2">
+                            <i className="bi bi-check2-square text-indigo-600"></i>
+                            <span className="font-medium text-slate-800">{delText}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setFormDeliverables((prev) => prev.filter((_, i) => i !== idx))
+                            }
+                            className="w-6 h-6 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center text-xs cursor-pointer transition-colors"
+                          >
+                            <i className="bi bi-trash3"></i>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Add Checklist Input */}
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={newFormDeliverableText}
+                        onChange={(e) => setNewFormDeliverableText(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            if (newFormDeliverableText.trim()) {
+                              setFormDeliverables((prev) => [...prev, newFormDeliverableText.trim()]);
+                              setNewFormDeliverableText("");
+                            }
+                          }
+                        }}
+                        placeholder="Add specific deliverable checklist item (Press Enter)..."
+                        className="flex-1 h-9 px-3 text-xs font-medium rounded-xl bg-slate-50/70 border border-slate-200/80 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
                           if (newFormDeliverableText.trim()) {
                             setFormDeliverables((prev) => [...prev, newFormDeliverableText.trim()]);
                             setNewFormDeliverableText("");
                           }
-                        }
-                      }}
-                      placeholder="Add specific deliverable checklist item (Press Enter)..."
-                      className="flex-1 h-8.5 px-3 text-xs rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 outline-none"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (newFormDeliverableText.trim()) {
-                          setFormDeliverables((prev) => [...prev, newFormDeliverableText.trim()]);
-                          setNewFormDeliverableText("");
-                        }
-                      }}
-                      className="h-8.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer shrink-0"
-                    >
-                      + Add Item
-                    </button>
+                        }}
+                        className="h-9 px-3 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs text-xs font-semibold cursor-pointer shrink-0 transition-all"
+                      >
+                        + Add Item
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <div className="flex items-center justify-end gap-2 pt-2.5 border-t border-slate-200/80 relative z-10">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingMode(false)}
+                    className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200/90 shadow-2xs cursor-pointer transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingForm}
+                    className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm shadow-indigo-600/20 transition-all cursor-pointer disabled:opacity-50 active:scale-98"
+                  >
+                    {savingForm ? "Saving..." : editingMilestoneId ? "Update Milestone" : "Create Milestone"}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* LIST OF NESTED MILESTONE PHASES */}
+            {loading ? (
+              <div className="py-16 text-center text-slate-400">
+                <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                <span className="text-xs font-medium">Loading deliverable milestones...</span>
+              </div>
+            ) : milestones.length === 0 ? (
+              <div className="p-10 text-center bg-white rounded-2xl border border-dashed border-slate-200 shadow-2xs">
+                <div className="w-11 h-11 rounded-xl bg-purple-50 text-indigo-600 border border-purple-100 flex items-center justify-center text-lg mx-auto mb-3 shadow-2xs">
+                  <i className="bi bi-calendar2-range-fill"></i>
+                </div>
+                <h4 className="text-[13px] font-bold text-slate-900 mb-1 tracking-tight">No Nested Milestones Yet</h4>
+                <p className="text-[11px] text-slate-400 max-w-md mx-auto mb-4 leading-relaxed">
+                  Deconstruct this initiative into phased deliverable milestones (MVP Architecture, Beta Rollout, Final Signoff) with checklists.
+                </p>
                 <button
                   type="button"
-                  onClick={() => setIsEditingMode(false)}
-                  className="px-3.5 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100 cursor-pointer"
+                  onClick={handleOpenAddForm}
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm shadow-indigo-600/20 transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-98"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={savingForm}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-500/25 transition-all cursor-pointer disabled:opacity-50"
-                >
-                  {savingForm ? "Saving..." : editingMilestoneId ? "Update Milestone" : "Create Milestone"}
+                  <i className="bi bi-plus-lg text-xs"></i>
+                  <span>Create Phase 1 Milestone</span>
                 </button>
               </div>
-            </form>
-          )}
-
-          {/* LIST OF NESTED MILESTONE PHASES */}
-          {loading ? (
-            <div className="py-12 text-center text-slate-400 text-xs">
-              <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-              <span>Loading deliverable milestones...</span>
-            </div>
-          ) : milestones.length === 0 ? (
-            <div className="py-12 text-center bg-white rounded-2xl border border-slate-200 p-6">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl mx-auto mb-3 shadow-xs">
-                <i className="bi bi-calendar2-range-fill"></i>
-              </div>
-              <h4 className="text-sm font-bold text-slate-800 mb-1">No Nested Milestones Yet</h4>
-              <p className="text-xs text-slate-500 max-w-md mx-auto mb-4">
-                Deconstruct this initiative into phased deliverable milestones (MVP Architecture, Beta Rollout, Final Signoff) with checklists.
-              </p>
-              <button
-                type="button"
-                onClick={handleOpenAddForm}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-semibold shadow-md shadow-indigo-500/20 cursor-pointer"
-              >
-                + Create Phase 1 Milestone
-              </button>
-            </div>
           ) : (
             <div className="space-y-2.5">
               {milestones.map((milestone, idx) => {
