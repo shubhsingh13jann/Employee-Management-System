@@ -240,13 +240,17 @@ export const ProjectBlockerModal: React.FC<ProjectBlockerModalProps> = ({
           className="relative w-full max-w-[780px] max-h-[92vh] bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 pointer-events-auto"
           onClick={(e) => e.stopPropagation()}
         >
-        {/* Pulsing Top Laser Accent Bar */}
+        {/* Dynamic Glowing Top Edge Accent Line matching Login Card Style */}
         <div
-          className={`h-1.5 w-full transition-colors duration-300 ${
-            isBlocked
-              ? "bg-gradient-to-r from-rose-500 via-amber-500 to-rose-600 animate-pulse"
-              : "bg-gradient-to-r from-emerald-500 to-teal-600"
-          }`}
+          className="absolute top-0 left-0 right-0 h-[2.5px] z-30 pointer-events-none transition-all duration-400"
+          style={{
+            background: isBlocked
+              ? "linear-gradient(90deg, transparent 5%, #e11d48 50%, transparent 95%)"
+              : "linear-gradient(90deg, transparent 5%, #059669 50%, transparent 95%)",
+            boxShadow: isBlocked
+              ? "0 0 14px rgba(225, 29, 72, 0.65)"
+              : "0 0 14px rgba(5, 150, 105, 0.6)",
+          }}
         ></div>
 
         {/* Header */}
