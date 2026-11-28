@@ -253,49 +253,145 @@ export const ProjectBlockerModal: React.FC<ProjectBlockerModalProps> = ({
           }}
         ></div>
 
-        {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-start justify-between gap-3 bg-slate-50/70 shrink-0">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span
-                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                  isBlocked
-                    ? "bg-rose-100 text-rose-800 border border-rose-300 shadow-2xs"
-                    : "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                }`}
-              >
-                <i
-                  className={`bi ${
-                    isBlocked ? "bi-exclamation-triangle-fill text-rose-600" : "bi-check-circle-fill text-emerald-600"
-                  } text-xs`}
-                ></i>
-                {isBlocked ? "Executive Blocker Flagged" : "Initiative Unblocked / Normal"}
-              </span>
+        {/* Header with Fluid Pastel Wave Background matching Executive Modal Suite */}
+        <div className="relative px-3.5 sm:px-4 py-3 sm:py-3.5 bg-white flex items-center justify-between border-b border-slate-200 overflow-hidden shrink-0">
+          {/* Top-Right Fluid Pastel Wave Background */}
+          <div className="absolute top-0 right-0 w-[340px] sm:w-[420px] h-full pointer-events-none overflow-hidden z-0">
+            <svg
+              viewBox="0 0 500 74"
+              fill="none"
+              preserveAspectRatio="none"
+              className="w-full h-full"
+            >
+              <defs>
+                <mask id="blockerModalWaveFadeMask">
+                  <linearGradient id="blockerModalWaveFadeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="black" />
+                    <stop offset="18%" stopColor="white" />
+                    <stop offset="100%" stopColor="white" />
+                  </linearGradient>
+                  <rect width="500" height="74" fill="url(#blockerModalWaveFadeGrad)" />
+                </mask>
 
-              <span className="text-xs font-mono font-semibold text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
-                PRJ-{String(project.id).padStart(4, "0")}
-              </span>
+                <linearGradient id="blockerModalWaveGrad1" x1="0%" y1="0%" x2="100%" y2="70%">
+                  <stop offset="0%" stopColor="#E0E7FF" stopOpacity="0.2" />
+                  <stop offset="30%" stopColor="#D7E0FC" stopOpacity="0.85" />
+                  <stop offset="65%" stopColor="#E0E7FE" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="#EDE9FE" stopOpacity="0.7" />
+                </linearGradient>
 
-              {project.department_name && (
-                <span className="text-[11px] font-semibold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-full">
-                  {project.department_name}
-                </span>
-              )}
-            </div>
+                <linearGradient id="blockerModalWaveGrad2" x1="15%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#D8E2FB" stopOpacity="0.3" />
+                  <stop offset="30%" stopColor="#C7D2FE" stopOpacity="0.85" />
+                  <stop offset="60%" stopColor="#DDD6FE" stopOpacity="0.9" />
+                  <stop offset="85%" stopColor="#E9D5FF" stopOpacity="0.85" />
+                  <stop offset="100%" stopColor="#F3E8FF" stopOpacity="0.4" />
+                </linearGradient>
 
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 truncate" title={project.title}>
-              {project.title}
-            </h2>
+                <linearGradient id="blockerModalWaveGrad3" x1="30%" y1="10%" x2="95%" y2="100%">
+                  <stop offset="0%" stopColor="#E0F2FE" stopOpacity="0.5" />
+                  <stop offset="45%" stopColor="#DDD6FE" stopOpacity="0.75" />
+                  <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0.7" />
+                </linearGradient>
+              </defs>
+
+              <g mask="url(#blockerModalWaveFadeMask)">
+                <path
+                  d="M0 26 C60 10 120 8 180 18 C245 28 305 50 370 38 C425 28 465 10 500 20 V0 H0 Z"
+                  fill="url(#blockerModalWaveGrad1)"
+                />
+                <path
+                  d="M0 50 C80 34 145 12 215 10 C280 8 330 32 390 44 C445 54 475 38 500 28 V0 H0 Z"
+                  fill="url(#blockerModalWaveGrad2)"
+                />
+                <path
+                  d="M130 38 C195 26 260 48 325 56 C385 64 445 50 500 38 V8 C470 20 420 18 370 24 C310 34 235 32 130 38 Z"
+                  fill="url(#blockerModalWaveGrad3)"
+                  opacity="0.75"
+                />
+              </g>
+            </svg>
           </div>
 
+          {/* Left: Squircle Governance Icon + Project Information */}
+          <div className="flex items-center gap-3 relative z-10 min-w-0">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-700 text-white flex items-center justify-center font-bold text-lg sm:text-xl shadow-md shadow-indigo-500/20 shrink-0 border border-white/20">
+              <i className={`bi ${isBlocked ? "bi-exclamation-triangle-fill text-rose-200" : "bi-shield-check text-amber-300"}`}></i>
+            </div>
+
+            <div className="min-w-0">
+              {/* Project Title + PRJ-ID Pill */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="font-bold text-[13.5px] sm:text-[14.5px] text-slate-900 mb-0 tracking-tight leading-tight truncate" title={project.title}>
+                  {project.title}
+                </h2>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-2xs">
+                  PRJ-{String(project.id).padStart(4, "0")}
+                </span>
+              </div>
+
+              {/* Subtitle Line with Department, Lead Supervisor & Target Date */}
+              <div className="text-[10.5px] sm:text-[11px] text-slate-400 mb-1 font-normal leading-tight truncate mt-0.5 flex items-center gap-1.5 flex-wrap">
+                {project.department_name && (
+                  <span className="flex items-center gap-1 font-medium text-slate-500">
+                    <i className="bi bi-building text-[9.5px] text-indigo-500"></i>
+                    <span>{project.department_name}</span>
+                  </span>
+                )}
+                {project.supervisor_name && (
+                  <>
+                    <span>•</span>
+                    <span className="flex items-center gap-1 font-medium text-slate-500">
+                      <i className="bi bi-person text-[9.5px] text-emerald-500"></i>
+                      <span>Lead: {project.supervisor_name}</span>
+                    </span>
+                  </>
+                )}
+                {project.target_date && (
+                  <>
+                    <span>•</span>
+                    <span className="flex items-center gap-1 font-medium text-slate-500">
+                      <i className="bi bi-calendar-event text-[9.5px] text-amber-500"></i>
+                      <span>Target: {project.target_date}</span>
+                    </span>
+                  </>
+                )}
+              </div>
+
+              {/* Meta Pills */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <div
+                  className={`inline-flex items-center gap-1 px-2 py-0.2 rounded-md text-[9.5px] font-bold shadow-2xs border ${
+                    isBlocked
+                      ? "bg-rose-50/90 text-rose-700 border-rose-200/90"
+                      : "bg-emerald-50/90 text-emerald-700 border-emerald-200/90"
+                  }`}
+                >
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full shadow-xs ${
+                      isBlocked ? "bg-rose-500 shadow-rose-500/50" : "bg-emerald-500 shadow-emerald-500/50"
+                    }`}
+                  ></span>
+                  <span>{isBlocked ? "Executive Blocker Flagged" : "Initiative Unblocked / Normal"}</span>
+                </div>
+                <div className="inline-flex items-center gap-1 px-2 py-0.2 rounded-md text-[9.5px] font-bold bg-indigo-50/80 text-indigo-700 border border-indigo-200/90 shadow-2xs">
+                  <i className="bi bi-shield-exclamation text-[9px] text-indigo-600"></i>
+                  <span>Risk & Blocker Governance</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Close Button */}
           <button
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="w-8 h-8 rounded-lg bg-white hover:bg-slate-100 text-slate-400 hover:text-slate-700 border border-slate-200 flex items-center justify-center shrink-0 transition-colors cursor-pointer"
-            title="Close dialog"
+            className="w-8 h-8 rounded-xl bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 border border-slate-200/90 shadow-2xs flex items-center justify-center shrink-0 transition-all cursor-pointer text-xs relative z-10"
+            title="Close Blocker Dialog"
+            aria-label="Close"
           >
-            <i className="bi bi-x-lg text-sm"></i>
+            <i className="bi bi-x-lg text-xs"></i>
           </button>
         </div>
 
