@@ -397,28 +397,28 @@ export const ProjectBlockerModal: React.FC<ProjectBlockerModalProps> = ({
 
         {/* Existing Escalation Telemetry Ribbon (If currently blocked in DB) */}
         {project.is_blocked && project.blocker_status !== "none" && (
-          <div className="bg-rose-50/90 border-b border-rose-200 p-3 sm:px-5 flex items-center justify-between gap-3 flex-wrap shrink-0">
+          <div className="bg-rose-50/70 border-b border-rose-200/80 px-3.5 sm:px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap shrink-0">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-rose-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs animate-bounce">
+              <div className="w-8 h-8 rounded-xl bg-rose-100 border border-rose-200 text-rose-600 flex items-center justify-center text-sm shrink-0 shadow-2xs">
                 <i className="bi bi-shield-slash-fill"></i>
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-rose-900 uppercase tracking-wide">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[10.5px] font-bold text-rose-900 uppercase tracking-wider">
                     Active Blocker: {project.blocker_status?.replace(/_/g, " ")}
                   </span>
                   {escalationTelemetry && (
-                    <span className="text-[10px] font-bold bg-rose-200 text-rose-800 px-1.5 py-0.2 rounded-full">
+                    <span className="text-[9px] font-bold bg-rose-100 text-rose-700 border border-rose-200/80 px-2 py-0.2 rounded-full shadow-2xs">
                       {escalationTelemetry.relative}
                     </span>
                   )}
                 </div>
-                <div className="text-[11px] text-rose-700 truncate">
+                <div className="text-[10px] text-rose-700/90 truncate mt-0.5">
                   {escalationTelemetry?.formattedDate && (
                     <span>Escalated on {escalationTelemetry.formattedDate}</span>
                   )}
                   {project.blocker_flagged_by_name && (
-                    <span> by {project.blocker_flagged_by_name}</span>
+                    <span> by <strong className="font-semibold text-rose-900">{project.blocker_flagged_by_name}</strong></span>
                   )}
                 </div>
               </div>
@@ -428,10 +428,10 @@ export const ProjectBlockerModal: React.FC<ProjectBlockerModalProps> = ({
               type="button"
               onClick={handleQuickResolve}
               disabled={saving}
-              className="px-2.5 py-1 text-xs font-bold text-emerald-700 bg-white hover:bg-emerald-50 border border-emerald-300 rounded-lg shadow-2xs transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
+              className="px-3 py-1.5 text-[11px] font-bold text-emerald-700 bg-white hover:bg-emerald-50 border border-emerald-200/90 rounded-xl shadow-2xs transition-all cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-98"
               title="Immediately mark this blocker resolved"
             >
-              <i className="bi bi-check2-circle text-emerald-600"></i>
+              <i className="bi bi-check2-circle text-emerald-600 text-xs"></i>
               <span>Resolve Blocker Now</span>
             </button>
           </div>
