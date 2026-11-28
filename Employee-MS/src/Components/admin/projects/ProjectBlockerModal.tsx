@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { ProjectItem } from "../../../pages/admin/AdminProjects";
 
 export type BlockerStatusKey =
@@ -135,15 +136,23 @@ export const ProjectBlockerModal: React.FC<ProjectBlockerModalProps> = ({
     }
   }, [project, isOpen]);
 
-  // Handle ESC key to dismiss
+  // Handle ESC key to dismiss & lock body scroll
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen && !saving) {
+      if (e.key === "Escape" && !saving) {
         onClose();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
   }, [isOpen, saving, onClose]);
 
   if (!isOpen || !project) return null;
@@ -220,12 +229,17 @@ export const ProjectBlockerModal: React.FC<ProjectBlockerModalProps> = ({
 
   const escalationTelemetry = formatEscalatedTime(project.blocker_escalated_at);
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-      <div
-        className="relative bg-white rounded-2xl shadow-2xl border border-slate-200/90 w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
-        onClick={(e) => e.stopPropagation()}
-      >
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[10000] bg-slate-950/60 backdrop-blur-xs overscroll-contain animate-in fade-in duration-150"
+      onClick={onClose}
+    >
+      {/* Centered strictly within the right-side content portion (offsetting sidebar on md+) */}
+      <div className="fixed inset-y-0 right-0 left-0 md:left-[240px] flex items-center justify-center p-3 sm:p-4 pointer-events-none">
+        <div
+          className="relative w-full max-w-[780px] max-h-[92vh] bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 pointer-events-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Pulsing Top Laser Accent Bar */}
         <div
           className={`h-1.5 w-full transition-colors duration-300 ${
@@ -236,7 +250,7 @@ export const ProjectBlockerModal: React.FC<ProjectBlockerModalProps> = ({
         ></div>
 
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-start justify-between gap-3 bg-slate-50/70">
+        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-start justify-between gap-3 bg-slate-50/70 shrink-0">
           <div className="min-w-0">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
               <span
@@ -283,7 +297,7 @@ export const ProjectBlockerModal: React.FC<ProjectBlockerModalProps> = ({
 
         {/* Existing Escalation Telemetry Ribbon (If currently blocked in DB) */}
         {project.is_blocked && project.blocker_status !== "none" && (
-          <div className="bg-rose-50/90 border-b border-rose-200 p-3 sm:px-5 flex items-center justify-between gap-3 flex-wrap">
+          <div className="bg-rose-50/90 border-b border-rose-200 p-3 sm:px-5 flex items-center justify-between gap-3 flex-wrap shrink-0">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-8 h-8 rounded-lg bg-rose-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs animate-bounce">
                 <i className="bi bi-shield-slash-fill"></i>
@@ -323,15 +337,15 @@ export const ProjectBlockerModal: React.FC<ProjectBlockerModalProps> = ({
           </div>
         )}
 
-        {/* Error message */}
-        {errorMessage && (
-          <div className="mx-4 sm:mx-5 mt-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
-            <i className="bi bi-exclamation-octagon-fill text-rose-600 shrink-0"></i>
-            <span>{errorMessage}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+          {/* Error message */}
+          {errorMessage && (
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+              <i className="bi bi-exclamation-octagon-fill text-rose-600 shrink-0"></i>
+              <span>{errorMessage}</span>
+            </div>
+          )}
           {/* 1. Master Flag Toggle */}
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
@@ -471,8 +485,10 @@ export const ProjectBlockerModal: React.FC<ProjectBlockerModalProps> = ({
             </div>
           )}
 
+          </div>
+
           {/* Modal Footer Actions */}
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2.5">
+          <div className="px-4 sm:px-5 py-3 bg-white border-t border-slate-100 flex items-center justify-between gap-2.5 shrink-0">
             <button
               type="button"
               onClick={onClose}
@@ -524,7 +540,9 @@ export const ProjectBlockerModal: React.FC<ProjectBlockerModalProps> = ({
             </div>
           </div>
         </form>
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
