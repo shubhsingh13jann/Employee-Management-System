@@ -551,44 +551,46 @@ export const ProjectBlockerModal: React.FC<ProjectBlockerModalProps> = ({
                   </div>
                 </div>
 
-              {/* 3. Executive Blocker Notes */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Executive Blocker Notes & Unblocking Path <span className="text-rose-500">*</span>
-                  </label>
-                  <span className="text-[11px] text-slate-400">{blockerNotes.length} chars</span>
-                </div>
+                {/* 3. Executive Blocker Notes Card */}
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-0">
+                      Executive Blocker Notes & Unblocking Path <span className="text-rose-500">*</span>
+                    </label>
+                    <span className="text-[9.5px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/80">
+                      {blockerNotes.length} chars
+                    </span>
+                  </div>
 
-                <textarea
-                  rows={3}
-                  value={blockerNotes}
-                  onChange={(e) => setBlockerNotes(e.target.value)}
-                  placeholder="Detail the blocker, impact on target deadline, accountable stakeholders, and action items needed to unblock..."
-                  className="w-full text-xs rounded-xl border border-slate-300 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 p-2.5 text-slate-800 placeholder-slate-400 transition-colors resize-none shadow-2xs"
-                  required={isBlocked}
-                />
+                  <textarea
+                    rows={3}
+                    value={blockerNotes}
+                    onChange={(e) => setBlockerNotes(e.target.value)}
+                    placeholder="Detail the blocker, impact on target deadline, accountable stakeholders, and action items needed to unblock..."
+                    className="w-full text-xs font-medium rounded-xl bg-slate-50/70 border border-slate-200/80 focus:bg-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 p-3 text-slate-800 placeholder-slate-400 transition-all resize-none shadow-2xs"
+                    required={isBlocked}
+                  />
 
-                {/* Quick Suggestion Chips */}
-                <div className="mt-2">
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-                    Quick Suggestion Templates ({currentCategory.badgeLabel}):
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {currentCategory.suggestedNotes.map((note, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => handleApplyTemplate(note)}
-                        className="text-[10.5px] bg-slate-100 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300 text-slate-600 px-2 py-0.5 rounded-lg border border-slate-200 transition-colors text-left cursor-pointer"
-                        title="Click to append this note"
-                      >
-                        + {note}
-                      </button>
-                    ))}
+                  {/* Quick Suggestion Chips */}
+                  <div className="mt-2.5 pt-2.5 border-t border-slate-100">
+                    <span className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                      Quick Suggestion Templates ({currentCategory.badgeLabel}):
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {currentCategory.suggestedNotes.map((note, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleApplyTemplate(note)}
+                          className="text-[10.5px] font-medium bg-slate-50/80 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 text-slate-600 px-2.5 py-1 rounded-xl border border-slate-200/80 shadow-2xs transition-all text-left cursor-pointer"
+                          title="Click to append this note"
+                        >
+                          + {note}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
             </div>
           ) : (
             <div className="p-8 rounded-2xl bg-white border border-slate-200/90 shadow-2xs text-center animate-in fade-in duration-200">
