@@ -608,24 +608,33 @@ export const ProjectBlockerModal: React.FC<ProjectBlockerModalProps> = ({
 
           </div>
 
-          {/* Modal Footer Actions */}
-          <div className="px-4 sm:px-5 py-3 bg-white border-t border-slate-100 flex items-center justify-between gap-2.5 shrink-0">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={saving}
-              className="px-3.5 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
-            >
-              Cancel
-            </button>
+          {/* Modal Footer matching Executive Tab Standard */}
+          <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 bg-white border-t border-slate-200 flex items-center justify-between gap-2 shrink-0">
+            <div className="text-[10.5px] text-slate-400 font-medium hidden sm:flex items-center gap-1.5">
+              <span
+                className={`w-2 h-2 rounded-full shadow-xs ${
+                  isBlocked ? "bg-rose-500 shadow-rose-500/50" : "bg-emerald-500 shadow-emerald-500/50"
+                }`}
+              ></span>
+              <span>Risk Escalation Protocol • Governance Certified</span>
+            </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 ml-auto">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={saving}
+                className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200/90 shadow-2xs transition-all cursor-pointer active:scale-98"
+              >
+                Cancel
+              </button>
+
               {project.is_blocked && isBlocked && (
                 <button
                   type="button"
                   onClick={handleQuickResolve}
                   disabled={saving}
-                  className="px-3.5 py-1.5 rounded-xl border border-emerald-300 text-xs font-bold text-emerald-700 hover:bg-emerald-50 transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                  className="px-3.5 py-1.5 rounded-xl border border-emerald-200/90 text-xs font-bold text-emerald-700 bg-white hover:bg-emerald-50 transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs active:scale-98"
                 >
                   <i className="bi bi-check-lg"></i>
                   <span>Clear Blocker</span>
@@ -635,10 +644,10 @@ export const ProjectBlockerModal: React.FC<ProjectBlockerModalProps> = ({
               <button
                 type="submit"
                 disabled={saving}
-                className={`px-4 py-1.5 rounded-xl text-xs font-bold text-white transition-all cursor-pointer flex items-center gap-1.5 shadow-xs ${
+                className={`px-4 py-1.5 rounded-xl text-xs font-bold text-white transition-all cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-98 ${
                   isBlocked
-                    ? "bg-rose-600 hover:bg-rose-700 shadow-rose-200"
-                    : "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200"
+                    ? "bg-rose-600 hover:bg-rose-700 shadow-rose-600/20"
+                    : "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20"
                 }`}
               >
                 {saving ? (
