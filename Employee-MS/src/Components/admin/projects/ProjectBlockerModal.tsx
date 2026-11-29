@@ -438,47 +438,62 @@ export const ProjectBlockerModal: React.FC<ProjectBlockerModalProps> = ({
         )}
 
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
-          {/* Error message */}
-          {errorMessage && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
-              <i className="bi bi-exclamation-octagon-fill text-rose-600 shrink-0"></i>
-              <span>{errorMessage}</span>
-            </div>
-          )}
-          {/* 1. Master Flag Toggle */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-              Initiative Blocker State
-            </label>
-            <div className="grid grid-cols-2 gap-2.5 p-1 bg-slate-100 rounded-xl border border-slate-200/80">
-              <button
-                type="button"
-                onClick={() => setIsBlocked(false)}
-                className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  !isBlocked
-                    ? "bg-white text-emerald-700 shadow-xs border border-slate-200/60"
-                    : "text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                <i className="bi bi-check-circle-fill text-emerald-600"></i>
-                <span>Healthy / Clear</span>
-              </button>
+          <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 bg-slate-50/40 space-y-3.5">
+            {/* Error message */}
+            {errorMessage && (
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center justify-between gap-2 shadow-2xs">
+                <div className="flex items-center gap-2">
+                  <i className="bi bi-exclamation-octagon-fill text-rose-600 shrink-0"></i>
+                  <span className="font-medium">{errorMessage}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setErrorMessage("")}
+                  className="text-slate-400 hover:text-slate-700 cursor-pointer text-xs"
+                >
+                  <i className="bi bi-x-lg"></i>
+                </button>
+              </div>
+            )}
 
-              <button
-                type="button"
-                onClick={() => setIsBlocked(true)}
-                className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  isBlocked
-                    ? "bg-rose-600 text-white shadow-xs"
-                    : "text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                <i className="bi bi-exclamation-triangle-fill text-amber-200"></i>
-                <span>Flagged as Blocker</span>
-              </button>
+            {/* 1. Master Flag Toggle Card */}
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-0">
+                  Initiative Blocker State
+                </label>
+                <span className="text-[10px] text-slate-400 font-medium">
+                  Select operational risk status
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100/80 rounded-xl border border-slate-200/80">
+                <button
+                  type="button"
+                  onClick={() => setIsBlocked(false)}
+                  className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    !isBlocked
+                      ? "bg-white text-emerald-700 shadow-2xs border border-slate-200/80"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  <i className="bi bi-check-circle-fill text-emerald-600"></i>
+                  <span>Healthy / Clear</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsBlocked(true)}
+                  className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    isBlocked
+                      ? "bg-rose-600 text-white shadow-sm shadow-rose-600/20"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  <i className={`bi bi-exclamation-triangle-fill ${isBlocked ? "text-amber-200" : "text-amber-500"}`}></i>
+                  <span>Flagged as Blocker</span>
+                </button>
+              </div>
             </div>
-          </div>
 
           {/* Conditional Blocker Configuration Section */}
           {isBlocked ? (
