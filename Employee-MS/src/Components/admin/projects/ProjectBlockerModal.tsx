@@ -495,59 +495,61 @@ export const ProjectBlockerModal: React.FC<ProjectBlockerModalProps> = ({
               </div>
             </div>
 
-          {/* Conditional Blocker Configuration Section */}
-          {isBlocked ? (
-            <div className="space-y-4 animate-in fade-in duration-200">
-              {/* 2. Blocker Category Selection Cards */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Blocker Category
-                  </label>
-                  <span className="text-[11px] text-slate-400">Select principal bottleneck</span>
-                </div>
+            {/* Conditional Blocker Configuration Section */}
+            {isBlocked ? (
+              <div className="space-y-3.5 animate-in fade-in duration-200">
+                {/* 2. Blocker Category Selection Card */}
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-0">
+                      Blocker Category
+                    </label>
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      Select principal bottleneck
+                    </span>
+                  </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {BLOCKER_CATEGORIES.map((cat) => {
-                    const isSelected = blockerStatus === cat.key;
-                    return (
-                      <div
-                        key={cat.key}
-                        onClick={() => setBlockerStatus(cat.key)}
-                        className={`p-2.5 rounded-xl border transition-all cursor-pointer text-left relative flex items-start gap-2.5 ${
-                          isSelected
-                            ? `${cat.bgLightClass} ${cat.borderClass} shadow-xs ring-1 ring-rose-500`
-                            : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700"
-                        }`}
-                      >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {BLOCKER_CATEGORIES.map((cat) => {
+                      const isSelected = blockerStatus === cat.key;
+                      return (
                         <div
-                          className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0 ${
+                          key={cat.key}
+                          onClick={() => setBlockerStatus(cat.key)}
+                          className={`p-3 rounded-xl border transition-all cursor-pointer text-left relative flex items-start gap-2.5 ${
                             isSelected
-                              ? "bg-white shadow-2xs font-bold " + cat.colorClass
-                              : "bg-slate-100 text-slate-500"
+                              ? `${cat.bgLightClass} ${cat.borderClass} shadow-2xs ring-1 ring-rose-500/70`
+                              : "bg-slate-50/70 hover:bg-white border-slate-200/80 text-slate-700"
                           }`}
                         >
-                          <i className={`bi ${cat.icon}`}></i>
-                        </div>
-
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-1">
-                            <span className="text-xs font-bold text-slate-900 truncate">
-                              {cat.label}
-                            </span>
-                            {isSelected && (
-                              <i className="bi bi-check-circle-fill text-rose-600 text-xs"></i>
-                            )}
+                          <div
+                            className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs shrink-0 shadow-2xs border ${
+                              isSelected
+                                ? `bg-white border-white/80 font-bold ${cat.colorClass}`
+                                : "bg-white border-slate-200/80 text-slate-500"
+                            }`}
+                          >
+                            <i className={`bi ${cat.icon}`}></i>
                           </div>
-                          <p className="text-[10.5px] text-slate-500 leading-tight mt-0.5 line-clamp-2">
-                            {cat.description}
-                          </p>
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-1">
+                              <span className="text-xs font-bold text-slate-900 truncate">
+                                {cat.label}
+                              </span>
+                              {isSelected && (
+                                <i className="bi bi-check-circle-fill text-rose-600 text-xs"></i>
+                              )}
+                            </div>
+                            <p className="text-[10.5px] text-slate-500 leading-tight mt-0.5 line-clamp-2 mb-0">
+                              {cat.description}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
 
               {/* 3. Executive Blocker Notes */}
               <div>
@@ -589,12 +591,14 @@ export const ProjectBlockerModal: React.FC<ProjectBlockerModalProps> = ({
               </div>
             </div>
           ) : (
-            <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 text-center animate-in fade-in duration-200">
-              <i className="bi bi-shield-check text-emerald-600 text-2xl block mb-1"></i>
-              <h3 className="text-xs font-bold text-emerald-900 mb-0.5">
+            <div className="p-8 rounded-2xl bg-white border border-slate-200/90 shadow-2xs text-center animate-in fade-in duration-200">
+              <div className="w-11 h-11 rounded-xl bg-emerald-50 border border-emerald-200/80 text-emerald-600 flex items-center justify-center text-lg mx-auto mb-3 shadow-2xs">
+                <i className="bi bi-shield-check"></i>
+              </div>
+              <h3 className="text-[13px] font-bold text-slate-900 mb-1 tracking-tight">
                 Ready to Clear Blocker & Restore Normal Status
               </h3>
-              <p className="text-[11px] text-emerald-700 max-w-md mx-auto">
+              <p className="text-[11px] text-slate-500 max-w-md mx-auto leading-relaxed mb-0">
                 Saving will remove the high-visibility blocker banner from all project views and return the initiative health to its standard timeline calculation.
               </p>
             </div>
